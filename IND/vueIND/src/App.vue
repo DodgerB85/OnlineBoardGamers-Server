@@ -35,6 +35,8 @@ import * as rfm from "./js/INDmapData"
 import * as funcs from "./js/INDfuncs"
 //import * as controller from "./js/INDcontroller"
 
+import i18n from "./i18n"
+
 import { watchEffect } from "vue"
 
 import { usePersonalStore } from "./stores/INDpersonal.js"
@@ -70,13 +72,27 @@ watchEffect(() => {
 	document.body.style.backgroundColor = backgroundColour
 })
 
+// Tab title + favicon indicate whose turn it is at a glance.
+watchEffect(() => {
+	const gameName = funcs.htmlUnescape(store.gameName || "")
+	const yourTurn = personal.canPlay()
+	document.title = yourTurn ? i18n.global.t("websocket.yourTurn") + " - " + gameName : "OBG - " + gameName
+	const icon = document.querySelector('link[rel="icon"]')
+	if (icon) icon.href = yourTurn ? "/static/IND/images/turn_icon.svg" : "/static/IND/images/ind_icon.png"
+})
+
+watchEffect(() => {
+	document.body.classList.toggle("reduce-motion", !!personal.preferReducedMotion)
+})
+
 //store.mapData.selectedMap = rf.OM_MAP_HEX
 //store.mapData.selectedMapData = JSON.parse(JSON.stringify(rfm.OM_MAP_HEX))
 
 // Set IND options
 let options = window.initData.preferredINDoptions
-//INDoptions = ["indColour","mapType","citySizeColour","indOutline", "iconsToUse", "shipIconsToUse", "playerTableStyle"]
+//INDoptions = ["indColour","mapType","citySizeColour","indOutline", "iconsToUse", "shipIconsToUse", "playerTableStyle", "reducedMotion"]
 personal.preferredColour = options[0]
+personal.preferReducedMotion = options[7] === 1
 if (options.length >= 5) store.options.iconsToUse = options[4]
 if (options.length >= 6) store.options.shipIconsToUse = options[5]
 if (options.length >= 7) store.options.playerTableStyle = options[6]
@@ -515,6 +531,25 @@ function getWholeMiddleAreaClass() {
 									</div>
 								</transition>
 								<ReplayArea v-if="store.topMenuViews.replayAtBottom" />
+								<div id="mapLegend" v-if="!store.historyOnly">
+									<span class="legendTitle">{{ $t('map.legend') }}</span>
+									<span v-for="size in [1, 2, 3]" :key="'legend-city-' + size" class="legendItem">
+										<img :src="view.getImage('city_' + size)" :alt="$t('map.citySize', { size })" :title="$t('map.citySize', { size })" />
+										{{ $t('map.citySize', { size }) }}
+									</span>
+									<span v-for="good in [{ key: 'rice', img: 'prod_marker_rice' }, { key: 'spice', img: 'prod_marker_spice' }, { key: 'rubber', img: 'prod_marker_rubber' }, { key: 'siapFaji', img: 'prod_marker_siap_faji' }, { key: 'oil', img: 'prod_marker_oil' }]" :key="'legend-good-' + good.key" class="legendItem">
+										<img :src="view.getImage(good.img)" :alt="$t('goods.' + good.key)" :title="$t('goods.' + good.key)" />
+										{{ $t('goods.' + good.key) }}
+									</span>
+									<span class="legendItem">
+										<span class="legendSquares"><i class="filled"></i><i></i><i></i></span>
+										{{ $t('map.shipCapacityUsed') }}
+									</span>
+									<span class="legendItem">
+										<span class="legendDeed">✕</span>
+										{{ $t('map.unavailableDeed') }}
+									</span>
+								</div>
 								<template v-if="IO.DEBUG_USERS.includes(personal.name)">
 									<DebugArea />
 									<CompanysTable />
@@ -539,6 +574,23 @@ body {
 	font-size: 16px;
 }
 
+body.reduce-motion *,
+body.reduce-motion *::before,
+body.reduce-motion *::after {
+	animation-duration: 0.001ms !important;
+	animation-iteration-count: 1 !important;
+	transition-duration: 0.001ms !important;
+}
+
+body.reduce-motion animate {
+	display: none;
+}
+
+body.reduce-motion .moneyDelta {
+	animation: none !important;
+	opacity: 1 !important;
+}
+
 #patternsSVG {
 	height: 0px;
 	margin: 0px;
@@ -546,6 +598,65 @@ body {
 	position: absolute;
 	top: 10px;
 	left: 0px;
+}
+
+#mapLegend {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 6px 14px;
+	padding: 6px 10px;
+	font-size: 13px;
+	background: rgba(255, 255, 255, 0.55);
+	border-top: 1px solid #bbb;
+}
+
+.legendTitle {
+	font-weight: bold;
+	margin-right: 4px;
+}
+
+.legendItem {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	white-space: nowrap;
+}
+
+.legendItem img {
+	width: 18px;
+	height: 18px;
+	object-fit: contain;
+}
+
+.legendSquares {
+	display: inline-flex;
+	gap: 1px;
+}
+
+.legendSquares i {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	border: 1px solid #333;
+	background: white;
+}
+
+.legendSquares i.filled {
+	background: #333;
+}
+
+.legendDeed {
+	display: inline-flex;
+	width: 14px;
+	height: 14px;
+	border: 1px solid #333;
+	align-items: center;
+	justify-content: center;
+	font-size: 11px;
+	line-height: 1;
+	background: #fff;
 }
 
 .fadeGameBoard-enter-active,

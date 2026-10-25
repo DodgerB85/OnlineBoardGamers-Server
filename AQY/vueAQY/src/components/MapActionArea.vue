@@ -23,12 +23,15 @@ import * as IO from "../backend/AQY_IO"
 import * as funcs from "../js/AQYfuncs.js"
 
 import { ref, watch, onUnmounted } from "vue"
+import { useI18n } from "vue-i18n"
 
 import { useModelStore } from "../stores/AQYstore.js"
 import { usePersonalStore } from "../stores/AQYpersonal.js"
 const personal = usePersonalStore()
 
 const store = useModelStore()
+
+const { t } = useI18n()
 
 /** Kickout */
 function cancelKickout() {
@@ -81,7 +84,7 @@ function kickoutVoteCount() {
 }
 
 function kickoutVoters() {
-	if (personal.pov < 0) return "None"
+	if (personal.pov < 0) return t("mapActionArea.none")
 	const target = currentKickoutTarget()
 	let voters = "None"
 	for (const voter in store.kickoutVotesData) {
@@ -91,7 +94,7 @@ function kickoutVoters() {
 			else voters += ", " + voter
 		}
 	}
-	return voters
+	return voters === "None" ? t("mapActionArea.none") : voters
 }
 
 // My vote would bring the count to the threshold, so the kickout goes ahead
@@ -342,9 +345,9 @@ function selectFisheryRes(res) {
 }
 
 function getCityCostText(isFood) {
-	if (isFood) return "1 Food"
-	if (city.hasWorkingUniqueBuilding(controller.currentPlayerIndex(), rf.BLDG_PHILOSOPHY)) return "1 Lux"
-	return "1D Lux"
+	if (isFood) return t("mapActionArea.oneFood")
+	if (city.hasWorkingUniqueBuilding(controller.currentPlayerIndex(), rf.BLDG_PHILOSOPHY)) return t("mapActionArea.oneLux")
+	return t("mapActionArea.oneDoubleLux")
 }
 
 function clickedUseFacAlch() {
@@ -375,7 +378,7 @@ function getCountryEndTurnWarnings() {
 	let _playerIndex = controller.currentPlayerIndex()
 	let _resources = player.availableResources
 	// Caution: Unused cart shops
-	if (city.getCartShopStatus(controller.currentPlayerIndex())[0] > 0) ret.push(["orange", "Caution: You have unused Cart Shops"])
+	if (city.getCartShopStatus(controller.currentPlayerIndex())[0] > 0) ret.push(["orange", t("mapActionArea.unusedCartShops")])
 
 	//ret.push(["orange", "Caution: You cannot currently store all your resources (More might be spent in the Countryside Building phase)"])
 	//ret.push(["red", "WARNING: You have no wood and no manned Cart Shops"])
@@ -655,11 +658,10 @@ function flatmapResourceArray(array) {
 	<!-- LOGGED OUT TEXT-->
 	<template v-if="personal.name == undefined">
 		<div id="loggedOutText">
-			Please
-			<a href="/register">REGISTER</a>
-			or
-			<a href="/login">LOGIN</a>
-			to play a game
+			<i18n-t keypath="mapActionArea.loggedOutPrompt" tag="span" scope="global">
+				<template #register><a href="/register">{{ $t("mapActionArea.register") }}</a></template>
+				<template #login><a href="/login">{{ $t("mapActionArea.login") }}</a></template>
+			</i18n-t>
 			<br />
 		</div>
 		<br />
@@ -669,28 +671,28 @@ function flatmapResourceArray(array) {
 	<template v-if="shouldShowAnyPreTurnOption()">
 		<br />
 		<div class="expertPanel">
-			<b>Expert Options</b>
-			: If unsure then ignore
+			<i18n-t keypath="mapActionArea.expertOptions" tag="span" scope="global">
+				<template #title><b>{{ $t("mapActionArea.expertOptionsTitle") }}</b></template>
+			</i18n-t>
 			<hr />
 			<template v-if="shouldShowPreStorageOption() >= 0">
 				<template v-if="shouldShowPreStorageOption() === 0">
 					<button @click="localActionPreStoreTurn" class="actionsLineButton">
-						<span v-if="getStoragePreMove().length === 0">Action Store Turn</span>
-						<span v-else>Change Store Turn</span>
+						<span v-if="getStoragePreMove().length === 0">{{ $t("mapActionArea.actionStoreTurn") }}</span>
+						<span v-else>{{ $t("mapActionArea.changeStoreTurn") }}</span>
 					</button>
 					<template v-if="getStoragePreMove().length > 0">
-						Store:
+						{{ $t("mapActionArea.store") }}
 						<img v-for="(res, idx) in flatmapResourceArray(getStoragePreMove())" :key="idx"
 							class="storagePreMoveRes" :src="view.getImage('res_' + String(res))" />
 					</template>
-					<template v-else>No Data</template>
+					<template v-else>{{ $t("mapActionArea.noData") }}</template>
 				</template>
 				<template v-else>
-					<span v-if="shouldShowPreStorageOption() === 1">Your Saint Power gives you Unlimited Storage</span>
-					<span v-else-if="shouldShowPreStorageOption() === 2">You have no resources to store</span>
-					<span v-else-if="shouldShowPreStorageOption() === 3">You have enough storage for all your
-						resources</span>
-					<span v-else-if="shouldShowPreStorageOption() === 4">You have no storage</span>
+					<span v-if="shouldShowPreStorageOption() === 1">{{ $t("mapActionArea.unlimitedStorage") }}</span>
+					<span v-else-if="shouldShowPreStorageOption() === 2">{{ $t("mapActionArea.noResourcesToStore") }}</span>
+					<span v-else-if="shouldShowPreStorageOption() === 3">{{ $t("mapActionArea.enoughStorage") }}</span>
+					<span v-else-if="shouldShowPreStorageOption() === 4">{{ $t("mapActionArea.noStorage") }}</span>
 				</template>
 				<hr />
 			</template>
@@ -698,17 +700,15 @@ function flatmapResourceArray(array) {
 			<template v-if="shouldShowPreHarvestOption() >= 0">
 				<template v-if="shouldShowPreHarvestOption() === 0">
 					<button @click="localActionPreHarvestTurn" class="actionsLineButton">
-						<span v-if="getHarvestPreMove() === -1">Action Harvest Turn</span>
-						<span v-else>Change Harvest Turn</span>
+						<span v-if="getHarvestPreMove() === -1">{{ $t("mapActionArea.actionHarvestTurn") }}</span>
+						<span v-else>{{ $t("mapActionArea.changeHarvestTurn") }}</span>
 					</button>
-					<template v-if="getHarvestPreMove() >= 0">Harvesting Pre-set</template>
-					<template v-else>No Data</template>
+					<template v-if="getHarvestPreMove() >= 0">{{ $t("mapActionArea.harvestingPreset") }}</template>
+					<template v-else>{{ $t("mapActionArea.noData") }}</template>
 				</template>
 				<template v-else>
-					<span v-if="shouldShowPreHarvestOption() === 1">You have no decisions to make during
-						harvesting</span>
-					<span v-if="shouldShowPreHarvestOption() === 2">You must complete countryside building before
-						harvesting</span>
+					<span v-if="shouldShowPreHarvestOption() === 1">{{ $t("mapActionArea.noHarvestDecisions") }}</span>
+					<span v-if="shouldShowPreHarvestOption() === 2">{{ $t("mapActionArea.finishCountrysideBeforeHarvest") }}</span>
 				</template>
 				<hr />
 			</template>
@@ -716,58 +716,56 @@ function flatmapResourceArray(array) {
 			<template v-if="shouldShowPreExploreOption() >= 0">
 				<template v-if="shouldShowPreExploreOption() === 0">
 					<button @click="localActionPreExploreTurn" class="actionsLineButton">
-						<span v-if="getExplorerPreMove() === -1">Action Explore Turn</span>
-						<span v-else>Change Explore Turn</span>
+						<span v-if="getExplorerPreMove() === -1">{{ $t("mapActionArea.actionExploreTurn") }}</span>
+						<span v-else>{{ $t("mapActionArea.changeExploreTurn") }}</span>
 					</button>
-					<template v-if="getExplorerPreMove() === 1">You chose to explore</template>
-					<template v-else-if="getExplorerPreMove() === 0">Skip exploration</template>
-					<template v-else>No Data</template>
+					<template v-if="getExplorerPreMove() === 1">{{ $t("mapActionArea.choseToExplore") }}</template>
+					<template v-else-if="getExplorerPreMove() === 0">{{ $t("mapActionArea.skipExploration") }}</template>
+					<template v-else>{{ $t("mapActionArea.noData") }}</template>
 				</template>
 				<template v-else>
-					<span v-if="shouldShowPreExploreOption() === 1">You do not have a manned explorer</span>
-					<span v-if="shouldShowPreExploreOption() === 2">You cannot reach an explorer token</span>
+					<span v-if="shouldShowPreExploreOption() === 1">{{ $t("mapActionArea.noMannedExplorer") }}</span>
+					<span v-if="shouldShowPreExploreOption() === 2">{{ $t("mapActionArea.cannotReachExplorerToken") }}</span>
 				</template>
 				<hr />
 			</template>
 			<template v-if="shouldShowPreFamineOption() >= 0">
 				<template v-if="shouldShowPreFamineOption() === 0">
 					<button @click="localActionPreFamineTurn" class="actionsLineButton">
-						<span v-if="getFaminePreMove() === -1">Action Famine Turn</span>
-						<span v-else>Change Famine Turn</span>
+						<span v-if="getFaminePreMove() === -1">{{ $t("mapActionArea.actionFamineTurn") }}</span>
+						<span v-else>{{ $t("mapActionArea.changeFamineTurn") }}</span>
 					</button>
-					<template v-if="getFaminePreMove() >= 0">Graves Pre-set</template>
-					<template v-else>No Data</template>
+					<template v-if="getFaminePreMove() >= 0">{{ $t("mapActionArea.gravesPreset") }}</template>
+					<template v-else>{{ $t("mapActionArea.noData") }}</template>
 					<br />
-					<b>Graves:</b>
+					<b>{{ $t("mapActionArea.graves") }}</b>
 					{{ Math.max(city.getTotalGravesToPlaceForPreTurn(personal.pov)[0] -
 						city.getTotalGravesToPlaceForPreTurn(personal.pov)[1], 0) }}
 					<span v-if="city.getTotalGravesToPlaceForPreTurn(personal.pov)[1] > 0">- {{
 						city.getTotalGravesToPlaceForPreTurn(personal.pov)[0] }}</span>
 				</template>
 				<template v-else>
-					<span v-if="shouldShowPreFamineOption() === 1">No graves to place, no explorers in play</span>
-					<span v-if="shouldShowPreFamineOption() === 2">Even if all explorers find food, you will still have
-						0 graves</span>
-					<span v-if="shouldShowPreFamineOption() === 3">You do not have enough space to place all
-						graves</span>
+					<span v-if="shouldShowPreFamineOption() === 1">{{ $t("mapActionArea.noGravesNoExplorers") }}</span>
+					<span v-if="shouldShowPreFamineOption() === 2">{{ $t("mapActionArea.noGravesEvenIfExplorersFindFood") }}</span>
+					<span v-if="shouldShowPreFamineOption() === 3">{{ $t("mapActionArea.notEnoughSpaceForGraves") }}</span>
 				</template>
 				<hr />
 			</template>
 			<template v-if="shouldShowPrePollutionOption() >= 0">
 				<template v-if="shouldShowPrePollutionOption() === 0">
 					<button @click="localActionPrePollutionTurn" class="actionsLineButton">
-						<span v-if="getPollutionPreMove() === -1">Action Pollution Turn</span>
-						<span v-else>Change Pollution Turn</span>
+						<span v-if="getPollutionPreMove() === -1">{{ $t("mapActionArea.actionPollutionTurn") }}</span>
+						<span v-else>{{ $t("mapActionArea.changePollutionTurn") }}</span>
 					</button>
-					<template v-if="getPollutionPreMove() >= 0">Pollution Pre-set</template>
-					<template v-else>No Data</template>
+					<template v-if="getPollutionPreMove() >= 0">{{ $t("mapActionArea.pollutionPreset") }}</template>
+					<template v-else>{{ $t("mapActionArea.noData") }}</template>
 					<br />
-					<b>Pollution:</b>
+					<b>{{ $t("mapActionArea.pollution") }}</b>
 					{{ country.getPendingPollution(personal.pov) }}
 				</template>
 				<template v-else>
-					<span v-if="shouldShowPrePollutionOption() === 1">No pollution to place</span>
-					<span v-if="shouldShowPrePollutionOption() === 2">You have more pollution than free hexes</span>
+					<span v-if="shouldShowPrePollutionOption() === 1">{{ $t("mapActionArea.noPollutionToPlace") }}</span>
+					<span v-if="shouldShowPrePollutionOption() === 2">{{ $t("mapActionArea.morePollutionThanFreeHexes") }}</span>
 				</template>
 				<br />
 			</template>
@@ -777,17 +775,18 @@ function flatmapResourceArray(array) {
 	<!-- KICKOUT-->
 	<template v-if="personal.kickoutRequired > 0 && !personal.canPlay() && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 		<div v-if="personal.kickoutRequired == 1" id="kickoutDiv">
-			Player
-			<b>{{ controller.currentPlayerObj().name }}</b>
-			has used all the standard kickout time.
+			<i18n-t keypath="mapActionArea.playerUsedAllKickoutTime" tag="span" scope="global">
+				<template #name><b>{{ controller.currentPlayerObj().name }}</b></template>
+			</i18n-t>
 			<br />
 			<br />
-			Remaining Flex-Time:
+			{{ $t("mapActionArea.remainingFlexTime") }}
 			<span id="flexiKickoutTimerSpan">{{ getFlexiKickoutTImerText() }}</span>
 			<br />
 			<br />
-			For more information see
-			<b><a href="/help/" target="_blank">Help</a></b>
+			<i18n-t keypath="mapActionArea.forMoreInfoSeeHelp" tag="span" scope="global">
+				<template #help><b><a href="/help/" target="_blank">{{ $t("mapActionArea.help") }}</a></b></template>
+			</i18n-t>
 		</div>
 		<!--<div v-else-if="personal.externalTournamentGame" id="kickoutDiv">
 			Under the tournament rules set by the external tournament organisers, you cannot kick other players from this type of tournament game
@@ -806,84 +805,83 @@ function flatmapResourceArray(array) {
 			<br />
 			<template v-if="canKickoutNow()">
 				<template v-if="store.context.action !== rf.ACT_CONFIRM_KICKOUT">
-					Player
-					<b>{{ controller.currentPlayerObj().name }}</b>
-					has timed out
+					<i18n-t keypath="mapActionArea.playerTimedOut" tag="span" scope="global">
+						<template #name><b>{{ controller.currentPlayerObj().name }}</b></template>
+					</i18n-t>
 					<br />
-					To kick out
-					<b>{{ controller.currentPlayerObj().name }}</b>
-					press Confirm Kickout
+					<i18n-t keypath="mapActionArea.toKickoutPressConfirm" tag="span" scope="global">
+						<template #name><b>{{ controller.currentPlayerObj().name }}</b></template>
+					</i18n-t>
 					<br />
-					The game will proceed to the next player/phase/turn
+					{{ $t("mapActionArea.gameProceedsNext") }}
 					<br />
 					<br />
-					Otherwise you can allow
-					<b>{{ controller.currentPlayerObj().name }}</b>
-					more time - reload the page to initiate kickout again
+					<i18n-t keypath="mapActionArea.allowMoreTimeReload" tag="span" scope="global">
+						<template #name><b>{{ controller.currentPlayerObj().name }}</b></template>
+					</i18n-t>
 					<br />
 
 					<br />
 					<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
-					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow
-							more time</button></span>
+					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("mapActionArea.notNowAllowMoreTime") }}</button></span>
 					<span>
-						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{
-							controller.currentPlayerObj().name }} in the game - but end their current turn</button>
+						<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t("mapActionArea.keepInGame", { name: controller.currentPlayerObj().name }) }}</button>
 					</span>
 					<span><button class="actionsLineButton" id="confirmKickoutButton"
-							@click="store.context.action = rf.ACT_CONFIRM_KICKOUT">Confirm Kickout</button></span>
+							@click="store.context.action = rf.ACT_CONFIRM_KICKOUT">{{ $t("mapActionArea.confirmKickout") }}</button></span>
 				</template>
 				<template v-if="store.context.action === rf.ACT_CONFIRM_KICKOUT">
-					This will permanently remove <b>{{ controller.currentPlayerObj().name }}</b> from the game<br />
-					<b>It cannot be undone</b><br />
+					<i18n-t keypath="mapActionArea.permanentlyRemove" tag="span" scope="global">
+						<template #name><b>{{ controller.currentPlayerObj().name }}</b></template>
+					</i18n-t><br />
+					<b>{{ $t("mapActionArea.cannotBeUndone") }}</b><br />
 					<br />
-					Try checking the chat in case they have given a reason for any temporary absence<br />
-					Please consider giving them a short grace period, in case they are just delayed
+					{{ $t("mapActionArea.checkChatAbsence") }}<br />
+					{{ $t("mapActionArea.gracePeriodNote") }}
 
 					<br />
 					<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
-					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow
-							more time</button></span>
+					<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("mapActionArea.notNowAllowMoreTime") }}</button></span>
 					<span><button class="actionsLineButton" id="confirmKickoutButton"
-							@click="Bot.actionPlayerKickout">Permanently Kickout {{ controller.currentPlayerObj().name
-							}}</button></span>
+							@click="Bot.actionPlayerKickout">{{ $t("mapActionArea.permanentlyKickout", { name: controller.currentPlayerObj().name }) }}</button></span>
 				</template>
 			</template>
 			<template v-else>
-				Player
-				<b>{{ controller.currentPlayerObj().name }}</b>
-				has timed out
+				<i18n-t keypath="mapActionArea.playerTimedOut" tag="span" scope="global">
+					<template #name><b>{{ controller.currentPlayerObj().name }}</b></template>
+				</i18n-t>
 				<br />
-				A vote from the other players is needed to kick out
-				<b>{{ controller.currentPlayerObj().name }}</b>
+				<i18n-t keypath="mapActionArea.voteNeededKickout" tag="span" scope="global">
+					<template #name><b>{{ controller.currentPlayerObj().name }}</b></template>
+				</i18n-t>
 				<br />
-				Votes: {{ kickoutVoteCount() }}/{{ store.kickoutVoteThreshold }}
-				({{ kickoutVoters() }})
+				{{ $t("mapActionArea.votesLine", { count: kickoutVoteCount(), threshold: store.kickoutVoteThreshold, voters: kickoutVoters() }) }}
 				<br />
 				<br />
 				<span v-if="!myKickoutVote()">
 					<template v-if="isLastVoteRequired()">
-						This will permanently remove <b>{{ controller.currentPlayerObj().name }}</b> from the game<br />
-						<b>It cannot be undone</b><br />
+						<i18n-t keypath="mapActionArea.permanentlyRemove" tag="span" scope="global">
+							<template #name><b>{{ controller.currentPlayerObj().name }}</b></template>
+						</i18n-t><br />
+						<b>{{ $t("mapActionArea.cannotBeUndone") }}</b><br />
 						<br />
 					</template>
 					<button class="actionsLineButton" id="voteKickoutButton"
-						@click="Bot.actionPlayerKickout">Vote to Kickout {{ controller.currentPlayerObj().name }}</button>
+						@click="Bot.actionPlayerKickout">{{ $t("mapActionArea.voteToKickout", { name: controller.currentPlayerObj().name }) }}</button>
 				</span>
 				<span v-else>
-					You have voted to kick out
-					<b>{{ controller.currentPlayerObj().name }}</b>
+					<i18n-t keypath="mapActionArea.youHaveVotedKickout" tag="span" scope="global">
+						<template #name><b>{{ controller.currentPlayerObj().name }}</b></template>
+					</i18n-t>
 					<br />
-					If the other players do not also vote, you will be able to kick them out directly in {{ soloKickoutCountdown }}
+					{{ $t("mapActionArea.kickDirectlyIn", { countdown: soloKickoutCountdown }) }}
 				</span>
 				<br />
 				<br />
 				<TurnNudge v-if="personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
-				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">Not now - allow
-						more time</button></span>
+				<span><button class="actionsLineButton" id="cancelKickoutButton" @click="cancelKickout">{{ $t("mapActionArea.notNowAllowMoreTime") }}</button></span>
 				<span>
-					<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">Keep {{
-						controller.currentPlayerObj().name }} in the game - but end their current turn</button>
+					<button class="actionsLineButton" id="passKickoutButton" @click="passKickout">{{ $t("mapActionArea.keepInGame", { name: controller.currentPlayerObj().name }) }}</button>
 				</span>
 			</template>
 		</div>
@@ -892,106 +890,104 @@ function flatmapResourceArray(array) {
 	<!-- ALWAYS SHOWS GAME END-->
 	<template v-if="store.gameflow.phase === rf.PHASE_GAME_OVER">
 		<div id="gameEndDiv">
-			Game Over
+			{{ $t("mapActionArea.gameOver") }}
 			<br />
 			<br />
 			<!-- LAST MAN STANDING WIN -->
 			<template v-if="store.history[store.history.length - 1][3][0] === rf.GAME_WIN_LAST_MAN_STANING">
-				Winner:
+				{{ $t("mapActionArea.winner") }}
 				<div class="playerScoreSummaryDiv">
 					<span class="mainEntryPlayerNewTurn"
 						:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[store.history[store.history.length - 1][3][1][0]].colour)">{{
 							store.players[store.history[store.history.length - 1][3][1][0]].displayName }}</span>
 				</div>
 				<br />
-				<span>Last Man Standing</span>
+				<span>{{ $t("mapActionArea.lastManStanding") }}</span>
 				<br />
 				<span v-if="store.players[store.history[store.history.length - 1][3][1][0]].saint !== rf.SAINT_NONE">
-					Winning Saint:
+					{{ $t("mapActionArea.winningSaint") }}
 					<img class="winningSaintImage"
 						:src="view.getImage('saint_' + String(store.players[store.history[store.history.length - 1][3][1][0]].saint))" />
 					{{ rf.SAINT_INFO[store.players[store.history[store.history.length - 1][3][1][0]].saint].name }}
 				</span>
-				<span v-else>No Saint</span>
+				<span v-else>{{ $t("mapActionArea.noSaint") }}</span>
 				<br />
 				<template v-if="store.players[store.history[store.history.length - 1][3][1][0]].name === personal.name">
-					<h1>Congratulations!</h1>
+					<h1>{{ $t("mapActionArea.congratulations") }}</h1>
 				</template>
 			</template>
 
 			<!-- GAME_WIN_LAST_UNGRAVED WIN -->
 			<template v-if="store.history[store.history.length - 1][3][0] === rf.GAME_WIN_LAST_UNGRAVED">
-				Winner:
+				{{ $t("mapActionArea.winner") }}
 				<div class="playerScoreSummaryDiv">
 					<span class="mainEntryPlayerNewTurn"
 						:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[store.history[store.history.length - 1][3][1][0]].colour)">{{
 							store.players[store.history[store.history.length - 1][3][1][0]].displayName }}</span>
 				</div>
 				<br />
-				<span>Grave Dodger</span>
+				<span>{{ $t("mapActionArea.graveDodger") }}</span>
 				<br />
 				<span v-if="store.players[store.history[store.history.length - 1][3][1][0]].saint !== rf.SAINT_NONE">
-					Winning Saint:
+					{{ $t("mapActionArea.winningSaint") }}
 					<img class="winningSaintImage"
 						:src="view.getImage('saint_' + String(store.players[store.history[store.history.length - 1][3][1][0]].saint))" />
 					{{ rf.SAINT_INFO[store.players[store.history[store.history.length - 1][3][1][0]].saint].name }}
 				</span>
-				<span v-else>No Saint</span>
+				<span v-else>{{ $t("mapActionArea.noSaint") }}</span>
 				<br />
 				<template v-if="store.players[store.history[store.history.length - 1][3][1][0]].name === personal.name">
-					<h1>Congratulations!</h1>
+					<h1>{{ $t("mapActionArea.congratulations") }}</h1>
 				</template>
 			</template>
 
 			<!-- SINGLE SAINT WINNER -->
 			<template v-if="store.history[store.history.length - 1][3][0] === rf.GAME_WIN_ONLY_SAINT_WINNER">
-				Winner:
+				{{ $t("mapActionArea.winner") }}
 				<div class="playerScoreSummaryDiv">
 					<span class="mainEntryPlayerNewTurn"
 						:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[store.history[store.history.length - 1][3][1][0]].colour)">{{
 							store.players[store.history[store.history.length - 1][3][1][0]].displayName }}</span>
 				</div>
 				<br />
-				<span>Solo Saintly Fulfilment</span>
+				<span>{{ $t("mapActionArea.soloSaintlyFulfilment") }}</span>
 				<br />
 				<span v-if="store.players[store.history[store.history.length - 1][3][1][0]].saint !== rf.SAINT_NONE">
-					Winning Saint:
+					{{ $t("mapActionArea.winningSaint") }}
 					<img class="winningSaintImage"
 						:src="view.getImage('saint_' + String(store.players[store.history[store.history.length - 1][3][1][0]].saint))" />
 					{{ rf.SAINT_INFO[store.players[store.history[store.history.length - 1][3][1][0]].saint].name }}
 				</span>
-				<span v-else>No Saint</span>
+				<span v-else>{{ $t("mapActionArea.noSaint") }}</span>
 				<br />
 				<template v-if="store.players[store.history[store.history.length - 1][3][1][0]].name === personal.name">
-					<h1>Congratulations!</h1>
+					<h1>{{ $t("mapActionArea.congratulations") }}</h1>
 				</template>
 			</template>
 
 			<!-- SINGLE POLLUTION  WINNER -->
 			<template v-if="store.history[store.history.length - 1][3][0] === rf.GAME_WIN_ONLY_POLLUTION_WINNER">
-				Winner:
+				{{ $t("mapActionArea.winner") }}
 				<div class="playerScoreSummaryDiv">
 					<span class="mainEntryPlayerNewTurn"
 						:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[store.history[store.history.length - 1][3][1][0]].colour)">{{
 							store.players[store.history[store.history.length - 1][3][1][0]].displayName }}</span>
 				</div>
 				<br />
-				<span>Most Unpolluted Hexes</span>
+				<span>{{ $t("mapActionArea.mostUnpollutedHexes") }}</span>
 				<br />
 				<span v-if="store.players[store.history[store.history.length - 1][3][1][0]].saint !== rf.SAINT_NONE">
-					Winning Saint:
+					{{ $t("mapActionArea.winningSaint") }}
 					<img class="winningSaintImage"
 						:src="view.getImage('saint_' + String(store.players[store.history[store.history.length - 1][3][1][0]].saint))" />
 					{{ rf.SAINT_INFO[store.players[store.history[store.history.length - 1][3][1][0]].saint].name }}
 				</span>
-				<span v-else>No Saint</span>
+				<span v-else>{{ $t("mapActionArea.noSaint") }}</span>
 				<br />
 				<template v-if="store.players[store.history[store.history.length - 1][3][1][0]].name === personal.name">
-					<h1>Congratulations!</h1>
+					<h1>{{ $t("mapActionArea.congratulations") }}</h1>
 				</template>
-				Runner
-				<span v-if="store.history[store.history.length - 1][3][2].length > 1">s</span>
-				Up:
+				{{ store.history[store.history.length - 1][3][2].length > 1 ? $t("mapActionArea.runnersUp") : $t("mapActionArea.runnerUp") }}
 				<div class="playerScoreSummaryDiv"
 					v-for="(playerIndex, idx) in store.history[store.history.length - 1][3][2]" :key="idx">
 					<span class="mainEntryPlayerNewTurn"
@@ -1002,7 +998,7 @@ function flatmapResourceArray(array) {
 
 			<!-- MULTI POLLUTION WINNER -->
 			<template v-if="store.history[store.history.length - 1][3][0] === rf.GAME_WIN_TIE">
-				Winners:
+				{{ $t("mapActionArea.winners") }}
 				<div class="playerScoreSummaryDiv"
 					v-for="(playerIndex, idx) in store.history[store.history.length - 1][3][1]" :key="idx">
 					<span class="mainEntryPlayerNewTurn"
@@ -1010,26 +1006,24 @@ function flatmapResourceArray(array) {
 							store.players[playerIndex].displayName }}</span>
 				</div>
 				<br />
-				<span>Joint Most Unpolluted Hexes</span>
+				<span>{{ $t("mapActionArea.jointMostUnpollutedHexes") }}</span>
 				<br />
-				Winning Saints:
+				{{ $t("mapActionArea.winningSaints") }}
 				<template v-for="(playerIndex, idx) in store.history[store.history.length - 1][3][1]" :key="idx">
 					<span v-if="store.players[playerIndex].saint !== rf.SAINT_NONE">
 						<img class="winningSaintImage"
 							:src="view.getImage('saint_' + String(store.players[playerIndex].saint))" />
 						{{ rf.SAINT_INFO[store.players[playerIndex].saint].name }}
 					</span>
-					<span v-else>No Saint</span>
+					<span v-else>{{ $t("mapActionArea.noSaint") }}</span>
 				</template>
 				<br />
 				<template v-if="store.history[store.history.length - 1][3][1].includes(personal.pov)">
-					<h1>Congratulations!</h1>
+					<h1>{{ $t("mapActionArea.congratulations") }}</h1>
 				</template>
 
 				<template v-if="store.history[store.history.length - 1][3].length > 2">
-					Runner
-					<span v-if="store.history[store.history.length - 1][3][2].length > 1">s</span>
-					Up:
+					{{ store.history[store.history.length - 1][3][2].length > 1 ? $t("mapActionArea.runnersUp") : $t("mapActionArea.runnerUp") }}
 					<div class="playerScoreSummaryDiv"
 						v-for="(playerIndex, idx) in store.history[store.history.length - 1][3][2]" :key="idx">
 						<span class="mainEntryPlayerNewTurn"
@@ -1042,9 +1036,9 @@ function flatmapResourceArray(array) {
 			<!-- ALWAYS HAVE REMATCH LINK AT THE BOTTOM -->
 			<br />
 			<br />
-			Fancy a
-			<a :href="'/createAQYpage/' + String(personal.gameID) + '/'">rematch</a>
-			?
+			<i18n-t keypath="mapActionArea.fancyARematch" tag="span" scope="global">
+				<template #link><a :href="'/createAQYpage/' + String(personal.gameID) + '/'">{{ $t("mapActionArea.rematch") }}</a></template>
+			</i18n-t>
 			<br />
 			<br />
 		</div>
@@ -1052,11 +1046,11 @@ function flatmapResourceArray(array) {
 
 	<!-- EXPLORER RESULT -->
 	<div v-if="store.newlyExplorerResource !== rf.RES_NONE" class="generalActions explorerRevealDiv">
-		Your Explorer Revealed:
-		<img class="newBuildingCostRes" :src="view.getImage('res_' + String(store.newlyExplorerResource))" />
+		{{ $t("mapActionArea.explorerRevealed") }}
+		<img class="newBuildingCostRes explorer-reveal-res" :src="view.getImage('res_' + String(store.newlyExplorerResource))" />
 		<br />
-		<span v-if="store.newlyExplorerResource === rf.RES_WINE">Famine level remains at: {{ store.famineLevel }}</span>
-		<span v-else>Famine level increases to: {{ store.famineLevel }}</span>
+		<span v-if="store.newlyExplorerResource === rf.RES_WINE">{{ $t("mapActionArea.famineRemainsAt", { level: store.famineLevel }) }}</span>
+		<span v-else>{{ $t("mapActionArea.famineIncreasesTo", { level: store.famineLevel }) }}</span>
 	</div>
 
 	<!-- ONLY SHOW ACTIONS IF YOU CAN PLAY -->
@@ -1064,62 +1058,57 @@ function flatmapResourceArray(array) {
 		<!-- TURN 1 INFO -->
 		<template
 			v-if="store.gameflow.turn === 1 && store.gameflow.phase === rf.PHASE_FIRST_CITY && !store.topMenuViews.showReplay">
-			<h2>Welcome to Antiquity!</h2>
+			<h2>{{ $t("mapActionArea.welcome") }}</h2>
 			<div class="intro_items_list_div">
-				To switch between City and Country views, click on any player icon
-				<img :src="view.getImage('clickPlayers')" alt="Player Boxes" class="helpImage clickPlayers" />
+				{{ $t("mapActionArea.switchViews") }}
+				<img :src="view.getImage('clickPlayers')" :alt="$t('mapActionArea.playerBoxesAlt')" class="helpImage clickPlayers" />
 				<br />
-				<img :src="view.getImage('helpCity')" alt="City Help" class="helpImage helpCity" />
-				<br />
-				<br />
-				During City Building:
+				<img :src="view.getImage('helpCity')" :alt="$t('mapActionArea.cityHelpAlt')" class="helpImage helpCity" />
 				<br />
 				<br />
-				<span class="greenArea">Use the green area for main actions: Reset Whole Turn / Undo / Finish Actions
-					(and End Turn)</span>
+				{{ $t("mapActionArea.duringCityBuilding") }}
 				<br />
 				<br />
-				<span class="purpleArea">Use the purple area to interact with your cities: (Re)move buildings, man and
-					un-man buildings</span>
+				<span class="greenArea">{{ $t("mapActionArea.greenAreaHelp") }}</span>
 				<br />
 				<br />
-				<span class="blueArea">Use the blue area to directly use buildings, eg Market, Faculty of
-					Theology</span>
+				<span class="purpleArea">{{ $t("mapActionArea.purpleAreaHelp") }}</span>
+				<br />
+				<br />
+				<span class="blueArea">{{ $t("mapActionArea.blueAreaHelp") }}</span>
 				<br />
 				<br />
 
-				NOTE: You may MOVE unused buildings during city building on the turn they were built even without the
-				Saint power.
+				{{ $t("mapActionArea.moveUnusedBuildingsNote") }}
 				<br />
-				This is effectively a shortcut to prevent you having to reset the whole turn just to place a building
-				somewhere slighly different.
+				{{ $t("mapActionArea.shortcutNote") }}
 				<br />
-				Using certain buildings or performing certain actions will lock in your buildings;
+				{{ $t("mapActionArea.lockInBuildings") }}
 				<br />
-				in this case you will need to reset your turn in order to perform your actions differently.
+				{{ $t("mapActionArea.resetTurnToChange") }}
 				<br />
 				<br />
-				<img :src="view.getImage('icon-info')" alt="Info" class="helpImage infoIcon" />
-				Click the Info button to view Victory Progression
+				<img :src="view.getImage('icon-info')" :alt="$t('mapActionArea.infoAlt')" class="helpImage infoIcon" />
+				{{ $t("mapActionArea.infoButtonHelp") }}
 				<br />
 				<br />
-				Don't forget to set your Antiquity Preferences!
-				<a class="linkOther" href="/profileAQY/" target="_blank">Antiquity Preferences</a>
+				{{ $t("mapActionArea.dontForgetPreferences") }}
+				<a class="linkOther" href="/profileAQY/" target="_blank">{{ $t("mapActionArea.antiquityPreferences") }}</a>
 				<br />
 				<br />
-				For more information please see
-				<a class="linkOther" href="/AQY/help/" target="_blank">Antiquity Help</a>
+				{{ $t("mapActionArea.forMoreInfoHelp") }}
+				<a class="linkOther" href="/AQY/help/" target="_blank">{{ $t("mapActionArea.antiquityHelp") }}</a>
 			</div>
 			<br />
 		</template>
 
 		<!-- FIRST CITY -->
 		<template v-if="store.gameflow.phase === rf.PHASE_FIRST_CITY">
-			<div class="generalActions">Place your first city</div>
+			<div class="generalActions">{{ $t("mapActionArea.placeFirstCity") }}</div>
 		</template>
 		<!-- CITY BUILDING -->
 		<template v-if="store.gameflow.phase === rf.PHASE_CITY_BUILDING">
-			<div class="generalActions">Build your Cities</div>
+			<div class="generalActions">{{ $t("mapActionArea.buildYourCities") }}</div>
 		</template>
 		<!-- COUNTRYSIDE PHASE-->
 		<template
@@ -1129,97 +1118,88 @@ function flatmapResourceArray(array) {
 				<!-- ACTION SELECTION -->
 				<div id="actionsContainer" class="countryPhase" v-if="!store.context.needToPlaceSecondFisheryHex">
 					<div id="actionSelectionDiv">
-						Available cart shops: {{ city.getCartShopStatus(controller.currentPlayerIndex())[0] }}
+						{{ $t("mapActionArea.availableCartShops", { count: city.getCartShopStatus(controller.currentPlayerIndex())[0] }) }}
 						<br />
 						<button v-if="canBuildBuilding(rf.COUNTRYSIDE_BLDG_WOODCUTTER)" class="actionsLineButton"
 							@click="setupCountryBuilding(rf.COUNTRYSIDE_BLDG_WOODCUTTER)">
-							Build
+							{{ $t("mapActionArea.build") }}
 							<br />
-							Woodcutter
+							{{ $t("mapActionArea.woodcutter") }}
 						</button>
 						<button v-if="canBuildBuilding(rf.COUNTRYSIDE_BLDG_MINE)" class="actionsLineButton"
 							@click="setupCountryBuilding(rf.COUNTRYSIDE_BLDG_MINE)">
-							Build
+							{{ $t("mapActionArea.build") }}
 							<br />
-							Mine
+							{{ $t("mapActionArea.mine") }}
 						</button>
 						<button v-if="canBuildBuilding(rf.COUNTRYSIDE_BLDG_FARM)" class="actionsLineButton"
 							@click="setupCountryBuilding(rf.COUNTRYSIDE_BLDG_FARM)">
-							Build
+							{{ $t("mapActionArea.build") }}
 							<br />
-							Farm
+							{{ $t("mapActionArea.farm") }}
 						</button>
 						<button v-if="canBuildBuilding(rf.COUNTRYSIDE_BLDG_FISHERY)" class="actionsLineButton"
 							@click="setupCountryBuilding(rf.COUNTRYSIDE_BLDG_FISHERY)">
-							Build
+							{{ $t("mapActionArea.build") }}
 							<br />
-							Fishery
+							{{ $t("mapActionArea.fishery") }}
 						</button>
 						<button v-if="canBuildBuilding(rf.COUNTRYSIDE_BLDG_INN)" class="actionsLineButton"
 							@click="setupCountryBuilding(rf.COUNTRYSIDE_BLDG_INN)">
-							Build
+							{{ $t("mapActionArea.build") }}
 							<br />
-							Inn
+							{{ $t("mapActionArea.inn") }}
 						</button>
 						<button v-if="canBuildBuilding(rf.COUNTRYSIDE_BLDG_CITY)" class="actionsLineButton"
 							@click="setupCountryBuilding(rf.COUNTRYSIDE_BLDG_CITY)">
-							Build
+							{{ $t("mapActionArea.build") }}
 							<br />
-							City
+							{{ $t("mapActionArea.city") }}
 						</button>
 						<button class="actionsLineButton"
 							v-if="city.hasWorkingUniqueBuilding(controller.currentPlayerIndex(), rf.BLDG_ALCHEMY, true)"
 							@click="clickedUseFacAlch">
-							Use Faculty
+							{{ $t("mapActionArea.useFaculty") }}
 							<br />
-							of Alchemy
+							{{ $t("mapActionArea.ofAlchemy") }}
 						</button>
 						<br />
 
-						<span v-if="store.context.countryBuildCalculation.hasWood === false">No wood for Woodcutter /
-							Mine / Fishery,</span>
-						<span v-if="store.context.countryBuildCalculation.anyWoodHexes === false">No wood tiles for
-							Woodcutter,</span>
-						<span v-if="store.context.countryBuildCalculation.anyMountainHexes === false">No Mountains for
-							Mine,</span>
-						<span v-if="store.context.countryBuildCalculation.anyFishermanHexes === false">No hexes for
-							Fishery,</span>
-						<span v-if="store.context.countryBuildCalculation.hasSeedRes === false">No seed for Farm,</span>
-						<span v-if="!store.context.countryBuildCalculation.anyPlainsHexes">No Plains for Farm,</span>
-						<span v-if="store.context.countryBuildCalculation.hasBrewery === false">No Brewery for
-							Inn,</span>
-						<span v-else-if="!store.context.countryBuildCalculation.hasFoodRes">No Food for Inn,</span>
-						<span v-if="store.context.countryBuildCalculation.canAffordCity === false">No Resources for
-							City,</span>
-						<span v-if="store.context.countryBuildCalculation.noSpaceForCity === true">No space for
-							City,</span>
-						<span v-if="store.context.countryBuildCalculation.hasFacAlchToUse === false">No Fac Alch to
-							remove Pollution,</span>
+						<span v-if="store.context.countryBuildCalculation.hasWood === false">{{ $t("mapActionArea.noWoodForWoodcutterMineFishery") }}</span>
+						<span v-if="store.context.countryBuildCalculation.anyWoodHexes === false">{{ $t("mapActionArea.noWoodTilesForWoodcutter") }}</span>
+						<span v-if="store.context.countryBuildCalculation.anyMountainHexes === false">{{ $t("mapActionArea.noMountainsForMine") }}</span>
+						<span v-if="store.context.countryBuildCalculation.anyFishermanHexes === false">{{ $t("mapActionArea.noHexesForFishery") }}</span>
+						<span v-if="store.context.countryBuildCalculation.hasSeedRes === false">{{ $t("mapActionArea.noSeedForFarm") }}</span>
+						<span v-if="!store.context.countryBuildCalculation.anyPlainsHexes">{{ $t("mapActionArea.noPlainsForFarm") }}</span>
+						<span v-if="store.context.countryBuildCalculation.hasBrewery === false">{{ $t("mapActionArea.noBreweryForInn") }}</span>
+						<span v-else-if="!store.context.countryBuildCalculation.hasFoodRes">{{ $t("mapActionArea.noFoodForInn") }}</span>
+						<span v-if="store.context.countryBuildCalculation.canAffordCity === false">{{ $t("mapActionArea.noResourcesForCity") }}</span>
+						<span v-if="store.context.countryBuildCalculation.noSpaceForCity === true">{{ $t("mapActionArea.noSpaceForCity") }}</span>
+						<span v-if="store.context.countryBuildCalculation.hasFacAlchToUse === false">{{ $t("mapActionArea.noFacAlchForPollution") }}</span>
 						<br />
-						<button class="actionsLineButton" @click="cancelButton">Cancel</button>
+						<button class="actionsLineButton" @click="cancelButton">{{ $t("mapActionArea.cancel") }}</button>
 					</div>
 					<!-- Selected Action -->
 					<div id="selectedActionDiv">
-						<span v-if="store.context.countryBuildingBeingPlaced === rf.COUNTRSIDE_BLDG_NONE">Select a
-							Building to Place</span>
+						<span v-if="store.context.countryBuildingBeingPlaced === rf.COUNTRSIDE_BLDG_NONE">{{ $t("mapActionArea.selectBuildingToPlace") }}</span>
 						<span v-else>
 							<!-- BUILDING TYPE -->
-							Building:
+							{{ $t("mapActionArea.building") }}
 							<b>{{ rf.COUNTRYSIDE_BLDG_NAMES[store.context.countryBuildingBeingPlaced] }}</b>
 							<br />
 							<!-- Woodcutter / mine / fishery COST -->
-							Cost:
+							{{ $t("mapActionArea.cost") }}
 							<span
 								v-if="store.context.countryBuildingBeingPlaced === rf.COUNTRYSIDE_BLDG_WOODCUTTER || store.context.countryBuildingBeingPlaced === rf.COUNTRYSIDE_BLDG_MINE || store.context.countryBuildingBeingPlaced === rf.COUNTRYSIDE_BLDG_FISHERY">
 								<img class="newBuildingCostRes" :src="view.getImage('res_0')" />
 							</span>
 							<span v-else-if="store.context.countryBuildingBeingPlaced === rf.COUNTRYSIDE_BLDG_FARM">
-								<b>1 Seed Good</b>
+								<b>{{ $t("mapActionArea.oneSeedGood") }}</b>
 								<span
 									v-if="city.hasWorkingUniqueBuilding(controller.currentPlayerIndex(), rf.BLDG_BIOLOGY, true)"
 									class="greenText">
 									<br />
-									<b>Your Faculty Of Biology gives you a Free Seed</b>
+									<b>{{ $t("mapActionArea.freeSeedFromBiology") }}</b>
 								</span>
 							</span>
 							<!-- CHOOSE INN COST -->
@@ -1253,7 +1233,7 @@ function flatmapResourceArray(array) {
 							<!-- SELECT MINE RESOURCE Method 2-->
 							<span v-if="store.context.countryBuildingBeingPlaced === rf.COUNTRYSIDE_BLDG_MINE">
 								<br />
-								Mine Type:
+								{{ $t("mapActionArea.mineType") }}
 								<img class="newBuildingCostRes resSelectable"
 									:class="{ selectedRes: store.context.goodsToBeProduced === rf.RES_STONE }"
 									@click="selectMineRes(rf.RES_STONE)" :src="view.getImage('res_' + rf.RES_STONE)" />
@@ -1264,13 +1244,13 @@ function flatmapResourceArray(array) {
 								<br />
 								<span class="redText"
 									v-if="store.context.goodsToBeProduced !== rf.RES_NONE && store.context.hexesToHighlight.length === 0">
-									<b>No available mountains for this resouce</b>
+									<b>{{ $t("mapActionArea.noAvailableMountains") }}</b>
 								</span>
 								<span v-else>
 									<b>
-										Mountain ranges already producing the other
+										{{ $t("mapActionArea.mountainRangesUnavailablePart1") }}
 										<br />
-										resource will not be available to select
+										{{ $t("mapActionArea.mountainRangesUnavailablePart2") }}
 									</b>
 								</span>
 							</span>
@@ -1279,7 +1259,7 @@ function flatmapResourceArray(array) {
 								<br />
 								<template
 									v-if="city.hasWorkingUniqueBuilding(controller.currentPlayerIndex(), rf.BLDG_BIOLOGY, true)">
-									<span class="greenText"><b>&nbsp;&nbsp;&nbsp;Free Seed:</b></span>
+									<span class="greenText"><b>&nbsp;&nbsp;&nbsp;{{ $t("mapActionArea.freeSeed") }}</b></span>
 									<img class="newBuildingCostRes resSelectable"
 										@click="clickedCostRes(rf.RES_GRAIN, true)"
 										:class="[{ selectedRes: store.context.goodsToBeProduced === rf.RES_GRAIN && store.context.goodsToBeProducedUsesFreeSeed }]"
@@ -1301,7 +1281,7 @@ function flatmapResourceArray(array) {
 										:src="view.getImage('res_' + String(rf.RES_WINE))" />
 									<br />
 								</template>
-								Stored Seed:
+								{{ $t("mapActionArea.storedSeed") }}
 								<img class="newBuildingCostRes" @click="clickedCostRes(rf.RES_GRAIN)"
 									:class="[{ resSelectable: canSelectCostRes(rf.RES_GRAIN), selectedRes: store.context.goodsToBeProduced === rf.RES_GRAIN && !store.context.goodsToBeProducedUsesFreeSeed }]"
 									:src="view.getImage('res_' + String(rf.RES_GRAIN))" />
@@ -1321,7 +1301,7 @@ function flatmapResourceArray(array) {
 							<!-- SET FISHERY -->
 							<span v-if="store.context.countryBuildingBeingPlaced === rf.COUNTRYSIDE_BLDG_FISHERY">
 								<br />
-								Fishery Type:
+								{{ $t("mapActionArea.fisheryType") }}
 								<img class="newBuildingCostRes resSelectable" @click="selectFisheryRes(rf.RES_FISH)"
 									:class="{ selectedRes: store.context.goodsToBeProduced === rf.RES_FISH }"
 									:src="view.getImage('res_' + String(rf.RES_FISH))" />
@@ -1368,7 +1348,7 @@ function flatmapResourceArray(array) {
 
 								<span v-if="store.context.action === rf.ACT_CHOOSE_BUILDING_PAYMENT">
 									<br />
-									Food Cost:
+									{{ $t("mapActionArea.foodCost") }}
 									<img class="newBuildingCostRes" @click="clickedCostRes(rf.RES_GRAIN)"
 										:class="[{ resSelectable: canSelectCostRes(rf.RES_GRAIN) }]"
 										:src="view.getImage('res_' + String(rf.RES_GRAIN))" />
@@ -1385,7 +1365,7 @@ function flatmapResourceArray(array) {
 										:class="[{ resSelectable: canSelectCostRes(rf.RES_FISH) }]"
 										:src="view.getImage('res_' + String(rf.RES_FISH))" />
 									<br />
-									Lux Cost:
+									{{ $t("mapActionArea.luxCost") }}
 									<img class="newBuildingCostRes" @click="clickedCostRes(rf.RES_GOLD)"
 										:class="[{ resSelectable: canSelectCostRes(rf.RES_GOLD) }]"
 										:src="view.getImage('res_' + String(rf.RES_GOLD))" />
@@ -1410,7 +1390,7 @@ function flatmapResourceArray(array) {
 								v-if="model.unableToAffordBuilding(controller.currentPlayerIndex(), store.context.countryBuildingBeingPlaced)"
 								class="redText">
 								<br />
-								You Cannot Afford This Building
+								{{ $t("mapActionArea.cannotAffordBuilding") }}
 							</span>
 							<!-- ALREADY HAVE 4 CITIES -->
 							<span
@@ -1418,7 +1398,7 @@ function flatmapResourceArray(array) {
 								class="redText">
 								<br />
 								<br />
-								You can only have 4 cities
+								{{ $t("mapActionArea.onlyFourCities") }}
 							</span>
 						</span>
 					</div>
@@ -1426,7 +1406,7 @@ function flatmapResourceArray(array) {
 				<div v-else-if="store.context.needToPlaceSecondFisheryHex" id="actionsContainer" class="countryPhase">
 					<br />
 					<br />
-					<b>Place The Second Fishery Hex</b>
+					<b>{{ $t("mapActionArea.placeSecondFisheryHex") }}</b>
 				</div>
 			</template>
 			<template v-else>
@@ -1434,40 +1414,39 @@ function flatmapResourceArray(array) {
 					<br />
 					<br />
 					<br />
-					No More Cart Shops
+					{{ $t("mapActionArea.noMoreCartShops") }}
 				</div>
 			</template>
 		</template>
 		<!-- STORE GOODS -->
 		<template v-if="store.gameflow.phase === rf.PHASE_STORE_GOODS">
-			<div class="generalActions">Store goods in your cities</div>
+			<div class="generalActions">{{ $t("mapActionArea.storeGoodsInCities") }}</div>
 		</template>
 		<!-- HARVEST -->
 		<template
 			v-else-if="store.gameflow.phase === rf.PHASE_HARVEST || store.gameflow.phase === rf.PRE_PHASE_HARVEST">
 			<div id="generalActions">
-				<b>Harvest your resources</b>
+				<b>{{ $t("mapActionArea.harvestYourResources") }}</b>
 
 				<br />
 				<template v-if="store.context.hexesToHighlight.length > 0">
 					<br />
-					<b>Harvest resources before ending your turn</b>
+					<b>{{ $t("mapActionArea.harvestBeforeEndingTurn") }}</b>
 				</template>
 
 				<br />
 				<!-- END PRE_PHASE_HARVEST-->
 				<template v-if="store.gameflow.phase === rf.PRE_PHASE_HARVEST">
-					<button @click="model.resetPreMove" class="actionsLineButton">Cancel Pre Move</button>
+					<button @click="model.resetPreMove" class="actionsLineButton">{{ $t("mapActionArea.cancelPreMove") }}</button>
 					<button
 						v-if="store.players[personal.pov].preMoves.some((move) => move.phase === rf.PRE_PHASE_HARVEST)"
-						@click="IO.savePreTurn(rf.PRE_PHASE_HARVEST, [-999])" class="actionsLineButton">Delete Pre
-						Move</button>
+						@click="IO.savePreTurn(rf.PRE_PHASE_HARVEST, [-999])" class="actionsLineButton">{{ $t("mapActionArea.deletePreMove") }}</button>
 				</template>
 
 				<template
 					v-if="store.gameflow.phase === rf.PRE_PHASE_HARVEST && store.context.hexesToHighlight.length === 0">
 					<button @click="IO.savePreTurn(rf.PRE_PHASE_HARVEST, [...store.context.historyObj])"
-						class="actionsLineButton">Save Harvest Turn</button>
+						class="actionsLineButton">{{ $t("mapActionArea.saveHarvestTurn") }}</button>
 				</template>
 			</div>
 		</template>
@@ -1476,57 +1455,55 @@ function flatmapResourceArray(array) {
 			v-else-if="store.gameflow.phase === rf.PHASE_EXPLORE || store.gameflow.phase === rf.PRE_PHASE_EXPLORE">
 			<div v-if="store.context.selectedExplorerRes === rf.RES_NONE" class="generalActions explorerActionsDiv">
 				<br />
-				You may select an Explorer Token in your Zone of Control, or Skip Exploration
+				{{ $t("mapActionArea.selectExplorerOrSkip") }}
 				<span
 					v-if="store.context.action === rf.ACT_CONFIRM_END_TURN && city.hasWorkingUniqueBuilding(controller.currentPlayerIndex(), rf.BLDG_EXPLORER, true)"
 					class="cautionSpan">
 					<br />
-					CAUTION: You have not used your Explorer
+					{{ $t("mapActionArea.cautionExplorerNotUsed") }}
 				</span>
 				<span v-else class="cautionSpan">
 					<br />
-					Caution: Selecting an Explorer is irreversible and will end your turn immediately
+					{{ $t("mapActionArea.cautionExplorerIrreversible") }}
 				</span>
 				<br />
-				Possible Resources:
+				{{ $t("mapActionArea.possibleResources") }}
 				<img v-for="(res, idx) in [...store.mapData.availableExplorerResources].sort((a, b) => a - b)"
 					:key="idx" class="possibleExplorerRes" :src="view.getImage('res_' + String(res))" />
 				<!-- END PRE_PHASE_EXPLORE-->
 				<template v-if="store.gameflow.phase === rf.PRE_PHASE_EXPLORE">
 					<br />
-					<button @click="model.resetPreMove" class="actionsLineButton">Cancel Pre Move</button>
+					<button @click="model.resetPreMove" class="actionsLineButton">{{ $t("mapActionArea.cancelPreMove") }}</button>
 					<button
 						v-if="store.players[personal.pov].preMoves.some((move) => move.phase === rf.PRE_PHASE_EXPLORE)"
-						@click="IO.savePreTurn(rf.PRE_PHASE_EXPLORE, [-999])" class="actionsLineButton">Delete Pre
-						Move</button>
-					<button @click="IO.savePreTurn(rf.PRE_PHASE_EXPLORE, [-1])" class="actionsLineButton">Choose not to
-						Explore</button>
+						@click="IO.savePreTurn(rf.PRE_PHASE_EXPLORE, [-999])" class="actionsLineButton">{{ $t("mapActionArea.deletePreMove") }}</button>
+					<button @click="IO.savePreTurn(rf.PRE_PHASE_EXPLORE, [-1])" class="actionsLineButton">{{ $t("mapActionArea.chooseNotToExplore") }}</button>
 				</template>
 			</div>
 			<div v-else-if="store.context.selectedExplorerRes !== rf.RES_NONE"
 				class="generalActions explorerActionsDiv">
-				Your Explorer revealed:
+				{{ $t("mapActionArea.yourExplorerRevealed") }}
 				<img class="newBuildingCostRes"
 					:src="view.getImage('res_' + String(store.context.selectedExplorerRes))" />
 				<span v-if="rf.RES_FOODS.includes(store.context.selectedExplorerRes)">
 					<br />
-					Famine level increases
+					{{ $t("mapActionArea.famineLevelIncreases") }}
 				</span>
 			</div>
 		</template>
 		<!-- FAMINE -->
 		<template v-else-if="store.gameflow.phase === rf.PHASE_FAMINE">
-			<div class="generalActions">Place Graves in your Cities</div>
+			<div class="generalActions">{{ $t("mapActionArea.placeGravesInCities") }}</div>
 		</template>
 		<!-- POLLUTION -->
 		<template v-else-if="store.gameflow.phase === rf.PHASE_POLLUTION">
 			<div class="generalActions" v-if="store.context.gravesLeftToPlace > 0">
-				No space for pollution in your Zone of Control - Pollution converted to graves
+				{{ $t("mapActionArea.noSpaceForPollution") }}
 				<br />
-				Graves Left to Place: {{ store.context.gravesLeftToPlace }}
+				{{ $t("mapActionArea.gravesLeftToPlace", { count: store.context.gravesLeftToPlace }) }}
 			</div>
 			<div class="generalActions" v-else>
-				Remaining Pollution: {{ store.context.pollutionLeftToPlace }}
+				{{ $t("mapActionArea.remainingPollution", { count: store.context.pollutionLeftToPlace }) }}
 				<button v-if="IO.DEBUG_USERS.includes(personal.name)" @click="store.context.pollutionLeftToPlace = 0"
 					class="actionsLineButton">CHEAT: Remove pollution</button>
 			</div>
@@ -1535,22 +1512,20 @@ function flatmapResourceArray(array) {
 		<!-- PRE PHASE POLLUTION -->
 		<template v-else-if="store.gameflow.phase === rf.PRE_PHASE_POLLUTION">
 			<div class="generalActions">
-				Remaining Pollution: {{ store.context.pollutionLeftToPlace }}<br />
+				{{ $t("mapActionArea.remainingPollution", { count: store.context.pollutionLeftToPlace }) }}<br />
 				<span v-if="store.context.gameflowPhase <= rf.PHASE_HARVEST">
 					<br />
-					NOTE: As harvest is not yet complete, you will be allowed to pre-place pollution under Fisheries and
-					Wood resources<br />
-					If these spaces are not free during the pollution phase, you will need to do your move again
+					{{ $t("mapActionArea.prePollutionNoteHarvest") }}<br />
+					{{ $t("mapActionArea.prePollutionNoteSpaces") }}
 					<br />
 				</span>
-				<button @click="model.resetPreMove" class="actionsLineButton">Cancel Pre Move</button>
+				<button @click="model.resetPreMove" class="actionsLineButton">{{ $t("mapActionArea.cancelPreMove") }}</button>
 				<button
 					v-if="store.players[personal.pov].preMoves.some((move) => move.phase === rf.PRE_PHASE_POLLUTION)"
-					@click="IO.savePreTurn(rf.PRE_PHASE_POLLUTION, [-999])" class="actionsLineButton">Delete Pre
-					Move</button>
+					@click="IO.savePreTurn(rf.PRE_PHASE_POLLUTION, [-999])" class="actionsLineButton">{{ $t("mapActionArea.deletePreMove") }}</button>
 				<button v-if="store.context.pollutionLeftToPlace === 0"
 					@click="IO.savePreTurn(rf.PRE_PHASE_POLLUTION, [...store.context.historyObj])"
-					class="actionsLineButton">Save Pollution Turn</button>
+					class="actionsLineButton">{{ $t("mapActionArea.savePollutionTurn") }}</button>
 			</div>
 		</template>
 
@@ -1560,24 +1535,23 @@ function flatmapResourceArray(array) {
 			v-if="rf.COUNTRY_PHASES.includes(store.gameflow.phase) && personal.canPlay() && store.context.action !== rf.ACT_CONFIRM_END_TURN">
 			<div class="inlineDiv"
 				v-if="store.gameflow.phase === rf.PHASE_FIRST_CITY || (store.gameflow.phase === rf.PHASE_POLLUTION && store.context.pollutionLeftToPlace > 0)">
-				<button @click="toggleHexSelection" class="actionsLineButton">Toggle Hex Outline</button>
+				<button @click="toggleHexSelection" class="actionsLineButton">{{ $t("mapActionArea.toggleHexOutline") }}</button>
 			</div>
 			<div class="inlineDiv">
-				<button @click="model.resetWholeTurn" class="actionsLineButton">Reset Whole Turn</button>
+				<button @click="model.resetWholeTurn" class="actionsLineButton">{{ $t("mapActionArea.resetWholeTurn") }}</button>
 			</div>
 			<div class="inlineDiv">
 				<button
 					v-if="store.gameflow.phase === rf.PHASE_COUNTRYSIDE_BUILDING && !store.context.needToPlaceSecondFisheryHex"
 					@click="model.undoLastAction" class="actionsLineButton"
-					:disabled="store.undoPoints.length === 0">Undo</button>
+					:disabled="store.undoPoints.length === 0" :title="$t('aqyUi.hotkeys.undo')">{{ $t("mapActionArea.undo") }}</button>
 			</div>
 			<div class="inlineDiv">
-				<button v-if="controller.canEndPlayerTurn()" class="actionsLineButton" @click="localEndTurn">
+				<button v-if="controller.canEndPlayerTurn()" id="endTurnButton" class="actionsLineButton" @click="localEndTurn" :title="$t('aqyUi.hotkeys.endTurn')">
 					<span
-						v-if="store.gameflow.phase === rf.PHASE_POLLUTION || store.gameflow.phase === rf.PHASE_HARVEST">End
-						Turn</span>
-					<span v-else-if="store.gameflow.phase === rf.PHASE_EXPLORE">Skip Exploration</span>
-					<span v-else>Finish Actions</span>
+						v-if="store.gameflow.phase === rf.PHASE_POLLUTION || store.gameflow.phase === rf.PHASE_HARVEST">{{ $t("mapActionArea.endTurn") }}</span>
+					<span v-else-if="store.gameflow.phase === rf.PHASE_EXPLORE">{{ $t("mapActionArea.skipExplorationAction") }}</span>
+					<span v-else>{{ $t("mapActionArea.finishActions") }}</span>
 				</button>
 			</div>
 			<PromiseArea v-if="personal.pov >= 0" :playerIndexProp="personal.pov" />
@@ -1598,15 +1572,15 @@ function flatmapResourceArray(array) {
 			</template>
 
 			<div class="inlineDiv">
-				<button @click="model.resetWholeTurn" class="actionsLineButton">Reset Whole Turn</button>
+				<button @click="model.resetWholeTurn" class="actionsLineButton">{{ $t("mapActionArea.resetWholeTurn") }}</button>
 			</div>
 			<div class="inlineDiv">
 				<button v-if="store.gameflow.phase === rf.PHASE_COUNTRYSIDE_BUILDING" @click="store.clearVars()"
-					class="actionsLineButton">Back To Country</button>
+					class="actionsLineButton">{{ $t("mapActionArea.backToCountry") }}</button>
 			</div>
 
 			<div class="inlineDiv">
-				<button class="actionsLineButton" @click="localEndTurn">End Turn</button>
+				<button id="endTurnButton" class="actionsLineButton" @click="localEndTurn" :title="$t('aqyUi.hotkeys.endTurn')">{{ $t("mapActionArea.endTurn") }}</button>
 			</div>
 		</div>
 	</template>
@@ -1752,6 +1726,21 @@ function flatmapResourceArray(array) {
 	margin-top: 10px;
 	margin-bottom: 10px;
 	padding: 5px;
+}
+
+.explorer-reveal-res {
+	animation: explorer-reveal 0.25s ease-out;
+}
+
+@keyframes explorer-reveal {
+	0% {
+		transform: rotateY(90deg) scale(0.8);
+		opacity: 0;
+	}
+	100% {
+		transform: rotateY(0deg) scale(1);
+		opacity: 1;
+	}
 }
 
 .winningSaintImage {

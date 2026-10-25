@@ -460,7 +460,7 @@ const sortedCampaigns = computed(() => {
 				</i18n-t>
 				<br />
 				<i18n-t keypath="topMenuViews.coffeeRulesFound" tag="span" scope="global">
-					<template #link><a href="https://www.boardgamehelpers.com/FoodChainMagnate/Images/FCM_ketchup_Regels_Eng_web.pdf" target="_blank">{{ $t('topMenuViews.hereLower') }}</a></template>
+					<template #link><a href="/static/FCM/rules/FCM_Ketchup_rules.pdf" target="_blank">{{ $t('topMenuViews.hereLower') }}</a></template>
 				</i18n-t>
 				<br />
 				<br />
@@ -538,7 +538,7 @@ const sortedCampaigns = computed(() => {
 				{{ $t('topMenuViews.rewindWhy') }}
 				<br />
 				<br />
-				<span class="topMenuItem" @click="loadRewind()">
+				<span class="topMenuItem" role="button" tabindex="0" @click="loadRewind()" @keydown.enter.prevent="loadRewind()" @keydown.space.prevent="loadRewind()">
 					<img :src="view.getImage('icon-rewind')" />
 					<span>{{ $t('topMenuViews.rewind') }}</span>
 				</span>
@@ -569,7 +569,7 @@ const sortedCampaigns = computed(() => {
 				{{ $t('topMenuViews.rewindWhy') }}
 				<br />
 				<br />
-				<span class="topMenuItem" @click="loadRewind()">
+				<span class="topMenuItem" role="button" tabindex="0" @click="loadRewind()" @keydown.enter.prevent="loadRewind()" @keydown.space.prevent="loadRewind()">
 					<img :src="view.getImage('icon-rewind')" />
 					<span>{{ $t('topMenuViews.rewind') }}</span>
 				</span>
@@ -582,7 +582,7 @@ const sortedCampaigns = computed(() => {
 				<br />
 				<div v-html="store.viewSettings.rewindHostHTML"></div>
 				<br />
-				<span v-if="store.viewSettings.rewindHostPossible" class="topMenuItem" @click="loadHostRewind()">
+				<span v-if="store.viewSettings.rewindHostPossible" class="topMenuItem" role="button" tabindex="0" @click="loadHostRewind()" @keydown.enter.prevent="loadHostRewind()" @keydown.space.prevent="loadHostRewind()">
 					<img :src="view.getImage('icon-rewind')" />
 					<span>{{ $t('topMenuViews.rewind') }}</span>
 				</span>
@@ -610,7 +610,10 @@ const sortedCampaigns = computed(() => {
 	<!-- RESERVE -->
 	<transition name="slideRes">
 		<div id="reserveDiv" v-if="store.viewSettings.showReserve">
-			<h2 id="reserveTitle">{{ $t('topMenuViews.reserveTitle') }}</h2>
+			<div class="reserveHeader">
+				<h2 id="reserveTitle">{{ $t('topMenuViews.reserveTitle') }}</h2>
+				<button class="actionsLineButton" @click="store.viewSettings.showReserve = false">{{ $t('topMenuViews.close') }}</button>
+			</div>
 			<!-- SELECTED MODULES -->
 			<template v-if="store.startingOptionsHTML !== ''">
 				<h3><b>{{ $t('topMenuViews.selectedModules') }}</b></h3>
@@ -1019,6 +1022,11 @@ const sortedCampaigns = computed(() => {
 	filter: brightness(0) saturate(100%) invert(100%) sepia(17%) saturate(6440%) hue-rotate(174deg) brightness(98%) contrast(102%);
 }
 
+.topMenuItem:focus-visible {
+	outline: 3px solid lightblue;
+	outline-offset: -3px;
+}
+
 .topMenuItem img {
 	height: 38px;
 	width: 38px;
@@ -1044,6 +1052,13 @@ const sortedCampaigns = computed(() => {
 	width: 100%;
 	font-family: Arial, Helvetica, sans-serif;
 	min-width: 1200px;
+}
+
+.reserveHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
 }
 
 #reserveTitle {

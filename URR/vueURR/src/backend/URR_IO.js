@@ -6,6 +6,9 @@
  */
 
 import * as funcs from "../js/URRfuncs.js"
+import i18n from "../i18n.js"
+
+const t = i18n.global.t
 import * as rf from "../js/URRreference.js"
 import * as model from "../js/URRmodel.js"
 import * as controller from "../js/URRcontroller.js"
@@ -38,7 +41,7 @@ export function getNextCurrentPlayers() {
 		const currentPlayer = store.players[store.gameflow.turnOrder[0]]
 		// One remaining player persists bot moves so concurrent clients do not race.
 		const actingPlayer = currentPlayer.isMissing ? store.players[controller.botTurnPlayerIndex()] : currentPlayer
-		if (!actingPlayer) throw new Error("No active player remains to continue this game")
+		if (!actingPlayer) throw new Error(t("io.noActivePlayer"))
 		allIsCurrentPlayers.push(actingPlayer.name)
 	}
 	const allRemainingPlayersInTurnOrder = store.gameflow.turnOrder.filter(idx => !store.players[idx].isMissing).map((idx) => store.players[idx].name)
@@ -55,12 +58,18 @@ export async function saveGame(saveRewind = true) {
 	personal.haltPlay = true
 	store.viewSettings.isSaving = true
 
+	try {
+		model.playMissingSeats()
+	} catch (error) {
+		// The App.vue fallback retries the abandoned seat on the next load.
+		console.error("Unable to pass for a missing seat:", error)
+	}
 	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder } = getNextCurrentPlayers()
 
 	let postData = {
 		action: "saveGame",
 		latestUpdate: personal.latestUpdate,
-		gameDataCompressed: funcs.compressData64(model.exportGameData()),
+		gameDataCompressed: funcs.exportURRmodel(store.gameflow.phase === rf.PHASE_GAME_OVER),
 		turn: store.gameflow.turn,
 		phase: store.gameflow.phase,
 		status: "ACTIVE",
@@ -69,6 +78,8 @@ export async function saveGame(saveRewind = true) {
 		allIsCurrentPlayers: allIsCurrentPlayers,
 		allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
 	}
+
+	console.log("Saving data....")
 
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
 		postData.status = "FINISHED"
@@ -88,7 +99,7 @@ export async function saveGame(saveRewind = true) {
 		if (!response.ok) throw new Error("Network response was not ok")
 		const data = await response.json()
 		if (data.syncError === true) {
-			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.errorText = t("io.olderVersion")
 			return false
 		}
 		personal.latestUpdate = data.latestUpdate
@@ -102,7 +113,7 @@ export async function saveGame(saveRewind = true) {
 		return true
 	} catch (error) {
 		console.error("Error saving game:", error)
-		store.gameMessages.errorText = "Unable to confirm that the move was saved. Refresh the page before playing again."
+		store.gameMessages.errorText = t("io.saveUnconfirmed")
 		return false
 	} finally {
 		store.viewSettings.isSaving = false
@@ -128,7 +139,7 @@ export async function sendChatMessage(newEntry) {
 		return true
 	} catch (error) {
 		console.error("Error sending chat:", error)
-		store.gameMessages.chatErrorText = "Error sending chat message"
+		store.gameMessages.chatErrorText = t("io.chatError")
 		return false
 	} finally {
 		store.viewSettings.isSendingChat = false
@@ -171,7 +182,6 @@ export async function reloadGameData() {
 		updateKickoutData(data)
 		model.importGameData(data.gameData)
 		model.setMissingPlayers(data.missingPlayers)
-		model.rebuildTurnOrder()
 		personal.secondsToNextKickout = data.secondsToNextKickout
 		personal.latestUpdate = data.latestUpdate
 		window.initData.latestUpdate = data.latestUpdate
@@ -201,12 +211,12 @@ export async function saveNotes() {
 		}
 		if (!response.ok) throw new Error("Network response was not ok")
 		if (!data.notePosted) {
-			store.gameMessages.notesErrorText = "Sorry, there was a problem. Please email the webmaster directly"
+			store.gameMessages.notesErrorText = t("io.notesWebmaster")
 			return
 		}
 	} catch (error) {
 		console.error("Error saving notes:", error)
-		store.gameMessages.notesErrorText = "Error saving notes"
+		store.gameMessages.notesErrorText = t("io.notesError")
 	} finally {
 		store.viewSettings.isSavingNotes = false
 	}
@@ -222,12 +232,15 @@ export async function resign() {
 			body: JSON.stringify({ gameID: personal.gameID, action: "resign", user: personal.name }),
 			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
 		})
-		if (!response.ok) throw new Error("Network response was not ok")
-		await response.json()
-		return true
+		const data = await response.json()
+		if (!response.ok) throw new Error(data.error || "Network response was not ok")
+		model.setMissingPlayers(data.missingPlayers)
+		model.addHistory(rf.HIST_RESIGN, personal.pov)
+		// No rewind point: rewinding cannot undo a resignation on the server.
+		return await saveGame(false)
 	} catch (error) {
 		console.error("Error resigning:", error)
-		store.gameMessages.errorText = "Error resigning"
+		store.gameMessages.errorText = t("io.resignError")
 		return false
 	} finally {
 		store.viewSettings.showLoader = false
@@ -258,15 +271,15 @@ export async function kickout() {
 			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
 		})
 		const data = await response.json()
-		if (!response.ok) throw new Error(data.error || "Unable to kick out player")
+		if (!response.ok) throw new Error(data.error || t("io.kickError"))
 		if (data.syncError) {
-			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.errorText = t("io.olderVersion")
 			return
 		}
 		if (data.voteCast) {
 			store.kickoutVotesData = JSON.parse(data.votesData)
 			store.kickoutVoteThreshold = data.threshold
-			store.gameMessages.successText = "Kickout vote recorded"
+			store.gameMessages.successText = t("io.kickVoteRecorded")
 			return data
 		}
 		personal.kickoutRequired = 0
@@ -274,6 +287,7 @@ export async function kickout() {
 		window.initData.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
 		model.setMissingPlayers(data.missingPlayers)
+		model.addHistory(rf.HIST_KICKOUT, model.getPlayerIndexByName(kickedPlayerObj.name))
 		// Save the abandoned seat without creating a rewind across the kickout.
 		if (!await saveGame(false)) return
 		return data
@@ -306,10 +320,10 @@ export async function castVote(topic) {
 				personal.votedToExclude = true
 				store.statsExcludeVotesData = JSON.parse(data.votesData)
 			}
-		} else store.gameMessages.errorText = "Error casting vote; contact admin"
+		} else store.gameMessages.errorText = t("io.voteError")
 	} catch (error) {
 		console.error("Error casting vote:", error)
-		store.gameMessages.errorText = "Error casting vote; contact admin"
+		store.gameMessages.errorText = t("io.voteError")
 	}
 	store.viewSettings.showLoader = false
 }
@@ -336,7 +350,6 @@ export async function checkForLatestData() {
 		if (data.latest === true) return
 		model.importGameData(data.gameData)
 		model.setMissingPlayers(data.missingPlayers)
-		model.rebuildTurnOrder()
 		personal.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
 		window.initData.latestUpdate = data.latestUpdate
@@ -353,18 +366,18 @@ export async function submitBug(bugContent) {
 	try {
 		const response = await fetch("/URR/bugEntry/", {
 			method: "POST",
-			body: JSON.stringify({ gameID: personal.gameID, action: "bugentry", description: bugContent, gameData: JSON.stringify(model.exportGameData()) }),
+			body: JSON.stringify({ gameID: personal.gameID, action: "bugentry", description: bugContent, gameData: funcs.exportURRmodel() }),
 			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
 		})
 		if (!response.ok) throw new Error("Network response was not ok")
 		const data = await response.json()
 		if (data.bugEntrySuccess) {
-			store.gameMessages.successText = "Your bug report has been submitted"
+			store.gameMessages.successText = t("io.bugSubmitted")
 			store.viewSettings.showBug = false
-		} else store.gameMessages.bugErrorText = "Sorry, there was a problem. Please email the webmaster directly"
+		} else store.gameMessages.bugErrorText = t("io.notesWebmaster")
 	} catch (error) {
 		console.error("Error submitting bug:", error)
-		store.gameMessages.bugErrorText = "Sorry, there was a problem. Please email the webmaster directly"
+		store.gameMessages.bugErrorText = t("io.notesWebmaster")
 	}
 	store.viewSettings.showLoader = false
 }
@@ -372,7 +385,7 @@ export async function submitBug(bugContent) {
 export async function loadRewind() {
 	const store = useModelStore()
 	if (store.turnDraft.start) {
-		store.gameMessages.errorText = "Reset your uncommitted turn before rewinding a saved turn."
+		store.gameMessages.errorText = t("io.rewindResetFirst")
 		return
 	}
 	if (store.viewSettings.performingRewind || store.viewSettings.showLoader || store.viewSettings.isSaving || store.viewSettings.showReplay) return
@@ -392,7 +405,7 @@ export async function loadRewind() {
 		if (!response.ok) throw new Error("Network response was not ok")
 		const data = await response.json()
 		if (data.syncError) {
-			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.errorText = t("io.olderVersion")
 			return
 		}
 		if (data.errorMessage) {
@@ -404,12 +417,12 @@ export async function loadRewind() {
 		personal.latestUpdate = data.latestUpdate
 		window.initData.latestUpdate = data.latestUpdate
 		if (await updateDataFromLoadRewind()) {
-			store.gameMessages.successText = "Game loaded from rewind"
+			store.gameMessages.successText = t("io.rewindLoaded")
 			store.viewSettings.showRewindPanel = false
 		}
 	} catch (error) {
 		console.error("Error rewinding:", error)
-		store.gameMessages.errorText = "Unable to confirm the rewind. Refresh the page before playing again."
+		store.gameMessages.errorText = t("io.rewindUnconfirmed")
 	} finally {
 		store.viewSettings.showLoader = false
 		store.viewSettings.performingRewind = false
@@ -431,7 +444,7 @@ async function updateDataFromLoadRewind() {
 				allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
 				gameID: personal.gameID,
 				phase: store.gameflow.phase,
-				gameDataCompressed: funcs.compressData64(model.exportGameData()),
+				gameDataCompressed: funcs.exportURRmodel(store.gameflow.phase === rf.PHASE_GAME_OVER),
 			}),
 			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
 		})
@@ -446,7 +459,7 @@ async function updateDataFromLoadRewind() {
 	} catch (error) {
 		console.error("Error updating after rewind:", error)
 		personal.haltPlay = true
-		store.gameMessages.errorText = "Unable to confirm the rewound game. Refresh the page before playing again."
+		store.gameMessages.errorText = t("io.rewoundUnconfirmed")
 		return false
 	}
 }

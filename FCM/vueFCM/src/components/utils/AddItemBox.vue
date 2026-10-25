@@ -8,6 +8,8 @@ let activeRotate = null
 
 function rotateKeyHandler(event) {
 	if (event.key !== "r" && event.key !== "R") return
+	const target = event.target
+	if (target instanceof HTMLElement && (target.closest("input, textarea, select, [contenteditable='true']") || target.isContentEditable)) return
 	if (activeRotate) activeRotate()
 }
 
@@ -379,9 +381,9 @@ function flipLobbyist(vertical) {
 				<img v-for="campaign in store.context.campaigns" :key="campaign" :src="view.getImage(`campaign_${campaign}`)" class="selectable campaignChoiceImg" :class="{ selectedChoice: store.context.campaign === campaign }" :style="campaignChoiceStyle(campaign)" @click="controller.chooseCampaign(campaign)" :alt="campaign" />
 			</div>
 
-			<!-- Main good (Media Line: locked to the first token during the second phone call) -->
+			<!-- Main good (locked to the first token during the second phone call and the second campaign manager tile) -->
 			<div v-if="!store.context.mediaLineSecondCall" class="addBoxSection">
-				<img v-for="good in mainGoodChoices" :key="good" :src="view.getImage(`item_${good}`)" class="goodChoiceImg" :class="{ selectedGoodImg: store.context.good === good }" @click="controller.chooseGood(good)" :alt="good" />
+				<img v-for="good in mainGoodChoices" :key="good" v-show="!store.context.secondCampaignManager || store.context.good === good" :src="view.getImage(`item_${good}`)" class="goodChoiceImg" :class="{ selectedGoodImg: store.context.good === good }" @click="controller.chooseGood(good)" :alt="good" />
 			</div>
 
 			<!-- Second good for the Brand Manager double airplane campaign -->

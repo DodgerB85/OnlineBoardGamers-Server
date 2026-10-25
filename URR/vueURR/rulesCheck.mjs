@@ -6,7 +6,8 @@ import { createGame, applyAction, finishWaterRouting, previewMaintenanceSales } 
 import { startWaterRouting, allocateWater, waterChoices } from "./src/js/URRwater.js"
 import { getCanalCost, getDigPathPreview } from "./src/js/URRmap.js"
 import { endsDecision, defaultEndAction, describeAction } from "./src/js/URRturnDraft.js"
-import { compactHistory, expandHistory } from "./src/js/URRhistoryStorage.js"
+import { encodeAction } from "./src/js/URRhistoryActions.js"
+import { changesBetween, expandHistory, syncHistoryReplay } from "./src/js/URRhistoryStorage.js"
 
 const fresh = () => createGame(["A", "B", "C"])
 const id = (row, column) => `printed-${row}-${column}`
@@ -179,51 +180,31 @@ const area = (game, areaId) => game.board.areas.find((entry) => entry.id === are
 	assert.equal(game.players[0].score, rules.playerAssets(game, 0))
 }
 
-// Barahshum's between-state opportunity remains a player decision.
+// Privately owned Barahshum is optional during the owner's settlement turn only.
 {
 	const game = fresh()
-	Object.assign(game.gameflow, { phase: rf.PHASE_DEVELOPMENT, stateOrder: [0], stateIndex: 0, developmentStep: "digging", turnOrder: [0] })
-	Object.assign(game.states[0], { isActive: true, king: 0, diggers: [{ id: 0, era: 1, capacity: "1+1", hasDug: false }] })
+	Object.assign(game.gameflow, { phase: rf.PHASE_SETTLEMENT, turnOrder: [0] })
 	Object.assign(game.nations[rf.NATION_BARAHSHUM], { ownerType: "player", owner: 1 })
-	const next = applyAction(game, 0, { type: "endDevelopment" })
-	assert.equal(next.gameflow.developmentStep, "betweenStates")
-	assert.equal(rules.canExchangeBarahshum(next, 1), true)
-	assert.equal(rules.getAutomaticAction(next), null)
-	const home = next.board.areas.find((land) => land.nation === rf.NATION_BARAHSHUM)
-	const destination = home.neighbours.find((areaId) => area(next, areaId).nation === null && !next.board.canals.some(([from, to]) => (from === home.id && to === areaId) || (to === home.id && from === areaId)))
+	const home = game.board.areas.find((land) => land.nation === rf.NATION_BARAHSHUM)
+	const destination = rules.barahshumDestinations(game)[0]
 	const action = { type: "exchangeBarahshum", from: home.id, to: destination }
-	const exchanged = applyAction(next, 1, action)
+	assert.equal(rules.canExchangeBarahshum(game, 1), false)
+	assert.throws(() => applyAction(game, 1, action), /Barahshum cannot be exchanged now/)
+	game.gameflow.turnOrder = [1]
+	const exchanged = applyAction(game, 1, action)
 	assert.equal(exchanged.nations[rf.NATION_BARAHSHUM].isRemoved, true)
-	assert.equal(exchanged.gameflow.phase, rf.PHASE_SETTLEMENT)
-	assert.equal(exchanged.gameflow.turn, 2)
-	Object.assign(next.gameflow, { stateOrder: [0, 2], stateIndex: 1 })
-	Object.assign(next.states[2], { isActive: true, king: 2 })
-	const handoff = applyAction(next, 1, action)
-	assert.equal(handoff.gameflow.phase, rf.PHASE_DEVELOPMENT)
-	assert.equal(handoff.gameflow.developmentStep, "digging")
-	assert.deepEqual(handoff.gameflow.turnOrder, [2])
-	assert.equal(handoff.gameflow.stateIndex, 1)
-	Object.assign(next.gameflow, { phase: rf.PHASE_SETTLEMENT, turnOrder: [0] })
-	assert.deepEqual(applyAction(next, 1, action).gameflow.turnOrder, [0])
-	Object.assign(next.gameflow, { phase: rf.PHASE_DEVELOPMENT, stateOrder: [0], stateIndex: 0, developmentStep: "digging" })
-	Object.assign(next.nations[rf.NATION_BARAHSHUM], { ownerType: "state", owner: 0 })
-	const stateExchange = applyAction(next, 0, action)
+	assert.deepEqual(exchanged.gameflow.turnOrder, [1])
+	Object.assign(game.gameflow, { phase: rf.PHASE_DEVELOPMENT, stateOrder: [0, 2], stateIndex: 0, developmentStep: "digging", turnOrder: [0] })
+	Object.assign(game.states[0], { isActive: true, king: 0, diggers: [{ id: 0, era: 1, capacity: "1+1", hasDug: false }] })
+	Object.assign(game.states[2], { isActive: true, king: 2 })
+	const next = applyAction(game, 0, { type: "endDevelopment" })
+	assert.equal(next.gameflow.developmentStep, "digging")
+	assert.deepEqual(next.gameflow.turnOrder, [2])
+	assert.equal(rules.canExchangeBarahshum(next, 1), false)
+	Object.assign(game.nations[rf.NATION_BARAHSHUM], { ownerType: "state", owner: 0 })
+	const stateExchange = applyAction(game, 0, action)
 	assert.equal(stateExchange.gameflow.developmentStep, "digging")
 	assert.equal(stateExchange.gameflow.stateIndex, 0)
-	Object.assign(next.nations[rf.NATION_BARAHSHUM], { ownerType: "player", owner: 1 })
-	for (const neighbour of home.neighbours) {
-		if (!next.board.canals.some(([from, to]) => (from === home.id && to === neighbour) || (to === home.id && from === neighbour))) next.board.canals.push([home.id, neighbour])
-	}
-	assert.deepEqual(rules.barahshumDestinations(next), [])
-	Object.assign(next.gameflow, { developmentStep: "betweenStates", stateOrder: [0, 2], stateIndex: 1 })
-	assert.equal(rules.canExchangeBarahshum(next, 1), false)
-	assert.deepEqual(rules.getAutomaticAction(next), { type: "beginDevelopment" })
-	Object.assign(next.gameflow, { developmentStep: "digging", stateIndex: 0, turnOrder: [0] })
-	const skippedExchange = applyAction(next, 0, { type: "endDevelopment" })
-	assert.equal(skippedExchange.gameflow.developmentStep, "digging")
-	assert.equal(skippedExchange.gameflow.stateIndex, 1)
-	assert.deepEqual(skippedExchange.gameflow.turnOrder, [2])
-	assert.equal(skippedExchange.nations[rf.NATION_BARAHSHUM].isRemoved, false)
 }
 
 // Earlier saves may already be paused at an empty harvest; preserve the next real choice.
@@ -417,44 +398,39 @@ const area = (game, areaId) => game.board.areas.find((entry) => entry.id === are
 	assert.equal(rules.getAutomaticAction(game), null)
 }
 
-// Replay compaction preserves every choice, including deletions and array changes.
+// Replay storage keeps only numeric action codes and changes; positions are replayed.
 {
-	const history = []
-	const game = fresh()
-	const record = (action = null) => history.push([rf.HIST_ACTION, 0, JSON.stringify(game), action, 12345])
-	record()
-	game.gameflow.pendingOffer = { state: 0, action: { type: "offerNation", nation: 1, amount: 50 } }
-	game.states[0].diggers.push({ id: 0, capacity: 2, era: 1, hasDug: false })
-	record({ type: "offerNation", nation: 1, amount: 50 })
-	game.gameflow.pendingOffer.action.amount = 60
-	game.board.areas[0].irrigatedBy = 0
-	game.states[0].diggers[0].hasDug = true
+	const opening = fresh()
+	let game = applyAction(opening, 0, { type: "pass" })
+	const [passCode, passParams] = encodeAction({ type: "pass" })
+	const history = [[rf.HIST_NEW_GAME, -1, null], [passCode, 0, 1, ...passParams]]
+	const before = game
+	game = applyAction(game, 1, { type: "pass" })
+	const predicted = JSON.parse(JSON.stringify(game))
 	game.players[0].money -= 10
-	record({ type: "allocateWater", area: game.board.areas[0].id, amount: 1 })
-	delete game.gameflow.pendingOffer
-	game.states[0].diggers = []
-	record()
-	game.gameflow.phase = rf.PHASE_SETTLEMENT
-	record()
-	const compact = compactHistory(history)
-	assert.equal(typeof compact[0][2], "string")
-	assert.equal(typeof compact[1][2], "object")
-	assert.equal(typeof compact.at(-1)[2], "string")
-	assert.ok(JSON.stringify(compact).length < JSON.stringify(history).length / 2)
-	const saved = JSON.stringify(compact)
-	const expanded = expandHistory(compact)
-	assert.equal(JSON.stringify(compact), saved, "Expansion must not mutate compact records")
-	for (const [index, entry] of expanded.entries()) {
-		assert.deepEqual(JSON.parse(entry[2]), JSON.parse(history[index][2]))
-		assert.deepEqual(entry.slice(3), history[index].slice(3))
-	}
-	assert.deepEqual(expandHistory(history), history, "Legacy full snapshots remain readable")
-	assert.deepEqual(compactHistory(history), compact, "Cached exports preserve the same history")
-	// A replay branch can replace a snapshot on the same history entry.
-	game.players[0].money += 30
-	history[2][2] = JSON.stringify(game)
-	assert.deepEqual(JSON.parse(expandHistory(compactHistory(history))[2][2]), game)
-	assert.throws(() => expandHistory([[rf.HIST_ACTION, 0, compact[1][2]]]), /Invalid URR replay delta/)
+	game.states[0].diggers.push({ id: 0, capacity: 2, era: 1, hasDug: false })
+	history.push([passCode, 1, 2, ...passParams])
+	history.push([rf.HIST_KICKOUT, 1, 3, changesBetween(predicted, game)])
+	assert.equal(history[1].length, 3)
+	assert.equal(typeof history[1][0], "number")
+	assert.ok(history.every((row) => !row.some((value) => typeof value === "string" && value.startsWith("{"))), "No snapshots are stored")
+
+	const saved = JSON.stringify(history.slice(1))
+	const expanded = expandHistory({ replay: history.slice(1), replayStart: [] }, rf.HIST_NEW_GAME)
+	assert.deepEqual(expanded, history)
+	assert.equal(JSON.stringify(history.slice(1)), saved, "Expansion must not mutate compact records")
+
+	const cache = { entries: [], snapshots: [], times: [] }
+	syncHistoryReplay(cache, expanded, ["A", "B", "C"], 12345)
+	assert.deepEqual(cache.snapshots[1], before)
+	assert.deepEqual(cache.snapshots[3], game)
+	assert.deepEqual(cache.times, [12345, 12346, 12348, 12351])
+
+	// A replay branch replaces the entry object and rebuilds the following positions.
+	history[3] = [rf.HIST_KICKOUT, 1, 3, [[["players", "0", "money"], 590]]]
+	syncHistoryReplay(cache, history, ["A", "B", "C"], 12345)
+	assert.equal(cache.snapshots[3].players[0].money, 590)
+	assert.throws(() => syncHistoryReplay({ entries: [], snapshots: [], times: [] }, [[rf.HIST_NEW_GAME, -1, null], [rf.HIST_KICKOUT, 0, 0, [[[], 1]]]], ["A", "B", "C"], 12345), /Invalid URR replay change path/)
 }
 
 // Ending a state's development is a review boundary even when the same king

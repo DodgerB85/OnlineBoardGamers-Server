@@ -1,5 +1,7 @@
 import * as rf from "./BUSreference.js"
 
+import i18n from "../i18n"
+
 import { useModelStore } from "../stores/BUSstore.js"
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 
@@ -1097,18 +1099,18 @@ export function getLineSVGpoints(lineID, index, raw) {
 export function phaseStr() {
 	const store = useModelStore()
 	var phaseStr = "333"
-	if (store.gameflow.phase === rf.PHASE_SETUP_BLDGS) phaseStr = "Setup Buildings" // TO: 2 bldgs on zone 1 per player
-	if (store.gameflow.phase === rf.PHASE_SETUP_LINES) phaseStr = "Setup Lines" // TO then reverse TO,eg 1,2,3,4,4,3,2,1, place 1 line
-	if (store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS) phaseStr = "Choose Actions" // TO: At least 2 actions, then can pass
-	if (store.gameflow.phase === rf.PHASE_LINE_EXPANSION) phaseStr = "Line Expansion" // 5p: +1 to maxNumBus
-	if (store.gameflow.phase === rf.PHASE_ADD_BUS) phaseStr = "Add a Bus"
-	if (store.gameflow.phase === rf.PHASE_ADD_PAX) phaseStr = "Add Passengers"
-	if (store.gameflow.phase === rf.PHASE_ADD_BLDGS) phaseStr = "Add Buildings" // (GE check)
-	if (store.gameflow.phase === rf.PHASE_ALTER_TIME) phaseStr = "Alter Time" // AND POSSIBLE IMMEDIATE GAME END
-	if (store.gameflow.phase === rf.PHASE_VROM) phaseStr = "VRROOOMM!!"
-	if (store.gameflow.phase === rf.PHASE_CHANGE_START_PLAYER) phaseStr = "Change Start Player" // GE check, if no more bldg spots
-	if (store.gameflow.phase === rf.PHASE_GAME_END_CHECK) phaseStr = "Game End Check" // bldg spots, only 1 player with action markers
-	if (store.gameflow.phase === rf.PHASE_GAME_OVER) phaseStr = "Game Finished"
+	if (store.gameflow.phase === rf.PHASE_SETUP_BLDGS) phaseStr = i18n.global.t("phase.setupBuildings") // TO: 2 bldgs on zone 1 per player
+	if (store.gameflow.phase === rf.PHASE_SETUP_LINES) phaseStr = i18n.global.t("phase.setupLines") // TO then reverse TO,eg 1,2,3,4,4,3,2,1, place 1 line
+	if (store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS) phaseStr = i18n.global.t("phase.chooseActions") // TO: At least 2 actions, then can pass
+	if (store.gameflow.phase === rf.PHASE_LINE_EXPANSION) phaseStr = i18n.global.t("phase.lineExpansion") // 5p: +1 to maxNumBus
+	if (store.gameflow.phase === rf.PHASE_ADD_BUS) phaseStr = i18n.global.t("phase.addBus")
+	if (store.gameflow.phase === rf.PHASE_ADD_PAX) phaseStr = i18n.global.t("phase.addPassengers")
+	if (store.gameflow.phase === rf.PHASE_ADD_BLDGS) phaseStr = i18n.global.t("phase.addBuildings") // (GE check)
+	if (store.gameflow.phase === rf.PHASE_ALTER_TIME) phaseStr = i18n.global.t("phase.alterTime") // AND POSSIBLE IMMEDIATE GAME END
+	if (store.gameflow.phase === rf.PHASE_VROM) phaseStr = i18n.global.t("phase.vroom")
+	if (store.gameflow.phase === rf.PHASE_CHANGE_START_PLAYER) phaseStr = i18n.global.t("phase.changeStartPlayer") // GE check, if no more bldg spots
+	if (store.gameflow.phase === rf.PHASE_GAME_END_CHECK) phaseStr = i18n.global.t("phase.gameEndCheck") // bldg spots, only 1 player with action markers
+	if (store.gameflow.phase === rf.PHASE_GAME_OVER) phaseStr = i18n.global.t("phase.gameFinished")
 
 	return phaseStr
 }
@@ -1496,66 +1498,4 @@ export function getLinesAroundJunction(junctionID) {
 	}
 	alert(`No lines for: ${junctionID} on ${personal.selectedBoard}`)
 	return ""
-}
-
-export function getLineEndCircleData() {
-	const store = useModelStore()
-	// want [player colour, line1end]
-	let ret = []
-
-	for (let i = 0; i < store.players.length; i++) {
-		for (let j = 0; j < store.players[i].endLines.length; j++) {
-			let endLine = store.players[i].endLines[j]
-			let lineOffset = 0
-			lineOffset = store.lines[endLine].indexOf(store.players[i].colour)
-			let rawPoints = getLineSVGpoints(endLine, lineOffset, true)
-
-			// find the index of the junction in connected lines
-			var index = getJunctionsAtEndOfLine(endLine).indexOf(store.players[i].endJunctions[j])
-			// Now place the circle at either the left / right of the line
-			let shift = 0
-			if (index === 1) shift = 4
-
-			let correctedX = rawPoints[0 + shift] + (rawPoints[2 + shift] - rawPoints[0 + shift]) / 2
-			let correctedY = rawPoints[1 + shift] + (rawPoints[3 + shift] - rawPoints[1 + shift]) / 2
-
-			let startCorrectedX = correctedX + 20
-			let startCorrectedY = correctedY + 20
-			// Find the start points
-			//let otherJunction = getJunctionsAtEndOfLine(endLine).find((j) => j !== store.players[i].endJunctions[j])
-			//let otherJunctionIndex = getJunctionsAtEndOfLine(endLine).indexOf(otherJunction)
-			//let shiftStart = 0
-			//if (otherJunctionIndex === 1) shiftStart = 4
-			startCorrectedX = rawPoints[0 + shift] + (rawPoints[2 + shift] - rawPoints[0 + shift]) / 2
-			startCorrectedY = rawPoints[1 + shift] + (rawPoints[3 + shift] - rawPoints[1 + shift]) / 2
-
-			ret.push([store.players[i].colour, correctedX, correctedY, startCorrectedX, startCorrectedY])
-		}
-	}
-
-	return ret
-}
-
-// Get the starting position for circle animation (from the OTHER junction)
-export function getCircleStartPosition(lineID, playerColor, endJunction) {
-	const store = useModelStore()
-	const junctions = getJunctionsAtEndOfLine(lineID)
-
-	// Find the OTHER junction (not the endJunction)
-	const otherJunction = junctions.find((j) => j !== endJunction)
-	if (!otherJunction) return null
-
-	// Get the line position for this player
-	const lineOffset = store.lines[lineID].indexOf(playerColor)
-	const rawPoints = getLineSVGpoints(lineID, lineOffset, true)
-
-	// Find which junction index corresponds to the other junction
-	const otherJunctionIndex = junctions.indexOf(otherJunction)
-	const shift = otherJunctionIndex === 1 ? 4 : 0
-
-	// Calculate position at the other end of the line
-	const startX = rawPoints[0 + shift] + (rawPoints[2 + shift] - rawPoints[0 + shift]) / 2
-	const startY = rawPoints[1 + shift] + (rawPoints[3 + shift] - rawPoints[1 + shift]) / 2
-
-	return { x: startX, y: startY }
 }

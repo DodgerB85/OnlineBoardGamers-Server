@@ -4,6 +4,8 @@ import * as funcs from "../js/BUSfuncs.js"
 import * as pitts from "./BUSpitts.js"
 import * as rf from "./BUSreference.js"
 
+import i18n from "../i18n"
+
 import { useModelStore } from "../stores/BUSstore.js"
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 
@@ -111,7 +113,6 @@ store.desiredBuilding = rf.BLDG_HOME
 	store.jorisStatus = rf.DESIGNER_NOT_ARRIVED
 	store.bridges.splice(0)
 	store.remainingBridgeMarkers = 5
-	for (const key in store.bridgeEnds) delete store.bridgeEnds[key]
 	// actionAreaData
 	for (let i = 0; i < store.actionAreaData.length; i++) {
 		for (let j = 0; j < store.actionAreaData[i].length; j++) {
@@ -338,12 +339,12 @@ function replayNewTurn(historyIndex, _playerIndex, _entry3) {
 	}
 }
 
-function replayAddBus(historyIndex, playerIndex, _entry3) {
+function replayAddBus(historyIndex, playerIndex, entry3) {
 	const store = useModelStore()
 
 	performReplayEndTurn(historyIndex)
 
-	store.players[playerIndex].buses++
+	if (entry3[1] === undefined || entry3[1] === 1) store.players[playerIndex].buses++
 }
 
 function replayAddPax(historyIndex, _playerIndex, entry3) {
@@ -358,7 +359,7 @@ function replayAddPax(historyIndex, _playerIndex, entry3) {
 			else if (entry3[i][1] === rf.DESIGNER_JORIS) store.jorisStatus = entry3[i][0]
 			continue
 		}
-		if (entry3[i].length != undefined) alert("Anomaly detected. Please submit bug report")
+		if (entry3[i].length != undefined) alert(i18n.global.t("io.anomalyDetected"))
 		if (entry3[i] !== -1) {
 			store.junctions[entry3[i]][rf.paxIdx]++
 			store.remainingPassengers--
@@ -457,17 +458,8 @@ function replayStartingPlayer(historyIndex, _playerIndex, _entry3) {
 function replayGameEnd(_historyIndex, _playerIndex, _entry3) {
 	const store = useModelStore()
 	store.gameflow.phase = rf.PHASE_GAME_OVER
-	let scoreObj = model.getScoreObj()
-	let resArr = [...store.players]
-	for (let i = 0; i < resArr.length; i++) resArr[i].playerIndex = i
-	let order = []
-	for (let i = 0; i < scoreObj.length; i++) {
-		for (let j = 0; j < scoreObj[i][1].length; j++) {
-			let player = resArr.find((el) => el.colour === scoreObj[i][1][j])
-			order.push(player.playerIndex)
-		}
-	}
-	store.gameflow.turnOrder.push(order[0])
+	const order = model.getFinalRankingIndices()
+	if (order.length > 0) store.gameflow.turnOrder.push(order[0])
 }
 
 function replayMissingPlayer(historyIndex, _playerIndex, _entry3) {

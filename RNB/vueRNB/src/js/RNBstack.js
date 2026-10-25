@@ -14,6 +14,7 @@ import * as wonder from "./RNBwonder.js"
 import * as funcs from "./RNBfuncs.js"
 import * as context from "./RNBcontext.js"
 import * as hd from "./RNBhex.js"
+import * as train from "./RNBtrain.js"
 //import * as IO from "../backend/RNB_IO.js"
 
 import { useModelStore } from "../stores/RNBstore.js"
@@ -286,7 +287,7 @@ export function addItemToStack(newItem) {
 				}
 				// Ah a later fix was to check pickup/drop locations the same. So below should be redundant
 				// But if a previous action was a LAND MOVE of either trans, we cannot combine
-				else if (previousEntry.action === rf.STACK_MOVE_LAND) {
+				else if (previousEntry.action === rf.STACK_MOVE_LAND || previousEntry.action === rf.STACK_TAKE_TRAIN) {
 					const movingTransporterID = previousEntry.historyEntry[1]
 					if (movingTransporterID === mainTransporterID || movingTransporterID === carriedTransporterID) {
 						break
@@ -324,7 +325,7 @@ export function addItemToStack(newItem) {
 					}
 				}
 				// But if a previous action was a LAND MOVE of either trans, we cannot reverse
-				else if (previousEntry.action === rf.STACK_MOVE_LAND) {
+				else if (previousEntry.action === rf.STACK_MOVE_LAND || previousEntry.action === rf.STACK_TAKE_TRAIN) {
 					const movingTransporterID = previousEntry.historyEntry[1]
 					if (movingTransporterID === mainTransporterID || movingTransporterID === carriedTransporterID) {
 						break
@@ -623,7 +624,7 @@ export function addItemToStack(newItem) {
 					}
 				}
 				// But if a previous action was something ARRIVING on the hex, we must stop looking
-				else if (previousEntry.action === rf.STACK_MOVE_LAND) {
+				else if (previousEntry.action === rf.STACK_MOVE_LAND || previousEntry.action === rf.STACK_TAKE_TRAIN) {
 					const fullToLocation = decompressLocation(previousEntry.historyEntry[3])
 					const toHexID = fullToLocation[1]
 					if (toHexID === newPickupHexID) {
@@ -667,7 +668,7 @@ export function addItemToStack(newItem) {
 					}
 				}
 				// But if a previous action was something ARRIVING on the hex, we must stop looking
-				else if (previousEntry.action === rf.STACK_MOVE_LAND) {
+				else if (previousEntry.action === rf.STACK_MOVE_LAND || previousEntry.action === rf.STACK_TAKE_TRAIN) {
 					const fullToLocation = decompressLocation(previousEntry.historyEntry[3])
 					const toHexID = fullToLocation[1]
 					if (toHexID === newPickupHexID) {
@@ -720,7 +721,7 @@ export function addItemToStack(newItem) {
 					}
 				}
 				// But if a previous action was something ARRIVING on the hex, we must stop looking
-				else if (previousEntry.action === rf.STACK_MOVE_LAND) {
+				else if (previousEntry.action === rf.STACK_MOVE_LAND || previousEntry.action === rf.STACK_TAKE_TRAIN) {
 					const fullToLocation = decompressLocation(previousEntry.historyEntry[3])
 					const toHexID = fullToLocation[1]
 					if (toHexID === newDropHexID) {
@@ -774,7 +775,7 @@ export function addItemToStack(newItem) {
 					}
 				}
 				// But if a previous action was something ARRIVING on the hex, we must stop looking
-				else if (previousEntry.action === rf.STACK_MOVE_LAND) {
+				else if (previousEntry.action === rf.STACK_MOVE_LAND || previousEntry.action === rf.STACK_TAKE_TRAIN) {
 					const fullToLocation = decompressLocation(previousEntry.historyEntry[3])
 					const toHexID = fullToLocation[1]
 					if (toHexID === newDropHexID) {
@@ -827,7 +828,7 @@ export function addItemToStack(newItem) {
 					}
 				}
 				// But if a previous action was something ARRIVING on the hex, we must stop looking
-				else if (previousEntry.action === rf.STACK_MOVE_LAND) {
+				else if (previousEntry.action === rf.STACK_MOVE_LAND || previousEntry.action === rf.STACK_TAKE_TRAIN) {
 					const fullToLocation = decompressLocation(previousEntry.historyEntry[3])
 					const toHexID = fullToLocation[1]
 					if (toHexID === newDropHexID) {
@@ -872,7 +873,7 @@ export function addItemToStack(newItem) {
 					}
 				}
 				// But if a previous action was something ARRIVING on the hex, we must stop looking
-				else if (previousEntry.action === rf.STACK_MOVE_LAND) {
+				else if (previousEntry.action === rf.STACK_MOVE_LAND || previousEntry.action === rf.STACK_TAKE_TRAIN) {
 					const fullToLocation = decompressLocation(previousEntry.historyEntry[3])
 					const toHexID = fullToLocation[1]
 
@@ -1044,6 +1045,75 @@ export function verifySingleStackAction(stackActionData) {
 		//console.log(JSON.stringify(stackActionData))
 	}
 
+	if (action === rf.STACK_TAKE_TRAIN) {
+		const movingTransporterID = stackAction[1]
+		const fromBucketLocation = decompressLocation(stackAction[2])
+		const toBucketLocation = decompressLocation(stackAction[3])
+		const contents = stackAction[4]
+		const fareResID = stackAction[5]
+		let numGeeseFollowing = 0
+		if (stackAction.length >= 7) numGeeseFollowing = stackAction[6][0]
+
+		if (!train.isTrainsEnabled()) {
+			rf.doAdminAlrt(`1 - Trains not enabled on this map`)
+			return 1
+		}
+		const transporterObj = model.getTransporterByID(movingTransporterID)
+		if (!transporterObj || loc.isOOBlocation(transporterObj.location)) {
+			rf.doAdminAlrt(`1 - Transporter not found for train ride`)
+			return 1
+		}
+		if (!rf.LAND_TRANSPORTERS.includes(transporterObj.type)) return 2
+
+		const fromHexID = fromBucketLocation[1]
+		const fromBucketID = fromBucketLocation[2]
+		const currentBucket = loc.convertLocationToBucket(transporterObj.location)
+		if (currentBucket[1] !== fromHexID || currentBucket[2] !== fromBucketID) return 2
+		if (transporterObj.remainingMoves <= 0) return 3
+		if (transporterObj.movedThisTurn) return 3
+		if (model.doesTransporterHaveAlreadyMovedResource(movingTransporterID)) return 3
+		if (model.doesTransporterHaveAlreadyMovedTransporter(movingTransporterID)) return 3
+		if (!train.isBucketOnTrack(fromHexID, fromBucketID)) return 4
+
+		const toHexID = toBucketLocation[1]
+		const toBucketID = toBucketLocation[2]
+		// A ride must actually go somewhere: the departure tile is never a destination
+		if (toHexID === fromHexID) return 5
+		if (!train.getTrackConnectedHexIDs(fromHexID).includes(toHexID)) return 5
+		if (!train.isBucketOnTrack(toHexID, toBucketID)) return 5
+		// Land transporters cannot end their turn on a water tile
+		if (rf.TERR_ACTS_LIKE_WATER.includes(model.getHexByID(toHexID).currentTerrain)) return 5
+
+		// The fare must exist and be payable from the start tile or the transporter
+		const fareRes = model.getResByID(fareResID)
+		if (!fareRes || loc.isOOBlocation(fareRes.location)) return 6
+		if (!train.isFareAccessible(fareRes, transporterObj)) return 6
+
+		// Contents and geese must match what is actually aboard
+		const resourcesOnTransporter = model.resourcesOnTransport(transporterObj.id).map((r) => [r.id, r.uniqueID])
+		const transporterOntrans = model.transportersOnTransporter(transporterObj.id).map((t) => [t.id, t.uniqueID])
+		if (resourcesOnTransporter.length > 0) {
+			for (const [actualID, actualUniqueID] of resourcesOnTransporter) {
+				let found = contents.includes(actualID) || contents.includes(actualUniqueID)
+				if (!found) {
+					found = contents.some((contentID) => typeof contentID === "string" && resolvePseudoResourceID(contentID) === actualID)
+				}
+				if (!found) {
+					rf.doAdminAlrt(`7 - Train transporter contents incorrect res: ${actualUniqueID} not in ${contents}`)
+					return 7
+				}
+			}
+			if (resourcesOnTransporter.length !== contents.length) return 7
+		}
+		if (transporterOntrans.length > 0) {
+			if (contents.length !== 2 || contents[0] !== -1) return 8
+			const [id, uniqueID] = transporterOntrans[0]
+			if (contents[1] !== id && contents[1] !== uniqueID) return 8
+		}
+		if (numGeeseFollowing !== model.resourcesFollowingTransporter(transporterObj.id).length) return 9
+
+		return 0
+	}
 	if (action === rf.STACK_MOVE_LAND) {
 		// Split out the parameters
 		let movingTransporterID = stackAction[1]
@@ -1934,8 +2004,9 @@ export function verifySingleStackAction(stackActionData) {
 		const transporterObj = model.getTransporterByID(transporterID)
 		// Transporter must be on the correct hex
 		if (transporterObj.location[1] !== hexID) return 1
-		// The bomb must be carried by the transporter
-		if (!model.resourcesOnTransport(transporterID).some((r) => r.type === rf.RES_BOMB)) return 11
+		// The bomb must be accessible, not necessarily carried
+		let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], true)
+		if (errorFlag > 0) return errorFlag + 10
 		// The target must be one non-strengthened building on the hex
 		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
 		let targetBldg = undefined
@@ -2042,6 +2113,21 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 	const stackAction = stackActionData.historyEntry
 	const stackPlayerIndex = stackActionData.playerIndex
 
+	if (action === rf.STACK_TAKE_TRAIN) {
+		if (swapIDs && typeof stackAction[1] === "string") {
+			stackAction[1] = model.getTransporterByID(stackAction[1]).id
+		}
+		const movingTransporterID = stackAction[1]
+		const toBucketLocation = decompressLocation(stackAction[3])
+		let fareResID = stackAction[5]
+		if (swapIDs && typeof fareResID === "string") {
+			const fareRes = model.getResByID(fareResID)
+			if (fareRes) fareResID = fareRes.id
+		}
+		// Geese always get off at the destination; the fare is consumed on the way
+		train.performTrainRide_core(movingTransporterID, toBucketLocation, model.getResByID(fareResID))
+		return
+	}
 	if (action === rf.STACK_MOVE_LAND) {
 		if (swapIDs && typeof stackAction[1] === "string") {
 			stackAction[1] = model.getTransporterByID(stackAction[1]).id
@@ -2724,10 +2810,8 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 		}
 		const buildingType = stackAction[2]
 		const hexID = stackAction[3]
-		// Remove the carried bomb (legacy fallback for old entries that used a bomb on the tile)
-		const bomb = model.resourcesOnTransport(transporterID).find((r) => r.type === rf.RES_BOMB)
-		if (bomb) bomb.location = loc.setOOBlocation()
-		else model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
+		// Remove an accessible bomb (it may be on the tile or another of the player's transporters)
+		model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
 		// Remove the targeted non-strengthened building only
 		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
 		let targetBldg = undefined

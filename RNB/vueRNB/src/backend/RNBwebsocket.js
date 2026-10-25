@@ -4,6 +4,7 @@ import { usePersonalStore } from "../stores/RNBpersonal.js"
 import * as IO from "./RNB_IO"
 //import * as funcs from "../js/RNBfuncs"
 import * as view from "../js/RNBview"
+import i18n from "../i18n"
 //import * as rf from "../js/RNBreference.js"
 //import * as model from "../js/RNBmodel"
 
@@ -148,7 +149,7 @@ async function RNBwebSocketOnInfo(IncomingInfo) {
 						let decodedGameName = tempElement.textContent
 
 						Notification.requestPermission(function (_status) {
-							const title = "It is your turn in Roads & Boats"
+							const title = i18n.global.t("io.yourTurn")
 
 							const options = {
 								body: "" + decodedGameName + ": " + store.gameflow.turn + " - " + view.phaseStr(store.gameflow.phase),

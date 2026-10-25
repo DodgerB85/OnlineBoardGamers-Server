@@ -193,6 +193,16 @@ function toggleReserve() {
 	store.viewSettings.showReserve = !store.viewSettings.showReserve
 }
 
+// Menu items are spans, so give keyboard users Enter/Space activation.
+function menuKeydown(event) {
+	if (event.key !== "Enter" && event.key !== " ") return
+	if (event.target.closest?.("a")) return
+	const item = event.target.closest?.(".topMenuItem")
+	if (!item) return
+	event.preventDefault()
+	item.click()
+}
+
 const topDivMinWidth = computed(() => {
 	const p = store.players.length
 	if (p <= 4) return 1050
@@ -216,7 +226,10 @@ function getCurrentPlayerNames() {
 
 <template>
 	<div id="topDiv" :style="{ minWidth: topDivMinWidth + 'px' }">
-		<div id="menuDiv">
+		<div v-if="personal.WSstatus === 'WSdisconnected'" class="reconnectBanner" role="status" aria-live="polite">
+			{{ $t('topMenu.reconnecting') }}
+		</div>
+		<div id="menuDiv" @keydown="menuKeydown">
 			<a href="/">
 				<span class="topMenuItem">
 					<img :src="view.getImage('icon-house')" />
@@ -224,7 +237,7 @@ function getCurrentPlayerNames() {
 				</span>
 			</a>
 			<!-- IF LOGGED IN -->
-			<span v-if="personal.name" class="topMenuItem" id="menuButtonNext" @click="nextGame">
+			<span v-if="personal.name" class="topMenuItem" id="menuButtonNext" role="button" tabindex="0" @click="nextGame">
 				<img :src="view.getImage('icon-nextGame')" />
 				<span>{{ $t('topMenu.next') }}</span>
 			</span>
@@ -239,14 +252,14 @@ function getCurrentPlayerNames() {
 				</span>
 			</a>
 
-			<span :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showReserve }]" id="menuButtonReserve" @click="toggleReserve">
+			<span :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showReserve }]" id="menuButtonReserve" role="button" tabindex="0" @click="toggleReserve">
 				<img :src="view.getImage('icon-box')" />
 				<span>{{ $t('topMenu.reserve') }}</span>
 			</span>
 			<div class="menuDivider"></div>
 
 			<!-- IF INVOLVED PLAYER-->
-			<span v-if="personal.pov >= 0" id="menuButtonRewindPos" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showRewindPanel }]" @click="loadRewind()">
+			<span v-if="personal.pov >= 0" id="menuButtonRewindPos" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showRewindPanel }]" role="button" tabindex="0" @click="loadRewind()">
 				<img :src="view.getImage('icon-rewind')" />
 				<span>{{ $t('topMenu.rewind') }}</span>
 			</span>
@@ -254,13 +267,13 @@ function getCurrentPlayerNames() {
 
 			<br />
 
-			<span v-if="personal.name" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showChat }]" id="menuButtonChat" @click="toggleChat">
+			<span v-if="personal.name" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showChat }]" id="menuButtonChat" role="button" tabindex="0" @click="toggleChat">
 				<img :src="view.getImage('icon-chat')" />
 				<span>{{ $t('topMenu.chat') }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
-			<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showBug }]" id="menuButtonBug" @click="toggleBug">
+			<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showBug }]" id="menuButtonBug" role="button" tabindex="0" @click="toggleBug">
 				<img :src="view.getImage('icon-stop')" />
 				<span>{{ $t('topMenu.bug') }}</span>
 			</span>
@@ -269,20 +282,20 @@ function getCurrentPlayerNames() {
 			<div class="menuDivider"></div>
 
 			<!-- IF INVOLVED PLAYER-->
-			<span v-if="personal.pov >= 0" class="topMenuItem" :class="['topMenuItem', { hasNotes: personal.notes.length > 0 }, { topMenuItemSelected: store.viewSettings.showNotes }]" id="menuButtonNotes" @click="toggleNotes">
+			<span v-if="personal.pov >= 0" class="topMenuItem" :class="['topMenuItem', { hasNotes: personal.notes.length > 0 }, { topMenuItemSelected: store.viewSettings.showNotes }]" id="menuButtonNotes" role="button" tabindex="0" @click="toggleNotes">
 				<img :src="view.getImage('icon-notebook')" />
 				<span>{{ $t('topMenu.notes') }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
-			<span :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showHistory }]" id="menuButtonHistory" @click="toggleHistory">
+			<span :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showHistory }]" id="menuButtonHistory" role="button" tabindex="0" @click="toggleHistory">
 				<img :src="view.getImage('icon-scroll')" />
 				<span>{{ $t('topMenu.history') }}</span>
 			</span>
 
 			<div class="menuDivider"></div>
 
-			<span class="topMenuItem" @click="toggleReplay()">
+			<span class="topMenuItem" role="button" tabindex="0" @click="toggleReplay()">
 				<img :src="view.getImage('icon-replay')" />
 				<span>{{ $t('topMenu.replay') }}</span>
 			</span>
@@ -453,6 +466,34 @@ function getCurrentPlayerNames() {
 	filter: brightness(0) saturate(100%) invert(100%) sepia(17%) saturate(6440%) hue-rotate(174deg) brightness(98%) contrast(102%);
 	/*filter:  brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7500%) hue-rotate(299deg) brightness(99%) contrast(104%);
     */
+}
+
+.topMenuItem:focus-visible {
+	outline: 3px solid lightblue;
+	outline-offset: -3px;
+	border-radius: 5px;
+}
+
+.reconnectBanner {
+	position: fixed;
+	top: 0;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 5000;
+	background: #ffcc00;
+	color: #000;
+	font-weight: bold;
+	padding: 4px 14px;
+	border-radius: 0 0 6px 6px;
+	pointer-events: none;
+	animation: reconnectIn 0.25s ease-out;
+}
+
+@keyframes reconnectIn {
+	from {
+		opacity: 0;
+		transform: translate(-50%, -100%);
+	}
 }
 
 .hasNotes {

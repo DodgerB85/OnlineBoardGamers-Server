@@ -29,6 +29,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
+from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin, is_site_admin
 
 # from django.urls import reverse
 # from django.db.models import Q
@@ -43,6 +44,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 from . import RNBconstants as rfRNB
 from .common import create_rnb_game
 from .models import RNBmap, RNBMapScore
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 RNB_DB_LOCK_NAME = "lockRNBgame_"
 
@@ -294,6 +296,9 @@ def _processRNBturn(request):
 
     presenter = cast("RNBpresenter", currentGame.presenter())
 
+    if not can_act_in_game(request.user, currentGame):
+        return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
+
     #    if jsonData["action"] == "simpleSave":
     #        # Check if old version is older than DB version, and if so, return
     #        if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
@@ -345,7 +350,7 @@ def _processRNBturn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         nameToUse = request.user.username
-        if request.user.username == "BotKickStarter":
+        if is_game_admin(request.user):
             nameToUse = jsonData["BKSN"]
         check_name = jsonData.get("checkName", "")
         if check_name:
@@ -557,7 +562,7 @@ def _processRNBturn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         nameToUse = request.user.username
-        if request.user.username == "BotKickStarter":
+        if is_game_admin(request.user):
             nameToUse = jsonData["BKSN"]
 
         # First, ALWAYS add the conflict preset move
@@ -620,7 +625,7 @@ def _processRNBturn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         nameToUse = request.user.username
-        if request.user.username == "BotKickStarter":
+        if is_game_admin(request.user):
             nameToUse = jsonData["BKSN"]
         check_name = jsonData.get("checkName", "")
         if check_name:
@@ -839,7 +844,7 @@ def _processRNBturn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         nameToUse = request.user.username
-        if request.user.username == "BotKickStarter":
+        if is_game_admin(request.user):
             nameToUse = jsonData["BKSN"]
 
         conflictPresetMove = PdecompressData(jsonData["conflictPresetData"])
@@ -880,7 +885,7 @@ def _processRNBturn(request):
             currentGame.transactionID = ""
 
         nameToUse = request.user.username
-        if request.user.username == "BotKickStarter":
+        if is_game_admin(request.user):
             nameToUse = jsonData["BKSN"]
 
         gameDataB64 = jsonData["gameDataB64"]
@@ -1008,7 +1013,7 @@ def _processRNBturn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         nameToUse = request.user.username
-        if request.user.username == "BotKickStarter":
+        if is_game_admin(request.user):
             nameToUse = jsonData["BKSN"]
 
         presenter.cancelPreMovesForPlayer(nameToUse, jsonData["startingTurn"], jsonData["startingPhase"])
@@ -1191,7 +1196,7 @@ def _processRNBturn(request):
         # If the vote is only recorded, return straight away without kicking.
         # A super-user (BotKickStarter) votes as the seat it is currently POV-ing
         nameToUse = request.user.username
-        if request.user.username == "BotKickStarter":
+        if is_game_admin(request.user):
             nameToUse = jsonData.get("BKSN", nameToUse)
         kickout_vote_result = presenter.processKickoutVote(nameToUse, jsonData["kickedName"])
         if kickout_vote_result["voteCast"]:
@@ -1222,10 +1227,15 @@ def _processRNBturn(request):
 
 # ===== PLAYER TRADE =====
 
+RNB_HIST_CHOOSE_HOME_TILE = 2
+RNB_LOCATION_DOCKED = 3
+RNB_WATER_TRANSPORTER_TYPES = {33, 34, 35}  # raft, rowboat, steamer
+
+
 def _decompress_rnb_trade_data(raw_trade_data):
     if not raw_trade_data:
         return {"playerTrades": []}
-    return json.loads(gzip.decompress(bytearray(base64.b64decode(raw_trade_data))).decode("utf-8"))
+    return json.loads(safe_gzip_decompress(bytearray(base64.b64decode(raw_trade_data))).decode("utf-8"))
 
 
 def _compress_rnb_trade_data(trade_data):
@@ -1233,23 +1243,75 @@ def _compress_rnb_trade_data(trade_data):
 
 
 def _decompress_rnb_gamedata(string_to_decompress):
-    return json.loads(gzip.decompress(bytearray(base64.b64decode(string_to_decompress))).decode("utf-8"))
+    return json.loads(safe_gzip_decompress(bytearray(base64.b64decode(string_to_decompress))).decode("utf-8"))
 
 
 def _compress_rnb_gamedata(raw_data):
     return base64.b64encode(gzip.compress(json.dumps(raw_data).encode("utf-8"))).decode("utf-8")
 
 
-def _get_rnb_player_home_hex_id(raw_data, player_index):
-    if len(raw_data) <= 8:
-        return None
-    home_markers = raw_data[8]
-    if not isinstance(home_markers, list):
-        return None
-    for marker in home_markers:
-        if int(marker.get("ownerIndex", -1)) == int(player_index):
-            return marker["location"][1]
+def _get_rnb_home_location(raw_data, player_index):
+    """Home bucket location in exported compressed form, e.g. [hex] or [hex, bucket]."""
+    if len(raw_data) > 4:
+        for entry in reversed(raw_data[4]):
+            if entry[0] == RNB_HIST_CHOOSE_HOME_TILE and int(entry[1]) == int(player_index):
+                compressed = entry[3]
+                if isinstance(compressed, list) and compressed and compressed[0] >= 0:
+                    if len(compressed) > 2 and compressed[0] == 7:
+                        return [compressed[1]] if compressed[2] == 0 else [compressed[1], compressed[2]]
+                    return compressed
+    # Legacy saves that stored home markers directly at index 8
+    if len(raw_data) > 8 and isinstance(raw_data[8], list):
+        for marker in raw_data[8]:
+            if int(marker.get("ownerIndex", -1)) == int(player_index):
+                location = marker["location"]
+                if len(location) > 2 and location[0] == 7:
+                    return [location[1]] if location[2] == 0 else [location[1], location[2]]
     return None
+
+
+def _rnb_player_has_transporter_on_home(raw_data, player_index, home_location):
+    if not home_location or len(raw_data) <= 2:
+        return False
+    home_hex = home_location[0]
+    for transporter in raw_data[2]:
+        if int(transporter[0]) != int(player_index):
+            continue
+        transporter_type = transporter[1]
+        location = transporter[2]
+        if not location:
+            continue
+        if transporter_type in RNB_WATER_TRANSPORTER_TYPES:
+            # River vertices use [hex] or [hex, vertex]; sea vertices and docks use a -1/3 flag.
+            if location[0] == home_hex:
+                return True
+            if location[0] == -1 and len(location) >= 3 and location[1] == home_hex:
+                return True
+            if location[0] == RNB_LOCATION_DOCKED and len(location) >= 2 and location[1] == home_hex:
+                return True
+        elif len(location) >= 2 and location[0] == home_hex:
+            return True
+    return False
+
+
+def _rnb_validate_trade_resources(resources, res_ids, home_location):
+    if not isinstance(res_ids, list):
+        return False
+    home_hex = home_location[0]
+    seen = set()
+    for rid in res_ids:
+        if not isinstance(rid, int) or isinstance(rid, bool) or rid < 0 or rid >= len(resources):
+            return False
+        location = resources[rid][1]
+        if rid in seen or not location or location[0] != home_hex:
+            return False
+        seen.add(rid)
+    return True
+
+
+def _rnb_trade_option_enabled(currentGame):
+    loaded_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    return rfRNB.SO_TRADE in loaded_options
 
 
 def _broadcast_trade_update(game_id):
@@ -1276,9 +1338,10 @@ def _cancel_trades_for_player(trade_data, player_index):
 
 @login_required()
 def processRNBtrade(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
+    return process_game_with_mutex(request, _processRNBtrade, mutex_prefix="processTurn_")
 
+
+def _processRNBtrade(request):
     jsonData = json.loads(request.body)
     game_id = jsonData["gameID"]
 
@@ -1288,6 +1351,9 @@ def processRNBtrade(request):
         raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("RNBpresenter", currentGame.presenter())
+
+    if not can_act_in_game(request.user, currentGame):
+        return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
     raw_data = _decompress_rnb_gamedata(currentGame.gameData)
     trade_data = _decompress_rnb_trade_data(currentGame.playerTradeData or "")
@@ -1308,7 +1374,7 @@ def processRNBtrade(request):
 
 def _handle_rnb_propose_trade(request, currentGame, presenter, raw_data, trade_data, jsonData):
     nameToUse = request.user.username
-    if request.user.username == "BotKickStarter":
+    if is_game_admin(request.user):
         nameToUse = jsonData.get("BKSN", nameToUse)
 
     proposer_idx = _get_player_idx_from_name(presenter, nameToUse)
@@ -1319,15 +1385,35 @@ def _handle_rnb_propose_trade(request, currentGame, presenter, raw_data, trade_d
     your_res_ids = jsonData["yourResIDs"]
     their_res_ids = jsonData["theirResIDs"]
 
+    if not isinstance(target_idx, int) or isinstance(target_idx, bool) or target_idx < 0:
+        return JsonResponse({"tradeError": "Invalid opponent"}, safe=False)
+
     if proposer_idx == target_idx:
         return JsonResponse({"tradeError": "Cannot trade with yourself"}, safe=False)
 
     if currentGame.phase != rfRNB.PHASE_WONDER_TO:
         return JsonResponse({"tradeError": "Trade only allowed during wonder phase"}, safe=False)
 
-    loaded_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-    if rfRNB.SO_TRADE not in loaded_options:
+    if not _rnb_trade_option_enabled(currentGame):
         return JsonResponse({"tradeError": "Trade option not enabled"}, safe=False)
+
+    if not your_res_ids and not their_res_ids:
+        return JsonResponse({"tradeError": "Trade must include goods"}, safe=False)
+
+    if len(raw_data) <= 3:
+        return JsonResponse({"tradeError": "Game data not available"}, safe=False)
+    proposer_home = _get_rnb_home_location(raw_data, proposer_idx)
+    target_home = _get_rnb_home_location(raw_data, target_idx)
+    if proposer_home is None or target_home is None:
+        return JsonResponse({"tradeError": "Could not find home tiles"}, safe=False)
+    if not _rnb_player_has_transporter_on_home(raw_data, proposer_idx, proposer_home):
+        return JsonResponse({"tradeError": "You need a transporter on your home tile"}, safe=False)
+    if not _rnb_player_has_transporter_on_home(raw_data, target_idx, target_home):
+        return JsonResponse({"tradeError": "Opponent has no transporter on their home tile"}, safe=False)
+    if not _rnb_validate_trade_resources(raw_data[3], your_res_ids, proposer_home):
+        return JsonResponse({"tradeError": "Offered goods are not on your home tile"}, safe=False)
+    if not _rnb_validate_trade_resources(raw_data[3], their_res_ids, target_home):
+        return JsonResponse({"tradeError": "Requested goods are not on their home tile"}, safe=False)
 
     if len(trade_data.get("playerTrades", [])) >= 5:
         return JsonResponse({"tradeError": "Maximum concurrent trades reached"}, safe=False)
@@ -1349,7 +1435,7 @@ def _handle_rnb_propose_trade(request, currentGame, presenter, raw_data, trade_d
 
 def _handle_rnb_accept_trade(request, currentGame, presenter, raw_data, trade_data, jsonData):
     nameToUse = request.user.username
-    if request.user.username == "BotKickStarter":
+    if is_game_admin(request.user):
         nameToUse = jsonData.get("BKSN", nameToUse)
 
     acceptor_idx = _get_player_idx_from_name(presenter, nameToUse)
@@ -1366,33 +1452,43 @@ def _handle_rnb_accept_trade(request, currentGame, presenter, raw_data, trade_da
     if currentGame.phase != rfRNB.PHASE_WONDER_TO:
         return JsonResponse({"tradeError": "Trade only allowed during wonder phase"}, safe=False)
 
+    if not _rnb_trade_option_enabled(currentGame):
+        return JsonResponse({"tradeError": "Trade option not enabled"}, safe=False)
+
     proposer_idx = trade_entry[0]
     offered_res_ids = trade_entry[2]  # proposer offered these
     requested_res_ids = trade_entry[3]  # acceptor gives these
 
-    proposer_home_hex = _get_rnb_player_home_hex_id(raw_data, proposer_idx)
-    target_home_hex = _get_rnb_player_home_hex_id(raw_data, acceptor_idx)
+    matching_trades = [
+        t
+        for t in trade_data.get("playerTrades", [])
+        if len(t) >= 5 and t[0] == proposer_idx and t[1] == acceptor_idx and t[2] == offered_res_ids and t[3] == requested_res_ids
+    ]
+    if not matching_trades:
+        return JsonResponse({"tradeError": "Trade not found"}, safe=False)
 
-    # Fallback: use client-provided hex IDs if server can't find them in gameData
-    if proposer_home_hex is None:
-        proposer_home_hex = jsonData.get("proposerHomeHex")
-    if target_home_hex is None:
-        target_home_hex = jsonData.get("targetHomeHex")
+    if len(raw_data) <= 3:
+        return JsonResponse({"tradeError": "Game data not available"}, safe=False)
+    proposer_home = _get_rnb_home_location(raw_data, proposer_idx)
+    target_home = _get_rnb_home_location(raw_data, acceptor_idx)
+    if proposer_home is None or target_home is None:
+        return JsonResponse({"tradeError": "Could not find home tiles"}, safe=False)
+    if not _rnb_player_has_transporter_on_home(raw_data, proposer_idx, proposer_home) or not _rnb_player_has_transporter_on_home(
+        raw_data, acceptor_idx, target_home
+    ):
+        return JsonResponse({"tradeError": "Both players need a transporter on their home tile"}, safe=False)
+    if not _rnb_validate_trade_resources(raw_data[3], offered_res_ids, proposer_home) or not _rnb_validate_trade_resources(
+        raw_data[3], requested_res_ids, target_home
+    ):
+        return JsonResponse({"tradeError": "Trade goods are no longer on the home tiles"}, safe=False)
 
-    if proposer_home_hex is not None and target_home_hex is not None:
-        # gameData format (exportRNBmodel):
-        #   0 players, 1 wonderBricks, 2 transporters, 3 resources, 4 history,
-        #   5 mineContent, 6 gameflow, 7 ongoingVars
-        # resource entry: [type, [location], uniqueID]
-        #   location is [hexID] for bucket 0 (home tile)
-        all_resources = raw_data[3]
-        for rid in offered_res_ids:
-            if rid < len(all_resources):
-                all_resources[rid][1] = [target_home_hex]
-        for rid in requested_res_ids:
-            if rid < len(all_resources):
-                all_resources[rid][1] = [proposer_home_hex]
-        currentGame.gameData = _compress_rnb_gamedata(raw_data)
+    # gameData resource location is compressed: [hexID] for bucket 0, [hexID, bucketID] otherwise.
+    all_resources = raw_data[3]
+    for rid in offered_res_ids:
+        all_resources[rid][1] = list(target_home)
+    for rid in requested_res_ids:
+        all_resources[rid][1] = list(proposer_home)
+    currentGame.gameData = _compress_rnb_gamedata(raw_data)
 
     trade_data["playerTrades"] = [
         t for t in trade_data.get("playerTrades", [])
@@ -1425,7 +1521,7 @@ def _handle_rnb_accept_trade(request, currentGame, presenter, raw_data, trade_da
 
 def _handle_rnb_reject_trade(request, currentGame, presenter, raw_data, trade_data, jsonData):
     nameToUse = request.user.username
-    if request.user.username == "BotKickStarter":
+    if is_game_admin(request.user):
         nameToUse = jsonData.get("BKSN", nameToUse)
 
     rejector_idx = _get_player_idx_from_name(presenter, nameToUse)
@@ -1454,7 +1550,7 @@ def _handle_rnb_reject_trade(request, currentGame, presenter, raw_data, trade_da
 
 def _handle_rnb_cancel_trade(request, currentGame, presenter, raw_data, trade_data, jsonData):
     nameToUse = request.user.username
-    if request.user.username == "BotKickStarter":
+    if is_game_admin(request.user):
         nameToUse = jsonData.get("BKSN", nameToUse)
 
     canceller_idx = _get_player_idx_from_name(presenter, nameToUse)
@@ -1668,8 +1764,17 @@ def _sendChatMessageRNB(request):
         base64_data = currentGame.chatData if currentGame.chatData else ""
         if len(base64_data) > 0:
             compressed_data = base64.b64decode(base64_data)
-            unzipped = gzip.decompress(compressed_data).decode("utf-8")
+            unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
             currentChatData = json.loads(unzipped)
+        new_entry = jsonData["newEntry"]
+        if (
+            not isinstance(new_entry, list)
+            or len(new_entry) < 3
+            or not isinstance(new_entry[2], str)
+            or len(new_entry[2]) > 2000
+        ):
+            return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
+        new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
 
         json_string = json.dumps(currentChatData)
@@ -1720,7 +1825,7 @@ def saveRNBmap(request):
         map_description = data.get("mapDescription", "")
         map_data = data.get("mapData", [])
         map_playerCount = data.get("playerCount", 2)
-        map_isVerified = data.get("isVerified", False) if request.user.username == "admin" else False
+        map_isVerified = data.get("isVerified", False) if is_site_admin(request.user) else False
 
         # Validate required fields
         # if not map_name:
@@ -1781,9 +1886,9 @@ def replaceRNBmap(request):
 
         # Double-check the request user is the creator and map is not official
         # Admin user can replace any map, including official maps
-        if existing_map.creator != request.user and request.user.username != "admin":
+        if existing_map.creator != request.user and not is_site_admin(request.user):
             return JsonResponse({"error": "Only the map creator can replace this map"}, status=403)
-        if existing_map.isVerified and request.user.username != "admin":
+        if existing_map.isVerified and not is_site_admin(request.user):
             return JsonResponse({"error": "Verified maps cannot be replaced"}, status=403)
 
         # Ensure the incoming map_data has the correct uniqueID metadata at the end
@@ -1798,7 +1903,7 @@ def replaceRNBmap(request):
         existing_map.playerCount = map_playerCount
         existing_map.hexData = map_data
         # Only allow isVerified to be changed by admin
-        if request.user.username == "admin":
+        if is_site_admin(request.user):
             existing_map.isVerified = map_isVerified
         existing_map.save()
 
@@ -1819,7 +1924,7 @@ def deleteRNBmap(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST method required"}, status=405)
 
-    if request.user.username != "admin":
+    if not is_site_admin(request.user):
         return JsonResponse({"error": "Only admin can delete maps"}, status=403)
 
     try:
@@ -1874,7 +1979,7 @@ def getRNBmaps(request):
                     "playerCount": map_obj.playerCount,
                     "isVerified": map_obj.isVerified,
                     "hexData": map_obj.hexData,
-                    "canReplace": (map_obj.creator == request.user and not map_obj.isVerified) or request.user.username == "admin",
+                    "canReplace": (map_obj.creator == request.user and not map_obj.isVerified) or is_site_admin(request.user),
                 }
             )
 
@@ -2158,8 +2263,8 @@ def PwipeAllMoveData(currentGame):
 
 
 def PdecompressData(string_to_decompress):
-    # return json.loads(gzip.decompress(base64.b64decode(string_to_decompress)).decode("utf-8"))
-    return json.loads(gzip.decompress(bytearray(base64.b64decode(string_to_decompress))).decode("utf-8"))
+    # return json.loads(safe_gzip_decompress(base64.b64decode(string_to_decompress)).decode("utf-8"))
+    return json.loads(safe_gzip_decompress(bytearray(base64.b64decode(string_to_decompress))).decode("utf-8"))
 
 
 def setPlayerStackToCurrent(currentGame, playerName):

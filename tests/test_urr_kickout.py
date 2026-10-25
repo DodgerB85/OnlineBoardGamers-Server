@@ -81,3 +81,29 @@ class UrrKickoutTests(TestCase):
         self.game.save(update_fields=["activeVotes"])
         self.assertIn("missingPlayers", self.kickout().json())
         self.assertTrue(self.game.players.get(player=self.players[2]).is_kicked)
+
+
+class UrrResignTests(TestCase):
+    def setUp(self):
+        self.players = [User.objects.create_user(username=f"urr-resign-{index}", password="pw") for index in range(3)]
+        self.game = Game.objects.create(gameCode="URR", creator=self.players[0], host=self.players[0], gameStatus="ACTIVE", maxPlayers=3, phase=1, latestUpdate=str(int(time.time() * 1000)), startingOptions="[]")
+        for index, player in enumerate(self.players):
+            GamePlayer.objects.create(game=self.game, player=player, seat_order=index, is_current=index == 0)
+        self.client.force_login(self.players[0])
+
+    def resign(self):
+        return self.client.post(reverse("URR:processURRturn"), json.dumps({"action": "resign", "gameID": self.game.id}), content_type="application/json")
+
+    def test_resign_on_own_settlement_turn_reports_missing_seat(self):
+        self.assertEqual(self.resign().json()["missingPlayers"], [self.players[0].username])
+        self.assertTrue(self.game.players.get(player=self.players[0]).is_missing)
+
+    def test_resign_outside_settlement_or_turn_is_rejected(self):
+        self.game.phase = 3
+        self.game.save(update_fields=["phase"])
+        self.assertEqual(self.resign().status_code, 400)
+        self.game.phase = 1
+        self.game.save(update_fields=["phase"])
+        self.client.force_login(self.players[1])
+        self.assertEqual(self.resign().status_code, 400)
+        self.assertFalse(self.game.players.filter(is_missing=True).exists())

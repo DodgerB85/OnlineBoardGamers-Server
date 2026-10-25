@@ -70,6 +70,7 @@ const hexesForDisplay = computed(() =>
 		roadJoinPoints: hex.roadJoinPoints,
 		fullRoadPath: hex.fullRoadPath,
 		fullPowerLinePath: hex.fullPowerLinePath,
+		fullTrainTrackPath: hex.fullTrainTrackPath,
 	}))
 )
 
@@ -199,14 +200,14 @@ const shouldShowLandBubble = computed(() => {
 })
 
 // Bombs: show a target bubble per non-strengthened building on the selected
-// transporter's hex. A bomb must be carried by the transporter to be usable.
+// transporter's hex. The bomb must be accessible, not necessarily carried.
 const bombBubbleInfo = computed(() => {
 	if (!rf.PHASE_BUILDINGS.includes(store.gameflow.phase)) return null
 	if (store.context.selectedTransporterIDforTM === -1) return null
 	const transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
 	if (!transporterObj || !loc.isAnyHexLocation(transporterObj.location)) return null
-	// The transporter must carry a bomb
-	const hasBomb = model.resourcesOnTransport(transporterObj.id).some((res) => res.type === rf.RES_BOMB)
+	// The bomb must be accessible, not necessarily carried
+	const hasBomb = loc.getAllResourcesAccessibleToTransporter(transporterObj.id, true).some((res) => res.type === rf.RES_BOMB)
 	if (!hasBomb) return null
 	const hexID = transporterObj.location[1]
 	const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
@@ -216,6 +217,13 @@ const bombBubbleInfo = computed(() => {
 })
 
 const shouldShowBombBubble = computed(() => bombBubbleInfo.value !== null)
+
+// Trains: offer the ride when a land transporter sits on a live track
+const shouldShowTrainBubble = computed(() => {
+	if (!rf.PHASE_MOVEMENTS.includes(store.gameflow.phase)) return false
+	if (store.context.selectedTransporterIDforTM === -1) return false
+	return store.context.trainModeSelectionActive
+})
 
 // Planes & Aeroports: check if taxi is disabled (plane carrying goods)
 const isTaxiDisabled = computed(() => {
@@ -227,7 +235,7 @@ const isTaxiDisabled = computed(() => {
 
 const transporterScreenPosition = computed(() => {
 	if (store.context.selectedTransporterIDforTM === -1 && !shouldShowAtelierRecipeBubbles.value) return null
-	if (!shouldShowResearchBubbles.value && !shouldShowBuildingOptions.value && !shouldShowPickupSelectBubbles.value && !shouldShowAtelierRecipeBubbles.value && !shouldShowPlaneModeBubbles.value && !shouldShowLandBubble.value && !shouldShowBombBubble.value) return null
+	if (!shouldShowResearchBubbles.value && !shouldShowBuildingOptions.value && !shouldShowPickupSelectBubbles.value && !shouldShowAtelierRecipeBubbles.value && !shouldShowPlaneModeBubbles.value && !shouldShowLandBubble.value && !shouldShowBombBubble.value && !shouldShowTrainBubble.value) return null
 	let transporterObj
 	if (shouldShowAtelierRecipeBubbles.value) transporterObj = model.getTransporterByID(store.context.atelierTransporterID)
 	else if (shouldShowPickupSelectBubbles.value) transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforPickupOrSelection)
@@ -338,6 +346,19 @@ function getLandBubblePosition() {
 // Bombs: position the bomb bubble above the transporter
 function getBombBubblePosition() {
 	return { transform: `translate(0px, -70px)` }
+}
+
+// Trains: position the Train bubble above the transporter
+function getTrainBubblePosition() {
+	return { transform: `translate(0px, -60px)` }
+}
+
+// Trains: click to start picking the good, click again (or Cancel) to back out -
+// backing out moves nothing, the good stays where it was
+function handleTrainModeClick() {
+	if (store.context.selectedTrainFareResID !== -1) store.context.selectedTrainFareResID = -1
+	else store.context.selectedTrainMode = !store.context.selectedTrainMode
+	highlight.updateAllHighlightsForTransporterMode()
 }
 
 // Bombs: with a single target, blow it up directly; with several (a city), highlight
@@ -530,6 +551,10 @@ function getAtelierRecipeGfx(recipeIdx) {
 							<feMergeNode in="SourceGraphic" />
 						</feMerge>
 					</filter>
+					<mask v-for="hex in hexesForDisplay" :key="'trainTrackMask' + hex.hexID" :id="`mapAreaTrainTrackMask${hex.hexID}`" maskUnits="userSpaceOnUse" x="-20000" y="-20000" width="40000" height="40000">
+						<rect x="-20000" y="-20000" width="40000" height="40000" fill="white" />
+						<path :d="hex.fullTrainTrackPath" stroke="black" :stroke-width="(84 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+					</mask>
 				</defs>
 				<!-- MAKE UP AN INDIVIDUAL HEX HERE WITH ALL ITEMS ON TOP OF IT. IT CAN THEN BE ROATED TO FLAT TOP IF NEEDED BEFORE BEING MOVED TO THE CORRECT LOCATION -->
 				<!-- LAYER 1 -- JUST THE HEX ART AND OUTLINES-->
@@ -581,6 +606,10 @@ function getAtelierRecipeGfx(recipeIdx) {
 								<path class="noClick" :d="hex.fullRoadPath" stroke="#1C2526" :stroke-width="60 * store.RATIO" stroke-linejoin="round" stroke-linecap="round" />
 								<path class="noClick" :d="hex.fullRoadPath" stroke="#F5F5F5" :stroke-width="(7 * store.RATIO).toFixed(0)" :stroke-dasharray="`${(25 * store.RATIO).toFixed(0)} ${(20 * store.RATIO).toFixed(0)}`" fill="none" />
 							</g>
+						</g>
+						<!-- TRAIN TRACKS - same paths/anchors as roads -->
+						<g v-if="store.gameOptions.useTrains && hex.fullTrainTrackPath">
+							<path class="noClick" :d="hex.fullTrainTrackPath" stroke="#1A237E" :stroke-width="(124 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" :mask="`url(#mapAreaTrainTrackMask${hex.hexID})`" />
 						</g>
 						<!-- POWER LINES - narrow red line with yellow dots, drawn inside roads -->
 						<g v-if="store.gameOptions.useElectricity && hex.fullPowerLinePath">
@@ -963,7 +992,7 @@ function getAtelierRecipeGfx(recipeIdx) {
 						<div v-if="isResearched === 0 && (idx !== rf.RND_FUNDAMENTAL_RESEARCH_IDX || (idx === rf.RND_FUNDAMENTAL_RESEARCH_IDX && store.gameOptions.useFundamentalResearch))" class="researchBubble" @click="produce.doResearch(idx)" :style="getBubblePosition(idx)">
 							<div class="researchBubbleContent">
 								<img :src="view.getImage(`research_${idx}`)" class="researchBubbleImg" />
-								<span class="researchBubbleText">{{ rf.RND_STRINGS[idx] }}</span>
+								<span class="researchBubbleText">{{ view.rndName(idx) }}</span>
 							</div>
 						</div>
 					</template>
@@ -1047,6 +1076,18 @@ function getAtelierRecipeGfx(recipeIdx) {
 								<span v-if="!bombBubbleInfo.strengthened" class="bombSparkle">&#10022;</span>
 							</span>
 							<span class="researchBubbleText">{{ bombBubbleInfo.strengthened ? "Building too strong" : "Blow up Building" }}</span>
+						</div>
+					</div>
+				</div>
+			</transition>
+
+			<!-- Trains: Take Train Bubble -->
+			<transition name="fade">
+				<div v-if="shouldShowTrainBubble && transporterScreenPosition" class="researchBubblesOverlay" :style="{ left: transporterScreenPosition.x + 'px', top: transporterScreenPosition.y + 'px' }">
+					<div class="researchBubble" @click="handleTrainModeClick" :style="getTrainBubblePosition()">
+						<div class="researchBubbleContent">
+							<span class="researchBubbleImg trainBubbleIcon">&#128642;</span>
+							<span class="researchBubbleText">{{ store.context.selectedTrainFareResID !== -1 ? "Cancel" : "Select Good to Take Train" }}</span>
 						</div>
 					</div>
 				</div>
@@ -1143,6 +1184,13 @@ function getAtelierRecipeGfx(recipeIdx) {
 	width: 35px;
 	height: 35px;
 	pointer-events: none;
+}
+
+/* Trains: the bubble uses a text glyph, no train image asset exists */
+.trainBubbleIcon {
+	font-size: 24px;
+	line-height: 35px;
+	text-align: center;
 }
 
 .researchBubbleText {

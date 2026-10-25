@@ -1018,6 +1018,7 @@ function doZoom(e) {
 
 .layer44polygon {
 	fill: none;
+	animation: highlight-fade 0.15s ease-out;
 }
 
 .outlineRed {
@@ -1042,7 +1043,18 @@ function doZoom(e) {
 	fill-opacity: 1;
 	pointer-events: visiblePainted;
 	cursor: default;
-	animation: glow 0.6s infinite alternate;
+	animation:
+		highlight-fade 0.15s ease-out,
+		glow 0.6s 0.15s infinite alternate;
+}
+
+@keyframes highlight-fade {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 .polygonYellow {

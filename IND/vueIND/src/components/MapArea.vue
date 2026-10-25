@@ -22,7 +22,7 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/INDpersonal.js"
 const personal = usePersonalStore()
 
-import { ref, reactive, computed } from "vue"
+import { ref, reactive, computed, watch, onMounted, onUnmounted } from "vue"
 
 /** DEBUG - USE TO LAYOUT MAP ITEMS*/
 /*
@@ -94,6 +94,28 @@ const DEBUGstopDrag = () => {
 const DEBUGmapSVG = ref(null)
 
 const originalMapDivRef = ref(null)
+const hoveredRndRow = ref(-1)
+
+const previousCitySizes = new Map()
+watch(
+	() => store.cities.map((city) => [city.territory, city.size]),
+	(newValues) => {
+		for (const [territory, size] of newValues) {
+			const oldSize = previousCitySizes.get(territory)
+			if (oldSize !== undefined && size > oldSize) {
+				const city = store.cities.find((candidate) => candidate.territory === territory)
+				if (city) {
+					city.isGrown = true
+					setTimeout(() => {
+						city.isGrown = false
+					}, 350)
+				}
+			}
+			previousCitySizes.set(territory, size)
+		}
+	},
+	{ deep: true }
+)
 const popupSetter = reactive({
 	showPopup: false,
 	popupData: {
@@ -109,6 +131,8 @@ function mouseOverAvailableCompany(event, popupObjectType, popupObjectData) {
 	showPopupFunc(event, popupObjectType, popupObjectData)
 	if (store.context.action === rf.ACT_ACQUIRE_COMPANY) {
 		const companyID = popupObjectData[0]
+		const hoveredCompany = store.availableCompanies.find((company) => company.id === companyID)
+		if (hoveredCompany && hoveredCompany.markedForRemoval) return
 		const ret = model.getTerritoryIDsToHighlightForNewCompany(companyID)
 		store.context.territoriesToHighlight.splice(0)
 		store.context.territoriesToHighlightRed.splice(0)
@@ -953,6 +977,20 @@ function localToggleFutureBoardState() {
 	} else store.topMenuViews.showFutureBoardState = 0
 }
 
+function handleMapShortcut(event) {
+	if (event.ctrlKey || event.metaKey || event.altKey) return
+	if (store.topMenuViews.showReplay || personal.pov < 0 || store.gameflow.phase === rf.PHASE_GAME_OVER) return
+	const target = event.target
+	if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.tagName === "BUTTON" || target.tagName === "A" || target.isContentEditable)) return
+	if (event.key.toLowerCase() === "a") {
+		event.preventDefault()
+		localToggleFutureBoardState()
+	}
+}
+
+onMounted(() => window.addEventListener("keydown", handleMapShortcut))
+onUnmounted(() => window.removeEventListener("keydown", handleMapShortcut))
+
 function getShipCapacitySqX(index, used, total) {
 	// You start on the ship marker left-X
 	// index runs from ONE to FIVE
@@ -1112,7 +1150,7 @@ function handlePointerEnter(event, company) {
 			<g v-for="(city, idx) in store.cities" :key="idx">
 				<ellipse
 					class="cityEllipse"
-					:class="[{ 'city-plop': city.isNew }, { selectableCity: store.context.citiesToHighlight.includes(city.territory) }, { redCity: store.context.citiesToHighlightRed.includes(city.territory) }]"
+					:class="[{ 'city-plop': city.isNew }, { 'city-grow': city.isGrown }, { selectableCity: store.context.citiesToHighlight.includes(city.territory) }, { redCity: store.context.citiesToHighlightRed.includes(city.territory) }]"
 					:cx="map.getTerritoryDataFromTerritoryID(city.territory).resCenter[0]"
 					:cy="map.getTerritoryDataFromTerritoryID(city.territory).resCenter[1]"
 					:rx="store.mapData.selectedMapData.cityRadius"
@@ -1242,7 +1280,7 @@ function handlePointerEnter(event, company) {
 						<rect :style="{ 'stroke-width': `${store.mapData.selectedMapData.prodMarkerHighlightStrokeWidth/4 }` }" :x="map.getTerritoryDataFromTerritoryID(terrArr[0]).resCenter[0] - store.mapData.selectedMapData.viewSettings.resRefSize / 2" :y="map.getTerritoryDataFromTerritoryID(terrArr[0]).resCenter[1] + store.mapData.selectedMapData.viewSettings.resRefSize / 2 + store.mapData.selectedMapData.prodMarkerHighlightStrokeWidth/4" :width="store.mapData.selectedMapData.viewSettings.resRefSize + 'px'" :height="(store.mapData.selectedMapData.prodMarkerHighlightStrokeWidth*2) + 'px'" stroke="white" :fill="personal.getCorrectedColourHex(store.players[company.ownerIndex].colour)" />
 					-->
 							<!-- Used Prod Marker -->
-							<g v-if="terrArr[1]">
+							<g v-if="terrArr[1]" class="soldGoodCross">
 								<path :transform="`rotate(${company.newExpansionsThisTurn.includes(terrArr[0]) ? '45' : '0'} ${map.getTerritoryDataFromTerritoryID(terrArr[0]).resCenter[0]} ${map.getTerritoryDataFromTerritoryID(terrArr[0]).resCenter[1]})`" :d="'M' + (map.getTerritoryDataFromTerritoryID(terrArr[0]).resCenter[0] - store.mapData.selectedMapData.viewSettings.resRefSize / 2) + ',' + (map.getTerritoryDataFromTerritoryID(terrArr[0]).resCenter[1] - store.mapData.selectedMapData.viewSettings.resRefSize / 2) + ' L' + (map.getTerritoryDataFromTerritoryID(terrArr[0]).resCenter[0] + store.mapData.selectedMapData.viewSettings.resRefSize / 2) + ',' + (map.getTerritoryDataFromTerritoryID(terrArr[0]).resCenter[1] + store.mapData.selectedMapData.viewSettings.resRefSize / 2)" :stroke="company.newExpansionsThisTurn.includes(terrArr[0]) ? 'blue' : 'black'" :stroke-width="store.mapData.selectedMapData.prodMarkerHighlightStrokeWidth" />
 								<path :transform="`rotate(${company.newExpansionsThisTurn.includes(terrArr[0]) ? '45' : '0'} ${map.getTerritoryDataFromTerritoryID(terrArr[0]).resCenter[0]} ${map.getTerritoryDataFromTerritoryID(terrArr[0]).resCenter[1]})`" :d="'M' + (map.getTerritoryDataFromTerritoryID(terrArr[0]).resCenter[0] - store.mapData.selectedMapData.viewSettings.resRefSize / 2) + ',' + (map.getTerritoryDataFromTerritoryID(terrArr[0]).resCenter[1] + store.mapData.selectedMapData.viewSettings.resRefSize / 2) + ' L' + (map.getTerritoryDataFromTerritoryID(terrArr[0]).resCenter[0] + store.mapData.selectedMapData.viewSettings.resRefSize / 2) + ',' + (map.getTerritoryDataFromTerritoryID(terrArr[0]).resCenter[1] - store.mapData.selectedMapData.viewSettings.resRefSize / 2)" :stroke="company.newExpansionsThisTurn.includes(terrArr[0]) ? 'blue' : 'black'" :stroke-width="store.mapData.selectedMapData.prodMarkerHighlightStrokeWidth" />
 							</g>
@@ -1335,24 +1373,34 @@ function handlePointerEnter(event, company) {
 				</g>
 			</g>
 
+			<!-- RnD row hover targets: reveal track labels without occupying space -->
+			<g v-for="rowIdx in [0, 1, 2, 3, 4]" :key="'rnd-hover-' + rowIdx">
+				<rect
+					:x="store.mapData.selectedMapData.RNDdata.topCorner[0]"
+					:y="store.mapData.selectedMapData.RNDdata.topCorner[1] + rowIdx * store.mapData.selectedMapData.RNDdata.yShift"
+					:width="store.mapData.selectedMapData.RNDdata.xShift * 5"
+					:height="store.mapData.selectedMapData.RNDdata.boxHeight"
+					fill="transparent"
+					@mouseenter="hoveredRndRow = rowIdx"
+					@mouseleave="hoveredRndRow = -1" />
+			</g>
+
 			<!-- RnD Texts -->
-			<g v-if="store.gameflow.phase === rf.PHASE_R_AND_D && personal.canPlay()">
-				<g v-for="(row, rowIdx) in [0, 1, 2, 3, 4]" :key="rowIdx">
-					<text
-						:x="store.mapData.selectedMapData.RNDdata.topCorner[0] + store.mapData.selectedMapData.RNDhelpText[0]"
-						:y="store.mapData.selectedMapData.RNDdata.topCorner[1] + store.mapData.selectedMapData.RNDhelpText[1] + rowIdx * store.mapData.selectedMapData.RNDdata.yShift"
-						class="rndText"
-						:style="{
-							'font-size': `${store.mapData.selectedMapData.RNDhelpText[2]}px !important`,
-							'stroke-width': `${store.mapData.selectedMapData.strokeWidthBase05}`,
-						}">
-						<tspan v-if="rowIdx === 0">Bid Multiplier</tspan>
-						<tspan v-else-if="rowIdx === 1">Slots</tspan>
-						<tspan v-else-if="rowIdx === 2">Mergers</tspan>
-						<tspan v-else-if="rowIdx === 3">Expansions</tspan>
-						<tspan v-else-if="rowIdx === 4">Hull Capacity</tspan>
-					</text>
-				</g>
+			<g v-for="(row, rowIdx) in [0, 1, 2, 3, 4]" :key="'rnd-label-' + rowIdx" :style="{ opacity: (store.gameflow.phase === rf.PHASE_R_AND_D && personal.canPlay()) || hoveredRndRow === rowIdx ? 1 : 0, transition: 'opacity 0.15s ease-in-out', 'pointer-events': 'none' }">
+				<text
+					:x="store.mapData.selectedMapData.RNDdata.topCorner[0] + store.mapData.selectedMapData.RNDhelpText[0]"
+					:y="store.mapData.selectedMapData.RNDdata.topCorner[1] + store.mapData.selectedMapData.RNDhelpText[1] + rowIdx * store.mapData.selectedMapData.RNDdata.yShift"
+					class="rndText"
+					:style="{
+						'font-size': `${store.mapData.selectedMapData.RNDhelpText[2]}px !important`,
+						'stroke-width': `${store.mapData.selectedMapData.strokeWidthBase05}`,
+					}">
+					<tspan v-if="rowIdx === 0">{{ $t('map.bidMultiplier') }}</tspan>
+					<tspan v-else-if="rowIdx === 1">{{ $t('map.slots') }}</tspan>
+					<tspan v-else-if="rowIdx === 2">{{ $t('map.mergers') }}</tspan>
+					<tspan v-else-if="rowIdx === 3">{{ $t('map.expansions') }}</tspan>
+					<tspan v-else-if="rowIdx === 4">{{ $t('map.hullCapacity') }}</tspan>
+				</text>
 			</g>
 			<!-- RnD MARKERS -->
 			<g v-for="marker in computedRNDdisplayData" :key="marker.id">
@@ -1455,12 +1503,12 @@ function handlePointerEnter(event, company) {
 			<!-- END DEBUG ONLY -->
 		</svg>
 		<button class="actionsLineButton" @click="store.topMenuViews.showTerrOutline = !store.topMenuViews.showTerrOutline">
-			<span v-if="store.topMenuViews.showTerrOutline">Hide Territory Outline</span>
-			<span v-else>Show Territory Outline</span>
+			<span v-if="store.topMenuViews.showTerrOutline">{{ $t('map.hideOutline') }}</span>
+			<span v-else>{{ $t('map.showOutline') }}</span>
 		</button>
 		<button v-if="personal.pov >= 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER" class="actionsLineButton" @click="localToggleFutureBoardState">
-			<span v-if="store.topMenuViews.showFutureBoardState === 0">Show All Available Companies and My Era Card Provinces</span>
-			<span v-else>Show Game</span>
+			<span v-if="store.topMenuViews.showFutureBoardState === 0">{{ $t('map.showAvailable') }}</span>
+			<span v-else>{{ $t('map.showGame') }}</span>
 		</button>
 	</div>
 	<!-- AG MAP-->
@@ -1500,7 +1548,7 @@ function handlePointerEnter(event, company) {
 					:rx="store.mapData.selectedMapData.cityRadius"
 					:ry="store.mapData.selectedMapData.cityRadius"
 					:fill="'url(#city_' + String(city.size) + ')'"
-					:class="[{ selectableCity: store.context.citiesToHighlight.includes(city.territory) }, { redCity: store.context.citiesToHighlightRed.includes(city.territory) }]"
+					:class="[{ 'city-grow': city.isGrown }, { selectableCity: store.context.citiesToHighlight.includes(city.territory) }, { redCity: store.context.citiesToHighlightRed.includes(city.territory) }]"
 					:style="{
 						'stroke-width': getCityStrokeWidth(city),
 					}"
@@ -1572,12 +1620,12 @@ function handlePointerEnter(event, company) {
 		</svg>
 		<button class="actionsLineButton" @click="store.topMenuViews.showTerrOutline = !store.topMenuViews.showTerrOutline">
 			THIS SHOULD NEVER BE USED?
-			<span v-if="store.topMenuViews.showTerrOutline">Hide Territory Outline</span>
-			<span v-else>Show Territory Outline</span>
+			<span v-if="store.topMenuViews.showTerrOutline">{{ $t('map.hideOutline') }}</span>
+			<span v-else>{{ $t('map.showOutline') }}</span>
 		</button>
 		<button v-if="personal.pov >= 0" class="actionsLineButton" @click="localToggleFutureBoardState">
-			<span v-if="store.topMenuViews.showFutureBoardState === 0">Show All Available Companies and My Era Card Provinces</span>
-			<span v-else>Show Game</span>
+			<span v-if="store.topMenuViews.showFutureBoardState === 0">{{ $t('map.showAvailable') }}</span>
+			<span v-else>{{ $t('map.showGame') }}</span>
 		</button>
 	</div>
 </template>
@@ -1685,6 +1733,37 @@ function handlePointerEnter(event, company) {
 .deliveredGoodRect {
 	stroke: white;
 	pointer-events: none;
+	animation: pipPop 0.18s ease-out;
+	transform-box: fill-box;
+	transform-origin: center;
+}
+
+.hullCaoacityRect {
+	transition: fill 0.2s ease, stroke 0.2s ease;
+}
+
+.soldGoodCross {
+	animation: soldGoodFade 0.18s ease-out;
+}
+
+@keyframes pipPop {
+	0% {
+		opacity: 0;
+		transform: scale(0.5);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@keyframes soldGoodFade {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
 }
 
 .availableCompanyRect {
@@ -1849,6 +1928,24 @@ function handlePointerEnter(event, company) {
 	/* Ensures the scaling happens from the center of the ellipse */
 	transform-origin: center;
 	transform-box: fill-box;
+}
+
+.city-grow {
+	animation: cityGrowPulse 0.3s ease-out;
+	transform-origin: center;
+	transform-box: fill-box;
+}
+
+@keyframes cityGrowPulse {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.18);
+	}
+	100% {
+		transform: scale(1);
+	}
 }
 
 @keyframes plop {

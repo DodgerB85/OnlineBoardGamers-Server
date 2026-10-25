@@ -28,6 +28,7 @@ import Lobby.sharedFunctions.constants as rf
 # from django.http import HttpResponseRedirect
 from Lobby.models import Game, Profile, User
 from Lobby.sharedFunctions.hotStreaks import get_turn_nudge_message
+from Lobby.sharedFunctions.sharedRefs import DISCORD, SLACK, SR_valid_webhook_url
 
 # Website Bots / AI / Shadow
 USERNAMES_NOT_TO_NOTIFY = [
@@ -1737,6 +1738,9 @@ def SN_sendWebhooks(profile, messageText, urlText, urlRaw):
             w_url = webhookData[1]
             w_id = webhookData[2]
 
+            if w_type in (DISCORD, SLACK) and not SR_valid_webhook_url(w_type, w_url):
+                continue
+
             try:
                 ## Discord
                 # if w_type == "DC":
@@ -1782,13 +1786,13 @@ def SN_sendDiscordDM(discordID, message_text, urlText, urlRaw):
     headers = {"Authorization": f"Bot {bot_token}", "Content-Type": "application/json"}
 
     # 2. OPEN DM CHANNEL
-    channel_resp = requests.post("https://discord.com/api/v10/users/@me/channels", json={"recipient_id": discordID}, headers=headers)
+    channel_resp = requests.post("https://discord.com/api/v10/users/@me/channels", json={"recipient_id": discordID}, headers=headers, timeout=10)
 
     if channel_resp.status_code == 200:
         channel_id = channel_resp.json()["id"]
 
         # 3. SEND THE MESSAGE
-        requests.post(f"https://discord.com/api/v10/channels/{channel_id}/messages", json={"content": complete_message}, headers=headers)
+        requests.post(f"https://discord.com/api/v10/channels/{channel_id}/messages", json={"content": complete_message}, headers=headers, timeout=10)
     else:
         SN_sendAdminErrorMessage(f"Discord DM failed for id: ({discordID}): {channel_resp.text}")
 
@@ -1812,6 +1816,7 @@ def SN_sendAdminErrorMessage(message, webhook_key="WEBHOOK_ADMIN_ERROR_MSG"):
         response = requests.post(
             f"https://discord.com/api/webhooks/{config(webhook_key)}",
             data={"content": message},
+            timeout=5,
         )
         return response.ok
     except Exception as e:

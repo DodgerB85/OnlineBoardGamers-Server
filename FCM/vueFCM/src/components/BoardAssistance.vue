@@ -257,24 +257,29 @@ function buildProduction(playerIndex, player) {
 		const goods = foodSumGoods(productionArr)
 
 		const chips = []
+		const moreDrinks = plyr.hasMilestone(playerIndex, rf.FIRST_ERRAND_BOY) || plyr.hasMilestone(playerIndex, rf.FIRST_CART_OPERATOR_USED)
+		const moreRange = plyr.hasMilestone(playerIndex, rf.FIRST_CART_OPERATOR)
 		if (numErrand > 0) {
 			let label = "E"
-			if (plyr.hasMilestone(playerIndex, rf.FIRST_ERRAND_BOY)) label += " *"
+			if (plyr.hasMilestone(playerIndex, rf.FIRST_ERRAND_BOY)) label += "+"
 			chips.push({ count: numErrand + "x", label: " " + label + " ", cls: "compactAid " + rf.EMPLOYEES_STR[rf.ERRAND_BOY].type })
 		}
 		if (numCart > 0) {
 			let label2 = "C"
-			if (plyr.hasMilestone(playerIndex, rf.FIRST_CART_OPERATOR)) label2 += " *"
+			if (moreDrinks) label2 += "+"
+			if (moreRange) label2 += "*"
 			chips.push({ count: numCart + "x", label: " " + label2 + " ", cls: "compactAid " + rf.EMPLOYEES_STR[rf.CART_OPERATOR].type })
 		}
 		if (numTruck > 0) {
 			let label3 = "T"
-			if (plyr.hasMilestone(playerIndex, rf.FIRST_CART_OPERATOR)) label3 += " *"
+			if (moreDrinks) label3 += "+"
+			if (moreRange) label3 += "*"
 			chips.push({ count: numTruck + "x", label: " " + label3 + " ", cls: "compactAid " + rf.EMPLOYEES_STR[rf.TRUCK_DRIVER].type })
 		}
 		if (numZeppelin > 0) {
 			let label4 = "Z"
-			if (plyr.hasMilestone(playerIndex, rf.FIRST_CART_OPERATOR)) label4 += " *"
+			if (moreDrinks) label4 += "+"
+			if (moreRange) label4 += "*"
 			chips.push({ count: "&nbsp;", label: " " + label4 + " ", cls: "compactAid " + rf.EMPLOYEES_STR[rf.ZEPPELIN_PILOT].type })
 		}
 		if (numKitchen > 0) {
@@ -288,7 +293,7 @@ function buildProduction(playerIndex, player) {
 			if (numBaristaTrainee > 0) nsmChips.push({ count: numBaristaTrainee + "x", label: "", good: rf.COFFEE, cls: "marketerAidFood" })
 			if (numErrand > 0) {
 				let label = "E"
-				if (plyr.hasMilestone(playerIndex, rf.FIRST_ERRAND_BOY)) label += " *"
+				if (plyr.hasMilestone(playerIndex, rf.FIRST_ERRAND_BOY)) label += "+"
 				nsmChips.push({ count: numErrand + "x", label: " " + label + " ", cls: "compactAid " + rf.EMPLOYEES_STR[rf.ERRAND_BOY].type })
 			}
 			if (numKitchen > 0) nsmChips.push({ count: numKitchen + "x", label: " K ", cls: "compactAid " + rf.EMPLOYEES_STR[rf.KITCHEN_TRAINEE].type })

@@ -2,7 +2,10 @@
   "row": {
     "bidding": {
       "position": "#{{position}}",
-      "placeBid": "Bid {{points}} VP"
+      "placeBid": "Bid {{points}} VP",
+      "title": "Bidding for turn order — bid VPs (the higher the bid, the earlier you play; a bid costs its value in VP)",
+      "bid": "Bid",
+      "waiting": "Waiting for the other players to bid…"
     },
     "buildingsDialog": "Available Buildings",
     "objectivesDialog": "Objectives and Tiles",
@@ -22,7 +25,16 @@
     "totalBreedingValue": "Total breeding value",
     "cattleMarket": {
       "select": "Pick a single cattle card or a pair of cattle cards and click confirm.<br/>You can repeat this action as long as you have enough dollars and cowboys.",
-      "buy": "Buy cattle cards"
+      "buy": "Buy cattle cards",
+      "takeThree": "Take a breeding value 3 card",
+      "selectToBuy": "Select card(s) to buy",
+      "notEnough": "Not enough dollars or cowboys to buy cattle",
+      "drawTwoHint": "Click the draw pile to draw 2 cattle cards for 1 cowboy ({cowboys} left)",
+      "confirmBuy": "Buy",
+      "drawTwoTitle": "Draw 2 cattle cards for 1 cowboy",
+      "drawPileTitle": "Draw pile ({count}) — cattle cards still to be turned face up into the market",
+      "drawTwo": "Draw 2",
+      "cowboyCost": "1 cowboy"
     },
     "buyCattleDialog": "Buy cattle cards",
     "computerExplanation": "I'm a computer using <a href=\"https://boardgamegeek.com/filepage/151608/garth-specialized-automa-row-solo-play\" target=\"_new\">Garth solo variant</a> rules.",
@@ -559,7 +571,92 @@
       "TOWN_NOT_ACCESSIBLE": "This town is not accessible.",
       "INVALID_CATTLE_TYPE": "This cattle card type is not valid for this action.",
       "CANNOT_FORCE_END_TURN": "The players turn cannot be forcibly ended while the current action is not yet completed.",
-      "NOT_ENOUGH_CARDS": "There aren't enough cards to draw."
+      "NOT_ENOUGH_CARDS": "There aren't enough cards to draw.",
+      "GAME_NOT_ENDED": "The game has not ended yet.",
+      "HAZARD_MUST_BE_OF_TYPE": "This hazard is not of the required type.",
+      "HAZARD_NOT_ON_TRAIL": "This hazard is not on the trail.",
+      "JOB_MARKET_CLOSED": "The job market is closed for this action.",
+      "LOCATION_EMPTY": "There is nothing at this location to interact with.",
+      "LOCATION_NOT_EMPTY": "This location is not empty.",
+      "MUST_MOVE_AT_LEAST_STEPS": "You must move at least the given number of steps.",
+      "NOT_PAIR": "You must select a pair of cattle cards.",
+      "NOT_AT_LOCATION": "You are not at this location.",
+      "NOT_AT_STATION": "You are not at this station.",
+      "REPLACEMENT_BUILDING_MUST_BE_PLAYER_BUILDING": "You can only replace one of your own buildings.",
+      "STATION_NOT_UPGRADED_BY_PLAYER": "You have not upgraded this station.",
+      "STATION_NOT_ON_TRACK": "This station is not on the track.",
+      "BID_INVALID_POSITION": "This bid is not valid for this position.",
+      "NOT_CURRENT_PLAYER": "It is not your turn.",
+      "NO_TILES_LEFT": "There are no tiles left.",
+      "CANNOT_UPGRADE_SIMMENTAL": "You cannot upgrade this Simmental card.",
+      "STATION_MUST_BE_DIFFERENT": "You must choose a different station.",
+      "NO_AUTOMA_STATE": "There is no automa state for this player.",
+      "NOT_IMPLEMENTED": "This action is not implemented yet."
+    },
+    "status": {
+      "garthThinking": "Garth is thinking…"
+    },
+    "actionArea": {
+      "moveStepsLeft": "Move — click a highlighted spot ({steps} steps left; yellow = next step, cyan = further)",
+      "moveAtMost": "Move — click a highlighted spot (at most {limit} steps)",
+      "hireWorker": "Hire worker",
+      "placeBuildingHint": "Place building — choose a spot, then place a building. Here are your available buildings.",
+      "placeBranchletHint": "Rails to the North — click a highlighted town on the strip",
+      "clickTown": "Click a town",
+      "clickWorker": "Click a worker on your player board",
+      "clickCardToDiscard": "Click a card on your player table to discard it",
+      "cardActionsHint": "Card actions — select, then click a card on your player table",
+      "otherActions": "Other actions"
+    },
+    "buildingInfo": {
+      "label": "{building} — craftsmen: {craftsmen}; {hand}; points: {points}",
+      "handNone": "no hand limit",
+      "handGreen": "green hand",
+      "handBlack": "black hand",
+      "handBoth": "green or black hand"
+    },
+    "debug": {
+      "title": "Debug",
+      "showGameData": "Show game data",
+      "current": "current:",
+      "status": "status:",
+      "actions": "actions:"
+    },
+    "ended": {
+      "title": "Game over",
+      "total": "Total",
+      "breakdown": "Breakdown",
+      "tie": "Tie between {players}"
+    },
+    "history": {
+      "empty": "No actions yet",
+      "undo": "Undo",
+      "endTurn": "End turn",
+      "skip": "Skip",
+      "resign": "Resign"
+    },
+    "map": {
+      "removeHazard": "Remove hazard",
+      "tradeWithTribe": "Trade with tribe",
+      "placeBuilding": "Place building {building}",
+      "useBuilding": "Use {building} building",
+      "moveHere": "Move here ({cost}$)",
+      "moveHereWithFees": "Move here ({cost}$; {fees})",
+      "playerFee": "{fee}$ to {player}",
+      "deliveryOption": "Certificates: {certificates} → ${payout}",
+      "stayHere": "Stay Here"
+    },
+    "playerTable": {
+      "handValue": "hand value {value}",
+      "certs": "certs {temp}/{total}",
+      "engine": "engine {space}",
+      "drawPileTitle": "Draw pile ({count}) — click to inspect",
+      "discardPileTitle": "Discard pile ({count}) — click to inspect",
+      "jobMarketToken": "Job market token",
+      "hazardTitle": "{type} ({hand}) {points} pts",
+      "teepeeTitle": "{teepee} teepee",
+      "drawPileValueOrder": "Draw pile (shown in value order)",
+      "discardPile": "Discard pile"
     }
   },
   "row2": {

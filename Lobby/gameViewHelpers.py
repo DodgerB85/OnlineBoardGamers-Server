@@ -10,6 +10,8 @@ from django.utils.translation import gettext
 import Lobby.sharedFunctions.constants as rf
 from Lobby.models import Game, Profile
 from Lobby.sharedFunctions.db_mutex import db_mutex
+from Lobby.sharedFunctions.permissions import is_game_admin
+from Lobby.sharedFunctions.rateLimit import is_rate_limited
 
 
 def build_show_game_data(
@@ -20,7 +22,6 @@ def build_show_game_data(
     default_zoom=0,
     extra_select_related=None,
     settings_debug_key=None,
-    super_users=("BotKickStarter",),
     clear_chat_notification=True,
 ):
     """
@@ -113,7 +114,7 @@ def build_show_game_data(
     is_in_all = user_id in all_player_ids
     is_missing = user_gp.is_missing if user_gp else False
     involvedPlayer = is_in_all and not is_missing
-    if username in super_users:
+    if is_game_admin(request.user):
         involvedPlayer = True
 
     chatData = currentGame.chatData
@@ -171,7 +172,9 @@ def build_show_game_data(
 
     # --- Involved player ---
     pov = presenter.seatPosition(username)
-    if username in super_users:
+    # A game admin observing (no seat, or a missing one) views as -1; a seated
+    # admin keeps their own seat so they can still play.
+    if is_game_admin(request.user) and (pov < 0 or is_missing):
         pov = -1
 
     secondsToNextKickout = presenter.getSecondsToNextKickout()
@@ -306,6 +309,13 @@ def shared_bug_entry(request, game_code, extra_info_fn=None):
     jsonData = json.loads(request.body)
     gameID = jsonData["gameID"]
 
+    if is_rate_limited(f"bugEntry:{request.user.id}", 5, 600):
+        return JsonResponse({"error": gettext("Too many bug reports. Please try again later.")}, status=429)
+
+    description = jsonData.get("description", "")
+    if len(description) > 5000:
+        return JsonResponse({"error": gettext("Bug description is too long.")}, status=400)
+
     try:
         currentGame = Game.objects.get(id=gameID, gameCode=game_code)
     except Game.DoesNotExist:
@@ -319,7 +329,7 @@ def shared_bug_entry(request, game_code, extra_info_fn=None):
         game_code,
         gameID,
         jsonData["gameData"],
-        jsonData["description"],
+        description,
         currentGame.rewindData,
         extra_info,
     )

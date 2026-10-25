@@ -107,16 +107,13 @@ class Profile(models.Model):
     webhooks = models.TextField(blank=True, null=True)
     discord_id = models.CharField(max_length=100, blank=True, null=True)
 
-    preferredRestaurantColour = models.SmallIntegerField(null=False, blank=False, default=-1)
-    highContrastBoardItems = models.BooleanField(default=False)
+    preferredFCMoptions = models.CharField(max_length=30, blank=True)
 
     preferredHCcolour = models.SmallIntegerField(null=False, blank=False, default=-1)
 
-    preferredBusColour = models.SmallIntegerField(null=False, blank=False, default=-1)
-    preferredBusBoard = models.SmallIntegerField(null=False, blank=False, default=0)
+    preferredBUSoptions = models.CharField(max_length=30, blank=True)
 
-    preferredTGZcolour = models.SmallIntegerField(null=False, blank=False, default=-1)
-    TGZminimalText = models.BooleanField(blank=False, default=False)
+    preferredTGZoptions = models.CharField(max_length=30, blank=True)
 
     preferredCNScolour = models.PositiveSmallIntegerField(null=True, blank=True, default=None)
 
@@ -134,6 +131,9 @@ class Profile(models.Model):
 
     liveNotification = models.SmallIntegerField(null=True, blank=False, default=1)
     email_confirmed = models.BooleanField(default=False)
+    # Explicit staff rights; usernames are not permission checks.
+    is_site_admin = models.BooleanField(default=False)
+    is_game_admin = models.BooleanField(default=False)
     showAssistance = models.BooleanField(default=True)
 
     profileLanguage = models.CharField(max_length=10, choices=settings.LANGUAGES, default=settings.LANGUAGE_CODE)

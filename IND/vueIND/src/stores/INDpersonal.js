@@ -12,6 +12,7 @@
 
 
 //import { ref } from 'vue'
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import * as rf from '../js/INDreference.js'
 import * as IO from '../backend/IND_IO.js'
@@ -32,6 +33,7 @@ export const usePersonalStore = defineStore('personal', () => {
 
   var votedToDelete = false
   var votedToExclude = false
+  const preferReducedMotion = ref(false)
 
   function canPlay() {
     if (this.haltPlay) return false
@@ -97,6 +99,7 @@ export const usePersonalStore = defineStore('personal', () => {
     latestUpdate,
     votedToDelete,
     votedToExclude,
+    preferReducedMotion,
     pov,
     notes
   }

@@ -1,4 +1,6 @@
 {% load static %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 {% if settingsDebug %}
     <script type="module" src="http://localhost:3042/static/@vite/client"></script>
     <script type="module" src="http://localhost:3042/static/main.js"></script>
@@ -20,6 +22,7 @@
 var initData = {};
   
 ///////////////////////
+initData.locale = "{{ LANGUAGE_CODE|default:'en-gb' }}";
 initData.showMapOnly = true;
 initData.startingMap = {{ startingMap|safe }};
 initData.gameID = {{ gameID }};

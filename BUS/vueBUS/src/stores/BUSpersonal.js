@@ -17,6 +17,7 @@ export const usePersonalStore = defineStore('personal', () => {
   //const superuser = ref(false)
   //const preferredColour = 1
   const selectedBoard = ref(rf.BOARD_20A_CAPSTONE)
+  const prefersHighContrast = ref(false)
   var WSstatus = "WSconnecting" // Use for light colour
   var votedToDelete = false
 
@@ -89,6 +90,7 @@ export const usePersonalStore = defineStore('personal', () => {
     canEndTurn,
     WSstatus,
     selectedBoard,
+    prefersHighContrast,
     votedToDelete,
   }
 })

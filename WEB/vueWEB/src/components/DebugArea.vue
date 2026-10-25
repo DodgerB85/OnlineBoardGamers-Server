@@ -26,7 +26,7 @@ const store = useModelStore()
 <template>
 	<body>
 		<div class="optionsDiv">
-      <button class="actionsLineButton" @click="map.prettyPrint()">Print Map</button>
+      <button class="actionsLineButton" @click="map.prettyPrint()">{{ $t("debug.printMap") }}</button>
 		</div>
     <br/>
     {{ store.historyHighlights }}

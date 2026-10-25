@@ -27,11 +27,11 @@ function getFullHistoryEntry() {
 </script>
 
 <template>
-	<span class="errorText">Other players have caused this action to fail</span>
+	<span class="errorText">{{ $t("failedStack.failed") }}</span>
 	<div class="failedEntryDiv">
 		<HistoryEntry :entry="getFullHistoryEntry()" />
 	</div>
-	<span class="errorText">You can reset your turn or continue from just before this action</span>
+	<span class="errorText">{{ $t("failedStack.resetOrContinue") }}</span>
 	<br />
 </template>
 

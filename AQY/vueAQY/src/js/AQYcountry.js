@@ -410,6 +410,16 @@ export function removeExplorerFromHexID(hex_id) {
 	}
 }
 
+export function grassCityWater(cityHex) {
+	const store = useModelStore()
+	const centreID = map.getIDfromHex(cityHex)
+	const ids = [centreID, ...store.mapNeighbours[centreID]]
+	for (const id of ids) {
+		const hexData = map.getHexDataFromID(id)
+		if (hexData.terrainType === rf.TERR_WATER) hexData.terrainType = rf.TERR_GRASS
+	}
+}
+
 export function hexPolluted(hexId) {
 	const store = useModelStore()
 	/*let pollutions = store.mapData.pollution
@@ -1221,7 +1231,7 @@ export function getMinePlacementZone(playerIndex, res, zoc = [], checkAny = fals
 	})*/
 	if (checkAny) {
 		for (const tile of zoc) {
-			if (tile.terrainType === rf.TERR_MOUNTAINS && !hexOccupied(tile.id) && !hexPolluted(tile.id) && (tile.mountainType === rf.MOUNTAIN_NONE || tile.mountainType !== (res === rf.RES_STONE ? rf.MOUNTAIN_STONE : rf.MOUNTAIN_GOLD))) {
+			if (tile.terrainType === rf.TERR_MOUNTAINS && !hexOccupied(tile.id) && !hexPolluted(tile.id) && (tile.mountainType === rf.MOUNTAIN_NONE || tile.mountainType === (res === rf.RES_STONE ? rf.MOUNTAIN_STONE : rf.MOUNTAIN_GOLD))) {
 				return true
 			}
 		}

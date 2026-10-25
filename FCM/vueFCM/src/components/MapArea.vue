@@ -8,10 +8,25 @@ import * as rules from "../js/FCMrules.js"
 import { useModelStore } from "../stores/FCMstore.js"
 import { usePersonalStore } from "../stores/FCMpersonal.js"
 import { useDinnerAnimationStore } from "../stores/dinnerAnimation.js"
+import i18n from "../i18n"
 
 const store = useModelStore()
 const personal = usePersonalStore()
 const dinner = useDinnerAnimationStore()
+
+const GOOD_LABEL_KEYS = {
+	[rf.LEMONADE]: "items.lemonade",
+	[rf.COKE]: "items.coke",
+	[rf.BEER]: "items.beer",
+	[rf.PIZZA]: "items.pizza",
+	[rf.BURGER]: "items.burger",
+	[rf.COFFEE]: "items.coffee",
+	[rf.NOODLES]: "items.noodles",
+	[rf.SUSHI]: "items.sushi",
+	[rf.KIMCHI]: "items.kimchi",
+	[rf.DUMPLING]: "items.dumplings",
+	[rf.FRIED_CHICKEN]: "items.friedChicken",
+}
 
 import { computed } from "vue"
 import MapHighlight from "./MapHighlight.vue"
@@ -22,8 +37,9 @@ function getTilePos(index) {
 	const cols = map.getUsedRowCol()[1].length
 	const row = Math.floor(index / cols)
 	const col = index % cols
-	// Shift the board when planes/freeways are off the edge
-	const xOffset = model.isItemOnLeftOfBoard() ? 0.5 : 0
+	// Shift the board when planes/freeways are off the edge or a new tile is
+	// being placed (left margin for its hotspots / ghost tile)
+	const xOffset = model.leftBoardMargin() / 5
 	const yOffset = model.isItemOnTopOfBoard() ? 0.5 : 0
 	return [(yOffset + row) * store.refSize, (xOffset + col) * store.refSize]
 }
@@ -102,6 +118,10 @@ const campaignDisplays = computed(() => {
 		const playerIndex = model.findPlayerForCampaign(c.number)
 		const player = playerIndex === -1 ? -1 : store.players[playerIndex]
 		const secondGood = player !== -1 && player.additionalMarketedGood.length > 0 && player.additionalMarketedGood[0] == c.number ? player.additionalMarketedGood[1] : -1
+		const goodLabel = i18n.global.t(GOOD_LABEL_KEYS[c.good] ?? "items.none")
+		const durationLabel = c.duration === 9 ? i18n.global.t("history.eternally") : i18n.global.t("history.forTurns", c.duration)
+		const owner = player === -1 ? "" : player.displayName + " — "
+		const title = owner + i18n.global.t("items.campaignTooltip", { num: c.number, good: goodLabel, duration: durationLabel })
 
 		let imgName = "campaign_" + c.number
 		if (secondGood !== -1 && campaignData.type === rf.AIRPLANE) imgName += "a"
@@ -125,6 +145,7 @@ const campaignDisplays = computed(() => {
 
 		res.push({
 			src: view.getImage(imgName),
+			title,
 			x: adjustedX,
 			y: adjustedY,
 			width: campaignData.width * sqSize,
@@ -309,7 +330,7 @@ const roadDisplays = computed(() => {
 		if (road.variety === 1) w = 4 * sqSize
 
 		// Off-board items shift the whole board
-		const xOffset = model.isItemOnLeftOfBoard() ? 2.5 : 0
+		const xOffset = model.leftBoardMargin()
 		const yOffset = model.isItemOnTopOfBoard() ? 2.5 : 0
 		let adjustedX = (xOffset + x) * sqSize
 		let adjustedY = (yOffset + y) * sqSize
@@ -344,7 +365,7 @@ const roadworkDisplays = computed(() => {
 	const rwIdxs = map.getRoadworkIndexes()
 	if (rwIdxs.length === 0) return []
 	const sqSize = store.refSize / 5
-	const xOffset = model.isItemOnLeftOfBoard() ? 2.5 : 0
+	const xOffset = model.leftBoardMargin()
 	const yOffset = model.isItemOnTopOfBoard() ? 2.5 : 0
 	const res = []
 	for (const rwIdx of rwIdxs) {
@@ -369,7 +390,7 @@ const freewayDisplays = computed(() => {
 
 		const [freewayXcoord, freewayYcoord] = boardOffsetPos(fw.index)
 
-		const xOffset = model.isItemOnLeftOfBoard() ? 2.5 : 0
+		const xOffset = model.leftBoardMargin()
 		const yOffset = model.isItemOnTopOfBoard() ? 2.5 : 0
 		let adjustedX = (xOffset + freewayXcoord) * sqSize
 		let adjustedY = (yOffset + freewayYcoord) * sqSize
@@ -455,7 +476,7 @@ const parkDisplays = computed(() => {
 		if (park.variety === 0) w = 4 * sqSize
 
 		// Off-board items shift the whole board
-		const xOffset = model.isItemOnLeftOfBoard() ? 2.5 : 0
+		const xOffset = model.leftBoardMargin()
 		const yOffset = model.isItemOnTopOfBoard() ? 2.5 : 0
 		let adjustedX = (xOffset + x) * sqSize
 		let adjustedY = (yOffset + y) * sqSize
@@ -711,6 +732,27 @@ function isCurrentUrbanPlanningTile(tileData) {
 function tileRotationClass(tileData) {
 	return "r" + (isCurrentUrbanPlanningTile(tileData) ? store.context.rotation : tileData[1])
 }
+
+// A placement tool is active: clicking a non-highlighted square gets a short
+// inline reason instead of silently doing nothing.
+function isPlacementMode() {
+	if (!personal.canPlay()) return false
+	const phase = store.gameflow.phase
+	const subphase = store.gameflow.subphase
+	if (phase === rf.PHASE_SETUP_RESTAURANT1 || phase === rf.PHASE_SETUP_RESTAURANT2) return true
+	if (phase === rf.PHASE_PIZZA_BOMB || phase === rf.PHASE_COFFE_SHOP_MS) return true
+	if (subphase === rf.SUBPHASE_MARKETING && store.context.marketer > -1 && (store.context.campaign > -1 || store.context.hawkerRouteActive)) return true
+	if (store.context.restaurantMilestone && store.context.campaign > -1) return true
+	if (subphase === rf.SUBPHASE_PRODUCE && [rf.CART_OPERATOR, rf.TRUCK_DRIVER, rf.ZEPPELIN_PILOT].includes(store.context.producer)) return true
+	if ([rf.SUBPHASE_HOUSES, rf.SUBPHASE_COFFEE_SHOPS_FROM_TRAIN, rf.SUBPHASE_LOBBYISTS, rf.SUBPHASE_NEW_RESTAURANTS].includes(subphase)) return true
+	return store.context.action === rf.ACT_PLACE_FREEWAY
+}
+
+function clickedMap(event) {
+	if (!isPlacementMode()) return
+	if (event.target instanceof Element && event.target.closest(".higlightSquareToClick, .tileToClick")) return
+	store.gameMessages.actionError = i18n.global.t("actionArea.invalidPlacement")
+}
 </script>
 
 <template>
@@ -718,8 +760,9 @@ function tileRotationClass(tileData) {
 		<!-- DISPLAY MAP TILES -->
 		<div
 			id="mapTilesDiv"
+			@click="clickedMap"
 			:style="{
-				width: (map.getUsedRowCol()[1].length + (model.isItemOnLeftOfBoard() ? 0.5 : 0) + (model.isItemOnRightOfBoard() ? 0.5 : 0)) * store.refSize + 'px',
+				width: (map.getUsedRowCol()[1].length + model.leftBoardMargin() / 5 + (model.isItemOnRightOfBoard() ? 0.5 : 0)) * store.refSize + 'px',
 				height: (map.getUsedRowCol()[0].length + (model.isItemOnTopOfBoard() ? 0.5 : 0) + (model.isItemOnBottomOfBoard() ? 0.5 : 0)) * store.refSize + 'px',
 			}">
 		<template v-for="(tileData, index) in store.mapData.displayTiles" :key="index">
@@ -775,7 +818,7 @@ function tileRotationClass(tileData) {
 
 			<!-- Display marketing campaigns -->
 			<template v-for="(camp, campIdx) in campaignDisplays" :key="'camp' + campIdx">
-				<img class="boardCampaignImg" :src="camp.src" :class="camp.rotatedClass" :style="{ left: camp.x + 'px', top: camp.y + 'px', width: camp.width + 'px' }" :alt="campIdx" />
+				<img class="boardCampaignImg" :src="camp.src" :class="camp.rotatedClass" :style="{ left: camp.x + 'px', top: camp.y + 'px', width: camp.width + 'px' }" :alt="camp.title" :title="camp.title" />
 				<img v-for="(token, tIdx) in camp.tokens" :key="'tok' + campIdx + '-' + tIdx" class="boardTokenImg" :class="{ seeThroughBoardItem: camp.transparent }" :style="tokenStyle(token)" :src="view.giveBoardFoodTokenImage(token.good)" :alt="token.good" />
 				<span class="campaignDurationSpan" :class="{ r1: camp.duration === 9, inverted: camp.hasSecondGood }" :style="{ left: camp.numX + 'px', top: camp.numY + 'px' }">{{ camp.duration === 9 ? "8" : camp.duration }}</span>
 			</template>
@@ -887,6 +930,27 @@ function tileRotationClass(tileData) {
 	position: absolute;
 }
 
+/* New board items fade in once; keeps placement feedback subtle and never
+   fights the rotation transforms already applied to these images. */
+.boardCampaignImg,
+.boardAntennaImg,
+.boardHouseImg,
+.boardApartmentImg,
+.boardGardenImg,
+.boardCoffeeShopImg,
+.boardRoadImg,
+.boardParkImg,
+.boardFreewayImg,
+.restoImg {
+	animation: placeIn 0.3s ease-out;
+}
+
+@keyframes placeIn {
+	from {
+		opacity: 0;
+	}
+}
+
 .restoImg {
 	width: 100%;
 	height: 100%;
@@ -966,6 +1030,11 @@ function tileRotationClass(tileData) {
 	position: absolute;
 	z-index: 12;
 	color: #fff;
+	text-shadow:
+		-1px -1px 0 #000,
+		1px -1px 0 #000,
+		-1px 1px 0 #000,
+		1px 1px 0 #000;
 	pointer-events: none;
 	font-family: "Times New Roman", Times, serif;
 }
@@ -979,6 +1048,7 @@ function tileRotationClass(tileData) {
 	color: #fff;
 	font-size: 20px;
 	z-index: 12;
+	pointer-events: none;
 }
 
 .campaignDurationSpan.inverted {

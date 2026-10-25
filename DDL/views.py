@@ -25,6 +25,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
+from Lobby.sharedFunctions.permissions import is_game_admin
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -34,6 +35,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 from . import DDLconstants as rfDDL
 from .common import create_ddl_game
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 DDL_DB_LOCK_NAME = "lockDDLgame_"
 
@@ -72,8 +74,15 @@ def showDDLgame(request, game_id=1, spoilerFree=False, replayStep=1):
     presenter = cast("DDLpresenter", currentGame.presenter())
 
     returnData = {**result["base_data"]}
-    # The DDL client reads the whole model as plain JSON out of gameData.
-    returnData["gameData"] = returnData["gameData"] if returnData["gameData"] else "{}"
+    # gameData is a gzip+base64 string produced by the client.
+    returnData["gameData"] = returnData["gameData"] if returnData["gameData"] else ""
+    returnData["gameCreationTimestamp"] = int(currentGame.created) / 1000 if currentGame.created else 0
+    returnData["setupSeed"] = currentGame.playerOrderSeed
+    returnData["maxPlayers"] = currentGame.maxPlayers
+    returnData["displayNames"] = "[]"
+    loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    if rf.SO_TRAINING_GAME in loadedStartingOptions and result.get("user_gp") and result["user_gp"].notes:
+        returnData["displayNames"] = result["user_gp"].notes
 
     currentPlayersArr = []
     if currentGame.phase in rfDDL.MAIN_PHASES:
@@ -138,6 +147,12 @@ def _processDDLturn(request):
         raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("DDLpresenter", currentGame.presenter())
+
+    if jsonData["action"] == "saveBid":
+        return saveDDLBid(request, currentGame, jsonData)
+
+    elif jsonData["action"] == "getBids":
+        return getDDLBids(currentGame, jsonData)
 
     if jsonData["action"] == "saveGame":
         return performSaveDDLGame(request, currentGame, jsonData)
@@ -241,6 +256,63 @@ def _processDDLturn(request):
     return HttpResponse(status=204)  # No Content
 
 
+def saveDDLBid(request, currentGame, jsonData):
+    """Store one player's sealed starting-auction bid outside gameData."""
+    try:
+        starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    except json.JSONDecodeError:
+        starting_options = []
+    if rfDDL.SO_AUCTION not in starting_options:
+        return JsonResponse({"ok": False, "error": gettext("This game has no starting auction.")}, safe=False)
+    if currentGame.phase != rfDDL.PHASE_SETUP:
+        return JsonResponse({"ok": False, "error": gettext("The setup phase is over.")}, safe=False)
+
+    gp = currentGame.players.select_related("player").filter(player=request.user, is_kicked=False, is_missing=False).first()
+    if gp is None:
+        return JsonResponse({"ok": False, "error": gettext("You are not an active player in this game.")}, safe=False)
+
+    round_number = 2 if int(jsonData.get("round", 1)) == 2 else 1
+    if round_number == 2:
+        tied_players = jsonData.get("tiedPlayers") or []
+        if request.user.username not in tied_players:
+            return JsonResponse({"ok": False, "error": gettext("You are not in this tie-break.")}, safe=False)
+
+    bid = max(0, min(999, int(jsonData.get("bid", 0))))
+    existing = gp.moveDataJSON if isinstance(gp.moveDataJSON, dict) else {}
+    bids = existing.get("ddlBids") if isinstance(existing.get("ddlBids"), dict) else {}
+    if "ddlBid" in existing and existing.get("round") is not None:
+        bids[str(existing["round"])] = int(existing["ddlBid"])
+    bids[str(round_number)] = bid
+    gp.moveDataJSON = {"ddlBids": bids}
+    gp.save(update_fields=["moveDataJSON"])
+    return JsonResponse({"ok": True}, safe=False)
+
+
+def getDDLBids(currentGame, jsonData):
+    """Reveal bids only when every required player has submitted one."""
+    round_number = 2 if int(jsonData.get("round", 1)) == 2 else 1
+    active_gps = list(currentGame.players.select_related("player").filter(is_kicked=False, is_missing=False))
+    tied_players = jsonData.get("tiedPlayers") or []
+    if round_number == 2:
+        required = [gp for gp in active_gps if gp.player and gp.player.username in tied_players]
+    else:
+        required = [gp for gp in active_gps if gp.player]
+
+    missing = []
+    bids = {}
+    for gp in required:
+        data = gp.moveDataJSON if isinstance(gp.moveDataJSON, dict) else {}
+        bids_by_round = data.get("ddlBids") if isinstance(data.get("ddlBids"), dict) else {}
+        value = bids_by_round.get(str(round_number))
+        if value is None and data.get("round") == round_number and "ddlBid" in data:
+            value = data["ddlBid"]
+        if value is not None:
+            bids[gp.player.username] = int(value)
+        else:
+            missing.append(gp.player.username)
+    return JsonResponse({"ready": len(missing) == 0, "bids": bids, "missing": missing}, safe=False)
+
+
 def performSaveDDLGame(request, currentGame, jsonData):
     db_latest_update = currentGame.latestUpdate
     latest_update = jsonData.get("latestUpdate", 0)
@@ -257,13 +329,14 @@ def performSaveDDLGame(request, currentGame, jsonData):
         return JsonResponse({"syncError": True}, safe=False)
 
     nameToUse = request.user.username
-    if request.user.username == "BotKickStarter":
+    if is_game_admin(request.user):
         nameToUse = jsonData.get("BKSN", nameToUse)
     check_name = jsonData.get("checkName", "")
     if check_name:
         nameToUse = check_name
 
     currentGame.gameData = jsonData["gameData"]
+    previous_phase = currentGame.phase
     currentGame.turn = jsonData["turn"]
     currentGame.phase = jsonData["phase"]
 
@@ -280,10 +353,13 @@ def performSaveDDLGame(request, currentGame, jsonData):
     currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
     presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], acting_username=nameToUse, old_latest_update=oldVer)
-    presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
+    presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData.get("allRemainingPlayersInTurnOrder") or jsonData.get("allIsCurrentPlayers") or [])
 
     # SAVE BEFORE NOTIFICATIONS
     currentGame.save()
+
+    if previous_phase == rfDDL.PHASE_SETUP and currentGame.phase == rfDDL.PHASE_MAIN:
+        PwipeAllMoveData(currentGame)
 
     if jsonData.get("status") == "FINISHED":
         presenter.endGame(
@@ -296,7 +372,7 @@ def performSaveDDLGame(request, currentGame, jsonData):
     else:
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         allIsCurrentPlayers = jsonData["allIsCurrentPlayers"]
-        if len(allIsCurrentPlayers) > 0 and rf.SO_TRAINING_GAME not in loadedStartingOptions:
+        if len(allIsCurrentPlayers) > 0 and rf.SO_TRAINING_GAME not in loadedStartingOptions and not jsonData.get("noNotify"):
             playerListToNotify = [p.strip() for p in allIsCurrentPlayers if p.strip() not in {request.user.username, "DdlBot"}]
             if len(playerListToNotify) > 0:
                 presenter.sendYourTurnNotification("DDL", playerListToNotify, currentGame.id, presenter.getGameName(), currentGame, oldVer)
@@ -380,7 +456,7 @@ def _decompressGenericChat(base64_data):
     currentChatData = []
     if base64_data and len(base64_data) > 0:
         compressed_data = base64.b64decode(base64_data)
-        unzipped = gzip.decompress(compressed_data).decode("utf-8")
+        unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
         currentChatData = json.loads(unzipped)
     return currentChatData
 
@@ -430,7 +506,7 @@ def DDLdata(request, dataType=1):
                 user_gp.save()
         return JsonResponse(
             {
-                "gameData": currentGame.gameData if currentGame.gameData else "{}",
+                "gameData": currentGame.gameData if currentGame.gameData else "",
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "finishedGame": currentGame.gameStatus == "FINISHED",
                 "latestUpdate": currentGame.latestUpdate,
@@ -452,7 +528,7 @@ def DDLdata(request, dataType=1):
         return JsonResponse(
             {
                 "latest": False,
-                "gameData": currentGame.gameData if currentGame.gameData else "{}",
+                "gameData": currentGame.gameData if currentGame.gameData else "",
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
                 "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),

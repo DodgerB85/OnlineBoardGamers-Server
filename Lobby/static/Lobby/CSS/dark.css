@@ -17,6 +17,7 @@
     --color-warn-bg: #493b25;
     --color-danger: #ffb4b4;
     --color-danger-bg: #4b2c33;
+    --color-finished: #f0ca83;
 }
 
 .col-game a,
@@ -30,16 +31,21 @@
     border-bottom-color: var(--color-border-strong);
 }
 
-.row09.myMove { background: var(--color-positive-bg); }
+.row09.myMove {
+    --color-muted: var(--color-ink-soft);
+    --color-accent-strong: var(--color-positive);
+    background: #285b35;
+}
 .row09.kickoutRequired1 { background: var(--color-warn-bg); }
 .row09.kickoutRequired2 { background: var(--color-danger-bg); }
+.row09.pendingFinish { background: #24414f; }
+.colour-guide-item.pendingFinish { background: #24414f; }
 
 @media (hover: hover) {
-    .row09.myMove:hover,
-    .row09.kickoutRequired1:hover,
-    .row09.kickoutRequired2:hover {
-        background: var(--color-surface-soft);
-    }
+    .row09.myMove:hover { background: #2c6039; }
+    .row09.kickoutRequired1:hover { background: #59482d; }
+    .row09.kickoutRequired2:hover { background: #613741; }
+    .row09.pendingFinish:hover { background: #2b4a5b; }
 }
 
 .opts-slate, .opts-red, .opts-green, .opts-amber,

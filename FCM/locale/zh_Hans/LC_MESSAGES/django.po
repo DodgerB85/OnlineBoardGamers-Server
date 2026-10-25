@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-16 20:13+0800\n"
+"POT-Creation-Date: 2026-10-23 00:35+0800\n"
 "PO-Revision-Date: 2023-10-07 20:13+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -74,9 +74,9 @@ msgstr "城市规划"
 #: .\FCM\templates\FCM\FCMchinaHelp.html:214
 #: .\FCM\templates\FCM\fanExpansionsHelp.html:39
 #: .\FCM\templates\FCM\fanExpansionsHelp.html:100
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:159
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:184
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:232
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:164
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:189
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:237
 msgid "Overview"
 msgstr "概览"
 
@@ -334,13 +334,13 @@ msgstr ""
 
 #: .\FCM\templates\FCM\FCMchinaHelp.html:258
 #: .\FCM\templates\FCM\FCMhelp.html:104 .\FCM\templates\FCM\coffeeHelp.html:328
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:249
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:254
 msgid "Further Help"
 msgstr "更多帮助"
 
 #: .\FCM\templates\FCM\FCMchinaHelp.html:260
 #: .\FCM\templates\FCM\FCMhelp.html:106 .\FCM\templates\FCM\coffeeHelp.html:330
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:251
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:256
 msgid "For any questions / comments / suggestions, please contact"
 msgstr "如有问题/意见/建议，请联系"
 
@@ -367,12 +367,14 @@ msgid ""
 "target=\"_blank\">here</a> <br /> How to play guide example <a "
 "href=\"https://www.myboardgameguides.com/game-strategy/game-specific-"
 "strategy/food-chain-magnate-strategy-guide/\" target=\"_blank\">here</a>"
-msgstr "Food Chain Magnate 规则见 <a href=\"%(fcm_rules_url)s\">此处</a> <br /> "
-"番茄酱扩展规则见 <a href=\"%(fcm_ketchup_rules_url)s\">此处</a> <br /> 中国扩展规则见 <a "
-"href=\"%(fcm_china_help_url)s\" target=\"_blank\">此处</a> <br /> 玩家扩展规则见 <a "
-"href=\"%(fcm_fan_help_url)s\" target=\"_blank\">此处</a> <br /> 玩法示例见 <a "
-"href=\"https://www.myboardgameguides.com/game-strategy/game-specific-strateg"
-"y/food-chain-magnate-strategy-guide/\" target=\"_blank\">此处</a>"
+msgstr ""
+"Food Chain Magnate 规则见 <a href=\"%(fcm_rules_url)s\">此处</a> <br /> 番茄"
+"酱扩展规则见 <a href=\"%(fcm_ketchup_rules_url)s\">此处</a> <br /> 中国扩展规"
+"则见 <a href=\"%(fcm_china_help_url)s\" target=\"_blank\">此处</a> <br /> 玩"
+"家扩展规则见 <a href=\"%(fcm_fan_help_url)s\" target=\"_blank\">此处</a> "
+"<br /> 玩法示例见 <a href=\"https://www.myboardgameguides.com/game-strategy/"
+"game-specific-strategy/food-chain-magnate-strategy-guide/\" "
+"target=\"_blank\">此处</a>"
 
 #: .\FCM\templates\FCM\FCMhelp.html:33
 msgid "Game Play"
@@ -675,8 +677,10 @@ msgid ""
 "understand the example and the reasons why each route was chosen. <br /> The "
 "Ketchup Expansion rules are available <a "
 "href=\"%(fcm_ketchup_rules_url)s\">here</a>."
-msgstr "找到正确的咖啡路线可能相当棘手！首先请阅读扩展规则的咖啡部分。<br /> 请确保完全理解示例以及选择每条路线的原因。<br /> "
-"番茄酱扩展规则见 <a href=\"%(fcm_ketchup_rules_url)s\">此处</a>。"
+msgstr ""
+"找到正确的咖啡路线可能相当棘手！首先请阅读扩展规则的咖啡部分。<br /> 请确保完"
+"全理解示例以及选择每条路线的原因。<br /> 番茄酱扩展规则见 <a "
+"href=\"%(fcm_ketchup_rules_url)s\">此处</a>。"
 
 #: .\FCM\templates\FCM\coffeeHelp.html:35
 msgid "What goes into finding a valid coffee route?"
@@ -1141,15 +1145,16 @@ msgid ""
 "entire ring road, so a stocked coffee shop next to either half's road can "
 "sell. All other customers count the two tiles as normal map tiles."
 msgstr ""
-"与咖啡模组联动：体育场在比赛日的步行（含沿途买的咖啡）把这两个板块算作同一栋建"
-"筑——在两个板块之间移动永远不算跨板块边界。步行可以绕外环路走完整圈，因此贴着任"
-"意一半环路的有货咖啡店都能卖出。其他顾客仍把这两个板块按普通地图板块计距。"
+"与咖啡模组联动：体育场在比赛日的步行（含沿途买的咖啡）把这两个板块算作同一栋"
+"建筑——在两个板块之间移动永远不算跨板块边界。步行可以绕外环路走完整圈，因此贴"
+"着任意一半环路的有货咖啡店都能卖出。其他顾客仍把这两个板块按普通地图板块计"
+"距。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:154
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:159
 msgid "Labor Market"
 msgstr "劳动力市场"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:160
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:165
 msgid ""
 "Labor Market turns staffing from private engine-building into a shared "
 "contest. Each company has one Temporary Worker whose value rises as rivals "
@@ -1166,12 +1171,12 @@ msgstr ""
 "织：让更多员工上班可以保护人才，却可能招来工会；让员工休假可以控制公司规模，"
 "却会把他们暴露给竞争对手；临时工则提供了以更少人数换取更多行动的第三条路。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:161
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:234
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:166
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:239
 msgid "Rules"
 msgstr "规则"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:163
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:168
 msgid ""
 "Temporary Worker: Every player starts with one on their Beach. At the start "
 "of each turn, its action limit is frozen at 1 plus the number of Temporary "
@@ -1188,7 +1193,7 @@ msgstr ""
 "同一员工。临时工不受夜班经理翻倍、不领工资，并在该玩家工作日后永久移除；未分"
 "配或未使用的行动视为放弃。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:164
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:169
 msgid ""
 "Temporary Worker example: Two Temporary Workers had been removed before the "
 "current turn, so every Temporary Worker used this turn receives 3 actions. "
@@ -1201,7 +1206,7 @@ msgstr ""
 "动。即使你的临时工先被移除，同回合稍后使用临时工的对手也仍然只有相同的3次行"
 "动。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:165
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:170
 msgid ""
 "Temporary campaigns: A Temporary Worker acting as a Marketing Trainee "
 "creates a normal campaign, but no employee card is attached and nothing "
@@ -1210,7 +1215,7 @@ msgstr ""
 "临时广告：临时工模仿营销实习生时建立正常广告，但不会有员工卡附着其上，广告到"
 "期后也不会有员工返回休假区。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:166
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:171
 msgid ""
 "Headhunter: Train one level from a Management Trainee. It is a level-2 "
 "salaried employee. Each working Headhunter may take one legal employee from "
@@ -1225,7 +1230,7 @@ msgstr ""
 "（如有）外，还须向银行一次性支付员工等级乘$10的跳槽薪水；若发薪前解雇，则不支"
 "付跳槽薪水。临时工、猎头、工会组织者和其他不可转移员工不能成为目标。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:167
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:172
 msgid ""
 "Headhunter example: You take a level-4 Senior Vice President from an "
 "opponent's Beach. If you keep it until Payday, you pay its normal $5 salary "
@@ -1236,7 +1241,7 @@ msgstr ""
 "付正常的$5工资，并向银行额外支付一次性$40跳槽薪水，合计$45；若在发薪前将其解"
 "雇，则不必为该员工支付这两项费用。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:168
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:173
 msgid ""
 "Unique employees and salary milestones: A Headhunter cannot take a unique "
 "employee when the hiring player already owns the same unique employee. The "
@@ -1251,7 +1256,7 @@ msgstr ""
 "金额中减免$15。若公司仍无法支付，首个使用培训师里程碑按原破产规则保护全部员"
 "工。跳槽薪水在本次发薪结算后移除，之后不再支付。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:169
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:174
 msgid ""
 "Union Organizer: The game uses one card per player, with inactive cards in "
 "the public supply. After all Working Days, ignore companies with fewer than "
@@ -1262,7 +1267,7 @@ msgstr ""
 "后，先排除少于5名上班员工的公司，再给所有并列最大的合格公司各1张。其他工会组"
 "织者返回公共供应区。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:170
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:175
 msgid ""
 "Union Organizer example: Companies A, B and C send 6, 6 and 5 employees to "
 "work. All three meet the 5-worker threshold, but only A and B are tied for "
@@ -1273,7 +1278,7 @@ msgstr ""
 "人门槛，但只有A和B并列上班人数最多，因此下一工作日A、B各获得1名工会组织者，C"
 "不获得。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:171
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:176
 msgid ""
 "Each Union Organizer must occupy one slot directly under the CEO on the next "
 "Working Day, provides no action or subordinate slots, and costs $5 at "
@@ -1285,11 +1290,11 @@ msgstr ""
 "位，并在发薪时支付$5。它不能招聘、培训、解雇或被猎头挖走，且不计入员工规模。"
 "无论临时工执行多少次行动，上班时都只计1名员工。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:177
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:182
 msgid "Second Bailout"
 msgstr "二次救助"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:186
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:191
 msgid ""
 "In the base game the bank only breaks once. With this module the city steps "
 "in the second time: the bank gets a fresh cash injection and every player "
@@ -1300,14 +1305,14 @@ msgstr ""
 "行获得一笔新的注资，每位玩家获得一名免费的 2 级营销员工。游戏要到第三次破产才"
 "会真正结束。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:194
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:199
 msgid ""
 "First break: unchanged - reserve cards are cashed in (or prices re-picked "
 "with the price-changing reserve cards) exactly as in the base game."
 msgstr ""
 "第一次破产：不变——储备卡按基础游戏的规则兑现（或使用改价储备卡重新定价）。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:199
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:204
 msgid ""
 "Second break: the city bails the bank out. The bank immediately receives "
 "$300 per player (e.g. +$600 in a 2-player game, +$1500 with 5 players)."
@@ -1315,7 +1320,7 @@ msgstr ""
 "第二次破产：城市出手救助银行。银行立即获得每名玩家 $300 的注资（例如 2 人局 +"
 "$600，5 人局 +$1500）。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:204
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:209
 msgid ""
 "The gift: on the night of the bailout, players pick one free level-2 "
 "marketing employee each, in turn order, first come first served: Campaign "
@@ -1329,7 +1334,7 @@ msgstr ""
 "员、美食评论家或小贩营销员。人才市场中已售罄的卡不能选；轮到你时若已无剩余，"
 "则一无所获。你也可以放弃。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:209
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:214
 msgid ""
 "The gift is not a hire: it does not trigger \"first to hire 3 employees\" "
 "style milestones. The employee joins your beach and is paid like any other "
@@ -1342,29 +1347,29 @@ msgstr ""
 "题。模组里程碑（例如「首个使用乡村推销员」）仍会在你第一次用他进行营销时正常"
 "触发。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:214
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:219
 msgid "Third break: the game ends immediately - there is only one bailout."
 msgstr "第三次破产：游戏立即结束——救助只有一次。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:219
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:224
 msgid ""
 "Short games are unaffected: the first break already ends them, so the "
 "bailout never happens."
 msgstr "短局不受影响：第一次破产就已结束游戏，因此救助永远不会发生。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:228
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:233
 msgid "Media Line"
 msgstr "传媒线"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:229
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:234
 msgid "Telemarketer"
 msgstr "电话营销员"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:230
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:235
 msgid "TV Announcer"
 msgstr "电视播音员"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:233
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:238
 msgid ""
 "The base game's marketing is paper: billboards, mail, airplanes. This module "
 "adds the airwaves. A Telemarketer calls the houses right next door - no "
@@ -1378,7 +1383,7 @@ msgstr ""
 "设天线，掌控新闻：一则报道会让明天全城的所有价格上下浮动 $5。需求虽小却精准——"
 "回报是完美备货的头奖之夜，足以让银行破产。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:236
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:241
 msgid ""
 "Training chain: Marketing Trainee → Telemarketer (level 2) → TV Announcer "
 "(level 3) → Brand Director. Six of each; cards may be stacked."
@@ -1386,7 +1391,7 @@ msgstr ""
 "培训链：营销实习生 → 电话营销员（2 级）→ 电视播音员（3 级）→ 品牌总监。每种"
 "各 6 张；可叠放。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:237
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:242
 msgid ""
 "Telemarketer: places 2x1 phone tokens attached to buildings (not roads) "
 "within one orthogonal step of your restaurant (a cross of 5 tiles). Each "
@@ -1400,7 +1405,7 @@ msgstr ""
 "时长相同，一起放置；也可以只放一个。夹在两栋房屋之间的标记可同时覆盖两者。时"
 "长 1-3 回合。全城只有 6 个标记：版面上最多同时存在 6 通电话。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:238
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:243
 msgid ""
 "TV Announcer: picks exactly 5 houses within 2 steps of your restaurant (a "
 "diamond of 13 tiles) and mounts a rooftop antenna on each. Duration 1-4 "
@@ -1411,7 +1416,7 @@ msgstr ""
 "在每栋屋顶架设天线。时长 1-4 回合。全城只有 2 个频道：最多同时存在 2 个电视营"
 "销活动；若一名玩家同时持有两个，则形成垄断。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:239
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:244
 msgid ""
 "Headline (TV Announcer only, free, one per working announcer per turn): "
 "tomorrow night every sale in the city pays +$5 (Prime Time) or -$5 (Bad "
@@ -1422,7 +1427,7 @@ msgstr ""
 "销售 +$5（黄金时段）或 -$5（负面报道）。报道会叠加并互相抵消，全城总计上限为 "
 "+$10 或 -$10。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:240
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:245
 msgid ""
 "Timing: campaigns start pushing demand the turn after placement, like all "
 "campaigns. Houses keep the usual 3-demand cap; the different media push in a "
@@ -1431,11 +1436,11 @@ msgstr ""
 "时机：与其他所有营销活动一样，营销活动在放置后的下一回合开始推动需求。房屋保"
 "持平常的 3 点需求上限；不同媒介按固定顺序推动。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:241
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:246
 msgid "Unserved orders stay on the house and may be fulfilled by anyone."
 msgstr "未被满足的订单会留在房屋上，任何人都可以供货。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:242
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:247
 msgid ""
 "Milestone \"First Telemarketer used\": unlocks a permanent group bonus - at "
 "Dinnertime, if every house of one of your media groups (the 2 phone houses "
@@ -1449,7 +1454,7 @@ msgstr ""
 "（电话组 $20，电视组 $50；各组单独结算）。要求纯粹性：当晚不得有其他由你发起"
 "的营销员工或营销活动处于活跃状态。"
 
-#: .\FCM\templates\FCM\fanExpansionsHelp.html:243
+#: .\FCM\templates\FCM\fanExpansionsHelp.html:248
 msgid ""
 "Milestone \"First TV Announcer used\": one-time launch bonus - during your "
 "first TV campaign, every antenna house gets 2 demand per night instead of 1."
@@ -1475,28 +1480,32 @@ msgstr "FCM 教程"
 msgid "The tutorial is loading........"
 msgstr "教程加载中........"
 
-#: .\FCM\views.py:437 .\FCM\views.py:459 .\FCM\views.py:1546
-#: .\FCM\views.py:1606
+#: .\FCM\views.py:429 .\FCM\views.py:451 .\FCM\views.py:1535
+#: .\FCM\views.py:1597
 msgid "Game does not exist"
 msgstr "游戏不存在"
 
-#: .\FCM\views.py:468 .\FCM\views.py:1548 .\FCM\views.py:1608
+#: .\FCM\views.py:457 .\FCM\views.py:1599
 msgid "You are not a player in this game"
 msgstr "你不是本局游戏的玩家"
 
-#: .\FCM\views.py:1271 .\FCM\views.py:1332
+#: .\FCM\views.py:1260 .\FCM\views.py:1321
 msgid ""
 "No rewind data. Rewind limit reached. Please play on to generate more rewind "
 "data"
 msgstr "无法回退。已达到回退极限。请继续游戏以供回退"
 
-#: .\FCM\views.py:1281
+#: .\FCM\views.py:1270
 msgid "Permissions missing. Please reload the page and check again"
 msgstr "缺少权限，请刷新页面并重新尝试"
 
-#: .\FCM\views.py:1404
+#: .\FCM\views.py:1393
 msgid "Permissions missing"
 msgstr "缺少权限"
+
+#: .\FCM\views.py:1545
+msgid "Invalid chat entry"
+msgstr "无效的聊天记录"
 
 #~ msgid "Home"
 #~ msgstr "首页"

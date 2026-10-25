@@ -18,6 +18,9 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/AQYpersonal.js"
 const personal = usePersonalStore()
 
+import { useI18n } from "vue-i18n"
+const { t } = useI18n()
+
 defineProps(["entry", "entry_ID"])
 
 function clickedHistoryEntry(action, entry3, entry_id) {
@@ -29,8 +32,8 @@ function clickedHistoryEntry(action, entry3, entry_id) {
 
 function getBldgName(bldgNum) {
 	if (bldgNum < 20) return rf.BLDG_DATA[rf.BLDG_ARRAY[bldgNum]].name
-	if (bldgNum === 100) return "Grave"
-	return `House ${bldgNum - 20}`
+	if (bldgNum === 100) return t("historyEntry.grave")
+	return t("historyEntry.houseNumber", { number: bldgNum - 20 })
 }
 
 function getBldgCost(item) {
@@ -40,7 +43,7 @@ function getBldgCost(item) {
 		if (rf.BLDG_SINGLE_STONE.includes(item[0])) return ` (<img class="singleResImgForCityHistoryBuildCost" src="${view.getImage("res_1")}" />)`
 		if (rf.BLDG_DOUBLE_STONE.includes(item[0])) return ` (<img class="singleResImgForCityHistoryBuildCost" src="${view.getImage("res_1")}" /><img class="singleResImgForCityHistoryBuildCost" src="${view.getImage("res_1")}" />)`
 
-		return " COST NOT FOUND "
+		return " " + t("historyEntry.costNotFound") + " "
 	}
 	// Otherwise, must be complex building
 	//return JSON.stringify(item)
@@ -48,7 +51,7 @@ function getBldgCost(item) {
 	if (rf.BLDG_ROTATABLE.includes(item[0])) costs = [...item[4]]
 	else costs = [...item[3]]
 
-	if (costs.length === 0) return " (Free) "
+	if (costs.length === 0) return " (" + t("historyEntry.free") + ") "
 	let res = " ("
 	for (let i = 0; i < costs.length; i++) {
 		if (i > 0) res += ", "
@@ -63,22 +66,22 @@ function getGraveRemovedText(entry34) {
 	for (let i = 0; i < entry34.length; i++) {
 		totalRemoved += entry34[i].length
 	}
-	if (totalRemoved !== 1) return ` ${totalRemoved} Graves`
-	else return ` 1 Grave`
+	if (totalRemoved !== 1) return ` ${totalRemoved} ${t("historyEntry.graves")}`
+	else return ` 1 ${t("historyEntry.grave")}`
 }
 
 function getNewPhaseText(entry3) {
 	const histAction = entry3[0]
-	if (histAction === rf.HIST_FIRST_CITY) return "Setup"
-	if (histAction === rf.HIST_PHASE_CITY_BUILDING) return "City Building"
-	if (histAction === rf.HIST_NEW_TURN_ORDER) return "New Turn Order"
-	if (histAction === rf.HIST_PHASE_COUNTRYSIDE_BUILDING) return "Countryside Building"
-	if (histAction === rf.HIST_PHASE_GOODS_STORAGE) return "Goods Storage"
-	if (histAction === rf.HIST_PHASE_HARVEST) return "Harvest"
-	if (histAction === rf.HIST_PHASE_EXPLORE) return "Explore"
-	if (histAction === rf.HIST_PHASE_FAMINE) return "Famine: Level " + entry3[1]
-	if (histAction === rf.HIST_PHASE_POLLUTION) return "Pollution"
-	return "UNKNOWN"
+	if (histAction === rf.HIST_FIRST_CITY) return t("historyEntry.setup")
+	if (histAction === rf.HIST_PHASE_CITY_BUILDING) return t("historyEntry.cityBuilding")
+	if (histAction === rf.HIST_NEW_TURN_ORDER) return t("historyEntry.newTurnOrder")
+	if (histAction === rf.HIST_PHASE_COUNTRYSIDE_BUILDING) return t("historyEntry.countrysideBuilding")
+	if (histAction === rf.HIST_PHASE_GOODS_STORAGE) return t("historyEntry.goodsStorage")
+	if (histAction === rf.HIST_PHASE_HARVEST) return t("historyEntry.harvest")
+	if (histAction === rf.HIST_PHASE_EXPLORE) return t("historyEntry.explore")
+	if (histAction === rf.HIST_PHASE_FAMINE) return t("historyEntry.famineLevelPhase", { level: entry3[1] })
+	if (histAction === rf.HIST_PHASE_POLLUTION) return t("historyEntry.pollution")
+	return t("historyEntry.unknown")
 }
 </script>
 
@@ -90,7 +93,7 @@ function getNewPhaseText(entry3) {
 	<template v-if="entry[0] === rf.HIST_NEW_GAME">
 		<div class="log separator mainEntry" :class="{ selectableHistory: store.topMenuViews.showReplay }" @click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
 			<div class="new_turn">
-				Welcome to Antiquity!
+				{{ $t("historyEntry.welcome") }}
 				<br />
 				<div v-for="(player, idx) in store.players" :key="idx" class="playerScoreSummaryDiv">
 					<span class="mainEntryPlayerNewTurn" :class="'mainEntryPlayer' + personal.getCorrectedColour(player.colour)">{{ store.players[idx].name }}</span>
@@ -103,9 +106,9 @@ function getNewPhaseText(entry3) {
 	<template v-if="entry[0] === rf.HIST_NEW_TURN">
 		<div class="log separator mainEntry" :class="{ selectableHistory: store.topMenuViews.showReplay }" @click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
 			<div class="new_turn">
-				Start of turn {{ entry[3][0] }}
+				{{ $t("historyEntry.startOfTurn", { turn: entry[3][0] }) }}
 				<br />
-				Famine level: {{ entry[3][1] }}
+				{{ $t("historyEntry.famineLevel", { level: entry[3][1] }) }}
 			</div>
 		</div>
 	</template>
@@ -120,7 +123,7 @@ function getNewPhaseText(entry3) {
 	<!-- Famine Increase -->
 	<template v-if="entry[0] === rf.HIST_FAMINE_INCREASE">
 		<div class="newPhaseDiv">
-			Famine level increases to {{ entry[3][0] }}
+			{{ $t("historyEntry.famineLevelIncreases", { level: entry[3][0] }) }}
 		</div>
 	</template>
 
@@ -131,7 +134,7 @@ function getNewPhaseText(entry3) {
 				<span>{{ refFuncs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
 			</div>
 			<div class="mainEntry new_turn">
-				Game Ended
+				{{ $t("historyEntry.gameEnded") }}
 				<br />
 			</div>
 		</div>
@@ -143,7 +146,7 @@ function getNewPhaseText(entry3) {
 			<div class="header">
 				<span>{{ refFuncs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
 			</div>
-			<div class="mainEntry rewind">Game rewound to here by {{ store.players[entry[3][0]].name }}</div>
+			<div class="mainEntry rewind">{{ $t("historyEntry.rewoundBy", { player: store.players[entry[3][0]].name }) }}</div>
 		</div>
 	</template>
 
@@ -153,7 +156,7 @@ function getNewPhaseText(entry3) {
 			<div class="header">
 				<span>{{ refFuncs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
 			</div>
-			<div class="mainEntry rewind">{{ entry[3][0] }} Resigns</div>
+			<div class="mainEntry rewind">{{ $t("historyEntry.resigns", { player: entry[3][0] }) }}</div>
 		</div>
 	</template>
 
@@ -164,9 +167,9 @@ function getNewPhaseText(entry3) {
 				<span>{{ refFuncs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
 			</div>
 			<div class="mainEntry rewind">
-				Player Eliminated!
+				{{ $t("historyEntry.playerEliminated") }}
 				<br />
-				{{ entry[3][0] }} has no space for graves
+				{{ $t("historyEntry.noSpaceForGraves", { player: entry[3][0] }) }}
 			</div>
 		</div>
 	</template>
@@ -177,7 +180,7 @@ function getNewPhaseText(entry3) {
 			<div class="header">
 				<span>{{ refFuncs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
 			</div>
-			<div class="mainEntry rewind">{{ entry[3][0] }} was kicked out</div>
+			<div class="mainEntry rewind">{{ $t("historyEntry.kickedOut", { player: entry[3][0] }) }}</div>
 		</div>
 	</template>
 
@@ -192,8 +195,9 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				builds their starting city
+				<i18n-t keypath="historyEntry.buildsStartingCity" tag="span" scope="global">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				</i18n-t>
 			</div>
 		</div>
 	</template>
@@ -207,11 +211,13 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][0][0]].colour)">{{ store.players[entry[3][0][0]].displayName }}</span>
-				Trades
+				<i18n-t keypath="historyEntry.trades" tag="span" scope="global">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][0][0]].colour)">{{ store.players[entry[3][0][0]].displayName }}</span></template>
+				</i18n-t>
 				<br />
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][0][0]].colour)">{{ store.players[entry[3][0][0]].displayName }}</span>
-				recceives:
+				<i18n-t keypath="historyEntry.receives" tag="span" scope="global">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][0][0]].colour)">{{ store.players[entry[3][0][0]].displayName }}</span></template>
+				</i18n-t>
 				<img v-for="(res, idx) in entry[3][1][1]" :key="idx" class="singleResImg" :src="view.getImage('res_' + String(res))" />
 				<template v-if="entry[3][1].length > 2">
 					<br />
@@ -219,8 +225,9 @@ function getNewPhaseText(entry3) {
 					<b>{{ entry[3][1][2][0] }}</b>
 				</template>
 				<br />
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][1][0]].colour)">{{ store.players[entry[3][1][0]].displayName }}</span>
-				recceives:
+				<i18n-t keypath="historyEntry.receives" tag="span" scope="global">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][1][0]].colour)">{{ store.players[entry[3][1][0]].displayName }}</span></template>
+				</i18n-t>
 				<img v-for="(res, idx) in entry[3][0][1]" :key="idx" class="singleResImg" :src="view.getImage('res_' + String(res))" />
 				<template v-if="entry[3][0].length > 2">
 					<br />
@@ -244,7 +251,7 @@ function getNewPhaseText(entry3) {
 				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
 				<template v-if="entry[3][0].length > 0">
 					<br />
-					<b>Builds:</b>
+					<b>{{ $t("historyEntry.builds") }}</b>
 					<span v-for="(item, idx) in entry[3][0]" :key="idx">
 						<span v-if="idx !== 0">,</span>
 						{{ getBldgName(item[0]) }}
@@ -253,7 +260,7 @@ function getNewPhaseText(entry3) {
 					<br />
 				</template>
 				<template v-if="entry[3][1].length > 0">
-					<b>Moves:</b>
+					<b>{{ $t("historyEntry.moves") }}</b>
 					<span v-for="(item, idx) in entry[3][1]" :key="idx">
 						<span v-if="idx !== 0">,</span>
 						{{ getBldgName(item[0]) }}
@@ -261,7 +268,7 @@ function getNewPhaseText(entry3) {
 					<br />
 				</template>
 				<template v-if="entry[3][2].length > 0">
-					<b>Mans:</b>
+					<b>{{ $t("historyEntry.mans") }}</b>
 					<template v-for="(item, idx) in entry[3][2]" :key="idx">
 						<span>
 							<span v-if="idx !== 0">,</span>
@@ -272,7 +279,7 @@ function getNewPhaseText(entry3) {
 				</template>
 
 				<template v-if="entry[3][3].length > 0">
-					<b>Trades:</b>
+					<b>{{ $t("historyEntry.tradesLabel") }}</b>
 					<template v-for="(item, idx) in entry[3][3]" :key="idx">
 						<img class="singleResImg" :src="view.getImage('res_' + String(item[0]))" />
 						<img class="singleResImg" :src="view.getImage('res_' + String(item[1]))" />
@@ -284,22 +291,22 @@ function getNewPhaseText(entry3) {
 				</template>
 
 				<template v-if="entry[3][4].length > 0">
-					<b>Removes:</b>
+					<b>{{ $t("historyEntry.removes") }}</b>
 					{{ getGraveRemovedText(entry[3][4]) }}
 					<br />
 				</template>
 
 				<template v-if="entry[3][5] !== rf.SAINT_NONE">
-					<b>Chooses New Patron:</b>
+					<b>{{ $t("historyEntry.choosesNewPatron") }}</b>
 					{{ rf.SAINT_INFO[entry[3][5]].name }}
 					<br />
 				</template>
 
 				<template v-if="entry[3][6] === 1">
-					<b>Razed Cathedral</b>
+					<b>{{ $t("historyEntry.razedCathedral") }}</b>
 				</template>
 
-				<template v-if="entry[3][0].length === 0 && entry[3][1].length === 0 && entry[3][2].length === 0">No building, moving, or manning</template>
+				<template v-if="entry[3][0].length === 0 && entry[3][1].length === 0 && entry[3][2].length === 0">{{ $t("historyEntry.noCityAction") }}</template>
 			</div>
 		</div>
 	</template>
@@ -313,8 +320,10 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				Adds {{ entry[3][0].length }} Pollution
+				<i18n-t keypath="historyEntry.addsPollution" tag="span" scope="global">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+					<template #count>{{ entry[3][0].length }}</template>
+				</i18n-t>
 			</div>
 		</div>
 	</template>
@@ -328,10 +337,11 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				Adds {{ entry[3][0].length }} Pollution and {{ entry[3][1].reduce((length, subarray) => length + subarray.length, 0) }}
-				<span v-if="entry[3][1].reduce((length, subarray) => length + subarray.length, 0) === 1">grave</span>
-				<span v-else>graves</span>
+				<i18n-t keypath="historyEntry.addsPollutionAndGraves" tag="span" scope="global" :plural="entry[3][1].reduce((length, subarray) => length + subarray.length, 0)">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+					<template #pollution>{{ entry[3][0].length }}</template>
+					<template #graves>{{ entry[3][1].reduce((length, subarray) => length + subarray.length, 0) }}</template>
+				</i18n-t>
 			</div>
 		</div>
 	</template>
@@ -345,8 +355,10 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				Removes {{ entry[3].length }} Pollution
+				<i18n-t keypath="historyEntry.removesPollution" tag="span" scope="global">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+					<template #count>{{ entry[3].length }}</template>
+				</i18n-t>
 			</div>
 		</div>
 	</template>
@@ -360,11 +372,10 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				builds a Woodcutter with {{ entry[3][1].length + 1 }}
-				<span v-if="entry[3][1].length === 0">resource</span>
-				<span v-else>resources</span>
-				to harvest
+				<i18n-t keypath="historyEntry.buildsWoodcutter" tag="span" scope="global" :plural="entry[3][1].length + 1">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+					<template #count>{{ entry[3][1].length + 1 }}</template>
+				</i18n-t>
 			</div>
 		</div>
 	</template>
@@ -378,16 +389,13 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				builds a
-				<img class="singleResImg" :src="view.getImage('res_' + String(entry[3][1]))" />
-				Mine
-				<span v-if="entry[3][0] === 0">(already set from the mountain range)</span>
-				<span v-else-if="entry[3][0] === 1">(setting the mountain range resource)</span>
-				with {{ entry[3][3].length + 1 }}
-				<span v-if="entry[3][3].length === 0">resource</span>
-				<span v-else>resources</span>
-				to harvest
+				<i18n-t keypath="historyEntry.buildsMine" tag="span" scope="global">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+					<template #resource><img class="singleResImg" :src="view.getImage('res_' + String(entry[3][1]))" /></template>
+				</i18n-t>
+				<span v-if="entry[3][0] === 0">{{ $t("historyEntry.alreadySetFromMountainRange") }}</span>
+				<span v-else-if="entry[3][0] === 1">{{ $t("historyEntry.settingMountainRangeResource") }}</span>
+				{{ $t("historyEntry.withResourcesToHarvest", { count: entry[3][3].length + 1 }) }}
 			</div>
 		</div>
 	</template>
@@ -401,14 +409,12 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				builds a
-				<img class="singleResImg" :src="view.getImage('res_' + String(entry[3][0]))" />
-				Farm with {{ entry[3][2].length + 1 }}
-				<span v-if="entry[3][2].length === 0">resource</span>
-				<span v-else>resources</span>
-				to harvest
-				<span v-if="entry[3].length >= 4">(free seeed from Biology)</span>
+				<i18n-t keypath="historyEntry.buildsFarm" tag="span" scope="global">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+					<template #resource><img class="singleResImg" :src="view.getImage('res_' + String(entry[3][0]))" /></template>
+				</i18n-t>
+				{{ $t("historyEntry.withResourcesToHarvest", { count: entry[3][2].length + 1 }) }}
+				<span v-if="entry[3].length >= 4">{{ $t("historyEntry.freeSeedFromBiology") }}</span>
 			</div>
 		</div>
 	</template>
@@ -422,13 +428,11 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				builds a
-				<img class="singleResImg" :src="view.getImage('res_' + String(entry[3][1]))" />
-				Fishery with {{ entry[3][2].length }}
-				<span v-if="entry[3][2].length === 1">resource</span>
-				<span v-else>resources</span>
-				to harvest
+				<i18n-t keypath="historyEntry.buildsFishery" tag="span" scope="global">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+					<template #resource><img class="singleResImg" :src="view.getImage('res_' + String(entry[3][1]))" /></template>
+				</i18n-t>
+				{{ $t("historyEntry.withResourcesToHarvest", { count: entry[3][2].length }) }}
 			</div>
 		</div>
 	</template>
@@ -442,9 +446,10 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				builds an Inn with
-				<img class="singleResImg" :src="view.getImage('res_' + String(entry[3][0]))" />
+				<i18n-t keypath="historyEntry.buildsInn" tag="span" scope="global">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+					<template #resource><img class="singleResImg" :src="view.getImage('res_' + String(entry[3][0]))" /></template>
+				</i18n-t>
 			</div>
 		</div>
 	</template>
@@ -458,13 +463,16 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				builds a new city with
-				<img class="singleResImg" :src="view.getImage('res_0')" />
-				<img class="singleResImg" :src="view.getImage('res_1')" />
-				<img class="singleResImg" :src="view.getImage('res_' + String(entry[3][1][0]))" />
-				<img class="singleResImg" :src="view.getImage('res_' + String(entry[3][1][1]))" />
-				<img class="singleResImg" :src="view.getImage('res_' + String(entry[3][1][2]))" />
+				<i18n-t keypath="historyEntry.buildsNewCity" tag="span" scope="global">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+					<template #resources>
+						<img class="singleResImg" :src="view.getImage('res_0')" />
+						<img class="singleResImg" :src="view.getImage('res_1')" />
+						<img class="singleResImg" :src="view.getImage('res_' + String(entry[3][1][0]))" />
+						<img class="singleResImg" :src="view.getImage('res_' + String(entry[3][1][1]))" />
+						<img class="singleResImg" :src="view.getImage('res_' + String(entry[3][1][2]))" />
+					</template>
+				</i18n-t>
 			</div>
 		</div>
 	</template>
@@ -479,7 +487,7 @@ function getNewPhaseText(entry3) {
 			</div>
 			<div class="container">
 				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				stores only:
+				{{ $t("historyEntry.storesOnly") }}
 				<template v-for="(res, idx) in entry[3]" :key="idx">
 					<img class="singleResImg" :src="view.getImage('res_' + String(res))" />
 				</template>
@@ -497,15 +505,15 @@ function getNewPhaseText(entry3) {
 			</div>
 			<div class="container">
 				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				<template v-if="entry[3].length === 0">skips Harvest - Nothing to Harvest</template>
+				<template v-if="entry[3].length === 0">{{ $t("historyEntry.harvestSkipped") }}</template>
 				<template v-else>
-					harvests:
+					{{ $t("historyEntry.harvests") }}
 					<template v-for="(item, idx) in entry[3]" :key="idx">
 						<img v-if="item[2] === 1" class="singleResImg" :src="view.getImage('res_' + String(item[0]))" />
 					</template>
 					<template v-if="entry[3].some((entry) => entry[2] === 0)">
 						<br />
-						and discards:
+						{{ $t("historyEntry.andDiscards") }}
 						<template v-for="(item, idx) in entry[3]" :key="idx">
 							<img v-if="item[2] === 0" class="singleResImg" :src="view.getImage('res_' + String(item[0]))" />
 						</template>
@@ -524,12 +532,13 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				explores and finds:
+				<i18n-t keypath="historyEntry.exploresAndFinds" tag="span" scope="global">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				</i18n-t>
 				<img class="singleResImg" :src="view.getImage('res_' + String(entry[3][1]))" />
 				<span v-if="rf.RES_FOODS.includes(entry[3][1])">
 					<br />
-					Famine level increases to {{ entry[3][2] }}
+					{{ $t("historyEntry.famineLevelIncreases", { level: entry[3][2] }) }}
 				</span>
 			</div>
 		</div>
@@ -545,7 +554,7 @@ function getNewPhaseText(entry3) {
 			</div>
 			<div class="container">
 				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				chose not to explore
+				{{ $t("historyEntry.choseNotToExplore") }}
 			</div>
 		</div>
 	</template>
@@ -560,7 +569,7 @@ function getNewPhaseText(entry3) {
 			</div>
 			<div class="container">
 				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				pre-chose to explore, but the chosen explorer was removed and there are no others in range - turn skipped
+				{{ $t("historyEntry.preExploreInvalid") }}
 			</div>
 		</div>
 	</template>
@@ -574,10 +583,10 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				places {{ entry[3].reduce((length, subarray) => length + subarray.length, 0) }}
-				<span v-if="entry[3].reduce((length, subarray) => length + subarray.length, 0) === 1">grave</span>
-				<span v-else>graves</span>
+				<i18n-t keypath="historyEntry.placesGraves" tag="span" scope="global" :plural="entry[3].reduce((length, subarray) => length + subarray.length, 0)">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+					<template #count>{{ entry[3].reduce((length, subarray) => length + subarray.length, 0) }}</template>
+				</i18n-t>
 			</div>
 		</div>
 	</template>
@@ -595,11 +604,10 @@ function getNewPhaseText(entry3) {
 			</div>
 			<div class="container">
 				<b>
-					{{ entry[3][[0]] }} new fountain
-					<span v-if="entry[3][0] !== 1">s</span>
+					{{ entry[3][[0]] }} {{ $t("historyEntry.newFountain", entry[3][0]) }}
 					.
 				</b>
-				New famine level: {{ entry[3][1] }}
+				{{ $t("historyEntry.newFamineLevel", { level: entry[3][1] }) }}
 			</div>
 		</div>
 	</template>
@@ -613,9 +621,7 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				{{ entry[3][[0]] }} new cathedral
-				<span v-if="entry[3][0] !== 1">s</span>
-				built
+				{{ $t("historyEntry.newCathedralBuilt", entry[3][[0]]) }}
 			</div>
 		</div>
 	</template>
@@ -629,7 +635,7 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				New Turn Order:
+				{{ $t("historyEntry.newTurnOrderHeading") }}
 				<br />
 				<template v-for="(item, idx) in entry[3]" :key="idx">
 					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[item[0]].colour)">{{ store.players[item[0]].displayName }}</span>
@@ -648,8 +654,9 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				skips country phase - no cart shops or Faculty of Alchemy
+				<i18n-t keypath="historyEntry.skipsCountryPhase" tag="span" scope="global">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				</i18n-t>
 			</div>
 		</div>
 	</template>
@@ -663,12 +670,13 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				skips Storage -
-				<span v-if="entry[3][0] === 0">Unlimited Storage (Saint Power)</span>
-				<span v-if="entry[3][0] === 1">No Resources</span>
-				<span v-if="entry[3][0] === 2">Enough Storage</span>
-				<span v-if="entry[3][0] === 3">No Storage - Resources Discaded</span>
+				<i18n-t keypath="historyEntry.skipsStorage" tag="span" scope="global">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				</i18n-t>
+				<span v-if="entry[3][0] === 0">{{ $t("historyEntry.unlimitedStorage") }}</span>
+				<span v-if="entry[3][0] === 1">{{ $t("historyEntry.noResources") }}</span>
+				<span v-if="entry[3][0] === 2">{{ $t("historyEntry.enoughStorage") }}</span>
+				<span v-if="entry[3][0] === 3">{{ $t("historyEntry.noStorage") }}</span>
 			</div>
 		</div>
 	</template>
@@ -682,10 +690,12 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				gains
-				<img v-for="idx in entry[3][0]" :key="idx" class="singleResImg" :src="view.getImage('res_' + String(rf.RES_FISH))" />
-				with the Saint Power
+				<i18n-t keypath="historyEntry.gainsWithSaintPower" tag="span" scope="global">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+					<template #resources>
+						<img v-for="idx in entry[3][0]" :key="idx" class="singleResImg" :src="view.getImage('res_' + String(rf.RES_FISH))" />
+					</template>
+				</i18n-t>
 			</div>
 		</div>
 	</template>
@@ -700,15 +710,15 @@ function getNewPhaseText(entry3) {
 			</div>
 			<div class="container">
 				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				<template v-if="entry[3].length === 0">skips Harvest - Nothing to Harvest</template>
+				<template v-if="entry[3].length === 0">{{ $t("historyEntry.harvestSkipped") }}</template>
 				<template v-else>
-					auto-harvests:
+					{{ $t("historyEntry.autoHarvests") }}
 					<template v-for="(item, idx) in entry[3]" :key="idx">
 						<img v-if="item[2] === 1" class="singleResImg" :src="view.getImage('res_' + String(item[0]))" />
 					</template>
 					<template v-if="entry[3].some((entry) => entry[2] === 0)">
 						<br />
-						and discards:
+						{{ $t("historyEntry.andDiscards") }}
 						<template v-for="(item, idx) in entry[3]" :key="idx">
 							<img v-if="item[2] === 0" class="singleResImg" :src="view.getImage('res_' + String(item[0]))" />
 						</template>
@@ -727,12 +737,12 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				Explore skipped by:
+				{{ $t("historyEntry.exploreSkippedBy") }}
 				<template v-for="(item, idx) in entry[3]" :key="idx">
 					<br />
 					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[item[0]].colour)">{{ store.players[item[0]].displayName }}</span>
-					<span v-if="item[1] === 0">(No Explorers)</span>
-					<span v-if="item[1] === 1">(No tiles in ZoC)</span>
+					<span v-if="item[1] === 0">{{ $t("historyEntry.noExplorers") }}</span>
+					<span v-if="item[1] === 1">{{ $t("historyEntry.noTilesInZoc") }}</span>
 				</template>
 			</div>
 		</div>
@@ -747,8 +757,9 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				skips Famine - No Graves to Place
+				<i18n-t keypath="historyEntry.skipsFamine" tag="span" scope="global">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				</i18n-t>
 			</div>
 		</div>
 	</template>
@@ -762,8 +773,9 @@ function getNewPhaseText(entry3) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				skips Pollution - No Pollution to place
+				<i18n-t keypath="historyEntry.skipsPollution" tag="span" scope="global">
+					<template #player><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span></template>
+				</i18n-t>
 			</div>
 		</div>
 	</template>

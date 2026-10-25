@@ -49,10 +49,10 @@ def create_ddl_game(
     def get_max_players(post_data):
         """Determine max players based on playerNumber or tournament."""
         if "playerNumber" in post_data:
-            return int(post_data.get("playerNumber", 2))
+            return int(post_data.get("playerNumber", 3))
         if tournamentObj is not None and (is_main_tournament or is_mini_tournament):
             return tournamentObj.maxGamePlayers
-        return 2
+        return 3
 
     #############################################
     #
@@ -79,6 +79,8 @@ def create_ddl_game(
     isTrainingGame = False
 
     max_players = get_max_players(request.POST)
+    if not (is_main_tournament or is_mini_tournament):
+        max_players = max(3, min(5, int(max_players)))
 
     if is_main_tournament or is_mini_tournament:
         if not tournamentObj or not tournamentGameName:
@@ -128,7 +130,8 @@ def create_ddl_game(
         elif "experiencedGame" in request.POST:
             starting_options.append(rf.SO_EXPERIENCED_GAME)
 
-        # DDL-specific options would be appended to starting_options here.
+        if "startingOptionAuction" in request.POST:
+            starting_options.append(rfDDL.SO_AUCTION)
 
         all_players.append(request.user)
 
@@ -141,7 +144,7 @@ def create_ddl_game(
             host=host,
             gamePace=game_pace,
             turn=1,
-            phase=rfDDL.PHASE_MAIN,
+            phase=rfDDL.PHASE_SETUP,
             created=created_time,
             latestUpdate=created_time,
             maxPlayers=max_players,

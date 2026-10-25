@@ -64,7 +64,8 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     search_fields = ["user__username", "email_confirmed"]
-    list_display = ("user", "email_confirmed", "availabilityMoveCounts", "availabilityTurnCounts")
+    list_display = ("user", "email_confirmed", "is_site_admin", "is_game_admin", "availabilityMoveCounts", "availabilityTurnCounts")
+    list_filter = ("is_site_admin", "is_game_admin")
 
 
 @admin.register(Tournament)
@@ -180,6 +181,7 @@ class GameAdmin(admin.ModelAdmin):
             "rewindData",
             "rewindTempData",
             "kickoutFlexiData",
+            "playersPreMoveData",
             # "player0notes",
             # "player1notes",
             # "player2notes",
@@ -219,6 +221,7 @@ class GameAdmin(admin.ModelAdmin):
                 "rewindData",
                 "rewindTempData",
                 "kickoutFlexiData",
+                "playersPreMoveData",
                 # "player0notes",
                 # "player1notes",
                 # "player2notes",
@@ -330,12 +333,6 @@ class GameAdmin(admin.ModelAdmin):
     # search_fields = ("gameName", "creator__username")
     search_fields = ("gameName", "gameDescription", "gameCode", "id")
 
-    readonly_fields = ("ind_premove_display",)  # , "gameDataBLOB")
-
-    @admin.display(description="IND premove")
-    def ind_premove_display(self, obj):
-        return obj.playersPreMoveData
-
     # 4. Fieldsets for a cleaner UI
     fieldsets = (
         (
@@ -385,7 +382,7 @@ class GameAdmin(admin.ModelAdmin):
                 "fields": (
                     "serverCurrentPlayerNamesInTurnOrder",
                     "FCMplayersMoveData",
-                    "ind_premove_display",
+                    "playersPreMoveData",
                     "currentPlayersInTurnOrder",
                     "autoMoves",
                 ),

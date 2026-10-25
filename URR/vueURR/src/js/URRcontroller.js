@@ -1,9 +1,13 @@
 import * as rf from "./URRreference"
+import * as funcs from "./URRfuncs"
 import * as model from "./URRmodel"
 import * as IO from "../backend/URR_IO"
 import * as game from "./URRgame.js"
 import * as turnDraft from "./URRturnDraft.js"
 import * as rules from "./URRrules.js"
+import i18n from "../i18n.js"
+
+const t = i18n.global.t
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
 
@@ -25,7 +29,6 @@ export function startPlayerTurn() {
 	if (personal.canPlay() && personal.yourTurnAudioType > 0) {
 		// Optional "your turn" sound. Add sound files to static/Lobby/common/sounds if wanted.
 	}
-	model.rebuildTurnOrder()
 	if (personal.canPlay() && !store.turnDraft.start && !store.gameflow.pendingOffer && store.gameflow.offerDeclined) {
 		try {
 			const restored = game.restoreDevelopmentChoices(model.snapshotState())
@@ -39,7 +42,7 @@ export function startPlayerTurn() {
 			draft.pauseAutomatic = true
 			draft.revision++
 		} catch (error) {
-			store.gameMessages.actionError = `Unable to restore construction choices: ${error.message}`
+			store.gameMessages.actionError = t("controller.restoreChoices", { error: error.message })
 			console.error("Unable to restore declined development plan:", error)
 		}
 	}
@@ -49,13 +52,12 @@ export function startPlayerTurn() {
 export async function submitAction(action) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	let player = personal.trainingGame || rf.SUPER_USERS.includes(personal.name) ? currentPlayerIndex() : personal.pov
-	if (["exchangeBarahshum", "passBarahshum"].includes(action.type)) {
+	const player = personal.trainingGame || rf.SUPER_USERS.includes(personal.name) ? currentPlayerIndex() : personal.pov
+	if (!personal.canPlay()) return false
+	if (action.type === "exchangeBarahshum") {
 		if (store.turnDraft.ready || personal.haltPlay || store.viewSettings.showReplay || personal.pov < 0) return false
-		const nation = store.nations[rf.NATION_BARAHSHUM]
-		if ((personal.trainingGame || rf.SUPER_USERS.includes(personal.name)) && nation.ownerType === "player") player = nation.owner
 		if (!rules.canExchangeBarahshum(store, player)) return false
-	} else if (!personal.canPlay()) return false
+	}
 	const before = model.snapshotState()
 	const checkpoint = { state: before, historyLength: store.history.length }
 	try {
@@ -80,13 +82,14 @@ export function canReviewTurn() {
 	const personal = usePersonalStore()
 	if (personal.haltPlay || store.viewSettings.showReplay || store.viewSettings.showLoader || personal.pov < 0) return false
 	if (store.turnDraft.start) return personal.trainingGame || rf.SUPER_USERS.includes(personal.name) || personal.pov === store.turnDraft.player
-	return personal.canPlay() || rules.canExchangeBarahshum(store, personal.pov)
+	return personal.canPlay()
 }
 
 function restoreCheckpoint(checkpoint) {
 	const store = useModelStore()
 	model.restoreState(checkpoint.state)
 	store.history.splice(checkpoint.historyLength)
+	store.refreshHistory()
 	store.gameMessages.actionError = ""
 	store.viewSettings.actionIntent = ""
 	store.viewSettings.historyArea = null
@@ -100,7 +103,7 @@ export function undoAction() {
 	if (!canReviewTurn() || !store.turnDraft.steps.length) return
 	const checkpoint = store.turnDraft.steps.pop()
 	restoreCheckpoint(checkpoint)
-	store.turnDraft.message = "Last action undone."
+	store.turnDraft.message = t("controller.actionUndone")
 }
 
 // Remove one choice from the draft by replaying the later ones without it; if they no longer fit, nothing changes.
@@ -109,7 +112,7 @@ export async function removeDraftStep(index) {
 	const actionIntent = store.viewSettings.actionIntent
 	const steps = store.turnDraft.steps
 	if (!canReviewTurn() || !steps[index]) return false
-	const backup = { state: model.snapshotState(), history: [...store.history], steps: [...steps], ready: store.turnDraft.ready }
+	const backup = { model: funcs.simpleExportWholeURRmodel(), steps: [...steps], ready: store.turnDraft.ready }
 	const later = steps.slice(index + 1).map((step) => step.action)
 	const checkpoint = steps[index]
 	steps.splice(index)
@@ -117,15 +120,14 @@ export async function removeDraftStep(index) {
 	store.viewSettings.actionIntent = actionIntent
 	for (const action of later) {
 		if (await submitAction(action)) continue
-		model.restoreState(backup.state)
-		store.history.splice(0, store.history.length, ...backup.history)
+		funcs.simpleImportWholeURRmodel(backup.model)
 		steps.splice(0, steps.length, ...backup.steps)
 		store.turnDraft.ready = backup.ready
 		store.turnDraft.revision++
-		store.gameMessages.actionError = "That choice can't be removed because later choices depend on it. Undo those first."
+		store.gameMessages.actionError = t("controller.choiceLocked")
 		return false
 	}
-	store.turnDraft.message = "Choice removed."
+	store.turnDraft.message = t("controller.choiceRemoved")
 	return true
 }
 
@@ -138,17 +140,13 @@ export function resetTurn() {
 	store.viewSettings.actionIntent = ""
 	store.clearTurnDraft()
 	store.turnDraft.pauseAutomatic = true
-	store.turnDraft.message = "Turn reset."
+	store.turnDraft.message = t("controller.turnReset")
 }
 
 export async function endPlayerTurn() {
 	const store = useModelStore()
 	if (!canReviewTurn()) return false
 	if (!store.turnDraft.ready) {
-		if (!usePersonalStore().canPlay()) {
-			store.gameMessages.actionError = "Choose the Barahshum exchange before ending your turn."
-			return false
-		}
 		try {
 			// Reuse the existing forced-action rules after an Undo or Reset.
 			let automatic = rules.getAutomaticAction(store)

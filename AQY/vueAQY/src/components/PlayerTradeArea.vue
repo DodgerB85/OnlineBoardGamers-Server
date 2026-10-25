@@ -13,7 +13,7 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/AQYpersonal.js"
 const personal = usePersonalStore()
 
-const props = defineProps({
+defineProps({
 	playerIndexProp: {
 		type: Number,
 		required: true,
@@ -26,6 +26,8 @@ import { ref, computed } from "vue"
 
 const confirmTradeBoo = ref(false)
 
+const actingPlayerIndex = computed(() => personal.actingPlayerIndex())
+
 const yourSelectedPromisePhase = ref(0)
 const opponentsSelectedPromisePhase = ref(0)
 
@@ -34,7 +36,7 @@ const opponentsSelectedPromisePhase = ref(0)
 })*/
 
 const filteredPlayers = computed(() => {
-	return store.players.map((player, idx) => ({ originalIndex: idx, displayName: player.displayName })).filter(({ originalIndex }) => originalIndex !== personal.pov)
+	return store.players.map((player, idx) => ({ originalIndex: idx, displayName: player.displayName })).filter(({ originalIndex }) => originalIndex !== actingPlayerIndex.value)
 })
 function cancelTrade() {
 	store.clearVars()
@@ -72,7 +74,7 @@ function localAcceptTrade(entry) {
 }
 
 function unableToAffordTrade(entry) {
-	let availableResourcesCopy = [...store.players[props.playerIndexProp].availableResources]
+	let availableResourcesCopy = [...store.players[actingPlayerIndex.value].availableResources]
 
 	for (let i = 0; i < entry[4].length; i++) {
 		availableResourcesCopy[entry[4][i]] -= 1
@@ -88,19 +90,19 @@ function unableToAffordTrade(entry) {
 <template>
 	<div class="wholeTradeDiv" v-if="store.context.action === rf.ACT_SETUP_PLAYER_TRADE">
 		<template v-if="!confirmTradeBoo">
-			<span class="cautionSpan">Trade negotiations should be done in chat BEFORE submitting a trade</span>
+			<span class="cautionSpan">{{ $t("playerTradeArea.negotiateInChat") }}</span>
 			<br />
-			<span class="cautionSpan">Trades submitted without negotiation will almost certainly be rejected</span>
+			<span class="cautionSpan">{{ $t("playerTradeArea.unnegotiatedRejected") }}</span>
 
 			<div class="playerBoxes">
 				<div class="playerBox">
-					<b><u>Your Trade</u></b>
+					<b><u>{{ $t("playerTradeArea.yourTrade") }}</u></b>
 					<br />
 					<br />
 					<br />
-					<ResourceTable :playerIndexProp="playerIndexProp" class="" />
+					<ResourceTable :playerIndexProp="actingPlayerIndex" class="" />
 					<br />
-					Resources To Trade:
+					{{ $t("playerTradeArea.resourcesToTrade") }}
 					<img v-for="(res, idx) in store.context.setupPlayerTrade.yourResources" :key="idx" class="tradingRes" :src="view.getImage('res_' + String(res))" />
 					<br />
 					<!--
@@ -109,47 +111,47 @@ function unableToAffordTrade(entry) {
 						Tick to add Promise
 					</label>-->
 					<div>
-						<textarea v-model="store.context.setupPlayerTrade.yourPromise" placeholder="Trade an optional promise here" class="promiseTextArea"></textarea>
+						<textarea v-model="store.context.setupPlayerTrade.yourPromise" :placeholder="$t('playerTradeArea.promisePlaceholder')" class="promiseTextArea"></textarea>
 						<br />
-						Add a nominal Phase to your Promise:
+						{{ $t("playerTradeArea.addPhaseToYourPromise") }}
 						<select v-model="yourSelectedPromisePhase" class="phaseSelect">
-							<option :value="0">None</option>
-							<option :value="2">City Building</option>
-							<option :value="3">Turn Order</option>
-							<option :value="4">Countryside Building</option>
-							<option :value="5">Store Goods</option>
-							<option :value="6">Harvest</option>
-							<option :value="7">Explore</option>
-							<option :value="8">Famine</option>
-							<option :value="9">Pollution</option>
+							<option :value="0">{{ $t("playerTradeArea.phaseNone") }}</option>
+							<option :value="2">{{ $t("playerTradeArea.phaseCityBuilding") }}</option>
+							<option :value="3">{{ $t("playerTradeArea.phaseTurnOrder") }}</option>
+							<option :value="4">{{ $t("playerTradeArea.phaseCountrysideBuilding") }}</option>
+							<option :value="5">{{ $t("playerTradeArea.phaseStoreGoods") }}</option>
+							<option :value="6">{{ $t("playerTradeArea.phaseHarvest") }}</option>
+							<option :value="7">{{ $t("playerTradeArea.phaseExplore") }}</option>
+							<option :value="8">{{ $t("playerTradeArea.phaseFamine") }}</option>
+							<option :value="9">{{ $t("playerTradeArea.phasePollution") }}</option>
 						</select>
 					</div>
 				</div>
 
 				<div class="playerBox">
-					<b><u>Opponent's Trade</u></b>
+					<b><u>{{ $t("playerTradeArea.opponentsTrade") }}</u></b>
 					<br />
 					<template v-if="filteredPlayers.length > 1">
-						Select Opponent:
+						{{ $t("playerTradeArea.selectOpponent") }}
 						<select v-model="store.context.setupPlayerTrade.selectedOpponent">
-							<option :value="-1">Select Player</option>
+							<option :value="-1">{{ $t("playerTradeArea.selectPlayer") }}</option>
 							<option v-for="(player, idx) in filteredPlayers" :key="idx" :value="player.originalIndex">
 								{{ player.displayName }}
 							</option>
 						</select>
 					</template>
-					<template v-else>Selected Opponent: {{ filteredPlayers[0].displayName }}</template>
+					<template v-else>{{ $t("playerTradeArea.selectedOpponent", { player: filteredPlayers[0].displayName }) }}</template>
 					<br />
 					<br />
 					<template v-if="store.context.setupPlayerTrade.selectedOpponent !== -1 && !store.gameflow.turnOrder.includes(store.context.setupPlayerTrade.selectedOpponent)">
-						<span class="cautionSpan">{{ store.players[store.context.setupPlayerTrade.selectedOpponent].displayName }} has ended their turn. You cannot trade with them</span>
+						<span class="cautionSpan">{{ $t("playerTradeArea.opponentEndedTurn", { player: store.players[store.context.setupPlayerTrade.selectedOpponent].displayName }) }}</span>
 						<br />
 						<br />
 					</template>
 					<template v-if="store.context.setupPlayerTrade.selectedOpponent !== -1">
 						<ResourceTable :playerIndexProp="store.context.setupPlayerTrade.selectedOpponent" class="" />
 						<br />
-						Resources To Trade:
+						{{ $t("playerTradeArea.resourcesToTrade") }}
 						<img v-for="(res, idx) in store.context.setupPlayerTrade.opponentsResources" :key="idx" class="tradingRes" :src="view.getImage('res_' + String(res))" />
 						<br />
 						<!--
@@ -158,130 +160,130 @@ function unableToAffordTrade(entry) {
 						Tick to add Promise
 					</label>-->
 						<div>
-							<textarea v-model="store.context.setupPlayerTrade.opponentsPromise" placeholder="Trade an optional promise here" class="promiseTextArea"></textarea>
+							<textarea v-model="store.context.setupPlayerTrade.opponentsPromise" :placeholder="$t('playerTradeArea.promisePlaceholder')" class="promiseTextArea"></textarea>
 							<br />
-							Add a nominal Phase to their Promise:
+							{{ $t("playerTradeArea.addPhaseToTheirPromise") }}
 							<select v-model="opponentsSelectedPromisePhase" class="phaseSelect">
-								<option :value="0">None</option>
-								<option :value="2">City Building</option>
-								<option :value="3">Turn Order</option>
-								<option :value="4">Countryside Building</option>
-								<option :value="5">Store Goods</option>
-								<option :value="6">Harvest</option>
-								<option :value="7">Explore</option>
-								<option :value="8">Famine</option>
-								<option :value="9">Pollution</option>
+								<option :value="0">{{ $t("playerTradeArea.phaseNone") }}</option>
+								<option :value="2">{{ $t("playerTradeArea.phaseCityBuilding") }}</option>
+								<option :value="3">{{ $t("playerTradeArea.phaseTurnOrder") }}</option>
+								<option :value="4">{{ $t("playerTradeArea.phaseCountrysideBuilding") }}</option>
+								<option :value="5">{{ $t("playerTradeArea.phaseStoreGoods") }}</option>
+								<option :value="6">{{ $t("playerTradeArea.phaseHarvest") }}</option>
+								<option :value="7">{{ $t("playerTradeArea.phaseExplore") }}</option>
+								<option :value="8">{{ $t("playerTradeArea.phaseFamine") }}</option>
+								<option :value="9">{{ $t("playerTradeArea.phasePollution") }}</option>
 							</select>
 						</div>
 					</template>
 				</div>
 			</div>
-			<button @click="cancelTrade" class="actionsLineButton">Cancel Trade</button>
-			<button @click="resetTrade" class="actionsLineButton">Reset Trade</button>
-			<button v-if="store.context.setupPlayerTrade.selectedOpponent !== -1" @click="confirmTrade" class="actionsLineButton">Confirm Trade</button>
+			<button @click="cancelTrade" class="actionsLineButton">{{ $t("playerTradeArea.cancelTrade") }}</button>
+			<button @click="resetTrade" class="actionsLineButton">{{ $t("playerTradeArea.resetTrade") }}</button>
+			<button v-if="store.context.setupPlayerTrade.selectedOpponent !== -1" @click="confirmTrade" class="actionsLineButton">{{ $t("playerTradeArea.confirmTrade") }}</button>
 		</template>
 
 		<!-- TRADE CONFIRMATION -->
 		<template v-if="confirmTradeBoo">
 			<div class="playerBoxes">
 				<div class="playerBox">
-					<b><u>Your Trade</u></b>
+					<b><u>{{ $t("playerTradeArea.yourTrade") }}</u></b>
 					<br />
 					<br />
-					Resources To Trade:
+					{{ $t("playerTradeArea.resourcesToTrade") }}
 					<img v-for="(res, idx) in store.context.setupPlayerTrade.yourResources" :key="idx" class="tradingRes" :src="view.getImage('res_' + String(res))" />
 					<br />
 
 					<div v-if="store.context.setupPlayerTrade.yourPromise !== ''">
 						<br />
-						Promise Phase: {{ rf.PHASE_STRINGS[yourSelectedPromisePhase] }}
+						{{ $t("playerTradeArea.promisePhase") }}: {{ rf.PHASE_STRINGS[yourSelectedPromisePhase] }}
 						<br />
 						<br />
-						Promise:
+						{{ $t("playerTradeArea.promise") }}:
 						<br />
 						{{ store.context.setupPlayerTrade.yourPromise }}
 					</div>
 				</div>
 
 				<div class="playerBox">
-					<b><u>Opponent's Trade</u></b>
+					<b><u>{{ $t("playerTradeArea.opponentsTrade") }}</u></b>
 					<br />
-					Selected Opponent: {{ store.players[store.context.setupPlayerTrade.selectedOpponent].displayName }}
+					{{ $t("playerTradeArea.selectedOpponent", { player: store.players[store.context.setupPlayerTrade.selectedOpponent].displayName }) }}
 					<br />
-					Resources To Trade:
+					{{ $t("playerTradeArea.resourcesToTrade") }}
 					<img v-for="(res, idx) in store.context.setupPlayerTrade.opponentsResources" :key="idx" class="tradingRes" :src="view.getImage('res_' + String(res))" />
 					<br />
 
 					<div v-if="store.context.setupPlayerTrade.opponentsPromise !== ''">
 						<br />
-						Promise Phase: {{ rf.PHASE_STRINGS[opponentsSelectedPromisePhase] }}
+						{{ $t("playerTradeArea.promisePhase") }}: {{ rf.PHASE_STRINGS[opponentsSelectedPromisePhase] }}
 						<br />
 						<br />
-						Promise:
+						{{ $t("playerTradeArea.promise") }}:
 						<br />
 						{{ store.context.setupPlayerTrade.opponentsPromise }}
 					</div>
 				</div>
 			</div>
-			<span class="cautionSpan">Caution: If the trade is accepted, your city actions will be locked up to this point in time</span>
+			<span class="cautionSpan">{{ $t("playerTradeArea.cautionAcceptedTrade") }}</span>
 			<br />
-			<span class="cautionSpan">For maximum flexibility, reset your turn and perform just the necessary actions to trade</span>
+			<span class="cautionSpan">{{ $t("playerTradeArea.cautionResetTurn") }}</span>
 			<br />
 
-			<button @click="cancelTrade" class="actionsLineButton">Cancel Trade</button>
-			<button @click="resetTrade" class="actionsLineButton">Reset Trade</button>
-			<button @click="localProposeTrade" class="actionsLineButton">Propose Trade</button>
+			<button @click="cancelTrade" class="actionsLineButton">{{ $t("playerTradeArea.cancelTrade") }}</button>
+			<button @click="resetTrade" class="actionsLineButton">{{ $t("playerTradeArea.resetTrade") }}</button>
+			<button @click="localProposeTrade" class="actionsLineButton">{{ $t("playerTradeArea.proposeTrade") }}</button>
 		</template>
 	</div>
 
 	<!-- INCOMING TRADES -->
 	<template v-if="store.gameflow.phase === rf.PHASE_CITY_BUILDING && personal.canPlay() && store.context.relevantIncomingTrades.length > 0">
 		<div class="wholeTradeDiv">
-			<h2>Incoming Trades</h2>
+			<h2>{{ $t("playerTradeArea.incomingTrades") }}</h2>
 			<div v-for="(entry, idx) in store.context.relevantIncomingTrades" :key="idx" class="incomingTradeDiv">
 				<div class="playerScoreSummaryDiv">
 					<span class="mainEntryPlayerNewTurn" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[0]].colour)">{{ store.players[entry[0]].displayName }}</span>
 				</div>
-				's Trade
+				{{ $t("playerTradeArea.tradeSuffix") }}
 				<br />
 				<div class="incomingPlayerBoxes">
 					<div class="incomingPlayerBox">
-						You will receive:
+						{{ $t("playerTradeArea.youWillReceive") }}
 						<br />
 						<img v-for="(res, idx) in entry[2]" :key="idx" class="tradingRes" :src="view.getImage('res_' + String(res))" />
 						<template v-if="entry[3][0] !== ''">
 							<br />
-							Promise:
+							{{ $t("playerTradeArea.promise") }}:
 							<br />
 							{{ entry[3][0] }}
 							<br />
 							<br />
-							Nominal Phase: {{ rf.PHASE_STRINGS[entry[3][1]] }}
+							{{ $t("playerTradeArea.nominalPhase") }}: {{ rf.PHASE_STRINGS[entry[3][1]] }}
 						</template>
 					</div>
 					<div class="incomingPlayerBox">
-						You will give:
+						{{ $t("playerTradeArea.youWillGive") }}
 						<br />
 						<img v-for="(res, idx) in entry[4]" :key="idx" class="tradingRes" :src="view.getImage('res_' + String(res))" />
 						<template v-if="entry[5][0] !== ''">
 							<br />
-							Promise:
+							{{ $t("playerTradeArea.promise") }}:
 							<br />
 							{{ entry[5][0] }}
 							<br />
 							<br />
-							Nominal Phase: {{ rf.PHASE_STRINGS[entry[5][1]] }}
+							{{ $t("playerTradeArea.nominalPhase") }}: {{ rf.PHASE_STRINGS[entry[5][1]] }}
 						</template>
 					</div>
 				</div>
-				<span class="cautionSpan">Caution: If you accept this trade, your city actions will be locked up to this point in time</span>
+				<span class="cautionSpan">{{ $t("playerTradeArea.cautionAcceptIncomingTrade") }}</span>
 				<br />
-				<span class="cautionSpan">For maximum flexibility, reset your turn and perform just the necessary actions to trade</span>
+				<span class="cautionSpan">{{ $t("playerTradeArea.cautionResetTurn") }}</span>
 				<br />
-				<span class="warningSpan" v-if="unableToAffordTrade(entry)">You no longer have these resource. Reset turn / undo actions to enable this trade</span>
+				<span class="warningSpan" v-if="unableToAffordTrade(entry)">{{ $t("playerTradeArea.cannotAffordTrade") }}</span>
 				<br />
-				<button @click="localRejectTrade(entry)" class="actionsLineButton">Reject Trade</button>
-				<button v-if="!unableToAffordTrade(entry)" @click="localAcceptTrade(entry)" class="actionsLineButton">Accept Trade</button>
+				<button @click="localRejectTrade(entry)" class="actionsLineButton">{{ $t("playerTradeArea.rejectTrade") }}</button>
+				<button v-if="!unableToAffordTrade(entry)" @click="localAcceptTrade(entry)" class="actionsLineButton">{{ $t("playerTradeArea.acceptTrade") }}</button>
 			</div>
 		</div>
 	</template>
@@ -289,40 +291,40 @@ function unableToAffordTrade(entry) {
 	<!-- OUTGOING TRADES -->
 	<template v-if="store.gameflow.phase === rf.PHASE_CITY_BUILDING && personal.canPlay() && store.context.relevantOutgoingTrades.length > 0">
 		<div class="wholeTradeDiv">
-			<h2>Outgoing Trades</h2>
+			<h2>{{ $t("playerTradeArea.outgoingTrades") }}</h2>
 			<div v-for="(entry, idx) in store.context.relevantOutgoingTrades" :key="idx" class="incomingTradeDiv">
 				<div class="playerScoreSummaryDiv">
 					<span class="mainEntryPlayerNewTurn" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
 				</div>
-				's Trade
+				{{ $t("playerTradeArea.tradeSuffix") }}
 				<br />
 				<div class="incomingPlayerBoxes">
 					<div class="incomingPlayerBox">
-						You will receive:
+						{{ $t("playerTradeArea.youWillReceive") }}
 						<br />
 						<img v-for="(res, idx) in entry[4]" :key="idx" class="tradingRes" :src="view.getImage('res_' + String(res))" />
 						<template v-if="entry[5][0] !== ''">
 							<br />
-							Promise:
+							{{ $t("playerTradeArea.promise") }}:
 							<br />
 							{{ entry[5][0] }}
 							<br />
 							<br />
-							Nominal Phase: {{ rf.PHASE_STRINGS[entry[5][1]] }}
+							{{ $t("playerTradeArea.nominalPhase") }}: {{ rf.PHASE_STRINGS[entry[5][1]] }}
 						</template>
 					</div>
 					<div class="incomingPlayerBox">
-						You will give:
+						{{ $t("playerTradeArea.youWillGive") }}
 						<br />
 						<img v-for="(res, idx) in entry[2]" :key="idx" class="tradingRes" :src="view.getImage('res_' + String(res))" />
 						<template v-if="entry[3][0] !== ''">
 							<br />
-							Promise:
+							{{ $t("playerTradeArea.promise") }}:
 							<br />
 							{{ entry[3][0] }}
 							<br />
 							<br />
-							Nominal Phase: {{ rf.PHASE_STRINGS[entry[3][1]] }}
+							{{ $t("playerTradeArea.nominalPhase") }}: {{ rf.PHASE_STRINGS[entry[3][1]] }}
 						</template>
 					</div>
 				</div>

@@ -123,7 +123,7 @@ When building or demolishing walls from sea, planes suffer the same penalties as
 ### Bombs
 **Producing bombs.** Bombs are a type of goods. They can be produced in a bomb factory. Bomb factories cost two boards and one stone to build. They do not require research. Producing a bomb costs one iron and one fuel. A bomb factory can produce one bomb each round.
 
-**Blowing up buildings.** In the building phase, a transporter carrying a bomb may use it to blow up a building. To do so, the player controlling the transporter takes both the bomb and the building on the tile off the board. Goods, roads, walls and transporters are not affected.
+**Blowing up buildings.** In the building phase, a transporter carrying a bomb may use it to blow up a building. To do so, the player controlling the transporter takes both the bomb and the building on the tile off the board. Goods, roads, walls and transporters are not affected. For online play, the bomb need not be carried by that transporter: a bomb lying on the same tile, or carried by another of the same player's transporters there, may be used instead.
 
 **Bomb-proof buildings.** Any building can be made bomb-proof by strengthening it. This is done in the building phase at the cost of one stone. Put a wooden cube on top of the building to indicate it has been strengthened. Strengthened buildings can never be destroyed.
 

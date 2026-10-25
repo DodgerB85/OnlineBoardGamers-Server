@@ -2,7 +2,10 @@
   "row": {
     "bidding": {
       "position": "#{{position}}",
-      "placeBid": "Bied {{points}}p"
+      "placeBid": "Bied {{points}}p",
+      "title": "Bieden om de beurtvolgorde — bied SP (hoe hoger het bod, hoe eerder je speelt; een bod kost zijn waarde in SP)",
+      "bid": "Bieden",
+      "waiting": "Wachten op de biedingen van de andere spelers…"
     },
     "buildingsDialog": "Beschikbare gebouwen",
     "objectivesDialog": "Doelen en tegels",
@@ -14,7 +17,7 @@
     "confirmEndTurn": "Je kunt nog acties uitvoeren. Weet je zeker dat je je beurt wilt beëindigen?",
     "confirmCannotUndo": "Je kunt deze actie niet ongedaan maken. Weet je zeker dat je dit wilt?",
     "deliverRequiresCertificates": "Je moet tenminste {{atLeast}} certificaten inzetten om te leveren aan {{city}}.",
-    "deliverOptionalCertificates": "Optioneel kan je extra certificaten inzetten om een hoger bedrag te ontvangen.",
+    "deliverOptionalCertificates": "Optioneel kun je extra certificaten inzetten bij het leveren aan {{city}} om een hoger bedrag te ontvangen.",
     "spendCertificates": "Kies het aantal certificaten dat je wilt inzetten:",
     "permCertificates": "Permanente certificaten",
     "tempCertificates": "Lever tijdelijke certificaten in",
@@ -22,7 +25,16 @@
     "totalBreedingValue": "Totale fokwaarde",
     "cattleMarket": {
       "select": "Kies een runderkaart of een paar en bevestig.<br/>Je kunt daarna meer kaarten kopen zolang je voldoende cowboys en dollar hebt.",
-      "buy": "Koop runderkaarten"
+      "buy": "Koop runderkaarten",
+      "takeThree": "Neem een kaart met fokwaarde 3",
+      "selectToBuy": "Selecteer kaart(en) om te kopen",
+      "notEnough": "Niet genoeg dollars of cowboys om vee te kopen",
+      "drawTwoHint": "Klik op de trekstapel om 2 veekaarten voor 1 cowboy te trekken ({cowboys} over)",
+      "confirmBuy": "Kopen",
+      "drawTwoTitle": "Trek 2 veekaarten voor 1 cowboy",
+      "drawPileTitle": "Trekstapel ({count}) — veekaarten die nog open in de markt worden gelegd",
+      "drawTwo": "Trek 2",
+      "cowboyCost": "1 cowboy"
     },
     "buyCattleDialog": "Koop runderkaarten",
     "computerExplanation": "Ik ben een computer met <a href=\"https://boardgamegeek.com/filepage/151608/garth-specialized-automa-row-solo-play\" target=\"_new\">Garth solo variant</a> regels.",
@@ -542,7 +554,27 @@
       "TOWN_NOT_ACCESSIBLE": "Deze stad is nog niet bereikbaar.",
       "INVALID_CATTLE_TYPE": "Dit type runderkaart is niet geldig voor deze actie.",
       "CANNOT_FORCE_END_TURN": "De beurt van deze speler kan niet geforceerd worden beëindigd omdat de huidige actie nog niet is afgerond.",
-      "NOT_ENOUGH_CARDS": "Er zijn niet genoeg kaarten om te trekken."
+      "NOT_ENOUGH_CARDS": "Er zijn niet genoeg kaarten om te trekken.",
+      "GAME_NOT_ENDED": "Het spel is nog niet afgelopen.",
+      "HAZARD_MUST_BE_OF_TYPE": "Dit gevaar is niet van het vereiste type.",
+      "HAZARD_NOT_ON_TRAIL": "Dit gevaar ligt niet op het pad.",
+      "JOB_MARKET_CLOSED": "De arbeidsmarkt is gesloten voor deze actie.",
+      "LOCATION_EMPTY": "Er is niets op deze plek om mee te werken.",
+      "LOCATION_NOT_EMPTY": "Deze plek is niet leeg.",
+      "MUST_MOVE_AT_LEAST_STEPS": "Je moet minstens het opgegeven aantal stappen zetten.",
+      "NOT_PAIR": "Je moet een paar veekaarten selecteren.",
+      "NOT_AT_LOCATION": "Je bent niet op deze plek.",
+      "NOT_AT_STATION": "Je bent niet bij dit station.",
+      "REPLACEMENT_BUILDING_MUST_BE_PLAYER_BUILDING": "Je kunt alleen een van je eigen gebouwen vervangen.",
+      "STATION_NOT_UPGRADED_BY_PLAYER": "Je hebt dit station niet uitgebreid.",
+      "STATION_NOT_ON_TRACK": "Dit station ligt niet op het spoor.",
+      "BID_INVALID_POSITION": "Dit bod is niet geldig voor deze positie.",
+      "NOT_CURRENT_PLAYER": "Je bent niet aan de beurt.",
+      "NO_TILES_LEFT": "Er zijn geen tegels meer over.",
+      "CANNOT_UPGRADE_SIMMENTAL": "Je kunt deze Simmental-kaart niet opwaarderen.",
+      "STATION_MUST_BE_DIFFERENT": "Je moet een ander station kiezen.",
+      "NO_AUTOMA_STATE": "Er is geen automatstand voor deze speler.",
+      "NOT_IMPLEMENTED": "Deze actie is nog niet geïmplementeerd."
     },
     "statsHeader": "Gedetailleerd resultaat",
     "stats": {
@@ -560,6 +592,71 @@
       "stops": "Stops bij gebouw",
       "stopsTeepee": "Stops bij tipi",
       "stopsHazard": "Stops bij ramptegel"
+    },
+    "status": {
+      "garthThinking": "Garth denkt na…"
+    },
+    "actionArea": {
+      "moveStepsLeft": "Verplaatsen — klik op een gemarkeerde plek ({steps} stappen over; geel = volgende stap, cyaan = verder)",
+      "moveAtMost": "Verplaatsen — klik op een gemarkeerde plek (hoogstens {limit} stappen)",
+      "hireWorker": "Arbeider aannemen",
+      "placeBuildingHint": "Gebouw plaatsen — kies een plek en plaats dan een gebouw. Dit zijn je beschikbare gebouwen.",
+      "placeBranchletHint": "Rails to the North — klik op een gemarkeerde stad op de strook",
+      "clickTown": "Klik op een stad",
+      "clickWorker": "Klik op een arbeider op je spelersbord",
+      "clickCardToDiscard": "Klik op een kaart op je spelersbord om die af te leggen",
+      "cardActionsHint": "Kaartacties — selecteer en klik dan op een kaart op je spelersbord",
+      "otherActions": "Andere acties"
+    },
+    "buildingInfo": {
+      "label": "{building} — ambachtslieden: {craftsmen}; {hand}; punten: {points}",
+      "handNone": "geen handlimiet",
+      "handGreen": "groene hand",
+      "handBlack": "zwarte hand",
+      "handBoth": "groene of zwarte hand"
+    },
+    "debug": {
+      "title": "Debug",
+      "showGameData": "Spelgegevens tonen",
+      "current": "huidige:",
+      "status": "status:",
+      "actions": "acties:"
+    },
+    "ended": {
+      "title": "Spel voorbij",
+      "total": "Totaal",
+      "breakdown": "Verdeling",
+      "tie": "Gelijkspel tussen {players}"
+    },
+    "history": {
+      "empty": "Nog geen acties",
+      "undo": "Ongedaan maken",
+      "endTurn": "Beurt beëindigen",
+      "skip": "Overslaan",
+      "resign": "Opgeven"
+    },
+    "map": {
+      "removeHazard": "Gevaar verwijderen",
+      "tradeWithTribe": "Handelen met de stam",
+      "placeBuilding": "Gebouw {building} plaatsen",
+      "useBuilding": "Gebouw {building} gebruiken",
+      "moveHere": "Hierheen verplaatsen ({cost}$)",
+      "moveHereWithFees": "Hierheen verplaatsen ({cost}$; {fees})",
+      "playerFee": "{fee}$ aan {player}",
+      "deliveryOption": "Certificaten: {certificates} → ${payout}",
+      "stayHere": "Hier blijven"
+    },
+    "playerTable": {
+      "handValue": "handwaarde {value}",
+      "certs": "certificaten {temp}/{total}",
+      "engine": "locomotief {space}",
+      "drawPileTitle": "Trekstapel ({count}) — klik om te bekijken",
+      "discardPileTitle": "Aflegstapel ({count}) — klik om te bekijken",
+      "jobMarketToken": "Arbeidsmarktmarker",
+      "hazardTitle": "{type} ({hand}) {points} punten",
+      "teepeeTitle": "{teepee}-tipi",
+      "drawPileValueOrder": "Trekstapel (op waarde gesorteerd)",
+      "discardPile": "Aflegstapel"
     }
   },
   "row2": {
@@ -602,6 +699,9 @@
         "11a": "Gebouw 11a<br/><strong>Action:</strong> Verwijder een ramp voor 2 dollar<br/><strong>Action:</strong> Verwijder een ramp voor 2 dollar",
         "13a": "Gebouw 13a<br/><strong>Action:</strong> Ontvang 1 dollar per ambachtsman<br/><strong>Action:</strong> Verplaats rancher 1 vooruit",
         "13b": "Gebouw 13b<br/><strong>Action:</strong> Ontvang 2 dollars per opgewaardeerd treinstation<br/><strong>Action:</strong> Ontvang een wisselfiche"
+      },
+      "location": {
+        "FLOOD-RISK-1": "<br/><br/><strong>Risicoactie:</strong> Leg een runderkaart af om je certificaatsteen 1 vakje omlaag te zetten"
       }
     },
     "cattleType": {

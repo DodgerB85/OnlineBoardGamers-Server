@@ -265,7 +265,7 @@ class TestSFserializeGame(PrintSuccessTestCase):
         self.assertFalse(result["pendingFinish"])
         self.assertTrue(result["learningGame"])
         self.assertTrue(result["experiencedGame"])
-        self.assertEqual(result["latestUpdateElapsedTimeString"], "1m 0s")
+        self.assertEqual(result["latestUpdateElapsedTimeString"], "1min 0s")
 
     def test_missing_player_is_not_involved(self):
         creator = User.objects.create_user(username="creator", password="testpass123")

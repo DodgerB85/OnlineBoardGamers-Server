@@ -1,20 +1,21 @@
 <script setup>
 import { onMounted, onBeforeUnmount, computed, watch } from "vue"
 import * as model from "../js/URRmodel.js"
+import * as funcs from "../js/URRfuncs.js"
 import * as IO from "../backend/URR_IO.js"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
 
 store.replayStep.index = 0
 const step = computed({ get: () => store.replayStep.index, set: (index) => { store.replayStep.index = index } })
-const liveSnapshot = model.snapshotState()
+const liveSnapshot = funcs.simpleExportWholeURRmodel()
 
 onMounted(applyStep)
 watch(step, applyStep)
 // The menu can close replay without reloading; never leave a historical
 // position available for live moves.
 onBeforeUnmount(() => {
-	model.restoreState(liveSnapshot)
+	funcs.simpleImportWholeURRmodel(liveSnapshot)
 	IO.checkForLatestData()
 })
 
@@ -23,13 +24,10 @@ function maxStep() {
 }
 
 function applyStep() {
-	const entry = store.history[step.value]
-	if (!entry) return
+	const snapshot = store.historySnapshotAt(step.value)
+	if (!snapshot?.players) return
 	try {
-		const snapshot = JSON.parse(entry[2])
-		if (snapshot && snapshot.players) {
-			model.restoreState(snapshot)
-		}
+		model.restoreState(snapshot)
 	} catch (e) {
 		console.error("Unable to restore URR replay snapshot:", e)
 	}
@@ -53,14 +51,14 @@ function exitReplay() {
 </script>
 
 <template>
-	<div id="replayArea" aria-label="Replay controls">
-		<b>Replay</b>
-		<button class="actionsLineButton" :disabled="step === 0" @click="prev">&lt; Prev</button>
-		<input aria-label="Replay step" type="range" min="0" :max="Math.max(0, maxStep())" v-model.number="step" />
-		<span>Step {{ step }} / {{ maxStep() }}</span>
-		<button class="actionsLineButton" :disabled="step >= maxStep()" @click="next">Next &gt;</button>
-		<button class="actionsLineButton" @click="store.viewSettings.showHistory = !store.viewSettings.showHistory">History</button>
-		<button class="actionsLineButton" @click="exitReplay">Exit Replay</button>
+	<div id="replayArea" :aria-label="$t('replay.aria')">
+		<b>{{ $t("replay.title") }}</b>
+		<button class="actionsLineButton" :disabled="step === 0" @click="prev">&lt; {{ $t("replay.prev") }}</button>
+		<input :aria-label="$t('replay.stepAria')" type="range" min="0" :max="Math.max(0, maxStep())" v-model.number="step" />
+		<span>{{ $t("replay.step", { step, total: maxStep() }) }}</span>
+		<button class="actionsLineButton" :disabled="step >= maxStep()" @click="next">{{ $t("replay.next") }} &gt;</button>
+		<button class="actionsLineButton" @click="store.viewSettings.showHistory = !store.viewSettings.showHistory">{{ $t("replay.history") }}</button>
+		<button class="actionsLineButton" @click="exitReplay">{{ $t("replay.exit") }}</button>
 	</div>
 </template>
 

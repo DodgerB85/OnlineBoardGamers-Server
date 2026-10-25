@@ -93,6 +93,7 @@ function getDiscRadius() {
 .score {
 	position: absolute;
 	font-size: larger;
+	transition: top 0.3s ease, left 0.3s ease;
 }
 
 .scoreDisc {

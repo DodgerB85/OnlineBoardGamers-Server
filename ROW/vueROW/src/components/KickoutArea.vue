@@ -6,11 +6,13 @@
  * solo vote.
  */
 import { computed, onUnmounted, ref, watch } from "vue"
+import { useI18n } from "vue-i18n"
 import * as rf from "../js/ROWreference"
 import * as controller from "../js/ROWcontroller"
 import { useModelStore } from "../stores/ROWstore.js"
 import { usePersonalStore } from "../stores/ROWpersonal.js"
 
+const { t } = useI18n()
 const store = useModelStore()
 const personal = usePersonalStore()
 
@@ -83,28 +85,28 @@ onUnmounted(() => clearInterval(timer))
 <template>
 	<div v-if="visible" id="kickoutArea">
 		<template v-if="confirming">
-			<div>This will permanently remove <b>{{ target }}</b> from the game. <b>It cannot be undone.</b></div>
-			<div>Check the chat in case they gave a reason for their absence; consider a short grace period.</div>
-			<button class="ko" :disabled="submitting" @click="confirmKickout">Permanently kick out {{ target }}</button>
-			<button class="ko" :disabled="submitting" @click="confirming = false">Back</button>
+			<div>{{ t('kickout.removeWarning', { player: target }) }}</div>
+			<div>{{ t('kickout.chatHint') }}</div>
+			<button class="ko" :disabled="submitting" @click="confirmKickout">{{ t('kickout.kickOut', { player: target }) }}</button>
+			<button class="ko" :disabled="submitting" @click="confirming = false">{{ t('app.back') }}</button>
 		</template>
 		<template v-else-if="personal.kickoutRequired === 1">
-			<div>Player <b>{{ target }}</b> has used all the standard kickout time.</div>
-			<div>Remaining flex-time: {{ duration(Math.max(0, personal.secondsToNextKickout)) }}</div>
-			<button class="ko" @click="cancel">Not now - allow more time</button>
+			<div>{{ t('kickout.standardTimeUsed', { player: target }) }}</div>
+			<div>{{ t('kickout.flexTime', { time: duration(Math.max(0, personal.secondsToNextKickout)) }) }}</div>
+			<button class="ko" @click="cancel">{{ t('kickout.notNow') }}</button>
 		</template>
 		<template v-else>
-			<div>Player <b>{{ target }}</b> has timed out.</div>
+			<div>{{ t('kickout.timedOut', { player: target }) }}</div>
 			<template v-if="canKickoutNow || isLastVote">
-				<div>Votes: {{ voters.length }}/{{ store.kickoutVoteThreshold }} ({{ voters.join(", ") || "none" }})</div>
-				<button class="ko" :disabled="submitting" @click="vote">Confirm kickout</button>
+				<div>{{ t('kickout.votes', { votes: voters.length, threshold: store.kickoutVoteThreshold, voters: voters.join(", ") || t('kickout.none') }) }}</div>
+				<button class="ko" :disabled="submitting" @click="vote">{{ t('kickout.confirmKickout') }}</button>
 			</template>
 			<template v-else>
-				<div>Votes: {{ voters.length }}/{{ store.kickoutVoteThreshold }} ({{ voters.join(", ") || "none" }})</div>
-				<div v-if="myVote">You have voted to kick out <b>{{ target }}</b>. You can kick them out directly in {{ duration(soloRemaining) }} if others do not also vote.</div>
-				<button v-else class="ko" :disabled="submitting" @click="vote">Vote to kick out {{ target }}</button>
+				<div>{{ t('kickout.votes', { votes: voters.length, threshold: store.kickoutVoteThreshold, voters: voters.join(", ") || t('kickout.none') }) }}</div>
+				<div v-if="myVote">{{ t('kickout.voted', { player: target, time: duration(soloRemaining) }) }}</div>
+				<button v-else class="ko" :disabled="submitting" @click="vote">{{ t('kickout.voteToKick', { player: target }) }}</button>
 			</template>
-			<button class="ko" @click="cancel">Not now - allow more time</button>
+			<button class="ko" @click="cancel">{{ t('kickout.notNow') }}</button>
 		</template>
 	</div>
 </template>

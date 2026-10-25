@@ -149,6 +149,16 @@
                         </div>
                     </div>
                 </div>
+                <div class="form-row">
+                    <label class="form-label" for="reducedMotion">{% translate "Motion" %}</label>
+                    <div class="field">
+                        <label for="reducedMotion">
+                            <input type="checkbox" id="reducedMotion" name="reducedMotion" value="1" {% if reducedMotion %}checked{% endif %} />
+                            <span>{% translate "Prefer reduced motion" %}</span>
+                        </label>
+                        <div class="opt-help">{% translate "Disables most animations. Off by default." %}</div>
+                    </div>
+                </div>
                 <div style="margin-top:16px;">
                     <button type="submit" class="button button-primary">{% translate "Update Antiquity Preferences" %}</button>
                 </div>

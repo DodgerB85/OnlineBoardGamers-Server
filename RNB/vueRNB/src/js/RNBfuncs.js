@@ -18,6 +18,7 @@ import * as hd from "./RNBhex"
 import * as loc from "./RNBlocation"
 import * as stack from "./RNBstack"
 import * as context from "./RNBcontext"
+import i18n from "../i18n"
 import * as wonder from "./RNBwonder"
 
 import { useModelStore } from "../stores/RNBstore.js"
@@ -106,7 +107,7 @@ export function decompressChatData(data) {
 		chatArray[i][1] = currentFullTime
 	}
 
-	chatArray.push(["WelcomeBot", personal.gameCreationTimestamp, "Welcome to Roads & Boats Online!\n\nIf you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"])
+	chatArray.push(["WelcomeBot", personal.gameCreationTimestamp, i18n.global.t("io.welcomeChat")])
 
 	return chatArray
 }
@@ -166,6 +167,7 @@ export function clearMap(keepHistory) {
 	store.mapData.zoomData.hexID = -1
 	// Remove edgeData
 	store.mapData.edgeData.splice(0)
+	map.refreshUseTrainsFlag()
 	// Remove all hexes
 	store.mapData.hexData.splice(0)
 }
@@ -226,6 +228,9 @@ export function importStartingMap(inputArr) {
 	hd.setNeighbours()
 	map.updateEdgeData()
 	hd.updateAllHexRawXY()
+
+	// TN = train tracks: [[x1, y1, x2, y2, lane], ...]
+	map.applyTrainTracksFromMap(store.mapData.setupData.TN)
 
 	// if gameID is -1, load the home markers to show the locations
 	if (personal.gameID === -1 || personal.showMapOnly) {
@@ -583,6 +588,11 @@ export async function simpleImportWholeRNBmodelNoCompression(inputModel, keepHis
 	}
 
 	wonder.resolveAllTransportersForCurrentTerrain()
+
+	// Tracks are map data - clearMap() blanked the flag, so re-derive it (see
+	// simpleImportWholeRNBmodel)
+	map.applyTrainTracksFromMap(store.mapData.setupData.TN)
+	map.refreshUseTrainsFlag()
 }
 
 export async function simpleImportWholeRNBmodel(inputBase64, keepHistory = false) {
@@ -694,6 +704,12 @@ export async function simpleImportWholeRNBmodel(inputBase64, keepHistory = false
 	wonder.syncPoldersToBrickCount()
 	// Fix any boat left on terrain that polder syncing just invalidated
 	wonder.resolveAllTransportersForCurrentTerrain()
+
+	// Train tracks are map data, not turn data: clearMap() above blanked the flag,
+	// and a reset point saved before the tracks were built would drop them entirely.
+	// Re-apply from the map definition so they survive every reset.
+	map.applyTrainTracksFromMap(store.mapData.setupData.TN)
+	map.refreshUseTrainsFlag()
 }
 
 export function exportRNBmodel(forGameOver) {

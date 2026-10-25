@@ -3,6 +3,8 @@ import { usePersonalStore } from "../stores/TGZpersonal.js"
 
 import * as IO from "./TGZ_IO"
 import * as view from "./TGZview"
+import i18n from "../i18n"
+const t = i18n.global.t
 
 export var TGZwebSocket
 let TGZconnectionPromise = null // Track the in-progress connection
@@ -121,7 +123,7 @@ export async function StartWebSocket() {
 				resolve(null)
 			}
 
-			TGZwebSocket.onerror = (evt) => {
+			TGZwebSocket.onerror = (_evt) => {
 				cleanup()
 				handleFailure("Socket Error (Blocked)")
 				resolve(null)
@@ -183,7 +185,7 @@ async function TGZwebSocketOnInfo(IncomingInfo) {
 						let decodedGameName = tempElement.textContent
 
 						Notification.requestPermission(function (_status) {
-							const title = "It is your turn in The Great Zimbabwe"
+							const title = t("websocket.yourTurn")
 
 							const options = {
 								body: "" + decodedGameName + ": " + store.gameflow.turn + " - " + view.phaseStr(),

@@ -28,6 +28,9 @@ import * as IO from "./js/CNS_IO"
 import * as WS from "./js/CNSwebsocket"
 import * as replay from "./js/CNSreplay"
 
+import { useI18n } from "vue-i18n"
+const { t } = useI18n()
+
 import { useModelStore } from "./stores/CNSstore.js"
 const store = useModelStore()
 
@@ -173,12 +176,12 @@ async function initGame() {
 
 	// If new, save, otherwise, import data
 	if (window.initData.pov == undefined && window.initData.gameData === "") {
-		store.topMenuViews.rewindErrorText = "The game has not yet started"
+		store.topMenuViews.rewindErrorText = t("io.gameNotStarted")
 		// Create the <h1> element
 		var heading = document.createElement("h1")
 
 		// Set the text content of the <h1> element
-		heading.textContent = "The game has not yet started"
+		heading.textContent = t("io.gameNotStarted")
 
 		// Get a reference to the body element
 		var body = document.body

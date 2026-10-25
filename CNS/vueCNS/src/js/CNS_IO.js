@@ -4,6 +4,7 @@ import * as controller from "./CNScontroller"
 import * as rf from "./CNSreference"
 import * as model from "./CNSmodel"
 import * as Bot from "./CNSbot"
+import i18n from "../i18n"
 
 import { useModelStore } from "../stores/CNSstore.js"
 
@@ -32,14 +33,14 @@ export async function submitBug(bugContent) {
 		}
 		const data = await response.json()
 		if (data.bugEntrySuccess) {
-			store.topMenuViews.bugSuccessText = "Your bug report has been submitted"
-			store.topMenuViews.successText = "Your bug report has been submitted"
+			store.topMenuViews.bugSuccessText = i18n.global.t("io.bugSubmitted")
+			store.topMenuViews.successText = i18n.global.t("io.bugSubmitted")
 			store.topMenuViews.showLoader = false
 			store.topMenuViews.showBug = false
-		} else store.topMenuViews.bugErrorText = "Sorry, there was a problem.<br/>Please email the webmaster directly or report on the Discord"
+		} else store.topMenuViews.bugErrorText = i18n.global.t("io.bugError")
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.topMenuViews.bugErrorText = "Sorry, there was a problem.<br/>Please email the webmaster directly or report on the Discord"
+		store.topMenuViews.bugErrorText = i18n.global.t("io.bugError")
 	}
 	store.topMenuViews.showLoader = false
 }
@@ -112,7 +113,7 @@ export async function saveGame(saveRewind, saveContext) {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			alert("It appears you have an older version of the game. Please refresh the page")
+			alert(i18n.global.t("io.olderVersion"))
 			return
 		}
 		personal.latestUpdate = data.latestUpdate
@@ -124,7 +125,7 @@ export async function saveGame(saveRewind, saveContext) {
 		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		alert("Error saving the game")
+		alert(i18n.global.t("io.errorSaving"))
 	}
 }
 
@@ -152,7 +153,7 @@ export async function sendChatMessage(newEntry) {
 		}
 		const data = await response.json()
 		if (!data.chatData) {
-			alert("Sorry, there was a problem. Please email the webmaster directly")
+			alert(i18n.global.t("io.webmasterProblem"))
 			return
 		}
 		store.chatData = funcs.decompressChatData(data.chatData)
@@ -160,7 +161,7 @@ export async function sendChatMessage(newEntry) {
 		store.topMenuViews.showLoader = false
 	} catch (error) {
 		console.error("Error sending chat:", error)
-		alert("Error sending chat message")
+		alert(i18n.global.t("io.errorSendingChat"))
 	}
 }
 
@@ -251,13 +252,13 @@ export async function saveNotes() {
 			throw new Error("Network response was not ok")
 		}
 		if (!data.notePosted) {
-			store.topMenuViews.errorText = "Sorry, there was a problem. Please email the webmaster directly"
+			store.topMenuViews.errorText = i18n.global.t("io.webmasterProblem")
 			return
 		}
 		store.topMenuViews.showLoader = false
 	} catch (error) {
 		console.error("Error saving Notes:", error)
-		store.topMenuViews.errorText = "Error: Sorry, there was a problem. Please email the webmaster directly"
+		store.topMenuViews.errorText = i18n.global.t("io.errorSavingNotes")
 
 	}
 }
@@ -270,7 +271,7 @@ export async function loadRewind() {
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
-		store.topMenuViews.rewindErrorText = "Error: Game Ended"
+		store.topMenuViews.rewindErrorText = i18n.global.t("io.gameEnded")
 		store.topMenuViews.performingRewind = false
 		store.topMenuViews.showLoader = false
 		return
@@ -291,7 +292,7 @@ export async function loadRewind() {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			alert("It appears you have an older version of the game. Please refresh the page")
+			alert(i18n.global.t("io.olderVersion"))
 			store.topMenuViews.performingRewind = false
 			return
 		}
@@ -322,7 +323,7 @@ export async function loadRewind() {
 		store.topMenuViews.showLoader = false
 	} catch (error) {
 		console.error("Error rewinding data:", error)
-		alert("Error rewinding the game")
+		alert(i18n.global.t("io.errorRewinding"))
 		store.topMenuViews.performingRewind = false
 	}
 }
@@ -367,7 +368,7 @@ async function updateDataFromLoadRewind() {
 		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error updating data:", error)
-		alert("Error updating the game")
+		alert(i18n.global.t("io.errorUpdating"))
 		store.topMenuViews.performingRewind = false
 		controller.startPlayerTurn()
 	}
@@ -398,7 +399,7 @@ export async function resign() {
 		const data = await response.json()
 	} catch (error) {
 		console.error("Error resiging:", error)
-		alert("Error Resigning")
+		alert(i18n.global.t("io.errorResigning"))
 	}
 }
 
@@ -427,14 +428,14 @@ export async function kickout() {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			alert("It appears you have an older version of the game. Please refresh the page")
+			alert(i18n.global.t("io.olderVersion"))
 			return
 		}
 		if (data.voteCast) {
 			// Vote recorded but no kickout (yet): show the updated vote state
 			store.kickoutVotesData = JSON.parse(data.votesData)
 			store.kickoutVoteThreshold = data.threshold
-			store.topMenuViews.tradeSuccessText = "Kickout vote recorded"
+			store.topMenuViews.tradeSuccessText = i18n.global.t("io.kickoutVoteRecorded")
 			store.topMenuViews.showLoader = false
 			return data
 		}
@@ -443,7 +444,7 @@ export async function kickout() {
 		return data
 	} catch (error) {
 		console.error("Error kicking:", error)
-		alert("Error Kicking")
+		alert(i18n.global.t("io.errorKicking"))
 		return false
 	}
 }
@@ -522,7 +523,7 @@ export async function submitStatsExcludeConsent() {
 
 	let checkbox = document.querySelector("#checkStatsExclude")
 	if (!checkbox || !checkbox.checked) {
-		store.topMenuViews.rewindErrorText = "Please check the box first"
+		store.topMenuViews.rewindErrorText = i18n.global.t("io.checkBoxFirst")
 		return
 	}
 	let csrftoken = funcs.getCookie("csrftoken")
@@ -571,7 +572,7 @@ export async function castVote(topic) {
 			headers: { "X-CSRFToken": csrftoken },
 		})
 		if (!response.ok) {
-			store.topMenuViews.rewindErrorText = "Error; Contact Admin"
+			store.topMenuViews.rewindErrorText = i18n.global.t("io.contactAdmin")
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
@@ -579,7 +580,7 @@ export async function castVote(topic) {
 		store.topMenuViews.showLoader = false
 		console.log(data)
 		if (data.voteChanged === true) {
-			store.topMenuViews.tradeSuccessText = "Vote Saved"
+			store.topMenuViews.tradeSuccessText = i18n.global.t("io.voteSaved")
 
 			if (topic === rf.DELETE_VOTE_TOPIC) {
 				personal.votedToDelete = true
@@ -589,10 +590,10 @@ export async function castVote(topic) {
 				personal.votedToExclude = true
 				store.statsExcludeVotesData = JSON.parse(data.votesData)
 			}
-		} else store.topMenuViews.rewindErrorText = "Error; Contact Admin"
+		} else store.topMenuViews.rewindErrorText = i18n.global.t("io.contactAdmin")
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.topMenuViews.rewindErrorText = "Error; Contact Admin"
+		store.topMenuViews.rewindErrorText = i18n.global.t("io.contactAdmin")
 		return false
 	}
 }

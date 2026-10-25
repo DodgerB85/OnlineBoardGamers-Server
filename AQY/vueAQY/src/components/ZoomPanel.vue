@@ -113,7 +113,7 @@ function getExplorerID() {
 
 <template>
 	<div id="zoomPanelDiv">
-		<div id="noZoomHexDiv" v-if="store.zoomPanelInfo.hexID === -1">Mouse over or long press a hex to view it in detail</div>
+		<div id="noZoomHexDiv" v-if="store.zoomPanelInfo.hexID === -1">{{ $t("zoomPanel.hexHint") }}</div>
 		<svg v-if="store.zoomPanelInfo.hexID >= 0" id="mapSVG" viewBox="-51 -51 102 102">
 			<!-- MAP LAYER 0 - THE BIG HEX, ROTATED AS REQUIRED-->
 			<!-- IN THE ZOOM PANEL, THIS SHOULD BE JUST THE TERRAIN IMAGE -->

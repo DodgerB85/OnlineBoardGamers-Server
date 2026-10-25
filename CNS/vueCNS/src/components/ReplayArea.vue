@@ -16,8 +16,10 @@ import { usePersonalStore } from "../stores/CNSpersonal.js";
 const personal = usePersonalStore()
 
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-const copyMessage = ref('https://www.onlineboardgamers.com/TGZ/110/replay/5 Copied to Clipboard');
+const { t } = useI18n();
+const copyMessage = ref('');
 
 function copyToClipboard() {
     const textToCopy =
@@ -35,7 +37,7 @@ function copyToClipboard() {
 
     document.body.removeChild(textarea);
 
-    copyMessage.value = textToCopy + " Copied to Clipboard"
+    copyMessage.value = t("replay.copiedToClipboard", { url: textToCopy })
 
     const button = document.getElementById("copyURLbutton");
     const popup = document.getElementById("popup");
@@ -70,7 +72,7 @@ function copyToClipboard() {
 <template>
     <template v-if="store.topMenuViews.showReplay">
         <button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="store.replayStep === 0"
-            @click="replay.performStep(-999)">Back to my last move</button>
+            @click="replay.performStep(-999)">{{ $t("replay.backToMyLastMove") }}</button>
         <button class="actionsLineButton" :disabled="store.replayStep === 0"
             @click="replay.performStep(-99)">|&lt;</button>
         <button class="actionsLineButton" :disabled="store.replayStep === 0"
@@ -88,14 +90,13 @@ function copyToClipboard() {
         <div class="copyGameButtonDiv" v-if="personal.name != undefined">
             <button @click="store.topMenuViews.replayAtBottom = !store.topMenuViews.replayAtBottom"
                 class="actionsLineButton">
-                <template v-if="!store.topMenuViews.replayAtBottom">Move UI<br />to Bottom <b>▼</b></template>
-                <template v-if="store.topMenuViews.replayAtBottom">Move UI<br />to Top <b>▲</b></template>
+                <template v-if="!store.topMenuViews.replayAtBottom">{{ $t("replay.moveUi") }}<br />{{ $t("replay.toBottom") }} <b>▼</b></template>
+                <template v-if="store.topMenuViews.replayAtBottom">{{ $t("replay.moveUi") }}<br />{{ $t("replay.toTop") }} <b>▲</b></template>
             </button>
         </div>
 
-        <br />Use the arrows to step through the game. This will not alter the current game in any way
-        <br /><button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">Copy URL to this move to
-            clipboard</button>
+        <br />{{ $t("replay.useArrows") }}
+        <br /><button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">{{ $t("replay.copyUrl") }}</button>
         <div id="popup" class="popup">{{ copyMessage }}</div>
 
         <div v-if="!store.topMenuViews.generatingReplay" class="replayHistoryEntry">

@@ -4,6 +4,7 @@ import json
 import logging
 import time
 from typing import TYPE_CHECKING, cast
+from urllib.parse import urlparse
 
 from decouple import config
 from django.contrib.auth.decorators import login_required
@@ -24,6 +25,7 @@ from Lobby.gameViewHelpers import (
     shared_save_notes,
 )
 from Lobby.models import Game, GamePlayer, Profile, User
+from Lobby.sharedFunctions.permissions import is_game_admin, is_site_admin
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_updateFlexiTime,
@@ -35,14 +37,11 @@ from Lobby.sharedFunctions.sharedRefs import SR_getFCMstartingOptionsHTML
 
 from . import FCMconstants as rfFCM
 from .common import create_fcm_game
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 if TYPE_CHECKING:
     from Lobby.presenters import FCMpresenter
 
-FCMsuperUsers = ["BotKickStarter"]
-# Accounts allowed to drive developer tooling. Kept here so the "Reset AI"
-# board-replacement path cannot be reached by an ordinary player's save.
-FCMadminUsers = ["admin", "DodgerB"]
 USE_NEW_CODE = False
 
 logger = logging.getLogger(__name__)
@@ -68,8 +67,7 @@ def _syncErrorResponse(label, request, currentGame, presenter, jsonData):
 
 def _canActInGame(request, currentGame):
     # Kicked players stay included: they can still chat and resign
-    username = request.user.username
-    return username in FCMsuperUsers or username in FCMadminUsers or currentGame.players.filter(player=request.user).exists()
+    return is_game_admin(request.user) or currentGame.players.filter(player=request.user).exists()
 
 
 def _resolvePassKickoutTarget(request, currentGame, presenter, jsonData):
@@ -225,7 +223,74 @@ def FCMstatGames(request):
     )
 
 
-@login_required()
+@login_required
+@require_POST
+def createFCMspinoff(request):
+    jsonData = json.loads(request.body)
+    if jsonData.get("action") != "copyGame":
+        return JsonResponse({"error": "Wrong request."}, status=400)
+
+    currentGame = Game.objects.filter(id=jsonData.get("gameID"), gameCode="FCM").first()
+    if currentGame is None:
+        raise Http404(gettext("Game does not exist"))
+    if not currentGame.players.filter(player=request.user).exists():
+        return JsonResponse({"error": "Not a player in this game."}, status=403)
+    if not jsonData.get("data"):
+        return JsonResponse({"error": "No game data."}, status=400)
+
+    startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    if rf.SO_TRAINING_GAME not in startingOptions:
+        startingOptions = [rf.SO_TRAINING_GAME, *startingOptions]
+    maxPlayers = currentGame.maxPlayers
+    pov = int(jsonData.get("pov", 0))
+    if pov < 0 or pov >= maxPlayers:
+        pov = 0
+    now = int(time.time()) * 1000
+    shadowNames = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
+
+    with transaction.atomic():
+        newGame = Game(
+            gameCode="FCM",
+            gameName="[Copy] - " + (currentGame.gameName or f"Game {currentGame.id}"),
+            gameDescription=currentGame.gameDescription,
+            creator=request.user,
+            host=request.user,
+            gamePace=currentGame.gamePace,
+            turn=int(jsonData.get("turn", currentGame.turn)),
+            phase=int(jsonData.get("phase", currentGame.phase)),
+            created=now,
+            latestUpdate=str(now),
+            playerOrderSeed=currentGame.playerOrderSeed,
+            startingOptions=json.dumps(startingOptions, separators=(",", ":")),
+            maxPlayers=maxPlayers,
+            gameStatus="ACTIVE",
+            kickoutDuration=currentGame.kickoutDuration,
+            zoomLevels=currentGame.zoomLevels,
+            startingMap=currentGame.startingMap,
+            gameData=jsonData["data"],
+            statsExcludedGame=True,
+            FCMnotificationSuppression="0" * maxPlayers,
+        )
+        newGame.save()
+
+        shadowIndex = 0
+        for seat in range(maxPlayers):
+            if seat == pov:
+                GamePlayer.objects.create(game=newGame, player=request.user, seat_order=seat, is_current=True)
+            else:
+                GamePlayer.objects.create(
+                    game=newGame,
+                    player=User.objects.get(username=shadowNames[shadowIndex]),
+                    seat_order=seat,
+                )
+                shadowIndex += 1
+
+        newGame.rewindData = json.dumps([jsonData["data"]])
+        newGame.save()
+
+    return JsonResponse({"response": "ok", "newID": newGame.id})
+
+
 def createFCMgame(request):
     return create_fcm_game(request)
 
@@ -237,7 +302,6 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
         "FCM",
         default_zoom=200,
         settings_debug_key="FCM_USE_SOURCE_CODE",
-        super_users=FCMsuperUsers,
         clear_chat_notification=False,
     )
     if isinstance(result, HttpResponseRedirect):
@@ -247,10 +311,6 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
     presenter = cast("FCMpresenter", currentGame.presenter())
     all_players = result["all_players"]
     username = request.user.username
-
-    # FCMtourneyAdmin super user check (needs game data)
-    if currentGame.relatedMainTournament and username == "FCMtourneyAdmin" and "FCMtourneyAdmin" not in FCMsuperUsers:
-        FCMsuperUsers.append("FCMtourneyAdmin")
 
     finishedGame = currentGame.gameStatus == "FINISHED"
     USE_NEW_CODE = int(currentGame.created) > rfFCM.TS_USE_NEW_CODE
@@ -287,7 +347,20 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
     user_profile = result["user_profile"]
     user_id = request.user.id
 
-    highContrastBoardItems = user_profile.highContrastBoardItems
+    preferredFCMoptions = []
+    if user_profile.preferredFCMoptions:
+        try:
+            preferredFCMoptions = json.loads(user_profile.preferredFCMoptions)
+        except (TypeError, ValueError):
+            preferredFCMoptions = []
+    if not isinstance(preferredFCMoptions, list):
+        preferredFCMoptions = []
+    preferredFCMoptions = preferredFCMoptions[:3]
+    while len(preferredFCMoptions) < 3:
+        preferredFCMoptions.append([-1, 0, 0][len(preferredFCMoptions)])
+    preferredRestaurantColour = preferredFCMoptions[0]
+    highContrastBoardItems = bool(preferredFCMoptions[1])
+    prefersReducedMotion = bool(preferredFCMoptions[2])
     showAssistance = "true" if user_profile.showAssistance else "false"
     now = int(time.time()) * 1000
 
@@ -299,7 +372,6 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
     moveData = ""
     currentNotes = ""
     pov = -9
-    preferredRestaurantColour = -1
     allPlayerListBySeat = presenter.getAllPlayersOrderedySeatInArray()
     kickoutRequired = 0
     chatNotification = False
@@ -327,7 +399,7 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
 
     involvedPlayer = result["is_involved"]
     # Re-check involvement if FCMtourneyAdmin was added after helper ran
-    if not involvedPlayer and username in FCMsuperUsers:
+    if not involvedPlayer and is_game_admin(request.user):
         involvedPlayer = True
 
     if involvedPlayer:
@@ -339,7 +411,7 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
             rewindHostPossible = presenter.getRewindHostPossible()
             rewindHostHTML = presenter.getRewindHostHTML()
 
-        if username in FCMsuperUsers:
+        if is_game_admin(request.user):
             rewindPanelType = 2
             rewindHostPossible = True
             rewindHostHTML = presenter.getRewindHostHTML()
@@ -347,7 +419,6 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
         pov = presenter.seatPosition(username)
         currentRewindConsent = presenter.getCurrentRewindConsent(username)
 
-        preferredRestaurantColour = user_profile.preferredRestaurantColour
         liveNotification = user_profile.liveNotification
 
         moveData = ""
@@ -410,6 +481,7 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
             "kickoutVotesData": json.dumps(presenter.getKickoutVotesData()),
             "tournamentGame": tournamentGame,
             "highContrastBoardItems": highContrastBoardItems,
+            "prefersReducedMotion": prefersReducedMotion,
             "startingOptionsHTML": startingOptionsHTML,
             "statsExcludedGame": statsExcludedGame,
             "displayNames": displayNames,
@@ -459,9 +531,6 @@ def _processTurn(request):
         raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("FCMpresenter", currentGame.presenter())
-
-    if currentGame.relatedMainTournament and request.user.username == "FCMtourneyAdmin":
-        FCMsuperUsers.append("FCMtourneyAdmin")
 
     # Spectators may poll loadNew; every other action mutates the game
     if jsonData["action"] != "loadNew" and not _canActInGame(request, currentGame):
@@ -723,7 +792,7 @@ def _processTurn(request):
         # from the server's, so it rightly rejects a different map - but a
         # deliberate reset has to be able to replace startingMap, so it carries its
         # own flag and is restricted to admin accounts.
-        isGameReset = bool(jsonData.get("resetGame")) and (request.user.username in FCMsuperUsers or request.user.username in FCMadminUsers)
+        isGameReset = bool(jsonData.get("resetGame")) and is_game_admin(request.user)
 
         if "mapTiles" in jsonData and jsonData["mapTiles"] and currentGame.startingMap != "" and not isGameReset:
             incomingTiles = jsonData["mapTiles"]
@@ -757,7 +826,7 @@ def _processTurn(request):
             currentGame.startingMap = json.dumps(jsonData["mapTiles"], separators=(",", ":"))
 
         nameToUse = request.user.username
-        if request.user.username in FCMsuperUsers:
+        if is_game_admin(request.user):
             nameToUse = jsonData["BKSN"]
             if nameToUse.startswith("FCMtourneyAdmin/"):
                 name_parts = nameToUse.split("/", 1)
@@ -877,7 +946,7 @@ def _processTurn(request):
         # If it WAS a working day save the side data (pre moves) - UNLESS it is now working day again
         # So also check you're not coming from Turn Order
         if not trainingGame and nameToUse != "" and oldPhase != rfFCM.PHASE_TURN_ORDER and jsonData["phase"] != rfFCM.PHASE_RESTRUCTURING and (jsonData["phase"] == rfFCM.PHASE_WORKING_DAY or oldPhase == rfFCM.PHASE_WORKING_DAY) and jsonData["sideData"] and jsonData["sideData"] != "":
-            preMoveArray = json.loads(gzip.decompress(bytearray(base64.b64decode(jsonData["sideData"]))).decode("utf-8"))
+            preMoveArray = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(jsonData["sideData"]))).decode("utf-8"))
             # currentGame.updateWholeMoveData(nameToUse, json.dumps(preMoveArray, separators=(",", ":")))
             phases = [
                 rfFCM.PHASE_WORKING_DAY,
@@ -1024,7 +1093,7 @@ def _processTurn(request):
 
         if not continueFromStalledGame:
             passKickoutTarget = ""
-            if request.user.username not in FCMsuperUsers and jsonData.get("passKickoutFor"):
+            if not is_game_admin(request.user) and jsonData.get("passKickoutFor"):
                 passKickoutTarget, passKickoutReject = _resolvePassKickoutTarget(request, currentGame, presenter, jsonData)
                 if passKickoutReject:
                     return JsonResponse({"syncError": True}, safe=False)
@@ -1033,7 +1102,7 @@ def _processTurn(request):
             currentGame.phase = jsonData["phase"]
 
             nameToUpdate = request.user.username
-            if request.user.username in FCMsuperUsers:
+            if is_game_admin(request.user):
                 nameToUpdate = jsonData["BKSN"]
                 if nameToUpdate.startswith("FCMtourneyAdmin/"):
                     name_parts = nameToUpdate.split("/", 1)
@@ -1070,7 +1139,7 @@ def _processTurn(request):
                     rfFCM.PHASE_CHOOSE_CEO_BONUS,
                 ]
             # Decompress the incoming data
-            decompressedData = json.loads(gzip.decompress(bytearray(base64.b64decode(jsonData["moveData"]))).decode("utf-8"))
+            decompressedData = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(jsonData["moveData"]))).decode("utf-8"))
 
             presenter.insertPlayerMoveData(nameToUpdate, phaseArr, decompressedData)
 
@@ -1078,7 +1147,7 @@ def _processTurn(request):
             if currentGame.phase != rfFCM.PHASE_SETUP_RESTAURANT1 and currentGame.phase != rfFCM.PHASE_SETUP_RESTAURANT2:
                 presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayersFCM(), acting_username=nameToUpdate, old_latest_update=oldVer)
 
-            if request.user.username in FCMsuperUsers:
+            if is_game_admin(request.user):
                 flexName = jsonData["BKSN"]
                 if flexName.startswith("FCMtourneyAdmin/"):
                     name_parts = flexName.split("/", 1)
@@ -1111,7 +1180,7 @@ def _processTurn(request):
             return _syncErrorResponse("FCM kickout - preTurn:", request, currentGame, presenter, jsonData)
 
         # decompress the move data array
-        preMoveArray = json.loads(gzip.decompress(bytearray(base64.b64decode(jsonData["data"]))).decode("utf-8"))
+        preMoveArray = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(jsonData["data"]))).decode("utf-8"))
 
         # FIX THIS TO ALLOW NAME CHECK (or just don't do pre turns with FCMtA)
         phaseArr = [
@@ -1276,7 +1345,7 @@ def _processTurn(request):
         if "latency" in jsonData and jsonData["latency"] == 20:
             allowAnyRewind = True
 
-        if not allowAnyRewind and not presenter.getRewindHostPossible() and request.user.username not in FCMsuperUsers:
+        if not allowAnyRewind and not presenter.getRewindHostPossible() and not is_game_admin(request.user):
             return JsonResponse(
                 {"message": "<b>" + gettext("Permissions missing. Please reload the page and check again") + "</b>"},
                 safe=False,
@@ -1400,7 +1469,7 @@ def _processTurn(request):
         )
 
     elif jsonData["action"] == "adminKickout":
-        if request.user.username not in FCMsuperUsers and request.user.username not in FCMadminUsers:
+        if not is_game_admin(request.user):
             return JsonResponse({"error": gettext("Permissions missing")}, status=403)
         # Check if old version is older than DB version, and if so, return
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
@@ -1544,15 +1613,22 @@ def _sendChatMessage(request):
             currentGame = Game.objects.get(id=game_id, gameCode="FCM")
         except Game.DoesNotExist:
             raise Http404(gettext("Game does not exist")) from None
-        if not _canActInGame(request, currentGame):
-            return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
         presenter = cast("FCMpresenter", currentGame.presenter())
 
         currentChatData = []
         if currentGame.chatData:
             compressed_data = base64.b64decode(currentGame.chatData)
-            unzipped = gzip.decompress(compressed_data).decode("utf-8")
+            unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
             currentChatData = json.loads(unzipped)
+        new_entry = jsonData["newEntry"]
+        if (
+            not isinstance(new_entry, list)
+            or len(new_entry) < 3
+            or not isinstance(new_entry[2], str)
+            or len(new_entry[2]) > 2000
+        ):
+            return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
+        new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
 
         json_string = json.dumps(currentChatData, separators=(",", ":"))
@@ -1633,7 +1709,7 @@ def changeAssistance(request):
 
 @login_required()
 def gameAdmin(request):
-    if request.user.username != "admin" and request.user.username != "DodgerB":
+    if not is_site_admin(request.user):
         return JsonResponse({"error": "Wrong request."}, status=400)
     return render(
         request,
@@ -1647,7 +1723,7 @@ def gameAdmin(request):
 
 @login_required()
 def gameAdminGetMoveData(request):
-    if request.user.username != "admin" and request.user.username != "DodgerB":
+    if not is_site_admin(request.user):
         return JsonResponse({"error": "Wrong request."}, status=400)
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
@@ -1790,8 +1866,10 @@ def load_rewind_data(currentGame):
 def nudgeTourneyAdmins(request):
     # Webhook lives in .env; callers post {content} with no CSRF header.
     origin = request.headers.get("Origin") or request.headers.get("Referer", "")
-    if origin and request.get_host().lower() not in origin.lower():
-        return JsonResponse({"error": "Bad origin"}, status=403)
+    if origin:
+        origin_host = (urlparse(origin).hostname or "").lower()
+        if origin_host != request.get_host().split(":")[0].lower():
+            return JsonResponse({"error": "Bad origin"}, status=403)
 
     try:
         jsonData = json.loads(request.body.decode("utf-8"))

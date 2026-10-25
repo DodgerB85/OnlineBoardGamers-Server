@@ -1,0 +1,377 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-23 00:59+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\BUS\common.py:214
+msgid "Your Practice game has started"
+msgstr ""
+
+#: .\BUS\templates\BUS\BUShelp.html:5
+msgid "Bus Help"
+msgstr "Aiuto di Bus"
+
+#: .\BUS\templates\BUS\BUShelp.html:9
+msgid "Rules"
+msgstr "Regole"
+
+#: .\BUS\templates\BUS\BUShelp.html:13
+#, python-format
+msgid ""
+"Bus rules available <a href=\"%(bus_rules_url)s\" target=\"_blank\">here</a>"
+msgstr ""
+"Regole di Bus disponibili <a href=\"%(bus_rules_url)s\" "
+"target=\"_blank\">qui</a>"
+
+#: .\BUS\templates\BUS\BUShelp.html:19
+#, python-format
+msgid ""
+"Pittsburgh rules available <a class=\"linkOther\" "
+"href=\"%(pitts_rules_url)s\" target=\"_blank\">here</a>"
+msgstr ""
+"Regole di Pittsburgh disponibili <a class=\"linkOther\" "
+"href=\"%(pitts_rules_url)s\" target=\"_blank\">qui</a>"
+
+#: .\BUS\templates\BUS\BUShelp.html:24
+msgid ""
+"How to play guide example <a href=\"https://www.youtube.com/watch?"
+"v=CKW0tYoIU_k\" target=\"_blank\">here</a>"
+msgstr ""
+"Esempio di guida al gioco <a href=\"https://www.youtube.com/watch?"
+"v=CKW0tYoIU_k\" target=\"_blank\">qui</a>"
+
+#: .\BUS\templates\BUS\BUShelp.html:31
+msgid "Playing the Game"
+msgstr "Come si gioca"
+
+#: .\BUS\templates\BUS\BUShelp.html:35
+#, python-format
+msgid ""
+"<li> Check your connection to the live update server by looking at the "
+"circle next to your name in the upper right. <br /> Orange = Connecting, "
+"Green = Connected, Red = Disconncedted </li> <li>The active player has a "
+"green background in the Players table</li> <li> In addition, after actions "
+"have been chosen, the current move is highlighted in green in the action "
+"selection area </li> <li>During the \"Choose Actions\" phase, any player "
+"that has passed will have an orange background</li> <li> Place buildings, "
+"lines, and passengers directly on the board. Vrrooomm by selecting "
+"passengers and destinations on the board </li> <li>Choose your actions in "
+"the upper right area or next to the board</li> <li> The Players table is in "
+"order of the \"Choose Actions\" phase. So top player picks first <br /> If "
+"no one chooses the \"Starting Player\" choice, then the player on the 2nd "
+"line will become the new start player. </li> <li> To view another player's "
+"actions, open the \"History\" tab and select a \"board\" action to highlight "
+"that move </li> <li>Score is calculated as you play - Time Stone deductions "
+"happen immediately, not at the end</li> <li>Any player can rewind at any "
+"time. Please be courteous. Misuse will result in alteration of this feature</"
+"li> <li> You can change which board you are playing on from the menu. Select "
+"a preference in your <a class=\"linkOther\" "
+"href=\"%(profile_url)s\">Profile</a> <br /> <b>NOTE: THE CHANGE IS COSMETIC "
+"ONLY. BOTH BOARDS HAVE THE SAME CONNECTIONS <br /> THE ORIGINAL BOARD IS "
+"ROTATED 90 DEGREES FROM THE 20TH ANNIVERSARY BOARD </b> </li>"
+msgstr ""
+"<li> Controlla la connessione al server di aggiornamento live guardando il "
+"cerchio accanto al tuo nome in alto a destra. <br /> Arancione = "
+"Connessione, Verde = Connesso, Rosso = Disconnesso </li> <li>Il giocatore "
+"attivo ha lo sfondo verde nella tabella giocatori</li> <li> Inoltre, dopo la "
+"scelta delle azioni, la mossa corrente è evidenziata in verde nell'area di "
+"selezione azioni </li> <li>Durante la fase «Scegli azioni», i giocatori che "
+"hanno passato hanno lo sfondo arancione</li> <li> Piazza edifici, linee e "
+"passeggeri direttamente sul tabellone. Vrrooomm selezionando passeggeri e "
+"destinazioni sul tabellone </li> <li>Scegli le tue azioni in alto a destra o "
+"accanto al tabellone</li> <li> La tabella giocatori segue l'ordine della "
+"fase «Scegli azioni». Il giocatore in alto sceglie per primo <br /> Se "
+"nessuno sceglie «Giocatore iniziale», il giocatore della 2ª riga diventa il "
+"nuovo giocatore iniziale. </li> <li> Per vedere le azioni di un altro "
+"giocatore, apri la scheda «Cronologia» e seleziona un'azione «tabellone» per "
+"evidenziare quella mossa </li> <li>Il punteggio viene calcolato mentre "
+"giochi: le detrazioni delle pietre del tempo avvengono subito, non alla "
+"fine</li> <li>Qualsiasi giocatore può riavvolgere in qualsiasi momento. Sii "
+"cortese. L'abuso comporterà la modifica di questa funzione</li> <li> Puoi "
+"cambiare tabellone dal menu. Scegli una preferenza nel tuo <a "
+"class=\"linkOther\" href=\"%(profile_url)s\">Profilo</a> <br /> <b>NOTA: IL "
+"CAMBIO È SOLO ESTETICO. ENTRAMBI I TABELLONI HANNO LE STESSE CONNESSIONI "
+"<br /> IL TABELLONE ORIGINALE È RUOTATO DI 90 GRADI RISPETTO A QUELLO DEL "
+"20° ANNIVERSARIO </b> </li>"
+
+#: .\BUS\templates\BUS\BUShelp.html:77
+msgid "How can I find other players' moves?"
+msgstr "Come trovo le mosse degli altri giocatori?"
+
+#: .\BUS\templates\BUS\BUShelp.html:80
+msgid ""
+"Click on History from the top menu to open the history, and then click on an "
+"entry to highlight where it happened on the board. You can click entries to "
+"see where buildings or lines were added, and to see where passengers were "
+"VRROOOMM'd from and to."
+msgstr ""
+"Fai clic su Cronologia nel menu superiore, poi su una voce per evidenziare "
+"il punto sul tabellone. Vedrai dove sono stati aggiunti edifici o linee e da "
+"dove a dove sono stati portati i passeggeri con VRROOOMM."
+
+#: .\BUS\templates\BUS\BUShelp.html:88
+msgid "Why did I miss my turn?"
+msgstr "Perché ho saltato il mio turno?"
+
+#: .\BUS\templates\BUS\BUShelp.html:91
+msgid ""
+"Turns where you cannot do anything are skipped. For example, during VRROOOMM "
+"if you either have no possible destination buildings, or no available "
+"passengers to move. During Line Expansion, Add Passengers and New Buildings "
+"then players are skipped if they would have 0 actions. In this case, it "
+"means that the Max number of Buses is too low for these players to have any "
+"actions. Check the history for the reason a player's turn was skipped."
+msgstr ""
+"I turni in cui non puoi fare nulla vengono saltati. Ad esempio durante "
+"VRROOOMM se non hai edifici di destinazione possibili o passeggeri "
+"disponibili. In Espansione linee, Aggiungi passeggeri e Nuovi edifici i "
+"giocatori vengono saltati se avrebbero 0 azioni; significa che il numero "
+"massimo di autobus è troppo basso perché abbiano azioni. Controlla la "
+"cronologia per il motivo."
+
+#: .\BUS\templates\BUS\BUShelp.html:101
+msgid "When can I resign?"
+msgstr "Quando posso abbandonare?"
+
+#: .\BUS\templates\BUS\BUShelp.html:103
+msgid "You can resign during your \"Choose Actions\" phase."
+msgstr "Puoi abbandonare durante la tua fase «Scegli azioni»."
+
+#: .\BUS\templates\BUS\BUShelp.html:107
+msgid "Further Help"
+msgstr "Ulteriore aiuto"
+
+#: .\BUS\templates\BUS\BUShelp.html:109
+msgid "For any questions / comments / suggestions, please contact"
+msgstr "Per domande, commenti o suggerimenti, contatta"
+
+#: .\BUS\templates\BUS\BUSstats.html:16
+msgid "Bus Stats"
+msgstr "Statistiche di Bus"
+
+#: .\BUS\templates\BUS\BUSstats.html:18
+msgid "Back to Main Stats"
+msgstr "Torna alle statistiche principali"
+
+#: .\BUS\templates\BUS\BUSstats.html:25
+msgid "Finished games"
+msgstr "Partite concluse"
+
+#: .\BUS\templates\BUS\BUSstats.html:29
+msgid "Average turns"
+msgstr "Turni medi"
+
+#: .\BUS\templates\BUS\BUSstats.html:33
+msgid "Median score of winners"
+msgstr "Punteggio mediano dei vincitori"
+
+#: .\BUS\templates\BUS\BUSstats.html:37
+msgid ""
+"Any game with a resigned or kicked player, a practice/learning game, or a "
+"Pittsburgh map game is not considered for these stats."
+msgstr ""
+"Le partite con giocatori che hanno abbandonato o sono stati espulsi, di "
+"pratica/apprendimento o con la mappa Pittsburgh non contano per queste "
+"statistiche."
+
+#: .\BUS\templates\BUS\BUSstats.html:40
+msgid ""
+"These are historical stats. They show what has happened in previous games, "
+"but Bus still rewards reading and responding to the current game state."
+msgstr ""
+"Queste sono statistiche storiche. Mostrano ciò che è accaduto nelle partite "
+"precedenti, ma Bus premia comunque la lettura e la risposta allo stato "
+"attuale della partita."
+
+#: .\BUS\templates\BUS\BUSstats.html:43
+msgid "Action Statistics"
+msgstr "Statistiche delle azioni"
+
+#: .\BUS\templates\BUS\BUSstats.html:45
+#| msgid ""
+#| "Every player starts with 20 action points, and each chosen action costs "
+#| "one. 'Everyone else' is every losing player. Compare 'Win %% when used' "
+#| "against a fair share of wins (100%% divided by the player count) to see "
+#| "how the action is linked to winning."
+msgid ""
+"Every player starts with 20 action points, and each chosen action costs one. "
+"'Everyone else' is every losing player. Compare 'Win &#37; when used' "
+"against a fair share of wins (100&#37; divided by the player count) to see "
+"how the action is linked to winning."
+msgstr "Ogni giocatore inizia con 20 punti azione e ogni azione scelta ne costa uno. «Tutti gli altri» sono i giocatori perdenti. Confronta «Vittorie &#37; quando usata» con una quota equa di vittorie (100&#37; diviso per il numero di giocatori) per vedere il legame tra l'azione e la vittoria."
+
+#: .\BUS\templates\BUS\BUSstats.html:49
+msgid "3 Player"
+msgstr "3 giocatori"
+
+#: .\BUS\templates\BUS\BUSstats.html:50
+msgid "4 Player"
+msgstr "4 giocatori"
+
+#: .\BUS\templates\BUS\BUSstats.html:51
+msgid "5 Player"
+msgstr "5 giocatori"
+
+#: .\BUS\templates\BUS\BUSstats.html:52
+msgid "All Games"
+msgstr "Tutte le partite"
+
+#: .\BUS\templates\BUS\BUSstats.html:58
+msgid "Games:"
+msgstr "Partite:"
+
+#: .\BUS\templates\BUS\BUSstats.html:59
+msgid "Average turns:"
+msgstr "Turni medi:"
+
+#: .\BUS\templates\BUS\BUSstats.html:60
+msgid "median"
+msgstr "mediana"
+
+#: .\BUS\templates\BUS\BUSstats.html:111
+msgid ""
+"The chart shows the average number of times each group chose that action "
+"over a whole game. Percentages are per player; every bracketed game count is "
+"clickable and opens exactly those games."
+msgstr ""
+"Il grafico mostra quante volte ciascun gruppo ha scelto quell'azione per "
+"partita. Le percentuali sono per giocatore; ogni numero di partite tra "
+"parentesi è cliccabile e apre esattamente quelle partite."
+
+#: .\BUS\templates\BUS\BUSstats.html:115
+msgid "Action"
+msgstr "Azione"
+
+#: .\BUS\templates\BUS\BUSstats.html:116
+msgid "Winner average"
+msgstr "Media dei vincitori"
+
+#: .\BUS\templates\BUS\BUSstats.html:117
+msgid "Others average"
+msgstr "Media degli altri"
+
+#: .\BUS\templates\BUS\BUSstats.html:118
+#| msgid "Win %% when used"
+msgid "Win &#37; when used"
+msgstr "Vittorie % quando usata"
+
+#: .\BUS\templates\BUS\BUSstats.html:126 .\BUS\templates\BUS\BUSstats.html:176
+#: .\BUS\templates\BUS\BUSstats.html:178
+msgid "games"
+msgstr "partite"
+
+#: .\BUS\templates\BUS\BUSstats.html:131
+msgid "At Game End (Per Player)"
+msgstr "A fine partita (per giocatore)"
+
+#: .\BUS\templates\BUS\BUSstats.html:135
+msgid "Winners"
+msgstr "Vincitori"
+
+#: .\BUS\templates\BUS\BUSstats.html:136
+msgid "Everyone else"
+msgstr "Tutti gli altri"
+
+#: .\BUS\templates\BUS\BUSstats.html:139
+msgid "Score (avg and median)"
+msgstr "Punteggio (media e mediana)"
+
+#: .\BUS\templates\BUS\BUSstats.html:144
+msgid "Time stones taken"
+msgstr "Pietre del tempo prese"
+
+#: .\BUS\templates\BUS\BUSstats.html:149
+msgid "Buses owned"
+msgstr "Autobus posseduti"
+
+#: .\BUS\templates\BUS\BUSstats.html:154
+msgid "Action points used"
+msgstr "Punti azione usati"
+
+#: .\BUS\templates\BUS\BUSstats.html:159
+msgid "Line markers placed"
+msgstr "Segnalini linea piazzati"
+
+#: .\BUS\templates\BUS\BUSstats.html:164
+msgid "Buildings placed"
+msgstr "Edifici piazzati"
+
+#: .\BUS\templates\BUS\BUSstats.html:169
+msgid "Passengers delivered"
+msgstr "Passeggeri consegnati"
+
+#: .\BUS\templates\BUS\BUSstats.html:174
+msgid "Delivered at least one passenger"
+msgstr "Ha consegnato almeno un passeggero"
+
+#: .\BUS\templates\BUS\BUSstats.html:182
+msgid "How Games Ended"
+msgstr "Come sono terminate le partite"
+
+#: .\BUS\templates\BUS\BUSstats.html:185
+msgid "End reason"
+msgstr "Motivo di fine"
+
+#: .\BUS\templates\BUS\BUSstats.html:186 .\BUS\templates\BUS\BUSstats.html:204
+msgid "Games"
+msgstr "Partite"
+
+#: .\BUS\templates\BUS\BUSstats.html:187
+msgid "Share"
+msgstr "Quota"
+
+#: .\BUS\templates\BUS\BUSstats.html:198
+msgid "Wins by Starting Turn Position"
+msgstr "Vittorie per posizione iniziale"
+
+#: .\BUS\templates\BUS\BUSstats.html:201
+msgid "Starting position"
+msgstr "Posizione iniziale"
+
+#: .\BUS\templates\BUS\BUSstats.html:202
+msgid "Wins"
+msgstr "Vittorie"
+
+#: .\BUS\templates\BUS\BUSstats.html:203
+msgid "Win &#37;"
+msgstr "Vittoria %"
+
+#: .\BUS\views.py:148 .\BUS\views.py:197 .\BUS\views.py:250 .\BUS\views.py:542
+#: .\BUS\views.py:595
+msgid "Game does not exist"
+msgstr "La partita non esiste"
+
+#: .\BUS\views.py:213
+msgid "Invalid chat entry"
+msgstr "Voce chat non valida"
+
+#: .\BUS\views.py:255
+msgid "You are not a player in this game"
+msgstr "Non sei un giocatore in questa partita"
+
+#: .\BUS\views.py:401
+msgid ""
+"No rewind data. Rewind limit reached. Please play on to generate more rewind "
+"data"
+msgstr ""
+"Nessun dato di riavvolgimento. Limite di riavvolgimento raggiunto. Continua "
+"a giocare per generare più dati"
+
+#, python-format
+#~ msgid "Win %%"
+#~ msgstr "Vittoria %%"

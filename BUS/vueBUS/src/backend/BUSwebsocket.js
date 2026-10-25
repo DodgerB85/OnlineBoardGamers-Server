@@ -4,6 +4,8 @@ import { usePersonalStore } from "../stores/BUSpersonal.js"
 import { useModelStore } from "../stores/BUSstore.js"
 import * as view from "../js/BUSview.js"
 
+import i18n from "../i18n"
+
 import * as IO from "./BUS_IO.js"
 
 export var BUSwebSocket
@@ -131,16 +133,11 @@ async function BUSwebSocketOnInfo(IncomingInfo) {
 				if (personal.canPlay()) {
 					// Check the browser is capable
 					if ("serviceWorker" in navigator && "PushManager" in window) {
-						let tempElement = document.createElement("div")
-						tempElement.innerHTML = store.gameName
-						// Get the decoded text
-						let decodedGameName = tempElement.textContent
-
 						Notification.requestPermission(function (status) {
-							const title = "It is your turn in Bus"
+							const title = i18n.global.t("websocket.yourTurn")
 
 							const options = {
-								body: "" + decodedGameName + ": " + store.gameflow.turn + " - " + view.phaseStr(),
+								body: "" + store.gameName + ": " + store.gameflow.turn + " - " + view.phaseStr(),
 								//badge: "/static/Lobby/favicon.jpg", // Monochrome, chrome only. Seems to crash
 								icon: "/static/BUS/images/bus_icon.png",
 								tag: "OBGgame",

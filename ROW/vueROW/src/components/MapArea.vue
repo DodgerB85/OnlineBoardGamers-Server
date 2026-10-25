@@ -7,6 +7,7 @@
  * action. Spots with more than one legal interpretation open a chooser.
  */
 import { computed, ref } from "vue"
+import { useI18n } from "vue-i18n"
 import * as rf from "../js/ROWreference"
 import * as controller from "../js/ROWcontroller"
 import * as model from "../js/ROWmodel"
@@ -18,6 +19,7 @@ import { CERTIFICATE_STEPS } from "../js/ROWengine"
 import { useModelStore } from "../stores/ROWstore.js"
 
 const { ActionType } = rf
+const { t } = useI18n()
 const store = useModelStore()
 
 const {
@@ -145,10 +147,10 @@ function candidatesFor(name) {
 	const sel = store.selectedAction
 	if (loc.hazard) {
 		const hz = HAZARD_ACTIONS.find((a) => acts.includes(a))
-		if (hz) out.push({ label: `Remove hazard`, run: () => controller.perform({ type: hz, location: name }) })
+		if (hz) out.push({ label: t("row.map.removeHazard"), run: () => controller.perform({ type: hz, location: name }) })
 	}
 	if (loc.teepee && acts.includes(ActionType.TRADE_WITH_TRIBES)) {
-		out.push({ label: `Trade with tribe`, run: () => controller.perform({ type: ActionType.TRADE_WITH_TRIBES, location: name }) })
+		out.push({ label: t("row.map.tradeWithTribe"), run: () => controller.perform({ type: ActionType.TRADE_WITH_TRIBES, location: name }) })
 	}
 	if (sel && BUILD_ACTIONS.includes(sel) && loc.kind === "BUILDING" && (!loc.building || loc.building.player === player)) {
 		// The chooser on the clicked spot is where the building is picked; unaffordable
@@ -156,27 +158,27 @@ function candidatesFor(name) {
 		const color = colorByPlayer.value[player] ?? "red"
 		for (const b of g().playerState(player).buildings) {
 			out.push({
-				label: `Place building ${b}`,
+				label: t("row.map.placeBuilding", { building: b }),
 				img: view.buildingImage(g().edition, b, color),
 				enabled: map.canPlaceBuilding(g(), player, loc, b, sel),
 				run: () => controller.perform({ type: sel, location: name, building: b }),
 			})
 		}
 	} else if (sel === ActionType.USE_ADJACENT_BUILDING && loc.building) {
-		out.push({ label: `Use ${loc.building.name} building`, run: () => controller.perform({ type: ActionType.USE_ADJACENT_BUILDING, location: name }) })
+		out.push({ label: t("row.map.useBuilding", { building: loc.building.name }), run: () => controller.perform({ type: ActionType.USE_ADJACENT_BUILDING, location: name }) })
 	}
 	return out
 }
 
 function playerFeesLabel(m) {
 	return Object.entries(m.playerFees)
-		.map(([p, f]) => `${f}$ to ${p}`)
+		.map(([p, f]) => t("row.map.playerFee", { fee: f, player: p }))
 		.join(", ")
 }
 
 function moveLabel(m) {
 	const fee = playerFeesLabel(m)
-	return `Move here (${m.cost}$${fee ? "; " + fee : ""})`
+	return fee ? t("row.map.moveHereWithFees", { cost: m.cost, fees: fee }) : t("row.map.moveHere", { cost: m.cost })
 }
 
 // ---------- trail moves: cheapest/shortest path per destination ----------
@@ -282,10 +284,10 @@ function clickCity(idx, city) {
 	// Permanent certificates are always free value; the only real choice is how many
 	// temporary certificates to spend (which moves the temp track down to a valid step).
 	const totals = [...new Set(CERTIFICATE_STEPS.filter((s) => s <= ps.tempCertificates).map((s) => perm + (ps.tempCertificates - s)))]
-		.filter((t) => t >= minTotal)
+		.filter((cert) => cert >= minTotal)
 		.sort((a, b) => a - b)
 	const cands = totals.map((total) => ({
-		label: `${total} cert${total === 1 ? "" : "s"} → $${deliveryPayout(name, total)}`,
+		label: t("row.map.deliveryOption", { certificates: total, payout: deliveryPayout(name, total) }),
 		run: () => controller.perform({ type: ActionType.DELIVER_TO_CITY, city: pd.city, certificates: total }),
 	}))
 	if (cands.length === 0) {
@@ -946,7 +948,7 @@ function leaveTarget(t) {
 				<img v-if="c.img" class="cand" :class="c.enabled === false ? 'disabled' : 'enabled'" :src="c.img" :title="c.label" :alt="c.label" draggable="false" @click="choose(c)" />
 				<button v-else class="act" :disabled="c.enabled === false" @click="choose(c)">{{ c.label }}</button>
 			</template>
-			<button class="act cancel" @click="chooser = null">Cancel</button>
+			<button class="act cancel" @click="chooser = null">{{ t('panels.cancel') }}</button>
 		</div>
 
 		<!-- Stop the walk early: anchored to the spot the plan has reached. -->
@@ -956,7 +958,7 @@ function leaveTarget(t) {
 			:style="{ left: (stayHereAt.cx / 800) * 100 + '%', top: ((stayHereAt.cy + shift + 20) / (rttn ? 1015 : 820)) * 100 + '%' }"
 			@click="controller.commitMove(store.plannedSteps)"
 		>
-			Stay Here<span class="arrow">▼</span>
+			{{ t('row.map.stayHere') }}<span class="arrow">▼</span>
 		</div>
 	</div>
 </template>

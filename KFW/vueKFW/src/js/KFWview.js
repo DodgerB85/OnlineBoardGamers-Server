@@ -6,6 +6,7 @@
  */
 
 import * as rf from "./KFWreference"
+import i18n from "../i18n.js"
 
 import { useModelStore } from "../stores/KFWstore.js"
 import { usePersonalStore } from "../stores/KFWpersonal.js"
@@ -129,25 +130,25 @@ export function kickoutFlexiTimerTicker() {
 export function phaseStr() {
 	const store = useModelStore()
 
-	if (store.gameflow.phase === rf.PHASE_BIDDING_AND_ACTIONS) return "Bidding & Actions"
-	if (store.gameflow.phase === rf.PHASE_COLLECT_BOAT_RESOURCES) return "Collect Boat Resources"
-	if (store.gameflow.phase === rf.PHASE_VILLAGE_EXPANDING) return "Village Expansion"
-	if (store.gameflow.phase === rf.PHASE_CHOOSE_WINTER_TILES) return "Choose Winter Tiles"
-	if (store.gameflow.phase === rf.PHASE_FINAL_SCORING) return "Final Scoring"
-	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return "Game Over"
-	if (store.gameflow.phase === rf.PHASE_GET_BOOKKEEPER_B_CONTRACT) return "Bidding & Actions-B"
-	if (store.gameflow.phase === rf.PHASE_GET_SECOND_CONTRACT_UPGRADED_MERCHANTS_TILE) return "Bidding & Actions-B"
+	if (store.gameflow.phase === rf.PHASE_BIDDING_AND_ACTIONS) return i18n.global.t("phases.biddingActions")
+	if (store.gameflow.phase === rf.PHASE_COLLECT_BOAT_RESOURCES) return i18n.global.t("phases.collectBoatResources")
+	if (store.gameflow.phase === rf.PHASE_VILLAGE_EXPANDING) return i18n.global.t("phases.villageExpansion")
+	if (store.gameflow.phase === rf.PHASE_CHOOSE_WINTER_TILES) return i18n.global.t("phases.chooseWinterTiles")
+	if (store.gameflow.phase === rf.PHASE_FINAL_SCORING) return i18n.global.t("phases.finalScoring")
+	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return i18n.global.t("phases.gameOver")
+	if (store.gameflow.phase === rf.PHASE_GET_BOOKKEEPER_B_CONTRACT) return i18n.global.t("phases.biddingActionsB")
+	if (store.gameflow.phase === rf.PHASE_GET_SECOND_CONTRACT_UPGRADED_MERCHANTS_TILE) return i18n.global.t("phases.biddingActionsB")
 
-	if (store.gameflow.phase === rf.PRE_PHASE_VILLAGE_EXPANDING) return "Pre-Village Expansion"
+	if (store.gameflow.phase === rf.PRE_PHASE_VILLAGE_EXPANDING) return i18n.global.t("phases.preVillageExpansion")
 
-	return "NOT FOUND"
+	return i18n.global.t("phases.notFound")
 }
 
 export function getSeasonText(season) {
-	if (season === rf.SPRING) return "Spring"
-	if (season === rf.SUMMER) return "Summer"
-	if (season === rf.AUTUMN) return "Autumn"
-	if (season === rf.WINTER) return "Winter"
+	if (season === rf.SPRING) return i18n.global.t("seasons.spring")
+	if (season === rf.SUMMER) return i18n.global.t("seasons.summer")
+	if (season === rf.AUTUMN) return i18n.global.t("seasons.autumn")
+	if (season === rf.WINTER) return i18n.global.t("seasons.winter")
 }
 
 export function getImage(image) {

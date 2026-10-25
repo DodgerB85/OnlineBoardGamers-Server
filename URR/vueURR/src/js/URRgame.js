@@ -6,10 +6,12 @@ import * as board from "./URRboard.js"
 import * as water from "./URRwater.js"
 import * as boardRules from "./URRmap.js"
 
+// Historical replays retain the former out-of-turn Barahshum timing.
+const legacyReplayGames = new WeakSet()
+
 export function createGame(playerNames, boardDefinition = board.createPrintedBoard()) {
 	boardRules.requireRule(playerNames.length >= 3 && playerNames.length <= 6, "UR: 1830 BC requires 3–6 players")
 	return {
-		version: rf.GAME_DATA_VERSION,
 		players: playerNames.map((name, index) => ({ name, displayName: name, colour: rf.ALL_COLOURS[index], money: rf.STARTING_MONEY_BY_PLAYER_COUNT[playerNames.length], score: 0, soldLandTypes: [], soldEmergingStates: [] })),
 		gameflow: {
 			turn: 1, phase: rf.PHASE_DIVIDING_NATIONS, fullTurnOrder: Array.from(playerNames.keys()), turnOrder: [0],
@@ -339,7 +341,7 @@ function exchangeCalah(game, state, action, consentingPlayer = null) {
 }
 
 function exchangeBarahshum(game, player, action) {
-	boardRules.requireRule(rules.canExchangeBarahshum(game, player), "Barahshum cannot be exchanged now")
+	boardRules.requireRule(rules.canExchangeBarahshum(game, player, legacyReplayGames.has(game)), "Barahshum cannot be exchanged now")
 	const from = boardRules.getArea(game, action.from)
 	const to = boardRules.getArea(game, action.to)
 	boardRules.requireRule(from.nation === rf.NATION_BARAHSHUM && from.neighbours.includes(to.id), "Dig from Barahshum to an adjacent area")
@@ -401,7 +403,7 @@ function endStateTurn(game) {
 function pauseBetweenStates(game) {
 	const flow = game.gameflow
 	const barahshum = game.nations[rf.NATION_BARAHSHUM]
-	if (!barahshum.isRemoved && barahshum.ownerType === "player" && !(flow.barahshumPass?.turn === flow.turn && flow.barahshumPass.player === barahshum.owner) && rules.barahshumDestinations(game).length) {
+	if (legacyReplayGames.has(game) && !barahshum.isRemoved && barahshum.ownerType === "player" && !(flow.barahshumPass?.turn === flow.turn && flow.barahshumPass.player === barahshum.owner) && rules.barahshumDestinations(game).length) {
 		flow.developmentStep = "betweenStates"
 		flow.turnOrder = [flow.stateIndex < flow.stateOrder.length ? game.states[flow.stateOrder[flow.stateIndex]].king : flow.primogeniture]
 	} else beginStateTurn(game)
@@ -548,9 +550,9 @@ function developmentAction(game, action) {
 	}
 }
 
-export function applyAction(current, player, action) {
+export function applyAction(current, player, action, isLegacyReplay = false) {
 	const game = JSON.parse(JSON.stringify(current))
-	boardRules.requireRule(game.version === rf.GAME_DATA_VERSION, "Unsupported game data version")
+	if (isLegacyReplay) legacyReplayGames.add(game)
 	boardRules.requireRule(Number.isInteger(player) && game.players[player], "Unknown player")
 	if (action.type === "exchangeBarahshum") {
 		exchangeBarahshum(game, player, action)
@@ -558,8 +560,9 @@ export function applyAction(current, player, action) {
 		return game
 	}
 	if (action.type === "passBarahshum") {
+		boardRules.requireRule(isLegacyReplay, "Barahshum no longer needs a separate pass")
 		const flow = game.gameflow
-		boardRules.requireRule((flow.phase === rf.PHASE_SETTLEMENT || (flow.phase === rf.PHASE_DEVELOPMENT && flow.developmentStep === "betweenStates")) && game.nations[rf.NATION_BARAHSHUM].ownerType === "player" && rules.canExchangeBarahshum(game, player), "Only Barahshum's owner may skip its prompts")
+		boardRules.requireRule((flow.phase === rf.PHASE_SETTLEMENT || (flow.phase === rf.PHASE_DEVELOPMENT && flow.developmentStep === "betweenStates")) && game.nations[rf.NATION_BARAHSHUM].ownerType === "player" && rules.canExchangeBarahshum(game, player, legacyReplayGames.has(game)), "Only Barahshum's owner may skip its prompts")
 		if (action.passTurn) boardRules.requireRule(flow.phase === rf.PHASE_SETTLEMENT && flow.turnOrder[0] === player, "Only the current player may pass their settlement turn")
 		flow.barahshumPass = { turn: flow.turn, player }
 		if (action.passTurn) settlementAction(game, player, { type: "pass" })

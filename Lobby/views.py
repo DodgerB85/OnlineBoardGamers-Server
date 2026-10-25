@@ -5,6 +5,7 @@ import gzip
 import json
 import logging
 import re
+import secrets
 import time
 import traceback
 from collections import Counter
@@ -65,6 +66,16 @@ from user_visit.models import UserVisit
 import Lobby.sharedFunctions.constants as rf
 from FCM.common import buildFCMstartingOptions
 from Lobby.sharedFunctions.db_mutex import db_mutex
+from Lobby.sharedFunctions.loginThrottle import (
+    LOGIN_FAILURE_KEY,
+    clear_failures,
+    client_ip,
+    failure_key as make_failure_key,
+    is_locked,
+    record_failure,
+)
+from Lobby.sharedFunctions.permissions import is_site_admin
+from Lobby.sharedFunctions.rateLimit import is_rate_limited, rate_limit
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_getMiniTournamentCreationJsonReturn,
@@ -95,6 +106,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getTGZstartingOptionsHTML,
     SR_getTournamentTypeDisplay,
     SR_getWEBstartingOptionsHTML,
+    SR_valid_webhook_url,
 )
 
 from .forms import (
@@ -112,6 +124,7 @@ from .models import (
     changelog,
 )
 from .tokens import account_activation_token
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 User = get_user_model()
 
@@ -335,6 +348,8 @@ def telegram_bot_response(request):
 
 @login_required
 def addTGid(request, TGid):
+    if request.method != "POST":
+        return render(request, "Lobby/confirmAddTG.html", {"TGid": TGid})
     try:
         webhookType = "TG"
         webhookURL = ""
@@ -395,13 +410,8 @@ GAME_NAMES_MODELS = {
     "RNB": "RNB",
     "ROW": "ROW",
     "PAP": "PAP",
+    "URR": "URR",
 }
-
-
-def trigger_500_error(request):
-    # This deliberately forces a 500 server error
-    division_by_zero = 1 / 0
-    return HttpResponse("This will not be reached.")
 
 
 def testLobby(request):
@@ -456,7 +466,7 @@ def set_language_custom(request):
 
 @login_required()
 def userStats(request):
-    if request.user.username != "admin" and request.user.username != "DodgerB":
+    if not is_site_admin(request.user):
         raise Http404()
 
     user_stats_data = User.objects.annotate(date_joined_date=TruncDate("date_joined")).values("date_joined_date").annotate(total_users=Count("id")).order_by("date_joined_date")
@@ -532,7 +542,7 @@ def userStats(request):
 
 @login_required()
 def DBO(request):
-    if request.user.username != "admin" and request.user.username != "DodgerB":
+    if not is_site_admin(request.user):
         raise Http404()
 
     gamesList = []
@@ -590,7 +600,7 @@ def DBO(request):
 @login_required
 def DBO_deleteGame(request, game_type):
     # 1. Authorization check
-    if request.user.username not in ["admin", "DodgerB"]:
+    if not is_site_admin(request.user):
         raise Http404()
 
     if request.method != "DELETE":
@@ -627,7 +637,7 @@ def DBO_deleteGame(request, game_type):
 
     # 5. Logic execution
     if data.get("action") == "deleteTrgGame":
-        if request.user.username == "admin":
+        if is_site_admin(request.user):
             status = current_game.gameStatus
             current_game.delete()
 
@@ -684,7 +694,7 @@ def fcmNewCode(request):
 def changelog_view(request):
     allChanges = changelog.objects.order_by("-timestamp").all()
 
-    if request.user.username == "admin":
+    if is_site_admin(request.user):
         # create object of form
         changelogFormVar = changelogForm(request.POST or None, request.FILES or None)
 
@@ -696,6 +706,7 @@ def changelog_view(request):
             requests.post(
                 f"https://discord.com/api/webhooks/{config('WEBHOOK_DISCORD_UPDATES')}",
                 data={"content": message},
+                timeout=5,
             )
 
         return render(
@@ -714,6 +725,9 @@ def feedback(request):
     from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
 
     if request.method == "POST":
+        if is_rate_limited(f"feedback:{request.user.id}", 3, 600):
+            messages.error(request, gettext("Too many feedback messages. Please try again later."))
+            return redirect("/")
         feedback_text = request.POST.get("feedback", "")
         category = request.POST.get("category", "")
         if not feedback_text.strip():
@@ -807,6 +821,7 @@ def handler404(request, exception):
             requests.post(
                 f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                 data={"content": message},
+                timeout=5,
             )
     except Exception as e:
         print("404 handler error: " + str(e))
@@ -846,6 +861,9 @@ def handler500(request, exception=None, *_, **_k):
         message = f"Failed to build full report: {str(format_error)}\n\nRaw Traceback:\n{raw_traceback}"
 
     # 2. GUARANTEED EMAIL ATTEMPT (Isolated from Discord)
+    notify = not is_rate_limited(f"handler500:{client_ip(request)}:{request.path}", 3, 600) and not is_rate_limited("handler500:global", 20, 600)
+    if not notify:
+        return render(request, "Lobby/500.html", status=500)
     try:
         mail_admins(subject, message, fail_silently=False)
     except Exception as email_error:
@@ -917,45 +935,48 @@ def next_game_redirect(request):
 
 
 def password_reset_request(request):
+    generic_message = gettext("If that email address is registered, a reset link has been sent. Please check your inbox and spam folder.")
     if request.method == "POST":
+        if is_rate_limited(f"password_reset:{client_ip(request)}", 5, 3600):
+            messages.success(request, generic_message)
+            return redirect("/")
+
         password_reset_form = PasswordResetFormCustom(request.POST)
         if password_reset_form.is_valid():
             data = password_reset_form.cleaned_data["email"]
-            associated_users = User.objects.filter(Q(email=data))
-            if associated_users.exists():
-                for user in associated_users:
-                    current_site = get_current_site(request)
-                    subject = gettext("Password Reset Requested")
-                    email_template_name = "Lobby/password/password_reset_email.txt"
-                    c = {
-                        "email": user.email,
-                        "domain": current_site.domain,
-                        "site_name": "Website",
-                        "uid": urlsafe_base64_encode(force_bytes(user.pk)),
-                        "user": user,
-                        "token": default_token_generator.make_token(user),
-                        "protocol": "https",
-                        "username": user.username,
-                    }
-                    email = render_to_string(email_template_name, c)
-                    try:
-                        send_mail(
-                            subject,
-                            email,
-                            config("OBG_EMAIL_HOST_USER"),
-                            [user.email],
-                            fail_silently=False,
-                        )
-                    except BadHeaderError:
-                        return HttpResponse("Invalid header found.")
+            if is_rate_limited(f"password_reset_email:{data.strip().lower()}", 3, 3600):
+                messages.success(request, generic_message)
+                return redirect("/")
 
-                    messages.success(
-                        request,
-                        gettext("An email with password reset instructions has been sent to your inbox. Please check spam folders"),
+            associated_users = User.objects.filter(Q(email=data))
+            for user in associated_users:
+                current_site = get_current_site(request)
+                subject = gettext("Password Reset Requested")
+                email_template_name = "Lobby/password/password_reset_email.txt"
+                c = {
+                    "email": user.email,
+                    "domain": current_site.domain,
+                    "site_name": "Website",
+                    "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+                    "user": user,
+                    "token": default_token_generator.make_token(user),
+                    "protocol": "https",
+                    "username": user.username,
+                }
+                email = render_to_string(email_template_name, c)
+                try:
+                    send_mail(
+                        subject,
+                        email,
+                        config("OBG_EMAIL_HOST_USER"),
+                        [user.email],
+                        fail_silently=False,
                     )
-                    return redirect("/")
-            else:
-                messages.error(request, gettext("No user found with this email"))
+                except BadHeaderError:
+                    return HttpResponse("Invalid header found.")
+
+            messages.success(request, generic_message)
+            return redirect("/")
         else:
             messages.error(request, gettext("Please enter a valid email address"))
     password_reset_form = PasswordResetFormCustom()
@@ -1590,6 +1611,8 @@ def index(request):
     )
 
 
+
+
 def login_view(request):
     if request.method == "POST":
         # Attempt to sign user in
@@ -1609,27 +1632,28 @@ def login_view(request):
                 "POST_Keys": list(request.POST.keys()),
             }
 
-            # Try to peek at the raw body in case it's JSON
-            try:
-                body_sample = request.body.decode("utf-8")[:500]
-                debug_info["Raw_Body_Sample"] = body_sample
-            except (UnicodeDecodeError, AttributeError):
-                debug_info["Raw_Body_Status"] = "Not decodable"
-
             formatted_data = json.dumps(debug_info, indent=2)
             # Discord has a 2000 character limit, so we truncate if needed
             content = f"**!!! LOGIN ATTEMPT: Missing Fields !!!**\n```json\n{formatted_data[:1800]}\n```"
 
-            # Send to Discord
-            SN_sendAdminErrorMessage(content)
+            # Send to Discord (rate-limited: this branch is reachable without login)
+            if not is_rate_limited(f"login_missing:{client_ip(request)}", 5, 600):
+                SN_sendAdminErrorMessage(content)
 
             messages.error(request, gettext("Username and password are required."))
+            return render(request, "Lobby/login.html")
+
+        # shortcut: per-process cache; move to a shared cache if multiple web workers are added.
+        failure_key = make_failure_key(LOGIN_FAILURE_KEY, request, username)
+        if is_locked(failure_key):
+            messages.error(request, gettext("Too many failed sign-in attempts. Please wait 15 minutes and try again."))
             return render(request, "Lobby/login.html")
 
         user = authenticate(request, username=username, password=password)
 
         # Check if authentication successful
         if user is not None:
+            clear_failures(failure_key)
             login(request, user)
             request.session.modified = True  # Force session save
 
@@ -1662,6 +1686,7 @@ def login_view(request):
             response.set_cookie(settings.LANGUAGE_COOKIE_NAME, language_code, max_age=settings.LANGUAGE_COOKIE_AGE)
             return response
         else:
+            record_failure(failure_key)
             try:
                 user = User.objects.get(username=request.POST["username"])
                 if not user.is_active:
@@ -1775,15 +1800,33 @@ def profile(request):
             return redirect("profile")
         elif request.POST["action"] == "updateProfileFavourites":
             profile = Profile.objects.get(user=request.user)
-            profile.preferredRestaurantColour = request.POST["fcmResto"]
+            profile.preferredFCMoptions = json.dumps(
+                [
+                    int(request.POST["fcmResto"]),
+                    1 if "highContrastBoardItems" in request.POST else 0,
+                    1 if "FCMprefersReducedMotion" in request.POST else 0,
+                ],
+                separators=(",", ":"),
+            )
             profile.preferredHCcolour = request.POST["hcColour"]
-            profile.highContrastBoardItems = "highContrastBoardItems" in request.POST
 
-            profile.preferredBusColour = request.POST["busColour"]
-            profile.preferredBusBoard = request.POST["BusBoard"]
+            profile.preferredBUSoptions = json.dumps(
+                [
+                    int(request.POST.get("busColour") or -1),
+                    int(request.POST.get("BusBoard") or 0),
+                    1 if "BUShighContrast" in request.POST else 0,
+                ],
+                separators=(",", ":"),
+            )
 
-            profile.preferredTGZcolour = request.POST["tgzColour"]
-            profile.TGZminimalText = "TGZminimalText" in request.POST
+            profile.preferredTGZoptions = json.dumps(
+                [
+                    int(request.POST["tgzColour"]),
+                    1 if "TGZminimalText" in request.POST else 0,
+                    1 if "TGZprefersReducedMotion" in request.POST else 0,
+                ],
+                separators=(",", ":"),
+            )
 
             preferredCNScolour = request.POST["cnsColour"] if request.POST["cnsColour"] != "-1" else None
             profile.preferredCNScolour = preferredCNScolour
@@ -1856,13 +1899,23 @@ def profile(request):
         else:
             stop_emails_until = -1
         profile_form = UpdateProfileForm(instance=request.user.profile)
-        favColour = profile.preferredRestaurantColour
-        if favColour == "":
-            favColour = -1
+        preferredFCMoptions = []
+        if profile.preferredFCMoptions:
+            try:
+                preferredFCMoptions = json.loads(profile.preferredFCMoptions)
+            except (TypeError, ValueError):
+                preferredFCMoptions = []
+        if not isinstance(preferredFCMoptions, list):
+            preferredFCMoptions = []
+        preferredFCMoptions = preferredFCMoptions[:3]
+        while len(preferredFCMoptions) < 3:
+            preferredFCMoptions.append([-1, 0, 0][len(preferredFCMoptions)])
+        favColour = preferredFCMoptions[0]
+        highContrastBoardItems = bool(preferredFCMoptions[1])
+        FCMprefersReducedMotion = bool(preferredFCMoptions[2])
         favHLCcolour = profile.preferredHCcolour
         if favHLCcolour == "":
             favHLCcolour = -1
-        highContrastBoardItems = profile.highContrastBoardItems
 
         preferredCNScolour = profile.preferredCNScolour if profile.preferredCNScolour is not None else -1
 
@@ -1871,6 +1924,36 @@ def profile(request):
 
         preferredWEBoptions = json.loads(profile.preferredWEBoptions) if profile.preferredWEBoptions != "" and profile.preferredWEBoptions is not None else [-1]
         favWEBcolour = preferredWEBoptions[0]
+
+        preferredBUSoptions = []
+        if profile.preferredBUSoptions:
+            try:
+                preferredBUSoptions = json.loads(profile.preferredBUSoptions)
+            except (TypeError, ValueError):
+                preferredBUSoptions = []
+        if not isinstance(preferredBUSoptions, list):
+            preferredBUSoptions = []
+        preferredBUSoptions = preferredBUSoptions[:3]
+        while len(preferredBUSoptions) < 3:
+            preferredBUSoptions.append([-1, 0, 0][len(preferredBUSoptions)])
+        busOptColour = preferredBUSoptions[0]
+        busOptBoard = preferredBUSoptions[1]
+        BUShighContrast = bool(preferredBUSoptions[2])
+
+        preferredTGZoptions = []
+        if profile.preferredTGZoptions:
+            try:
+                preferredTGZoptions = json.loads(profile.preferredTGZoptions)
+            except (TypeError, ValueError):
+                preferredTGZoptions = []
+        if not isinstance(preferredTGZoptions, list):
+            preferredTGZoptions = []
+        preferredTGZoptions = preferredTGZoptions[:3]
+        while len(preferredTGZoptions) < 3:
+            preferredTGZoptions.append([-1, 0, 0][len(preferredTGZoptions)])
+        favTGZcolour = preferredTGZoptions[0]
+        TGZminimalText = bool(preferredTGZoptions[1])
+        TGZprefersReducedMotion = bool(preferredTGZoptions[2])
 
         sendEmails = profile.sendEmailNotificationOnTurn
 
@@ -1909,17 +1992,20 @@ def profile(request):
                 "favColour": favColour,
                 "favHLCcolour": favHLCcolour,
                 "highContrastBoardItems": highContrastBoardItems,
+                "FCMprefersReducedMotion": FCMprefersReducedMotion,
                 "sendEmails": sendEmails,
                 "liveNotification": liveNotification,
                 "username": request.user.username,
                 "email": request.user.email,
-                "preferredBusColour": profile.preferredBusColour,
-                "preferredBusBoard": profile.preferredBusBoard,
-                "favTGZcolour": profile.preferredTGZcolour,
+                "busOptColour": busOptColour,
+                "busOptBoard": busOptBoard,
+                "BUShighContrast": BUShighContrast,
+                "favTGZcolour": favTGZcolour,
                 "favCNScolour": preferredCNScolour,
                 "favKFWcolour": favKFWcolour,
                 "favWEBcolour": favWEBcolour,
-                "TGZminimalText": profile.TGZminimalText,
+                "TGZminimalText": TGZminimalText,
+                "TGZprefersReducedMotion": TGZprefersReducedMotion,
                 "webhooks": webhooks,
                 "yourTurnEmail": yourTurnEmail,
                 "gameInviteEmail": gameInviteEmail,
@@ -1935,6 +2021,7 @@ def profile(request):
                 "blacklistedPlayers": blacklisted_players,
                 "stop_emails_until": stop_emails_until,  # -1 if not set
                 "discord_client_id": config("DISCORD_CLIENT_ID"),
+                "discord_oauth_state": request.session.setdefault("discord_oauth_state", secrets.token_urlsafe(32)),
                 "discord_id": profile.discord_id,
             },
         )
@@ -1955,6 +2042,7 @@ def profileAQY(request):
         AQYoptions.append(int(request.POST["keepForestUnderWoodRes"]))
         AQYoptions.append(int(request.POST["showPollutionUnderRes"]))
         AQYoptions.append(int(request.POST["housesInNumOrder"]))
+        AQYoptions.append(1 if "reducedMotion" in request.POST else 0)
 
         profile.preferredAQYoptions = json.dumps(AQYoptions, separators=(",", ":"))
 
@@ -1968,9 +2056,11 @@ def profileAQY(request):
 
     else:
         profile = Profile.objects.get(user=request.user)
-        preferredAQYoptions = json.loads(request.user.profile.preferredAQYoptions) if request.user.profile.preferredAQYoptions != "" else [-1, 1, 0, 0, 1, 1, 0]
+        preferredAQYoptions = json.loads(request.user.profile.preferredAQYoptions) if request.user.profile.preferredAQYoptions != "" else [-1, 1, 0, 0, 1, 1, 0, 0]
+        if len(preferredAQYoptions) < 8:
+            preferredAQYoptions.append(0)
 
-        # [colour, mapHybrid, resourceIconType, pullResToMan, keepForestUnderWoodRes, showPollutionUnderRes, housesInNumOrder]
+        # [colour, mapHybrid, resourceIconType, pullResToMan, keepForestUnderWoodRes, showPollutionUnderRes, housesInNumOrder, reducedMotion]
 
         return render(
             request,
@@ -1983,6 +2073,7 @@ def profileAQY(request):
                 "keepForestUnderWoodRes": preferredAQYoptions[4],
                 "showPollutionUnderRes": preferredAQYoptions[5],
                 "housesInNumOrder": preferredAQYoptions[6],
+                "reducedMotion": preferredAQYoptions[7],
             },
         )
 
@@ -2000,6 +2091,7 @@ def profileIND(request):
         INDoptions.append(int(request.POST.get("goodsIcon", 1)))
         INDoptions.append(int(request.POST.get("shipIcon", 1)))
         INDoptions.append(int(request.POST.get("playerTableStyle", 0)))
+        INDoptions.append(1 if "reducedMotion" in request.POST else 0)
 
         profile.preferredINDoptions = json.dumps(INDoptions, separators=(",", ":"))
 
@@ -2013,15 +2105,17 @@ def profileIND(request):
 
     else:
         profile = Profile.objects.get(user=request.user)
-        preferredINDoptions = json.loads(request.user.profile.preferredINDoptions) if request.user.profile.preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1, 0]
+        preferredINDoptions = json.loads(request.user.profile.preferredINDoptions) if request.user.profile.preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1, 0, 0]
 
         if len(preferredINDoptions) < 7:
             preferredINDoptions.extend([0] * (7 - len(preferredINDoptions)))
             preferredINDoptions[6] = 0
+        if len(preferredINDoptions) < 8:
+            preferredINDoptions.append(0)
         # Option 4 (goods icon) must be 1 or 2, for the edition. Check it hasn't slipped to 0.
         if preferredINDoptions[4] == 0:
             preferredINDoptions[4] = 1
-        # [colour, mapType, citySizeColour, indOutline, goodsIcon, shipIcon, playerTableStyle]
+        # [colour, mapType, citySizeColour, indOutline, goodsIcon, shipIcon, playerTableStyle, reducedMotion]
 
         return render(
             request,
@@ -2034,6 +2128,7 @@ def profileIND(request):
                 "goodsIcon": preferredINDoptions[4],
                 "shipIcon": preferredINDoptions[5],
                 "playerTableStyle": preferredINDoptions[6],
+                "reducedMotion": preferredINDoptions[7],
             },
         )
 
@@ -2476,7 +2571,7 @@ def createRNBpage2(request, gameID=0):
 def createURRpage(request, gameID=0):
     experienced = SF_hasRequiredExperience(request, "URR", Game)
     if request.method != "POST" and gameID == 0:
-        return render(request, "Lobby/createURR.html", {"experienced": experienced, "playtestOnly": True})
+        return render(request, "Lobby/createURR.html", {"experienced": experienced})
     elif request.method != "POST" and gameID != 0:
         try:
             currentGame = Game.objects.get(id=gameID, gameCode="URR")
@@ -2501,7 +2596,6 @@ def createURRpage(request, gameID=0):
                 "kickoutDuration": currentGame.kickoutDuration,
                 "startingOptions": loadedStartingOptions,
                 "experienced": experienced,
-                "playtestOnly": True,
             },
         )
 
@@ -2787,6 +2881,10 @@ class registerView(View):
         return render(request, self.template_name, {"form": form})
 
     def post(self, request, *args, **kwargs):
+        if is_rate_limited(f"register:{client_ip(request)}", 5, 3600):
+            messages.error(request, gettext("Too many sign-up attempts. Please try again later."))
+            return render(request, self.template_name, {"form": self.form_class()})
+
         form = self.form_class(request.POST)
         if form.is_valid():
             # Limit intial signups
@@ -3437,6 +3535,7 @@ def checkJoinGame(request, gameType, gameID):
                 requests.post(
                     f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                     data={"content": message},
+                    timeout=5,
                 )
             except Exception as e:
                 print(f"Discord webhook failed (new user exp): {e}")
@@ -3492,6 +3591,7 @@ def checkJoinGame(request, gameType, gameID):
                 requests.post(
                     f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                     data={"content": message},
+                    timeout=5,
                 )
             except Exception as e:
                 print(f"Discord webhook failed (fair play): {e}")
@@ -3623,6 +3723,7 @@ def deleteGame(request, gameCode):
                 requests.post(
                     f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                     data={"content": message},
+                    timeout=5,
                 )
             except Exception as e:
                 print(f"Discord webhook failed (delete game alert): {e}")
@@ -3636,11 +3737,12 @@ def autoCompleteUsername(request):
         jsonData = json.loads(request.body)
         partialString = jsonData["partialString"]
 
-        matchObjects = User.objects.filter(username__icontains=partialString).all()
+        if not isinstance(partialString, str) or len(partialString) < 2:
+            return JsonResponse({"matchList": []}, safe=False)
 
-        matchList = []
-        for user in matchObjects:
-            matchList.append(user.username)
+        matchObjects = User.objects.filter(username__icontains=partialString).order_by("username")[:20]
+
+        matchList = [user.username for user in matchObjects]
         return JsonResponse({"matchList": matchList}, safe=False)
 
     else:
@@ -3691,7 +3793,7 @@ def testWebhook(request):
 
     if notification[0] == "Discord":
         # Validate Discord URL
-        if notification[1] and notification[1][0:15] != "https://discord" and notification[1][0:19] != "https://ptb.discord" and notification[1][0:18] != "https://discordapp":
+        if not SR_valid_webhook_url("DC", notification[1]):
             error_string = gettext("Please enter a Valid Discord Webhook URL")
             return JsonResponse({"errorMessage": error_string, "type": 0})
         # Validate Discord ID:
@@ -3707,12 +3809,12 @@ def testWebhook(request):
         if len(notification[2]) != 0:
             message += "<@" + notification[2] + ">\n"
         message += gettext("This is a test message from Online Board Gamers")
-        requests.post("" + notification[1], data={"content": message})
+        requests.post("" + notification[1], data={"content": message}, timeout=5)
         return JsonResponse({"response": "ok", "type": 0})
 
     if notification[0] == "Slack":
         # Validate Slack URL
-        if notification[1] and notification[1][0:33] != "https://hooks.slack.com/services/":
+        if not SR_valid_webhook_url("SL", notification[1]):
             error_string = gettext("Please enter a Valid Slack Webhook URL")
             return JsonResponse({"errorMessage": error_string, "type": 1})
 
@@ -3734,7 +3836,7 @@ def testWebhook(request):
         payload = {"text": message, "link_names": 1}  # Enables @mentions
 
         # Send via POST (your existing method works fine)
-        requests.post(notification[1], json=payload)
+        requests.post(notification[1], json=payload, timeout=5)
 
         return JsonResponse({"response": "ok", "type": 1})
 
@@ -3742,13 +3844,16 @@ def testWebhook(request):
         TOKEN = config("TELEGRAM_OBG_BOT_TOKEN", default="BOT_TOKEN", cast=str)
         message = "This is a test message from Online Board Gamers"
         url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={notification[2]}&text={message}"
-        requests.post(url)
+        requests.post(url, timeout=5)
         return JsonResponse({"response": "ok", "type": 1})
 
     if notification[0] == "Other":
-        message = "This is a test message from Online Board Gamers"
-        requests.post(notification[1], data={"content": message})
-        return JsonResponse({"response": "ok", "type": 1})
+        return JsonResponse(
+            {
+                "errorMessage": gettext("Custom webhook URLs are not supported"),
+                "type": 0,
+            }
+        )
 
     return JsonResponse({"errorMessage": gettext("Server Error")})
 
@@ -4209,6 +4314,11 @@ def discord_callback(request):
     if not code:
         return redirect("profile")
 
+    expected_state = request.session.pop("discord_oauth_state", None)
+    if not expected_state or request.GET.get("state") != expected_state:
+        messages.error(request, gettext("Discord link expired. Please try again from your profile."))
+        return redirect("profile")
+
     # Use config to get secrets from your .env file
     client_id = config("DISCORD_CLIENT_ID")
     client_secret = config("DISCORD_CLIENT_SECRET")
@@ -4223,7 +4333,7 @@ def discord_callback(request):
 
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
-    response = requests.post("https://discord.com/api/oauth2/token", data=data, headers=headers)
+    response = requests.post("https://discord.com/api/oauth2/token", data=data, headers=headers, timeout=10)
     credentials = response.json()
     access_token = credentials.get("access_token")
 
@@ -4235,7 +4345,7 @@ def discord_callback(request):
 
     # 2. GET THE USER ID
     user_headers = {"Authorization": f"Bearer {access_token}"}
-    user_resp = requests.get("https://discord.com/api/users/@me", headers=user_headers)
+    user_resp = requests.get("https://discord.com/api/users/@me", headers=user_headers, timeout=10)
     discord_data = user_resp.json()
     discord_user_id = discord_data["id"]
 
@@ -4254,7 +4364,7 @@ def discord_callback(request):
 
     # This 'PUT' request actually adds the user to the server
     # This sends the "Join" request to Discord
-    requests.put(join_url, json=join_data, headers=join_headers)
+    requests.put(join_url, json=join_data, headers=join_headers, timeout=10)
 
     new_join_message = "👋 **Welcome to the OnlineBoardGamers Discord Bot!**\n\n🔔 You'll receive game notifications here\n\n⚙️ You can turn off messages at any time from your profile"
     SN_sendDiscordDM(discord_user_id, new_join_message, "https://onlineboardgamers.com/profile/", "https://onlineboardgamers.com/profile/")
@@ -4266,6 +4376,7 @@ def discord_callback(request):
 
 
 @login_required()
+@require_POST
 def stop_discord_dms(request):
     profile = Profile.objects.get(user=request.user)
     profile.discord_id = None
@@ -4300,14 +4411,19 @@ def addWebhook(request):
             return redirect("profile")
 
     # Valid URL, so check discord patterns
-    if webhookType == "DC" and webhookURL[0:15] != "https://discord" and webhookURL[0:19] != "https://ptb.discord" and webhookURL[0:18] != "https://discordapp":
+    if webhookType == "DC" and not SR_valid_webhook_url("DC", webhookURL):
         error_string = gettext("Please enter a Valid Discord Webhook URL")
         messages.error(request, error_string)
         return redirect("profile")
 
     # Valid URL, so check Slack patterns
-    if webhookType == "SL" and webhookURL[0:33] != "https://hooks.slack.com/services/":
+    if webhookType == "SL" and not SR_valid_webhook_url("SL", webhookURL):
         error_string = gettext("Please enter a Valid Slack Webhook URL")
+        messages.error(request, error_string)
+        return redirect("profile")
+
+    if webhookType not in ("DC", "SL", "TG"):
+        error_string = gettext("Please select a valid webhook type")
         messages.error(request, error_string)
         return redirect("profile")
 
@@ -4388,6 +4504,8 @@ def deleteWebhook(request):
 @login_required
 @require_POST
 def sendAdminMessage(request):
+    if is_rate_limited(f"sendAdminMessage:{request.user.id}", 10, 600):
+        return JsonResponse({"status": "error", "message": "Too many messages, please try again later"}, status=429)
     # if not request.user.is_superuser:
     #    return JsonResponse({"status": "error", "message": "Forbidden"}, status=403)
 
@@ -4411,8 +4529,10 @@ def sendAdminMessage(request):
 
 @login_required
 def BGH_API(request, options):
+    if not re.fullmatch(r"[A-Za-z0-9_,.-]{1,100}", options):
+        return JsonResponse({"error": "Invalid options"}, status=400)
     url = "http://api.boardgamehelpers.com/api/FoodChainMagnate/GenerateMap/" + options
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     data = response.json()
     final_dictionary = {}
     if isinstance(data, dict):
@@ -4660,7 +4780,7 @@ def _sendMTchatMessage(request):
     base64_data = currentMT.chatData if currentMT.chatData else ""
     if len(base64_data) > 0:
         compressed_data = base64.b64decode(base64_data)
-        unzipped = gzip.decompress(compressed_data).decode("utf-8")
+        unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
         currentChatData = json.loads(unzipped)
     currentChatData.insert(0, new_entry)
 
@@ -4694,6 +4814,7 @@ def reloadMTchatData(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createFCMminiTournament(request):
     # experienced = SF_hasRequiredExperience(request, "FCM", Game)
     if request.method != "POST":
@@ -4754,6 +4875,8 @@ def createFCMminiTournament(request):
     return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
 
 
+@login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createTGZminiTournament(request):
     if request.method != "POST":
         return render(
@@ -4822,6 +4945,7 @@ def createTGZminiTournament(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createHLCminiTournament(request):
     if request.method != "POST":
         return render(
@@ -4886,6 +5010,7 @@ def createHLCminiTournament(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createBUSminiTournament(request):
     if request.method != "POST":
         return render(
@@ -4947,6 +5072,7 @@ def createBUSminiTournament(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createAQYminiTournament(request):
     if request.method != "POST":
         return render(
@@ -5006,6 +5132,7 @@ def createAQYminiTournament(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createINDminiTournament(request):
     if request.method != "POST":
         return render(
@@ -5069,6 +5196,7 @@ def createINDminiTournament(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createRNBminiTournament(request):
     if request.method != "POST":
         return render(
@@ -5134,6 +5262,7 @@ def createRNBminiTournament(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createCNSminiTournament(request):
     if request.method != "POST":
         return render(
@@ -5199,6 +5328,7 @@ def createCNSminiTournament(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createWEBminiTournament(request):
     if request.method != "POST":
         return render(
@@ -5258,6 +5388,7 @@ def createWEBminiTournament(request):
 
 
 @login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createKFWminiTournament(request):
     if request.method != "POST":
         return render(
@@ -5355,7 +5486,7 @@ def MainTournament(request, Main_Tournament_id):
             raise Http404(gettext("Tournament does not exist")) from None
 
         if "startTournament" in request.POST:
-            if request.user.username != "admin":
+            if not is_site_admin(request.user):
                 messages.error(request, gettext("Illegal Access"))
             elif currentTournament.tournamentStatus != OPEN:
                 messages.error(request, gettext("This tournament cannot be started"))
@@ -5534,7 +5665,7 @@ def _sendMainTchatMessage(request):
     base64_data = currentMainT.chatData if currentMainT.chatData else ""
     if len(base64_data) > 0:
         compressed_data = base64.b64decode(base64_data)
-        unzipped = gzip.decompress(compressed_data).decode("utf-8")
+        unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
         currentChatData = json.loads(unzipped)
     currentChatData.insert(0, new_entry)
 

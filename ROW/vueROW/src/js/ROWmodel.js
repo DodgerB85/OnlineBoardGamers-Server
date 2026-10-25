@@ -2,6 +2,7 @@
  * ROW model: builds the game, exposes the engine, and handles persistence.
  * Mirrors the role of FCMmodel / RNBmodel.
  */
+import i18n from "../i18n"
 import { JavaRandom, defaultOptions } from "./ROWcore"
 import { Game } from "./ROWengine"
 import { deserializeGame, serializeGame, savedPayload as makeSavedPayload } from "./ROWfuncs"
@@ -134,7 +135,7 @@ export function initFromGameData(gameData, players, options) {
 	// corrupted/unrecognised state and must not silently start a fresh game.
 	const hasData = gameData && typeof gameData === "object" && Object.keys(gameData).length > 0
 	if (hasData) {
-		store.gameMessages.errorText = "Could not load the saved game (unrecognised data). Please report this bug."
+		store.gameMessages.errorText = i18n.global.t("error.loadGame")
 		return
 	}
 	store.setGame(Game.start(players, { ...defaultOptions(options.edition, options) }, rng))

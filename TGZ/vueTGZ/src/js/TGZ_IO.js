@@ -10,6 +10,9 @@ import { useModelStore } from "../stores/TGZstore.js"
 
 import { usePersonalStore } from "../stores/TGZpersonal.js"
 
+import i18n from "../i18n"
+const t = i18n.global.t
+
 export async function doSimpleSave() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
@@ -41,7 +44,7 @@ export async function doSimpleSave() {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			alert("It appears you have an older version of the game. Please refresh the page")
+			alert(t("io.olderVersion"))
 			return
 		}
 		personal.latestUpdate = data.latestUpdate
@@ -51,7 +54,7 @@ export async function doSimpleSave() {
 		controller.startPlayerTurn()
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		alert("Error saving the game")
+		alert(t("io.saveError"))
 	}
 }
 
@@ -87,7 +90,7 @@ export async function replaceExternalTournamentPlayer() {
 	postData.nextPlayer = store.players[store.gameflow.turnOrder[0]].name // USED > goes to currentPlayers
 
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
-		alert("ERROR: Game over")
+		alert(t("io.gameOver"))
 		return
 	}
 
@@ -102,7 +105,7 @@ export async function replaceExternalTournamentPlayer() {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			alert("It appears you have an older version of the game. Please refresh the page")
+			alert(t("io.olderVersion"))
 			return
 		}
 		personal.latestUpdate = data.latestUpdate
@@ -111,11 +114,11 @@ export async function replaceExternalTournamentPlayer() {
 		store.topMenuViews.showLoader = false
 		personal.haltPlay = false
 		controller.startPlayerTurn()
-		store.topMenuViews.rewindErrorText = "PLAYER REPLACED"
+		store.topMenuViews.rewindErrorText = t("io.playerReplaced")
 		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		alert("Error saving the game")
+		alert(t("io.saveError"))
 	}
 }
 
@@ -215,7 +218,7 @@ export async function saveGame(saveRewind) {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			alert("It appears you have an older version of the game. Please refresh the page")
+			alert(t("io.olderVersion"))
 			return
 		}
 		personal.latestUpdate = data.latestUpdate
@@ -245,7 +248,7 @@ export async function saveGame(saveRewind) {
 		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		alert("Error saving the game")
+		alert(t("io.saveError"))
 	}
 }
 
@@ -273,7 +276,7 @@ export async function sendChatMessage(newEntry) {
 		}
 		const data = await response.json()
 		if (!data.chatData) {
-			alert("Sorry, there was a problem. Please email the webmaster directly")
+			alert(t("io.webmasterProblem"))
 			return
 		}
 		store.chatData = funcs.decompressChatData(data.chatData)
@@ -281,7 +284,7 @@ export async function sendChatMessage(newEntry) {
 		store.topMenuViews.showLoader = false
 	} catch (error) {
 		console.error("Error sending chat:", error)
-		alert("Error sending chat message")
+		alert(t("io.chatError"))
 	}
 }
 
@@ -371,14 +374,14 @@ export async function saveNotes() {
 			throw new Error("Network response was not ok")
 		}
 		if (!data.notePosted) {
-			store.topMenuViews.errorText = "Sorry, there was a problem. Please email the webmaster directly"
+			store.topMenuViews.errorText = t("io.webmasterProblem")
 			return
 		}
 
 		store.topMenuViews.showLoader = false
 	} catch (error) {
 		console.error("Error saving Notes:", error)
-		alert("Error saving Notes")
+		alert(t("io.saveNotesError"))
 	}
 }
 
@@ -389,13 +392,13 @@ export async function loadRewind() {
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
-		store.topMenuViews.rewindErrorText = "Error: Game Ended"
+		store.topMenuViews.rewindErrorText = t("io.rewindGameEnded")
 		store.topMenuViews.performingRewind = false
 		store.topMenuViews.showLoader = false
 		return
 	}
 	if (store.topMenuViews.showReplay) {
-		store.topMenuViews.rewindErrorText = "Error: Exit Replay Mode First"
+		store.topMenuViews.rewindErrorText = t("io.rewindExitReplay")
 		store.topMenuViews.performingRewind = false
 		store.topMenuViews.showLoader = false
 		return
@@ -415,7 +418,7 @@ export async function loadRewind() {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			alert("It appears you have an older version of the game. Please refresh the page")
+			alert(t("io.olderVersion"))
 			store.topMenuViews.performingRewind = false
 			return
 		}
@@ -447,7 +450,7 @@ export async function loadRewind() {
 		store.topMenuViews.showLoader = false
 	} catch (error) {
 		console.error("Error rewinding data:", error)
-		alert("Error rewinding the game")
+		alert(t("io.rewindError"))
 		store.topMenuViews.performingRewind = false
 	}
 }
@@ -492,7 +495,7 @@ async function updateDataFromLoadRewind() {
 		WS.broadcastGameUpdate(wsConnecting)
 	} catch (error) {
 		console.error("Error updating data:", error)
-		alert("Error updating the game")
+		alert(t("io.updateError"))
 		store.topMenuViews.performingRewind = false
 		controller.startPlayerTurn()
 	}
@@ -523,10 +526,9 @@ export async function resign() {
 		if (!response.ok) {
 			throw new Error("Network response was not ok")
 		}
-		const data = await response.json()
 	} catch (error) {
 		console.error("Error resiging:", error)
-		alert("Error Resigning")
+		alert(t("io.resignError"))
 	}
 }
 
@@ -554,7 +556,7 @@ export async function kickout() {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			alert("It appears you have an older version of the game. Please refresh the page")
+			alert(t("io.olderVersion"))
 			return
 		}
 		if (data.voteCast) {
@@ -567,7 +569,7 @@ export async function kickout() {
 		return data
 	} catch (error) {
 		console.error("Error kicking:", error)
-		alert("Error Kicking")
+		alert(t("io.kickError"))
 	}
 }
 
@@ -622,11 +624,11 @@ export async function submitBug(bugContent) {
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
-		if (data.bugEntrySuccess) store.topMenuViews.bugSuccessText = "Your bug report has been submitted"
-		else alert("Sorry, there was a problem. Please email the webmaster directly")
+		if (data.bugEntrySuccess) store.topMenuViews.bugSuccessText = t("io.bugReportSubmitted")
+		else alert(t("io.webmasterProblem"))
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		alert("Sorry, there was a problem. Please email the webmaster directly")
+		alert(t("io.webmasterProblem"))
 	}
 
 	store.topMenuViews.showLoader = false
@@ -685,7 +687,7 @@ export async function copyGameToNewPracticeGame(_replayStep) {
 		if (!response.ok) {
 			store.history.splice(0)
 			store.history = [...histotyCopy]
-			alert("Network response was not ok")
+			alert(t("io.networkError"))
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
@@ -696,7 +698,7 @@ export async function copyGameToNewPracticeGame(_replayStep) {
 		history.performStep(0)
 
 		console.error("Error fetching data:", error)
-		alert("Error Creating a Copy of the game")
+		alert(t("io.errorCopying"))
 		return false
 	}
 }
@@ -729,8 +731,8 @@ export async function saveAutoPass(autoPass) {
 		}
 		const data = await response.json()
 		if (data.setAutoPassSuccess) {
-			if (document.querySelector("#autoPassCheckbox").checked) document.querySelector("#autoPassResponse").innerHTML = "<br/>Auto-Pass Saved"
-			else document.querySelector("#autoPassResponse").innerHTML = "<br/>Auto-Pass Cancelled"
+			if (document.querySelector("#autoPassCheckbox").checked) document.querySelector("#autoPassResponse").innerHTML = "<br/>" + t("io.autoPassSaved")
+			else document.querySelector("#autoPassResponse").innerHTML = "<br/>" + t("io.autoPassCancelled")
 		}
 
 		store.topMenuViews.showLoader = false
@@ -830,12 +832,12 @@ export function nudgeTourneyAdmins(type) {
 				funcs.importModel(store.wholeTurnResetData)
 				controller.startPlayerTurn()
 				store.topMenuViews.showLoader = false
-				store.topMenuViews.rewindErrorText = "Alert Sent"
+				store.topMenuViews.rewindErrorText = t("io.alertSent")
 			} else {
 				store.clearVars()
 				funcs.importModel(store.wholeTurnResetData)
 				controller.startPlayerTurn()
-				store.topMenuViews.rewindErrorText = "Error. Please use email or discord."
+				store.topMenuViews.rewindErrorText = t("io.emailOrDiscord")
 			}
 		})
 		.catch((error) => {
@@ -862,14 +864,14 @@ export async function castVote(topic) {
 			headers: { "X-CSRFToken": csrftoken },
 		})
 		if (!response.ok) {
-			store.topMenuViews.rewindErrorText = "Error; Contact Admin"
+			store.topMenuViews.rewindErrorText = t("io.contactAdmin")
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
 
 		store.topMenuViews.showLoader = false
 		if (data.voteChanged === true) {
-			store.topMenuViews.bugSuccessText = "Vote Saved"
+			store.topMenuViews.bugSuccessText = t("io.voteSaved")
 
 			if (topic === rf.DELETE_VOTE_TOPIC) {
 				personal.votedToDelete = true
@@ -879,10 +881,10 @@ export async function castVote(topic) {
 				personal.votedToExclude = true
 				store.statsExcludeVotesData = JSON.parse(data.votesData)
 			}
-		} else store.topMenuViews.rewindErrorText = "Error; Contact Admin"
+		} else store.topMenuViews.rewindErrorText = t("io.contactAdmin")
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.topMenuViews.rewindErrorText = "Error; Contact Admin"
+		store.topMenuViews.rewindErrorText = t("io.contactAdmin")
 		return false
 	}
 }

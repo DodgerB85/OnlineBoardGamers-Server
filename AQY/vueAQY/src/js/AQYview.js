@@ -51,19 +51,7 @@ export function kickoutFlexiTimerTicker() {
 
 export function phaseStr() {
 	const store = useModelStore()
-
-	if (store.gameflow.phase === rf.PHASE_FIRST_CITY) return " - First City"
-	else if (store.gameflow.phase === rf.PHASE_ALL_RISE) return ".1 - All Rise"
-	else if (store.gameflow.phase === rf.PHASE_CITY_BUILDING) return ".2 - City Building"
-	else if (store.gameflow.phase === rf.PHASE_TURN_ORDER) return ".3 - Turn Order"
-	else if (store.gameflow.phase === rf.PHASE_COUNTRYSIDE_BUILDING) return ".4 - Countryside Building"
-	else if (store.gameflow.phase === rf.PHASE_STORE_GOODS) return ".5 - Store Goods"
-	else if (store.gameflow.phase === rf.PHASE_HARVEST) return ".6 - Harvest"
-	else if (store.gameflow.phase === rf.PHASE_EXPLORE) return ".7 - Explore"
-	else if (store.gameflow.phase === rf.PHASE_FAMINE) return ".8 - Famine"
-	else if (store.gameflow.phase === rf.PHASE_POLLUTION) return ".9 - Pollution"
-	else if (store.gameflow.phase === rf.PHASE_CHECK_VICTORY) return ".10 - Check Victory"
-	else if (store.gameflow.phase === rf.PHASE_GAME_OVER) return " - Game Over"
+	return " - " + (rf.PHASE_STRINGS[store.gameflow.phase] ?? "")
 }
 
 export function getTileImgNameFromSeed(seed) {

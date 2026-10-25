@@ -227,9 +227,9 @@ function toggleTileInfo() {
 		}">
 		<transition name="fadeOut">
 			<div class="hexPlaceErrorPopup" v-if="showErrorPopup" :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }">
-				Invitation Cannot
+				{{ $t("map.invitationCannot") }}
 				<br />
-				Join to Party
+				{{ $t("map.joinToParty") }}
 			</div>
 		</transition>
 
@@ -287,7 +287,7 @@ function toggleTileInfo() {
 			<!-- Add table Right Edge -->
 			<rect v-if="store.tableUp !== 0" :x="(((store.tableRight * store.refSize) / 1 / 3) * 260) / store.canvasSize + 10" :y="(((-store.tableUp * rf.hexSmallRatio * store.refSize * 1) / 3) * 262.7) / store.canvasSize - (((0.5 * store.refSize) / 8) * 3 * 262.7) / store.canvasSize + 10 - store.tableBulk" :height="((((store.tableUp + store.tableDown) * rf.hexSmallRatio * store.refSize * 1) / 3) * 262.7) / store.canvasSize + ((store.refSize / 8) * 3 * 262.7) / store.canvasSize - 20 + store.tableBulk * 2" :width="store.tableBulk - 20" fill="brown" stroke="black" stroke-width="20" />
 
-			<text x="0" y="0" text-anchor="middle" dominant-baseline="central" fill="white" font-size="16">Table</text>
+			<text x="0" y="0" text-anchor="middle" dominant-baseline="central" fill="white" font-size="16">{{ $t("map.table") }}</text>
 
 			<!-- Add Hexes -->
 			<g v-for="tile in store.hexes" :key="tile.id" :transform="'rotate(' + tile.rotation * 60 + ' ' + hexCenter(tile.hex, false, true) + ')' + hexCenter(tile.hex, false)">
@@ -417,7 +417,7 @@ function toggleTileInfo() {
 	</div>
 
 	<button class="actionsLineButton tileInfoButton" :class="{ tileInfoButtonActive: store.topMenuViews.showTileInfo }" @click="toggleTileInfo()">
-		{{ store.topMenuViews.showTileInfo ? "Hide" : "Show" }} Tile Info
+		{{ store.topMenuViews.showTileInfo ? $t("map.hideTileInfo") : $t("map.showTileInfo") }}
 	</button>
 </template>
 

@@ -17,7 +17,7 @@ const store = useModelStore()
 				<span class="ht">{{ view.humanizeAction(h.type) }}</span>
 				<span v-if="h.params.length" class="hparams">{{ h.params.join(", ") }}</span>
 			</div>
-			<div v-if="store.history.length === 0" class="empty">No actions yet</div>
+			<div v-if="store.history.length === 0" class="empty">{{ t('row.history.empty') }}</div>
 		</div>
 	</div>
 </template>

@@ -16,7 +16,6 @@
     // Hiring
     remainingPoints: "{count} remaining point | {count} remaining points",
     salaryPoints: "1 point may be used to reduce salaries by $5 | {count} points may be used to reduce salaries by ${amount}",
-    resetWorkingDay: "Reset Working Day",
     resetRecruiting: "Reset Recruiting",
     finishRecruiting: "Finish Recruiting",
 
@@ -69,7 +68,7 @@
     setHawkerRoute: "Set Hawker Route",
     hawkerRouteRangeLeft: "Set Hawker Route: {count} range left",
     hawkerRouteNoRange: "Set Hawker Route: 0 range — click a highlighted square to stop",
-    doneDrawingRoute: "Done Drawing Route",
+    doneDrawingRoute: "Stop Hawker Truck",
     addHawkerTruck: "Add Hawker Truck",
     placeCampaign: "Place Campaign",
     clickToPlaceCampaign: "Click a highlighted square on the map to place your campaign",
@@ -143,7 +142,6 @@
     // Confirm end of working day
     confirmWorkingDay: "You are about to confirm the whole Working Day",
     warningNoHires: "WARNING: YOU HAVE NOT HIRED ANYONE",
-    resetWholeTurn: "Reset Whole Turn",
     endTurn: "End Turn",
     paydaySkipped: "Payday will be skipped as you have no salary to pay and it is turn 1 or 2",
     paydayTurnOrder: "Payday will be played in turn order",

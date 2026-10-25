@@ -1,7 +1,10 @@
 <script setup>
+import { computed } from "vue"
 import { useModelStore } from "../stores/DDLstore.js"
 import HistoryEntry from "./HistoryEntry.vue"
 const store = useModelStore()
+
+const reversed = computed(() => [...store.history].reverse())
 
 function close() {
 	store.viewSettings.showHistory = false
@@ -12,11 +15,11 @@ function close() {
 <template>
 	<div id="history" v-if="store.viewSettings.showHistory">
 		<div class="historyHeader">
-			<h2>History</h2>
-			<button class="actionsLineButton" @click="close">Close</button>
+			<h2>{{ $t("history.title") }}</h2>
+			<button class="actionsLineButton" @click="close">{{ $t("common.close") }}</button>
 		</div>
 		<div class="historyList">
-			<HistoryEntry v-for="(entry, idx) in store.history" :key="idx" :entry="entry" :index="idx" />
+			<HistoryEntry v-for="(entry, idx) in reversed" :key="idx" :entry="entry" :index="idx" />
 		</div>
 	</div>
 </template>
@@ -39,14 +42,9 @@ function close() {
 	background-color: #eee;
 	position: sticky;
 	top: 0;
+	z-index: 1;
 }
 .historyHeader h2 { margin: 0; }
 .historyList { padding: 4px; }
-.actionsLineButton {
-	border: 2px solid green;
-	border-radius: 5px;
-	font-weight: bolder;
-	padding: 4px 10px;
-	cursor: pointer;
-}
+.actionsLineButton { border: 2px solid green; border-radius: 5px; font-weight: bolder; padding: 4px 10px; cursor: pointer; }
 </style>

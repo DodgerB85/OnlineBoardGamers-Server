@@ -43,6 +43,17 @@ const canReplaceMap = ref(false)
 // State for showing/hiding hex icons
 const showHexIcons = ref(true)
 
+// State for showing/hiding the custom map rules panel
+const showCustomRules = ref(false)
+
+const customRuleOptions = [
+	{ value: rf.CR_START_2_DONKEY_3RD_ON_WONDER_BRICK_27, labelKey: "mapEditor.customRuleStart2Donkeys" },
+	{ value: rf.CR_START_WITH_ONE_EXTRA_STONE, labelKey: "mapEditor.customRuleExtraStone" },
+	{ value: rf.CR_START_WITH_ONE_EXTRA_BOARDS, labelKey: "mapEditor.customRuleExtraBoards" },
+	{ value: rf.CR_USE_ONLY_28_NEUTRAL_BRICKS, labelKey: "mapEditor.customRule28NeutralBricks" },
+	{ value: rf.CR_ONLY_START_WITH_1_DONKEY, labelKey: "mapEditor.customRuleOnly1Donkey" },
+]
+
 //import { usePersonalStore } from "../stores/RNBpersonal.js"
 //const personal = usePersonalStore()
 
@@ -75,6 +86,7 @@ const hexesForDisplay = computed(() =>
 		bridgeRiverLines: hex.bridgeRiverLines,
 		roadJoinPoints: hex.roadJoinPoints,
 		fullRoadPath: hex.fullRoadPath,
+		fullTrainTrackPath: hex.fullTrainTrackPath,
 	}))
 )
 
@@ -278,6 +290,7 @@ function toggleHexStyle() {
 function clearMap() {
 	context.resetContextAndHighlights()
 	funcs.clearMap()
+	store.CUSTOM_RULES.splice(0)
 	canReplaceMap.value = false
 	if (hexPileSelectionAreaRef.value && hexPileSelectionAreaRef.value.resetIsVerified) {
 		hexPileSelectionAreaRef.value.resetIsVerified()
@@ -300,6 +313,9 @@ function removeHex(hexID) {
 		})
 		.filter((item) => item.hexCoord !== null)
 
+	// Tracks are stored by tile coordinates, so they survive the rebuild
+	const savedTrainTracks = map.compressTrainTracksForMap()
+
 	// Clear the entire map
 	funcs.clearMap()
 
@@ -307,6 +323,8 @@ function removeHex(hexID) {
 	for (const hex of remainingHexes) {
 		model.addHexToMap(hex.coord, hex.rotation, hex.hexTerrainID)
 	}
+
+	map.applyTrainTracksFromMap(savedTrainTracks)
 
 	// Restore home markers by finding hexes with matching coordinates
 	for (const item of savedHomeMarkers) {
@@ -392,7 +410,7 @@ store.refSize = 2400
 
 <template>
 	<div id="wholeMapEditorDiv">
-		<HexPileSelectionArea ref="hexPileSelectionAreaRef" :playerCount="playerCount" @update:playerCount="setPlayerCount" :canReplaceMap="canReplaceMap" @update:canReplaceMap="setCanReplaceMap" />
+		<HexPileSelectionArea ref="hexPileSelectionAreaRef" :playerCount="playerCount" @update:playerCount="setPlayerCount" :canReplaceMap="canReplaceMap" @update:canReplaceMap="setCanReplaceMap" @showCustomRules="showCustomRules = true" />
 		<!-- Buttons -->
 		<div class="mapButtonsDiv">
 			<button class="actionsLineButton showIconsButton" @click="toggleHexIcons" :title="showHexIcons ? 'Hide Hex Icons' : 'Show Hex Icons'">
@@ -441,6 +459,19 @@ store.refSize = 2400
 				<div class="homeMarkerContainer">
 					<img :src="view.getImage('home_2')" class="homeMarkerIcon" alt="Remove Home Marker" />
 					<span v-if="store.context.action !== rf.ACT_MAP_EDITOR_REMOVE_HOME_MARKER" class="homeMarkerMinus">-</span>
+					<span v-else class="homeMarkerX">×</span>
+				</div>
+			</button>
+			<button class="actionsLineButton homeMarkerButton" @click="ME.setupTrainTrackEditing" title="Add Train Tracks" :disabled="store.mapData.edgeData.length === 0" :class="{ disabledButton: store.mapData.edgeData.length === 0 }">
+				<div class="homeMarkerContainer">
+					<svg class="homeMarkerIcon" viewBox="0 0 24 24" fill="none">
+						<line x1="7" y1="2" x2="7" y2="22" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+						<line x1="17" y1="2" x2="17" y2="22" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+						<line x1="4" y1="6" x2="20" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+						<line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+						<line x1="4" y1="18" x2="20" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+					</svg>
+					<span v-if="store.context.action !== rf.ACT_MAP_EDITOR_EDIT_TRAIN_TRACKS" class="homeMarkerPlus">+</span>
 					<span v-else class="homeMarkerX">×</span>
 				</div>
 			</button>
@@ -514,6 +545,10 @@ store.refSize = 2400
 							<feFuncA type="linear" slope="4" intercept="-1" />
 						</feComponentTransfer>
 					</filter>
+					<mask v-for="hex in hexesForDisplay" :key="'trainTrackMask' + hex.hexID" :id="`mapEditorTrainTrackMask${hex.hexID}`" maskUnits="userSpaceOnUse" x="-20000" y="-20000" width="40000" height="40000">
+						<rect x="-20000" y="-20000" width="40000" height="40000" fill="white" />
+						<path :d="hex.fullTrainTrackPath" stroke="black" :stroke-width="(84 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+					</mask>
 				</defs>
 				<!-- MAKE UP AN INDIVIDUAL HEX HERE WITH ALL ITEMS ON TOP OF IT. IT CAN THEN BE ROATED TO FLAT TOP IF NEEDED BEFORE BEING MOVED TO THE CORRECT LOCATION -->
 				<!-- LAYER 1 -- JUST THE HEX ART AND OUTLINES-->
@@ -549,6 +584,10 @@ store.refSize = 2400
 								<path :d="hex.fullRoadPath" stroke="#1C2526" :stroke-width="60 * store.RATIO" stroke-linejoin="round" stroke-linecap="round" />
 								<path :d="hex.fullRoadPath" stroke="#F5F5F5" :stroke-width="(7 * store.RATIO).toFixed(0)" :stroke-dasharray="`${(25 * store.RATIO).toFixed(0)} ${(20 * store.RATIO).toFixed(0)}`" fill="none" />
 							</g>
+						</g>
+						<!-- TRAIN TRACKS -->
+						<g v-if="store.gameOptions.useTrains && hex.fullTrainTrackPath">
+							<path :d="hex.fullTrainTrackPath" stroke="#1A237E" :stroke-width="(124 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" :mask="`url(#mapEditorTrainTrackMask${hex.hexID})`" />
 						</g>
 					</g>
 					<!-- NOT FINE TO ROTATE TO FLAT-->
@@ -969,6 +1008,19 @@ store.refSize = 2400
 				</g>
 			</svg>
 		</div>
+		<div id="customRulesArea">
+			<button type="button" class="customRulesToggle" @click="showCustomRules = !showCustomRules" :aria-expanded="showCustomRules">{{ $t("mapEditor.customRules") }} {{ showCustomRules ? "▾" : "▸" }}</button>
+			<div class="customRulesCollapse" :class="{ open: showCustomRules }" :inert="!showCustomRules">
+				<div class="customRulesCollapseInner">
+					<div class="customRulesPanel">
+						<label v-for="rule in customRuleOptions" :key="rule.value" class="customRuleLabel">
+							<input type="checkbox" :value="rule.value" v-model="store.CUSTOM_RULES" />
+							{{ $t(rule.labelKey) }}
+						</label>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 </template>
 
@@ -1312,6 +1364,58 @@ store.refSize = 2400
 
 .disabledButton:hover {
 	opacity: 0.5;
+}
+
+#customRulesArea {
+	width: max-content;
+	margin: 10px auto;
+}
+
+.customRulesToggle {
+	display: block;
+	width: 100%;
+	padding: 8px 12px;
+	border: 2px solid black;
+	background-color: white;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.customRulesToggle:hover {
+	background-color: #f0f0f0;
+}
+
+.customRulesCollapse {
+	display: grid;
+	grid-template-rows: 0fr;
+	transition: grid-template-rows 0.3s ease;
+}
+
+.customRulesCollapse.open {
+	grid-template-rows: 1fr;
+}
+
+.customRulesCollapseInner {
+	overflow: hidden;
+	min-height: 0;
+}
+
+.customRulesPanel {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 10px;
+	border: 2px solid black;
+	border-top: none;
+	background-color: white;
+}
+
+.customRuleLabel {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	cursor: pointer;
+	user-select: none;
 }
 
 /*

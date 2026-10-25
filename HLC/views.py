@@ -21,6 +21,7 @@ from Lobby.gameViewHelpers import (
     shared_save_notes,
 )
 from Lobby.models import Game, User
+from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -86,6 +87,14 @@ def _processHLCturn(request):
 
     presenter = cast("HLCpresenter", currentGame.presenter())
 
+    if jsonData.get("action") not in ("load", "refreshChat") and not can_act_in_game(request.user, currentGame):
+        return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
+
+    for key in ("content", "data", "other"):
+        value = jsonData.get(key)
+        if isinstance(value, str) and len(value) > 500_000:
+            return JsonResponse({"error": gettext("Payload too large")}, status=413)
+
     if jsonData["action"] == "turn0move":
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             return JsonResponse({"syncError": True}, safe=False)
@@ -110,6 +119,8 @@ def _processHLCturn(request):
             # open up the game data.
             x = lzstring.LZString()
             raw_game_data = x.decompressFromEncodedURIComponent(currentGame.gameData or "{}")
+            if raw_game_data and len(raw_game_data) > 8_000_000:
+                return JsonResponse({"error": gettext("Payload too large")}, status=413)
             # Fallback to "{}" if decompression returns None
             gameDataString = raw_game_data if raw_game_data is not None else "{}"
             rawModel = json.loads(gameDataString)
@@ -120,6 +131,8 @@ def _processHLCturn(request):
                 move_data_raw = all_gps[i].currentMoveData if i < len(all_gps) else ""
 
                 decompressed_move = x.decompressFromEncodedURIComponent(move_data_raw or "")
+                if decompressed_move and len(decompressed_move) > 8_000_000:
+                    return JsonResponse({"error": gettext("Payload too large")}, status=413)
                 # Fallback to "{}" if decompression fails
                 rawModel[3][i][0] = json.loads(decompressed_move if decompressed_move is not None else "{}")
 
@@ -173,10 +186,15 @@ def _processHLCturn(request):
             name = jsonData["BKSN"]
 
         # Use a fallback string if decompression returns None
-        incomingFactoryDataRaw = json.loads(LZS.decompressFromEncodedURIComponent(jsonData["data"]) or "{}")
-        DBgameDataRaw = json.loads(LZS.decompressFromEncodedURIComponent(currentGame.gameData) or "[]")
+        incoming_data = LZS.decompressFromEncodedURIComponent(jsonData["data"]) or "{}"
+        db_data = LZS.decompressFromEncodedURIComponent(currentGame.gameData) or "[]"
+        other_data = LZS.decompressFromEncodedURIComponent(jsonData["other"]) or "[]"
+        if max(len(incoming_data), len(db_data), len(other_data)) > 8_000_000:
+            return JsonResponse({"error": gettext("Payload too large")}, status=413)
+        incomingFactoryDataRaw = json.loads(incoming_data)
+        DBgameDataRaw = json.loads(db_data)
         DBavailableComponents = DBgameDataRaw[0].copy() if DBgameDataRaw else []
-        other = json.loads(LZS.decompressFromEncodedURIComponent(jsonData["other"]) or "[]")
+        other = json.loads(other_data)
 
         FDBE = other[0]
         FCIATT = other[1]
@@ -468,7 +486,7 @@ def _processHLCturn(request):
 
         ################ REWIND EVERY SAVE #######################
 
-        if jsonData["saveRewind"]:
+        if jsonData.get("saveRewind", True):
             currentRewindData = currentGame.rewindData
             currentRewindDataArray = currentRewindData.split("'SPLIT'")
 
@@ -540,7 +558,7 @@ def _processHLCturn(request):
                 {"message": gettext("<b>No rewind data. Rewind limit reached. Please play on to generate more rewind data </b>")},
                 safe=False,
             )
-        if not presenter.getRewindHostPossible() and request.user.username != "BotKickStarter":
+        if not presenter.getRewindHostPossible() and not is_game_admin(request.user):
             return JsonResponse(
                 {"message": gettext("<b>Permissions missing. Please reload the page and check again</b>")},
                 safe=False,
@@ -759,10 +777,10 @@ def showHLCgame(request, game_id):
     user_id = request.user.id
 
     now = int(time.time()) * 1000
-    chatData = currentGame.chatData
-
-    c = bytes(chatData, "utf-8")
-    chatData = c.decode("unicode-escape")
+    # The template embeds this JSON fragment as-is (JS parses the \u escapes),
+    # so only stop </script> breakouts. Decoding it here mangles non-BMP characters
+    # into lone surrogates, which the response cannot encode.
+    chatData = currentGame.chatData.replace("<", "\\u003C")
 
     currentMove = ""
     currentNotes = ""
@@ -785,6 +803,10 @@ def showHLCgame(request, game_id):
     # But if the game is NOT finished, need to be able to supply 0 players to kickstart factory hang ups
     if len(currentPlayers) == 0 and currentGame.gameStatus == "FINISHED":
         currentPlayers = [presenter.getAllPlayersOrderedySeatInArray()[0]]
+    # Build Factory submissions are secret, so everyone stays current for everyone
+    # else - but a submitter may see their own name dropped from the queue
+    if currentGame.phase == 3 and presenter.hasMoveData(username):
+        currentPlayers = [n for n in currentPlayers if n != username]
     statsExcludedGame = currentGame.statsExcludedGame
     displayNames = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4"]
 
@@ -802,10 +824,10 @@ def showHLCgame(request, game_id):
 
     if involvedPlayer:
         rewindPanelType = 1
-        if currentGame.host == request.user or username == "BotKickStarter":
+        if currentGame.host == request.user or is_game_admin(request.user):
             rewindPanelType = 2
             rewindHostPossible = presenter.getRewindHostPossible()
-            if username == "BotKickStarter":
+            if is_game_admin(request.user):
                 rewindHostPossible = True
             rewindHostHTML = presenter.getRewindHostHTML()
 
@@ -942,15 +964,20 @@ def chat(request):
         currentChatData = currentGame.chatData
 
         newMessage = jsonData["message"]
-        newMessage = newMessage.encode("unicode-escape").decode("ASCII")
-
+        if not isinstance(newMessage, str) or len(newMessage) > 2000:
+            return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
         newMessage = newMessage.replace("\n", " ").replace("\r", "")
 
-        playerName = jsonData["player"]
-        playerName = playerName.encode("unicode-escape").decode("ASCII")
+        playerName = request.user.username
 
         now = str(int(time.time()) * 1000)
-        newChatString = '{"name":"' + playerName + '","timestamp":' + str(now) + ',"message":"' + newMessage + '"},'
+        newChatString = (
+            json.dumps(
+                {"name": playerName, "timestamp": int(now), "message": newMessage},
+                separators=(",", ":"),
+            )
+            + ","
+        )
         currentChatData = newChatString + currentChatData
         currentGame.chatData = currentChatData
         currentGame.save()

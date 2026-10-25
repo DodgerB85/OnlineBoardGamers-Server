@@ -575,6 +575,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 		}
 		if (result.syncError) {
 			personal.haltPlay = true
+			store.viewSettings.showGameLoader = false
 			store.gameMessages.errorText = i18n.global.t("FCM_IO.olderVersionRefresh")
 			return
 		}
@@ -715,6 +716,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 		console.error("Error fetching data:", error)
 		personal.haltPlay = false
 		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingGame")
+		store.gameMessages.retrySave = () => saveGameNormal(saveRewind, restartAnySimulPhase, isPointlessMove, extraPostData)
 		reportSaveError("FCM save error", `turn=${store.gameflow.turn}, phase=${store.gameflow.phase}, LU=${postData.latestUpdate}, nextPlayer=${postData.nextPlayer?.[0] || "none"}`, error)
 	}
 }
@@ -809,8 +811,12 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false, p
 	if (usePersonalStore().tutorial) return // Tutorial game is never persisted
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	store.gameMessages.retrySave = null
+	store.gameMessages.errorText = ""
 	store.viewSettings.showGameLoader = true
 	personal.haltPlay = true
+	// Keep an untouched copy for Retry: processSimulMoveData may mutate moveData.
+	const retryMoveData = JSON.parse(JSON.stringify(moveData))
 	let notificationSuppression = false
 	if (store.gameflow.phase == rf.PHASE_RESTRUCTURING && moveData[2] > 0) notificationSuppression = true
 
@@ -890,6 +896,7 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false, p
 		const data = await response.json()
 
 		if (data.syncError) {
+			store.viewSettings.showGameLoader = false
 			store.gameMessages.errorText = i18n.global.t("FCM_IO.olderVersionRefresh")
 			return
 		}
@@ -952,6 +959,7 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false, p
 		console.error("Error fetching data:", error)
 		personal.haltPlay = false
 		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingGame")
+		store.gameMessages.retrySave = () => saveSimulMove(retryMoveData, continueFromStalledGame, passKickoutFor)
 		reportSaveError("FCM simul move save error", `LU=${personal.latestUpdate}`, error)
 	}
 }
@@ -1295,6 +1303,26 @@ export async function checkForLatestData() {
 	} catch (error) {
 		console.error("Error fetching data:", error)
 	}
+}
+
+export async function copyGameToNewPracticeGame() {
+	const personal = usePersonalStore()
+	const prepared = funcs.exportPracticeFCMmodel()
+	const csrftoken = funcs.getCookie("csrftoken")
+	const response = await fetch("/FCM/createFCMspinoff/", {
+		method: "POST",
+		headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
+		body: JSON.stringify({
+			action: "copyGame",
+			gameID: personal.gameID,
+			pov: personal.pov,
+			turn: prepared.turn,
+			phase: prepared.phase,
+			data: prepared.data,
+		}),
+	})
+	if (!response.ok) throw new Error("Unable to create practice game")
+	return response.json()
 }
 
 export async function submitBug(bugContent) {
@@ -1994,7 +2022,7 @@ export function checkPaydayDataValid(playerIndex, paydayData) {
 		for (let i = 0; i < paydayData[0].length; i++) {
 			let unitarySalary = 5
 			if (plyr.hasMilestone(playerIndex, rf.FIRST_WAITRESS_USED)) unitarySalary = 3
-			if (rules.doesEmployeeRequireSalary(i, paydayData[0][i]) === true) due -= unitarySalary
+			if (rules.doesEmployeeRequireSalary(playerIndex, paydayData[0][i]) === true) due -= unitarySalary
 		}
 		if (playerObj.money >= due) return 1
 		else return 9

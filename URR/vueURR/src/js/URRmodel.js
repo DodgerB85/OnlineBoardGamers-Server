@@ -1,13 +1,16 @@
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
-import * as rf from "./URRreference"
-import * as funcs from "./URRfuncs"
+import * as rf from "./URRreference.js"
+import * as funcs from "./URRfuncs.js"
 import * as game from "./URRgame.js"
-import * as board from "./URRboard.js"
-import * as boardRules from "./URRmap.js"
 import * as historyStorage from "./URRhistoryStorage.js"
+import { encodeAction } from "./URRhistoryActions.js"
+import i18n from "../i18n.js"
 
-const STATE_FIELDS = ["version", "players", "gameflow", "states", "nations", "board", "landPrices", "era", "cardSupply", "rain", "nextDiggerId"]
+const t = i18n.global.t
+
+export const snapshotState = funcs.snapshotState
+export const restoreState = funcs.restoreState
 
 export function initGame() {
 	const store = useModelStore()
@@ -16,7 +19,8 @@ export function initGame() {
 
 	personal.name = initData.name || "Guest"
 	personal.gameID = initData.gameID
-	personal.gameCreationTimestamp = initData.gameCreationTimestamp
+	// The server sends milliseconds; history times are in seconds.
+	personal.gameCreationTimestamp = Math.floor(initData.gameCreationTimestamp / 1000)
 	personal.pov = initData.pov !== undefined ? initData.pov : -99
 	personal.latestUpdate = initData.latestUpdate
 	personal.secondsToNextKickout = initData.secondsToNextKickout !== undefined ? initData.secondsToNextKickout : 99999
@@ -48,7 +52,7 @@ export function initGame() {
 	const gameData = initData.gameData
 
 	try {
-		if (gameData && (typeof gameData === "string" || gameData.players?.length)) importGameData(gameData)
+		if (gameData && gameData !== "{}" && (typeof gameData === "string" || gameData.players?.length)) importGameData(gameData)
 		else initGameFresh(playerNames)
 	} catch (error) {
 		console.error("Unable to initialize URR:", error)
@@ -70,82 +74,79 @@ export function applyShadowDisplayNames(names) {
 		const player = store.players.find((candidate) => candidate.name === rf.SHADOW_PLAYER_NAMES[index])
 		if (player && name) player.displayName = name
 	}
+	captureOpening()
 }
 
 export function initGameFresh(playerNames, boardDefinition) {
 	const store = useModelStore()
 	restoreState(game.createGame(playerNames, boardDefinition))
 	store.clearTurnDraft()
-	store.history.splice(0)
+	store.setHistory([])
 	addHistory(rf.HIST_NEW_GAME, -1)
-}
-
-// The saved engine owns turn order, including auctions and consent requests.
-// Server names are only a fallback for the old, unversioned scaffold.
-export function rebuildTurnOrder() {
-	const store = useModelStore()
-	if (store.gameflow.primogeniture !== undefined) return
-	const currentNames = window.initData?.currentPlayers || []
-	store.gameflow.fullTurnOrder = Array.from(store.players.keys())
-	store.gameflow.turnOrder = currentNames.map((name) => store.players.findIndex((player) => player.name === name)).filter((index) => index !== -1)
-}
-
-export function restoreState(snapshot) {
-	const store = useModelStore()
-	const data = JSON.parse(JSON.stringify(snapshot))
-	for (const field of STATE_FIELDS) {
-		if (data[field] === undefined) throw new Error(`Missing URR state field: ${field}`)
-	}
-	store.players.splice(0, store.players.length, ...data.players)
-	for (const key of Object.keys(store.gameflow)) delete store.gameflow[key]
-	Object.assign(store.gameflow, data.gameflow)
-	for (const field of STATE_FIELDS) {
-		if (field !== "players" && field !== "gameflow") store[field] = data[field]
-	}
 }
 
 export function importGameData(obj) {
 	const store = useModelStore()
-	const data = typeof obj === "string" ? JSON.parse(obj) : obj
-	if (!data || !data.players?.length) throw new Error("Saved URR data contains no players")
-	if (data.version === undefined) {
-		// The old scaffold stored only names, dummy turns and zero scores, not
-		// game mechanics. Never apply those dummy phases to a real position.
-		console.warn("Initializing rules state from a legacy URR scaffold save")
-		initGameFresh(data.players.map((player) => player.name))
-		return
-	}
-	if (data.version !== rf.GAME_DATA_VERSION) throw new Error("Unsupported URR save version")
-	// Earlier rules saves had no board. Preserve their economy and turn order.
-	if (data.board?.areas.length === 0) data.board = boardRules.createBoard(board.createPrintedBoard())
-	const history = historyStorage.expandHistory(data.history || [])
+	const data = funcs.importURRmodel(obj)
 	const hadDraft = !!store.turnDraft.start
 	store.clearTurnDraft()
-	if (hadDraft) store.turnDraft.message = "The saved game was updated. Your uncommitted turn has been cleared."
-	restoreState(data)
-	store.history.splice(0, store.history.length, ...history)
-}
-
-export function exportGameData() {
-	return { ...snapshotState(), history: historyStorage.compactHistory(useModelStore().history) }
-}
-
-export function snapshotState() {
-	const store = useModelStore()
-	return JSON.parse(JSON.stringify(Object.fromEntries(STATE_FIELDS.map((field) => [field, store[field]]))))
+	if (hadDraft) store.turnDraft.message = t("io.uncommittedCleared")
+	restoreState(data.state)
+	store.setHistory(data.history)
 }
 
 export function performAction(playerIndex, action) {
 	const next = game.applyAction(snapshotState(), playerIndex, action)
 	restoreState(next)
-	addHistory(next.gameflow.phase === rf.PHASE_GAME_OVER ? rf.HIST_GAME_END : rf.HIST_ACTION, playerIndex, undefined, action)
+	addHistory(rf.HIST_ACTION, playerIndex, action)
 }
 
-export function addHistory(event, playerIndex, snapshot, action = null) {
-	const entry = [event, playerIndex, JSON.stringify(snapshot === undefined ? snapshotState() : snapshot)]
-	entry.push(action ? JSON.parse(JSON.stringify(action)) : null)
-	entry.push(event === rf.HIST_NEW_GAME ? usePersonalStore().gameCreationTimestamp || Math.floor(Date.now() / 1000) : Math.floor(Date.now() / 1000))
-	useModelStore().history.push(entry)
+// Missing seats never hold the turn: their remaining duties resolve with the
+// bot policy as soon as they come up, so the next real player is notified.
+export function playMissingSeats() {
+	const store = useModelStore()
+	// ponytail: bounded loop, a bot policy that stops advancing just leaves the seat to the App.vue fallback
+	for (let guard = 0; guard < 500 && store.gameflow.phase !== rf.PHASE_GAME_OVER; guard++) {
+		const player = store.gameflow.turnOrder[0]
+		if (!store.players[player]?.isMissing) return
+		const action = game.getBotAction(snapshotState())
+		if (!action) return
+		performAction(player, action)
+	}
+}
+
+export function addHistory(event, playerIndex, action = null) {
+	const store = useModelStore()
+	const entry = [event, playerIndex, null]
+	if (event !== rf.HIST_NEW_GAME) {
+		const now = Math.floor(Date.now() / 1000)
+		const previousTime = store.historyTimeAt(store.history.length - 1)
+		entry[2] = previousTime == null ? now : now - previousTime
+	}
+	if (action) {
+		// Clone now: callers may clear draft arrays (canal paths, sale batches) after submit.
+		const [code, params] = encodeAction(JSON.parse(JSON.stringify(action)))
+		entry[0] = code
+		entry.push(...params)
+	} else if (event !== rf.HIST_NEW_GAME) {
+		// Only out-of-band state needs a patch; actions replay exactly.
+		const previous = store.historySnapshotAt(store.history.length - 1)
+		if (previous) {
+			const changes = historyStorage.changesBetween(previous, snapshotState())
+			if (changes.length) entry.push(changes)
+		}
+	}
+	store.history.push(entry)
+	store.refreshHistory()
+}
+
+// Opening-only edits (shadow names, missing seats) are not a move: keep them
+// in the new-game entry so replay starts from the right position.
+function captureOpening() {
+	const store = useModelStore()
+	if (store.history.length !== 1) return
+	const names = store.players.map((player) => player.name)
+	store.setHistoryOpening(historyStorage.changesBetween(game.createGame(names), snapshotState()))
 }
 
 export function getPlayerByIndex(index) {
@@ -161,7 +162,10 @@ export function getPlayerIndexByName(name) {
 export function setMissingPlayers(names) {
 	const store = useModelStore()
 	for (const player of store.players) {
-		player.isMissing = names.includes(player.name)
-		if (player.isMissing) player.displayName = `${player.name} (Bot)`
+		// Only missing seats carry the flag, so saves and replays stay free of `isMissing: false`.
+		if (!names.includes(player.name)) continue
+		player.isMissing = true
+		player.displayName = `${player.name} (Bot)`
 	}
+	captureOpening()
 }

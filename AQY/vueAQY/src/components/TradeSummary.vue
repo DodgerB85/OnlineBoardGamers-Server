@@ -19,10 +19,10 @@ const store = useModelStore()
 				<template v-if="store.topMenuViews.WStradeToDisplay[0] === personal.pov">
 					<div class="playerScoreSummaryDiv">
 						<span class="mainEntryPlayerNewTurn" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[store.topMenuViews.WStradeToDisplay[0]].colour)">
-							You
+							{{ $t("tradeSummary.you") }}
 						</span>
 					</div>
-					offered:
+					{{ $t("tradeSummary.offered") }}
 				</template>
 				<template v-else>
 					<div class="playerScoreSummaryDiv">
@@ -30,14 +30,14 @@ const store = useModelStore()
 							{{ store.players[store.topMenuViews.WStradeToDisplay[0]].displayName }}
 						</span>
 					</div>
-					offered:
+					{{ $t("tradeSummary.offered") }}
 				</template>
 				<img v-for="(res, idx) in store.topMenuViews.WStradeToDisplay[2]" :key="idx" class="tradingRes" :src="view.getImage('res_' + String(res))" />
 
 				<div class="promiseDiv" v-if="store.topMenuViews.WStradeToDisplay[3][0] !== ''">
 					&nbsp;
-					<b>Promise Phase</b> {{ rf.PHASE_STRINGS[store.topMenuViews.WStradeToDisplay[3][1]] }}
-					<b>Promise</b>
+					<b>{{ $t("tradeSummary.promisePhase") }}</b> {{ rf.PHASE_STRINGS[store.topMenuViews.WStradeToDisplay[3][1]] }}
+					<b>{{ $t("tradeSummary.promise") }}</b>
 					{{ store.topMenuViews.WStradeToDisplay[3][0] }}
 				</div>
 			</div>
@@ -46,10 +46,10 @@ const store = useModelStore()
 				<template v-if="store.topMenuViews.WStradeToDisplay[1] === personal.pov">
 					<div class="playerScoreSummaryDiv">
 						<span class="mainEntryPlayerNewTurn" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[store.topMenuViews.WStradeToDisplay[1]].colour)">
-							You
+							{{ $t("tradeSummary.you") }}
 						</span>
 					</div>
-					were asked for:
+					{{ $t("tradeSummary.wereAskedFor") }}
 				</template>
 				<template v-else>
 					<div class="playerScoreSummaryDiv">
@@ -57,14 +57,14 @@ const store = useModelStore()
 							{{ store.players[store.topMenuViews.WStradeToDisplay[1]].displayName }}
 						</span>
 					</div>
-					was asked for:
+					{{ $t("tradeSummary.wasAskedFor") }}
 				</template>
 				<img v-for="(res, idx) in store.topMenuViews.WStradeToDisplay[4]" :key="idx" class="tradingRes" :src="view.getImage('res_' + String(res))" />
 
 				<div class="promiseDiv" v-if="store.topMenuViews.WStradeToDisplay[5][0] !== ''">
 					&nbsp;
-					<b>Promise Phase</b> {{ rf.PHASE_STRINGS[store.topMenuViews.WStradeToDisplay[5][1]] }}
-					<b>Promise</b>
+					<b>{{ $t("tradeSummary.promisePhase") }}</b> {{ rf.PHASE_STRINGS[store.topMenuViews.WStradeToDisplay[5][1]] }}
+					<b>{{ $t("tradeSummary.promise") }}</b>
 					{{ store.topMenuViews.WStradeToDisplay[5][0] }}
 				</div>
 			</div>

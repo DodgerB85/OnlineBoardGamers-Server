@@ -5,16 +5,16 @@
  */
 
 import { defineStore } from "pinia"
-import { computed, reactive, ref } from "vue"
-import * as rf from "../js/URRreference"
+import { computed, reactive, ref, shallowRef } from "vue"
+import * as rf from "../js/URRreference.js"
 import { usePersonalStore } from "./URRpersonal.js"
 import { computeHistory } from "../js/URRhistory.js"
+import { syncHistoryReplay } from "../js/URRhistoryStorage.js"
 
 export const useModelStore = defineStore("store", () => {
 	var gameName = "Game Name"
 
 	const players = reactive([])
-	const version = ref(rf.GAME_DATA_VERSION)
 	const states = ref([])
 	const nations = ref([])
 	const board = ref({ areas: [], canals: [], stateOrder: [], markerLimit: null })
@@ -43,8 +43,88 @@ export const useModelStore = defineStore("store", () => {
 
 	const chatData = reactive([])
 	const history = reactive([])
+	// Replayed positions and display-only entries are derived and never exported.
+	const historyReplay = { entries: [], snapshots: [], times: [] }
+	const historyDisplay = { entries: [], rows: [], reports: [] }
+	const historyRows = shallowRef([])
+	const riverReports = shallowRef([])
+
+	function resetHistoryReplay() {
+		historyReplay.entries.length = 0
+		historyReplay.snapshots.length = 0
+		historyReplay.times.length = 0
+	}
+
+	function resetHistoryDisplay() {
+		historyDisplay.entries.length = 0
+		historyDisplay.rows.length = 0
+		historyDisplay.reports.length = 0
+		historyRows.value = []
+		riverReports.value = []
+	}
+
+	function refreshHistory() {
+		const replay = syncHistory()
+		let rebuild = historyDisplay.entries.length > history.length
+		if (!rebuild) {
+			for (let index = 0; index < historyDisplay.entries.length; index++) {
+				if (historyDisplay.entries[index] !== history[index]) { rebuild = true; break }
+			}
+		}
+		if (rebuild) resetHistoryDisplay()
+		const start = historyDisplay.entries.length
+		if (!rebuild && start === history.length) return
+		const firstRow = historyDisplay.rows.length
+		const firstReport = historyDisplay.reports.length
+		computeHistory(history, usePersonalStore().gameCreationTimestamp, replay.snapshots, replay.times, historyDisplay.rows, start)
+		for (let index = start; index < history.length; index++) historyDisplay.entries.push(history[index])
+		for (let index = firstRow; index < historyDisplay.rows.length; index++) {
+			const row = historyDisplay.rows[index]
+			const kind = row.administration?.kind
+			if (kind === "riverStart" || kind === "riverComplete") historyDisplay.reports.push({ historyIndex: row.historyIndex, administration: row.administration })
+		}
+		if (rebuild || historyDisplay.rows.length !== firstRow) historyRows.value = historyDisplay.rows.slice()
+		// Keep the map subscribed to river rows only, not to every saved action.
+		if (rebuild || historyDisplay.reports.length !== firstReport) riverReports.value = historyDisplay.reports.slice()
+	}
+
+	function setHistory(entries) {
+		history.splice(0, history.length, ...entries)
+		resetHistoryReplay()
+		resetHistoryDisplay()
+		refreshHistory()
+	}
+
+	function syncHistory() {
+		return syncHistoryReplay(historyReplay, history, players.map((player) => player.name), usePersonalStore().gameCreationTimestamp)
+	}
+
+	function historySnapshotAt(index) {
+		if (index < 0 || index >= history.length) return null
+		return syncHistory().snapshots[index]
+	}
+
+	function historySnapshots() {
+		return syncHistory().snapshots
+	}
+
+	function historyTimeAt(index) {
+		if (index < 0 || index >= history.length) return null
+		return syncHistory().times[index]
+	}
+
+	// Pre-game edits (shadow names, missing seats) belong to the opening, not a move.
+	function setHistoryOpening(changes) {
+		if (!history.length) return
+		if (changes?.length) history[0][3] = changes
+		else if (history[0].length > 3) history[0].length = 3
+		resetHistoryReplay()
+		resetHistoryDisplay()
+		refreshHistory()
+	}
+
 	// Display-only entries and metadata belong here, not in exported history.
-	const computedHistory = computed(() => computeHistory(history, usePersonalStore().gameCreationTimestamp))
+	const computedHistory = computed(() => historyRows.value)
 
 	const viewSettings = reactive({
 		boardZoom: 1,
@@ -64,6 +144,7 @@ export const useModelStore = defineStore("store", () => {
 		inspectedPlayer: null,
 		inspectedState: null,
 		showRewindPanel: false,
+		showResignPanel: false,
 		performingRewind: false,
 		showReplay: false,
 	})
@@ -101,11 +182,18 @@ export const useModelStore = defineStore("store", () => {
 		gameName,
 		turnDraft, clearTurnDraft,
 		players,
-		version, states, nations, board, landPrices, era, cardSupply, rain, nextDiggerId, debug,
+		states, nations, board, landPrices, era, cardSupply, rain, nextDiggerId, debug,
 		gameflow,
 		chatData,
 		history,
+		setHistory,
+		historySnapshotAt,
+		historySnapshots,
+		historyTimeAt,
+		setHistoryOpening,
 		computedHistory,
+		historyRiverReports: computed(() => riverReports.value),
+		refreshHistory,
 		viewSettings,
 		gameMessages,
 		deleteVotesData,

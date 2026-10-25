@@ -6,6 +6,7 @@ import * as model from "../js/KFWmodel.js"
 import * as Bot from "../js/KFWbot.js"
 import * as view from "../js/KFWview.js"
 import * as village from "../js/KFWvillage.js"
+import i18n from "../i18n"
 
 import { useModelStore } from "../stores/KFWstore.js"
 
@@ -37,13 +38,13 @@ export async function submitBug(bugContent) {
 		}
 		const data = await response.json()
 		if (data.bugEntrySuccess) {
-			store.gameMessages.bugSuccessText = "Your bug report has been submitted"
+			store.gameMessages.bugSuccessText = i18n.global.t("io.bugSubmitted")
 			store.viewSettings.showLoader = false
 			store.viewSettings.showBug = false
-		} else store.gameMessages.bugErrorText = "Sorry, there was a problem.<br/>Please email the webmaster directly or report on the Discord"
+		} else store.gameMessages.bugErrorText = i18n.global.t("io.bugError")
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.gameMessages.bugErrorText = "Sorry, there was a problem.<br/>Please email the webmaster directly or report on the Discord"
+		store.gameMessages.bugErrorText = i18n.global.t("io.bugError")
 	}
 	store.viewSettings.showLoader = false
 }
@@ -88,7 +89,7 @@ export async function getBoatMeeplesAndSkills(meeplesRequired, skillsRequired) {
 		return [meeples, skills]
 	} catch (error) {
 		console.error("Error updating data:", error)
-		store.gameMessages.errorText = "Error updating the game"
+		store.gameMessages.errorText = i18n.global.t("io.errorUpdating")
 		store.viewSettings.performingRewind = false
 		controller.startPlayerTurn()
 	}
@@ -125,17 +126,17 @@ export async function simpleSave() {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			alert("It appears you have an older version of the game. Please refresh the page")
+			alert(i18n.global.t("io.olderVersion"))
 			return
 		}
 		//personal.latestUpdate = data.latestUpdate
-		if (!data.completed) alert("Error occurred")
+		if (!data.completed) alert(i18n.global.t("io.errorOccurred"))
 		store.viewSettings.showLoader = false
 		personal.haltPlay = false
 		controller.startPlayerTurn()
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		alert("Error saving the game")
+		alert(i18n.global.t("io.errorSaving"))
 	}
 }
 
@@ -243,7 +244,7 @@ export async function saveGame(saveRewind, saveContext = false) {
 		}
 		const data = await response.json()
 		if (data.syncError === "12345") {
-			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.errorText = i18n.global.t("io.olderVersion")
 			return
 		}
 		personal.latestUpdate = data.latestUpdate
@@ -284,7 +285,7 @@ export async function saveGame(saveRewind, saveContext = false) {
 		controller.startPlayerTurn()
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.gameMessages.errorText = "Error saving the game"
+		store.gameMessages.errorText = i18n.global.t("io.errorSaving")
 	}
 }
 
@@ -330,7 +331,7 @@ export async function saveSimulMove(playerIndex, moveDataString) {
 		const data = await response.json()
 
 		if (data.syncError) {
-			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.errorText = i18n.global.t("io.olderVersion")
 			return
 		}
 		window.initData.move = moveDataString
@@ -428,7 +429,7 @@ export async function saveSimulMove(playerIndex, moveDataString) {
 		personal.haltPlay = false
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.gameMessages.errorText = "Error saving the game"
+		store.gameMessages.errorText = i18n.global.t("io.errorSaving")
 	}
 }
 
@@ -480,7 +481,7 @@ export async function saveFinalScoringMove(playerIndex, moveDataString) {
 		}
 		const data = await response.json()
 		if (data.syncError) {
-			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.errorText = i18n.global.t("io.olderVersion")
 			return
 		}
 		if (!personal.trainingGame) window.initData.move = moveDataString
@@ -536,7 +537,7 @@ export async function saveFinalScoringMove(playerIndex, moveDataString) {
 		store.viewSettings.showLoader = false
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.gameMessages.errorText = "Error saving the game"
+		store.gameMessages.errorText = i18n.global.t("io.errorSaving")
 	}
 }
 
@@ -600,7 +601,7 @@ export async function saveGameForGameOver() {
 		}
 		const data = await response.json()
 		if (data.syncError === "12345") {
-			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.errorText = i18n.global.t("io.olderVersion")
 			return
 		}
 		personal.latestUpdate = data.latestUpdate
@@ -617,7 +618,7 @@ export async function saveGameForGameOver() {
 		//controller.startPlayerTurn()
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.gameMessages.errorText = "Error saving the game"
+		store.gameMessages.errorText = i18n.global.t("io.errorSaving")
 	}
 }
 
@@ -644,7 +645,7 @@ export async function sendChatMessage(newEntry) {
 		}
 		const data = await response.json()
 		if (!data.chatData) {
-			store.gameMessages.errorText = "Sorry, there was a problem. Please email the webmaster directly"
+			store.gameMessages.errorText = i18n.global.t("io.webmasterProblem")
 			return
 		}
 		store.chatData = funcs.decompressChatData(data.chatData)
@@ -652,7 +653,7 @@ export async function sendChatMessage(newEntry) {
 		store.viewSettings.showLoader = false
 	} catch (error) {
 		console.error("Error sending chat:", error)
-		store.gameMessages.errorText = "Error sending chat message"
+		store.gameMessages.errorText = i18n.global.t("io.errorSendingChat")
 	}
 }
 
@@ -764,13 +765,13 @@ export async function saveNotes() {
 			throw new Error("Network response was not ok")
 		}
 		if (!data.notePosted) {
-			store.gameMessages.errorText = "Sorry, there was a problem. Please email the webmaster directly"
+			store.gameMessages.errorText = i18n.global.t("io.webmasterProblem")
 			return
 		}
 		store.viewSettings.showLoader = false
 	} catch (error) {
 		console.error("Error saving Notes:", error)
-		store.gameMessages.errorText = "Error saving Notes"
+		store.gameMessages.errorText = i18n.global.t("io.errorSavingNotes")
 	}
 }
 
@@ -784,14 +785,14 @@ export async function loadRewind() {
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	if (store.viewSettings.showReplay) {
-		store.gameMessages.errorText = "Error: Exit Replay Mode First"
+		store.gameMessages.errorText = i18n.global.t("io.exitReplayFirst")
 		store.viewSettings.performingRewind = false
 		store.viewSettings.showLoader = false
 		return
 	}
 
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
-		store.gameMessages.errorText = "Error: Game Ended"
+		store.gameMessages.errorText = i18n.global.t("io.gameEnded")
 		store.viewSettings.performingRewind = false
 		store.viewSettings.showLoader = false
 		return
@@ -812,7 +813,7 @@ export async function loadRewind() {
 		}
 		const data = await response.json()
 		if (data.syncError === "12345") {
-			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.errorText = i18n.global.t("io.olderVersion")
 			store.viewSettings.performingRewind = false
 			return
 		}
@@ -852,7 +853,7 @@ export async function loadRewind() {
 		store.viewSettings.showLoader = false
 	} catch (error) {
 		console.error("Error rewinding data:", error)
-		store.gameMessages.errorText = "Error rewinding the game"
+		store.gameMessages.errorText = i18n.global.t("io.errorRewinding")
 		store.viewSettings.performingRewind = false
 	}
 }
@@ -927,7 +928,7 @@ async function updateDataFromLoadRewind() {
 		controller.startPlayerTurn()
 	} catch (error) {
 		console.error("Error updating data:", error)
-		store.gameMessages.errorText = "Error updating the game"
+		store.gameMessages.errorText = i18n.global.t("io.errorUpdating")
 		store.viewSettings.performingRewind = false
 		controller.startPlayerTurn()
 	}
@@ -958,7 +959,7 @@ export async function resign() {
 		const data = await response.json()
 	} catch (error) {
 		console.error("Error resiging:", error)
-		store.gameMessages.errorText = "Error Resigning"
+		store.gameMessages.errorText = i18n.global.t("io.errorResigning")
 	}
 }
 
@@ -986,13 +987,13 @@ export async function kickout() {
 		}
 		const data = await response.json()
 		if (data.syncError === "12345") {
-			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.errorText = i18n.global.t("io.olderVersion")
 			return
 		}
 		if (data.voteCast) {
 			store.kickoutVotesData = data.votesData
 			store.viewSettings.showLoader = false
-			store.gameMessages.successText = "Kickout vote recorded"
+			store.gameMessages.successText = i18n.global.t("io.kickoutVoteRecorded")
 			return data
 		}
 		personal.latestUpdate = data.latestUpdate
@@ -1001,7 +1002,7 @@ export async function kickout() {
 		return data
 	} catch (error) {
 		console.error("Error kicking:", error)
-		store.gameMessages.errorText = "Error Kicking Player"
+		store.gameMessages.errorText = i18n.global.t("io.errorKicking")
 	}
 }
 
@@ -1111,7 +1112,7 @@ export async function adminDataInspection() {
 		personal.haltPlay = false
 	} catch (error) {
 		console.error("Error updating data:", error)
-		store.gameMessages.errorText = "Error updating the game"
+		store.gameMessages.errorText = i18n.global.t("io.errorUpdating")
 		store.viewSettings.performingRewind = false
 		controller.startPlayerTurn()
 	}

@@ -13,6 +13,12 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/INDpersonal.js"
 const personal = usePersonalStore()
 
+import i18n from "../i18n"
+
+const RND_KEYS = ["rnd.bidMultiplier", "rnd.slots", "rnd.mergers", "rnd.expansion", "rnd.hullCapacity", "rnd.mergerSubsidy", "rnd.shippingSubsidy"]
+function rndString(idx) {
+	return i18n.global.t(RND_KEYS[idx])
+}
 
 const props = defineProps({
 	entry: {
@@ -37,11 +43,12 @@ function clickedHistoryEntry(action, entry3, entry_id) {
 }
 
 function getOrdinal(num) {
-	if (num === 1) return "Once"
-	else if (num === 2) return "Twice"
-	else if (num === 3) return "Three times"
-	else if (num === 4) return "Four times"
-	else if (num === 5) return "Five times"
+	const t = i18n.global.t
+	if (num === 1) return t("history.timesOnce")
+	else if (num === 2) return t("history.timesTwice")
+	else if (num === 3) return t("history.timesThree")
+	else if (num === 4) return t("history.timesFour")
+	else if (num === 5) return t("history.timesFive")
 }
 
 function getWinningMergerData(entry) {
@@ -106,7 +113,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 		<div class="log separator mainEntry" :class="{ selectableHistory: store.topMenuViews.showReplay }"
 			@click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
 			<div class="new_turn">
-				Welcome to Indonesia!
+				{{ $t('history.newGame') }}
 				<br />
 				<div v-for="(player, idx) in store.players" :key="idx" class="playerScoreSummaryDiv">
 					<span class="mainEntryPlayerNewTurn"
@@ -122,14 +129,13 @@ function landOperatingOwnerAlsoHadShips(entry) {
 		<div class="log separator mainEntry" :class="{ selectableHistory: store.topMenuViews.showReplay }"
 			@click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
 			<div class="new_turn">
-				Start of Era {{ rf.ERA_STRINGS[entry[3][0]] }}
+				{{ $t('history.newEra', { era: rf.ERA_STRINGS[entry[3][0]] }) }}
 				<template v-if="entry[3].length > 1 && entry[3][1].length > 0">
 					<br />
 					<template v-for="(compID, idx) in entry[3][1]" :key="idx">
-						<span v-if="compID <= 9">Era A: </span>
-						<span v-else-if="compID >= 10 && compID <= 20">Era B: </span>
-						{{rf.PH_ALL_COMPANIES.find(c => c.id === compID).typeText}} removed from {{
-							rf.PHP_PROVINCE_STRINGS[rf.PH_ALL_COMPANIES.find(c => c.id === compID).province]}}
+						<span v-if="compID <= 9">{{ $t('history.eraA') }}</span>
+						<span v-else-if="compID >= 10 && compID <= 20">{{ $t('history.eraB') }}</span>
+						{{ $t('history.removedFrom', { type: rf.PH_ALL_COMPANIES.find(c => c.id === compID).typeText, province: rf.PHP_PROVINCE_STRINGS[rf.PH_ALL_COMPANIES.find(c => c.id === compID).province] }) }}
 						<br />
 					</template>
 				</template>
@@ -143,7 +149,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 		<div class="log separator mainEntry" :class="{ selectableHistory: store.topMenuViews.showReplay }"
 			@click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
 			<div class="new_turn">
-				Start of turn {{ entry[3][0] }}
+				{{ $t('history.newTurn', { num: entry[3][0] }) }}
 				<template v-if="entry[3].length > 1">
 					<template v-for="(summary, idx) in entry[3].slice(1)" :key="idx">
 						<br />
@@ -171,14 +177,14 @@ function landOperatingOwnerAlsoHadShips(entry) {
 					<span class="mainEntryPlayer"
 						:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][0]].colour)">{{
 							store.players[entry[3][0]].displayName }}</span>
-					wins as King of the Hill
+					{{ $t('history.winsKing') }}
 				</template>
 				<template v-else>
 					<template v-for="(finalEntry, idx) in entry[3]" :key="idx">
 						<span class="mainEntryPlayer"
 							:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[finalEntry[0]].colour)">{{
 								store.players[finalEntry[0]].displayName }}</span>
-						Total: {{ finalEntry[1] }}
+						{{ $t('history.total', { score: finalEntry[1] }) }}
 						<br />
 					</template>
 				</template>
@@ -193,7 +199,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 			<div class="header">
 				<span>{{ getTimeString(entry[2]) }}</span>
 			</div>
-			<div class="mainEntry rewind">Game rewound to here by {{ store.players[entry[3][0]].name }}</div>
+			<div class="mainEntry rewind">{{ $t('history.rewoundBy', { name: store.players[entry[3][0]].name }) }}</div>
 		</div>
 	</template>
 
@@ -203,7 +209,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 			<div class="header">
 				<span>{{ getTimeString(entry[2]) }}</span>
 			</div>
-			<div class="mainEntry rewind">{{ entry[3][0] }} Resigns</div>
+			<div class="mainEntry rewind">{{ $t('history.resigns', { name: entry[3][0] }) }}</div>
 		</div>
 	</template>
 
@@ -213,7 +219,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 			<div class="header">
 				<span>{{ getTimeString(entry[2]) }}</span>
 			</div>
-			<div class="mainEntry rewind">{{ entry[3][0] }} was kicked out</div>
+			<div class="mainEntry rewind">{{ $t('history.kickedOut', { name: entry[3][0] }) }}</div>
 		</div>
 	</template>
 
@@ -227,7 +233,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				</span>
 			</div>
 			<span class="centreSpan">
-				<b><u>New Turn Order</u></b>
+				<b><u>{{ $t('history.newTurnOrder') }}</u></b>
 			</span>
 			<div class="centreSpan">
 				<template v-for="(playerIndex, idx) in entry[3]" :key="idx">
@@ -249,22 +255,22 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				</span>
 			</div>
 			<b><u></u></b>
-			<b><u>Mergers Skipped</u></b>
+			<b><u>{{ $t('history.mergersSkipped') }}</u></b>
 			<template v-for="(skipRow, idx) in entry[3]" :key="idx">
 				<br />
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[skipRow[0]].colour)">{{
 						store.players[skipRow[0]].displayName }}</span>
-				<span v-if="skipRow.length === 1">- passes</span>
-				<span v-else-if="skipRow[1] === 9">- All companies merged / not suitable to merge</span>
-				<span v-else-if="skipRow[1] === 1">- Merger tech too low for any merger</span>
-				<span v-else-if="skipRow[1] === 3">- No available slots for any mergers</span>
-				<span v-else-if="skipRow[1] === 5">- Not enough money for any mergers</span>
+				<span v-if="skipRow.length === 1">{{ $t('history.passes') }}</span>
+				<span v-else-if="skipRow[1] === 9">{{ $t('history.allCompaniesMerged') }}</span>
+				<span v-else-if="skipRow[1] === 1">{{ $t('history.mergerTechTooLow') }}</span>
+				<span v-else-if="skipRow[1] === 3">{{ $t('history.noSlotsAvailable') }}</span>
+				<span v-else-if="skipRow[1] === 5">{{ $t('history.notEnoughMoney') }}</span>
 				<span v-else>
 					-
-					<span v-if="skipRow.slice(1).includes(2)">Merger tech too low.</span>
-					<span v-if="skipRow.slice(1).includes(4)">Not enough slots.</span>
-					<span v-if="skipRow.slice(1).includes(6)">Not enough money,</span>
+					<span v-if="skipRow.slice(1).includes(2)">{{ $t('history.mergerTechTooLowShort') }}</span>
+					<span v-if="skipRow.slice(1).includes(4)">{{ $t('history.notEnoughSlotsShort') }}</span>
+					<span v-if="skipRow.slice(1).includes(6)">{{ $t('history.notEnoughMoneyShort') }}</span>
 				</span>
 			</template>
 		</div>
@@ -285,9 +291,8 @@ function landOperatingOwnerAlsoHadShips(entry) {
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{
 						store.players[playerIndex].displayName }}</span>
 			</template>
-			<span v-if="entry[3].length === 1">passes</span>
-			<span v-else>pass</span>
-			Mergers
+			<span v-if="entry[3].length === 1">{{ $t('history.passesMergers') }}</span>
+			<span v-else>{{ $t('history.passMergers') }}</span>
 		</div>
 	</template>
 
@@ -300,7 +305,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 					{{ getTimeString(entry[2]) }}
 				</span>
 			</div>
-			<span class="centreSpan">Acquisition Phase Skipped = No Players have Free Slots</span>
+			<span class="centreSpan">{{ $t('history.acquisitionsSkipped') }}</span>
 		</div>
 	</template>
 
@@ -315,7 +320,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 			</div>
 			<img class="removedCompanyCardNoTerrs" :src="view.getImage(view.getCompanyGfxFromID(entry[3][0]))"
 				alt="Era Card" />
-			Company removed - no space to start
+			{{ $t('history.companyRemoved') }}
 		</div>
 	</template>
 
@@ -328,13 +333,13 @@ function landOperatingOwnerAlsoHadShips(entry) {
 					{{ getTimeString(entry[2]) }}
 				</span>
 			</div>
-			Final turn income is doubled
+			{{ $t('history.finalIncomeDoubled') }}
 			<br />
 			<template v-for="(amount, playerIndex) in entry[3]" :key="playerIndex">
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{
 						store.players[playerIndex].displayName }}</span>
-				gains {{ amount }}
+				{{ $t('history.gains', { amount }) }}
 				<br />
 			</template>
 		</div>
@@ -354,9 +359,9 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				builds a city in
+				{{ $t('history.buildsCityIn') }}
 				<b>{{ view.getProvinceString(map.getProvinceFromTerrID(entry[3][0])) }}</b>
-				using
+				{{ $t('history.using') }}
 				<br />
 				<img class="eraCard" :src="view.getImage(view.findEraCardGfxCodeFromID(entry[3][1]))" alt="Era Card" />
 			</div>
@@ -375,10 +380,10 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				cannot place a city. 
-				<span v-if="entry[3].length > 1 && entry[3][1] === 1">No more level 1 cities.</span>
-				<span v-else>No valid territory.</span>
-				Card removed.
+				{{ $t('history.cannotPlaceCity') }}
+				<span v-if="entry[3].length > 1 && entry[3][1] === 1">{{ $t('history.noLevel1Cities') }}</span>
+				<span v-else>{{ $t('history.noValidTerritory') }}</span>
+				{{ $t('history.cardRemoved') }}
 				<br />
 				<img class="eraCard" :src="view.getImage(view.findEraCardGfxCodeFromID(entry[3][0]))" alt="Era Card" />
 			</div>
@@ -397,9 +402,9 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				bids
+				{{ $t('history.bids') }}
 				<b>{{ entry[3][0] * entry[3][1] }}</b>
-				({{ entry[3][0] }} with {{ entry[3][1] }}x Multiplier)
+				{{ $t('history.bidWithMultiplier', { amount: entry[3][0], multiplier: entry[3][1] }) }}
 			</div>
 		</div>
 	</template>
@@ -416,19 +421,17 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				bids {{ entry[3][0] }} and wins without further bids
+				{{ $t('history.bidsAndWins', { amount: entry[3][0] }) }}
 				<template v-if="view.getMergerSubsidyAmount(entry[1], entry[4]) > 0">
 					<br />
-					(Payout reduced by {{ view.getMergerSubsidyAmount(entry[1], entry[4]) }}
-					merger subsidy to <b>{{ Math.max(entry[3][0]
-						- view.getMergerSubsidyAmount(entry[1], entry[4]), 0) }}</b>)
+					{{ $t('history.payoutReduced', { amount: view.getMergerSubsidyAmount(entry[1], entry[4]), net: Math.max(entry[3][0] - view.getMergerSubsidyAmount(entry[1], entry[4]), 0) }) }}
 				</template>
 				<br />
 				<template v-for="(mergerEntry, idx) in entry[3].slice(1, 3)" :key="idx">
 					<span class="mainEntryPlayer"
 						:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[mergerEntry[0]].colour)">{{
 							store.players[mergerEntry[0]].displayName }}</span>
-					's
+					{{ $t('history.namePossessive') }}
 					<!-- slot content-->
 					<div class="slotImgsDiv"
 						:style="{ height: mergerEntry[1].length > 1 ? 79 + 10 * mergerEntry[1].length + 'px' : '79px' }">
@@ -454,14 +457,14 @@ function landOperatingOwnerAlsoHadShips(entry) {
 						<span class="mainEntryPlayer"
 							:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[bidEntry[1]].colour)">{{
 								store.players[bidEntry[1]].displayName }}</span>
-						does not have an available slot
+						{{ $t('history.doesNotHaveSlot') }}
 					</template>
 					<template v-else-if="bidEntry[0] === -6">
 						<br />
 						<span class="mainEntryPlayer"
 							:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[bidEntry[1]].colour)">{{
 								store.players[bidEntry[1]].displayName }}</span>
-						does not have enough money
+						{{ $t('history.doesNotHaveMoney') }}
 					</template>
 				</template>
 				<br />
@@ -473,8 +476,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 					<span class="mainEntryPlayer"
 						:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 							store.players[entry[1]].displayName }}</span>
-					gains: {{ Math.max(entry[3][0]
-						- view.getMergerSubsidyAmount(entry[1], entry[4]), 0) }}&nbsp;&nbsp;
+					{{ $t('history.gains', { amount: Math.max(entry[3][0] - view.getMergerSubsidyAmount(entry[1], entry[4]), 0) }) }}&nbsp;&nbsp;
 				</template>
 				<template v-else>
 					<!-- Otherwise, the winner does NOT own both companies-->
@@ -482,7 +484,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 						<span class="mainEntryPlayer"
 							:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[mergerEntry[0]].colour)">{{
 								store.players[mergerEntry[0]].displayName }}</span>
-						gains: {{ mergerEntry[2] }}&nbsp;&nbsp;
+						{{ $t('history.gainsColon') }} {{ mergerEntry[2] }}&nbsp;&nbsp;
 					</template>
 				</template>
 			</div>
@@ -501,13 +503,13 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				proposes a merger, bidding {{ entry[3][0] }} for
+				{{ $t('history.proposesMerger', { amount: entry[3][0] }) }}
 				<br />
 				<template v-for="(mergerEntry, idx) in entry[3].slice(1, 3)" :key="idx">
 					<span class="mainEntryPlayer"
 						:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[mergerEntry[0]].colour)">{{
 							store.players[mergerEntry[0]].displayName }}</span>
-					's
+					{{ $t('history.namePossessive') }}
 					<!-- slot content-->
 					<div class="slotImgsDiv"
 						:style="{ height: mergerEntry[1].length > 1 ? 79 + 10 * mergerEntry[1].length + 'px' : '79px' }">
@@ -534,14 +536,14 @@ function landOperatingOwnerAlsoHadShips(entry) {
 						<span class="mainEntryPlayer"
 							:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[bidEntry[1]].colour)">{{
 								store.players[bidEntry[1]].displayName }}</span>
-						does not have an available slot
+						{{ $t('history.doesNotHaveSlot') }}
 					</template>
 					<template v-else-if="bidEntry[0] === -6">
 						<br v-if="idx > 0" />
 						<span class="mainEntryPlayer"
 							:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[bidEntry[1]].colour)">{{
 								store.players[bidEntry[1]].displayName }}</span>
-						does not have enough money
+						{{ $t('history.doesNotHaveMoney') }}
 					</template>
 					<template v-else-if="bidEntry[0] !== -2">
 						<template v-if="bidEntry[1] === 0">
@@ -555,7 +557,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 							<span
 								v-if="idx === 0 || (idx > 0 && (entry[3].slice(3)[idx - 1][0] < 0 || entry[3].slice(3)[idx - 1][1] === 0))">
 								<br v-if="idx > 0" />
-								<b>Bids:</b>
+								<b>{{ $t('history.bidsLabel') }}</b>
 								&nbsp;
 							</span>
 							<span class="mainEntryPlayer"
@@ -568,17 +570,14 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<br />
 				<!-- Wining Summary -->
 				<template v-if="entry[3][entry[3].length - 1][0] === -2">
-					<b>Winner:</b>
+					<b>{{ $t('history.winner') }}</b>
 					<span class="mainEntryPlayer"
 						:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[getWinningMergerData(entry)[0]].colour)">{{
 							store.players[getWinningMergerData(entry)[0]].displayName }}</span>
-					Winning bid
-					<b>{{ getWinningMergerData(entry)[1] }}</b>
+					{{ $t('history.winningBid', { amount: getWinningMergerData(entry)[1] }) }}
 					<template v-if="view.getMergerSubsidyAmount(getWinningMergerData(entry)[0], entry[4]) > 0">
 						<br />
-						(Payout reduced by {{ view.getMergerSubsidyAmount(getWinningMergerData(entry)[0], entry[4]) }}
-						merger subsidy to <b>{{ Math.max(getWinningMergerData(entry)[1]
-							- view.getMergerSubsidyAmount(getWinningMergerData(entry)[0], entry[4]), 0) }}</b>)
+						{{ $t('history.payoutReduced', { amount: view.getMergerSubsidyAmount(getWinningMergerData(entry)[0], entry[4]), net: Math.max(getWinningMergerData(entry)[1] - view.getMergerSubsidyAmount(getWinningMergerData(entry)[0], entry[4]), 0) }) }}
 					</template>
 					<br />
 					<!-- This is win with bids, if both comps belonged to the same person -->
@@ -589,15 +588,14 @@ function landOperatingOwnerAlsoHadShips(entry) {
 						<span class="mainEntryPlayer"
 							:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 								store.players[entry[1]].displayName }}</span>
-						gains: {{ Math.max(getWinningMergerData(entry)[1]
-							- view.getMergerSubsidyAmount(entry[1], entry[4]), 0) }}&nbsp;&nbsp;
+						{{ $t('history.gainsColon') }} {{ Math.max(getWinningMergerData(entry)[1] - view.getMergerSubsidyAmount(entry[1], entry[4]), 0) }}&nbsp;&nbsp;
 					</template>
 					<!-- Otherwise, if the SAME player but not the winner owned both comps -->
 					<template v-else-if="entry[3][1][0] === entry[3][2][0]">
 						<span class="mainEntryPlayer"
 							:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][1][0]].colour)">{{
 								store.players[entry[3][1][0]].displayName }}</span>
-						gains
+						{{ $t('history.gainsColon') }}
 						{{ entry[3][entry[3].length - 1][1] + entry[3][entry[3].length - 1][2] }}
 					</template>
 					<!-- This seems to be if 2 diff player comps are involved in the merger -->
@@ -608,7 +606,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 								<span class="mainEntryPlayer"
 									:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[mergerEntry[0]].colour)">{{
 										store.players[mergerEntry[0]].displayName }}</span>
-								gains
+								{{ $t('history.gainsColon') }}
 								<!-- The lower of net winning bid-->
 								{{ Math.min(Math.max(getWinningMergerData(entry)[1]
 									- view.getMergerSubsidyAmount(getWinningMergerData(entry)[0], entry[4]), 0),
@@ -619,7 +617,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 								<span class="mainEntryPlayer"
 									:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[mergerEntry[0]].colour)">{{
 										store.players[mergerEntry[0]].displayName }}</span>
-								gains
+								{{ $t('history.gainsColon') }}
 								{{ entry[3][entry[3].length - 1][idx + 1] }}&nbsp;&nbsp;
 							</template>
 						</template>
@@ -641,8 +639,8 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				removes {{ entry[3].length - 1 }} Siap Saji Production
-				<span v-if="entry[3].length - 1 > 1">Markers</span><span v-else>Marker</span>
+				{{ $t('history.removesMarkers', { count: entry[3].length - 1 }) }}
+				<span v-if="entry[3].length - 1 > 1">{{ $t('history.markers') }}</span><span v-else>{{ $t('history.marker') }}</span>
 			</div>
 		</div>
 	</template>
@@ -659,8 +657,8 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				removes {{ entry[3].length - 1 }}
-				<span v-if="entry[3].length - 1 > 1">Ships</span><span v-else>Ship</span>
+				{{ $t('history.removesShips', { count: entry[3].length - 1 }) }}
+				<span v-if="entry[3].length - 1 > 1">{{ $t('history.ships') }}</span><span v-else>{{ $t('history.ship') }}</span>
 			</div>
 		</div>
 	</template>
@@ -677,11 +675,11 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				acquires a
+				{{ $t('history.acquires') }}
 				<b>{{ model.getRawCompanyDataFromID(entry[3][0]).typeText }}</b>
-				company
+				{{ $t('history.company') }}
 				<template v-if="map.getProvinceFromTerrID(entry[3][1]) !== -1">
-					in
+					{{ $t('history.inProvince') }}
 					<b>{{ view.getProvinceString(map.getProvinceFromTerrID(entry[3][1])) }}</b>
 				</template>
 				<br />
@@ -713,7 +711,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				passes Acquisition Turn
+				{{ $t('history.passesAcquisition') }}
 			</div>
 		</div>
 	</template>
@@ -730,7 +728,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				passes Acquisition Turn - no companies to acquire
+				{{ $t('history.passesAcquisitionsNoCompanies') }}
 			</div>
 		</div>
 	</template>
@@ -747,7 +745,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				passes Acquisitions - No Slots
+				{{ $t('history.passesAcquisitionsNoSlots') }}
 			</div>
 		</div>
 	</template>
@@ -764,14 +762,14 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				researches
+				{{ $t('history.researches') }}
 				<template v-if="entry[3].length === 3">
 					<span class="mainEntryPlayer"
 						:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][2]].colour)">{{
 							store.players[entry[3][2]].displayName }}</span>
-					's
+					{{ $t('history.namePossessive') }}
 				</template>
-				<b>{{ rf.RND_STRINGS[entry[3][0]] }} {{ model.getRndDisplayValue(entry[3][0], entry[3][1]) }}</b>
+				<b>{{ rndString(entry[3][0]) }} {{ model.getRndDisplayValue(entry[3][0], entry[3][1]) }}</b>
 			</div>
 		</div>
 	</template>
@@ -788,7 +786,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				operates
+				{{ $t('history.operates') }}
 				<!-- slot content-->
 				<div class="slotImgsDiv"
 					:style="{ height: entry[3][0].length > 1 ? 79 + 10 * entry[3][0].length + 'px' : '79px' }">
@@ -804,9 +802,9 @@ function landOperatingOwnerAlsoHadShips(entry) {
 					</svg>
 				</div>
 
-				<template v-if="entry[3].length === 2">without expanding</template>
+				<template v-if="entry[3].length === 2">{{ $t('history.withoutExpanding') }}</template>
 				<template v-else>
-					expanding Shipping
+					{{ $t('history.expandingShipping') }}
 					<b>{{ getOrdinal(entry[3].length - 2) }}</b>
 				</template>
 			</div>
@@ -825,7 +823,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				operates
+				{{ $t('history.operates') }}
 				<!-- slot content-->
 				<div class="slotImgsDiv"
 					:style="{ height: entry[3][0].length > 1 ? 79 + 10 * entry[3][0].length + 'px' : '79px' }">
@@ -840,7 +838,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 							alt="Ship" />
 					</svg>
 				</div>
-				automatically, as there are only ship companies that cannot expand left to operate
+				{{ $t('history.automaticallyShipOnly') }}
 			</div>
 		</div>
 	</template>
@@ -857,7 +855,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				operates
+				{{ $t('history.operates') }}
 				<!-- slot content-->
 				<div class="slotImgsDiv"
 					:style="{ height: entry[3].length > 1 ? 79 + 10 * entry[3].length + 'px' : '79px' }">
@@ -866,7 +864,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 							alt="Company" :style="{ top: (entry[3].length - 1 - idx2) * 20 + 'px' }" />
 					</template>
 				</div>
-				but cannot ship any goods, and does not expand
+				{{ $t('history.butCannotShip') }}
 			</div>
 		</div>
 	</template>
@@ -883,7 +881,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				operates
+				{{ $t('history.operates') }}
 				<!-- slot content-->
 				<div class="slotImgsDiv"
 					:style="{ height: entry[3][0].length > 1 ? 79 + 10 * entry[3][0].length + 'px' : '79px' }">
@@ -893,9 +891,9 @@ function landOperatingOwnerAlsoHadShips(entry) {
 					</template>
 				</div>
 
-				paying to expand
+				{{ $t('history.payingToExpand') }}
 				<b>{{ getOrdinal(entry[3][1].length) }}</b>
-				<br />(Cost {{ getTotalExpansionCost(entry[3][1].length, entry[3][0][0]) }})
+				<br />{{ $t('history.cost', { amount: getTotalExpansionCost(entry[3][1].length, entry[3][0][0]) }) }}
 			</div>
 		</div>
 	</template>
@@ -912,7 +910,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				operates
+				{{ $t('history.operates') }}
 				<!-- slot content-->
 				<div class="slotImgsDiv"
 					:style="{ height: entry[3][0].length > 1 ? 79 + 10 * entry[3][0].length + 'px' : '79px' }">
@@ -928,38 +926,36 @@ function landOperatingOwnerAlsoHadShips(entry) {
 						:src="view.getImage(model.getActiveCompanyDataFromID(entry[3][0][0]).goodsGfx)" alt="good" />
 					<span class="mainEntryPlayer mainEntryPlayerShip"
 						:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[goodJourney[1]].colour)">
-						{{ goodJourney.length - 4 }} Ship
-						<span v-if="goodJourney.length - 4 !== 1">s</span>
+						{{ goodJourney.length - 4 === 1 ? $t('shipping.ship', { count: goodJourney.length - 4 }) : $t('shipping.shipsCount', { count: goodJourney.length - 4 }) }}
 					</span>
-					to
+					{{ $t('history.to') }}
 					<b>{{ view.getProvinceString(map.getProvinceFromTerrID(goodJourney[goodJourney.length - 1])) }}</b>
 					<!-- Check for subsidy -->
 					<template v-if="view.getShippingSubsidyAmount(entry[1], goodJourney[1], entry[4], 'flag0') > 0">
-						(+ {{ view.getShippingSubsidyAmount(entry[1], goodJourney[1], entry[4], 'flag1') }} Subsidy)
+						{{ $t('history.subsidy', { amount: view.getShippingSubsidyAmount(entry[1], goodJourney[1], entry[4], 'flag1') }) }}
 					</template>
 					<br />
 				</template>
 				<!-- EXPANSIONS -->
-				<template v-if="entry[3][entry[3].length - 1] === -1">Unable to expand anywhere for free</template>
+				<template v-if="entry[3][entry[3].length - 1] === -1">{{ $t('history.unableExpandFree') }}</template>
 				<template
 					v-else-if="entry[3][entry[3].length - 1][0] !== -1 && entry[3][entry[3].length - 1][0] !== -2">
-					Expands for free
+					{{ $t('history.expandsFree') }}
 					<b>{{ getOrdinal(entry[3][entry[3].length - 1].length) }}</b>
 					<br />
 				</template>
 				<template v-else-if="entry[3][entry[3].length - 1][0] === -1">
-					<template v-if="entry[3][entry[3].length - 1].length === 1">No Expansions</template>
+					<template v-if="entry[3][entry[3].length - 1].length === 1">{{ $t('history.noExpansions') }}</template>
 					<template v-else>
-						Expands with payment
-						<b>{{ getOrdinal(entry[3][entry[3].length - 1].length - 1) }}</b> (Cost: {{
-							getTotalExpansionCost(entry[3][entry[3].length - 1].length - 1, entry[3][0][0]) }})
+						{{ $t('history.expandsWithPayment') }}
+						<b>{{ getOrdinal(entry[3][entry[3].length - 1].length - 1) }}</b> {{ $t('history.cost', { amount: getTotalExpansionCost(entry[3][entry[3].length - 1].length - 1, entry[3][0][0]) }) }}
 					</template>
 				</template>
-				<template v-else-if="entry[3][entry[3].length - 1][0] === -2">Chooses not to expand</template>
+				<template v-else-if="entry[3][entry[3].length - 1][0] === -2">{{ $t('history.choosesNotExpand') }}</template>
 				<template v-if="entry[3].length > 2">
 					<br />
 					<div class="flexContainer">
-						<b><u>Income:</u></b>
+						<b><u>{{ $t('history.income') }}</u></b>
 						<template v-for="(incomeEntry, idx) in view.getTotalIncomeArray(entry, false, entry[4])"
 							:key="idx">
 
@@ -980,7 +976,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 					</div>
 					<!-- Add a note if the owner also had ships -->
 					 <template v-if="landOperatingOwnerAlsoHadShips(entry)">
-						{{ store.players[entry[1]].name }}'s ship income removed from company income
+						{{ $t('history.shipIncomeRemoved', { name: store.players[entry[1]].name }) }}
 					 </template>
 				</template>
 
@@ -998,7 +994,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 	<template v-if="entry[0] === rf.HIST_OPERATION_INCOME_SUMMARY">
 		<div class="log mainEntry" :class="{ selectableHistory: store.topMenuViews.showReplay }"
 			@click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
-			<span class="centreSpan"><b><u>Income Summary</u></b></span>
+			<span class="centreSpan"><b><u>{{ $t('history.incomeSummary') }}</u></b></span>
 			<template v-for="(income, idx) in entry[3]" :key="idx">
 				<br v-if="idx > 0" />
 				<span class="mainEntryPlayer"
@@ -1018,7 +1014,20 @@ function landOperatingOwnerAlsoHadShips(entry) {
 					{{ getTimeString(entry[2]) }}
 				</span>
 			</div>
-			<span class="centreSpan">No City Growth</span>
+			<span class="centreSpan">{{ $t('history.noCityGrowth') }}</span>
+		</div>
+	</template>
+
+	<!-- CITY GROWTH SKIPPED - NO TOKENS -->
+	<template v-if="entry[0] === rf.HIST_SKIP_CITY_GROWTH">
+		<div class="log mainEntry" :class="{ selectableHistory: store.topMenuViews.showReplay }"
+			@click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
+			<div class="header">
+				<span>
+					{{ getTimeString(entry[2]) }}
+				</span>
+			</div>
+			<span class="centreSpan">{{ $t('history.cityGrowthSkippedNoTokens') }}</span>
 		</div>
 	</template>
 
@@ -1031,10 +1040,10 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				</span>
 			</div>
 			<span class="centreSpan">
-				<b><u>City Growth</u></b>
+				<b><u>{{ $t('history.cityGrowth') }}</u></b>
 			</span>
 			<template v-if="entry[3][0].length > 0">
-				<b>Growth to size 2: </b>
+				<b>{{ $t('history.growthSize2') }} </b>
 				<span v-for="(terrID, idx) in entry[3][0]" :key="idx">
 					<span v-if="idx < entry[3][0].length - 1">{{
 						view.getProvinceString(map.getProvinceFromTerrID(terrID)) }},&nbsp;</span>
@@ -1042,11 +1051,11 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				</span>
 			</template>
 			<template v-else>
-				<b>No Growth to size 2</b>
+				<b>{{ $t('history.noGrowthSize2') }}</b>
 			</template>
 			<br />
 			<template v-if="entry[3].length > 1">
-				<b>Growth to size 3: </b>
+				<b>{{ $t('history.growthSize3') }} </b>
 				<span v-for="(terrID, idx) in entry[3][1]" :key="idx">
 					<span v-if="idx < entry[3][1].length - 1">{{
 						view.getProvinceString(map.getProvinceFromTerrID(terrID)) }},&nbsp;</span>
@@ -1054,7 +1063,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				</span>
 			</template>
 			<template v-else>
-				<b>No Growth to size 3</b>
+				<b>{{ $t('history.noGrowthSize3') }}</b>
 			</template>
 		</div>
 	</template>
@@ -1071,10 +1080,10 @@ function landOperatingOwnerAlsoHadShips(entry) {
 				<span class="mainEntryPlayer"
 					:class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
 						store.players[entry[1]].displayName }}</span>
-				grows cities manually
+				{{ $t('history.growsCitiesManually') }}
 				<br />
 				<template v-if="entry[3][0].length > 0">
-					<b>Growth to size 2:</b>
+					<b>{{ $t('history.growthSize2') }}</b>
 					<span v-for="(terrID, idx) in entry[3][0]" :key="idx">
 						{{ view.getProvinceString(map.getProvinceFromTerrID(terrID)) }}
 						<span v-if="idx < entry[3][0].length - 1">,</span>
@@ -1082,7 +1091,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 					<br />
 				</template>
 				<template v-if="entry[3].length > 1">
-					<b>Growth to size 3:</b>
+					<b>{{ $t('history.growthSize3') }}</b>
 					<span v-for="(terrID, idx) in entry[3][1]" :key="idx">
 						{{ view.getProvinceString(map.getProvinceFromTerrID(terrID)) }}
 						<span v-if="idx < entry[3][1].length - 1">,&nbsp;</span>

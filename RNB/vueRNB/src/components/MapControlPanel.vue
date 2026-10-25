@@ -24,6 +24,8 @@ import { usePersonalStore } from "../stores/RNBpersonal.js"
 //import MapZoomPanel from "./MapZoomPanel.vue"
 const personal = usePersonalStore()
 
+import i18n from "../i18n"
+
 function toggleShowTransporters() {
 	store.mapData.displaySettings.showTransporters = !store.mapData.displaySettings.showTransporters
 }
@@ -33,9 +35,9 @@ function cycleColourOverlay() {
 }
 
 function colourOverlayLabel() {
-	if (store.viewSettings.colourOverlay === 1) return "Colour Overlay: Transparent"
-	if (store.viewSettings.colourOverlay === 2) return "Colour Overlay: Full"
-	return "Colour Overlay: Off"
+	if (store.viewSettings.colourOverlay === 1) return i18n.global.t("mapControl.overlayTransparent")
+	if (store.viewSettings.colourOverlay === 2) return i18n.global.t("mapControl.overlayFull")
+	return i18n.global.t("mapControl.overlayOff")
 }
 
 function toggleShowAll() {
@@ -185,46 +187,46 @@ function loadGameData() {
 
 <template>
 	<div id="mapControlPanelDiv">
-		<b><u>Display Settings</u></b>
+		<b><u>{{ $t("mapControl.displaySettings") }}</u></b>
 		<br />
 		<button class="actionsLineButton" @click="toggleShowAll">
-			<span v-if="store.mapData.displaySettings.showTransporters && store.mapData.displaySettings.showResources && store.mapData.displaySettings.showRoads && store.mapData.displaySettings.showBridges && store.mapData.displaySettings.showBuildings && store.mapData.displaySettings.showHomeMakres">Hide All</span>
-			<span v-else>Show All</span>
+			<span v-if="store.mapData.displaySettings.showTransporters && store.mapData.displaySettings.showResources && store.mapData.displaySettings.showRoads && store.mapData.displaySettings.showBridges && store.mapData.displaySettings.showBuildings && store.mapData.displaySettings.showHomeMakres">{{ $t("mapControl.hideAll") }}</span>
+			<span v-else>{{ $t("mapControl.showAll") }}</span>
 		</button>
 		<br />
 		<button class="actionsLineButton" @click="toggleShowTransporters">
-			<span v-if="store.mapData.displaySettings.showTransporters">Hide Transporters</span>
-			<span v-else>Show Transporters</span>
+			<span v-if="store.mapData.displaySettings.showTransporters">{{ $t("mapControl.hideTransporters") }}</span>
+			<span v-else>{{ $t("mapControl.showTransporters") }}</span>
 		</button>
 		<br />
 		<button class="actionsLineButton" @click="store.mapData.displaySettings.showResources = !store.mapData.displaySettings.showResources">
-			<span v-if="store.mapData.displaySettings.showResources">Hide Resources</span>
-			<span v-else>Show Resources</span>
+			<span v-if="store.mapData.displaySettings.showResources">{{ $t("mapControl.hideResources") }}</span>
+			<span v-else>{{ $t("mapControl.showResources") }}</span>
 		</button>
 		<br />
 		<button class="actionsLineButton" @click="store.mapData.displaySettings.showRoads = !store.mapData.displaySettings.showRoads">
-			<span v-if="store.mapData.displaySettings.showRoads">Hide Roads</span>
-			<span v-else>Show Roads</span>
+			<span v-if="store.mapData.displaySettings.showRoads">{{ $t("mapControl.hideRoads") }}</span>
+			<span v-else>{{ $t("mapControl.showRoads") }}</span>
 		</button>
 		<br />
 		<button class="actionsLineButton" @click="store.mapData.displaySettings.showBridges = !store.mapData.displaySettings.showBridges">
-			<span v-if="store.mapData.displaySettings.showBridges">Hide Bridges</span>
-			<span v-else>Show Bridges</span>
+			<span v-if="store.mapData.displaySettings.showBridges">{{ $t("mapControl.hideBridges") }}</span>
+			<span v-else>{{ $t("mapControl.showBridges") }}</span>
 		</button>
 		<br />
 		<button class="actionsLineButton" @click="store.mapData.displaySettings.showWalls = !store.mapData.displaySettings.showWalls">
-			<span v-if="store.mapData.displaySettings.showWalls">Hide Walls</span>
-			<span v-else>Show Walls</span>
+			<span v-if="store.mapData.displaySettings.showWalls">{{ $t("mapControl.hideWalls") }}</span>
+			<span v-else>{{ $t("mapControl.showWalls") }}</span>
 		</button>
 		<br />
 		<button class="actionsLineButton" @click="store.mapData.displaySettings.showBuildings = !store.mapData.displaySettings.showBuildings">
-			<span v-if="store.mapData.displaySettings.showBuildings">Hide Buildings</span>
-			<span v-else>Show Buildings</span>
+			<span v-if="store.mapData.displaySettings.showBuildings">{{ $t("mapControl.hideBuildings") }}</span>
+			<span v-else>{{ $t("mapControl.showBuildings") }}</span>
 		</button>
 		<br />
 		<button class="actionsLineButton" @click="store.mapData.displaySettings.showHomeMakres = !store.mapData.displaySettings.showHomeMakres">
-			<span v-if="store.mapData.displaySettings.showHomeMakres">Hide Home Markers</span>
-			<span v-else>Show Home Makers</span>
+			<span v-if="store.mapData.displaySettings.showHomeMakres">{{ $t("mapControl.hideHomeMarkers") }}</span>
+			<span v-else>{{ $t("mapControl.showHomeMarkers") }}</span>
 		</button>
 		<br />
 		<button class="actionsLineButton" @click="cycleColourOverlay">
@@ -232,7 +234,7 @@ function loadGameData() {
 		</button>
 
 		<div class="adminDebugDiv" v-if="rf.DEBUG_USERS.includes(personal.name)">
-			<b><u>ADMIN DEBUG STUFF</u></b>
+			<b><u>{{ $t("mapControl.adminDebug") }}</u></b>
 			<br />
 			<button class="actionsLineButton hexStyleButton" @click="changeStyle">
 				<!-- Pointy Top: Just the "Roof" with a 2-unit gap at the top -->
@@ -251,10 +253,10 @@ function loadGameData() {
 					<polygon points="8,2 24,2 32,12 0,12" fill="currentColor" />
 				</svg>
 			</button>
-			<button class="actionsLineButton" @click="debugButton">Debug Btn</button>
-			<button class="actionsLineButton" @click="resetLimits">Reset Limits</button>
-			<button class="actionsLineButton" @click="loadGameData">Load Game</button>
-			<button class="actionsLineButton" @click="IO.saveGame(false)">Save Game</button>
+			<button class="actionsLineButton" @click="debugButton">{{ $t("mapControl.debugButton") }}</button>
+			<button class="actionsLineButton" @click="resetLimits">{{ $t("mapControl.resetLimits") }}</button>
+			<button class="actionsLineButton" @click="loadGameData">{{ $t("mapControl.loadGame") }}</button>
+			<button class="actionsLineButton" @click="IO.saveGame(false)">{{ $t("mapControl.saveGame") }}</button>
 		</div>
 	</div>
 </template>

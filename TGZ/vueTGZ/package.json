@@ -11,11 +11,13 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --fix",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "test": "vitest run"
   },
   "dependencies": {
     "pinia": "^3.0.3",
-    "vue": "^3.5.18"
+    "vue": "^3.5.18",
+    "vue-i18n": "^11.3.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",
@@ -26,6 +28,7 @@
     "globals": "^16.3.0",
     "prettier": "^3.6.2",
     "vite": "^7.0.6",
-    "vite-plugin-vue-devtools": "^8.0.0"
+    "vite-plugin-vue-devtools": "^8.0.0",
+    "vitest": "^5.0.5"
   }
 }

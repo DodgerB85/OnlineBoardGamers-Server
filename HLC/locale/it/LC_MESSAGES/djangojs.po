@@ -992,7 +992,7 @@ msgstr "Ricerca"
 
 #: .\static\HLC\JS\HLCreference.js:633
 msgid "Set Focus"
-msgstr "Imposta il focus"
+msgstr "Set Focus"
 
 #: .\static\HLC\JS\HLCreference.js:633
 msgid "Build Factory"

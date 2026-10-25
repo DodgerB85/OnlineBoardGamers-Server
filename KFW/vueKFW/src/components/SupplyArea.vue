@@ -101,7 +101,7 @@ function clickedExtensionsButton() {
 
 <template>
 	<div class="wholeSupplyDiv">
-		<b><u>Supply</u></b>
+		<b><u>{{ $t("supply.supply") }}</u></b>
 		<br />
 		<div class="supplyDiv">
 			<!-- TRAINING GAME TRAINING GAME TRAINING GAME-->
@@ -259,7 +259,7 @@ function clickedExtensionsButton() {
 				</div>
 			</div>
 			<br />
-			<button class="actionsLineButton" @click="store.viewSettings.showFullExtensions = true">Show Extensions</button>
+			<button class="actionsLineButton" @click="store.viewSettings.showFullExtensions = true">{{ $t("supply.showExtensions") }}</button>
 		</template>
 		<template v-else-if="store.useMerchantsExpansion && store.viewSettings.showFullExtensions">
 			<div class="fullExtensionDiv">
@@ -271,8 +271,8 @@ function clickedExtensionsButton() {
 					<br />
 				</template>
 				<button class="actionsLineButton" @click="clickedExtensionsButton">
-					<span v-if="store.context.action === rf.ACT_CHOOSE_EXTENSION">Cancel Adding Extension</span>
-					<span v-else>Hide Extensions</span>
+					<span v-if="store.context.action === rf.ACT_CHOOSE_EXTENSION">{{ $t("supply.cancelAddingExtension") }}</span>
+					<span v-else>{{ $t("supply.hideExtensions") }}</span>
 				</button>
 			</div>
 		</template>

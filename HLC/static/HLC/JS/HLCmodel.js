@@ -774,10 +774,12 @@ Model.import = function (tab) {
 		if (tab[15] != undefined && tab[16] != undefined) {
 			m.logs = []
 			var tRef = 0
+			var offsets = []
 			_.each(tab[15], function (log) {
 				if (typeof log === "number") {
 					tRef = log
-				} else {
+				} else if (log != null) {
+					// Games saved with a missing log timestamp hold a null here
 					var l = {
 						player: log[0],
 						action: log[1],
@@ -785,13 +787,13 @@ Model.import = function (tab) {
 					}
 					if (typeof l.param === "number") l.param = [l.param]
 					m.logs.push(l)
+					offsets.push(tab[16][m.logs.length - 1])
 				}
 			})
 
 			// FIXED AS ACCESSED ON SERVER
-			for (var i = 0; i < tab[16].length; i++) {
-				if (tab[16][i] != undefined) m.logs[i].timestamp = tab[16][i] + tRef
-				else m.logs[i].timestamp = 0
+			for (var i = 0; i < m.logs.length; i++) {
+				m.logs[i].timestamp = offsets[i] == undefined ? 0 : offsets[i] + tRef
 			}
 		}
 

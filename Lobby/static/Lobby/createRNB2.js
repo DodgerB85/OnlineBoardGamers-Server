@@ -57,136 +57,18 @@ function initGameCreation(fillData, setupData = {}) {
 	}
 }
 
+// Kickout choices per pace come from Lobby/kickoutOptions.html so the labels stay translated.
 function validateOptions(change) {
-	var el
 	if (change == "pace") {
-		document.getElementById("kickoutDuration").innerHTML = ""
-		// Blitz
-		if (document.getElementById("pace").value == 10) {
-			el = document.createElement("option")
-			el.value = 5
-			el.innerHTML = "5 Minutes"
-			document.getElementById("kickoutDuration").appendChild(el)
-			el = document.createElement("option")
-			el.value = 10
-			el.innerHTML = "10 Minutes"
-			document.getElementById("kickoutDuration").appendChild(el)
-			el = document.createElement("option")
-			el.value = 20
-			el.innerHTML = "20 Minutes"
-			document.getElementById("kickoutDuration").appendChild(el)
-
-			document.getElementById("blitzWarningSpan").style.display = "flex"
-		}
-		// Live
-		else if (document.getElementById("pace").value == 20) {
-			el = document.createElement("option")
-			el.value = 50
-			el.innerHTML = "12 hours"
-			document.getElementById("kickoutDuration").appendChild(el)
-			el = document.createElement("option")
-			el.value = 100
-			el.innerHTML = "1 day"
-			document.getElementById("kickoutDuration").appendChild(el)
-			el = document.createElement("option")
-
-			document.getElementById("blitzWarningSpan").style.display = "none"
-
-			// Unlock from 2p
-			document.getElementById("playerNumber").disabled = false
-
-			selectPlayers()
-		}
-		// Fast / std / slow
-		else if (document.getElementById("pace").value >= 30) {
-			el = document.createElement("option")
-			el.value = 100
-			el.innerHTML = "1 day"
-			document.getElementById("kickoutDuration").appendChild(el)
-			el = document.createElement("option")
-			el.value = 200
-			el.innerHTML = "2 days"
-			document.getElementById("kickoutDuration").appendChild(el)
-			el = document.createElement("option")
-			el.value = 300
-			el.innerHTML = "3 days"
-			document.getElementById("kickoutDuration").appendChild(el)
-			el = document.createElement("option")
-			el.value = 500
-			el.innerHTML = "5 days"
-			document.getElementById("kickoutDuration").appendChild(el)
-
-			document.getElementById("blitzWarningSpan").style.display = "none"
-
-			// Unlock from 2p
+		setKickoutOptions()
+		// Unlock from 2p
+		if (document.getElementById("pace").value != 10) {
 			document.getElementById("playerNumber").disabled = false
 			selectPlayers()
 		}
-	} else if (change === "trainingGame") {
-		if (document.getElementById(change).checked == true) {
-			//document.getElementById('playerNumber').value = 2;
-			//document.getElementById('playerNumber').disabled = true;
-			removeOption("learningGame")
-			removeOption("experiencedGame")
-			removeOption("privateGame")
-			selectPlayers()
-		} else {
-			addOption("learningGame")
-			addOption("privateGame")
-			if (global.experienced) addOption("experiencedGame")
-			document.getElementById("player2").value = ""
-			document.getElementById("player2").disabled = false
-			document.getElementById("player3").value = ""
-			document.getElementById("player3").disabled = false
-			document.getElementById("player4").value = ""
-			document.getElementById("player4").disabled = false
-			document.getElementById("player5").value = ""
-			document.getElementById("player5").disabled = false
-			document.getElementById("player6").value = ""
-			document.getElementById("player6").disabled = false
-			selectPlayers()
-		}
-	} else if (change === "learningGame") {
-		if (document.getElementById(change).checked == true) {
-			removeOption("trainingGame")
-			removeOption("experiencedGame")
-			document.getElementById("playerNumber").value = 2
-			document.getElementById("playerNumber").disabled = true
-			selectPlayers()
-		} else {
-			document.getElementById("playerNumber").disabled = false
-			selectPlayers()
-			addOption("trainingGame")
-			if (global.experienced) addOption("experiencedGame")
-		}
-	} else if (change === "experiencedGame") {
-		if (document.getElementById(change).checked == true) {
-			removeOption("trainingGame")
-			removeOption("learningGame")
-			document.getElementById("player2").value = ""
-			document.getElementById("player2").disabled = false
-			document.getElementById("player3").value = ""
-			document.getElementById("player3").disabled = false
-			document.getElementById("player4").value = ""
-			document.getElementById("player4").disabled = false
-			document.getElementById("player5").value = ""
-			document.getElementById("player5").disabled = false
-			selectPlayers()
-		} else {
-			addOption("trainingGame")
-			addOption("learningGame")
-		}
+	} else if (GAME_TYPE_OPTIONS.indexOf(change) !== -1) {
+		validateGameType(change)
 	}
-}
-
-function removeOption(option) {
-	document.getElementById(option).checked = false
-	document.getElementById(option).disabled = true
-}
-
-function addOption(option) {
-	//document.getElementById(option).checked = false;
-	document.getElementById(option).disabled = false
 }
 
 function validateGameOptions(_checkboxID) {
@@ -251,208 +133,30 @@ function updateMapPlayerCountWarning() {
 }
 
 function selectPlayers() {
-	var numberOfPlayers = document.getElementById("playerNumber").value
+	var solo = document.getElementById("playerNumber").value == "1"
+	showSeats()
 
-	if (document.getElementById("trainingGame").checked) {
-		document.getElementById("player2help").innerHTML = '<span style="background-color: yellow; color: darkred;">' + global.player2practiceText + "</span>"
-	} else document.getElementById("player2help").innerHTML = global.player2normText
-
-	switch (numberOfPlayers) {
-		case "1":
-			// Solo mode: tick and disable practice game
-			removeOption("trainingGame")
-			document.getElementById("trainingGame").checked = true
-
-			// Disable kickout options
-			document.getElementById("kickoutDuration").disabled = true
-			// Disable private game
-			removeOption("privateGame")
-			// Disable learning game
-			removeOption("learningGame")
-			// Disable experienced game
-			removeOption("experiencedGame")
-			// Tick and disable solo mine rules
-			removeOption("useSoloMineRules")
-			document.getElementById("useSoloMineRules").checked = true
-			// Hide all player name options
-			document.getElementById("selPlayer2").style.display = "none"
-			document.getElementById("selPlayer3").style.display = "none"
-			document.getElementById("selPlayer4").style.display = "none"
-			document.getElementById("selPlayer5").style.display = "none"
-			document.getElementById("selPlayer6").style.display = "none"
-			// Clear player fields
-			document.getElementById("player2").value = ""
-			document.getElementById("player3").value = ""
-			document.getElementById("player4").value = ""
-			document.getElementById("player5").value = ""
-			document.getElementById("player6").value = ""
-			break
-		case "2":
-			// Re-enable options when switching from solo
-			document.getElementById("kickoutDuration").disabled = false
-			// Only re-enable if practice game is not checked
-			if (!document.getElementById("trainingGame").checked) {
-				addOption("privateGame")
-				addOption("learningGame")
-			}
-			addOption("trainingGame")
-			if (document.getElementById("useSoloMineRules").disabled) {
-				document.getElementById("useSoloMineRules").checked = false
-			}
-			addOption("useSoloMineRules")
-			if (global.experienced) addOption("experiencedGame")
-			document.getElementById("player2").disabled = false
-
-			document.getElementById("selPlayer2").style.display = "flex"
-			document.getElementById("selPlayer3").style.display = "none"
-			document.getElementById("selPlayer4").style.display = "none"
-			document.getElementById("selPlayer5").style.display = "none"
-			document.getElementById("selPlayer6").style.display = "none"
-
-			document.getElementById("player3").value = ""
-			document.getElementById("player4").value = ""
-			document.getElementById("player5").value = ""
-			document.getElementById("player6").value = ""
-
-			if (document.getElementById("trainingGame").checked) document.getElementById("player2").value = "SHADOW"
-			break
-		case "3":
-			// Re-enable options when switching from solo
-			document.getElementById("kickoutDuration").disabled = false
-			// Only re-enable if practice game is not checked
-			if (!document.getElementById("trainingGame").checked) {
-				addOption("privateGame")
-				addOption("learningGame")
-			}
-			addOption("trainingGame")
-			if (document.getElementById("useSoloMineRules").disabled) {
-				document.getElementById("useSoloMineRules").checked = false
-			}
-			addOption("useSoloMineRules")
-
-			if (global.experienced) addOption("experiencedGame")
-			document.getElementById("player2").disabled = false
-			document.getElementById("player3").disabled = false
-
-			document.getElementById("selPlayer2").style.display = "flex"
-			document.getElementById("selPlayer3").style.display = "flex"
-			document.getElementById("selPlayer4").style.display = "none"
-			document.getElementById("selPlayer5").style.display = "none"
-			document.getElementById("selPlayer6").style.display = "none"
-
-			document.getElementById("player4").value = ""
-			document.getElementById("player5").value = ""
-			document.getElementById("player6").value = ""
-
-			if (document.getElementById("trainingGame").checked) {
-				document.getElementById("player2").value = "SHADOW"
-				document.getElementById("player3").value = "SHADOW_2"
-			}
-			break
-		case "4":
-			// Re-enable options when switching from solo
-			document.getElementById("kickoutDuration").disabled = false
-			// Only re-enable if practice game is not checked
-			if (!document.getElementById("trainingGame").checked) {
-				addOption("privateGame")
-				addOption("learningGame")
-			}
-			addOption("trainingGame")
-			if (document.getElementById("useSoloMineRules").disabled) {
-				document.getElementById("useSoloMineRules").checked = false
-			}
-			addOption("useSoloMineRules")
-
-			if (global.experienced) addOption("experiencedGame")
-			document.getElementById("player2").disabled = false
-			document.getElementById("player3").disabled = false
-			document.getElementById("player4").disabled = false
-
-			document.getElementById("selPlayer2").style.display = "flex"
-			document.getElementById("selPlayer3").style.display = "flex"
-			document.getElementById("selPlayer4").style.display = "flex"
-			document.getElementById("selPlayer5").style.display = "none"
-			document.getElementById("selPlayer6").style.display = "none"
-
-			document.getElementById("player5").value = ""
-			document.getElementById("player6").value = ""
-
-			if (document.getElementById("trainingGame").checked) {
-				document.getElementById("player2").value = "SHADOW"
-				document.getElementById("player3").value = "SHADOW_2"
-				document.getElementById("player4").value = "SHADOW_3"
-			}
-			break
-		case "5":
-			// Re-enable options when switching from solo
-			document.getElementById("kickoutDuration").disabled = false
-			// Only re-enable if practice game is not checked
-			if (!document.getElementById("trainingGame").checked) {
-				addOption("privateGame")
-				addOption("learningGame")
-			}
-			addOption("trainingGame")
-			if (document.getElementById("useSoloMineRules").disabled) {
-				document.getElementById("useSoloMineRules").checked = false
-			}
-			addOption("useSoloMineRules")
-
-			if (global.experienced) addOption("experiencedGame")
-			document.getElementById("player2").disabled = false
-			document.getElementById("player3").disabled = false
-			document.getElementById("player4").disabled = false
-			document.getElementById("player5").disabled = false
-
-			document.getElementById("selPlayer2").style.display = "flex"
-			document.getElementById("selPlayer3").style.display = "flex"
-			document.getElementById("selPlayer4").style.display = "flex"
-			document.getElementById("selPlayer5").style.display = "flex"
-			document.getElementById("selPlayer6").style.display = "none"
-
-			document.getElementById("player6").value = ""
-
-			if (document.getElementById("trainingGame").checked) {
-				document.getElementById("player2").value = "SHADOW"
-				document.getElementById("player3").value = "SHADOW_2"
-				document.getElementById("player4").value = "SHADOW_3"
-				document.getElementById("player5").value = "SHADOW_4"
-			}
-			break
-		case "6":
-			// Re-enable options when switching from solo
-			document.getElementById("kickoutDuration").disabled = false
-			// Only re-enable if practice game is not checked
-			if (!document.getElementById("trainingGame").checked) {
-				addOption("privateGame")
-				addOption("learningGame")
-			}
-			addOption("trainingGame")
-			if (document.getElementById("useSoloMineRules").disabled) {
-				document.getElementById("useSoloMineRules").checked = false
-			}
-			addOption("useSoloMineRules")
-
-			if (global.experienced) addOption("experiencedGame")
-			document.getElementById("player2").disabled = false
-			document.getElementById("player3").disabled = false
-			document.getElementById("player4").disabled = false
-			document.getElementById("player5").disabled = false
-			document.getElementById("player6").disabled = false
-
-			document.getElementById("selPlayer2").style.display = "flex"
-			document.getElementById("selPlayer3").style.display = "flex"
-			document.getElementById("selPlayer4").style.display = "flex"
-			document.getElementById("selPlayer5").style.display = "flex"
-			document.getElementById("selPlayer6").style.display = "flex"
-
-			if (document.getElementById("trainingGame").checked) {
-				document.getElementById("player2").value = "SHADOW"
-				document.getElementById("player3").value = "SHADOW_2"
-				document.getElementById("player4").value = "SHADOW_3"
-				document.getElementById("player5").value = "SHADOW_4"
-				document.getElementById("player6").value = "SHADOW_5"
-			}
-			break
+	if (solo) {
+		// Solo mode: the practice game is the only game type, and no kickout.
+		removeOption("trainingGame")
+		document.getElementById("trainingGame").checked = true
+		removeOption("privateGame")
+		removeOption("learningGame")
+		removeOption("experiencedGame")
+		removeOption("useSoloMineRules")
+		document.getElementById("useSoloMineRules").checked = true
+		document.getElementById("kickoutDuration").disabled = true
+	} else {
+		// Re-enable what solo mode locked, unless the practice game is on.
+		document.getElementById("kickoutDuration").disabled = false
+		if (!document.getElementById("trainingGame").checked) {
+			addOption("privateGame")
+			addOption("learningGame")
+		}
+		addOption("trainingGame")
+		if (document.getElementById("useSoloMineRules").disabled) document.getElementById("useSoloMineRules").checked = false
+		addOption("useSoloMineRules")
+		if (global.experienced) addOption("experiencedGame")
 	}
 
 	// Re-sort maps based on new player count
@@ -488,163 +192,6 @@ function selectPlayers() {
 	updateHighscoresButton()
 	updateMapPlayerCountWarning()
 	syncGalleryFilterToPlayerCount()
-}
-
-function autocomplete(inp) {
-	/*the autocomplete function takes two arguments,
-    the text field element and an array of possible autocompleted values:*/
-	var currentFocus
-	var searchtimer
-
-	/*execute a function when someone writes in the text field:*/
-	inp.addEventListener("input", function (e) {
-		if (document.getElementById("trainingGame").checked) return
-		clearTimeout(searchtimer)
-		searchtimer = setTimeout(() => {
-			var a,
-				b,
-				i,
-				val = this.value
-			/*close any already open lists of autocompleted values*/
-			closeAllLists()
-			if (!val) {
-				return false
-			}
-			currentFocus = -1
-			/*create a DIV element that will contain the items (values):*/
-			a = document.createElement("DIV")
-			a.setAttribute("id", this.id + "autocomplete-list")
-			a.setAttribute("class", "autocomplete-items")
-			/*append the DIV element as a child of the autocomplete container:*/
-			this.parentNode.appendChild(a)
-
-			let csrftoken = getCookie("csrftoken")
-
-			fetch("/autoCompleteUsername/", {
-				method: "POST",
-				body: JSON.stringify({
-					//id: global.gameId,
-					partialString: this.value,
-					//turn: turn,
-					//phase: phase,
-					//gameID: global.gameID
-				}),
-				headers: { "X-CSRFToken": csrftoken },
-			})
-				.then((response) => response.json())
-				.then((result) => {
-					var arr = result.matchList
-					var matchesFound = false
-					for (i = 0; i < arr.length; i++) {
-						/*check if the item starts with the same letters as the text field value:*/
-						if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
-							matchesFound = true
-							/*create a DIV element for each matching element:*/
-							b = document.createElement("DIV")
-							/*make the matching letters bold:*/
-							b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>"
-							b.innerHTML += arr[i].substr(val.length)
-							/*insert a input field that will hold the current array item's value:*/
-							b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>"
-							/*execute a function when someone clicks on the item value (DIV element):*/
-							b.addEventListener("click", function (e) {
-								/*insert the value for the autocomplete text field:*/
-								inp.value = this.getElementsByTagName("input")[0].value
-								/*close the list of autocompleted values,
-                                (or any other open lists of autocompleted values:*/
-								closeAllLists()
-							})
-							a.appendChild(b)
-						}
-					}
-					if (matchesFound === false) {
-						b = document.createElement("DIV")
-						b.innerHTML = "<strong>No User Found</strong>"
-						a.appendChild(b)
-					}
-				})
-				.catch((error) => {
-					console.log("Error:", error)
-				})
-		}, 500)
-	})
-
-	/*execute a function presses a key on the keyboard:*/
-	inp.addEventListener("keydown", function (e) {
-		var x = document.getElementById(this.id + "autocomplete-list")
-		if (x) x = x.getElementsByTagName("div")
-		if (e.keyCode == 40) {
-			/*If the arrow DOWN key is pressed,
-            increase the currentFocus variable:*/
-			currentFocus++
-			/*and and make the current item more visible:*/
-			addActive(x)
-		} else if (e.keyCode == 38) {
-			//up
-			/*If the arrow UP key is pressed,
-            decrease the currentFocus variable:*/
-			currentFocus--
-			/*and and make the current item more visible:*/
-			addActive(x)
-		} else if (e.keyCode == 13) {
-			/*If the ENTER key is pressed, prevent the form from being submitted,*/
-			e.preventDefault()
-			if (currentFocus > -1) {
-				/*and simulate a click on the "active" item:*/
-				if (x) x[currentFocus].click()
-			}
-		}
-	})
-
-	function addActive(x) {
-		/*a function to classify an item as "active":*/
-		if (!x) return false
-		/*start by removing the "active" class on all items:*/
-		removeActive(x)
-		if (currentFocus >= x.length) currentFocus = 0
-		if (currentFocus < 0) currentFocus = x.length - 1
-		/*add class "autocomplete-active":*/
-		x[currentFocus].classList.add("autocomplete-active")
-	}
-	function removeActive(x) {
-		/*a function to remove the "active" class from all autocomplete items:*/
-		for (var i = 0; i < x.length; i++) {
-			x[i].classList.remove("autocomplete-active")
-		}
-	}
-
-	function closeAllLists(elmnt) {
-		/*close all autocomplete lists in the document,
-        except the one passed as an argument:*/
-		var x = document.getElementsByClassName("autocomplete-items")
-		for (var i = 0; i < x.length; i++) {
-			if (elmnt != x[i] && elmnt != inp) {
-				x[i].parentNode.removeChild(x[i])
-			}
-		}
-	}
-
-	/*execute a function when someone clicks in the document:*/
-	document.addEventListener("click", function (e) {
-		closeAllLists(e.target)
-	})
-}
-
-// get CSRF for javascript
-function getCookie(name) {
-	var cookieValue = null
-	if (document.cookie && document.cookie !== "") {
-		var cookies = document.cookie.split(";")
-		for (var i = 0; i < cookies.length; i++) {
-			var cookie = cookies[i].trim()
-			// Does this cookie string begin with the name we want?
-			if (cookie.substring(0, name.length + 1) === name + "=") {
-				cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
-				break
-			}
-		}
-	}
-	return cookieValue
 }
 
 /*** MAP FUNCTIONS */
@@ -927,6 +474,48 @@ function galleryPlayerIconClicked(e) {
 	renderMapGallery()
 }
 
+// Weld unordered [[x1,y1],[x2,y2]] segments into continuous polylines so a run of
+// track tiles draws as one line with no gap at shared corners. Port of the editor's
+// trainTrackSegmentsToPath.
+function trackSegmentsToPath(segments) {
+	if (!segments.length) return ""
+	const key = (p) => `${p[0].toFixed(2)},${p[1].toFixed(2)}`
+	const nodeSegments = new Map()
+	for (let i = 0; i < segments.length; i++)
+		for (const p of segments[i]) {
+			const k = key(p)
+			if (!nodeSegments.has(k)) nodeSegments.set(k, [])
+			nodeSegments.get(k).push(i)
+		}
+	const otherPoint = (segIndex, pointKey) => {
+		const seg = segments[segIndex]
+		return key(seg[0]) === pointKey ? seg[1] : seg[0]
+	}
+	const used = new Array(segments.length).fill(false)
+	const r = (n) => Math.round(n * 100) / 100
+	let path = ""
+	for (let i = 0; i < segments.length; i++) {
+		if (used[i]) continue
+		used[i] = true
+		const points = [segments[i][0], segments[i][1]]
+		for (const dir of [0, 1]) {
+			for (;;) {
+				const endKey = key(dir === 0 ? points[0] : points[points.length - 1])
+				const connections = nodeSegments.get(endKey) || []
+				if (connections.length !== 2) break
+				const next = connections.find((j) => !used[j])
+				if (next === undefined) break
+				used[next] = true
+				const p = otherPoint(next, endKey)
+				if (dir === 0) points.unshift(p)
+				else points.push(p)
+			}
+		}
+		path += (path ? " " : "") + "M" + points.map((p) => `${r(p[0])} ${r(p[1])}`).join(" L")
+	}
+	return `<path d="${path}" stroke="#1A237E" stroke-width="34" stroke-linejoin="round" stroke-linecap="round" fill="none"/>`
+}
+
 function buildMapThumbnailSVG(hexData) {
 	if (!Array.isArray(hexData) || hexData.length < 2) return ""
 	const last = hexData[hexData.length - 1]
@@ -983,7 +572,86 @@ function buildMapThumbnailSVG(hexData) {
 		const c = centres[id]
 		body += `<image href="/static/RNB/images/hometiles/homered.jpg" x="${c[0] - homeSize / 2}" y="${c[1] - homeSize / 2}" width="${homeSize}" height="${homeSize}"/>`
 	})
-	return `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="${vbX} ${vbY} ${vbW} ${vbH}" preserveAspectRatio="xMidYMid meet"><rect x="${vbX}" y="${vbY}" width="${vbW}" height="${vbH}" fill="#f9f9f9"/><defs>${defs}</defs>${body}</svg>`
+	// Train tracks (TN = [[x1, y1, x2, y2, lane], ...]). Simplified routing: a track between two
+	// plain tiles runs straight centre-to-centre. When either tile is a river (terrains 0-22) the
+	// river sits at the tile centre and exits at the edge midpoints, so the track crosses the
+	// shared edge at the 1/4 point (halfway between the midpoint and a corner); a river tile then
+	// joins each lane's entry/exit points with a direct chord, skirting the river, never the centre.
+	const RIVER_TERRAINS = new Set()
+	for (let id = 0; id <= 22; id++) RIVER_TERRAINS.add(id)
+	const centreByCoord = {}
+	const terrByCoord = {}
+	hexes.forEach((e, i) => {
+		centreByCoord[e[0] + "," + e[1]] = centres[i]
+		terrByCoord[e[0] + "," + e[1]] = e[2]
+	})
+	const segments = []
+	const crossByCoord = {}
+	const seenTracks = {}
+	const tn = setup && Array.isArray(setup.TN) ? setup.TN : []
+	tn.forEach((t) => {
+		if (!Array.isArray(t) || t.length < 4) return
+		const lane = t.length > 4 ? t[4] : 0
+		const key = t[0] + "," + t[1] + "," + t[2] + "," + t[3] + "," + lane
+		if (seenTracks[key]) return
+		seenTracks[key] = true
+		const aK = t[0] + "," + t[1],
+			bK = t[2] + "," + t[3]
+		const aC = centreByCoord[aK],
+			bC = centreByCoord[bK]
+		if (!aC || !bC) return
+		if (!RIVER_TERRAINS.has(terrByCoord[aK]) && !RIVER_TERRAINS.has(terrByCoord[bK])) {
+			segments.push([aC, bC]) // no river on either tile: straight through both centres
+			return
+		}
+		// A river tile is crossed at its entry/exit points, not its centre. Cross the shared edge
+		// a quarter-edge off its midpoint (the river exits there) onto this lane's bank. TN stores
+		// [edgeHexIDs0, edgeHexIDs1, lane]; the editor maps lane 0 to vertex[side] and lane 1 to
+		// vertex[side+1] of the side facing B, so offset off the A->B perpendicular accordingly.
+		const mid = [(aC[0] + bC[0]) / 2, (aC[1] + bC[1]) / 2]
+		const dx = bC[0] - aC[0],
+			dy = bC[1] - aC[1]
+		const len = Math.hypot(dx, dy) || 1
+		const off = (lane === 1 ? 1 : -1) * (S / 4) // edge length == hex side S
+		const X = [mid[0] - (dy / len) * off, mid[1] + (dx / len) * off]
+		// A tile's track continuity runs bank-to-bank: the editor's node chains always join a
+		// bank-0 entry to a bank-1 exit on a different edge. TN's `lane` is edge-relative (it
+		// flips meaning between the two hexes of an edge), so pair on the tile-local bank index
+		// b instead: b = lane on edgeHexIDs0, lane^1 on edgeHexIDs1.
+		;(crossByCoord[aK] ||= []).push({ X, b: lane & 1, nk: bK })
+		;(crossByCoord[bK] ||= []).push({ X, b: lane ^ 1, nk: aK })
+	})
+	// Join each river-adjacent tile's crossings: a plain tile runs them through its centre; a river
+	// tile links a bank-0 crossing to a bank-1 crossing on another edge (a chord), never the centre.
+	Object.keys(crossByCoord).forEach((k) => {
+		const xs = crossByCoord[k]
+		const c = centreByCoord[k]
+		if (!RIVER_TERRAINS.has(terrByCoord[k])) {
+			xs.forEach((o) => segments.push([o.X, c]))
+			return
+		}
+		const ones = xs.filter((o) => o.b === 1)
+		const used = new Set()
+		xs.forEach((z) => {
+			if (z.b !== 0) return
+			let best = -1
+			let bestD = Infinity
+			ones.forEach((o, i) => {
+				if (used.has(i) || o.nk === z.nk) return // pair only across different edges
+				const d = (o.X[0] - z.X[0]) ** 2 + (o.X[1] - z.X[1]) ** 2
+				if (d < bestD) {
+					bestD = d
+					best = i
+				}
+			})
+			if (best >= 0) {
+				used.add(best)
+				segments.push([z.X, ones[best].X])
+			}
+		})
+	})
+	const tracks = trackSegmentsToPath(segments)
+	return `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="${vbX} ${vbY} ${vbW} ${vbH}" preserveAspectRatio="xMidYMid meet"><rect x="${vbX}" y="${vbY}" width="${vbW}" height="${vbH}" fill="#f9f9f9"/><defs>${defs}</defs>${body}${tracks}</svg>`
 }
 
 function escapeGalleryHTML(str) {

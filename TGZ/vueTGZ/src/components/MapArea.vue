@@ -14,7 +14,10 @@ import { usePersonalStore } from "../stores/TGZpersonal.js"
 const store = useModelStore()
 const personal = usePersonalStore()
 
-import { ref, reactive, onMounted } from "vue"
+import i18n from "../i18n"
+const t = i18n.global.t
+
+import { ref, reactive, computed, watch } from "vue"
 
 const showWATERTOLLpopup = ref(0)
 const EKWENSUdata = reactive({
@@ -28,15 +31,93 @@ const EKWENSUdata = reactive({
 	popupPosition: { x: 0, y: 0 },
 })
 const popupPosition = ref({ x: 0, y: 0 })
+const hoverInfo = ref(null)
+const errorPopup = ref({ show: false, x: 0, y: 0, text: "" })
+let errorPopupTimer
+
+watch(
+	() => store.context.actionError,
+	(text) => {
+		if (!text || !store.gameReady) {
+			errorPopup.value.show = false
+			return
+		}
+		const pos = store.context.lastClickPosition
+		errorPopup.value = {
+			show: true,
+			x: pos.x || window.innerWidth / 2,
+			y: pos.y || window.innerHeight / 2,
+			text,
+		}
+		clearTimeout(errorPopupTimer)
+		errorPopupTimer = setTimeout(() => {
+			errorPopup.value.show = false
+		}, 4000)
+	}
+)
+
+function updateMapHover(event) {
+	store.context.lastClickPosition = { x: event.clientX, y: event.clientY }
+	if (!isFullyMounted.value) {
+		hoverInfo.value = null
+		return
+	}
+	const rect = event.currentTarget.getBoundingClientRect()
+	const size = store.refSize / 6
+	const x = Math.floor((event.clientX - rect.left) / size)
+	const y = Math.floor((event.clientY - rect.top) / size)
+	const sw = map.getSw()
+	if (x < 0 || y < 0 || x >= sw) {
+		hoverInfo.value = null
+		return
+	}
+	const index = y * sw + x
+	const info = getHoverInfo(index)
+	if (!info) {
+		hoverInfo.value = null
+		return
+	}
+	hoverInfo.value = {
+		x: event.clientX + 14,
+		y: event.clientY + 14,
+		lines: info,
+	}
+}
+
+function getHoverInfo(index) {
+	const code = store.coords[index]
+	if (code === rf.WATER_SQ) return [t("mapHover.water")]
+	if (code === rf.START_SQ) return [t("mapHover.startingArea")]
+	if (rf.RESOURCE_SQS.includes(code)) {
+		const tile = rf.resSqToTile(code)
+		return [t("mapHover.resource"), t("mapHover.resourceNames." + (tile - rf.WOOD_TILE)), store.depletedResources.includes(index) ? t("mapHover.depleted") : ""]
+	}
+	for (let i = 0; i < store.players.length; i++) {
+		for (let j = 0; j < store.players[i].craftsmen.length; j++) {
+			const cman = store.players[i].craftsmen[j]
+			if (cman[0] === index) {
+				const nameIndex = cman[1] === rf.BLACKSMITH_TILE ? 7 : cman[1]
+				return [
+					t("mapHover.craftsmanNames." + nameIndex),
+					`${t("mapHover.owner")}: ${store.players[i].displayName}`,
+					`${t("mapHover.price")}: ${model.getPriceForCraftsman(store.players[i], cman[1], false)}`,
+					`${t("mapHover.remaining")}: ${store.remainingItems[cman[1]]}`,
+				]
+			}
+		}
+		for (let j = 0; j < store.players[i].monuments.length; j++) {
+			const monument = store.players[i].monuments[j]
+			if (monument[0] === index) {
+				return [t("mapHover.monument"), `${t("mapHover.owner")}: ${store.players[i].displayName}`, `${t("mapHover.level")}: ${monument[1]}`]
+			}
+		}
+	}
+	return null
+}
+
 
 // --- Plop Animation Setup ---
-const isFullyMounted = ref(false)
-
-onMounted(() => {
-	setTimeout(() => {
-		isFullyMounted.value = true
-	}, 100)
-})
+const isFullyMounted = computed(() => store.gameReady)
 
 // 4 separate plop directives for independent tweaking
 const vPlopMonument = {
@@ -47,6 +128,17 @@ const vPlopMonument = {
 			"animationend",
 			() => {
 				el.classList.remove("monument-plop-active")
+			},
+			{ once: true }
+		)
+	},
+	updated: (el, binding) => {
+		if (!isFullyMounted.value || binding.value === binding.oldValue) return
+		el.classList.add("monument-raise-active")
+		el.addEventListener(
+			"animationend",
+			() => {
+				el.classList.remove("monument-raise-active")
 			},
 			{ once: true }
 		)
@@ -89,6 +181,20 @@ const vPlopCraftsman = {
 			"animationend",
 			() => {
 				el.classList.remove("craftsman-plop-active")
+			},
+			{ once: true }
+		)
+	},
+}
+
+const vFadeDepleted = {
+	mounted: (el) => {
+		if (!isFullyMounted.value) return
+		el.classList.add("depleted-fade-active")
+		el.addEventListener(
+			"animationend",
+			() => {
+				el.classList.remove("depleted-fade-active")
 			},
 			{ once: true }
 		)
@@ -173,7 +279,8 @@ function shouldCraftsmanShowDepleted(craftsmanData) {
 	return true
 }
 
-function clickedMonument(monument) {
+function clickedMonument(monument, event) {
+	if (event) store.context.lastClickPosition = { x: event.clientX, y: event.clientY }
 	if (store.topMenuViews.mapInspectorMode) {
 		store.context.indexesToPipGreen.splice(0)
 		store.context.indexesToPipRed.splice(0)
@@ -181,6 +288,7 @@ function clickedMonument(monument) {
 		return
 	}
 	if (store.context.action === rf.ACT_CHOOSE_ANYANWU_MON) {
+		if (!store.context.canSelectRaiseMonument.includes(monument[0])) return
 		monument[1] = 3
 		model.addHistory(rf.HIST_CHOOSE_ANYANWU_MON, controller.currentPlayerIndex(), 0, [monument[0]])
 		store.clearVars(true)
@@ -209,6 +317,7 @@ function clickedMonument(monument) {
 }
 
 function clickedCraftsman(event, craftsmanData, playerIndex) {
+	if (event) store.context.lastClickPosition = { x: event.clientX, y: event.clientY }
 	// MAP INSPECTOR
 	if (store.topMenuViews.mapInspectorMode) {
 		// Add pips to resources
@@ -327,7 +436,7 @@ function clickedCraftsman(event, craftsmanData, playerIndex) {
 			let netCraftsmanCost = totalCraftsmanCost - EKWENSUcows
 
 			// OLOK CHECK - NOT ENOUGH COWS FOR TOLL
-			if (store.WATERTOLLpaymentStatus === 1 && netCraftsmanCost + hubsUsed + rf.WATERTOLLCowToll > controller.currentPlayerObj().cows) {
+			if (store.context.WATERTOLLpaymentStatus === 1 && netCraftsmanCost + hubsUsed + rf.WATERTOLLCowToll > controller.currentPlayerObj().cows) {
 				// Calculate the position based on the mouse/touch event
 				popupPosition.value = { x: event.clientX, y: event.clientY - 80 }
 				clearTimeout(popupInterval)
@@ -456,7 +565,8 @@ function isRitualGoodComplete(craftsmanSq) {
 	return false
 }
 
-function clickedResource(index) {
+function clickedResource(event, index) {
+	if (event) store.context.lastClickPosition = { x: event.clientX, y: event.clientY }
 	store.context.resourceIndexesToHighlight.splice(0)
 
 	// WATERTOLL check
@@ -525,7 +635,7 @@ function clickedResource(index) {
 				store.context.monumentsToPlace = 1
 				store.context.indexesToHighlightClick.splice(0)
 				store.context.indexesToHighlightClick = map.getSpacesForMonument(model.hasNomads(controller.currentPlayerObj()), false)
-				if (store.context.indexesToHighlightClick.length === 0) store.context.actionError = "No Space Left for Any Monuments"
+				if (store.context.indexesToHighlightClick.length === 0) store.context.actionError = t("model.noSpaceMonuments")
 			} else {
 				// +1 to monument level
 				store.context.upgradingMonumentProcess[0][1]++ // ONLY WORKS BECAUSE IT IS A POINTER
@@ -605,14 +715,14 @@ function localSelectEWKWENSUcows(val) {
 			}"
 			@mouseover="hideErrorPopup">
 			<span v-if="showWATERTOLLpopup === 1">
-				Unable to Afford
+				{{ $t("map.unableToAfford") }}
 				<br />
-				WATERTOLL Water Toll
+				{{ $t("map.watertollWaterToll") }}
 			</span>
 			<span v-if="showWATERTOLLpopup === 2">
-				WATERTOLL Water
+				{{ $t("map.watertollWater") }}
 				<br />
-				Toll Paid
+				{{ $t("map.tollPaid") }}
 			</span>
 		</div>
 	</transition>
@@ -626,9 +736,9 @@ function localSelectEWKWENSUcows(val) {
 			left: EKWENSUdata.popupPosition.x + 'px',
 		}">
 		<div class="EKWENSUpopupTextDiv">
-			You may use Ekwensu cows
+			{{ $t("map.ekwensuTitle") }}
 			<br />
-			Ekwensu has {{ EKWENSUdata.EKWENSUcowsAvailable }} cows. You need to pay {{ EKWENSUdata.craftsmanCost }} total
+			{{ $t("map.ekwensuDetail", { cows: EKWENSUdata.EKWENSUcowsAvailable, cost: EKWENSUdata.craftsmanCost }) }}
 			<br />
 			<img :src="view.getImage('cows1')" :class="[{ selectedEKWENSUcowImg: EKWENSUdata.EKWENSUcowsSelected === 1 }, { EKWENSUcowImgSelectable: controller.currentPlayerObj().cows + 1 >= EKWENSUdata.hubsUsed + EKWENSUdata.craftsmanCost }, { EKWENSUcowImgNOTselectable: controller.currentPlayerObj().cows + 1 < EKWENSUdata.hubsUsed + EKWENSUdata.craftsmanCost }]" class="EKWENSUcowImg" alt="1 cow" @click="localSelectEWKWENSUcows(1)" />
 			<img v-if="EKWENSUdata.EKWENSUcowsAvailable >= 2 && EKWENSUdata.craftsmanCost >= 2" :src="view.getImage('cows2')" :class="[{ selectedEKWENSUcowImg: EKWENSUdata.EKWENSUcowsSelected === 2 }, { EKWENSUcowImgSelectable: controller.currentPlayerObj().cows + 2 >= EKWENSUdata.hubsUsed + EKWENSUdata.craftsmanCost }, { EKWENSUcowImgNOTselectable: controller.currentPlayerObj().cows + 2 < EKWENSUdata.hubsUsed + EKWENSUdata.craftsmanCost }]" class="EKWENSUcowImg" alt="2 cows" @click="localSelectEWKWENSUcows(2)" />
@@ -639,9 +749,31 @@ function localSelectEWKWENSUcows(val) {
 		</div>
 	</div>
 
+	<!-- MAP HOVER INFO -->
+	<div
+		v-if="hoverInfo"
+		class="mapHover"
+		:style="{ top: hoverInfo.y + 'px', left: hoverInfo.x + 'px' }">
+		<div v-for="(line, idx) in hoverInfo.lines" :key="idx" :class="{ mapHoverMuted: idx > 0 }">{{ line }}</div>
+	</div>
+
+	<!-- MAP ERROR POPUP -->
+	<transition name="fadeOut">
+		<div
+			v-if="errorPopup.show"
+			class="mapErrorPopup"
+			:style="{ top: errorPopup.y + 'px', left: errorPopup.x + 'px' }"
+			role="alert">
+			{{ errorPopup.text }}
+		</div>
+	</transition>
+
 	<!-- DISPLAY MAP TILES -->
 	<div
 		id="mapTilesDiv"
+		@contextmenu.prevent
+		@mousemove="updateMapHover"
+		@mouseleave="hoverInfo = null"
 		:style="{
 			width: store.mapTiles.length === 8 ? (store.refSize * 480) / 240 + 'px' : (store.refSize * 720) / 240 + 'px',
 			height: store.mapTiles.length === 8 ? (store.refSize * 480) / 240 + 'px' : (store.refSize * 720) / 240 + 'px',
@@ -665,7 +797,7 @@ function localSelectEWKWENSUcows(val) {
 		<template v-for="(player, index1) in store.players" :key="index1">
 			<template v-for="(monument, index2) in player.monuments" :key="index2">
 				<div
-					v-plop-monument
+					v-plop-monument="monument[1]"
 					class="monumentDiv"
 					:style="{
 						width: store.refSize / 6 + 'px',
@@ -678,7 +810,7 @@ function localSelectEWKWENSUcows(val) {
 						//'line-height': store.refSize / 6 + 'px'
 					}"
 					:class="[{ canRaiseMonument: store.context.canSelectRaiseMonument.includes(monument[0]) }, { inMonRaiseProcess: store.context.itemsInMonumentUpgrade.includes(monument[0]) }, { mapInspectorMode: store.topMenuViews.mapInspectorMode }]"
-					@click="clickedMonument(monument)">
+					@click="clickedMonument(monument, $event)">
 					<span class="nonSelectableSpan">{{ monument[1] }}</span>
 					<div
 						class="notEnoguhCraftsmenForMon"
@@ -711,7 +843,7 @@ function localSelectEWKWENSUcows(val) {
 				<!-- Ripple Effect (Behind Resource) -->
 				<div class="resource-ripple"></div>
 				<img class="resourceImg" :src="view.getImage('res' + String(resourceObj[1]))" alt="RRR" />
-				<div v-if="store.depletedResources.includes(resourceObj[0])" class="depletedDiv" :class="getDepletedResourceTimes(resourceObj[0]) === 1 ? 'crossBackground' : 'crossBackground_Atete'"></div>
+				<div v-if="store.depletedResources.includes(resourceObj[0])" v-fade-depleted class="depletedDiv" :class="getDepletedResourceTimes(resourceObj[0]) === 1 ? 'crossBackground' : 'crossBackground_Atete'"></div>
 			</div>
 		</template>
 
@@ -726,6 +858,7 @@ function localSelectEWKWENSUcows(val) {
 						.includes(depletedIndex)
 				"
 				:class="[getDepletedResourceTimes(depletedIndex) === 1 ? 'crossBackground' : 'crossBackground_Atete', { inMonRaiseProcess: store.context.itemsInMonumentUpgrade.includes(depletedIndex) }]"
+				v-fade-depleted
 				:style="{
 					width: store.refSize / 6 + 'px',
 					height: store.refSize / 6 + 'px',
@@ -896,7 +1029,7 @@ function localSelectEWKWENSUcows(val) {
 					top: view.getIndexPos(index, 0)[0] + 'px',
 					left: view.getIndexPos(index, 0)[1] + 'px',
 				}"
-				@click="clickedResource(index)"></div>
+				@click="clickedResource($event, index)"></div>
 		</template>
 
 		<MapHighlight />
@@ -1203,8 +1336,74 @@ function localSelectEWKWENSUcows(val) {
 	opacity: 0;
 }
 
-/* --- Plop Animations for Map Elements --- */
+.mapHover {
+	position: fixed;
+	z-index: 3000;
+	background: rgba(20, 20, 20, 0.92);
+	color: white;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	padding: 5px 8px;
+	font-size: 13px;
+	line-height: 18px;
+	pointer-events: none;
+	max-width: 280px;
+}
 
+.mapHoverMuted {
+	color: #ddd;
+	font-size: 12px;
+}
+
+.mapErrorPopup {
+	position: fixed;
+	z-index: 3000;
+	background: #b00020;
+	color: white;
+	border: 2px solid #ffb3c0;
+	border-radius: 5px;
+	padding: 8px 12px;
+	max-width: 360px;
+	pointer-events: none;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.monument-raise-active {
+	animation: monument-raise 0.3s ease-out;
+	z-index: 30;
+}
+
+@keyframes monument-raise {
+	0% {
+		transform: scale(1);
+		filter: brightness(1);
+	}
+	45% {
+		transform: scale(1.18);
+		filter: brightness(1.5);
+	}
+	100% {
+		transform: scale(1);
+		filter: brightness(1);
+	}
+}
+
+.depleted-fade-active {
+	animation: depleted-fade 0.35s ease-out;
+}
+
+@keyframes depleted-fade {
+	from {
+		opacity: 0;
+		transform: scale(0.7);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+/* --- Plop Animations for Map Elements --- */
 /* Monument Plop */
 .monument-plop-active {
 	animation: monument-plop 0.4s ease-out forwards;

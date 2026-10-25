@@ -173,51 +173,9 @@
                     </div>
                 </div>
                 {% else %}
-                <div class="card">
-                    <div class="card-header"><h2 class="card-title">{% translate "Common Options" %}</h2></div>
-                    <div class="form-row">
-                        <label class="form-label" for="kickoutDuration">{% translate "Kickout available after:" %}</label>
-                        <select name="kickoutDuration" id="kickoutDuration" style="flex:0 0 auto;width:auto">
-                            <option value="100">{% translate "1 day" %}</option>
-                            <option value="200" selected="selected">{% translate "2 days" %}</option>
-                            <option value="300">{% translate "3 days" %}</option>
-                            <option value="500">{% translate "5 days" %}</option>
-                        </select>
-                        <div class="form-help">{% translate "Change Playing Speed for different options" %}</div>
-                    </div>
-                    <div class="check-list">
-                        {% url "lobbyHelp" as the_url %}
-                        <label class="check-label">
-                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="trainingGame" name="trainingGame" value="102">
-                            <div>
-                                <div>{% translate "Practice Game" %}</div>
-                                <div class="opt-help">{% blocktranslate trimmed %}Play as up to 5 players on the same device. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
-                            </div>
-                        </label>
-                        <label class="check-label">
-                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="privateGame" name="privateGame" value="1">
-                            <div>
-                                <div>{% translate "Private Game" %}</div>
-                                <div class="opt-help">{% translate "Players can only join with invite or link" %}</div>
-                            </div>
-                        </label>
-                        <label class="check-label">
-                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="learningGame" name="learningGame" value="110">
-                            <div>
-                                <div>{% translate "Request Learning Game" %}</div>
-                                <div class="opt-help">{% blocktranslate trimmed %}Request help to learn the game. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
-                            </div>
-                        </label>
-                        <label class="check-label">
-                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="experiencedGame" name="experiencedGame" value="120" disabled>
-                            <div>
-                                <div>{% translate "Experienced Game" %}</div>
-                                <div class="opt-help">{% blocktranslate trimmed %}Minimum Experience Level. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}</div>
-                                {% if not experienced %}<div style="font-size:12px;color:var(--color-danger);margin-top:2px">{% translate "You do not have enough experience" %}</div>{% endif %}
-                            </div>
-                        </label>
-                    </div>
-                </div>
+                {% url "lobbyHelp" as the_url %}
+                {% blocktranslate trimmed asvar practiceHelp %}Play as up to 5 players on the same device. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}
+                {% include "Lobby/createCommonOptions.html" with practiceHelp=practiceHelp %}
                 {% endif %}
 
                 <div class="card">
@@ -253,11 +211,13 @@
     
     {% block script %}
         {% compress js %}
+            <script src="{% static 'Lobby/createGamePage.js' %}"></script>
             <script src="{% static 'Lobby/createKFW.js' %}"></script>
             <script src="{% static 'Lobby/miniTournament.js' %}"></script>
         {% endcompress %}
         <script>
     var global = {};
+    {% include "Lobby/kickoutOptions.html" %}
     global.player2normText = '{% translate "Leave blank to invite anybody" %}';
     global.player2practiceText = '{% translate "You can change the in-game name of the other players" %}';
     {% if experienced %}

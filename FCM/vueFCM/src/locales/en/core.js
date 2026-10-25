@@ -57,7 +57,7 @@ welcome: {
   title: "Welcome to Food Chain Magnate Online!",
   contact: "If you have any suggestions, questions or comments, then please do contact the webmaster at",
   instructions: {
-    placeItem: "To place an item on the board, click any of the squares that are highlighted in red",
+    placeItem: "To place an item on the board, click any of the squares that are highlighted in yellow",
     rotateItem: "To rotate an item, use the arrows displayed next to the item just above the board",
     viewEmployees: "To see any player's employees and current structure, click on their name in the black bar at the top of the screen",
     viewReserve: "To see the remaining employees, milestones, and other items, click \"Reserve\" in the menu at the top",
@@ -176,7 +176,7 @@ milestones: {
   
   firstCampaignManager: "First campaign manager",
   firstCampaignManagerTitle: "First campaign manager used",
-  firstCampaignManagerDesc: "This turn, may place 1 marketing tile (same duration, type & range)",
+  firstCampaignManagerDesc: "This turn, may place 1 marketing tile (same duration, type & good)",
   
   firstBrandManager: "First brand manager",
   firstBrandManagerTitle: "First brand manager used",

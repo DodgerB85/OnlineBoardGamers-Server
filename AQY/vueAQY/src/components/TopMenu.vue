@@ -21,11 +21,15 @@ import * as replay from "../js/AQYreplay"
 
 import PlayerLine from "./PlayerLine.vue"
 
+import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { useModelStore } from "../stores/AQYstore.js"
 const store = useModelStore()
 
 import { usePersonalStore } from "../stores/AQYpersonal.js"
 const personal = usePersonalStore()
+
+const { t } = useI18n()
 
 function debugButton() {
 	//model.endGame()
@@ -234,6 +238,11 @@ function getCurrentPlayerNames() {
 	for (let i = 0; i < store.gameflow.turnOrder.length; i++) res.push(store.players[store.gameflow.turnOrder[i]].displayName)
 	return res.join(", ")
 }
+
+const phaseName = computed(() => (store.gameflow.phase === rf.PHASE_FIRST_CITY ? t("aqyUi.status.firstCity") : (rf.PHASE_STRINGS[store.gameflow.phase] ?? "")))
+const phaseNumber = computed(() => (store.gameflow.phase === rf.PHASE_FIRST_CITY ? 0 : Math.min(10, Math.max(1, store.gameflow.phase))))
+const isMyTurn = computed(() => personal.canPlay())
+const currentNames = computed(() => getCurrentPlayerNames())
 </script>
 
 <template>
@@ -242,35 +251,35 @@ function getCurrentPlayerNames() {
 			<a href="/">
 				<span class="topMenuItem">
 					<img :src="view.getImage('icon-house')" />
-					<span>Home</span>
+					<span>{{ $t("topMenu.home") }}</span>
 				</span>
 			</a>
 			<!-- IF LOGGED IN -->
 			<span v-if="personal.name != undefined" class="topMenuItem" id="menuButtonNext" @click="nextGame">
 				<img :src="view.getImage('icon-nextGame')" />
-				<span>Next</span>
+				<span>{{ $t("topMenu.next") }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
 			<div class="menuDivider"></div>
 
-			<a href="/AQY/help/" target="_blank">
+			<a href="/AQY/help/" target="_blank" :title="$t('aqyUi.hotkeys.help')">
 				<span class="topMenuItem">
 					<img :src="view.getImage('icon-rulebook')" />
-					<span>Rules</span>
+					<span>{{ $t("topMenu.rules") }}</span>
 				</span>
 			</a>
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showReserve }]" id="menuButtonReserve" @click="toggleReserve">
 				<img :src="view.getImage('icon-info')" />
-				<span>Info</span>
+				<span>{{ $t("topMenu.info") }}</span>
 			</span>
 			<div class="menuDivider"></div>
 
 			<!-- IF INVOLVED PLAYER-->
 			<span v-if="personal.pov >= 0" id="menuButtonRewindPos" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showRewindPanel }]" @click="loadRewind()">
 				<img :src="view.getImage('icon-rewind')" />
-				<span>Rewind</span>
+				<span>{{ $t("topMenu.rewind") }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
@@ -278,13 +287,13 @@ function getCurrentPlayerNames() {
 
 			<span v-if="personal.name != undefined" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showChat }]" id="menuButtonChat" @click="toggleChat">
 				<img :src="view.getImage('icon-chat')" />
-				<span>Chat</span>
+				<span>{{ $t("topMenu.chat") }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
 			<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showBug }]" id="menuButtonBug" @click="toggleBug">
 				<img :src="view.getImage('icon-stop')" />
-				<span>Bug</span>
+				<span>{{ $t("topMenu.bug") }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
@@ -293,21 +302,32 @@ function getCurrentPlayerNames() {
 			<!-- IF INVOLVED PLAYER-->
 			<span v-if="personal.pov >= 0" class="topMenuItem" :class="['topMenuItem', { hasNotes: personal.notes.length > 0 }, { topMenuItemSelected: store.topMenuViews.showNotes }]" id="menuButtonNotes" @click="toggleNotes">
 				<img :src="view.getImage('icon-notebook')" />
-				<span>Notes</span>
+				<span>{{ $t("topMenu.notes") }}</span>
 			</span>
 			<span v-else class="topMenuBlank"></span>
 
 			<span :class="['topMenuItem', { topMenuItemSelected: store.topMenuViews.showHistory }]" id="menuButtonHistory" @click="toggleHistory">
 				<img :src="view.getImage('icon-scroll')" />
-				<span>History</span>
+				<span>{{ $t("topMenu.history") }}</span>
 			</span>
 
 			<div class="menuDivider"></div>
 
 			<span class="topMenuItem" @click="toggleReplay()">
 				<img :src="view.getImage('icon-replay')" />
-				<span>Replay</span>
+				<span>{{ $t("topMenu.replay") }}</span>
 			</span>
+		</div>
+
+		<div id="topInfos">
+			<div class="infoSpanDiv">
+				<span id="infoSpan">
+					<span v-html="store.gameName"></span>
+				</span>
+			</div>
+			<div id="playerLineDiv">
+				<PlayerLine />
+			</div>
 		</div>
 
 		<div id="topRight">
@@ -318,7 +338,7 @@ function getCurrentPlayerNames() {
 
 				<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 					<span id="kickoutTimerSpan">
-						Time to next kickout:
+						{{ $t("topMenu.timeToNextKickout") }}
 						<span id="kickoutTimerTimer">{{ getKickoutTImerText() }}</span>
 					</span>
 				</template>
@@ -333,17 +353,10 @@ function getCurrentPlayerNames() {
 			</div>
 		</div>
 
-		<div id="topInfos">
-			<div class="infoSpanDiv">
-				<span id="infoSpan">
-					<span v-html="store.gameName"></span>
-					| {{ store.gameflow.turn }}{{ view.phaseStr() }}
-					<span v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER">| {{ getCurrentPlayerNames() }}</span>
-				</span>
-			</div>
-			<div id="playerLineDiv">
-				<PlayerLine />
-			</div>
+		<div id="statusBanner" :class="{ myTurn: isMyTurn, gameOver: store.gameflow.phase === rf.PHASE_GAME_OVER }">
+			<span class="statusTurn">{{ $t("aqyUi.status.turn", { turn: store.gameflow.turn }) }}</span>
+			<span class="statusPhase"><template v-if="phaseNumber > 0">{{ $t("aqyUi.status.phase", { number: phaseNumber }) }} · </template>{{ phaseName }}</span>
+			<span class="statusWho">{{ isMyTurn ? $t("aqyUi.status.yourTurn") : $t("aqyUi.status.waitingFor", { names: currentNames }) }}</span>
 		</div>
 	</div>
 </template>
@@ -407,15 +420,18 @@ function getCurrentPlayerNames() {
 	padding: 0px;
 	width: 100%;
 	min-width: 1050px;
-	height: 120px;
+	min-height: 120px;
+	height: auto;
 	top: 0px;
 	z-index: 2;
 	position: relative;
-	display: inline-block;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
 }
 
 #menu {
-	float: left;
+	flex-shrink: 0;
 	color: white;
 }
 
@@ -467,7 +483,7 @@ function getCurrentPlayerNames() {
 .topMenuItem img {
 	/*filter: brightness(0) saturate(100%) invert(100%) sepia(17%) saturate(6440%) hue-rotate(174deg) brightness(98%) contrast(102%);
 */
-	width: 38x;
+	width: 38px;
 	height: 38px;
 }
 
@@ -478,15 +494,46 @@ function getCurrentPlayerNames() {
 }
 
 #topRight {
-	float: right;
+	flex-shrink: 0;
 	height: 100%;
 	font-size: 14px;
 	text-align: center;
 	margin-right: 5px;
 }
 
+#statusBanner {
+	flex-basis: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
+	padding: 4px 8px;
+	background-color: #c4dff7;
+	border-bottom: 1px solid #8bb8d8;
+	color: black;
+	font-weight: bolder;
+	font-size: 15px;
+}
+
+#statusBanner.myTurn {
+	background-color: lightgreen;
+}
+
+#statusBanner.gameOver {
+	background-color: lightgoldenrodyellow;
+}
+
+.statusPhase {
+	color: #1a4f73;
+}
+
+.statusWho {
+	color: #1a5c1a;
+}
+
 #topInfos {
-	display: inline;
+	flex: 1 1 auto;
+	min-width: 0;
 	/*display: flex;*/
 	/*flex-direction: column;
     /* Add this line to change the direction to column */

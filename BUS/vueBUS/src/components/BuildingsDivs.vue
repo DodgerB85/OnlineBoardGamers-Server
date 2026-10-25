@@ -10,10 +10,26 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 const personal = usePersonalStore()
 
-import { ref } from "vue"
+import { computed, ref } from "vue"
+
+import i18n from "../i18n"
 
 const ghostBuildingRef = ref(null)
 const plopAnimationRef = ref(null)
+const vromHover = ref(null)
+
+const vromConnector = computed(() => {
+	const origin = store.context.selectedPaxToVromJunction
+	if (origin === -1 || vromHover.value === null) return null
+	const start = view.getBuildingPos(origin, -1)
+	const end = view.getVromDestinationPos(vromHover.value.junction, vromHover.value.building, false)
+	return {
+		x1: start[1] + (store.refSize * 30) / 400,
+		y1: start[0] + (store.refSize * 40) / 400,
+		x2: end[1] + (store.refSize * 17) / 100,
+		y2: end[0] + (store.refSize * 17) / 100,
+	}
+})
 
 function ghostBuilding(e, junction, building, add) {
 	if (!add) {
@@ -47,7 +63,8 @@ function ghostBuilding(e, junction, building, add) {
 		if (personal.selectedBoard === rf.BOARD_OG) e.target.style.border = String((store.refSize * 3) / 100) + "px solid lightgreen"
 	}
 }
-function mouseOverVromBuilding(e, junction, add) {
+function mouseOverVromBuilding(e, junction, building, add) {
+	vromHover.value = add ? { junction, building } : null
 	if (!add) {
 		if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS) e.target.style.border = String((store.refSize * 5) / 100) + "px solid yellow"
 		if (personal.selectedBoard === rf.BOARD_OG) e.target.style.border = String((store.refSize * 3) / 100) + "px solid yellow"
@@ -184,7 +201,7 @@ function addPassengerToJunction(junction) {
 	playPassengerPlopAnimation(junction)
 
 	if (store.remainingPassengers === 0) {
-		store.context.turnEndingErrorMessage = "No More Passengers"
+		store.context.turnEndingErrorMessage = i18n.global.t("actionArea.noMorePassengers")
 		store.context.historyObj.push(-1)
 	}
 }
@@ -213,7 +230,7 @@ function addDesignerToJunction(designerIdx) {
 	playPassengerPlopAnimation(rf.PITTS_AIRPORT_JUNCTION, designerIdx === rf.DESIGNER_JEROEN ? "jeroen" : "joris", landingOffset, (store.refSize * 184) / 1000, (store.refSize * 311) / 1000)
 }
 function clickedPaxToVrom(junction) {
-	if (!model.canPlayerVrom()) return
+	if (!controller.canPlayerVrom()) return
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
 		if (!paxSelectableForVrom(junction)) return
 	} else {
@@ -225,7 +242,7 @@ function clickedPaxToVrom(junction) {
 
 // Selection of a Splotter Designer to be moved during VRROOOMM
 function clickedDesignerToVrom(designerIdx, junction) {
-	if (!model.canPlayerVrom()) return
+	if (!controller.canPlayerVrom()) return
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
 		if (!designerSelectableForVrom(junction, designerIdx)) return
 	} else {
@@ -243,18 +260,18 @@ function clickedDesignerToVrom(designerIdx, junction) {
 // A passenger can select this junction for VROOMM only when a regular desired building is reachable from it;
 // designer special rides (convention centre / Airport) never make a junction selectable for a passenger
 function paxSelectableForVrom(junction) {
-	if (personal.selectedBoard !== rf.BOARD_PITTS) return model.canPlayerVrom() && controller.currentPlayerObj().playerJunctions.includes(junction)
-	return model.canPlayerVrom() && store.context.eligibleJunctionsToVromPitts.includes(junction) && controller.canReachBuildingFromJunction(junction, controller.currentPlayerObj(), store, null)
+	if (personal.selectedBoard !== rf.BOARD_PITTS) return controller.canPlayerVrom() && controller.currentPlayerObj().playerJunctions.includes(junction)
+	return controller.canPlayerVrom() && store.context.eligibleJunctionsToVromPitts.includes(junction) && controller.canReachBuildingFromJunction(junction, controller.currentPlayerObj(), store, null)
 }
 
 // A Splotter Designer can select this junction only when their own rides (and regular building rides) reach a destination
 function designerSelectableForVrom(junction, designerIdx) {
-	if (personal.selectedBoard !== rf.BOARD_PITTS) return model.canPlayerVrom() && controller.currentPlayerObj().playerJunctions.includes(junction)
-	return model.canPlayerVrom() && store.context.eligibleJunctionsToVromPitts.includes(junction) && controller.canReachBuildingFromJunction(junction, controller.currentPlayerObj(), store, designerIdx)
+	if (personal.selectedBoard !== rf.BOARD_PITTS) return controller.canPlayerVrom() && controller.currentPlayerObj().playerJunctions.includes(junction)
+	return controller.canPlayerVrom() && store.context.eligibleJunctionsToVromPitts.includes(junction) && controller.canReachBuildingFromJunction(junction, controller.currentPlayerObj(), store, designerIdx)
 }
 
 function mouseOverPaxNumber(e, junction, entering) {
-	if (!model.canPlayerVrom()) return
+	if (!controller.canPlayerVrom()) return
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
 		if (!paxSelectableForVrom(junction)) return
 	} else {
@@ -350,7 +367,7 @@ function getBuildingRadius() {
 	<template v-if="personal.canPlay() && (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS)">
 		<template v-for="(line, index) in model.getEmptyBuildingSpots()" v-bind:key="index">
 			<div
-				class="buildingSpotDiv"
+				class="buildingSpotDiv" role="button" tabindex="0" :aria-label="$t('actionArea.choose')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 				v-for="(building, index) in line[1]"
 				v-bind:key="index"
 				:style="{
@@ -428,7 +445,13 @@ function getBuildingRadius() {
 				}" />
 			<!-- Add the number of pax ADD THE PAX CLICK HERE AS IT COVERS BASICALLY THE WHOLE PAX -->
 			<div
+				:key="junction[rf.paxIdx]"
 				class="paxJuncNum"
+				role="button"
+				tabindex="0"
+				:aria-label="$t('actionArea.choose')"
+				@keydown.enter.prevent="$event.currentTarget.click()"
+				@keydown.space.prevent="$event.currentTarget.click()"
 				:style="{
 					top: (store.refSize * 6) / 400 + 'px',
 					left: (store.refSize * 30) / 400 + 'px',
@@ -453,6 +476,11 @@ function getBuildingRadius() {
 		<img
 			v-if="personal.selectedBoard === rf.BOARD_PITTS && pitts.getDesignerStatusJunction(store.jeroenStatus) === index"
 			class="designerImg"
+			role="button"
+			tabindex="0"
+			:aria-label="$t('actionArea.choose')"
+			@keydown.enter.prevent="$event.currentTarget.click()"
+			@keydown.space.prevent="$event.currentTarget.click()"
 			:id="'designerImg' + String(rf.DESIGNER_JEROEN) + 'x' + String(index)"
 			:src="view.getImage('jeroen')"
 			alt="Jeroen"
@@ -474,6 +502,11 @@ function getBuildingRadius() {
 		<img
 			v-if="personal.selectedBoard === rf.BOARD_PITTS && pitts.getDesignerStatusJunction(store.jorisStatus) === index"
 			class="designerImg"
+			role="button"
+			tabindex="0"
+			:aria-label="$t('actionArea.choose')"
+			@keydown.enter.prevent="$event.currentTarget.click()"
+			@keydown.space.prevent="$event.currentTarget.click()"
 			:id="'designerImg' + String(rf.DESIGNER_JORIS) + 'x' + String(index)"
 			:src="view.getImage('joris')"
 			alt="Joris"
@@ -517,12 +550,17 @@ function getBuildingRadius() {
 			height: (store.refSize * 311) / 1500 + 'px',
 		}" />
 
+	<!-- Dashed route from the selected passenger to the hovered VROM destination -->
+	<svg v-if="vromConnector" class="vromConnector">
+		<line :x1="vromConnector.x1" :y1="vromConnector.y1" :x2="vromConnector.x2" :y2="vromConnector.y2" stroke="#222" :stroke-width="(store.refSize * 3) / 400" stroke-dasharray="8 6" />
+	</svg>
+
 	<!-- Add highlight circles to VROM building spots -->
 	<!-- FOR junction in playersJunctions, if junction includes(reqBld) then add a circle there-->
 	<template v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS">
 		<template v-for="(line, index) in model.getVromBuildings()" v-bind:key="index">
 			<div
-				class="buildingSpotDiv"
+				class="buildingSpotDiv" role="button" tabindex="0" :aria-label="$t('actionArea.choose')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 				v-for="(building, index) in line[1]"
 				v-bind:key="index"
 				:style="{
@@ -532,8 +570,8 @@ function getBuildingRadius() {
 					width: (store.refSize * getBuildingRadius()) / 100 + 'px',
 					height: (store.refSize * getBuildingRadius()) / 100 + 'px',
 				}"
-				@mouseover="mouseOverVromBuilding($event, line[0], true)"
-				@mouseleave="mouseOverVromBuilding($event, line[0], false)"
+				@mouseover="mouseOverVromBuilding($event, line[0], building, true)"
+				@mouseleave="mouseOverVromBuilding($event, line[0], building, false)"
 				@click="clickedVromBldg(line[0], building)"></div>
 		</template>
 	</template>
@@ -551,7 +589,7 @@ function getBuildingRadius() {
 					height: (store.refSize * 32) / 100 + 'px',
 					border: String((store.refSize * 5) / 100) + 'px solid yellow',
 				}"
-				class="paxJuncOption"
+				class="paxJuncOption" role="button" tabindex="0" :aria-label="$t('actionArea.choose')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 				@mouseover="highlight($event, true)"
 				@mouseleave="highlight($event, false)"
 				@click="addPassengerToJunction(10)"></div>
@@ -564,7 +602,7 @@ function getBuildingRadius() {
 					height: (store.refSize * 32) / 100 + 'px',
 					border: String((store.refSize * 5) / 100) + 'px solid yellow',
 				}"
-				class="paxJuncOption"
+				class="paxJuncOption" role="button" tabindex="0" :aria-label="$t('actionArea.choose')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 				@mouseover="highlight($event, true)"
 				@mouseleave="highlight($event, false)"
 				@click="addPassengerToJunction(25)"></div>
@@ -580,7 +618,7 @@ function getBuildingRadius() {
 					height: (store.refSize * 32) / 100 + 'px',
 					border: String((store.refSize * 5) / 100) + 'px solid yellow',
 				}"
-				class="paxJuncOption"
+				class="paxJuncOption" role="button" tabindex="0" :aria-label="$t('actionArea.choose')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 				@mouseover="highlight($event, true)"
 				@mouseleave="highlight($event, false)"
 				@click="addPassengerToJunction(5)"></div>
@@ -593,7 +631,7 @@ function getBuildingRadius() {
 					height: (store.refSize * 32) / 100 + 'px',
 					border: String((store.refSize * 5) / 100) + 'px solid yellow',
 				}"
-				class="paxJuncOption"
+				class="paxJuncOption" role="button" tabindex="0" :aria-label="$t('actionArea.choose')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 				@mouseover="highlight($event, true)"
 				@mouseleave="highlight($event, false)"
 				@click="addPassengerToJunction(30)"></div>
@@ -605,12 +643,12 @@ function getBuildingRadius() {
 	<template v-if="personal.selectedBoard === rf.BOARD_PITTS && personal.canPlay() && store.context.passengersLeftToPlace >= 2 && !pitts.designerArrivedThisRound()">
 		<div
 			v-if="store.jeroenStatus === rf.DESIGNER_NOT_ARRIVED"
-			class="designerArrivalOption"
+			class="designerArrivalOption" role="button" tabindex="0" :aria-label="$t('actionArea.choose')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 			:style="{
 				top: view.getBuildingPos(30, -1, true)[0] + (store.refSize * 272) / 400 + 'px',
 				left: view.getBuildingPos(30, -1, true)[1] - (store.refSize * 63) / 400 + 'px',
 			}"
-			title="Bring Jeroen into play at the Airport (uses two of your passenger placements)"
+			:title="$t('actionArea.bringJeroen')"
 			@mouseover="highlight($event, true)"
 			@mouseleave="highlight($event, false)"
 			@click="addDesignerToJunction(rf.DESIGNER_JEROEN)">
@@ -627,12 +665,12 @@ function getBuildingRadius() {
 		</div>
 		<div
 			v-if="store.jorisStatus === rf.DESIGNER_NOT_ARRIVED"
-			class="designerArrivalOption"
+			class="designerArrivalOption" role="button" tabindex="0" :aria-label="$t('actionArea.choose')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 			:style="{
 				top: view.getBuildingPos(30, -1, true)[0] + (store.refSize * 272) / 400 + 'px',
 				left: view.getBuildingPos(30, -1, true)[1] + (store.refSize * 127) / 400 + 'px',
 			}"
-			title="Bring Joris into play at the Airport (takes two of your passenger placements)"
+			:title="$t('actionArea.bringJoris')"
 			@mouseover="highlight($event, true)"
 			@mouseleave="highlight($event, false)"
 			@click="addDesignerToJunction(rf.DESIGNER_JORIS)">
@@ -691,7 +729,7 @@ function getBuildingRadius() {
 	<template v-if="personal.canPlay() && personal.selectedBoard === rf.BOARD_OG">
 		<template v-for="(line, index) in model.getEmptyBuildingSpots()" v-bind:key="index">
 			<div
-				class="buildingSpotDiv_orig"
+				class="buildingSpotDiv_orig" role="button" tabindex="0" :aria-label="$t('actionArea.choose')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 				v-for="(building, index) in line[1]"
 				v-bind:key="index"
 				:style="{
@@ -713,7 +751,7 @@ function getBuildingRadius() {
 	<template v-if="personal.selectedBoard === rf.BOARD_OG">
 		<template v-for="(line, index) in model.getVromBuildings()" v-bind:key="index">
 			<div
-				class="buildingSpotDiv_orig"
+				class="buildingSpotDiv_orig" role="button" tabindex="0" :aria-label="$t('actionArea.choose')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 				v-for="(building, index) in line[1]"
 				v-bind:key="index"
 				:style="{
@@ -724,8 +762,8 @@ function getBuildingRadius() {
 					height: (store.refSize * 30) / 100 + 'px',
 					transform: 'rotate(' + view.getVromDestinationPos(line[0], building, true)[2] + 'deg)',
 				}"
-				@mouseover="mouseOverVromBuilding($event, line[0], true)"
-				@mouseleave="mouseOverVromBuilding($event, line[0], false)"
+				@mouseover="mouseOverVromBuilding($event, line[0], building, true)"
+				@mouseleave="mouseOverVromBuilding($event, line[0], building, false)"
 				@click="clickedVromBldg(line[0], building)"></div>
 		</template>
 	</template>
@@ -839,6 +877,16 @@ function getBuildingRadius() {
 	z-index: 12;
 	filter: drop-shadow(1px 0 0 black) drop-shadow(0 1px 0 black) drop-shadow(-1px 0 0 black) drop-shadow(0 -1px 0 black);
 	cursor: default;
+	animation: paxPop 0.15s ease-out;
+}
+
+@keyframes paxPop {
+	from {
+		transform: scale(1.35);
+	}
+	to {
+		transform: scale(1);
+	}
 }
 
 .buildingDiv {
@@ -954,6 +1002,16 @@ function getBuildingRadius() {
 
 .buildingSpotDiv:hover {
 	cursor: pointer;
+}
+
+.vromConnector {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	z-index: 6;
 }
 
 .plop-animation {

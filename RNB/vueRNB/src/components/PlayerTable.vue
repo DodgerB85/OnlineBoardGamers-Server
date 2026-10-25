@@ -110,17 +110,17 @@ const getFullTurnOrderArray = computed(() => {
 				<table id="playerTable">
 					<thead>
 						<tr>
-							<th rowspan="2"><b>Player</b></th>
-							<th :colspan="store.gameOptions.useArt ? 4 : 3"><b>Wealth Points</b></th>
+							<th rowspan="2"><b>{{ $t("playerTable.player") }}</b></th>
+							<th :colspan="store.gameOptions.useArt ? 4 : 3"><b>{{ $t("playerTable.wealthPoints") }}</b></th>
 							<th v-if="!props.minimiseInfoForMainScreen" colspan="3" style="text-align: center">
-								<b>Transports</b>
+								<b>{{ $t("playerTable.transports") }}</b>
 							</th>
 							<th rowspan="2" v-for="idx in util.indexArray(store.gameOptions.useFundamentalResearch ? 8 : 7)" :key="idx">
 								<div class="researchOptionDivHeader">
 									<img
 										:src="view.getImage(`research_${idx}`)"
 										class="researchOptionImg"
-										:title="rf.RND_STRINGS[idx]"
+										:title="view.rndName(idx)"
 										@mouseenter="onResearchMouseEnter(idx)"
 										@mouseleave="onResearchMouseLeave"
 										@touchstart="onResearchTouchStart(idx)"
@@ -129,22 +129,22 @@ const getFullTurnOrderArray = computed(() => {
 										@contextmenu.prevent
 									/>
 									<div v-if="hoveredResearch === idx || longPressedResearch === idx" class="researchTooltip">
-										{{ rf.RND_STRINGS[idx] }}
+										{{ view.rndName(idx) }}
 									</div>
 								</div>
 							</th>
-							<th v-if="!props.minimiseInfoForMainScreen" rowspan="2"><b>Held Goods</b></th>
+							<th v-if="!props.minimiseInfoForMainScreen" rowspan="2"><b>{{ $t("playerTable.heldGoods") }}</b></th>
 						</tr>
 						<tr>
-							<th style="text-align: center">Goods</th>
-							<th style="text-align: center">Wonder</th>
-							<th v-if="store.gameOptions.useArt" style="text-align: center">Art</th>
-							<th style="text-align: center">Total</th>
+							<th style="text-align: center">{{ $t("playerTable.goods") }}</th>
+							<th style="text-align: center">{{ $t("playerTable.wonder") }}</th>
+							<th v-if="store.gameOptions.useArt" style="text-align: center">{{ $t("playerTable.art") }}</th>
+							<th style="text-align: center">{{ $t("playerTable.total") }}</th>
 							<template v-if="!props.minimiseInfoForMainScreen">
 								<!-- These are the sub-headers for Transports -->
-								<th style="text-align: center">Land</th>
-								<th style="text-align: center">Sea</th>
-								<th style="text-align: center">Total</th>
+								<th style="text-align: center">{{ $t("playerTable.land") }}</th>
+								<th style="text-align: center">{{ $t("playerTable.sea") }}</th>
+								<th style="text-align: center">{{ $t("playerTable.total") }}</th>
 							</template>
 						</tr>
 					</thead>
@@ -177,7 +177,7 @@ const getFullTurnOrderArray = computed(() => {
 							<!-- Held Goods -->
 							<td v-if="!props.minimiseInfoForMainScreen">
 								<img v-for="(img, idx) in playerResources[playerIndex] ?? []" :key="idx" class="heldResImg" :src="view.getImage(img)" />
-								<span v-if="!playerResources[playerIndex] || playerResources[playerIndex].length === 0">None</span>
+								<span v-if="!playerResources[playerIndex] || playerResources[playerIndex].length === 0">{{ $t("playerTable.none") }}</span>
 							</td>
 						</tr>
 					</template>
@@ -191,40 +191,40 @@ const getFullTurnOrderArray = computed(() => {
 	<p v-if="minimiseInfoForMainScreen">
 		<b>
 			<template v-if="store.gameflow.phase === rf.PHASE_CHOOSE_HOME_TILE">
-				<span class="currentPhaseGlow">0) Setup</span>
+				<span class="currentPhaseGlow">{{ $t("playerTable.setup") }}</span>
 				►
 			</template>
 			<span :class="{ currentPhaseGlow: rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase) || rf.PHASE_CONFLICT_PRODUCTIONS.includes(store.gameflow.phase) }">
-				1) Production
-				<span v-if="store.gameflow.phase === rf.PHASE_CONFLICT_PRODUCTION_DECISION">(Conflict Decision)</span>
-				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_PRODUCTION_PRAYING">(Conflict Praying)</span>
-				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_PRODUCTION_TURN_ORDER">(Conflict Turn Order)</span>
+				{{ $t("playerTable.production") }}
+				<span v-if="store.gameflow.phase === rf.PHASE_CONFLICT_PRODUCTION_DECISION">{{ $t("playerTable.conflictDecision") }}</span>
+				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_PRODUCTION_PRAYING">{{ $t("playerTable.conflictPraying") }}</span>
+				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_PRODUCTION_TURN_ORDER">{{ $t("playerTable.conflictTurnOrder") }}</span>
 			</span>
 			►
 			<span :class="{ currentPhaseGlow: rf.PHASE_MOVEMENTS.includes(store.gameflow.phase) || rf.PHASE_CONFLICT_MOVEMENTS.includes(store.gameflow.phase) }">
-				2) Movement
-				<span v-if="store.gameflow.phase === rf.PHASE_CONFLICT_MOVEMENT_DECISION">(Conflict Decision)</span>
-				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_MOVEMENT_PRAYING">(Conflict Praying)</span>
-				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_MOVEMENT_TURN_ORDER">(Conflict Turn Order)</span>
+				{{ $t("playerTable.movement") }}
+				<span v-if="store.gameflow.phase === rf.PHASE_CONFLICT_MOVEMENT_DECISION">{{ $t("playerTable.conflictDecision") }}</span>
+				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_MOVEMENT_PRAYING">{{ $t("playerTable.conflictPraying") }}</span>
+				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_MOVEMENT_TURN_ORDER">{{ $t("playerTable.conflictTurnOrder") }}</span>
 			</span>
 			►
 			<span :class="{ currentPhaseGlow: rf.PHASE_BUILDINGS.includes(store.gameflow.phase) || rf.PHASE_CONFLICT_BUILDINGS.includes(store.gameflow.phase) }">
-				3) Building
-				<span v-if="store.gameflow.phase === rf.PHASE_CONFLICT_BUILDING_DECISION">(Conflict Decision)</span>
-				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_BUILDING_PRAYING">(Conflict Praying)</span>
-				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_BUILDING_TURN_ORDER">(Conflict Turn Order)</span>
+				{{ $t("playerTable.building") }}
+				<span v-if="store.gameflow.phase === rf.PHASE_CONFLICT_BUILDING_DECISION">{{ $t("playerTable.conflictDecision") }}</span>
+				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_BUILDING_PRAYING">{{ $t("playerTable.conflictPraying") }}</span>
+				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_BUILDING_TURN_ORDER">{{ $t("playerTable.conflictTurnOrder") }}</span>
 			</span>
 			►
 			<span :class="{ currentPhaseGlow: rf.PHASE_WONDERS.includes(store.gameflow.phase) || rf.PHASE_CONFLICT_WONDERS.includes(store.gameflow.phase) }">
-				4) Wonder
-				<span v-if="store.gameflow.phase === rf.PHASE_CONFLICT_WONDER_DECISION">(Conflict Decision)</span>
-				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_WONDER_PRAYING">(Conflict Praying)</span>
-				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_WONDER_TURN_ORDER">(Conflict Turn Order)</span>
+				{{ $t("playerTable.wonderPhase") }}
+				<span v-if="store.gameflow.phase === rf.PHASE_CONFLICT_WONDER_DECISION">{{ $t("playerTable.conflictDecision") }}</span>
+				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_WONDER_PRAYING">{{ $t("playerTable.conflictPraying") }}</span>
+				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_WONDER_TURN_ORDER">{{ $t("playerTable.conflictTurnOrder") }}</span>
 			</span>
 		</b>
 		<label v-if="personal.pov >= 0 && personal.trainingGame && !personal.soloGame" class="skipPhaseLabel">
 			<input type="checkbox" v-model="store.trainingGameSkipConflictPhase" class="skipPhaseCheckbox" />
-			Skip Conflict Phase
+			{{ $t("playerTable.skipConflictPhase") }}
 		</label>
 	</p>
 </template>

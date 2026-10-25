@@ -451,14 +451,18 @@ export function getRemainingRecruitPointsAvailableForDiscount() {
 export function giveSmallSquaresOutsideBoard() {
 	const store = useModelStore()
 	let ssWidth = store.mapData.dimensions[0] * 5
+	let last = store.mapData.coords.length - 1
 	let edgeSquares = []
 	for (let i = 0; i < store.mapData.coords.length; i++) {
 		// check if an empty SS is next to a non-empty SS
+		// Every neighbour must stay inside the grid: out-of-range lookups read
+		// undefined, which is != OFF_BOARD, so the grid's outer rows would all
+		// count as board edges and produce hotspots far off the map.
 		if (store.mapData.coords[i] === rf.OFF_BOARD) {
-			if (store.mapData.coords[i - 1] !== rf.OFF_BOARD) edgeSquares.push(i)
-			if (store.mapData.coords[i + 1] !== rf.OFF_BOARD) edgeSquares.push(i)
-			if (store.mapData.coords[i - ssWidth] !== rf.OFF_BOARD) edgeSquares.push(i)
-			if (store.mapData.coords[i + ssWidth] !== rf.OFF_BOARD) edgeSquares.push(i)
+			if (i % ssWidth !== 0 && store.mapData.coords[i - 1] !== rf.OFF_BOARD) edgeSquares.push(i)
+			if (i % ssWidth !== ssWidth - 1 && i < last && store.mapData.coords[i + 1] !== rf.OFF_BOARD) edgeSquares.push(i)
+			if (i >= ssWidth && store.mapData.coords[i - ssWidth] !== rf.OFF_BOARD) edgeSquares.push(i)
+			if (i + ssWidth <= last && store.mapData.coords[i + ssWidth] !== rf.OFF_BOARD) edgeSquares.push(i)
 		}
 	}
 	return edgeSquares
@@ -935,12 +939,11 @@ export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, 
 			})
 	}
 
-	// --- CASE A2: PHONE TOKENS (Media Line mod) - 2x1 with its anchor square on
-	// empty ground in the cross of 5 map tiles (the restaurant's tile plus the 4
-	// orthogonal neighbours). Like any other token the card may straddle the
-	// edge of the zone into the next tile (one cell each side); roads are
-	// irrelevant (radio waves), so this bypasses the road-adjacency machinery
-	// of CASE B ---
+	// --- CASE A2: PHONE TOKENS (Media Line mod) - 2x1 attached to a building in
+	// the cross of 5 map tiles (the restaurant's tile plus the 4 orthogonal
+	// neighbours). Like any other token the card may straddle the edge of the
+	// zone into the next tile (one cell each side); roads are irrelevant (radio
+	// waves), so this bypasses the road-adjacency machinery of CASE B ---
 	if (campaignData.type === rf.PHONE) {
 		// Measured from the restaurant doors (all four corners with a
 		// Local/Regional Manager), like every other restaurant-distance rule
@@ -952,7 +955,12 @@ export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, 
 			if (ax + w > rf.ssW || ay + h > rf.ssH) continue // never wrap off the board edge
 			const cells = map.giveAllSpaceForAToken(anchor, w, h)
 			const fits = cells.every((c) => store.mapData.coords[c] === rf.EMPTY_SPACE)
-			if (fits) possibilities.push(anchor)
+			// A phone token must touch at least one house/apartment building.
+			const touchesBuilding = map.neighbours(cells).some((c) => {
+				const v = store.mapData.coords[c]
+				return v > rf.HOUSE && v < rf.HOUSE + 29
+			})
+			if (fits && touchesBuilding) possibilities.push(anchor)
 		}
 		return possibilities
 	}
@@ -1077,8 +1085,7 @@ export function givePossibleStartsFromRestaurants(anyIndex) {
 	const playerObj = controller.currentPlayerObj()
 	const resultSet = new Set()
 
-	// openOnly: false — rules historically ignore resto.open (unlike model entrances)
-	for (const idx of model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: false })) {
+	for (const idx of model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: true })) {
 		const neighbors = anyIndex ? map.neighbours(idx) : map.nextRoadNeighbours(idx, -1, false, true)
 		for (const n of neighbors) {
 			resultSet.add(n)
@@ -1103,8 +1110,7 @@ export function firstStartIsFromTheSameTile(index) {
 
 	const vicinity = new Set(map.neighbours(index))
 
-	// openOnly: false — matches givePossibleStartsFromRestaurants
-	for (const doorIdx of model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: false })) {
+	for (const doorIdx of model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: true })) {
 		if (vicinity.has(doorIdx) && map.onTheSameTile(index, doorIdx)) {
 			return true
 		}
@@ -1122,6 +1128,14 @@ export function firstStartIsFromTheSameTile(index) {
 }
 
 export function nextRoadPossibilities(index, comingFrom, range) {
+	// Entering this square costs a tile crossing (if any); moving within a tile is free.
+	// Kept here so the hover preview and the committed move count range the same way.
+	if (comingFrom === -1) {
+		if (!firstStartIsFromTheSameTile(index)) range--
+	} else if (!map.onTheSameTile(index, comingFrom)) {
+		range--
+	}
+
 	// 1. Get the road segment until a junction or choice point is reached
 	let possibilities = map.traceRoadUntilChoice(index, comingFrom, range)
 
@@ -1248,8 +1262,7 @@ export function givePossibleStartsFromRestaurantsForZeppelin() {
 	const playerObj = controller.currentPlayerObj()
 	const uniqueTiles = new Set()
 
-	// openOnly: false — matches the other rules-side entrance walks
-	for (const doorIndex of model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: false })) {
+	for (const doorIndex of model.giveRestaurantDoorIndices(controller.currentPlayerIndex(), { openOnly: true })) {
 		uniqueTiles.add(map.giveTileNumber(doorIndex))
 	}
 
@@ -1787,6 +1800,45 @@ function settleMediaLineGroups(sold, replayOnly) {
 	return bonuses
 }
 
+// Route UI: a repeated square only offers a stop bubble when the route cannot
+// usefully continue (no range, or every remaining exit stays on this tile).
+// Only repeats on the current tile count: looping around an earlier tile does
+// not trap the route, and driving within a tile is free until a square repeats.
+export function shouldStopRepeatRoute(path, targets, range) {
+	if (path.length < 2) return false
+	const last = path[path.length - 1]
+	const currentTilePath = path.filter((step) => map.onTheSameTile(step, last))
+	if (new Set(currentTilePath).size === currentTilePath.length) return false
+	if (range <= 0) return true
+	return targets.length > 0 && targets.every((target) => map.onTheSameTile(target, last))
+}
+
+// Lexicographic tie-breakers: price+distance, best Movie Star, fewest Jazz
+// Musicians only when neither side has a Movie Star, most waitresses, turn order.
+export function compareDinnerCompetitors(a, b) {
+	const priceDistance = a.price + a.distance - (b.price + b.distance)
+	if (priceDistance !== 0) return priceDistance
+
+	const starRank = (emp) => {
+		if (emp.includes(rf.B_MOVIE_STAR)) return 3
+		if (emp.includes(rf.C_MOVIE_STAR)) return 2
+		if (emp.includes(rf.D_MOVIE_STAR)) return 1
+		return 0
+	}
+	const starA = starRank(a.emp)
+	const starB = starRank(b.emp)
+	if (starA !== starB) return starB - starA
+
+	if (starA === 0) {
+		const jazz = a.musicians - b.musicians
+		if (jazz !== 0) return jazz
+	}
+
+	const waitresses = b.waitress - a.waitress
+	if (waitresses !== 0) return waitresses
+	return a.order - b.order
+}
+
 export function doDinnerTime(replayOnly) {
 	const store = useModelStore()
 
@@ -1876,18 +1928,7 @@ export function doDinnerTime(replayOnly) {
 		}
 
 		if (winningCompetitors.length > 0) {
-			// Sort by ranking (lowest wins)
-			winningCompetitors.sort((a, b) => {
-				const getRank = (item) => {
-					let r = (item.price + item.distance) * 10000
-					if (item.emp.includes(rf.B_MOVIE_STAR)) r -= 5000
-					else if (item.emp.includes(rf.C_MOVIE_STAR)) r -= 4000
-					else if (item.emp.includes(rf.D_MOVIE_STAR)) r -= 3000
-					r += item.musicians * 450 - item.waitress * 10 + item.order
-					return r
-				}
-				return getRank(a) - getRank(b)
-			})
+			winningCompetitors.sort(compareDinnerCompetitors)
 
 			const winner = winningCompetitors[0]
 			const winnerColour = store.players[winner.playerIndex].colour
@@ -2089,9 +2130,9 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 		}
 		if (p.money >= 100) {
 			if (!replayOnly) plyr.awardMilestone(playerIndex, rf.FIRST_100_DOL)
-			if (p.employees.includes(rf.CFO) && plyr.hasMilestone(playerIndex, rf.FIRST_100_DOL)) {
-				plyr.fireEmployee(playerIndex, rf.CFO)
-				store.availableEmployees[rf.CFO]++
+			// The CFO must be fired wherever it is: structure or beach.
+			if (plyr.hasEmployee(playerIndex, rf.CFO) && plyr.hasMilestone(playerIndex, rf.FIRST_100_DOL)) {
+				if (plyr.fireEmployee(playerIndex, rf.CFO)) store.availableEmployees[rf.CFO]++
 			}
 		}
 		if (!replayOnly) {
@@ -2128,16 +2169,20 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 	}
 }
 
+// Keep only as many [marker, house, playerIndex] groups as there are radio
+// campaigns left. Always drop the LAST group, never an offset inside the queue.
+export function trimPizzaBombQueue(firstPizzas, numRadios) {
+	while (firstPizzas.length >= 3 && firstPizzas.length / 3 > numRadios) {
+		firstPizzas.splice(firstPizzas.length - 3, 3)
+	}
+	return firstPizzas
+}
+
 function finalizeMilestones(firstPizzas, possiblePizzaBomb) {
 	const store = useModelStore()
 	if (possiblePizzaBomb && firstPizzas.length > 0) {
-		let numPizzaBomb = firstPizzas.length / 3
 		const numRadios = store.availableMarketingCampaigns.filter((c) => rf.MARKETING_CAMPAIGNS[c].type === rf.RADIO).length
-
-		while (numPizzaBomb > numRadios) {
-			firstPizzas.splice(firstPizzas.length - 4, 3)
-			numPizzaBomb = firstPizzas.length / 3
-		}
+		trimPizzaBombQueue(firstPizzas, numRadios)
 
 		if (firstPizzas.length >= 3) {
 			// firstPizzas entries are already playerIndex ([1, house, playerIndex, ...])
@@ -2237,8 +2282,10 @@ export function basePrice() {
 			}
 		}
 
-		// Find the highest count
+		// Find the highest count. No usable cards (all timed out/missing):
+		// keep the normal $10 base price.
 		const maxCount = Math.max(...reserveCounts)
+		if (maxCount === 0) return price
 
 		// Logic check:
 		// 1. If Card 3 (index 2) is the most frequent, price is 20
@@ -2338,7 +2385,7 @@ export function baseSalary(playerIndex, applyFirstTrainDiscount = true) {
 	let recruitsUsed = 999
 	for (let i = store.history.length - 1; i >= 0; i--) {
 		if (store.history[i][0] === rf.HIST_HIRE && store.history[i][1] === playerIndex) {
-			recruitsUsed = store.history[i][3].length
+			recruitsUsed = store.history[i][3].length + (store.history[i][4] || 0)
 			break
 		}
 	}
@@ -2460,41 +2507,42 @@ export function paySalaries(foodPayements) {
 
 		// Add in case of skip payday
 		if (plyr.hasEmployee(i, rf.CFO) && plyr.hasMilestone(i, rf.FIRST_100_DOL)) {
-			plyr.fireEmployee(i, rf.CFO)
-			store.availableEmployees[rf.CFO]++
+			if (plyr.fireEmployee(i, rf.CFO)) store.availableEmployees[rf.CFO]++
 		}
 
 		const normalDue = baseSalary(i)
 		const switchDue = headhuntSalaryDue(i)
-		let due = normalDue + switchDue
-		let preMoney = player.money
-
-		if (due >= 20) {
-			plyr.awardMilestone(i, rf.FIRST_20_SALARIES)
-		}
-
+		let foodValue = 0
 		if (plyr.hasMilestone(i, rf.FIRST_BEER_SOLD) && foodPayement.length > 0) {
-			let unitarySalary = plyr.unitarySalary(i)
-			const normalAfterFood = Math.max(normalDue - unitarySalary * foodPayement.length, 0)
-			due = normalAfterFood + switchDue
+			foodValue = Math.min(normalDue, plyr.unitarySalary(i) * foodPayement.length)
 		}
+		const cashDue = Math.max(normalDue - foodValue, 0) + switchDue
 
-		if (due > player.money && plyr.hasMilestone(i, rf.FIRST_TRAINER_USED)) {
-			store.bank += player.money
+		let cashPaid = 0
+		if (cashDue > player.money && plyr.hasMilestone(i, rf.FIRST_TRAINER_USED)) {
+			cashPaid = Math.max(0, player.money)
+			store.bank += cashPaid
 			player.money = 0
 			if (plyr.hasMilestone(i, rf.FIRST_BEER_SOLD) && player.resources.length > 0) {
-				histo.push([due, player.resources.length])
+				histo.push([cashDue, player.resources.length])
 				player.resources = []
-			} else histo.push([due])
+			} else histo.push([cashDue])
 		} else {
-			player.money -= due
-			store.bank += due
+			cashPaid = Math.max(0, cashDue)
+			player.money -= cashDue
+			store.bank += cashDue
 
 			if (foodPayement && foodPayement.length > 0) {
-				histo.push([due, foodPayement.length])
+				histo.push([cashDue, foodPayement.length])
 			} else {
-				histo.push([due])
+				histo.push([cashDue])
 			}
+		}
+
+		// The milestone requires salaries to have actually been paid, not just
+		// owed. First Trainer Used can reduce the cash actually handed over.
+		if (cashPaid + foodValue >= 20) {
+			plyr.awardMilestone(i, rf.FIRST_20_SALARIES)
 		}
 		clearHeadhuntSalaries(i)
 	}
@@ -2857,9 +2905,9 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 				good2 = campaign.good
 			}
 
-			// Media Line mod: milestone 2 (First TV Announcer Used) - the holder's
+			// Media Line mod: milestone 2 (First TV Announcer Used) - each holder's
 			// first TV campaign pushes 2 identical cards per house per night
-			if (campaign.number === store.mediaLine.doubleCampaign) {
+			if (store.mediaLine.doubleCampaigns.includes(campaign.number)) {
 				good2 = campaign.good
 			}
 
@@ -2917,6 +2965,13 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 				model.addNeedToHouse(good1, houseId, playerIndex)
 				const reward = rewardMarketingOnHouse(playerIndex, houseId)
 				if (reward > 0) earnedByPlayers.push([houseId, reward, playerIndex])
+				if (store.startingOptions.dumplings) {
+					// The giant billboard markets twice, so it also adds two dumplings.
+					model.addNeedToHouse(rf.DUMPLING, houseId, playerIndex)
+					model.addNeedToHouse(rf.DUMPLING, houseId, playerIndex)
+					const dumplingReward = rewardMarketingOnHouse(playerIndex, houseId)
+					if (dumplingReward > 0) earnedByPlayers.push([houseId, dumplingReward, playerIndex])
+				}
 				h1[1].push(houseId)
 			}
 
@@ -2931,9 +2986,10 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 					for (let i = 0; i < store.players.length; i++) {
 						plyr.recallMarketeer(i, campaign.number)
 					}
-					// Media Line mod: the doubled campaign is gone - free the slot
-					// (the one-shot latch stays, doubling never repeats)
-					if (store.mediaLine.doubleCampaign === campaign.number) store.mediaLine.doubleCampaign = -1
+					// Media Line mod: the doubled campaign is gone - free its slot
+					// (the per-player one-shot latch stays, doubling never repeats)
+					const doubleIndex = store.mediaLine.doubleCampaigns.indexOf(campaign.number)
+					if (doubleIndex > -1) store.mediaLine.doubleCampaigns.splice(doubleIndex, 1)
 				} else if (campaign.duration < 9) {
 					campaign.duration--
 				}
@@ -3007,8 +3063,13 @@ export function handleBankBreak(replayOnly) {
 			reserve[card - 1]++
 		})
 
-		const maxVal = Math.max(...reserve)
-		store.ceoLevel = reserve.lastIndexOf(maxVal) + 2
+		if (chosenCards.length === 0) {
+			// No usable cards (all timed out/missing): keep the normal 3 slots.
+			store.ceoLevel = 3
+		} else {
+			const maxVal = Math.max(...reserve)
+			store.ceoLevel = reserve.lastIndexOf(maxVal) + 2
+		}
 
 		if (store.startingOptions.reservePrice) {
 			total = 200 * chosenCards.length

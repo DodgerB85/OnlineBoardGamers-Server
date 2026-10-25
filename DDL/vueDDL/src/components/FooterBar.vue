@@ -5,10 +5,10 @@
 	<div id="footer">
 		<div class="content">
 			<p>
-				Duck Dealer is a board game by Jeroen Doumen and Joris Wiersinga, published by
+				{{ $t("footer.credit") }}
 				<a target="_blank" href="https://www.splottershop.com/">Splotter Spellen</a>.
 			</p>
-			<p>Permissions provided. Menu icons from <a href="http://game-icons.net">game-icons.net</a></p>
+			<p>{{ $t("footer.permissions") }} <a href="http://game-icons.net">game-icons.net</a></p>
 		</div>
 	</div>
 </template>

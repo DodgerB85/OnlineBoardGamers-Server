@@ -13,6 +13,8 @@ import * as stack from "../../js/RNBstack"
 import * as wonder from "../../js/RNBwonder"
 import * as electricity from "../../js/RNBelectricity"
 import * as atelier from "../../js/RNBatelier"
+import * as train from "../../js/RNBtrain"
+import i18n from "../../i18n"
 
 import { useModelStore } from "../../stores/RNBstore.js"
 import { usePersonalStore } from "../../stores/RNBpersonal"
@@ -39,6 +41,7 @@ export function resetReplayStop() {
 
 export function performStep(amount) {
 	const store = useModelStore()
+	const personal = usePersonalStore()
 	const maxIdx = store.replayData.length - 1
 	// Exit if we are already at the end - mainly hotkey check
 	//if (amount > 0 && store.replayStep.computedHistoryIndex === store.computedHistory.length - 1 && (store.replayStep.subStep === -1 || store.replayStep.subStep === store.replayStep.maxStep)) return
@@ -71,6 +74,20 @@ export function performStep(amount) {
 	// Bounds checking
 	if (store.replayStep.index < 0) store.replayStep.index = 0
 	if (store.replayStep.index > maxIdx) store.replayStep.index = maxIdx
+
+	// Performing back to my last: land on the final replay entry of my previous history entry
+	if (amount === -999) {
+		const currentHistIdx = store.replayData[store.replayStep.index].computedHistoryIndex
+		let idx = store.replayStep.index - 1
+		while (idx > 0) {
+			const prevHistIdx = store.replayData[idx].computedHistoryIndex
+			if (prevHistIdx < currentHistIdx && store.computedHistory[prevHistIdx][1] === personal.pov) {
+				store.replayStep.index = idx
+				break
+			}
+			idx--
+		}
+	}
 
 	//funcs.importModel(store.replayData[store.replayStep], false, false)
 	//funcs.simpleImportWholeRNBmodel(store.replayData[store.replayStep], true)
@@ -141,6 +158,8 @@ async function resetDataForReplay() {
 	}
 
 	let mapData = funcs.exportMapOnly()
+	// Static map tracks are not history actions, so carry them across the rebuild
+	const trainTracks = map.compressTrainTracksForMap()
 
 	// First, remove all items from the map
 	store.ALL_TRANSPORTERS.splice(0)
@@ -162,6 +181,7 @@ async function resetDataForReplay() {
 	store.mapData.hexData.splice(0)
 
 	funcs.importMapOnly(mapData, true)
+	map.applyTrainTracksFromMap(trainTracks)
 
 	// Reset gameflow
 	store.gameflow.turn = 1
@@ -254,6 +274,7 @@ export const HIST_CONFLICT_TURN_ORDER = 6
 
 				if (stackAction[0] === rf.STACK_STRICT_PICKUP_RES) replayStackPickupRes(stackAction)
 				else if (stackAction[0] === rf.STACK_MOVE_LAND) replayStackMoveLand(stackAction, store.computedHistory[i][1])
+				else if (stackAction[0] === rf.STACK_TAKE_TRAIN) replayStackTakeTrain(stackAction)
 				else if (stackAction[0] === rf.STACK_MOVE_WATER) replayStackMoveWater(stackAction, store.computedHistory[i][1])
 				else if (stackAction[0] === rf.STACK_DROP_RES_FOLLOWING) replayStackDropResFollowing(stackAction)
 				else if (stackAction[0] === rf.STACK_STRICT_DROP_RES) replayStackDropRes(stackAction)
@@ -671,6 +692,23 @@ function replayStackMoveLand(stackAction, playerIndex) {
 	}
 }
 
+function replayStackTakeTrain(stackAction) {
+	/*
+		currentStack.push(rf.STACK_TAKE_TRAIN)
+		currentStack.push(stack.getTransIDtoUse(transporterObj))
+		currentStack.push([...compressedFromBucket])
+		currentStack.push([...compressedToBucket])
+		currentStack.push(contents)
+		currentStack.push(fareResID)
+		currentStack.push([numGeeseFollowing, 1])
+	*/
+	const movingTransporterID = stackAction[1]
+	const toLocationBucket = stack.decompressLocation(stackAction[3])
+	const fareRes = model.getResByID(stackAction[5])
+	// shortcut: no pathfind needed - the whole network is reachable in one ride
+	train.performTrainRide_core(movingTransporterID, toLocationBucket, fareRes)
+}
+
 function replayStackMoveWater(stackAction, playerIndex) {
 	const movingTransporterID = stackAction[1]
 	//const fromLocation = stackAction[2]
@@ -839,10 +877,8 @@ function replayStackBombBuilding(stackAction) {
 	const transporterID = stackAction[1]
 	const buildingType = stackAction[2]
 	const hexID = stackAction[3]
-	// Remove the carried bomb (legacy fallback for old entries that used a bomb on the tile)
-	const bomb = model.resourcesOnTransport(transporterID).find((r) => r.type === rf.RES_BOMB)
-	if (bomb) bomb.location = loc.setOOBlocation()
-	else model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
+	// Remove an accessible bomb (it may be on the tile or another of the player's transporters)
+	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
 	// Remove only the targeted non-strengthened building
 	const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
 	let targetBldg = undefined
@@ -1017,7 +1053,7 @@ function replayDropAllGeese(playerIndex) {
 		if (loc.isSeaVertexLocation(followedTransporterLocation) && !map.hasOilRigOnHexID(followedTransporterHexID)) {
 			let clientX = event ? event.clientX : window.innerWidth / 2
 			let clientY = event ? event.clientY : window.innerHeight / 2
-			let htmlMessage = "Geese cannot end<br/>turn at sea<br/>following transporter"
+			let htmlMessage = i18n.global.t("action.geeseCannotEndAtSea")
 			model.showPopup("error", clientX, clientY, htmlMessage)
 			store.context.errorUnableToDropGeeseAtSea = true
 			rf.doAdminAlrt("Dropping geese on sea during replay")

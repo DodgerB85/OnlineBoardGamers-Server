@@ -91,6 +91,7 @@ export function resetContext() {
 	store.context.from = -1
 	store.context.range = 0
 	store.context.path.splice(0)
+	store.context.routeTargets.splice(0)
 	store.context.collectionNumber = 0
 	store.context.indexes.splice(0)
 	store.context.edges.splice(0)

@@ -271,15 +271,13 @@ describe("Media Line B2 phone token placement", () => {
 		return store
 	}
 
-	it("allows any empty 2x1 pair anchored inside the cross of 5 tiles", () => {
-		phoneBoard(false)
+	it("allows empty 2x1 pairs attached to a building inside the cross", () => {
+		phoneBoard(true)
 		const positions = rules.givePossiblePositionsForMarketingCampaign(rf.TELEMARKETER, 30, false)
-		// deep inside the west tile (7,8)
-		expect(positions).toContain(mapMod.giveIndex(37, 41))
+		// touching the house on its west side, inside the cross
+		expect(positions).toContain(mapMod.giveIndex(37, 43))
 		// straddling the boundary between the west and centre tiles
 		expect(positions).toContain(mapMod.giveIndex(39, 43))
-		// anchored on the cross edge - the second cell may sit in the next tile
-		expect(positions).toContain(mapMod.giveIndex(49, 43))
 		// the diagonally adjacent tile (7,7) is not part of the cross
 		expect(positions).not.toContain(mapMod.giveIndex(37, 37))
 		// two tiles west (6,8) is beyond the cross
@@ -288,19 +286,21 @@ describe("Media Line B2 phone token placement", () => {
 		expect(positions).not.toContain(mapMod.giveIndex(40, 40))
 		// an anchor outside the cross does not become valid by reaching in
 		expect(positions).not.toContain(mapMod.giveIndex(50, 43))
+		// empty ground in the cross is not enough without a nearby building
+		expect(positions).not.toContain(mapMod.giveIndex(45, 43))
 	})
 
-	it("rotated tokens run vertically anywhere in the cross", () => {
-		phoneBoard(false)
+	it("rotated tokens run vertically and still attach to a building", () => {
+		phoneBoard(true)
 		const positions = rules.givePossiblePositionsForMarketingCampaign(rf.TELEMARKETER, 30, true)
-		// vertical pair inside the north tile (8,7)
-		expect(positions).toContain(mapMod.giveIndex(41, 37))
-		// vertical pair inside the west tile (7,8)
-		expect(positions).toContain(mapMod.giveIndex(37, 41))
-		// anchored on the top row of the north tile pokes into the tile above
-		expect(positions).toContain(mapMod.giveIndex(41, 35))
+		// vertical pair touching the house's west side
+		expect(positions).toContain(mapMod.giveIndex(37, 40))
+		// vertical pair crossing the west/centre tile boundary near the house
+		expect(positions).toContain(mapMod.giveIndex(40, 42))
 		// diagonal tile (7,7) again excluded
 		expect(positions).not.toContain(mapMod.giveIndex(37, 37))
+		// a detached vertical pair in the cross is not allowed
+		expect(positions).not.toContain(mapMod.giveIndex(45, 37))
 	})
 
 	it("house-occupied cells inside the cross are not placeable", () => {
@@ -1124,8 +1124,8 @@ describe("Media Line stage 5 - milestone 2 first-campaign double", () => {
 		controller.chooseDuration(3)
 		controller.placeMarketingCampaign(0)
 
-		expect(store.mediaLine.doubleCampaign).toBe(28)
-		expect(store.mediaLine.doubleUsed).toBe(true)
+		expect(store.mediaLine.doubleCampaigns).toEqual([28])
+		expect(store.mediaLine.doubleUsedBy).toEqual([0])
 		expect(store.players[0].milestones).toContain(rf.FIRST_TV_ANNOUNCER_USED)
 
 		// A second channel placement by the same holder does not re-latch
@@ -1137,7 +1137,7 @@ describe("Media Line stage 5 - milestone 2 first-campaign double", () => {
 		controller.chooseDuration(3)
 		controller.placeMarketingCampaign(0)
 
-		expect(store.mediaLine.doubleCampaign).toBe(28)
+		expect(store.mediaLine.doubleCampaigns).toEqual([28])
 		expect(store.campaigns).toHaveLength(2)
 	})
 
@@ -1145,8 +1145,8 @@ describe("Media Line stage 5 - milestone 2 first-campaign double", () => {
 		const store = tvBoard()
 		model.addMarketingCampaign(28, -1, false, rf.BURGER, 1, [7, 1, 5, 2, 4])
 		store.players[0].marketers.push({ campaign: 28, marketer: rf.TV_ANNOUNCER, nightShift: false })
-		store.mediaLine.doubleCampaign = 28
-		store.mediaLine.doubleUsed = true
+		store.mediaLine.doubleCampaigns = [28]
+		store.mediaLine.doubleUsedBy = [0]
 
 		rules.doMarketingCampaigns(false)
 		for (const h of [7, 1, 5, 2, 4]) {
@@ -1157,8 +1157,32 @@ describe("Media Line stage 5 - milestone 2 first-campaign double", () => {
 		}
 		// Duration 1: the campaign expired, the slot is freed, the latch stays
 		expect(store.campaigns).toHaveLength(0)
-		expect(store.mediaLine.doubleCampaign).toBe(-1)
-		expect(store.mediaLine.doubleUsed).toBe(true)
+		expect(store.mediaLine.doubleCampaigns).toEqual([])
+		expect(store.mediaLine.doubleUsedBy).toEqual([0])
+	})
+
+	it("doubles one campaign per holder", () => {
+		const store = tvBoard()
+		model.addMarketingCampaign(28, -1, false, rf.BURGER, 9, [7, 1, 5])
+		model.addMarketingCampaign(29, -1, false, rf.PIZZA, 9, [2, 4, 6])
+		store.mediaLine.doubleCampaigns = [28, 29]
+		store.mediaLine.doubleUsedBy = [0, 1]
+
+		rules.doMarketingCampaigns(false)
+
+		for (const h of [7, 1, 5]) {
+			expect(store.needs.find((n) => n.number === h).needs).toEqual([
+				[rf.BURGER, -1],
+				[rf.BURGER, -1],
+			])
+		}
+		for (const h of [2, 4, 6]) {
+			expect(store.needs.find((n) => n.number === h).needs).toEqual([
+				[rf.PIZZA, -1],
+				[rf.PIZZA, -1],
+			])
+		}
+		expect(store.mediaLine.doubleCampaigns).toEqual([28, 29])
 	})
 
 	it("unlatched TV campaigns push a single card per house", () => {
@@ -1235,18 +1259,19 @@ describe("Media Line stage 6 - save / load round trip", () => {
 		store.players[0].marketers.push({ campaign: 28, marketer: rf.TV_ANNOUNCER, nightShift: false })
 		store.players[0].marketers.push({ campaign: 30, marketer: rf.TELEMARKETER, nightShift: false })
 		store.mediaLine.headlines.push({ turn: 4, playerIndex: 0, value: 5 }, { turn: 4, playerIndex: 1, value: -5 })
-		store.mediaLine.doubleCampaign = 28
-		store.mediaLine.doubleUsed = true
+		store.mediaLine.doubleCampaigns = [28]
+		store.mediaLine.doubleUsedBy = [0]
 		store.mediaLine.night.groups[28] = { owner: 0, houses: [7, 1] }
 		store.mediaLine.night.aLinePushers.push(1)
 
 		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
 		const slot = decoded[decoded.length - 1]
-		// Compact tagged slot: [tag, version, headlinesFlat, doubleCampaign, doubleUsed, groupsFlat, aLinePushers]
+		// Compact tagged slot: [tag, version, headlinesFlat, doubleCampaigns, doubleUsedBy, groupsFlat, aLinePushers]
 		expect(slot[0]).toBe(-rf.SO_MEDIA_LINE)
+		expect(slot[1]).toBe(2)
 		expect(slot[2]).toEqual([4, 0, 5, 4, 1, -5])
-		expect(slot[3]).toBe(28)
-		expect(slot[4]).toBe(1)
+		expect(slot[3]).toEqual([28])
+		expect(slot[4]).toEqual([0])
 		expect(slot[5]).toEqual([28, 0, 2, 7, 1])
 		expect(slot[6]).toEqual([1])
 
@@ -1262,8 +1287,8 @@ describe("Media Line stage 6 - save / load round trip", () => {
 			{ turn: 4, playerIndex: 0, value: 5 },
 			{ turn: 4, playerIndex: 1, value: -5 },
 		])
-		expect(restored.mediaLine.doubleCampaign).toBe(28)
-		expect(restored.mediaLine.doubleUsed).toBe(true)
+		expect(restored.mediaLine.doubleCampaigns).toEqual([28])
+		expect(restored.mediaLine.doubleUsedBy).toEqual([0])
 		expect(restored.mediaLine.night.groups[28]).toEqual({ owner: 0, houses: [7, 1] })
 		expect(restored.mediaLine.night.aLinePushers).toEqual([1])
 	})
@@ -1295,25 +1320,36 @@ describe("Media Line stage 6 - save / load round trip", () => {
 
 		const restored = importInto(decoded)
 		expect(restored.mediaLine.headlines).toEqual([{ turn: 4, playerIndex: 0, value: 5 }])
-		expect(restored.mediaLine.doubleCampaign).toBe(28)
-		expect(restored.mediaLine.doubleUsed).toBe(true)
+		expect(restored.mediaLine.doubleCampaigns).toEqual([28])
+		// Legacy saves had one global latch; block every seat from doubling again.
+		expect(restored.mediaLine.doubleUsedBy).toEqual([0, 1])
 		expect(restored.mediaLine.night.groups[29]).toEqual({ owner: 1, houses: [3, 2] })
 		expect(restored.mediaLine.night.aLinePushers).toEqual([0])
+	})
+
+	it("converts a version 1 compact slot to per-holder doubling state", () => {
+		seedMLGame()
+		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
+		decoded[decoded.length - 1] = [-rf.SO_MEDIA_LINE, 1, [], 28, 1, [], []]
+
+		const restored = importInto(decoded)
+		expect(restored.mediaLine.doubleCampaigns).toEqual([28])
+		expect(restored.mediaLine.doubleUsedBy).toEqual([0, 1])
 	})
 
 	it("loads an older save without the media line slot using safe defaults", () => {
 		const store = seedMLGame()
 		store.mediaLine.headlines.push({ turn: 4, playerIndex: 0, value: 5 })
-		store.mediaLine.doubleCampaign = 28
-		store.mediaLine.doubleUsed = true
+		store.mediaLine.doubleCampaigns = [28]
+		store.mediaLine.doubleUsedBy = [0]
 
 		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
 		decoded.pop() // strip the media line slot: pre-module save shape
 
 		const restored = importInto(decoded)
 		expect(restored.mediaLine.headlines).toEqual([])
-		expect(restored.mediaLine.doubleCampaign).toBe(-1)
-		expect(restored.mediaLine.doubleUsed).toBe(false)
+		expect(restored.mediaLine.doubleCampaigns).toEqual([])
+		expect(restored.mediaLine.doubleUsedBy).toEqual([])
 	})
 
 	it("omits the slot when the module was not chosen", () => {
@@ -1326,8 +1362,8 @@ describe("Media Line stage 6 - save / load round trip", () => {
 		const store = seedMLGame()
 		model.addMarketingCampaign(28, -1, false, rf.BURGER, 3, [7, 1])
 		store.mediaLine.headlines.push({ turn: 4, playerIndex: 1, value: -5 })
-		store.mediaLine.doubleCampaign = 28
-		store.mediaLine.doubleUsed = true
+		store.mediaLine.doubleCampaigns = [28]
+		store.mediaLine.doubleUsedBy = [0]
 		const b64 = funcs.simpleExportWholeFCMmodel()
 
 		seedMLGame()
@@ -1335,8 +1371,8 @@ describe("Media Line stage 6 - save / load round trip", () => {
 		const restored = useModelStore()
 		expect(restored.campaigns.find((c) => c.number === 28)).toMatchObject({ index: -1, duration: 3, houses: [7, 1] })
 		expect(restored.mediaLine.headlines).toEqual([{ turn: 4, playerIndex: 1, value: -5 }])
-		expect(restored.mediaLine.doubleCampaign).toBe(28)
-		expect(restored.mediaLine.doubleUsed).toBe(true)
+		expect(restored.mediaLine.doubleCampaigns).toEqual([28])
+		expect(restored.mediaLine.doubleUsedBy).toEqual([0])
 	})
 })
 
@@ -1356,8 +1392,8 @@ describe("Media Line stage 6 - replay", () => {
 		expect(store.players[0].employees).toEqual([]) // announcer moved to the market
 		expect(store.players[0].marketers).toEqual([{ campaign: 28, marketer: rf.TV_ANNOUNCER, nightShift: false }])
 		// The milestone is not replayed yet - the latch comes from the lookahead
-		expect(store.mediaLine.doubleCampaign).toBe(28)
-		expect(store.mediaLine.doubleUsed).toBe(true)
+		expect(store.mediaLine.doubleCampaigns).toEqual([28])
+		expect(store.mediaLine.doubleUsedBy).toEqual([0])
 	})
 
 	it("replays a phone placement and chains the second token to the same telemarketer", () => {

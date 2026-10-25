@@ -22,6 +22,9 @@ const personal = usePersonalStore()
 
 import { computed, ref } from "vue"
 import ConflictDecisionPanel from "./ConflictDecisionPanel.vue"
+import i18n from "../i18n"
+
+const t = (key, named) => i18n.global.t(key, named)
 
 const expanded = ref(true)
 
@@ -151,53 +154,53 @@ function getPrephaseConflictText(futureUnboundedConflictPhaseNum) {
 		let decisionText
 		switch (decisionNum) {
 			case rf.CONFLICT_DECISION_WAIT_AND_SEE:
-				decisionText = "Wait and see"
+				decisionText = t("prePhase.waitAndSee")
 				break
 			case rf.CONFLICT_DECISION_NO_CONFLICT:
-				decisionText = "No conflict"
+				decisionText = t("prePhase.noConflict")
 				break
 			case rf.CONFLICT_DECISION_CONFLICT:
-				decisionText = "Call Conflict"
+				decisionText = t("prePhase.callConflict")
 				break
 			default:
-				decisionText = "Unknown"
+				decisionText = t("prePhase.unknown")
 		}
 
 		// Praying text
 		let prayingText
 		switch (prayingNum) {
 			case rf.CONFLICT_PRAYING_WAIT_AND_SEE:
-				prayingText = "Wait and see"
+				prayingText = t("prePhase.waitAndSee")
 				break
 			case rf.CONFLICT_PRAYING_CASH_IN:
-				prayingText = "Cash in prayers"
+				prayingText = t("prePhase.cashInPrayers")
 				break
 			case rf.CONFLICT_PRAYING_KEEP_PRAYING:
-				prayingText = "Keep praying"
+				prayingText = t("prePhase.keepPraying")
 				break
 			default:
-				prayingText = "Unknown"
+				prayingText = t("prePhase.unknown")
 		}
 
 		// Turn order text
 		let turnOrderText
 		switch (turnOrderNum) {
 			case rf.CONFLICT_TURN_ORDER_WAIT_AND_SEE:
-				turnOrderText = "Wait and see"
+				turnOrderText = t("prePhase.waitAndSee")
 				break
 			case rf.CONFLICT_TURN_ORDER_EARLIEST:
-				turnOrderText = "Go Earliest"
+				turnOrderText = t("prePhase.goEarliest")
 				break
 			case rf.CONFLICT_TURN_ORDER_LATEST:
-				turnOrderText = "Go Latest"
+				turnOrderText = t("prePhase.goLatest")
 				break
 			default:
-				turnOrderText = "Unknown"
+				turnOrderText = t("prePhase.unknown")
 		}
 
 		return `✅ ${decisionText} | ${prayingText} | ${turnOrderText}`
 	}
-	return `❌ No Move Set`
+	return `❌ ${t("prePhase.noMoveSet")}`
 }
 
 function getMainPhaseText(futureUnboundedMainPhaseNum) {
@@ -205,9 +208,9 @@ function getMainPhaseText(futureUnboundedMainPhaseNum) {
 	let turnRequired = model.getCorrectTurnForPhasePreseet(store.gameflow.turn, store.gameflow.phase, futureMainPhaseNum)
 	const prePhaseData = personal.allMyMoveData.find((entry) => entry.phase === futureMainPhaseNum && entry.turn === turnRequired)
 	if (prePhaseData) {
-		return `✅ Move set`
+		return `✅ ${t("prePhase.moveSet")}`
 	}
-	return `❌ No Move Set`
+	return `❌ ${t("prePhase.noMoveSet")}`
 }
 
 function changePrephaseConflictDecision(futureUnboundedConflictPhaseNum) {
@@ -444,17 +447,17 @@ const hasSetImmediateConflictPhase = computed(() => {
 	<!-- Loaded stack move -->
 	<template v-if="setDisplayAreas.loadedStackMove">
 		<div v-if="!store.stackControl.previewingPhase">
-			Your preset move has been loaded
+			{{ $t("prePhase.presetLoaded") }}
 			<br />
-			You may need to redo your move if other players intefere with your actions
+			{{ $t("prePhase.presetRedo") }}
 			<br />
-			<button class="actionsLineButton" @click="IO.cancelPresetMoves(store.gameflow.turn, store.gameflow.phase)">Cancel All Preset Moves</button>
+			<button class="actionsLineButton" @click="IO.cancelPresetMoves(store.gameflow.turn, store.gameflow.phase)">{{ $t("prePhase.cancelAllPresetMoves") }}</button>
 		</div>
 		<div v-else>
-			Previewing preset for {{ view.phaseStr(store.stackControl.previewingPhase % 16) }} phase
+			{{ $t("prePhase.previewing", { phase: view.phaseStr(store.stackControl.previewingPhase % 16) }) }}
 			<br />
-			<button class="actionsLineButton" @click="IO.cancelPreviewAndRedo">Cancel Move and Redo</button>
-			<button class="actionsLineButton" @click="IO.backFromPreview">Back</button>
+			<button class="actionsLineButton" @click="IO.cancelPreviewAndRedo">{{ $t("prePhase.cancelMoveRedo") }}</button>
+			<button class="actionsLineButton" @click="IO.backFromPreview">{{ $t("prePhase.back") }}</button>
 		</div>
 	</template>
 
@@ -463,8 +466,8 @@ const hasSetImmediateConflictPhase = computed(() => {
 		<div class="expertPanel" @click="!expanded && (expanded = true)">
 			<div class="expandDiv" >
 				<div style="width: 40px; flex-shrink: 0"></div>
-				<span v-if="!expanded" style="flex: 1; text-align: center">You may pre-set future phases (click to expand)</span>
-				<span v-else style="flex: 1; text-align: center">You may pre-set future phases</span>
+				<span v-if="!expanded" style="flex: 1; text-align: center">{{ $t("prePhase.preSetCollapsed") }}</span>
+				<span v-else style="flex: 1; text-align: center">{{ $t("prePhase.preSetExpanded") }}</span>
 				<button class="actionsLineButton expandButton" @click.stop="expanded = !expanded">
 					<span v-if="expanded">▲</span>
 					<span v-else>▼</span>
@@ -477,11 +480,11 @@ const hasSetImmediateConflictPhase = computed(() => {
 						{{ view.phaseStr((futureUnboundedMainPhaseNum - 3) % 16) }}:
 						<span v-if="!isPrephaseConflictSet(futureUnboundedMainPhaseNum - 3)">
 							{{ getPrephaseConflictText(futureUnboundedMainPhaseNum - 3) }}
-							<button v-if="allowSettingImmediateConflictPhase(futureUnboundedMainPhaseNum - 3)" class="actionsLineButton" @click="changePrephaseConflictDecision(futureUnboundedMainPhaseNum - 3)">Set</button>
+							<button v-if="allowSettingImmediateConflictPhase(futureUnboundedMainPhaseNum - 3)" class="actionsLineButton" @click="changePrephaseConflictDecision(futureUnboundedMainPhaseNum - 3)">{{ $t("prePhase.set") }}</button>
 						</span>
 						<span v-else>
 							{{ getPrephaseConflictText(futureUnboundedMainPhaseNum - 3) }}&nbsp;
-							<button class="actionsLineButton" @click="changePrephaseConflictDecision(futureUnboundedMainPhaseNum - 3)">Change</button>
+							<button class="actionsLineButton" @click="changePrephaseConflictDecision(futureUnboundedMainPhaseNum - 3)">{{ $t("prePhase.change") }}</button>
 						</span>
 					</template>
 					<template v-if="idx !== 4">
@@ -489,8 +492,8 @@ const hasSetImmediateConflictPhase = computed(() => {
 						{{ view.phaseStr(futureUnboundedMainPhaseNum % 16) }}:
 						{{ getMainPhaseText(futureUnboundedMainPhaseNum) }}
 						<!-- Give a cancel button if the phase is set. Give a play button if it's the NEXT phase unplayed-->
-						<button class="actionsLineButton" @click="IO.cancelPresetMoves(canCancelPreMove(futureUnboundedMainPhaseNum), futureUnboundedMainPhaseNum)" v-if="canCancelPreMove(futureUnboundedMainPhaseNum) >= 0">Cancel All Moves From Here</button>
-						<button class="actionsLineButton eyeButton" @click="previewPresetPhase(futureUnboundedMainPhaseNum, $event)" v-if="canCancelPreMove(futureUnboundedMainPhaseNum) >= 0" title="Preview this preset move">
+						<button class="actionsLineButton" @click="IO.cancelPresetMoves(canCancelPreMove(futureUnboundedMainPhaseNum), futureUnboundedMainPhaseNum)" v-if="canCancelPreMove(futureUnboundedMainPhaseNum) >= 0">{{ $t("prePhase.cancelAllMovesFromHere") }}</button>
+						<button class="actionsLineButton eyeButton" @click="previewPresetPhase(futureUnboundedMainPhaseNum, $event)" v-if="canCancelPreMove(futureUnboundedMainPhaseNum) >= 0" :title="$t('prePhase.previewPreset')">
 							<svg class="actionsLineButtonSvg" viewBox="0 0 32 32">
 								<ellipse cx="16" cy="16" rx="12" ry="7" fill="none" stroke="currentColor" stroke-width="3" />
 								<circle cx="16" cy="16" r="3" fill="currentColor" />
@@ -501,14 +504,14 @@ const hasSetImmediateConflictPhase = computed(() => {
 								<line x1="24" y1="9" x2="26" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
 							</svg>
 						</button>
-						<button class="actionsLineButton" @click="presetMainPhase(futureUnboundedMainPhaseNum, $event)" v-if="!showPolderNote(idx) && canSetPreMove(futureUnboundedMainPhaseNum)">Pre-set {{ view.phaseStr(futureUnboundedMainPhaseNum % 16) }} Phase</button>
+						<button class="actionsLineButton" @click="presetMainPhase(futureUnboundedMainPhaseNum, $event)" v-if="!showPolderNote(idx) && canSetPreMove(futureUnboundedMainPhaseNum)">{{ $t("prePhase.presetPhase", { phase: view.phaseStr(futureUnboundedMainPhaseNum % 16) }) }}</button>
 						<template v-if="showPolderNote(idx)">
-							Note: Movement can be preset once polders have been resolved in the Wonder phase
+							{{ $t("prePhase.polderNote") }}
 						</template>
 					</template>
 					<template v-else>
 						<br />
-						Too far in the future
+						{{ $t("prePhase.tooFarFuture") }}
 					</template>
 					<br />
 				</template>
@@ -520,8 +523,8 @@ const hasSetImmediateConflictPhase = computed(() => {
 	<!-- Set Pre Phase Conflict -->
 	<template v-if="setDisplayAreas.prePhaseConflictPanel">
 		<ConflictDecisionPanel />
-		<button class="actionsLineButton" @click="cancelPrePhaseConflict">Cancel</button>
-		<button class="actionsLineButton" @click="IO.savePrePhaseConflict">Save New Settings</button>
+		<button class="actionsLineButton" @click="cancelPrePhaseConflict">{{ $t("prePhase.cancel") }}</button>
+		<button class="actionsLineButton" @click="IO.savePrePhaseConflict">{{ $t("prePhase.saveNewSettings") }}</button>
 	</template>
 </template>
 

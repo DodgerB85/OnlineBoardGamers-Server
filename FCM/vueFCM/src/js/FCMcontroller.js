@@ -1135,6 +1135,7 @@ export function resetMarketingSelection() {
 
 	store.context.action = rf.ACT_NONE
 	store.context.marketer = -1
+	store.context.marketerSelectionMilestones.length = 0
 	store.context.campaign = -1
 	store.context.campaigns.splice(0)
 	store.context.double = false
@@ -1147,6 +1148,7 @@ export function resetMarketingSelection() {
 	store.context.hawkerRouteActive = false
 	store.context.showingHawkerRoute = -1
 	store.context.path.splice(0)
+	store.context.routeTargets.splice(0)
 	store.context.from = -1
 	store.context.range = 0
 	store.context.temporaryMarketer = false
@@ -1163,13 +1165,21 @@ export function selectMarketer(marketer, nightShift, temporary = false) {
 	store.context.nightShift = nightShift === true
 	store.context.temporaryMarketer = temporary === true
 
-	// Award "used" milestones on selection
+	// Award "used" milestones on selection. Track them so Cancel can roll back
+	// a milestone that was only earned by opening this selection.
+	if (store.context.marketerSelectionMilestones.length > 0) rollbackMarketerSelectionMilestones()
+	store.context.marketerSelectionMilestones.length = 0
+	const awardSelectionMilestone = (milestone) => {
+		if (plyr.hasMilestone(playerIndex, milestone) || !store.availableMilestones.includes(milestone)) return
+		plyr.awardMilestone(playerIndex, milestone)
+		store.context.marketerSelectionMilestones.push(milestone)
+	}
 	if (marketer === rf.BRAND_MANAGER) {
-		plyr.awardMilestone(playerIndex, rf.FIRST_MARKETEER_USED)
-		plyr.awardMilestone(playerIndex, rf.FIRST_BRAND_MANAGER_USED)
+		awardSelectionMilestone(rf.FIRST_MARKETEER_USED)
+		awardSelectionMilestone(rf.FIRST_BRAND_MANAGER_USED)
 	} else if (marketer === rf.BRAND_DIRECTOR) {
-		plyr.awardMilestone(playerIndex, rf.FIRST_MARKETEER_USED)
-		plyr.awardMilestone(playerIndex, rf.FIRST_BRAND_DIRECTOR_USED)
+		awardSelectionMilestone(rf.FIRST_MARKETEER_USED)
+		awardSelectionMilestone(rf.FIRST_BRAND_DIRECTOR_USED)
 	}
 
 	store.context.marketer = marketer
@@ -1259,10 +1269,29 @@ export function rotateCampaign() {
 }
 
 // Happens when you run out of campaigns for this marketer
+function rollbackMarketerSelectionMilestones() {
+	const store = useModelStore()
+	const playerIndex = currentPlayerIndex()
+	const playerObj = currentPlayerObj()
+	for (const milestone of store.context.marketerSelectionMilestones) {
+		const milestoneIndex = playerObj.milestones.lastIndexOf(milestone)
+		if (milestoneIndex > -1) playerObj.milestones.splice(milestoneIndex, 1)
+		for (let i = store.history.length - 1; i >= 0; i--) {
+			const entry = store.history[i]
+			if (entry[0] === rf.HIST_NEW_MILESTONE && entry[1] === playerIndex && entry[3]?.[0] === milestone) {
+				store.history.splice(i, 1)
+				break
+			}
+		}
+	}
+	store.context.marketerSelectionMilestones.length = 0
+}
+
 export function cancelMarketer() {
 	const store = useModelStore()
 	const playerObj = currentPlayerObj()
 
+	rollbackMarketerSelectionMilestones()
 	if (playerObj.employees.indexOf(store.context.marketer) !== -1) store.context.justMarketed.push(store.context.marketer)
 	store.context.temporaryMarketer = false
 	resetMarketingSelection()
@@ -1318,9 +1347,10 @@ function awardCampaignTypeAndGoodMilestones(playerIndex) {
 		plyr.awardMilestone(playerIndex, rf.FIRST_BURGER_MARKETED)
 	} else if (store.context.good === rf.PIZZA) {
 		plyr.awardMilestone(playerIndex, rf.FIRST_PIZZA_MARKETED)
-	} else {
+	} else if (rf.DRINK.includes(store.context.good)) {
 		plyr.awardMilestone(playerIndex, rf.FIRST_DRINK_MARKETED)
 	}
+	// Fried chicken is food, not a drink; it has no base "first marketed" milestone.
 }
 
 // Place campaign in model - after you click on square / press Place button
@@ -1427,11 +1457,11 @@ export function placeMarketingCampaign(index) {
 		model.addMarketingCampaign(store.context.campaign, index, store.context.rotated, store.context.good, store.context.duration, isTV ? [...store.context.tvHouses] : undefined)
 		rules.giveMarketingMilestones(playerIndex, store.context.marketer)
 
-		// Media Line mod: milestone 2 (First TV Announcer Used) - latch the
+		// Media Line mod: milestone 2 (First TV Announcer Used) - latch each
 		// holder's FIRST TV campaign; it pushes double demand until it expires
-		if (isTV && plyr.hasMilestone(playerIndex, rf.FIRST_TV_ANNOUNCER_USED) && !store.mediaLine.doubleUsed) {
-			store.mediaLine.doubleCampaign = store.context.campaign
-			store.mediaLine.doubleUsed = true
+		if (isTV && plyr.hasMilestone(playerIndex, rf.FIRST_TV_ANNOUNCER_USED) && !store.mediaLine.doubleUsedBy.includes(playerIndex)) {
+			store.mediaLine.doubleCampaigns.push(store.context.campaign)
+			store.mediaLine.doubleUsedBy.push(playerIndex)
 		}
 
 		// SECOND CAMPAIGN MANAGER MILESTONE - add another campaign of the same type
@@ -1547,6 +1577,7 @@ export function startHawkerRouteSelection() {
 	}
 
 	store.context.path.splice(0)
+	store.context.routeTargets.splice(0)
 	store.context.from = -1
 	store.context.range = 2
 	store.context.collectionNumber = 0
@@ -1562,15 +1593,6 @@ function advanceRoute(index) {
 	const store = useModelStore()
 	clearDrivingPreview()
 
-	if (store.context.from > -1) {
-		if (!map.onTheSameTile(index, store.context.from)) {
-			store.context.range--
-		}
-	} else {
-		if (!rules.firstStartIsFromTheSameTile(index)) {
-			store.context.range--
-		}
-	}
 	const nextRoad = rules.nextRoadPossibilities(index, store.context.from, store.context.range)
 
 	if (nextRoad.from !== -1) {
@@ -1581,6 +1603,7 @@ function advanceRoute(index) {
 	store.context.range = nextRoad.range
 
 	store.context.path = store.context.path.concat(nextRoad.path)
+	store.context.routeTargets = [...nextRoad.target]
 	store.highlights.indexesToHighlightPath = [...store.context.path]
 	return nextRoad
 }
@@ -1615,6 +1638,7 @@ export function stopHawkerTruck() {
 
 	store.context.path = [...new Set(store.context.path)]
 	store.highlights.indexesToHighlightPath = [...store.context.path]
+	store.context.routeTargets.splice(0)
 	store.context.hawkerRouteActive = false
 }
 
@@ -1625,6 +1649,7 @@ export function addHawkerTruck() {
 	placeMarketingCampaign(0)
 	// Clean up hawker state
 	store.context.path.splice(0)
+	store.context.routeTargets.splice(0)
 	store.context.from = -1
 	store.context.range = 0
 	store.context.hawkerRouteActive = false
@@ -2058,8 +2083,8 @@ export async function endCurrentPhase() {
 	store.clearCoffeeHistoryInfo()
 	const phase = store.gameflow.phase
 
-	// --- PHASE: SETUP RESTAURANT 1 ---
-	if (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1) {
+	// --- PHASE: SETUP RESTAURANTS, ROUNDS 1 AND 2 ---
+	if (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 || store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT2) {
 		const readyPlayers = store.players.filter((p) => p.restaurants.length > 0 || p.displayName === rf.BOT_NAME)
 		if (readyPlayers.length === store.players.length) {
 			if (store.startingOptions.shortGame) {
@@ -2078,16 +2103,20 @@ export async function endCurrentPhase() {
 				store.gameflow.turnOrder = [...fto]
 			}
 			return
-		} else {
-			store.gameflow.fullTurnOrder.reverse()
-			store.gameflow.turnOrder.length = 0
-			store.gameflow.fullTurnOrder.forEach((idx) => {
-				if (store.players[idx].restaurants.length === 0 && store.players[idx].displayName !== rf.BOT_NAME) {
-					store.gameflow.turnOrder.push(idx)
-				}
-			})
-			return
 		}
+
+		// A pass in round 1 starts round 2. Round 2 is played in turn order
+		// and cannot be passed; every unplaced player must place.
+		if (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1) {
+			store.gameflow.phase = rf.PHASE_SETUP_RESTAURANT2
+		}
+		store.gameflow.turnOrder.length = 0
+		store.gameflow.fullTurnOrder.forEach((idx) => {
+			if (store.players[idx].restaurants.length === 0 && store.players[idx].displayName !== rf.BOT_NAME) {
+				store.gameflow.turnOrder.push(idx)
+			}
+		})
+		return
 	}
 
 	// --- PHASE: SETUP RESERVE ---
@@ -2771,6 +2800,16 @@ export function trainEmployee(toEmp, steps) {
 
 	if (fromHire) {
 		store.context.justHired.push(fromEmp)
+		// The hire history was written before training started. Record the
+		// extra used recruiting action on that entry so salary discounts do not
+		// treat it as unused.
+		for (let i = store.history.length - 1; i >= 0; i--) {
+			const entry = store.history[i]
+			if (entry[0] === rf.HIST_HIRE && entry[1] === currentPlayerIndex()) {
+				entry[4] = (entry[4] || 0) + 1
+				break
+			}
+		}
 	} else {
 		if (fromStructure === true) {
 			playerObj.employees.splice(playerObj.employees.indexOf(fromEmp), 1)
@@ -2806,6 +2845,13 @@ export function undoTrainEmployee(entry) {
 		// Train-from-hire: the -1 markers in justHired / hire.hired are the recruiting point it spent
 		store.context.justHired.splice(store.context.justHired.lastIndexOf(-1), 1)
 		store.context.endOfDaySummaryData.hire.hired.splice(store.context.endOfDaySummaryData.hire.hired.lastIndexOf(-1), 1)
+		for (let i = store.history.length - 1; i >= 0; i--) {
+			const entry = store.history[i]
+			if (entry[0] === rf.HIST_HIRE && entry[1] === currentPlayerIndex() && entry[4] > 0) {
+				entry[4]--
+				break
+			}
+		}
 	}
 }
 
@@ -2863,11 +2909,8 @@ function completeTraining() {
 
 		playerObj.employees.push(...newEmployeeItems)
 
-		// 3. Milestones
-		if (store.context.justHired.length >= 3) {
-			plyr.awardMilestone(playerIndex, rf.FIRST_HIRE_3)
-		}
-
+		// 3. Milestones. First to hire 3 is awarded during the hiring subphase:
+		// only employees actually hired there count, not train-from-hire.
 		plyr.awardMilestone(playerIndex, rf.FIRST_TRAIN)
 
 		// 4. Trainer Check
@@ -2929,6 +2972,7 @@ export function clickedProducer(producer) {
 		// Else no possibilities given, so must be some sort of driving drink person
 		// Reset drink driving vars
 		store.context.path.splice(0)
+		store.context.routeTargets.splice(0)
 		store.context.from = -1
 		store.context.range = 0
 		store.context.collectionNumber = 0
@@ -3057,6 +3101,7 @@ export function stopCollecting() {
 
 	store.context.producer = -1
 	store.context.path.splice(0)
+	store.context.routeTargets.splice(0)
 	store.context.from = -1
 	store.context.range = 0
 	store.context.collectionNumber = 0

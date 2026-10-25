@@ -19,12 +19,15 @@ import * as map from "../js/AQYmap"
 import * as model from "../js//AQYmodel.js"
 
 import { ref } from "vue"
+import { useI18n } from "vue-i18n"
 
 import { useModelStore } from "../stores/AQYstore.js"
 const store = useModelStore()
 
 import { usePersonalStore } from "../stores/AQYpersonal.js"
 const personal = usePersonalStore()
+
+const { t } = useI18n()
 
 const chatMessage = ref("")
 const bugReportText = ref("")
@@ -101,7 +104,7 @@ function submitBug() {
 	store.topMenuViews.bugSuccessText = ""
 
 	if (bugReportText.value.length === 0) {
-		store.topMenuViews.bugErrorText = "Please enter a bug report"
+		store.topMenuViews.bugErrorText = t("topMenuViews.bugErrorRequired")
 		submittingBug.value = false
 		return
 	}
@@ -164,13 +167,13 @@ function getRewindPanelLeft() {
 
 function getStatsExcludeVotes(returnPlayers = false) {
 	let votes = 0
-	let players = "None"
+	let players = t("topMenuViews.none")
 
 	for (const player in store.statsExcludeVotesData) {
 		// Use const or let for player
 		if (store.statsExcludeVotesData[player] === true) {
 			votes += 1
-			if (players === "None") players = String(player)
+			if (players === t("topMenuViews.none")) players = String(player)
 			else players += ", " + player
 		}
 	}
@@ -180,13 +183,13 @@ function getStatsExcludeVotes(returnPlayers = false) {
 
 function getDeleteVotes(returnPlayers = false) {
 	let votes = 0
-	let players = "None"
+	let players = t("topMenuViews.none")
 
 	for (const player in store.deleteVotesData) {
 		// Use const or let for player
 		if (store.deleteVotesData[player] === true) {
 			votes += 1
-			if (players === "None") players = String(player)
+			if (players === t("topMenuViews.none")) players = String(player)
 			else players += ", " + player
 		}
 	}
@@ -203,7 +206,7 @@ function localCastVote(topic) {
 	<!-- BUG REPORT -->
 	<transition name="slideBug">
 		<div id="bugReport" v-if="store.topMenuViews.showBug">
-			<h1>Bug Report</h1>
+			<h1>{{ $t("topMenuViews.bugReportTitle") }}</h1>
 			<template v-if="store.topMenuViews.bugErrorText !== ''">
 				<h2 id="bugErrorText" v-html="store.topMenuViews.bugErrorText"></h2>
 			</template>
@@ -211,26 +214,26 @@ function localCastVote(topic) {
 				<h2 id="bugSuccessText" v-html="store.topMenuViews.bugSuccessText"></h2>
 			</template>
 			<p>
-				Please submit a bug report if you encounter any issues, giving as much detail as possbile.
+				{{ $t("topMenuViews.bugIntro") }}
 				<br />
-				The game data will be submitted along with your report.
+				{{ $t("topMenuViews.bugGameData") }}
 				<br />
-				You can also report it on the OBG discord. Click
-				<a href="https://discord.gg/hCU7Fr77yV" class="linkOther" target="_blank">Here</a>
-				to join
+				<i18n-t keypath="topMenuViews.bugDiscordInvite" tag="span" scope="global">
+					<template #link><a href="https://discord.gg/hCU7Fr77yV" class="linkOther" target="_blank">{{ $t("topMenuViews.here") }}</a></template>
+				</i18n-t>
 				<br />
 				<br />
-				<b>NOTE:</b>
-				If your cathedral has graves on it, you lose your Saint Power
+				<b>{{ $t("topMenuViews.bugNoteLabel") }}</b>
+				{{ $t("topMenuViews.bugNoteText") }}
 			</p>
 
 			<div><textarea cols="150" rows="10" name="bugContent" id="bugContent" v-model="bugReportText"></textarea></div>
 			<div>
 				<button class="actionsLineButton" id="submitBug" @click="submitBug" :disabled="submittingBug">
-					<span v-if="submittingBug">Submitting Bug Report...</span>
-					<span v-else>Submit</span>
+					<span v-if="submittingBug">{{ $t("topMenuViews.submittingBugReport") }}</span>
+					<span v-else>{{ $t("topMenuViews.submit") }}</span>
 				</button>
-				<button class="actionsLineButton" id="resetBug" @click="toggleBug">Cancel</button>
+				<button class="actionsLineButton" id="resetBug" @click="toggleBug">{{ $t("topMenuViews.cancel") }}</button>
 			</div>
 		</div>
 	</transition>
@@ -243,19 +246,18 @@ function localCastVote(topic) {
 	<!-- NOTES -->
 	<transition name="slideNotes">
 		<div id="notesBox" v-if="store.topMenuViews.showNotes">
-			<h2>Personal game notes</h2>
-			<p>Only you can see these notes</p>
+			<h2>{{ $t("topMenuViews.notesTitle") }}</h2>
+			<p>{{ $t("topMenuViews.notesPrivate") }}</p>
 			<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes" maxlength="5000"></textarea></div>
 			<div>
 				<button class="actionsLineButton" @click="toggleNoteHexIDs">
-					<template v-if="store.topMenuViews.showNoteHexIDs">Hide</template>
-					<template v-else>Show</template>
-					hex IDs
+					<template v-if="store.topMenuViews.showNoteHexIDs">{{ $t("topMenuViews.hideHexIds") }}</template>
+					<template v-else>{{ $t("topMenuViews.showHexIds") }}</template>
 				</button>
 				<br />
-				<button class="actionsLineButton" @click="IO.saveNotes">Save</button>
-				<button class="actionsLineButton" @click="clearNotes">Clear</button>
-				<button class="actionsLineButton" @click="toggleNotes">Close</button>
+				<button class="actionsLineButton" @click="IO.saveNotes">{{ $t("topMenuViews.save") }}</button>
+				<button class="actionsLineButton" @click="clearNotes">{{ $t("topMenuViews.clear") }}</button>
+				<button class="actionsLineButton" @click="toggleNotes">{{ $t("topMenuViews.close") }}</button>
 			</div>
 		</div>
 	</transition>
@@ -264,9 +266,9 @@ function localCastVote(topic) {
 	<transition name="fade">
 		<div id="wholeChat" v-if="store.topMenuViews.showChat">
 			<div id="chatBox">
-				<h2>Send a message</h2>
+				<h2>{{ $t("topMenuViews.chatTitle") }}</h2>
 				<div><textarea rows="6" name="chatMessage" id="chatMessage" v-model="chatMessage"></textarea></div>
-				<div><button class="actionsLineButton" @click="sendChatMessage()">Send</button></div>
+				<div><button class="actionsLineButton" @click="sendChatMessage()">{{ $t("topMenuViews.send") }}</button></div>
 			</div>
 			<div id="messageList">
 				<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
@@ -290,33 +292,33 @@ function localCastVote(topic) {
 			:style="{
 				left: getRewindPanelLeft() + 'px',
 			}">
-			Any player can rewind the game at any time.
+			{{ $t("topMenuViews.rewindAnyone") }}
 			<br />
-			Please be courteous and rewind only if absolutely necessary - send a chat message to inform the other players.
+			{{ $t("topMenuViews.rewindCourteous") }}
 			<br />
-			Misuse of this feature will result in rewinds requiring permission from all players.
+			{{ $t("topMenuViews.rewindMisuse") }}
 
 			<br />
 			<br />
 
 			<span class="topMenuItem" @click="loadRewind()">
 				<img :src="view.getImage('icon-rewind')" />
-				<span>Rewind</span>
+				<span>{{ $t("topMenuViews.rewind") }}</span>
 			</span>
 			<hr />
 			<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
-				If all players agree, this game can be excluded from the stats (won't count towards wins/losses)
+				{{ $t("topMenuViews.statsExcludeIntro") }}
 				<br />
-				Votes: {{ getStatsExcludeVotes(false) }} - Players: {{ getStatsExcludeVotes(true) }}
+				{{ $t("topMenuViews.votesPlayers", { votes: getStatsExcludeVotes(false), players: getStatsExcludeVotes(true) }) }}
 				<br />
-				<button v-if="!personal.votedToExclude" class="actionsLineButton" @click="localCastVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">Vote to Exclude Game from Stats</button>
+				<button v-if="!personal.votedToExclude" class="actionsLineButton" @click="localCastVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">{{ $t("topMenuViews.voteExclude") }}</button>
 			</div>
 			<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
-				If all players agree, this game will be deleted
+				{{ $t("topMenuViews.deleteGameIntro") }}
 				<br />
-				Votes: {{ getDeleteVotes(false) }} - Players: {{ getDeleteVotes(true) }}
+				{{ $t("topMenuViews.votesPlayers", { votes: getDeleteVotes(false), players: getDeleteVotes(true) }) }}
 				<br />
-				<button v-if="!personal.votedToDelete" class="actionsLineButton" @click="localCastVote(rf.DELETE_VOTE_TOPIC)">Vote to Delete Game</button>
+				<button v-if="!personal.votedToDelete" class="actionsLineButton" @click="localCastVote(rf.DELETE_VOTE_TOPIC)">{{ $t("topMenuViews.voteDelete") }}</button>
 			</div>
 		</div>
 	</transition>
@@ -324,7 +326,7 @@ function localCastVote(topic) {
 	<!-- RESERVE -->
 	<transition name="slideRes">
 		<div id="reserve" v-if="store.topMenuViews.showReserve">
-			<h2>Saints</h2>
+			<h2>{{ $t("topMenuViews.saintsTitle") }}</h2>
 
 			<div v-for="(saintNum, idx) in [rf.SAINT_GIORGIO, rf.SAINT_BARBARA, rf.SAINT_CHRISTOFORI, rf.SAINT_NICOLO, rf.SAINT_MARIA]" :key="idx" class="saintContainerContainer">
 				<div class="saintContainer">
@@ -334,23 +336,23 @@ function localCastVote(topic) {
 					<div class="saintText">
 						<strong>{{ rf.SAINT_INFO[saintNum].name }}</strong>
 						<br />
-						<strong>Bonus:</strong>
+						<strong>{{ $t("topMenuViews.bonusLabel") }}</strong>
 						{{ rf.SAINT_INFO[saintNum].bonus }}
 						<br />
-						<strong>VR:</strong>
+						<strong>{{ $t("topMenuViews.vrLabel") }}</strong>
 						{{ rf.SAINT_INFO[saintNum].VR }}
 					</div>
 				</div>
 			</div>
 
 			<!-- Win at 20 People -->
-			<h2>San Nicolo</h2>
+			<h2>{{ $t("topMenuViews.sanNicolo") }}</h2>
 
 			<table class="resultSummaryTable">
 				<thead>
 					<tr>
 						<th></th>
-						<th>Houses Built</th>
+						<th>{{ $t("topMenuViews.housesBuilt") }}</th>
 					</tr>
 				</thead>
 				<tr v-for="(player, playerIndex) in store.players" :key="playerIndex">
@@ -364,33 +366,33 @@ function localCastVote(topic) {
 				</tr>
 			</table>
 			<!-- Build Each City Building-->
-			<h2>Santa Barbara</h2>
-			<div class="barbaraInfoDiv barbaraInfoDivGreen">Built</div>
-			<div class="barbaraInfoDiv barbaraInfoDivOrange">Built But Graved</div>
-			<div class="barbaraInfoDiv barbaraInfoDivRed">Not Built</div>
+			<h2>{{ $t("topMenuViews.santaBarbara") }}</h2>
+			<div class="barbaraInfoDiv barbaraInfoDivGreen">{{ $t("topMenuViews.built") }}</div>
+			<div class="barbaraInfoDiv barbaraInfoDivOrange">{{ $t("topMenuViews.builtButGraved") }}</div>
+			<div class="barbaraInfoDiv barbaraInfoDivRed">{{ $t("topMenuViews.notBuilt") }}</div>
 			<table class="resultSummaryTable">
 				<thead>
 					<tr class="buildingHeaders">
 						<th></th>
-						<th>House</th>
-						<th>Theology</th>
-						<th>Biology</th>
-						<th>University</th>
-						<th>Alchemy</th>
-						<th>Philosophy</th>
-						<th>Brewery</th>
-						<th>Forced Labour</th>
-						<th>Stable</th>
-						<th>Harbour</th>
-						<th>Hospital</th>
-						<th>Explorer</th>
-						<th>Granary</th>
-						<th>Dump</th>
-						<th>Cathedral</th>
-						<th>Market</th>
-						<th>Cart</th>
-						<th>Fountain</th>
-						<th>Storage</th>
+						<th>{{ $t("topMenuViews.buildings.house") }}</th>
+						<th>{{ $t("topMenuViews.buildings.theology") }}</th>
+						<th>{{ $t("topMenuViews.buildings.biology") }}</th>
+						<th>{{ $t("topMenuViews.buildings.university") }}</th>
+						<th>{{ $t("topMenuViews.buildings.alchemy") }}</th>
+						<th>{{ $t("topMenuViews.buildings.philosophy") }}</th>
+						<th>{{ $t("topMenuViews.buildings.brewery") }}</th>
+						<th>{{ $t("topMenuViews.buildings.forcedLabour") }}</th>
+						<th>{{ $t("topMenuViews.buildings.stable") }}</th>
+						<th>{{ $t("topMenuViews.buildings.harbour") }}</th>
+						<th>{{ $t("topMenuViews.buildings.hospital") }}</th>
+						<th>{{ $t("topMenuViews.buildings.explorer") }}</th>
+						<th>{{ $t("topMenuViews.buildings.granary") }}</th>
+						<th>{{ $t("topMenuViews.buildings.dump") }}</th>
+						<th>{{ $t("topMenuViews.buildings.cathedral") }}</th>
+						<th>{{ $t("topMenuViews.buildings.market") }}</th>
+						<th>{{ $t("topMenuViews.buildings.cart") }}</th>
+						<th>{{ $t("topMenuViews.buildings.fountain") }}</th>
+						<th>{{ $t("topMenuViews.buildings.storage") }}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -401,12 +403,12 @@ function localCastVote(topic) {
 				</tbody>
 			</table>
 
-			<h2>Cost to Complete Unbuilt Buildings</h2>
+			<h2>{{ $t("topMenuViews.costToComplete") }}</h2>
 			<table class="resultSummaryTable">
 				<thead>
 					<tr class="buildingHeaders">
 						<th></th>
-						<th>Resources Required</th>
+						<th>{{ $t("topMenuViews.resourcesRequired") }}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -419,17 +421,17 @@ function localCastVote(topic) {
 							{{ city.getBarabaraCostToGo(playerIndex)[1] }} x
 							<img class="buildSummaryRes" :src="view.getImage('res_' + String(rf.RES_STONE))" />
 							&nbsp;&nbsp;
-							<template v-if="city.hasWorkingUniqueBuilding(playerIndex, rf.BLDG_PHILOSOPHY, false)">{{ city.getBarabaraCostToGo(playerIndex)[2] + 2 * city.getBarabaraCostToGo(playerIndex)[3] }} x Luxury Goods</template>
+							<template v-if="city.hasWorkingUniqueBuilding(playerIndex, rf.BLDG_PHILOSOPHY, false)">{{ city.getBarabaraCostToGo(playerIndex)[2] + 2 * city.getBarabaraCostToGo(playerIndex)[3] }} x {{ $t("topMenuViews.luxuryGoods") }}</template>
 							<template v-else>
-								{{ city.getBarabaraCostToGo(playerIndex)[2] }} x Luxury &nbsp;&nbsp;
-								<span v-if="city.getBarabaraCostToGo(playerIndex)[3] > 0">2 x Different Luxury</span>
+								{{ city.getBarabaraCostToGo(playerIndex)[2] }} x {{ $t("topMenuViews.luxury") }} &nbsp;&nbsp;
+								<span v-if="city.getBarabaraCostToGo(playerIndex)[3] > 0">{{ $t("topMenuViews.differentLuxury") }}</span>
 							</template>
 						</td>
 					</tr>
 				</tbody>
 			</table>
 
-			<h2>San Christofori</h2>
+			<h2>{{ $t("topMenuViews.sanChristofori") }}</h2>
 			<table class="resultSummaryTable">
 				<thead>
 					<tr>
@@ -458,7 +460,7 @@ function localCastVote(topic) {
 					</tr>
 				</tbody>
 			</table>
-			<h2>San Giorgio (Unenclosed Hexes)</h2>
+			<h2>{{ $t("topMenuViews.sanGiorgioUnenclosed") }}</h2>
 			<table class="resultSummaryTable">
 				<thead>
 					<tr>
@@ -478,12 +480,12 @@ function localCastVote(topic) {
 					</tr>
 				</tbody>
 			</table>
-			<h2>"Unpolluted" (actually unoccupied) Area</h2>
+			<h2>{{ $t("topMenuViews.unpollutedArea") }}</h2>
 			<table class="resultSummaryTable">
 				<thead>
 					<tr>
 						<th></th>
-						<th>Size</th>
+						<th>{{ $t("topMenuViews.size") }}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -496,7 +498,7 @@ function localCastVote(topic) {
 
 			<!-- FLEXI-TIMES -->
 			<div id="timesDiv">
-				Flexi-Times:
+				{{ $t("topMenuViews.flexiTimes") }}
 				<span v-for="(player, idx) in store.players" :key="idx">{{ player.displayName }}: {{ getFlexiTimeString(player.name) }}&nbsp;&nbsp;&nbsp;</span>
 				&nbsp;&nbsp;&nbsp;
 			</div>
@@ -717,7 +719,7 @@ function localCastVote(topic) {
 }
 
 .topMenuItem img {
-	width: 38x;
+	width: 38px;
 	height: 38px;
 }
 

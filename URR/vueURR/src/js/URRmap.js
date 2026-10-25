@@ -1,8 +1,77 @@
 /** Logical board only: no coordinates, DOM, or rendering dependencies. */
 import * as rf from "./URRreference.js"
+import i18n from "../i18n.js"
+
+// Common engine errors that a player can trigger; configuration errors stay English.
+const ruleMessageKeys = {
+	"It is not this player's turn": "ruleErrors.notYourTurn",
+	"Not enough unreserved money": "ruleErrors.notEnoughMoney",
+	"Not enough state money": "ruleErrors.notEnoughStateMoney",
+	"Choose an unused digging crew": "ruleErrors.chooseUnusedCrew",
+	"The digging crew cannot build this stretch": "ruleErrors.crewCannotDig",
+	"Canals must be dug before purchasing": "ruleErrors.canalsBeforePurchase",
+	"The king must sell land or resolve a revolution before hiring this crew": "ruleErrors.kingMustSell",
+	"You may only sell your own land": "ruleErrors.onlyOwnLand",
+	"Stop selling as soon as the mandatory crew can be paid for": "ruleErrors.stopSelling",
+	"Choose an available amount of water": "ruleErrors.chooseWaterAmount",
+	"Choose where to send the water": "ruleErrors.chooseWaterDestination",
+	"Store or distribute the harvest": "ruleErrors.storeOrDistribute",
+	"Bid more than the previous primogeniture bid": "ruleErrors.highestPrimogeniture",
+	"Raise the bid by at least 5 SPL": "ruleErrors.raiseBidFive",
+	"Raise the price or previous offer by at least 5 SPL": "ruleErrors.raiseOfferFive",
+	"Pay between half and twice the printed price": "ruleErrors.offerRange",
+	"Nations can only be assimilated in era 3": "ruleErrors.nationsEraThree",
+	"This state already owns the nation": "ruleErrors.stateOwnsNation",
+	"The landowner must consent to this waterwork": "ruleErrors.landownerConsent",
+	"Der can only be exchanged for forest": "ruleErrors.derForest",
+	"Not enough ownership markers": "ruleErrors.notEnoughMarkers",
+	"The last player-owned land in a state cannot be sold": "ruleErrors.lastLandCannotSell",
+	"Each sale batch must contain one terrain type": "ruleErrors.oneTerrainPerSale",
+	"Choose a nonempty sale batch": "ruleErrors.emptySaleBatch",
+	"List each land sale once": "ruleErrors.listSaleOnce",
+	"An empty trade is not an action": "ruleErrors.emptyTrade",
+	"Reservoirs require rivers; pumps require land": "ruleErrors.reservoirRiver",
+	"Calah must be exchanged for a waterwork": "ruleErrors.calahWaterwork",
+	"Only waterworks need landowner consent": "ruleErrors.onlyWaterworksConsent",
+	"Only the treaty nation can be bought outright": "ruleErrors.treatyOnly",
+	"Dig from Barahshum to an adjacent area": "ruleErrors.barahshumAdjacent",
+	"This nation cannot be assimilated": "ruleErrors.nationNotAssimilable",
+	"Nation is unavailable": "ruleErrors.nationUnavailable",
+	"Negotiate with an available non-treaty nation": "ruleErrors.nonTreatyNation",
+	"Choose where to send the available water": "ruleErrors.chooseAvailableWater",
+	"Remove a waterwork with the lowest printed capacity": "ruleErrors.lowestCapacity",
+	"Calah's free waterwork must be on or adjacent to its hills": "ruleErrors.calahHills",
+	"Only owned land can be irrigated by an active state": "ruleErrors.activeStateIrrigation",
+	"Choose an unused digging crew before tracing a route": "ruleErrors.chooseCrewFirst",
+	"Select a starting area": "ruleErrors.selectStartingArea",
+	"Only Barahshum's owner may skip its prompts": "ruleErrors.barahshumOwnerPass",
+	"Barahshum cannot be exchanged now": "ruleErrors.barahshumNoExchange",
+	"Barahshum no longer needs a separate pass": "ruleErrors.barahshumNoPass",
+	"Bid or withdraw from the auction": "ruleErrors.bidOrWithdraw",
+	"Choose a nation, negotiate, or pass": "ruleErrors.chooseNationPass",
+	"Trade land, bid for primogeniture, or pass": "ruleErrors.tradeBidPass",
+	"Private funds may only fund a mandatory first crew": "ruleErrors.privateFunds",
+	"You do not own Der": "ruleErrors.derNotOwned",
+	"Choose a digger, pump, or reservoir": "ruleErrors.chooseEquipment",
+	"Independent nation land is closed to construction": "ruleErrors.nationLandConstruction",
+	"No matching waterwork tokens remain": "ruleErrors.noTokens",
+	"This state does not own Calah": "ruleErrors.notOwnCalah",
+	"Canal already exists": "ruleErrors.canalExists",
+	"Independent nation land is closed to digging": "ruleErrors.nationLandDigging",
+	"Maintenance sales must preserve the current throne": "ruleErrors.preserveThrone",
+	"This state already has a maintenance crew": "ruleErrors.alreadyCrew",
+	"The cash left after hiring must be less than the cheapest land sold": "ruleErrors.cashLeft",
+	"Sell the remaining eligible land before declaring a revolution": "ruleErrors.sellRemaining",
+	"The landowner declined construction at this site for this development turn": "ruleErrors.declinedSite",
+	"Accept or decline the pending offer": "ruleErrors.acceptDecline",
+	"Start the next state's turn": "ruleErrors.startNextState",
+	"Use Eridu's crew or pass": "ruleErrors.useEridu",
+	"Only the current player may pass their settlement turn": "ruleErrors.currentPlayerPass",
+	"Not resolving water": "ruleErrors.notResolvingWater",
+}
 
 export function requireRule(condition, message) {
-	if (!condition) throw new Error(message)
+	if (!condition) throw new Error(ruleMessageKeys[message] ? i18n.global.t(ruleMessageKeys[message]) : message)
 }
 
 export function getArea(game, id) {

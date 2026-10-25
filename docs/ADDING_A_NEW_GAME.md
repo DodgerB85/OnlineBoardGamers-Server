@@ -35,7 +35,7 @@ Create `XYZ/common.py` with `create_xyz_game(request, tournamentObj=None, ...)` 
 
 Then add the create page:
 
-- `Lobby/templates/Lobby/createXYZ.html` (copy `createWEB.html`),
+- `Lobby/templates/Lobby/createXYZ.html` (copy `createWEB.html`). It comes with the shared create-page pieces already wired in: `Lobby/createGamePage.js` (autocomplete, `getCookie`, `removeOption`/`addOption`, `setKickoutOptions`, `showSeats`/`clearSeatNames`, `validateGameType`), `Lobby/createCommonOptions.html` (the Common Options card, parameterised by the practice-game sentence) and `Lobby/kickoutOptions.html` (translated kickout labels). Keep only the per-game `validateOptions` / `selectPlayers` / `initGameCreation` in `Lobby/createXYZ.js` - do not copy the shared helpers into it.
 - `createXYZpage` view in `Lobby/views.py` (copy `createWEBpage`; it also implements the rematch/`gameID` prefill),
 - routes in `Lobby/urls.py`: `createXYZpage/` and `createXYZpage/<int:gameID>/`, plus `createXYZminiTournament/` and its view/reverse entries if mini tournaments are wanted.
 

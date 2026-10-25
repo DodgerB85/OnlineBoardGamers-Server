@@ -48,6 +48,32 @@ const squareHighlightLayers = computed(() => [
 	{ list: store.highlights.indexesToHighlightTutorial, cls: "higlightSquareTutorial", key: "tutorial" },
 ])
 
+// A loop route can revisit a square. Show a small stop bubble above the last
+// selected square when the route cannot continue usefully: no range left, or
+// all remaining exits are on the same tile, so the player would loop forever.
+const stopRouteBubble = computed(() => {
+	if (!canShowHighlights.value) return null
+	const c = store.context
+	const hawker = store.gameflow.subphase === rf.SUBPHASE_MARKETING && c.hawkerRouteActive
+	const drinks = store.gameflow.subphase === rf.SUBPHASE_PRODUCE && [rf.CART_OPERATOR, rf.TRUCK_DRIVER].includes(c.producer)
+	if ((!hawker && !drinks) || !rules.shouldStopRepeatRoute(c.path, c.routeTargets || [], c.range)) return null
+
+	const last = c.path[c.path.length - 1]
+	const cell = store.refSize / 5
+	const [x, y] = view.getXYforSmallSquare(last)
+	return {
+		x: x + cell / 2,
+		y,
+		label: hawker ? "workingDay.doneDrawingRoute" : "workingDay.stopCollectDrinks",
+		hawker,
+	}
+})
+
+function stopRoute() {
+	if (stopRouteBubble.value?.hawker) controller.stopHawkerTruck()
+	else controller.stopCollecting()
+}
+
 // Freeway placement highlights: precompute x/y for the whole batch with a single
 // getUsedRowCol() scan, so the template no longer calls getXYforSmallSquare per element.
 const freewayHighlights = computed(() => {
@@ -739,6 +765,14 @@ function changeGhost(index, add, event) {
 		</svg>
 	</template>
 
+	<button
+		v-if="stopRouteBubble"
+		class="stopRouteBubble"
+		:style="{ left: stopRouteBubble.x + 'px', top: stopRouteBubble.y + 'px' }"
+		@click.stop="stopRoute">
+		{{ $t(stopRouteBubble.label) }}
+	</button>
+
 	<img class="ghostImg" ref="ghostImgRef" src="" alt="GI Image" oncontextmenu="return false" />
 	<img
 		v-for="(rwIdx, rwKey) in ghostRoadworkIndexes"
@@ -762,6 +796,23 @@ function changeGhost(index, add, event) {
 </template>
 
 <style scoped>
+.stopRouteBubble {
+	position: absolute;
+	z-index: 300;
+	transform: translate(-50%, -115%);
+	max-width: 7.5em;
+	border: 2px solid green;
+	border-radius: 5px;
+	background: white;
+	font-weight: bolder;
+	padding: 4px 8px;
+	cursor: pointer;
+}
+
+.stopRouteBubble:hover {
+	background-color: lightgrey;
+}
+
 .higlightSquareToClick {
 	position: absolute;
 	z-index: 100;

@@ -45,6 +45,7 @@ export const useModelStore = defineStore("store", () => {
 		useBombs: false,
 		useJumpStart: false,
 		usePolders: false,
+		useTrains: false,
 	}
 	var CUSTOM_RULES = []
 
@@ -234,6 +235,7 @@ export const useModelStore = defineStore("store", () => {
 		historyObj: [],
 
 		newRoadInfo: [],
+		newTrainTrackInfo: [],
 		transporterMoveInfo: [],
 		resIDbeingMoved: -1,
 		transporterIDbeingDropped: -1,
@@ -269,6 +271,11 @@ export const useModelStore = defineStore("store", () => {
 		planeModeSelectionActive: false, // true when Taxi/Takeoff bubbles should show
 		planeInFlight: false, // true after takeoff, before landing
 		midFlightDropTiles: [], // land tiles validated for airdrop this move
+
+		// Train (Trains) vars
+		selectedTrainMode: false, // true once the player clicks the Train bubble
+		selectedTrainFareResID: -1, // the goods chosen to pay for the ride
+		trainModeSelectionActive: false, // true when the Train bubble should show
 
 		// Building Vars
 		eligibleBuildingsToBuild: [],

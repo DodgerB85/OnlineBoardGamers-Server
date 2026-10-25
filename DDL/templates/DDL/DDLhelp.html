@@ -11,14 +11,82 @@
       <p>
         {% blocktranslate %}Duck Dealer is a board game by Jeroen Doumen and Joris Wiersinga, published by <a class="linkOther" href="https://www.splottershop.com/" target="_blank">Splotter Spellen</a>.{% endblocktranslate %}
       </p>
-    </div>
-  </div>
-  <div class="card section">
-    <h2>{% translate "Playing the Game" %}</h2>
-    <div class="help-qa">
       <p>
-        {% translate "This game is still being implemented. Help content will be added here." %}
+        <a class="linkOther" href="{% static 'DDL/Duck-Dealer-Rules.pdf' %}" target="_blank" download>{% translate "Download the rulebook (PDF)" %}</a>
       </p>
     </div>
+  </div>
+
+  <div class="card section">
+    <h2>{% translate "The aim" %}</h2>
+    <div class="help-qa">
+      <p>{% translate "Amass the most victory points by building factories, spaceyards and consumer sites, and by selling finished goods to consumers before the shared 24-turn action track runs out." %}</p>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h2>{% translate "Turn overview" %}</h2>
+    <div class="help-qa">
+      <p>{% translate "Players take turns in clockwise order. On a turn you either collect energy or take an action turn. Collect-energy turns are quick; action turns are where the game happens." %}</p>
+      <ul>
+        <li>{% translate "Collect energy: choose one movement (red), build (yellow) or trade (blue) marker. Each matching crew quarter in your ship produces another marker of its colour. After an action turn you may keep at most four energy markers." %}</li>
+        <li>{% translate "If a colour runs out, you still receive virtual markers and immediately take a free action turn. Virtual markers cannot be kept." %}</li>
+        <li>{% translate "Take action: place one of your cubes on the next space of the 24-space turn track. Then you may place free highway parts (one on turns 1-8, two on 9-16, three on 17-24), and spend energy to move, build and trade in any order." %}</li>
+        <li>{% translate "The game ends after the 24th action turn. Highest score wins; tied scores are joint winners." %}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h2>{% translate "Moving" %}</h2>
+    <div class="help-qa">
+      <ul>
+        <li>{% translate "One movement energy lets you move 8 steps if your ship has 3 filled gear slots, 5 steps if it has 4-6, and 2 steps if it has 7-8." %}</li>
+        <li>{% translate "Each dot and each planet counts as one step. Dots with your own highway are skipped and cost nothing." %}</li>
+        <li>{% translate "You can stop in mid-space. If you stop on a new planet you must explore it and take the top available tile of either consumer column; you may fly through a planet without exploring if you have steps left." %}</li>
+        <li>{% translate "A Schrödinger pathway entrance lets any player spend one movement energy to teleport one-way to the matching exit." %}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h2>{% translate "Building and trading" %}</h2>
+    <div class="help-qa">
+      <ul>
+        <li>{% translate "Factories: pay the two input goods plus one build energy. They score 10 points (intermediate), 25 points (10-point final) or 50 points (30-point final)." %}</li>
+        <li>{% translate "Consumer sites cost the printed good plus one build energy and score 10, 25 or 50 points. Spaceyards cost the printed good plus any other different good plus one build energy, score 10 points and give the gear part shown." %}</li>
+        <li>{% translate "Mines produce one primary good per trade energy. Factories convert input goods into their product. Consumer sites buy the printed good for 3, 10 or 30 points. A spaceyard sells ship gear." %}</li>
+        <li>{% translate "Each trade use costs one trade energy, plus the goods shown. Three build energy lets you claim a privilege on a mine, factory, spaceyard or consumer site: the first trade there costs one trade energy and further uses that turn are free." %}</li>
+        <li>{% translate "Cargo holds hold two goods each; the built-in small hold holds one. While on a planet you may carry any amount, but you must discard down to capacity before moving or ending your turn." %}</li>
+        <li>{% translate "Goods can be traded freely with players whose ships are on the same planet. Use the Trade panel to propose an offer; the other player can accept or decline." %}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h2>{% translate "Starting auction" %}</h2>
+    <div class="help-qa">
+      <p>{% translate "If the game was created with the starting auction, every player secretly bids victory points. Highest bid chooses their turn order first; bids are subtracted from final scores. A tie is resolved by one re-bid round, then by seat order. Practice games skip the auction." %}</p>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h2>{% translate "Using this site" %}</h2>
+    <div class="help-qa">
+      <ul>
+        <li>{% translate "The board shows your ship, all highways, planet mines and sites, and the two consumer columns." %}</li>
+        <li>{% translate "The left panel shows the current player's ship, gear, energy and cargo. The right panel contains the action buttons." %}</li>
+        <li>{% translate "History records every action. Replay steps through saved positions. Rewind restores an earlier position for all players; use it courteously." %}</li>
+        <li>{% translate "If a player times out, the other players can vote to kick them out and skip their turn." %}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h2>{% translate "Further Help" %}</h2>
+    <p>
+      <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>
+      <img id="contactEmailImg" src="{% static 'Lobby/email.png' %}" alt="Email Address" width="400" height="30" />
+    </p>
   </div>
 {% endblock content %}

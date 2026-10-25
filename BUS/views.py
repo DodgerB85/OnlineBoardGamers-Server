@@ -25,6 +25,7 @@ from Lobby.gameViewHelpers import (
 # from django.utils import translation
 # fore change comment
 from Lobby.models import Game, Profile, User
+from Lobby.sharedFunctions.permissions import can_act_in_game
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_updateFlexiTime,
@@ -38,7 +39,26 @@ from .common import create_bus_game
 if TYPE_CHECKING:
     from Lobby.presenters import BUSpresenter
 
-BUS_DB_LOCK_NAME = "lockTGZgame_"
+BUS_DB_LOCK_NAME = "lockBUSgame_"
+
+
+def _preferred_bus_options(profile):
+    """Return [colour, board, highContrast] with the documented defaults."""
+    options = []
+    if profile is not None and getattr(profile, "preferredBUSoptions", ""):
+        try:
+            options = json.loads(profile.preferredBUSoptions)
+        except (TypeError, ValueError):
+            options = []
+    if not isinstance(options, list):
+        options = []
+    options = options[:3]
+    while len(options) < 3:
+        options.append([-1, 0, 0][len(options)])
+    try:
+        return [int(options[0]), int(options[1]), 1 if options[2] else 0]
+    except (TypeError, ValueError):
+        return [-1, 0, 0]
 
 
 def index(request):
@@ -96,13 +116,12 @@ def showBUSgame(request, game_id, spoilerFree=False, replayStep=1):
         return render(request, "BUS/showBUSgame.html", returnData)
 
     returnData.update(result["auth_data"])
-    returnData["preferredBusBoard"] = result["user_profile"].preferredBusBoard
+    returnData["preferredBUSoptions"] = _preferred_bus_options(result["user_profile"])
 
     if not result["is_involved"]:
         return render(request, "BUS/showBUSgame.html", returnData)
 
     returnData.update(result["involved_data"])
-    returnData["preferredBusColour"] = result["user_profile"].preferredBusColour
 
     ## NEW GAME
     if currentGame.gameData == "":
@@ -207,7 +226,16 @@ def _sendChatMessage(request):
         # if currentGame.chatData != "":
         #    currentChatData = json.loads(LZS.decompressFromEncodedURIComponent(currentGame.chatData)) if currentGame.chatData else []
 
-        currentChatData.insert(0, jsonData["newEntry"])
+        new_entry = jsonData["newEntry"]
+        if (
+            not isinstance(new_entry, list)
+            or len(new_entry) < 3
+            or not isinstance(new_entry[2], str)
+            or len(new_entry[2]) > 2000
+        ):
+            return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
+        new_entry[0] = request.user.username
+        currentChatData.insert(0, new_entry)
 
         # save chat data.
         compressedChatData = LZS.compressToEncodedURIComponent(json.dumps(currentChatData))
@@ -245,6 +273,9 @@ def _processBUSturn(request):
         raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("BUSpresenter", currentGame.presenter())
+
+    if not can_act_in_game(request.user, currentGame):
+        return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
@@ -515,7 +546,9 @@ def changeBUSviewport(request):
     if jsonData["action"] == "saveBoardPreference":
         try:
             profile = Profile.objects.get(user=request.user)
-            profile.preferredBusBoard = jsonData["boardNumber"]
+            options = _preferred_bus_options(profile)
+            options[1] = int(jsonData["boardNumber"])
+            profile.preferredBUSoptions = json.dumps(options, separators=(",", ":"))
             profile.save()
         except Profile.DoesNotExist:
             print(f"* * * * * CHANGE BUS BOARD ERROR: Profile not found for {request.user.username}")

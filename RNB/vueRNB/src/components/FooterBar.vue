@@ -14,14 +14,15 @@ import * as view from "../js/RNBview"
 		<div class="content">
 			<img :src="view.getImage('RNBbox')" class="cover" />
 			<p>
-				Roads & Boats is a board game by Jeroen Doumen and Joris Wiersinga, published by
-				<a target="_blank" href="https://www.splottershop.com/">Splotter Spellen</a>
-				.
+				<i18n-t keypath="footer.gameBy" tag="span" scope="global">
+					<template #publisher><a target="_blank" href="https://www.splottershop.com/">{{ $t("footer.publisher") }}</a></template>
+				</i18n-t>
 			</p>
-			<p>Online Board Gamers implementation by DodgerB & vraid. Permissions Provided.</p>
+			<p>{{ $t("footer.implementation") }}</p>
 			<p>
-				Menu icons from
-				<a href="http://game-icons.net">game-icons.net</a>
+				<i18n-t keypath="footer.menuIcons" tag="span" scope="global">
+					<template #link><a href="http://game-icons.net">game-icons.net</a></template>
+				</i18n-t>
 			</p>
 		</div>
 	</div>

@@ -222,11 +222,13 @@
     
     {% block script %}
         {% compress js %}
+            <script src="{% static 'Lobby/createGamePage.js' %}"></script>
             <script src="{% static 'Lobby/createAQYgame.js' %}"></script>
             <script src="{% static 'Lobby/miniTournament.js' %}"></script>
         {% endcompress %}
         <script>
     var global = {};
+    {% include "Lobby/kickoutOptions.html" %}
     global.player2normText = '{% translate "Leave blank to invite anybody" %}';
     global.player2practiceText = '{% translate "You can change the in-game name of the other players" %}';
     {% if experienced %}

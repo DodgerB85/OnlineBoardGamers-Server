@@ -120,7 +120,7 @@
   // Core game data
   initData.gameID = {{ gameID|default:0 }};
   initData.gameName = "{{ gameName|default:"" }}";
-  initData.gameData = '{{ gameData|default:""|safe }}';
+  initData.gameData = '{{ gameData|default:""|escapejs }}';
   initData.gameCreationTimestamp = {{ gameCreationTimestamp|default:0 }};
   initData.myZoomLevel = {{ myZoomLevel|default:200 }};
   initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe|default:"[]"}};
@@ -135,6 +135,7 @@
   initData.startingMap = {{ startingMap|default:"[]" }}
   initData.moveData = '{{ moveData|default:"" }}'
   initData.highContrastBoardItems = {% if highContrastBoardItems %}true{% else %}false{% endif %};
+  initData.prefersReducedMotion = {% if prefersReducedMotion %}true{% else %}false{% endif %};
 
   // Game state
   {% if finishedGame %}
@@ -169,7 +170,7 @@
   initData.notes = '{{ currentNotes | escapejs }}';
   {% if not gameData %}
   {% if displayNames %}
-  initData.displayNames = {{ displayNames | safe }};
+  initData.displayNames = JSON.parse('{{ displayNames|escapejs }}');
   {% endif %}
   {% endif %}
   {% endif %}
@@ -180,7 +181,7 @@
   {% if gameData and phase == 13 %}initData.startingOptions = {{ startingOptionsLiteral }};{% endif %}
   initData.assistance = {{ showAssistance|default:1 }};
   {% if currentPlayers %}initData.currentPlayersArray = {{ currentPlayers|safe|default:"[]" }};{% endif %}
-  initData.preferedColor = {{ preferredColour|default:-1 }};
+  initData.preferedColor = {{ preferredColour|default_if_none:-1 }};
   {% if secondsToNextKickout %}initData.secondsToNextKickout = {{ secondsToNextKickout }};{% endif %}
   {% if currentNotes %}initData.currentNotes = '{{ currentNotes | escapejs }}';{% endif %}
   {% if nextURL %}initData.nextURLGlobal = "{{ nextURL|safe }}";{% endif %}

@@ -56,6 +56,7 @@ const hexesForDisplay = computed(() =>
 		roadSegments: hex.roadSegments,
 		hexGfx: hex.hexGfx,
 		mineData: hex.mineData,
+		fullTrainTrackPath: hex.fullTrainTrackPath,
 	}))
 )
 
@@ -184,8 +185,8 @@ const playerFilledSVG = `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.or
 	<div>
 		<h2>{{ personal.mapName }}</h2>
 		<div class="mapDescriptionDiv">{{ personal.mapDescription }}</div>
-		<div v-for="player in personal.playerCount" :key="player" class="playerCount" title="Player" v-html="playerFilledSVG"></div>
-		<p v-if="personal.showPlayerCountWarning" class="errorText">Caution: Number of players do not match this map's player count</p>
+		<div v-for="player in personal.playerCount" :key="player" class="playerCount" :title="$t('playerTable.player')" v-html="playerFilledSVG"></div>
+		<p v-if="personal.showPlayerCountWarning" class="errorText">{{ $t("mapEditor.playerCountWarning") }}</p>
 		<div
 			id="hexDIV"
 			:style="{
@@ -193,6 +194,12 @@ const playerFilledSVG = `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.or
 				height: store.canvasHeight + 'px',
 			}">
 			<svg id="hexSVG" v-if="store.mapData.hexData" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" :viewBox="hd.getViewbox()">
+				<defs>
+					<mask v-for="hex in hexesForDisplay" :key="'trainTrackMask' + hex.hexID" :id="`mapOnlyTrainTrackMask${hex.hexID}`" maskUnits="userSpaceOnUse" x="-20000" y="-20000" width="40000" height="40000">
+						<rect x="-20000" y="-20000" width="40000" height="40000" fill="white" />
+						<path :d="hex.fullTrainTrackPath" stroke="black" :stroke-width="(84 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+					</mask>
+				</defs>
 				<!-- MAKE UP AN INDIVIDUAL HEX HERE WITH ALL ITEMS ON TOP OF IT. IT CAN THEN BE ROATED TO FLAT TOP IF NEEDED BEFORE BEING MOVED TO THE CORRECT LOCATION -->
 				<!-- LAYER 1 -- JUST THE HEX ART AND OUTLINES-->
 				<g v-for="(hex, idx) in hexesForDisplay" :key="idx" :transform="`translate(${hex.rawXY[0]} , ${hex.rawXY[1]})`">
@@ -221,6 +228,10 @@ const playerFilledSVG = `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.or
 								<path :d="hex.fullRoadPath" stroke="#1C2526" :stroke-width="60 * store.RATIO" stroke-linejoin="round" stroke-linecap="round" />
 								<path :d="hex.fullRoadPath" stroke="#F5F5F5" :stroke-width="(7 * store.RATIO).toFixed(0)" :stroke-dasharray="`${(25 * store.RATIO).toFixed(0)} ${(20 * store.RATIO).toFixed(0)}`" fill="none" />
 							</g>
+						</g>
+						<!-- TRAIN TRACKS -->
+						<g v-if="store.gameOptions.useTrains && hex.fullTrainTrackPath">
+							<path :d="hex.fullTrainTrackPath" stroke="#1A237E" :stroke-width="(124 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" :mask="`url(#mapOnlyTrainTrackMask${hex.hexID})`" />
 						</g>
 					</g>
 					<!-- NOT FINE TO ROTATE TO FLAT-->

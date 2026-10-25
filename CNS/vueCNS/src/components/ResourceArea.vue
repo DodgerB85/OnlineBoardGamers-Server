@@ -30,8 +30,8 @@ function clickedRes(index) {
   <template v-if="store.gameflow.phase === rf.PHASE_NETWORK">
     <div id="ResourceAreaNetwork" v-if="store.context.availableResources.some(value => value !== 0)">
       <div class="ARtextDiv">
-        New Resources<br />
-        INCLUDING Stored Resources:
+        {{ $t("resourceArea.newResources") }}<br />
+        {{ $t("resourceArea.includingStored") }}
       </div>
       <template v-for="(amount, index) in store.context.availableResources" :key="index">
         <div v-if="amount !== 0" onselectstart="return false;" class="singleResDiv">
@@ -40,13 +40,13 @@ function clickedRes(index) {
         </div>
       </template>
     </div>
-    <div v-else-if="store.context.action !== rf.ACT_CONFIRM_END_TURN" id="noResourceAreaNetwork">No New Resources</div>
+    <div v-else-if="store.context.action !== rf.ACT_CONFIRM_END_TURN" id="noResourceAreaNetwork">{{ $t("resourceArea.noNewResources") }}</div>
   </template>
 
   <template v-else>
     <div id="ResourceArea" v-if="store.context.availableResources.some(value => value !== 0)">
       <div class="ARtextDiv">
-        Available<br />Resources:
+        {{ $t("resourceArea.availableResources") }}
       </div>
       <template v-for="(amount, index) in store.context.availableResources" :key="index">
         <div v-if="amount !== 0" @click="clickedRes(index)" onselectstart="return false;" class="singleResDiv"
@@ -56,7 +56,7 @@ function clickedRes(index) {
         </div>
       </template>
     </div>
-    <div v-else-if="store.context.action !== rf.ACT_CONFIRM_END_TURN" id="noResourceArea">No Available Resources</div>
+    <div v-else-if="store.context.action !== rf.ACT_CONFIRM_END_TURN" id="noResourceArea">{{ $t("resourceArea.noAvailableResources") }}</div>
   </template>
 </template>
 

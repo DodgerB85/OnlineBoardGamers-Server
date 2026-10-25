@@ -4,6 +4,9 @@
 
 import * as rf from "./URRreference"
 import * as water from "./URRwater"
+import i18n from "../i18n.js"
+
+const t = i18n.global.t
 
 export function playerIndexByName(game, name) {
 	return game.players.findIndex((player) => player.name === name || player.displayName === name)
@@ -31,17 +34,24 @@ export function currentStateId(game) {
 }
 
 export function phaseStr(phase) {
-	if (phase === rf.PHASE_DIVIDING_NATIONS) return "Dividing the Independent Nations"
-	if (phase === rf.PHASE_SETTLEMENT) return "Settlement"
-	if (phase === rf.PHASE_DEVELOPMENT) return "Development"
-	if (phase === rf.PHASE_RAINY_SEASON) return "Rainy Season"
-	if (phase === rf.PHASE_GAME_OVER) return "Game Over"
-	return "Unknown phase - " + phase
+	if (phase === rf.PHASE_DIVIDING_NATIONS) return t("phase.dividingNations")
+	if (phase === rf.PHASE_SETTLEMENT) return t("phase.settlement")
+	if (phase === rf.PHASE_DEVELOPMENT) return t("phase.development")
+	if (phase === rf.PHASE_RAINY_SEASON) return t("phase.rainySeason")
+	if (phase === rf.PHASE_GAME_OVER) return t("phase.gameOver")
+	return t("phase.unknown", { phase })
+}
+
+export function kindName(kind) {
+	return kind === "pump" ? t("common.pump") : kind === "reservoir" ? t("common.reservoir") : kind
 }
 
 export function waterworkMeasure(work) {
-	if (work.kind === "pump") return work.capacity === "M" ? "unlimited reach" : `reach: ${work.capacity} canal${Number(work.capacity) === 1 ? "" : "s"}`
-	return `capacity: ${work.capacity === "M" ? "unlimited" : work.capacity} water`
+	if (work.kind === "pump") {
+		if (work.capacity === "M") return t("map.unlimitedReach")
+		return Number(work.capacity) === 1 ? t("map.reachOne", { count: work.capacity }) : t("map.reach", { count: work.capacity })
+	}
+	return t("map.capacity", { capacity: work.capacity === "M" ? t("supply.unlimited") : work.capacity })
 }
 
 export function getLeadershipChanges(before, after) {
@@ -53,8 +63,8 @@ export function getLeadershipChanges(before, after) {
 		id: state.id, isActive: state.isActive, king: state.king,
 		hasEmerged: state.isActive && !before.states[state.id].isActive,
 		previousKing: before.states[state.id].king,
-		previousName: before.states[state.id].king === null ? "None" : before.players[before.states[state.id].king].displayName,
-		nextName: state.king === null ? "None" : after.players[state.king].displayName,
+		previousName: before.states[state.id].king === null ? t("common.none") : before.players[before.states[state.id].king].displayName,
+		nextName: state.king === null ? t("common.none") : after.players[state.king].displayName,
 	}))
 }
 

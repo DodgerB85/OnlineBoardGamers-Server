@@ -8,6 +8,8 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 const personal = usePersonalStore()
 
+import i18n from "../i18n"
+
 import { computed } from "vue"
 
 const forwardChars = ["A", "B", "C", "D", "E", "F"]
@@ -52,7 +54,19 @@ function getReminaingBuildingSpots() {
 			if (store.junctions[i][j] > 0) buildingsPlaced++
 		}
 	}
-	return 47 - buildingsPlaced
+	const totalSpots = personal.selectedBoard === rf.BOARD_PITTS ? 53 : 47
+	return totalSpots - buildingsPlaced
+}
+
+function designerStatusText(status) {
+	if (status === rf.DESIGNER_NOT_ARRIVED) return i18n.global.t("status.designerNotArrived")
+	if (status === rf.DESIGNER_REMOVED) return i18n.global.t("status.designerReturned")
+	if (status >= rf.DESIGNER_ON_BUILDING_FLAG) {
+		return status % rf.DESIGNER_ON_BUILDING_FLAG === rf.DESIGNER_CON_FLAG + rf.PITTS_CONVENTION_JUNCTION ? i18n.global.t("status.designerCon") : i18n.global.t("status.designerBuilding")
+	}
+	if (status >= rf.DESIGNER_CON_FLAG) return i18n.global.t("status.designerCon")
+	if (status === rf.PITTS_AIRPORT_JUNCTION) return i18n.global.t("status.designerAirport")
+	return i18n.global.t("status.designerPittsburgh")
 }
 
 function highlight(e, entering) {
@@ -66,28 +80,34 @@ function highlight(e, entering) {
 		e.target.style["background-color"] = ""
 	}
 }
+function isNewMarker(action, index) {
+	const marker = store.context.lastActionMarker
+	return marker !== null && marker[0] === action && marker[1] === index
+}
+
 function clickedActionOption(action, index) {
 	store.context.historyObj.push(action, index)
 	controller.currentPlayerObj().remainingActions--
 	store.actionAreaData[action][index] = controller.currentPlayerObj().colour
+	store.context.lastActionMarker = [action, index]
 	store.context.actionChosen = true
 	// Check for useless moves
 	let expansionBonus = 0
 	if (store.players.length === 5) expansionBonus = 1
 
-	if (action === 0 && index - 5 + model.maxBuses() + expansionBonus <= 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
+	if (action === 0 && index - 5 + model.maxBuses() + expansionBonus <= 0) store.context.turnEndingErrorMessage = i18n.global.t("actionSelection.cautionMaxBuses")
 	else if (action === 2) {
 		if (store.actionAreaData[1][0] !== -1 && model.maxBusesWithNewBus() - index <= 0) {
-			store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
-		} else if (store.actionAreaData[1][0] === -1 && model.maxBuses() - index === 0) store.context.turnEndingErrorMessage = "Caution: Unless a player chooses 'New Bus' then Max Buses will be too low for this action to have any effect"
+			store.context.turnEndingErrorMessage = i18n.global.t("actionSelection.cautionMaxBuses")
+		} else if (store.actionAreaData[1][0] === -1 && model.maxBuses() - index === 0) store.context.turnEndingErrorMessage = i18n.global.t("actionSelection.cautionNewBus")
 		//else if (store.actionAreaData[1][0] === -1 && controller.currentPlayerObj().buses - index === model.maxBuses()) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
 		//else if (store.actionAreaData[1][0] === -1 && controller.currentPlayerObj().buses - index < model.maxBuses()) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
 		//else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() === 0) store.context.turnEndingErrorMessage = "Caution: Unless a player chooses 'New Bus' then Max Buses will be too low for this action to have any effect"
-		else if (store.actionAreaData[1][0] === -1 && model.maxBuses() - index < 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
+		else if (store.actionAreaData[1][0] === -1 && model.maxBuses() - index < 0) store.context.turnEndingErrorMessage = i18n.global.t("actionSelection.cautionMaxBuses")
 	} else if (action === 3) {
-		if (store.actionAreaData[1][0] !== -1 && index - 5 + model.maxBusesWithNewBus() <= 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
-		else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() === 0) store.context.turnEndingErrorMessage = "Caution: Unless a player chooses 'New Bus' then Max Buses will be too low for this action to have any effect"
-		else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() < 0) store.context.turnEndingErrorMessage = "Caution: Max Buses is too low for this action to have any effect"
+		if (store.actionAreaData[1][0] !== -1 && index - 5 + model.maxBusesWithNewBus() <= 0) store.context.turnEndingErrorMessage = i18n.global.t("actionSelection.cautionMaxBuses")
+		else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() === 0) store.context.turnEndingErrorMessage = i18n.global.t("actionSelection.cautionNewBus")
+		else if (store.actionAreaData[1][0] === -1 && index - 5 + model.maxBuses() < 0) store.context.turnEndingErrorMessage = i18n.global.t("actionSelection.cautionMaxBuses")
 	}
 }
 </script>
@@ -97,7 +117,7 @@ function clickedActionOption(action, index) {
 		<table class="actionTable">
 			<thead>
 				<tr>
-					<th colspan="6" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_LINE_EXPANSION }">Line Expansion</th>
+					<th colspan="6" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_LINE_EXPANSION }">{{ $t('actionSelection.lineExpansion') }}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -109,12 +129,12 @@ function clickedActionOption(action, index) {
 							:class="{
 								currentPlayerGlow: store.gameflow.phase === rf.PHASE_LINE_EXPANSION && index === 6 - store.gameflow.turnOrder.length,
 							}">
-							<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)">{{ computedReverseCharsLineExpansion[index] }}</div>
+							<div class="actionDisc" :class="['actionDisc' + personal.getCorrectedColour(marker), { markerIn: isNewMarker(0, index) }]">{{ computedReverseCharsLineExpansion[index] }}</div>
 						</td>
 
 						<!-- Else IF action time, add a circle -->
 						<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && (index === 5 || store.actionAreaData[0][index + 1] !== -1)">
-							<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(0, index)">{{ computedReverseCharsLineExpansion[index] }}</div>
+							<div class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(0, index)">{{ computedReverseCharsLineExpansion[index] }}</div>
 						</td>
 
 						<!-- Else add a letter-->
@@ -127,7 +147,7 @@ function clickedActionOption(action, index) {
 		<table class="actionTable">
 			<thead>
 				<tr>
-					<th :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ADD_BUS }">New Bus</th>
+					<th :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ADD_BUS }">{{ $t('actionSelection.newBus') }}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -135,12 +155,12 @@ function clickedActionOption(action, index) {
 					<template v-for="(marker, index) in store.actionAreaData[1]" v-bind:key="index">
 						<!-- Add a marker -->
 						<td v-if="marker !== -1">
-							<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)"></div>
+							<div class="actionDisc" :class="['actionDisc' + personal.getCorrectedColour(marker), { markerIn: isNewMarker(1, index) }]"></div>
 						</td>
 
 						<!-- Else IF action time, add a circle -->
 						<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && store.actionAreaData[1][index] === -1">
-							<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(1, index)"></div>
+							<div class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(1, index)"></div>
 						</td>
 
 						<!-- Else add a letter-->
@@ -153,7 +173,7 @@ function clickedActionOption(action, index) {
 		<table class="actionTable">
 			<thead>
 				<tr>
-					<th colspan="6" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ADD_PAX }">Passengers ({{ store.remainingPassengers }})</th>
+					<th colspan="6" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ADD_PAX }">{{ $t('actionSelection.passengers', { count: store.remainingPassengers }) }}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -165,12 +185,12 @@ function clickedActionOption(action, index) {
 							:class="{
 								currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_PAX && index === store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length,
 							}">
-							<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)">{{ computedForwardChars[index] }}</div>
+							<div class="actionDisc" :class="['actionDisc' + personal.getCorrectedColour(marker), { markerIn: isNewMarker(2, index) }]">{{ computedForwardChars[index] }}</div>
 						</td>
 
 						<!-- Else IF action time, add a circle -->
 						<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && ((index === 0 && store.actionAreaData[2][0] === -1) || (store.actionAreaData[2][index] === -1 && store.actionAreaData[2][index - 1] !== -1))">
-							<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(2, index)">{{ computedForwardChars[index] }}</div>
+							<div class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(2, index)">{{ computedForwardChars[index] }}</div>
 						</td>
 
 						<!-- Else add a letter-->
@@ -183,7 +203,7 @@ function clickedActionOption(action, index) {
 		<table class="actionTable">
 			<thead>
 				<tr>
-					<th colspan="6" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ADD_BLDGS }">New Building ({{ getReminaingBuildingSpots() }})</th>
+					<th colspan="6" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ADD_BLDGS }">{{ $t('actionSelection.newBuilding', { count: getReminaingBuildingSpots() }) }}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -195,12 +215,12 @@ function clickedActionOption(action, index) {
 							:class="{
 								currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_BLDGS && index === 6 - store.gameflow.turnOrder.length,
 							}">
-							<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)">{{ computedReverseChars[index] }}</div>
+							<div class="actionDisc" :class="['actionDisc' + personal.getCorrectedColour(marker), { markerIn: isNewMarker(3, index) }]">{{ computedReverseChars[index] }}</div>
 						</td>
 
 						<!-- Else IF action time, add a circle -->
 						<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && (index === 5 || store.actionAreaData[3][index + 1] !== -1)">
-							<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(3, index)">{{ computedReverseChars[index] }}</div>
+							<div class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(3, index)">{{ computedReverseChars[index] }}</div>
 						</td>
 
 						<!-- Else add a letter-->
@@ -213,7 +233,7 @@ function clickedActionOption(action, index) {
 		<table class="actionTable">
 			<thead>
 				<tr>
-					<th :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ALTER_TIME }">Stop Time</th>
+					<th :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ALTER_TIME }">{{ $t('actionSelection.stopTime') }}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -221,12 +241,12 @@ function clickedActionOption(action, index) {
 					<template v-for="(marker, index) in store.actionAreaData[4]" v-bind:key="index">
 						<!-- Add a marker -->
 						<td v-if="marker !== -1" :class="{ currentPlayerGlow: store.gameflow.phase === rf.PHASE_ALTER_TIME }">
-							<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)"></div>
+							<div class="actionDisc" :class="['actionDisc' + personal.getCorrectedColour(marker), { markerIn: isNewMarker(4, index) }]"></div>
 						</td>
 
 						<!-- Else IF action time, add a circle -->
 						<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && store.actionAreaData[4][index] === -1">
-							<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(4, index)"></div>
+							<div class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(4, index)"></div>
 						</td>
 
 						<!-- Else add a letter-->
@@ -239,7 +259,7 @@ function clickedActionOption(action, index) {
 		<table class="actionTable">
 			<thead>
 				<tr>
-					<th colspan="6" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_VROM }">Vrrooomm!</th>
+					<th colspan="6" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_VROM }">{{ $t('actionSelection.vrrooomm') }}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -251,12 +271,12 @@ function clickedActionOption(action, index) {
 							:class="{
 								currentPlayerGlow: store.gameflow.phase === rf.PHASE_VROM && index === store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length,
 							}">
-							<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)"></div>
+							<div class="actionDisc" :class="['actionDisc' + personal.getCorrectedColour(marker), { markerIn: isNewMarker(5, index) }]"></div>
 						</td>
 
 						<!-- Else IF action time, add a circle -->
 						<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && ((index === 0 && store.actionAreaData[5][0] === -1) || (store.actionAreaData[5][index] === -1 && store.actionAreaData[5][index - 1] !== -1))">
-							<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(5, index)">{{ controller.currentPlayerObj().buses + (controller.currentPlayerObj().colour === store.actionAreaData[1][0] ? 1 : 0) }}</div>
+							<div class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(5, index)">{{ Math.min(5, controller.currentPlayerObj().buses + (controller.currentPlayerObj().colour === store.actionAreaData[1][0] ? 1 : 0)) }}</div>
 						</td>
 
 						<!-- Else add a letter-->
@@ -269,7 +289,7 @@ function clickedActionOption(action, index) {
 		<table class="actionTable" :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_CHANGE_START_PLAYER }">
 			<thead>
 				<tr>
-					<th>Starting Player</th>
+					<th>{{ $t('actionSelection.startingPlayer') }}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -277,12 +297,12 @@ function clickedActionOption(action, index) {
 					<template v-for="(marker, index) in store.actionAreaData[6]" v-bind:key="index">
 						<!-- Add a marker -->
 						<td v-if="marker !== -1">
-							<div class="actionDisc" :class="'actionDisc' + personal.getCorrectedColour(marker)"></div>
+							<div class="actionDisc" :class="['actionDisc' + personal.getCorrectedColour(marker), { markerIn: isNewMarker(6, index) }]"></div>
 						</td>
 
 						<!-- Else IF action time, add a circle -->
 						<td v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && store.actionAreaData[6][index] === -1">
-							<div class="actionDiscOption" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(6, index)"></div>
+							<div class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()" @mouseover="highlight($event, true)" @mouseleave="highlight($event, false)" @click="clickedActionOption(6, index)"></div>
 						</td>
 
 						<!-- Else add a letter-->
@@ -296,15 +316,15 @@ function clickedActionOption(action, index) {
 			<tbody>
 				<tr>
 					<td>
-						Remaining Passengers:
+						{{ $t('actionSelection.remainingPassengers') }}
 						<span :class="{ noMoreLeft: store.remainingPassengers === 0 }">
 							{{ store.remainingPassengers }}
 						</span>
 						<br />
-						Remaining Time Stones:
+						{{ $t('actionSelection.remainingTimeStones') }}
 						<span :class="{ noMoreLeft: store.remainingTimeStones === 0 }">{{ store.remainingTimeStones }}</span>
 						<br />
-						Max Buses:
+						{{ $t('actionSelection.maxBuses') }}
 						<span>{{ model.maxBuses() }}</span>
 					</td>
 				</tr>
@@ -315,15 +335,29 @@ function clickedActionOption(action, index) {
 			<tbody>
 				<tr>
 					<td>
-						Building Spots:
+						{{ $t('actionSelection.buildingSpots') }}
 						<br />
 						<br v-if="personal.selectedBoard !== rf.BOARD_PITTS" />
 						{{ model.getEmptyBuildingSpotsByNumberTotal(1) }} / {{ model.getEmptyBuildingSpotsByNumberTotal(2) }} / {{ model.getEmptyBuildingSpotsByNumberTotal(3) }} /
 						{{ model.getEmptyBuildingSpotsByNumberTotal(4) }}
 						<span v-if="personal.selectedBoard === rf.BOARD_PITTS">
 							<br />
-							Bridges: <span :class="{ noMoreLeft: store.remainingBridgeMarkers === 0 }">{{ store.remainingBridgeMarkers }}</span>
+							{{ $t('actionSelection.bridges') }} <span :class="{ noMoreLeft: store.remainingBridgeMarkers === 0 }">{{ store.remainingBridgeMarkers }}</span>
 						</span>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<table v-if="personal.selectedBoard === rf.BOARD_PITTS" class="remainingTable pittsStatusTable">
+			<tbody>
+				<tr>
+					<td>
+						<b>{{ $t('status.pittsburgh') }}</b>
+						<br />
+						Jeroen: {{ designerStatusText(store.jeroenStatus) }}
+						<br />
+						Joris: {{ designerStatusText(store.jorisStatus) }}
 					</td>
 				</tr>
 			</tbody>
@@ -358,6 +392,19 @@ function clickedActionOption(action, index) {
 	padding: 3px;
 }
 
+.actionDisc.markerIn {
+	animation: markerIn 0.15s ease-out;
+}
+
+@keyframes markerIn {
+	from {
+		transform: scale(0.6);
+	}
+	to {
+		transform: scale(1);
+	}
+}
+
 .actionDisc0 {
 	/*background-color: blue;*/
 	background-color: #0c64ae;
@@ -390,6 +437,16 @@ function clickedActionOption(action, index) {
 .currentPhaseGlow {
 	box-shadow: 0px 0px 10px 5px lightgreen;
 	z-index: 20;
+	animation: glowIn 0.2s ease-out;
+}
+
+@keyframes glowIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 .currentPlayerGlow {
@@ -420,6 +477,7 @@ function clickedActionOption(action, index) {
 	background-color: white;
 	padding: 5px;
 	border: 1px solid black;
+	vertical-align: top;
 }
 
 .actionTable td,

@@ -10,6 +10,8 @@ import * as controller from "./BUScontroller.js"
 import { useModelStore } from "../stores/BUSstore.js"
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 
+import i18n from "../i18n"
+
 export function initGame() {
 	// Set up all Data
 	const store = useModelStore()
@@ -24,11 +26,15 @@ export function initGame() {
 	personal.trainingGame = false
 	if (window.initData.startingOptions.includes(102)) personal.trainingGame = true
 
+	const busOptions = window.initData.preferredBUSoptions || [-1, 0, 0]
+	const preferredBusBoard = busOptions[1]
+	personal.prefersHighContrast = Boolean(busOptions[2])
+
 	// Initialize junctions based on board selection
 	if (window.initData.startingOptions.includes(3)) {
 		store.initializeJunctions(rf.BOARD_PITTS)
 	} else {
-		store.initializeJunctions(window.initData.preferredBusBoard)
+		store.initializeJunctions(preferredBusBoard)
 	}
 
 	personal.liveWS = false
@@ -47,7 +53,7 @@ export function initGame() {
 		if (window.initData.startingOptions.includes(3)) {
 			personal.selectedBoard = rf.BOARD_PITTS
 		} else {
-			personal.selectedBoard = window.initData.preferredBusBoard
+			personal.selectedBoard = preferredBusBoard
 		}
 	}
 
@@ -89,7 +95,7 @@ export function initGame() {
 
 		personal.notes = funcs.htmlUnescape(window.initData.notes)
 		if (window.initData.chatNotification) store.topMenuViews.showChat = true
-		personal.preferredColour = window.initData.preferredBusColour
+		personal.preferredColour = busOptions[0]
 		personal.yourTurnAudioType = window.initData.yourTurnAudioType
 
 		// Set up and save new game
@@ -137,12 +143,12 @@ export function initGame() {
 
 	// If new, save, otherwise, import data
 	if (window.initData.pov == undefined && window.initData.gameData === "") {
-		store.rewindErrorText = "The game has not yet started"
+		store.rewindErrorText = i18n.global.t("io.gameNotStarted")
 		// Create the <h1> element
 		var heading = document.createElement("h1")
 
 		// Set the text content of the <h1> element
-		heading.textContent = "The game has not yet started"
+		heading.textContent = i18n.global.t("io.gameNotStarted")
 
 		// Get a reference to the body element
 		var body = document.body
@@ -180,58 +186,58 @@ export function maxBuses() {
 export function maxBusesWithNewBus() {
 	const store = useModelStore()
 	if (store.actionAreaData[1][0] === -1) return maxBuses()
-	return Math.max(maxBuses(), controller.getPlayerByColour(store.actionAreaData[1][0]).buses + 1)
+	// Once the New Bus phase has resolved, its bus is already counted in maxBuses().
+	// Only anticipate it while choosing actions or resolving Line Expansion.
+	if (store.gameflow.phase >= rf.PHASE_ADD_BUS) return maxBuses()
+	return Math.max(maxBuses(), Math.min(5, controller.getPlayerByColour(store.actionAreaData[1][0]).buses + 1))
+}
+
+// One ranking used by the winner, the game-over table, score discs and saved final order.
+// Primary: net score (time stones are already deducted from score).
+// Secondary: most time stones. Tertiary: first to reach that net score.
+// Bots never win: they are pushed behind human players.
+function comparePlayers(a, b) {
+	const aIsBot = a.displayName === rf.BOT_NAME
+	const bIsBot = b.displayName === rf.BOT_NAME
+	if (aIsBot !== bIsBot) return aIsBot ? 1 : -1
+
+	return (
+		Math.floor(b.score) - Math.floor(a.score) ||
+		b.timeStones - a.timeStones ||
+		(b.maxScore || 0) - (a.maxScore || 0) ||
+		(b.score || 0) - (a.score || 0)
+	)
+}
+
+export function getFinalRankingIndices() {
+	const store = useModelStore()
+	return store.players
+		.map((_, index) => index)
+		.sort((a, b) => comparePlayers(store.players[a], store.players[b]) || a - b)
+}
+
+export function getFinalRanking() {
+	const store = useModelStore()
+	return getFinalRankingIndices().map((index) => store.players[index])
+}
+
+export function getWinnerPlayer() {
+	const ranking = getFinalRanking()
+	return ranking.length > 0 ? ranking[0] : null
 }
 
 export function getWinnerName(returnScores) {
-	const store = useModelStore()
-	// order players by score and timestones
-	let resArr = [...store.players]
-	let cmp = (a, b) => (a > b) - (a < b)
-
-	/* I WANT A SORT OF FLOOR(SCORE) -> TIMESTONES -> MAX SCORE */
-
-	// sort by timestones in equal score
-	resArr.sort(function (a, b) {
-		// Move bots to the end of the sort
-		const aIsBot = a.displayName === rf.BOT_NAME
-		const bIsBot = b.displayName === rf.BOT_NAME
-		if (aIsBot && !bIsBot) return 1
-		if (!aIsBot && bIsBot) return -1
-
-		// Primary: higher score wins
-		// Secondary: more timestones wins (not fewer)
-		// Tertiary: higher maxScore wins (reached score first)
-		return cmp(Math.floor(b.score), Math.floor(a.score)) || cmp(b.timeStones, a.timeStones) || cmp(b.maxScore, a.maxScore)
-	})
-
-	if (returnScores) return resArr
-	// Now, need to do a strict sort on scores, as higher decimal is a win
-	/* resArr.sort(function (a, b) {
-       return cmp(b.score, a.score)
-     })*/
-	// Now sort on timestones
-	/*resArr.sort(function (a, b) {
-      return cmp(b.timeStones, a.timeStones)
-    })*/
+	const ranking = getFinalRanking()
+	if (returnScores) return ranking
+	if (ranking.length === 0) return ["", 0]
 
 	let reason = 0
-	// If top 2 players don't have same score, then there must be 1 highest score
-	if (Math.floor(resArr[0].score) - Math.floor(resArr[1].score) !== 0) reason = 0
-	else {
-		/*let drawingPlayers = []
-      for (let i = 0; i < resArr.length; i++) if (Math.floor(resArr[0].score) - Math.floor(resArr[i].score) === 0) drawingPlayers.push([resArr[i]])
-
-      if (drawingPlayers[0].timeStones > drawingPlayers[1].timeStones) reason = 1
-      else reason = 2*/
-		if (resArr[0].timeStones > resArr[1].timeStones) reason = 1
-		else reason = 2
+	if (ranking.length > 1 && Math.floor(ranking[0].score) === Math.floor(ranking[1].score)) {
+		if (ranking[0].timeStones === ranking[1].timeStones) reason = 2
+		else reason = 1
 	}
 
-	//if (returnScores) return [resArr[0].name, resArr[1].name, resArr[2].name]
-	// then winner is bottom of the pile
-	//return [resArr[0].name, reason]
-	return [resArr[0].displayName, reason]
+	return [ranking[0].displayName, reason]
 }
 
 export function increaseScore(player) {
@@ -306,7 +312,7 @@ export function decreaseScore(player) {
 */
 
 export function getScoreObj() {
-	let resArr = getWinnerName(true)
+	let resArr = getFinalRanking()
 
 	// USE END GAME SCORING TO MAKE DISCS
 	let scoreObj = []
@@ -345,7 +351,7 @@ export function getEmptyBuildingSpots(forceReturn) {
 	if (options.length === 0) options = getEmptyBuildingSpotsByNumber(3)
 	if (options.length === 0) options = getEmptyBuildingSpotsByNumber(4)
 	if (options.length === 0) {
-		store.context.turnEndingErrorMessage = "No more building spots available"
+		store.context.turnEndingErrorMessage = i18n.global.t("actionArea.noMoreBuildingSpots")
 	}
 	return options
 }
@@ -517,39 +523,25 @@ function getJunctionLineOptions(junctionID) {
 // as legal placements (bridge spaces, forced bridge continuation).
 function applyPittJunctionRules(localPossibilities) {
 	const store = useModelStore()
+	const nonBridgeOptions = localPossibilities.filter((lineID) => !rf.PITTS_BRIDGE_LINE_IDS.includes(lineID))
 
 	// A street that already has a bridge placed on it is not a legal placement for a
 	// line marker - the only way forward is via the "expanding after a bridge" options
 	localPossibilities = localPossibilities.filter((lineID) => !store.bridges.includes(lineID))
 
 	// Bridges may not be placed during the first line marker placements (initial setup)
-	if (store.gameflow.turn === 0) {
-		// Remove bridge lines from options during turn 0
-		localPossibilities = localPossibilities.filter((lineID) => !rf.PITTS_BRIDGE_LINE_IDS.includes(lineID))
+	const canPlaceBridges = store.gameflow.turn !== 0 && store.remainingBridgeMarkers > 0
+	if (!canPlaceBridges) {
+		const withoutBridges = localPossibilities.filter((lineID) => !rf.PITTS_BRIDGE_LINE_IDS.includes(lineID))
+		return withoutBridges.length > 0 ? withoutBridges : nonBridgeOptions.filter((lineID) => !store.bridges.includes(lineID))
 	}
 
-	// Check if the only empty street from this end junction is a bridge space
-	let bridgeOnlyOption = null
-	let hasNonBridgeOption = false
-
-	for (const lineID of localPossibilities) {
-		if (rf.PITTS_BRIDGE_LINE_IDS.includes(lineID)) {
-			if (!bridgeOnlyOption) bridgeOnlyOption = lineID
-		} else {
-			hasNonBridgeOption = true
-			break
-		}
-	}
-
-	// If only bridge option exists and bridge markers are available, force bridge
-	if (bridgeOnlyOption && !hasNonBridgeOption && store.remainingBridgeMarkers > 0) {
-		localPossibilities = [bridgeOnlyOption]
-	}
-
-	// No bridge markers available, remove all bridge options
-	if (store.remainingBridgeMarkers === 0) {
-		localPossibilities = localPossibilities.filter((lineID) => !rf.PITTS_BRIDGE_LINE_IDS.includes(lineID))
-	}
+	// The rule only cares about EMPTY streets: an occupied non-bridge street is not
+	// an alternative when the only empty street is a bridge space.
+	const emptyOptions = localPossibilities.filter((lineID) => store.lines[lineID].length === 0)
+	const emptyBridgeOptions = emptyOptions.filter((lineID) => rf.PITTS_BRIDGE_LINE_IDS.includes(lineID))
+	const emptyNonBridgeOptions = emptyOptions.filter((lineID) => !rf.PITTS_BRIDGE_LINE_IDS.includes(lineID))
+	if (emptyBridgeOptions.length > 0 && emptyNonBridgeOptions.length === 0) return emptyBridgeOptions
 
 	return localPossibilities
 }
@@ -618,7 +610,7 @@ export function getLinePlacementOptions() {
 	//let lines = getLinesAroundJunction(junc)
 
 	possibilities = [...new Set(possibilities)]
-	if (possibilities.length === 0) store.context.turnEndingErrorMessage = "No Valid Line Placements Left"
+	if (possibilities.length === 0) store.context.turnEndingErrorMessage = i18n.global.t("actionArea.noLinePlacements")
 	return possibilities
 }
 
@@ -649,72 +641,6 @@ export function getPlayerNetworkJunctionsPitts(player) {
 	}
 
 	return Array.from(reachable)
-}
-
-export function canPlayerVrom(forceCheck) {
-	const store = useModelStore()
-	const personal = usePersonalStore()
-	if (!forceCheck) {
-		if (store.context.remainingVroms === 0) return false
-		if (store.gameflow.phase !== rf.PHASE_VROM) return false
-	}
-	let player = controller.currentPlayerObj()
-	let networkJunctions = [...player.playerJunctions]
-	// Pittsburgh: network includes placed bridges joined to the player's line
-	if (personal.selectedBoard === rf.BOARD_PITTS) networkJunctions = getPlayerNetworkJunctionsPitts(player)
-	let anyPax = false
-	// If no pax (or Splotter Designer) on owned junctions, cannot vrom
-	for (let i = 0; i < networkJunctions.length; i++) {
-		if (junctionHasMovableToken(networkJunctions[i])) {
-			anyPax = true
-			break
-		}
-	}
-	if (!anyPax) {
-		store.context.turnEndingErrorMessage = "No available passengers or designers in your network"
-		if (store.context.historyObj.length === 0 || store.context.historyObj[store.context.historyObj.length - 1].length !== 1) store.context.historyObj.push([1])
-		return false
-	}
-	let anyBldg = false
-	for (let i = 0; i < networkJunctions.length; i++) {
-		for (let j = 0; j < store.junctions[networkJunctions[i]].length - 1; j++) {
-			if (store.junctions[networkJunctions[i]][j] === store.desiredBuilding) {
-				anyBldg = true
-				break
-			}
-		}
-	}
-	// Pittsburgh: a designer can ride to their matching convention-centre spot when that destination
-	// type is desired, as long as they stand on one of your junctions, are not already parked on a
-	// building, and have not yet attended the Splotter Con; after attending the Splotter Con a designer
-	// can be transported back to the Airport (Returning to the Netherlands), again only when the desired
-	// type matches theirs (Jeroen - pubs, Joris - offices)
-	let specialDest = false
-	if (personal.selectedBoard === rf.BOARD_PITTS && !anyBldg) {
-		const jeroenJunction = pitts.getDesignerTransportJunction(store.jeroenStatus)
-		const jorisJunction = pitts.getDesignerTransportJunction(store.jorisStatus)
-		// Only count a designer as a valid move when they actually have a ride available (their
-		// convention-centre ride, or the return flight to the Airport when a bus route exists);
-		// this keeps the whole-turn gate in sync with what is highlighted and selectable
-		if (store.jeroenStatus !== rf.DESIGNER_REMOVED && networkJunctions.includes(jeroenJunction) && controller.canReachBuildingFromJunction(jeroenJunction, player, store, rf.DESIGNER_JEROEN)) specialDest = true
-		if (store.jorisStatus !== rf.DESIGNER_REMOVED && networkJunctions.includes(jorisJunction) && controller.canReachBuildingFromJunction(jorisJunction, player, store, rf.DESIGNER_JORIS)) specialDest = true
-	}
-	if (!anyBldg && !specialDest) {
-		store.context.turnEndingErrorMessage = "No available buildings of the desired type in your network"
-		// if the end isn't a single item, push a single item
-		if (store.context.historyObj.length === 0 || store.context.historyObj[store.context.historyObj.length - 1].length !== 1) store.context.historyObj.push([2])
-		return false
-	}
-	return true
-}
-
-// Does this junction contain a passenger, or a Splotter Designer?
-function junctionHasMovableToken(junction) {
-	const store = useModelStore()
-	if (store.junctions[junction][rf.paxIdx] > 0) return true
-	if (pitts.getDesignerTransportJunction(store.jeroenStatus) === junction) return true
-	if (pitts.getDesignerTransportJunction(store.jorisStatus) === junction) return true
-	return false
 }
 
 export function getVromBuildings() {
@@ -819,10 +745,7 @@ export function addLine_core(playerIndex, lineID) {
 					// Place bridge marker
 					store.remainingBridgeMarkers--
 					store.bridges.push(lineID)
-					// Track which end has the bridge (the end we just expanded from)
-					store.bridgeEnds[lineID] = i
-					// Set bridge expansion option for next turn
-					store.context.bridgeExpansionOption = { lineID: lineID, endIndex: i }
+					store.context.lastBridge = lineID
 
 					return startedEqual
 				} else if (player.endJunctions[i] === endJuncs[1]) {
@@ -830,10 +753,7 @@ export function addLine_core(playerIndex, lineID) {
 					// Place bridge marker
 					store.remainingBridgeMarkers--
 					store.bridges.push(lineID)
-					// Track which end has the bridge (the end we just expanded from)
-					store.bridgeEnds[lineID] = i
-					// Set bridge expansion option for next turn
-					store.context.bridgeExpansionOption = { lineID: lineID, endIndex: i }
+					store.context.lastBridge = lineID
 
 					return startedEqual
 				}
@@ -857,8 +777,7 @@ export function addLine_core(playerIndex, lineID) {
 						if (endJuncs[0] === bridgeFarEnd || endJuncs[1] === bridgeFarEnd) {
 							store.remainingBridgeMarkers--
 							store.bridges.push(lineID)
-							store.bridgeEnds[lineID] = i
-							store.context.bridgeExpansionOption = { lineID: lineID, endIndex: i }
+							store.context.lastBridge = lineID
 							return startedEqual
 						}
 					}
@@ -934,40 +853,6 @@ export function addLine_core(playerIndex, lineID) {
 			}
 		}
 	}
-}
-
-export function chooseBridgeExpansion(expandFromBridge) {
-	const store = useModelStore()
-	const player = controller.currentPlayerObj()
-
-	if (!store.context.bridgeExpansionOption) return
-
-	const { lineID, endIndex } = store.context.bridgeExpansionOption
-
-	if (expandFromBridge) {
-		// Expand from the far end of the bridge
-		// The player's end junction is still at the near end of the bridge
-		// (it is not moved when the bridge is placed), so the far end is
-		// the other junction of the bridge line
-		const nearJunction = player.endJunctions[endIndex]
-		const bridgeEndJunction = view.getJunctionsAtEndOfLine(lineID).find((j) => j !== nearJunction)
-
-		// Set the end junctions to expand from the bridge end
-		player.endJunctions = [bridgeEndJunction, bridgeEndJunction]
-		player.endLines = [lineID, lineID]
-	} else {
-		// Expand from the last line marker before the bridge
-		// This means expanding from the other end of the line
-		const otherEndIndex = endIndex === 0 ? 1 : 0
-		const otherEndJunction = player.endJunctions[otherEndIndex]
-
-		// Set the end junctions to expand from the other end
-		player.endJunctions = [otherEndJunction, otherEndJunction]
-		player.endLines = [lineID, lineID]
-	}
-
-	// Clear the bridge expansion option
-	store.context.bridgeExpansionOption = null
 }
 
 export function getJunctionsReachableFromJunction(playerIndex, junctionID) {

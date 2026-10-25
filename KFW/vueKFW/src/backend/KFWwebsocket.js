@@ -6,6 +6,7 @@ import * as IO from "./KFW_IO"
 import * as view from "../js/KFWview"
 import * as rf from "../js/KFWreference.js"
 import * as model from "../js/KFWmodel"
+import i18n from "../i18n"
 
 export var KFWwebSocket
 let KFWconnectionPromise = null // Track the in-progress connection
@@ -155,7 +156,7 @@ async function KFWwebSocketOnInfo(IncomingInfo) {
 						let decodedGameName = tempElement.textContent
 
 						Notification.requestPermission(function (_status) {
-							const title = "It is your turn in Keyflower"
+							const title = i18n.global.t("io.yourTurnNotification")
 
 							const options = {
 								body: "" + decodedGameName + ": " + store.gameflow.turn + " - " + view.phaseStr(),

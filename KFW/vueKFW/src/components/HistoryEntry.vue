@@ -2,6 +2,7 @@
 import * as rf from "../js/KFWreference"
 import * as view from "../js/KFWview"
 import * as history from "../js/KFWhistory"
+import i18n from "../i18n.js"
 //import * as replay from "../js/KFWreplay"
 
 import HistoryHex from "./HistoryHex.vue"
@@ -245,7 +246,7 @@ function updateRetWithActions(ret, tile, entry1, cleanEntry3) {
 		ret.resTileName = rf.ALL_TILES.find((x) => x.tileID.includes(destinationTileID)).name[destinationTileUpgradeNumber]
 		// Check for boat 7A
 		let detinationTile = rf.ALL_TILES.find((x) => x.tileID.includes(destinationTileID))
-		if (destinationTileID !== ret.tileID && detinationTile.season !== rf.SEASON_HOME_TILE) ret.boat7Atext = "(using boat 7A)"
+		if (destinationTileID !== ret.tileID && detinationTile.season !== rf.SEASON_HOME_TILE) ret.boat7Atext = i18n.global.t("history.usingBoat7A")
 	} else if (ret.action === rf.ACT_TILE_GET_RANDOM_MEEPLE) {
 		//ret.incomingMeeples = tile.action[ret.upgraded + 1]
 		ret.incomingMeeples = cleanEntry3 //[cleanEntry3.length-1]
@@ -277,7 +278,7 @@ function updateRetWithActions(ret, tile, entry1, cleanEntry3) {
 			ret.resTileName = rf.ALL_TILES.find((x) => x.tileID.includes(destinationTileID)).name[destinationTileUpgradeNumber]
 			// Check for boat 7A
 			let detinationTile = rf.ALL_TILES.find((x) => x.tileID.includes(destinationTileID))
-			if (destinationTileID !== ret.tileID && detinationTile.season !== rf.SEASON_HOME_TILE) ret.boat7Atext = "(using boat 7A)"
+			if (destinationTileID !== ret.tileID && detinationTile.season !== rf.SEASON_HOME_TILE) ret.boat7Atext = i18n.global.t("history.usingBoat7A")
 		} else if (ret.upgraded === 1) {
 			ret.incomingRes = [rf.WOOD, rf.STONE, rf.IRON]
 			let destinationTileID = cleanEntry3[0]
@@ -285,7 +286,7 @@ function updateRetWithActions(ret, tile, entry1, cleanEntry3) {
 			ret.resTileName = rf.ALL_TILES.find((x) => x.tileID.includes(destinationTileID)).name[destinationTileUpgradeNumber]
 			// Check for boat 7A
 			let detinationTile = rf.ALL_TILES.find((x) => x.tileID.includes(destinationTileID))
-			if (destinationTileID !== ret.tileID && detinationTile.season !== rf.SEASON_HOME_TILE) ret.boat7Atext = "(using boat 7A)"
+			if (destinationTileID !== ret.tileID && detinationTile.season !== rf.SEASON_HOME_TILE) ret.boat7Atext = i18n.global.t("history.usingBoat7A")
 		}
 	} else if (ret.action === rf.ACT_TILE_CONTRACT_OR_AND_ITEMS) {
 		// Either assayer, or merchant
@@ -300,7 +301,7 @@ function updateRetWithActions(ret, tile, entry1, cleanEntry3) {
 					ret.incomingRes = [cleanEntry3[1]]
 					// Check for boat 7A
 					let detinationTile = rf.ALL_TILES.find((x) => x.tileID.includes(destinationTileID))
-					if (destinationTileID !== rf.TILE_M_SPRING_ASSAYER_A && detinationTile.season !== rf.SEASON_HOME_TILE) ret.boat7Atext = "(using boat 7A)"
+					if (destinationTileID !== rf.TILE_M_SPRING_ASSAYER_A && detinationTile.season !== rf.SEASON_HOME_TILE) ret.boat7Atext = i18n.global.t("history.usingBoat7A")
 				}
 				// Otherwise, is a contract
 				else if (cleanEntry3.length === 1 || (cleanEntry3.length === 2 && cleanEntry3[0] === -1)) {
@@ -321,7 +322,7 @@ function updateRetWithActions(ret, tile, entry1, cleanEntry3) {
 				ret.incomingRes = [rf.STONE, rf.IRON]
 				// Check for boat 7A
 				let detinationTile = rf.ALL_TILES.find((x) => x.tileID.includes(destinationTileID))
-				if (destinationTileID !== rf.TILE_M_SPRING_ASSAYER_B && detinationTile.season !== rf.SEASON_HOME_TILE) ret.boat7Atext = "(using boat 7A)"
+				if (destinationTileID !== rf.TILE_M_SPRING_ASSAYER_B && detinationTile.season !== rf.SEASON_HOME_TILE) ret.boat7Atext = i18n.global.t("history.usingBoat7A")
 
 				// contract
 				// Not prac, not pov, then hidden
@@ -364,7 +365,7 @@ function updateRetWithActions(ret, tile, entry1, cleanEntry3) {
 		ret.resTileName = rf.ALL_TILES.find((x) => x.tileID.includes(destinationTileID)).name[destinationTileUpgradeNumber]
 		// Check for boat 7A
 		let detinationTile = rf.ALL_TILES.find((x) => x.tileID.includes(destinationTileID))
-		if (destinationTileID !== ret.tileID && detinationTile.season !== rf.SEASON_HOME_TILE) ret.boat7Atext = "(using boat 7A)"
+		if (destinationTileID !== ret.tileID && detinationTile.season !== rf.SEASON_HOME_TILE) ret.boat7Atext = i18n.global.t("history.usingBoat7A")
 	}
 	// Summer Manual Actions
 	else if (ret.action === rf.ACT_TILE_SKILL_FOR_GREEN) {
@@ -472,13 +473,8 @@ function updateRetWithActions(ret, tile, entry1, cleanEntry3) {
 }
 
 function getOrdinal(num) {
-	if (num === 1) return "1st"
-	else if (num === 2) return "2nd"
-	else if (num === 3) return "3rd"
-	else if (num === 4) return "4th"
-	else if (num === 5) return "5th"
-	else if (num === 6) return "6th"
-	return "Unknown"
+	if (num >= 1 && num <= 6) return i18n.global.t("common.ordinal" + num)
+	return i18n.global.t("common.unknown")
 }
 
 function getTileNameForVillageExpansion(tileID) {
@@ -503,7 +499,7 @@ function getTileNameForVillageExpansion(tileID) {
 	<template v-if="entry[0] === rf.HIST_NEW_GAME">
 		<div class="log separator mainEntry" :class="{ selectableHistory: store.viewSettings.showReplay }" @click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
 			<div class="new_turn">
-				Welcome to Keyflower!
+				{{ $t("action.welcomeTitle") }}
 				<br />
 				<div
 					v-for="(player, idx) in store.players"
@@ -532,7 +528,7 @@ function getTileNameForVillageExpansion(tileID) {
 				<span>{{ getTimeString(entry[2]) }}</span>
 			</div>
 			<div class="mainEntry new_turn">
-				<b><u>Final Scores</u></b>
+				<b><u>{{ $t("history.finalScores") }}</u></b>
 				<br />
 				<br />
 				<!--<template v-if="store.context.finalPositions.length === 1">
@@ -544,7 +540,7 @@ function getTileNameForVillageExpansion(tileID) {
 					{{ getOrdinal(idx + 1) }}:
 					<template v-for="(playerIndex, idx2) in finalEntry" :key="idx2">
 						<span class="mainEntryPlayer" :style="{ backgroundColor: personal.getCorrectedColourHex(store.players[playerIndex].colour), color: personal.getCorrectedColourText(store.players[playerIndex].colour) }">{{ store.players[playerIndex].displayName }}</span>
-						Total: {{ store.players[playerIndex].finalScore }}
+						{{ $t("history.total", { score: store.players[playerIndex].finalScore }) }}
 						<br />
 					</template>
 				</template>
@@ -561,7 +557,7 @@ function getTileNameForVillageExpansion(tileID) {
 			</div>
 			<div class="mainEntry">
 				<b>
-					<u>{{ view.getSeasonText(entry[3][0]) }} Tiles Used</u>
+					<u>{{ $t("history.seasonTilesUsed", { season: view.getSeasonText(entry[3][0]) }) }}</u>
 				</b>
 				<br />
 				<span v-for="(tile_id, idx) in entry[3].slice(1)" :key="idx">
@@ -580,7 +576,7 @@ function getTileNameForVillageExpansion(tileID) {
 			</div>
 			<div class="mainEntry">
 				<b>
-					<u>New Boat Resources</u>
+					<u>{{ $t("history.newBoatResources") }}</u>
 				</b>
 				<br />
 				<template v-for="(entry, idx1) in computedEntry3.boatInfos" :key="idx1">
@@ -627,7 +623,7 @@ function getTileNameForVillageExpansion(tileID) {
 			</div>
 			<div class="mainEntry">
 				<b>
-					<u>Chosen Winter Tiles</u>
+					<u>{{ $t("history.chosenWinterTiles") }}</u>
 				</b>
 				<br />
 				<template v-if="computedEntry3.chosenCount.length > 0">
@@ -649,11 +645,11 @@ function getTileNameForVillageExpansion(tileID) {
 				<span>{{ getTimeString(entry[2]) }}</span>
 			</div>
 			<div class="mainEntry">
-				<b><u>Collected Workers on Village Tiles</u></b>
+				<b><u>{{ $t("history.collectedVillageWorkers") }}</u></b>
 				<br />
 				<template v-for="(dataArrays, playerIndex) in entry[3]" :key="playerIndex">
 					<span class="mainEntryPlayer" :style="{ backgroundColor: personal.getCorrectedColourHex(store.players[playerIndex].colour), color: personal.getCorrectedColourText(store.players[playerIndex].colour) }">{{ store.players[playerIndex].displayName }}</span>
-					<template v-if="dataArrays.length === 0">No workers in village</template>
+					<template v-if="dataArrays.length === 0">{{ $t("history.noWorkersInVillage") }}</template>
 					<template v-else>
 						<template v-for="(recoveryArray, idx) in dataArrays" :key="idx">
 							{{ getTileNamwFromTileID(recoveryArray[0]) }}:
@@ -674,11 +670,11 @@ function getTileNameForVillageExpansion(tileID) {
 				<span>{{ getTimeString(entry[2]) }}</span>
 			</div>
 			<div class="mainEntry">
-				<b><u>Collected Outbid Workers</u></b>
+				<b><u>{{ $t("history.collectedOutbidWorkers") }}</u></b>
 				<br />
 				<template v-for="(dataArrays, playerIndex) in entry[3]" :key="playerIndex">
 					<span class="mainEntryPlayer" :style="{ backgroundColor: personal.getCorrectedColourHex(store.players[playerIndex].colour), color: personal.getCorrectedColourText(store.players[playerIndex].colour) }">{{ store.players[playerIndex].displayName }}</span>
-					<template v-if="dataArrays.length === 0">No outbid workers</template>
+					<template v-if="dataArrays.length === 0">{{ $t("history.noOutbidWorkers") }}</template>
 					<template v-else>
 						<template v-for="(recoveryArray, idx) in dataArrays" :key="idx">
 							{{ getTileNamwFromTileID(recoveryArray[0]) }}:
@@ -699,11 +695,11 @@ function getTileNameForVillageExpansion(tileID) {
 				<span>{{ getTimeString(entry[2]) }}</span>
 			</div>
 			<div class="mainEntry">
-				<b><u>Collected Village Tiles</u></b>
+				<b><u>{{ $t("history.collectedVillageTiles") }}</u></b>
 				<br />
 				<template v-for="(dataArrays, playerIndex) in entry[3]" :key="playerIndex">
 					<span class="mainEntryPlayer" :style="{ backgroundColor: personal.getCorrectedColourHex(store.players[playerIndex].colour), color: personal.getCorrectedColourText(store.players[playerIndex].colour) }">{{ store.players[playerIndex].displayName }}</span>
-					<template v-if="dataArrays.length === 0">No Collected Tiles</template>
+					<template v-if="dataArrays.length === 0">{{ $t("history.noCollectedTiles") }}</template>
 					<template v-else>
 						<template v-for="(wonTileArray, idx) in dataArrays" :key="idx">
 							<template v-if="wonTileArray.length > 1">
@@ -730,7 +726,7 @@ function getTileNameForVillageExpansion(tileID) {
 				<span>{{ getTimeString(entry[2]) }}</span>
 			</div>
 			<div class="mainEntry">
-				New Contracts
+				{{ $t("history.newContracts") }}
 				<br />
 				<div v-for="(contract_id, idx) in entry[3]" :key="idx" class="contractDiv">
 					<svg viewBox="77 131.5 55.5 34" class="contractSVG">
@@ -749,8 +745,8 @@ function getTileNameForVillageExpansion(tileID) {
 				<span>{{ getTimeString(entry[2]) }}</span>
 			</div>
 			<div class="mainEntry rewind">
-				<span v-if="entry[1] >= 0">Game rewound to here by {{ store.players[entry[1]].name }}</span>
-				<span v-else>Game rewound to here by Admin</span>
+				<span v-if="entry[1] >= 0">{{ $t("history.gameRewound", { name: store.players[entry[1]].name }) }}</span>
+				<span v-else>{{ $t("history.gameRewoundAdmin") }}</span>
 			</div>
 		</div>
 	</template>
@@ -761,7 +757,7 @@ function getTileNameForVillageExpansion(tileID) {
 			<div class="header">
 				<span>{{ getTimeString(entry[2]) }}</span>
 			</div>
-			<div class="mainEntry rewind">{{ entry[3][0] }} Resigns</div>
+			<div class="mainEntry rewind">{{ $t("history.resigns", { name: entry[3][0] }) }}</div>
 		</div>
 	</template>
 
@@ -771,7 +767,7 @@ function getTileNameForVillageExpansion(tileID) {
 			<div class="header">
 				<span>{{ getTimeString(entry[2]) }}</span>
 			</div>
-			<div class="mainEntry rewind">{{ entry[3][0] }} was kicked out</div>
+			<div class="mainEntry rewind">{{ $t("history.wasKickedOut", { name: entry[3][0] }) }}</div>
 		</div>
 	</template>
 
@@ -794,7 +790,7 @@ function getTileNameForVillageExpansion(tileID) {
 				</div>
 				<div class="rightDiv meepleSourceDiv">
 					<template v-if="computedEntry3.fromSupply.length > 0">
-						<b><u>Bids From Supply</u></b>
+						<b><u>{{ $t("history.bidsFromSupply") }}</u></b>
 						<br />
 						<img v-for="(meeple, idx) in computedEntry3.fromSupply" :key="idx" class="meepleImg" :src="view.getImage('meeple_' + meeple)" />
 						<br />
@@ -802,7 +798,7 @@ function getTileNameForVillageExpansion(tileID) {
 					<template v-if="computedEntry3.movedMeeples.length > 0">
 						<template v-for="(movedMeeples, idx) in computedEntry3.movedMeeples" :key="idx">
 							<b>
-								<u>Bids From {{ getTileNameFromTile_id(movedMeeples[0]) }}</u>
+								<u>{{ $t("history.bidsFrom", { tile: getTileNameFromTile_id(movedMeeples[0]) }) }}</u>
 							</b>
 							<br />
 							<img v-for="(meeple, idx2) in movedMeeples.slice(1)" :key="idx2" class="meepleImg" :src="view.getImage('meeple_' + meeple)" />
@@ -830,7 +826,7 @@ function getTileNameForVillageExpansion(tileID) {
 				</div>
 				<div class="rightDiv meepleSourceDiv">
 					<template v-if="computedEntry3.fromSupply.length > 0">
-						<b><u>Used From Supply</u></b>
+						<b><u>{{ $t("history.usedFromSupply") }}</u></b>
 						<br />
 						<img v-for="(meeple, idx) in computedEntry3.fromSupply" :key="idx" class="meepleImg" :src="view.getImage('meeple_' + meeple)" />
 						<br />
@@ -838,7 +834,7 @@ function getTileNameForVillageExpansion(tileID) {
 					<template v-if="computedEntry3.movedMeeples.length > 0">
 						<template v-for="(movedMeeples, idx) in computedEntry3.movedMeeples" :key="idx">
 							<b>
-								<u>Used From {{ getTileNameFromTile_id(movedMeeples[0]) }}</u>
+								<u>{{ $t("history.usedFrom", { tile: getTileNameFromTile_id(movedMeeples[0]) }) }}</u>
 							</b>
 							<br />
 							<img v-for="(meeple, idx2) in movedMeeples.slice(1)" :key="idx2" class="meepleImg" :src="view.getImage('meeple_' + meeple)" />
@@ -850,76 +846,76 @@ function getTileNameForVillageExpansion(tileID) {
 			<!-- ACTION RESOLUTION -->
 			<div classs="actionResolutionDiv">
 				<template v-if="computedEntry3.usedSorcerer">
-					Uses: {{ computedEntry3.chosenTileName }}
+					{{ $t("history.uses", { tile: computedEntry3.chosenTileName }) }}
 					<br />
 				</template>
 				<template v-if="computedEntry3.action === rf.ACT_TILE_GET_RES">
-					Received:
+					{{ $t("history.received") }}
 					<img v-for="(res, idx) in computedEntry3.incomingRes" :key="idx" class="resImg" :src="view.getImage('res_' + res)" />
-					&nbsp;on {{ computedEntry3.resTileName }} {{ computedEntry3.boat7Atext }}
+					&nbsp;{{ $t("history.on") }} {{ computedEntry3.resTileName }} {{ computedEntry3.boat7Atext }}
 				</template>
 				<template v-else-if="computedEntry3.action === rf.ACT_TILE_GET_RANDOM_MEEPLE">
-					Received:
+					{{ $t("history.received") }}
 					<img v-for="(colour, idx) in computedEntry3.incomingMeeples" :key="idx" class="meepleImg" :src="view.getImage('meeple_' + colour)" />
 				</template>
 				<template v-else-if="computedEntry3.action === rf.ACT_TILE_EXCHANGE_MEEPLE_MANUAL">
-					Exchanged:
+					{{ $t("history.exchanged") }}
 					<img v-for="(colour, idx) in computedEntry3.outgoingMeeples" :key="idx" class="meepleImg" :src="view.getImage('meeple_' + colour)" />
-					for
+					{{ $t("history.for") }}
 					<img v-for="(colour, idx) in computedEntry3.incomingMeeples" :key="idx" class="meepleImg" :src="view.getImage('meeple_' + colour)" />
 				</template>
 				<template v-else-if="computedEntry3.action === rf.ACT_TILE_EXCHANGE_SKILL_FOR_SKILL">
-					Exchanged:
+					{{ $t("history.exchanged") }}
 					<img v-for="(skill, idx) in computedEntry3.outgoingSkillTiles" :key="idx" class="skillTileImg" :src="view.getImage('skillTile_' + String(skill))" />
-					for
+					{{ $t("history.for") }}
 					<img v-for="(skill, idx) in computedEntry3.incomingSkillTiles" :key="idx" class="skillTileImg" :src="view.getImage('skillTile_' + String(skill))" />
 				</template>
 				<template v-else-if="computedEntry3.action === rf.ACT_TILE_SKILL_FOR_MEEPLE">
-					Exchanged:
+					{{ $t("history.exchanged") }}
 					<img v-for="(skill, idx) in computedEntry3.outgoingSkillTiles" :key="idx" class="skillTileImg" :src="view.getImage('skillTile_' + String(skill))" />
-					for
+					{{ $t("history.for") }}
 					<img v-for="(colour, idx) in computedEntry3.incomingMeeples" :key="idx" class="meepleImg" :src="view.getImage('meeple_' + colour)" />
 				</template>
 
 				<template v-else-if="computedEntry3.action === rf.ACT_TILE_GET_MEEPLE_AND_OR_SKILL">
-					Received:
+					{{ $t("history.received") }}
 					<img v-for="(colour, idx) in computedEntry3.incomingMeeples" :key="idx" class="meepleImg" :src="view.getImage('meeple_' + colour)" />
 					<img v-for="(skill, idx) in computedEntry3.incomingSkillTiles" :key="idx" class="skillTileImg" :src="view.getImage('skillTile_' + String(skill))" />
 				</template>
 
 				<template v-else-if="computedEntry3.action === rf.ACT_TILE_GET_RANDOM_SKILL_TILE">
-					Received:
+					{{ $t("history.received") }}
 					<img v-for="(skill, idx) in computedEntry3.incomingSkillTiles" :key="idx" class="skillTileImg" :src="view.getImage('skillTile_' + String(skill))" />
 				</template>
 				<template v-else-if="computedEntry3.action === rf.ACT_TILE_GET_RES_CHOICE_THEN_ALL">
 					<!-- if upgraded, get all, otherwise get 1  -->
-					Received:
+					{{ $t("history.received") }}
 					<img v-for="(res, idx) in computedEntry3.incomingRes" :key="idx" class="resImg" :src="view.getImage('res_' + res)" />
-					&nbsp;on {{ computedEntry3.resTileName }} {{ computedEntry3.boat7Atext }}
+					&nbsp;{{ $t("history.on") }} {{ computedEntry3.resTileName }} {{ computedEntry3.boat7Atext }}
 				</template>
 				<template v-else-if="computedEntry3.action === rf.ACT_TILE_SKILL_FOR_RES">
-					Used:
+					{{ $t("history.used") }}
 					<img class="skillTileImg" :src="view.getImage('skillTile_' + computedEntry3.usedSkillTile)" />
-					Received:
+					{{ $t("history.received") }}
 					<img v-for="(res, idx) in computedEntry3.incomingRes" :key="idx" class="resImg" :src="view.getImage('res_' + res)" />
-					&nbsp;on {{ computedEntry3.resTileName }} {{ computedEntry3.boat7Atext }}
+					&nbsp;{{ $t("history.on") }} {{ computedEntry3.resTileName }} {{ computedEntry3.boat7Atext }}
 				</template>
 				<template v-else-if="computedEntry3.action === rf.ACT_TILE_EXCHANGE_MEEPLE_AUTO">
-					Exchanges:
+					{{ $t("history.exchanges") }}
 					<img v-for="(meeple, idx) in computedEntry3.outgoingMeeples" :key="idx" class="meepleImg" :src="view.getImage('meeple_' + meeple)" />
-					from
+					{{ $t("history.from") }}
 					<b>
-						<span v-if="computedEntry3.meepleSource === -1"><b>their supply</b></span>
+						<span v-if="computedEntry3.meepleSource === -1"><b>{{ $t("history.theirSupply") }}</b></span>
 						<span v-else>{{ rf.ALL_TILES.find((tile) => tile.id === computedEntry3.meepleSource).name[0] }}</span>
 					</b>
-					for
+					{{ $t("history.for") }}
 					<img v-for="(meeple, idx) in computedEntry3.incomingMeeples" :key="idx" class="meepleImg" :src="view.getImage('meeple_' + meeple)" />
 				</template>
 				<template v-else-if="computedEntry3.action === rf.ACT_TILE_CONTRACT_OR_AND_ITEMS">
-					Received:
+					{{ $t("history.received") }}
 					<template v-if="computedEntry3.incomingRes.length > 0">
 						<img v-for="(res, idx) in computedEntry3.incomingRes" :key="idx" class="resImg" :src="view.getImage('res_' + res)" />
-						on {{ computedEntry3.resTileName }} {{ computedEntry3.boat7Atext }}
+						{{ $t("history.on") }} {{ computedEntry3.resTileName }} {{ computedEntry3.boat7Atext }}
 					</template>
 					<img v-for="(skill, idx) in computedEntry3.incomingSkillTiles" :key="idx" class="skillTileImg" :src="view.getImage('skillTile_' + String(skill))" />
 					<div v-if="computedEntry3.newContractGfx !== ''" class="contractDiv">
@@ -930,13 +926,13 @@ function getTileNameForVillageExpansion(tileID) {
 					</div>
 				</template>
 				<template v-else-if="computedEntry3.action === rf.ACT_TILE_SKILL_FOR_GREEN">
-					Exchanged:
+					{{ $t("history.exchanged") }}
 					<img v-for="(skill, idx) in computedEntry3.outgoingSkillTiles" :key="idx" class="skillTileImg" :src="view.getImage('skillTile_' + String(skill))" />
-					for
+					{{ $t("history.for") }}
 					<img v-for="(meeple, idx) in computedEntry3.incomingMeeples" :key="idx" class="meepleImg" :src="view.getImage('meeple_' + meeple)" />
 				</template>
 				<template v-else-if="computedEntry3.action === rf.ACT_TILE_GET_CONTRACT">
-					Received:
+					{{ $t("history.received") }}
 					<div v-for="(contractGfx, idx) in computedEntry3.newContractGfxs" :key="idx" class="contractDiv">
 						<svg viewBox="77 131.5 55.5 34" class="contractSVG">
 							<image width="52.916668" height="31.75" preserveAspectRatio="none" :xlink:href="view.getImage(contractGfx)" x="78.386688" y="132.625" style="clip-path: url(#conttractClipPath)" />
@@ -946,7 +942,7 @@ function getTileNameForVillageExpansion(tileID) {
 				</template>
 				<template v-else-if="computedEntry3.action === rf.ACT_TILE_MOVE_AND_UPGRADE">
 					<template v-if="computedEntry3.movedResArr.length > 0">
-						<b>Moves:&nbsp;</b>
+						<b>{{ $t("history.moves") }}&nbsp;</b>
 						<template v-for="(moveData, idx) in computedEntry3.movedResArr" :key="idx">
 							<img class="resImg" :src="view.getImage('res_' + moveData.res)" />
 							from {{ getTileNamwFromTileID(moveData.fromTileID) }}
@@ -956,10 +952,10 @@ function getTileNameForVillageExpansion(tileID) {
 						<br />
 					</template>
 					<template v-if="computedEntry3.upgradedTileArr.length > 0">
-						<b>Upgrades:&nbsp;</b>
+						<b>{{ $t("history.upgrades") }}&nbsp;</b>
 						<template v-for="(upgradeData, idx) in computedEntry3.upgradedTileArr" :key="idx">
 							{{ rf.ALL_TILES.find((x) => x.tileID.includes(upgradeData.tileID)).name[0] }}
-							with
+							{{ $t("history.with") }}
 							<template v-if="upgradeData.meeplesUsed.length > 0">
 								<img v-for="(meeple, idx2) in upgradeData.meeplesUsed" :key="idx2" class="meepleImg" :src="view.getImage('meeple_' + meeple)" />
 							</template>
@@ -973,11 +969,11 @@ function getTileNameForVillageExpansion(tileID) {
 						</template>
 					</template>
 					<template v-if="computedEntry3.extensionsArr.length > 0">
-						<b>Adds Extension:&nbsp;</b>
+						<b>{{ $t("history.addsExtension") }}&nbsp;</b>
 						<template v-for="(extensionData, idx) in computedEntry3.extensionsArr" :key="idx">
 							<img class="extensionImg" :src="view.getImage(extensionData.extension_gfx)" />
 							{{ rf.ALL_TILES.find((x) => x.id === extensionData.tile_id).name[1] }}
-							with
+							{{ $t("history.with") }}
 							<template v-if="extensionData.meeplesUsed.length > 0">
 								<img v-for="(meeple, idx2) in extensionData.meeplesUsed" :key="idx2" class="meepleImg" :src="view.getImage('meeple_' + meeple)" />
 							</template>
@@ -1037,7 +1033,7 @@ function getTileNameForVillageExpansion(tileID) {
 					<span class="mainEntryPlayer topRightNameSpan" :style="{ backgroundColor: personal.getCorrectedColourHex(store.players[entry[1]].colour), color: personal.getCorrectedColourText(store.players[entry[1]].colour) }">{{ store.players[entry[1]].displayName }}</span>
 				</div>
 			</div>
-			Passes
+			{{ $t("history.passes") }}
 		</div>
 	</template>
 
@@ -1052,8 +1048,7 @@ function getTileNameForVillageExpansion(tileID) {
 					<span class="mainEntryPlayer topRightNameSpan" :style="{ backgroundColor: personal.getCorrectedColourHex(store.players[entry[1]].colour), color: personal.getCorrectedColourText(store.players[entry[1]].colour) }">{{ store.players[entry[1]].displayName }}</span>
 				</div>
 			</div>
-			Gains from Winter Boat
-			<b>Keyside</b>
+			{{ $t("history.gainsFromWinterBoat", { boat: "Keyside" }) }}
 			<br />
 			<img v-for="i in 3" :key="i" class="resImg" :src="view.getImage('res_0')" />
 			<img v-for="i in 3" :key="i" class="resImg" :src="view.getImage('res_1')" />
@@ -1078,7 +1073,7 @@ function getTileNameForVillageExpansion(tileID) {
 					<HistoryHex :tileID_prop="entry[3][0]" :upgradedProp="computedEntry3.upgraded" />
 				</div>
 				<div class="rightDiv meepleSourceDiv">
-					<b><u>Collects</u></b>
+					<b><u>{{ $t("history.collects") }}</u></b>
 					<br />
 					<!-- Meeples -->
 					<img v-for="(meeple, idx) in computedEntry3.incomingMeeples" :key="idx" class="meepleImg" :src="view.getImage('meeple_' + meeple)" />
@@ -1102,9 +1097,7 @@ function getTileNameForVillageExpansion(tileID) {
 						<br />
 						<img v-for="(res, idx) in computedEntry3.incomingResources" :key="idx" class="resImg" :src="view.getImage('res_' + res)" />
 						<template v-if="computedEntry3.boat7atileID >= 0">
-							on to
-							<b>{{ computedEntry3.boat7atileName }}</b>
-							using boat 7a
+							{{ $t("history.onToUsingBoat7a", { tile: computedEntry3.boat7atileName }) }}
 						</template>
 					</template>
 					<!-- Contracts -->
@@ -1119,25 +1112,25 @@ function getTileNameForVillageExpansion(tileID) {
 					<!-- Boat 1a -->
 					<template v-if="computedEntry3.hasBoat1a === true">
 						<br />
-						Boat 1a adds 2 random workers at the end of the turn
+						{{ $t("history.boat1aAdds") }}
 					</template>
 					<!-- Boat 1b-->
 					<template v-if="computedEntry3.hasBoat1b === true">
 						<span v-if="!computedEntry3.collectedGreenMeeple">
 							<br />
-							Boat 1b would have given 1 green worker, but there are none left
+							{{ $t("history.boat1bWouldGive") }}
 						</span>
 
 						<span v-else-if="computedEntry3.collectedGreenMeeple">
 							<br />
-							Boat 1b adds
+							{{ $t("history.boat1bAdds") }}
 							<img class="meepleImg" :src="view.getImage('meeple_green')" />
 						</span>
 					</template>
 					<!-- Boat 7b -->
 					<template v-if="computedEntry3.hasBoat7b">
 						<br />
-						Boat 7b adds
+						{{ $t("history.boat7bAdds") }}
 						<img class="resImg" :src="view.getImage('res_0')" />
 						<img class="resImg" :src="view.getImage('res_1')" />
 						<img class="resImg" :src="view.getImage('res_2')" />
@@ -1160,7 +1153,7 @@ function getTileNameForVillageExpansion(tileID) {
 				</div>
 			</div>
 			<div class="container">
-				Boat 1a gives:&nbsp;
+				{{ $t("history.boat1aGives") }}&nbsp;
 				<br />
 				<!-- Meeples -->
 				<img v-for="(meeple, idx) in computedEntry3.incomingMeeples" :key="idx" class="meepleImg" :src="view.getImage('meeple_' + meeple)" />
@@ -1186,11 +1179,7 @@ function getTileNameForVillageExpansion(tileID) {
 				</div>
 				<div class="rightDiv meepleSourceDiv">
 					<b>
-						Replaces Sea Bastion II
-						<br />
-						with
-						<br />
-						{{ computedEntry3.newName }}
+						{{ $t("history.replacesSeaBastion", { tile: computedEntry3.newName }) }}
 					</b>
 				</div>
 				<br />
@@ -1214,30 +1203,30 @@ function getTileNameForVillageExpansion(tileID) {
 					<HistoryHex :tileID_prop="entry[3][0]" :upgradedProp="computedEntry3.upgraded" />
 				</div>
 				<div class="rightDiv meepleSourceDiv">
-					<b><u>Collects boat tile</u></b>
+					<b><u>{{ $t("history.collectsBoatTile") }}</u></b>
 					<br />
 					<!-- Boat 1a -->
 					<template v-if="computedEntry3.hasBoat1a === true">
 						<br />
-						Boat 1a adds 2 random workers at the end of the turn
+						{{ $t("history.boat1aAdds") }}
 					</template>
 					<!-- Boat 1b-->
 					<template v-if="computedEntry3.hasBoat1b === true">
 						<span v-if="!computedEntry3.collectedGreenMeeple">
 							<br />
-							Boat 1b would have given 1 green worker, but there are none left
+							{{ $t("history.boat1bWouldGive") }}
 						</span>
 
 						<span v-else-if="computedEntry3.collectedGreenMeeple">
 							<br />
-							Boat 1b adds
+							{{ $t("history.boat1bAdds") }}
 							<img class="meepleImg" :src="view.getImage('meeple_green')" />
 						</span>
 					</template>
 					<!-- Boat 7b -->
 					<template v-if="computedEntry3.hasBoat7b">
 						<br />
-						Boat 7b adds
+						{{ $t("history.boat7bAdds") }}
 						<img class="resImg" :src="view.getImage('res_0')" />
 						<img class="resImg" :src="view.getImage('res_1')" />
 						<img class="resImg" :src="view.getImage('res_2')" />
@@ -1245,7 +1234,7 @@ function getTileNameForVillageExpansion(tileID) {
 					<!-- KF 2 -->
 					<template v-if="computedEntry3.keyflower2goldIncome">
 						<br />
-						Keyflower II gives
+						{{ $t("history.keyflower2Gives") }}
 						<img class="resImg" :src="view.getImage('res_3')" />
 						<img class="resImg" :src="view.getImage('res_3')" />
 						<img class="resImg" :src="view.getImage('res_3')" />
@@ -1274,14 +1263,14 @@ function getTileNameForVillageExpansion(tileID) {
 				</div>
 			</div>
 			<template v-if="entry[3].length > 0">
-				<b>Expands village:</b>
+				<b>{{ $t("history.expandsVillage") }}</b>
 				<template v-for="(tileID, idx) in entry[3]" :key="idx">
 					<span v-if="idx !== 0">,</span>
 					{{ getTileNameForVillageExpansion(tileID) }}
 				</template>
 			</template>
 			<template v-else>
-				<b>No New Tiles To Expand Village</b>
+				<b>{{ $t("history.noNewTiles") }}</b>
 			</template>
 		</div>
 	</template>
@@ -1301,7 +1290,7 @@ function getTileNameForVillageExpansion(tileID) {
 				<div class="leftDiv">
 					<HistoryHex :tileID_prop="entry[3][0]" :upgradedProp="computedEntry3.upgraded" />
 				</div>
-				<div class="rightDiv meepleSourceDiv">Upgrades for Free using Flipper</div>
+				<div class="rightDiv meepleSourceDiv">{{ $t("history.upgradesFreeFlipper") }}</div>
 				<br />
 			</div>
 		</div>
@@ -1323,7 +1312,7 @@ function getTileNameForVillageExpansion(tileID) {
 					<HistoryHex :tileID_prop="entry[3][0]" :upgradedProp="computedEntry3.upgraded" />
 				</div>
 				<div class="rightDiv meepleSourceDiv">
-					Adds extension for free using Flipper II
+					{{ $t("history.addsExtensionFreeFlipperII") }}
 					<br />
 					<img class="extensionImg" :src="view.getImage(computedEntry3.extensionGfx)" />
 				</div>

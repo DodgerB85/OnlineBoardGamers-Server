@@ -30,19 +30,19 @@ function localMarkPromiseComplete(idx) {
 		<template v-for="(promise, idx) in store.players[playerIndexProp].promises" :key="idx">
 			<div class="playerScoreSummaryDiv">
 				<span class="mainEntryPlayerNewTurn" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[promise[1]].colour)">
-					<span v-if="personal.pov === promise[1]">You</span>
+					<span v-if="personal.pov === promise[1]">{{ $t("promiseArea.you") }}</span>
 					<span v-else>{{ store.players[promise[1]].displayName }}</span>
 				</span>
 			</div>
-			promise<span v-if="personal.pov !== promise[1]">s</span>
+			<span>{{ personal.pov !== promise[1] ? $t("promiseArea.promises") : $t("promiseArea.promise") }}</span>
 			<div class="playerScoreSummaryDiv">
 				<span class="mainEntryPlayerNewTurn" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[promise[0]].colour)">
-					<span v-if="personal.pov === promise[0]">You</span>
+					<span v-if="personal.pov === promise[0]">{{ $t("promiseArea.you") }}</span>
 					<span v-else>{{ store.players[promise[0]].displayName }}</span>
 				</span>
 			</div>
 			{{ rf.PHASE_STRINGS[promise[3]] }}: {{ promise[2] }}
-			<button class="actionsLineButton" v-if="promise[0] === personal.pov" @click="localMarkPromiseComplete(idx)">Mark as Complete</button>
+			<button class="actionsLineButton" v-if="promise[0] === personal.pov" @click="localMarkPromiseComplete(idx)">{{ $t("promiseArea.markComplete") }}</button>
 			<br/>
 		</template>
 	</div>

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-16 19:49+0800\n"
+"POT-Creation-Date: 2026-10-23 00:35+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,12 +35,11 @@ msgid "Rules"
 msgstr "Reglas"
 
 #: .\HLC\templates\HLC\HLChelp.html:12
+#, python-format
 msgid ""
-"Horseless Carriage rules available <a href=\"https://boardgamegeek.com/"
-"filepage/251309/first-edition-english-rulebook\" target=\"_blank\">here</a>"
+"Horseless Carriage rules available <a href=\"%(hlc_rules_url)s\" target=\"_blank\">here</a>"
 msgstr ""
-"Reglas de Horseless Carriage disponibles <a href=\"https://boardgamegeek.com/"
-"filepage/251309/first-edition-english-rulebook\" target=\"_blank\">aquí</a>"
+"Reglas de Horseless Carriage disponibles <a href=\"%(hlc_rules_url)s\" target=\"_blank\">aquí</a>"
 
 #: .\HLC\templates\HLC\HLChelp.html:19
 msgid ""
@@ -311,16 +310,18 @@ msgid ""
 "You can give permission for the host to rewind the game back to the start of "
 "the restructuring phase. All players must give permission before the host is "
 "able to rewind the game."
-msgstr "Puedes dar permiso al anfitrión para rebobinar la partida hasta el "
-"inicio de la fase de reestructuración. Todos los jugadores deben dar permiso "
-"antes de que el anfitrión pueda rebobinar la partida."
+msgstr ""
+"Puedes dar permiso al anfitrión para rebobinar la partida hasta el inicio de "
+"la fase de reestructuración. Todos los jugadores deben dar permiso antes de "
+"que el anfitrión pueda rebobinar la partida."
 
 #: .\HLC\templates\HLC\HLCtemplate.html:97
 msgid ""
 "Tournament games are a bit more competitive, so rewinds should not be "
 "expected"
-msgstr "Los juegos de torneo son un poco más competitivos, así que no "
-"deberías esperar rebobinados"
+msgstr ""
+"Los juegos de torneo son un poco más competitivos, así que no deberías "
+"esperar rebobinados"
 
 #: .\HLC\templates\HLC\HLCtemplate.html:109
 msgid "Permission for single rewind"
@@ -348,10 +349,10 @@ msgid ""
 "As the game host, you must wait for all players to give permission. They can "
 "allow you to rewind once, or as much as you like. Try asking in chat for "
 "permission if you wish to rewind. Current Permissions:"
-msgstr "Como anfitrión de la partida, debes esperar a que todos los jugadores "
-"den permiso. Pueden permitirte rebobinar una vez, o tantas veces como "
-"quieras. Intenta pedir permiso en el chat si deseas rebobinar. Permisos "
-"actuales:"
+msgstr ""
+"Como anfitrión de la partida, debes esperar a que todos los jugadores den "
+"permiso. Pueden permitirte rebobinar una vez, o tantas veces como quieras. "
+"Intenta pedir permiso en el chat si deseas rebobinar. Permisos actuales:"
 
 #: .\HLC\templates\HLC\HLCtemplate.html:146
 msgid "Reload the whole page to refresh permissions"
@@ -361,8 +362,9 @@ msgstr "Vuelva a cargar toda la página para actualizar los permisos"
 msgid ""
 "Tournament games are a bit more competitive, so you should not feel "
 "obligated to accept a rewind request"
-msgstr "Los juegos de torneo son un poco más competitivos, así que no "
-"deberías sentirte obligado a aceptar una solicitud de rebobinado"
+msgstr ""
+"Los juegos de torneo son un poco más competitivos, así que no deberías "
+"sentirte obligado a aceptar una solicitud de rebobinado"
 
 #: .\HLC\templates\HLC\HLCtemplate.html:156
 msgid "REWIND"
@@ -491,11 +493,15 @@ msgstr ""
 "Las preferencias de notificación se pueden cambiar en tu perfil\n"
 "\n"
 
-#: .\HLC\views.py:45 .\HLC\views.py:85
+#: .\HLC\views.py:46 .\HLC\views.py:86
 msgid "Game does not exist"
 msgstr "El juego no existe"
 
-#: .\HLC\views.py:540
+#: .\HLC\views.py:91
+msgid "You are not a player in this game"
+msgstr "No eres un jugador en esta partida"
+
+#: .\HLC\views.py:544
 msgid ""
 "<b>No rewind data. Rewind limit reached. Please play on to generate more "
 "rewind data </b>"
@@ -503,6 +509,6 @@ msgstr ""
 "<b>No hay datos de rebobinado. Se alcanzó el límite de rebobinado. Sigue "
 "jugando para generar más datos de rebobinado </b>"
 
-#: .\HLC\views.py:545
+#: .\HLC\views.py:549
 msgid "<b>Permissions missing. Please reload the page and check again</b>"
 msgstr "<b>Faltan permisos. "

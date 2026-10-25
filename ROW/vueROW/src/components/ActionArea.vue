@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import * as rf from "../js/ROWreference"
 import * as controller from "../js/ROWcontroller"
 import * as map from "../js/ROWmap"
@@ -9,6 +10,7 @@ import { AI_NAME } from "../js/automa/index"
 import { useModelStore } from "../stores/ROWstore.js"
 
 const { ActionType, Hand, Status } = rf
+const { t } = useI18n()
 const store = useModelStore()
 
 const g = () => store.getGame()
@@ -44,10 +46,10 @@ const buildingOptions = computed(() => {
 })
 
 const HAND_LABEL = {
-	[Hand.NONE]: "no hand limit",
-	[Hand.GREEN]: "green hand",
-	[Hand.BLACK]: "black hand",
-	[Hand.BOTH]: "green or black hand",
+	[Hand.NONE]: "row.buildingInfo.handNone",
+	[Hand.GREEN]: "row.buildingInfo.handGreen",
+	[Hand.BLACK]: "row.buildingInfo.handBlack",
+	[Hand.BOTH]: "row.buildingInfo.handBoth",
 }
 
 function buildingImageFor(building) {
@@ -57,7 +59,7 @@ function buildingImageFor(building) {
 function buildingLabel(building) {
 	const info = playerBuildingInfo(building, g().edition)
 	if (!info) return building
-	return `${building}: ${info.craftsmen} craftsman${info.craftsmen === 1 ? "" : "en"}, ${HAND_LABEL[info.hand]}, ${info.points} point${info.points === 1 ? "" : "s"}`
+	return t("row.buildingInfo.label", { building, craftsmen: info.craftsmen, hand: t(HAND_LABEL[info.hand]), points: info.points })
 }
 
 // --- Engine moves ---
@@ -116,21 +118,21 @@ function p(type, extra = {}) {
 <template>
 	<div id="actionBar">
 		<div v-if="!controller.canAct()" class="group">
-			<div class="label">{{ store.saving ? "Saving…" : automaThinking ? "Garth is thinking…" : "Waiting for other players" }}</div>
+			<div class="label">{{ store.saving ? t('app.saving') : automaThinking ? t('row.status.garthThinking') : t('app.waitingForOthers') }}</div>
 		</div>
 		<template v-else>
 		<template v-if="!isBidding">
 		<div v-if="canMove" class="group">
-			<div class="label">Move — click a highlighted spot, {{ stepsLeft }} step{{ stepsLeft === 1 ? "" : "s" }} left (yellow = next step, cyan = further)</div>
+			<div class="label">{{ t('row.actionArea.moveStepsLeft', { steps: stepsLeft }) }}</div>
 		</div>
 
 		<div v-if="armedMove" class="group">
-			<div class="label">Move — click a highlighted spot, {{ armedMove.limit }} step{{ armedMove.limit === 1 ? "" : "s" }} at most</div>
-			<button class="act" @click="store.clearAction()">Cancel</button>
+			<div class="label">{{ t('row.actionArea.moveAtMost', { limit: armedMove.limit }) }}</div>
+			<button class="act" @click="store.clearAction()">{{ t('panels.cancel') }}</button>
 		</div>
 
 		<div v-if="hireRows.length" class="group">
-			<div class="label">Hire worker</div>
+			<div class="label">{{ t('row.actionArea.hireWorker') }}</div>
 			<template v-for="row in hireRows" :key="row.index">
 				<button v-for="w in row.workers" :key="row.index + '-' + w" class="act" @click="p(actions.includes(ActionType.HIRE_WORKER_PLUS_2) ? ActionType.HIRE_WORKER_PLUS_2 : actions.includes(ActionType.HIRE_WORKER_MINUS_1) ? ActionType.HIRE_WORKER_MINUS_1 : actions.includes(ActionType.HIRE_WORKER_MINUS_2) ? ActionType.HIRE_WORKER_MINUS_2 : ActionType.HIRE_WORKER, { row: row.index, worker: w })">
 					r{{ row.index }} {{ w }}
@@ -139,36 +141,36 @@ function p(type, extra = {}) {
 		</div>
 
 		<div v-if="buildingOptions && buildingOptions.length" class="group">
-			<div class="label">Place building — choose a spot, then place a building. Here are your available buildings.</div>
+			<div class="label">{{ t('row.actionArea.placeBuildingHint') }}</div>
 			<div class="supply">
 				<img v-for="b in buildingOptions" :key="b" class="buildingTile display" :src="buildingImageFor(b)" :alt="b" :title="buildingLabel(b)" draggable="false" />
 			</div>
 		</div>
 
 		<div v-if="actions.includes(ActionType.PLACE_BRANCHLET)" class="group">
-			<div class="label">Rails to the North — click a highlighted town on the strip</div>
+			<div class="label">{{ t('row.actionArea.placeBranchletHint') }}</div>
 			<button class="act" :class="{ active: store.selectedAction === ActionType.PLACE_BRANCHLET }" @click="store.selectAction(ActionType.PLACE_BRANCHLET)">
-				{{ store.selectedAction === ActionType.PLACE_BRANCHLET ? "Click a town" : "Place branchlet" }}
+				{{ store.selectedAction === ActionType.PLACE_BRANCHLET ? t('row.actionArea.clickTown') : t('row.actions.buttons.PLACE_BRANCHLET') }}
 			</button>
 		</div>
 
 		<div v-if="actions.includes(ActionType.APPOINT_STATION_MASTER)" class="group">
-			<div class="label">Appoint station master</div>
+			<div class="label">{{ t('row.actions.buttons.APPOINT_STATION_MASTER') }}</div>
 			<button class="act" :class="{ active: store.selectedAction === ActionType.APPOINT_STATION_MASTER }" @click="store.selectAction(ActionType.APPOINT_STATION_MASTER)">
-				{{ store.selectedAction === ActionType.APPOINT_STATION_MASTER ? "Click a worker on your player board" : "Appoint station master" }}
+				{{ store.selectedAction === ActionType.APPOINT_STATION_MASTER ? t('row.actionArea.clickWorker') : t('row.actions.buttons.APPOINT_STATION_MASTER') }}
 			</button>
 		</div>
 
 		<div v-if="bonusStationMasters.length" class="group">
-			<div class="label">Take a bonus station master tile</div>
+			<div class="label">{{ t('row.actions.buttons.TAKE_BONUS_STATION_MASTER') }}</div>
 			<div class="supply">
 				<img
 					v-for="m in bonusStationMasters"
 					:key="m"
 					class="buildingTile"
 					:src="view.stationMasterImage(m)"
-					:alt="m"
-					:title="m"
+					:alt="view.humanizeAction(m)"
+					:title="view.humanizeAction(m)"
 					draggable="false"
 					@click="p(ActionType.TAKE_BONUS_STATION_MASTER, { stationMaster: m })"
 				/>
@@ -181,7 +183,7 @@ function p(type, extra = {}) {
 		</div>
 
 		<div v-if="cardActions.length" class="group">
-			<div class="label">{{ discardOnly ? "Click a card on your player table to discard it" : "Card actions — select, then click a card on your player table" }}</div>
+			<div class="label">{{ discardOnly ? t('row.actionArea.clickCardToDiscard') : t('row.actionArea.cardActionsHint') }}</div>
 			<button
 				v-for="a in cardActions"
 				:key="a"
@@ -192,16 +194,16 @@ function p(type, extra = {}) {
 		</div>
 
 		<div class="group">
-			<div class="label">Other actions</div>
+			<div class="label">{{ t('row.actionArea.otherActions') }}</div>
 			<button v-for="a in directActions" :key="a" class="act" @click="p(a)">{{ view.humanizeAction(a) }}</button>
 		</div>
 		</template>
 
 		<div class="group">
-			<button class="act" :disabled="!store.canUndo" @click="controller.undo()">Undo</button>
-			<button class="act reset" @click="controller.resetWholeTurn()">Reset Whole Turn</button>
-			<button class="act end" :disabled="store.saving || store.game?.isEnded()" @click="controller.endTurn()">End Turn</button>
-			<button v-if="store.canSkip" class="act" :disabled="store.saving" @click="controller.skip()">Skip</button>
+			<button class="act" :disabled="!store.canUndo" @click="controller.undo()">{{ t('app.undo') }}</button>
+			<button class="act reset" @click="controller.resetWholeTurn()">{{ t('app.resetWholeTurn') }}</button>
+			<button class="act end" :disabled="store.saving || store.game?.isEnded()" @click="controller.endTurn()">{{ t('action.endTurn') }}</button>
+			<button v-if="store.canSkip" class="act" :disabled="store.saving" @click="controller.skip()">{{ t('action.skip') }}</button>
 		</div>
 		</template>
 	</div>

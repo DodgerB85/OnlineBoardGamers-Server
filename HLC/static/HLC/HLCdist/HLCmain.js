@@ -5415,10 +5415,12 @@ Model.import = function (tab) {
 		if (tab[15] != undefined && tab[16] != undefined) {
 			m.logs = []
 			var tRef = 0
+			var offsets = []
 			_.each(tab[15], function (log) {
 				if (typeof log === "number") {
 					tRef = log
-				} else {
+				} else if (log != null) {
+					// Games saved with a missing log timestamp hold a null here
 					var l = {
 						player: log[0],
 						action: log[1],
@@ -5426,13 +5428,13 @@ Model.import = function (tab) {
 					}
 					if (typeof l.param === "number") l.param = [l.param]
 					m.logs.push(l)
+					offsets.push(tab[16][m.logs.length - 1])
 				}
 			})
 
 			// FIXED AS ACCESSED ON SERVER
-			for (var i = 0; i < tab[16].length; i++) {
-				if (tab[16][i] != undefined) m.logs[i].timestamp = tab[16][i] + tRef
-				else m.logs[i].timestamp = 0
+			for (var i = 0; i < m.logs.length; i++) {
+				m.logs[i].timestamp = offsets[i] == undefined ? 0 : offsets[i] + tRef
 			}
 		}
 
@@ -9720,12 +9722,15 @@ var View = function (model) {
 	function addMessageToDisplay(message, pre) {
 		var div = $('<div class="chatentry" >')
 		var header = $('<div class="header"/>')
-		header.append('<span class="date">' + Log.giveFormattedDate(message.timestamp) + " </span>")
-		header.append('<span class="bold">' + message.name + "</span>")
+		header.append($('<span class="date">').text(Log.giveFormattedDate(message.timestamp) + " "))
+		header.append($('<span class="bold">').text(message.name))
 		div.append(header)
-		message.message = message.message.replace(/=-NEWLINE-=/g, "<br/>")
-		message.message = message.message.replace(/\n/g, "<br/>")
-		div.append('<div class="body">' + message.message + "</span>")
+		var body = $('<div class="body">')
+		String(message.message).split(/=-NEWLINE-=|\n/).forEach(function (line, i) {
+			if (i > 0) body.append("<br/>")
+			body.append(document.createTextNode(line))
+		})
+		div.append(body)
 		if (message.date != undefined) div.data("ts", message.timestamp)
 		else div.data("ts", -1)
 		if (pre === true) $("#messageList").prepend(div)
@@ -11887,8 +11892,8 @@ var Log = {
 	},
 
 	log: function (model, player, action, param, timestamp) {
-		if (timestamp == undefined) timestamp = Math.round((new Date().getTime() - IO.timeOffset) / 1000)
-		if (timestamp < 0) timestamp = 0
+		if (timestamp == undefined) timestamp = Math.round((new Date().getTime() - (IO.timeOffset || 0)) / 1000)
+		if (!(timestamp >= 0)) timestamp = 0 // also catches NaN, which would be saved as null
 
 		if (this.TECH_LOGS.indexOf(action) == -1) {
 			this.history(model, player, action, param, timestamp)
@@ -13096,6 +13101,10 @@ var IO = {
 					global.move = true
 					// Clear factory expansion excesses -- need to keep components inactive
 					global.justMoved = true
+					// Drop only your own name - later players must still look unprocessed to you
+					global.currentPlayers = global.currentPlayers.filter(function (n) {
+						return n !== global.name && n !== M.players[global.pov].name
+					})
 					V.render(M.gameFlow.unalteredTurnOrder.indexOf(global.pov))
 				}
 

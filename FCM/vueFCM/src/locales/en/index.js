@@ -9,7 +9,7 @@ import history from './history.js'
 import panels from './panels.js'
 import io from './io.js'
 
-function merge(target, source) {
+export function merge(target, source) {
 	for (const key of Object.keys(source)) {
 		const a = target[key]
 		const b = source[key]

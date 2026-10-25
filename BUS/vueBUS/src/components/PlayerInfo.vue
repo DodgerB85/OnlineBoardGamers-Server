@@ -17,19 +17,8 @@ function getActivePlayerClass(index) {
 }
 
 function getPlayerIndexOrderForTable() {
-	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
-		let scoreObj = model.getScoreObj()
-		let resArr = [...store.players]
-		for (let i = 0; i < resArr.length; i++) resArr[i].playerIndex = i
-		let order = []
-		for (let i = 0; i < scoreObj.length; i++) {
-			for (let j = 0; j < scoreObj[i][1].length; j++) {
-				let player = resArr.find((el) => el.colour === scoreObj[i][1][j])
-				order.push(player.playerIndex)
-			}
-		}
-		return order
-	} else return [...store.gameflow.fullTurnOrder]
+	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return model.getFinalRankingIndices()
+	else return [...store.gameflow.fullTurnOrder]
 }
 
 </script>
@@ -39,24 +28,24 @@ function getPlayerIndexOrderForTable() {
     <table id="playerTable">
       <thead>
         <tr>
-          <th><b>Player</b></th>
-          <th><b>Actions</b></th>
-          <th><b>Buses</b></th>
-          <th><b>Stones</b></th>
-          <th><b>Score</b></th>
+          <th><b>{{ $t('playerInfo.player') }}</b></th>
+          <th><b>{{ $t('playerInfo.actions') }}</b></th>
+          <th><b>{{ $t('playerInfo.buses') }}</b></th>
+          <th><b>{{ $t('playerInfo.stones') }}</b></th>
+          <th><b>{{ $t('playerInfo.score') }}</b></th>
         </tr>
       </thead>
       <tbody>
       <tr v-for="(arrayIndex, index) in getPlayerIndexOrderForTable()" :key="index">
         <td :class="getActivePlayerClass(arrayIndex)">
-          <a><span
+          <span
               :class="['playerInfoName', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[arrayIndex].colour)]">
-              {{ store.players[arrayIndex].displayName }} </span></a>
+              {{ store.players[arrayIndex].displayName }} </span>
         </td>
-        <td :class="{ 'noMoreLeft': (store.players[arrayIndex].remainingActions === 0) }">{{ store.players[arrayIndex].remainingActions }}</td>
-        <td>{{ store.players[arrayIndex].buses }}</td>
-        <td>{{ store.players[arrayIndex].timeStones }}</td>
-        <td>{{ Math.floor(store.players[arrayIndex].score) }}</td>
+        <td :title="$t('playerInfo.actionsTooltip')" :class="{ 'noMoreLeft': (store.players[arrayIndex].remainingActions === 0) }">{{ store.players[arrayIndex].remainingActions }}</td>
+        <td :title="$t('playerInfo.busesTooltip')">{{ store.players[arrayIndex].buses }}</td>
+        <td :title="$t('playerInfo.stonesTooltip')">{{ store.players[arrayIndex].timeStones }}</td>
+        <td :title="$t('playerInfo.scoreTooltip')">{{ Math.floor(store.players[arrayIndex].score) }}</td>
       </tr>
       </tbody>
     </table>
@@ -65,7 +54,7 @@ function getPlayerIndexOrderForTable() {
       <!-- DESIRED DESTINATION -->
       <!-- REPLAY MODE< PHASE ALTER TIME-->
       <template v-if="store.topMenuViews.showReplay && store.gameflow.phase === rf.PHASE_ALTER_TIME">
-        Destination:
+        {{ $t('playerInfo.destination') }}
         <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="buildingDesireImg"
           :src="view.getImage('building' + String(store.desiredBuilding))" alt="desiredBldg">
         <img v-if="personal.selectedBoard === rf.BOARD_OG" class="buildingDesireImg"
@@ -73,8 +62,8 @@ function getPlayerIndexOrderForTable() {
       </template>
       <!-- PHASE ALTER TIME // NOT CLICKED AN OPTION-->
       <template v-else-if="store.gameflow.phase === rf.PHASE_ALTER_TIME && !store.context.confirmEndTurn">
-        <span v-if="store.gameflow.phase <= rf.PHASE_CHOOSE_ACTIONS || store.actionAreaData[4][0] !== -1">Expected
-        </span>Destination:
+        <span v-if="store.gameflow.phase <= rf.PHASE_CHOOSE_ACTIONS || store.actionAreaData[4][0] !== -1">{{ $t('playerInfo.expectedDestination') }}
+        </span><span v-else>{{ $t('playerInfo.destination') }}</span>
         <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="buildingDesireImg"
           :src="view.getImage('building' + String((store.desiredBuilding === rf.BLDG_PUB) ? rf.BLDG_HOME : store.desiredBuilding + 1))"
           alt="desiredBldg">
@@ -82,7 +71,7 @@ function getPlayerIndexOrderForTable() {
           :src="view.getImage('building' + String((store.desiredBuilding === rf.BLDG_PUB) ? rf.BLDG_HOME : store.desiredBuilding + 1) + '_orig')"
           alt="desiredBldg">
 
-        Altering Time would keep Destination as:
+        {{ $t('playerInfo.alteringTimeKeeps') }}
         <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="buildingDesireImg"
           :src="view.getImage('building' + String(store.desiredBuilding))" alt="desiredBldg">
         <img v-if="personal.selectedBoard === rf.BOARD_OG" class="buildingDesireImg"
@@ -90,7 +79,7 @@ function getPlayerIndexOrderForTable() {
       </template>
       <!-- PHASE ALTER TIME // CLICKED AN OPTION-->
       <template v-else-if="store.gameflow.phase === rf.PHASE_ALTER_TIME && store.context.confirmEndTurn">
-        Destination:
+        {{ $t('playerInfo.destination') }}
         <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="buildingDesireImg"
           :src="view.getImage('building' + String(store.desiredBuilding))" alt="desiredBldg">
         <img v-if="personal.selectedBoard === rf.BOARD_OG" class="buildingDesireImg"
@@ -99,8 +88,8 @@ function getPlayerIndexOrderForTable() {
 
       <!-- NOT PHASE VROM-->
       <template v-else-if="store.gameflow.phase !== rf.PHASE_VROM">
-        <span v-if="store.gameflow.phase <= rf.PHASE_CHOOSE_ACTIONS || store.actionAreaData[4][0] !== -1">Expected
-        </span>Destination:
+        <span v-if="store.gameflow.phase <= rf.PHASE_CHOOSE_ACTIONS || store.actionAreaData[4][0] !== -1">{{ $t('playerInfo.expectedDestination') }}
+        </span><span v-else>{{ $t('playerInfo.destination') }}</span>
         <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="buildingDesireImg"
           :src="view.getImage('building' + String((store.desiredBuilding === rf.BLDG_PUB) ? rf.BLDG_HOME : store.desiredBuilding + 1))"
           alt="desiredBldg">
@@ -109,7 +98,7 @@ function getPlayerIndexOrderForTable() {
           alt="desiredBldg">
 
         <template v-if="store.gameflow.phase <= rf.PHASE_CHOOSE_ACTIONS || store.actionAreaData[4][0] !== -1">
-          Altering Time would keep Destination as:
+          {{ $t('playerInfo.alteringTimeKeeps') }}
           <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="buildingDesireImg"
             :src="view.getImage('building' + String(store.desiredBuilding))" alt="desiredBldg">
           <img v-if="personal.selectedBoard === rf.BOARD_OG" class="buildingDesireImg"
@@ -118,7 +107,7 @@ function getPlayerIndexOrderForTable() {
       </template>
       <!-- NOT PHASE VROM-->
       <template v-else-if="store.gameflow.phase === rf.PHASE_VROM">
-        Destination:
+        {{ $t('playerInfo.destination') }}
         <img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="buildingDesireImg"
           :src="view.getImage('building' + String(store.desiredBuilding))" alt="desiredBldg">
         <img v-if="personal.selectedBoard === rf.BOARD_OG" class="buildingDesireImg"
@@ -126,7 +115,7 @@ function getPlayerIndexOrderForTable() {
       </template>
       <!-- END DESIRED DESTINATION -->
 
-      <div id="currentTurnOrder" v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER">Current Turn Order: <span
+      <div id="currentTurnOrder" v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER">{{ $t('playerInfo.currentTurnOrder') }} <span
           v-for="(playerID, index2) in store.gameflow.turnOrder" v-bind:key="index2"
           :class="['playerLineName', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerID].colour)]">
           {{ store.players[playerID].displayName }}
@@ -264,7 +253,7 @@ function getPlayerIndexOrderForTable() {
 }
 
 #playerTable tr {
-  cursor: pointer;
+  cursor: default;
   text-align: center;
 }
 

@@ -4,7 +4,6 @@ import * as model from "../js/RNBmodel"
 import * as view from "../js/RNBview"
 import * as highlight from "../js/RNBhighlight"
 import * as IO from "../backend/RNB_IO"
-import * as funcs from "../js/RNBfuncs"
 
 import { useModelStore } from "../stores/RNBstore.js"
 import { usePersonalStore } from "../stores/RNBpersonal.js"
@@ -51,6 +50,13 @@ const theirResIDsOnHomeTile = computed(() => {
 	return store.ALL_RESOURCES.filter((r) => r.location[0] === rf.LOCATION_BUCKET && r.location[1] === hexID).map((r) => r.id)
 })
 
+const proposerHasTransporter = computed(() => {
+	if (personal.pov < 0) return false
+	const homeMarker = store.ALL_HOME_MARKERS.find((m) => m.ownerIndex === personal.pov)
+	if (!homeMarker) return false
+	return model.getTransportersByPlayerIndexAndHexID(personal.pov, homeMarker.location[1]).length > 0
+})
+
 const opponentHasTransporter = computed(() => {
 	if (tradeOpponentIdx.value < 0) return false
 	const homeMarker = store.ALL_HOME_MARKERS.find((m) => m.ownerIndex === tradeOpponentIdx.value)
@@ -60,7 +66,7 @@ const opponentHasTransporter = computed(() => {
 })
 
 const canPropose = computed(() => {
-	return tradeOpponentIdx.value >= 0 && (tradeYourResIDs.value.length > 0 || tradeTheirResIDs.value.length > 0) && opponentHasTransporter.value && store.context.tradeRelevantOutgoing.length < rf.MAX_PLAYER_TRADES
+	return tradeOpponentIdx.value >= 0 && (tradeYourResIDs.value.length > 0 || tradeTheirResIDs.value.length > 0) && proposerHasTransporter.value && opponentHasTransporter.value && store.context.tradeRelevantOutgoing.length < rf.MAX_PLAYER_TRADES
 })
 
 const incomingCount = computed(() => store.context.tradeRelevantIncoming.length)
@@ -160,7 +166,7 @@ function resName(resID) {
 	<div v-if="isTradeEnabled" class="tradeAreaContainer">
 		<div class="tradeButtonRow">
 			<button class="actionsLineButton" @click="toggleTradePanel">
-				Trade {{ showTradePanel ? "▲" : "▼" }}
+				{{ $t("trade.button") }} {{ showTradePanel ? "▲" : "▼" }}
 				<span v-if="incomingCount > 0" class="tradeNotification">{{ incomingCount }}</span>
 			</button>
 		</div>
@@ -169,63 +175,64 @@ function resName(resID) {
 			<div class="tradePanelInner">
 				<!-- INCOMING TRADES -->
 				<div v-if="store.context.tradeRelevantIncoming.length > 0" class="tradeSection">
-					<strong>Incoming Trades:</strong>
+					<strong>{{ $t("trade.incomingTrades") }}</strong>
 					<div v-for="(entry, idx) in store.context.tradeRelevantIncoming" :key="idx" class="tradeEntry">
 						<span :class="playerColorClass(entry[0])">{{ store.players[entry[0]].displayName }}</span>
-						offers:
+						{{ $t("trade.offers") }}
 						<span class="tradeResList">
 							<img v-for="resID in entry[2]" :key="resID" class="tradeResImg" :src="resName(resID)" />
 						</span>
-						to
+						{{ $t("trade.to") }}
 						<span :class="playerColorClass(entry[1])">{{ store.players[entry[1]].displayName }}</span>
-						for:
+						{{ $t("trade.for") }}
 						<span class="tradeResList">
 							<img v-for="resID in entry[3]" :key="resID" class="tradeResImg" :src="resName(resID)" />
 						</span>
 						<br />
-						<button class="actionsLineButton" @click="localAcceptTrade(entry)">Accept</button>
-						<button class="actionsLineButton" @click="localRejectTrade(entry)">Reject</button>
+						<button class="actionsLineButton" @click="localAcceptTrade(entry)">{{ $t("trade.accept") }}</button>
+						<button class="actionsLineButton" @click="localRejectTrade(entry)">{{ $t("trade.reject") }}</button>
 					</div>
 				</div>
 
 				<!-- OUTGOING TRADES -->
 				<div v-if="store.context.tradeRelevantOutgoing.length > 0" class="tradeSection">
-					<strong>Your Pending Trades:</strong>
+					<strong>{{ $t("trade.yourPendingTrades") }}</strong>
 					<div v-for="(entry, idx) in store.context.tradeRelevantOutgoing" :key="idx" class="tradeEntry">
 						<span :class="playerColorClass(entry[0])">{{ store.players[entry[0]].displayName }}</span>
-						offers:
+						{{ $t("trade.offers") }}
 						<span class="tradeResList">
 							<img v-for="resID in entry[2]" :key="resID" class="tradeResImg" :src="resName(resID)" />
 						</span>
-						to
+						{{ $t("trade.to") }}
 						<span :class="playerColorClass(entry[1])">{{ store.players[entry[1]].displayName }}</span>
-						for:
+						{{ $t("trade.for") }}
 						<span class="tradeResList">
 							<img v-for="resID in entry[3]" :key="resID" class="tradeResImg" :src="resName(resID)" />
 						</span>
 						<br />
-						<button class="actionsLineButton" @click="localCancelTrade(entry)">Cancel</button>
+						<button class="actionsLineButton" @click="localCancelTrade(entry)">{{ $t("trade.cancel") }}</button>
 					</div>
 				</div>
 
 				<!-- TRADE SETUP -->
 				<div v-if="!tradeConfirmStep && (!hasEndedTurn || isTrainingMode)" class="tradeSection">
-					<strong>Propose a Trade:</strong>
+					<strong>{{ $t("trade.proposeTrade") }}</strong>
 					<br />
-					<span>Opponent:</span>
+					<span>{{ $t("trade.opponent") }}</span>
 					<select v-model="tradeOpponentIdx">
-						<option :value="-1">-- Choose --</option>
+						<option :value="-1">{{ $t("trade.choose") }}</option>
 						<option v-for="opponent in eligibleOpponents" :key="opponent.idx" :value="opponent.idx" :style="{ backgroundColor: playerColorHex(opponent.idx), color: 'white' }">
 							{{ opponent.name }}
 						</option>
 					</select>
 
 					<div v-if="tradeOpponentIdx >= 0">
-						<div v-if="!opponentHasTransporter" class="donkeyWarningSpan">Opponent has no transporter on their home tile</div>
+						<div v-if="!proposerHasTransporter" class="donkeyWarningSpan">{{ $t("trade.noYourTransporter") }}</div>
+						<div v-if="!opponentHasTransporter" class="donkeyWarningSpan">{{ $t("trade.noOpponentTransporter") }}</div>
 
 						<div class="tradeGoodsSection">
-							<strong>Your goods:</strong>
-							<span v-if="yourResIDsOnHomeTile.length === 0" class="donkeyWarningSpan">No goods on your home tile</span>
+							<strong>{{ $t("trade.yourGoods") }}</strong>
+							<span v-if="yourResIDsOnHomeTile.length === 0" class="donkeyWarningSpan">{{ $t("trade.noGoodsHome") }}</span>
 							<div class="tradeResPicker">
 								<img v-for="resID in yourResIDsOnHomeTile" :key="resID" class="tradeResImg tradeResSelectable" :class="{ tradeResSelected: tradeYourResIDs.includes(resID) }" :src="resName(resID)" @click="toggleYourRes(resID)" />
 							</div>
@@ -233,40 +240,41 @@ function resName(resID) {
 
 						<div class="tradeGoodsSection">
 							<strong>
-								<span :class="playerColorClass(tradeOpponentIdx)">{{ store.players[tradeOpponentIdx].displayName }}</span>
-								's goods:
+								<i18n-t keypath="trade.theirGoods" tag="span" scope="global">
+									<template #name><span :class="playerColorClass(tradeOpponentIdx)">{{ store.players[tradeOpponentIdx].displayName }}</span></template>
+								</i18n-t>
 							</strong>
 							<div class="tradeResPicker">
 								<img v-for="resID in theirResIDsOnHomeTile" :key="resID" class="tradeResImg tradeResSelectable" :class="{ tradeResSelected: tradeTheirResIDs.includes(resID) }" :src="resName(resID)" @click="toggleTheirRes(resID)" />
 							</div>
 						</div>
 
-						<button v-if="isTrainingMode" class="actionsLineButton" :disabled="!canPropose" @click="completeTradeLocal">Complete Trade</button>
-						<button v-else class="actionsLineButton" :disabled="!canPropose" @click="proposeTrade">Propose Trade</button>
+						<button v-if="isTrainingMode" class="actionsLineButton" :disabled="!canPropose" @click="completeTradeLocal">{{ $t("trade.completeTrade") }}</button>
+						<button v-else class="actionsLineButton" :disabled="!canPropose" @click="proposeTrade">{{ $t("trade.propose") }}</button>
 					</div>
 				</div>
 
 				<!-- ENDED TURN - cannot propose -->
 				<div v-if="!tradeConfirmStep && hasEndedTurn && !isTrainingMode" class="tradeSection">
-					<span class="donkeyWarningSpan">You may not propose a trade once you have ended your turn</span>
+					<span class="donkeyWarningSpan">{{ $t("trade.notAfterEndTurn") }}</span>
 				</div>
 
 				<!-- CONFIRM TRADE -->
 				<div v-if="tradeConfirmStep && !isTrainingMode" class="tradeSection">
-					<strong>Confirm Trade:</strong>
+					<strong>{{ $t("trade.confirmTrade") }}</strong>
 					<br />
-					<span>You give:</span>
+					<span>{{ $t("trade.youGive") }}</span>
 					<span class="tradeResList">
 						<img v-for="resID in tradeYourResIDs" :key="resID" class="tradeResImg" :src="resName(resID)" />
 					</span>
 					<br />
-					<span>You receive:</span>
+					<span>{{ $t("trade.youReceive") }}</span>
 					<span class="tradeResList">
 						<img v-for="resID in tradeTheirResIDs" :key="resID" class="tradeResImg" :src="resName(resID)" />
 					</span>
 					<br />
-					<button class="actionsLineButton" @click="confirmPropose">Confirm</button>
-					<button class="actionsLineButton" @click="cancelPropose">Back</button>
+					<button class="actionsLineButton" @click="confirmPropose">{{ $t("trade.confirm") }}</button>
+					<button class="actionsLineButton" @click="cancelPropose">{{ $t("trade.back") }}</button>
 				</div>
 			</div>
 		</div>

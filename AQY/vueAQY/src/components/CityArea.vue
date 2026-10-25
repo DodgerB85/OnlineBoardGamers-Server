@@ -33,6 +33,9 @@ const personal = usePersonalStore()
 const store = useModelStore()
 
 import { ref } from "vue"
+import { computed } from "vue"
+import { useI18n } from "vue-i18n"
+const { t } = useI18n()
 
 //import { shouldShowActivePlayerInfo } from "../js/AQYcontroller.js"
 // Define a reactive property to trigger a re-render
@@ -65,6 +68,62 @@ const props = defineProps({
 		prop: "playerIndexProp", // Specify the name of the prop in the parent component
 	},
 })
+
+const viewingOtherCity = computed(() => personal.actingPlayerIndex() >= 0 && props.playerIndexProp !== personal.actingPlayerIndex())
+
+function backToMyCity() {
+	if (personal.actingPlayerIndex() >= 0) store.topMenuViews.showingPlayerIndex = personal.actingPlayerIndex()
+}
+
+function housesBuilt() {
+	return 20 - store.players[props.playerIndexProp].availableHouses.length
+}
+
+function cartsBuilt() {
+	return city.getCartShopStatus(props.playerIndexProp).reduce((total, count) => total + count, 0)
+}
+
+function freeCitySquares() {
+	let count = 0
+	for (const cityObj of store.players[props.playerIndexProp].cities) {
+		for (const square of cityObj.coords) {
+			if (square === rf.BLDG_NONE_SQ) count++
+		}
+	}
+	return count
+}
+
+function storageCapacity() {
+	return city.getAvailableStorage(props.playerIndexProp)
+}
+
+function getBuildingTooltip(bldg) {
+	if (!bldg) return ""
+	if (bldg.bldgNum === rf.BLDG_GRAVE_INFO) return t("reference.grave.name")
+	if (bldg.bldgNum > 20) return t("cityNewBuildingArea.houseNumber", { number: bldg.bldgNum - 20 }) + " - " + t("cityNewBuildingArea.gainWorker")
+	const data = rf.BLDG_DATA[rf.BLDG_ARRAY[bldg.bldgNum]]
+	return data ? data.name + " - " + data.description : ""
+}
+
+const vPlopBuilding = {
+	mounted(el, binding) {
+		const bldg = binding.value
+		if (!bldg) return
+		if (!bldg.plop || personal.prefersReducedMotion || store.topMenuViews.showReplay) {
+			bldg.plop = false
+			return
+		}
+		bldg.plop = false
+		el.classList.add("building-plop-active")
+		el.addEventListener(
+			"animationend",
+			() => {
+				el.classList.remove("building-plop-active")
+			},
+			{ once: true }
+		)
+	},
+}
 
 function getBldgPath(bldg_str, offsetX, offsetY, terrain) {
 	let path = [...rf.BLDG_DATA[bldg_str].path]
@@ -107,7 +166,7 @@ function handleTouchStart(event, cityIndex, index) {
 		event.target.removeEventListener("touchend", touchEndHandler)
 
 		if (touchDuration < 200) {
-			clickedOnSquare(cityIndex, index)
+			clickedOnSquare(event, cityIndex, index)
 		} else {
 			changeGhost(event, index, true, cityIndex)
 		}
@@ -123,7 +182,8 @@ function hideErrorPopup() {
 	showErrorPopup.value = 0
 }
 
-function clickedOnSquare(cityIndex, index) {
+function clickedOnSquare(event, cityIndex, index) {
+	if (!personal.canPlay() || !personal.canPlayInCity(props.playerIndexProp)) return
 	store.clearMessages()
 	store.topMenuViews.strokeSelectableHighlightCity = [-1, -1, -1]
 	// Check for legal position -- House will always be legal -- Grave will always be legal
@@ -132,7 +192,7 @@ function clickedOnSquare(cityIndex, index) {
 		else showErrorPopup.value = city.checkForLegalStoragePlacement(props.playerIndexProp, cityIndex, index, store.context.newStorageWidth, store.context.newStorageHeight)
 		if (showErrorPopup.value > 0) {
 			// Calculate the position based on the mouse/touch event
-			popupPosition.value = { x: event.clientX, y: event.clientY - 80 }
+			popupPosition.value = { x: event?.clientX ?? 0, y: (event?.clientY ?? 0) - 80 }
 
 			clearTimeout(errorInterval)
 			// Hide the error popup after 2 seconds
@@ -403,7 +463,7 @@ function canManAllBuildings() {
 	if (!controller.shouldShowActivePlayerInfo(props.playerIndexProp)) return false
 
 	let player = controller.currentPlayerObj()
-	if (player.availableMan === 0) return false
+	if (player.availableMen === 0) return false
 	// Now find the number of built buildings that are mannable
 	let mannableBuildings = 0
 	for (let i = 0; i < player.cities.length; i++) {
@@ -441,6 +501,7 @@ function canUnManAnyBuilding() {
 }
 
 function clickedManOnBuilding(bldg) {
+	if (!personal.canPlayInCity(props.playerIndexProp)) return
 	if (store.context.action !== rf.ACT_UNMAN_BUILDING) return
 	if (bldg.lockedDueTrade) return
 	if (bldg.bldgNum === rf.BLDG_STORAGE) {
@@ -462,7 +523,12 @@ function clickedManOnBuilding(bldg) {
 		}">
 		<!--<CityPlayerInfo :playerIndexProp="store.topMenuViews.showingPlayerIndex" />
 		-->
-		<CityActionArea :playerIndexProp="store.topMenuViews.showingPlayerIndex" />
+		<CityActionArea v-if="!viewingOtherCity" :playerIndexProp="store.topMenuViews.showingPlayerIndex" />
+
+		<div v-if="viewingOtherCity" id="viewingCityBanner">
+			{{ $t("aqyUi.status.viewingCity", { player: store.players[playerIndexProp].displayName }) }}
+			<button class="actionsLineButton" @click="backToMyCity">{{ $t("aqyUi.status.backToMyCity") }}</button>
+		</div>
 
 		<PlayerTradeArea :playerIndexProp="store.topMenuViews.showingPlayerIndex" />
 
@@ -475,44 +541,44 @@ function clickedManOnBuilding(bldg) {
 				<div id="availableMenDiv">
 					<!-- EXPECTED HARVDEST -->
 					<div class="expectedHarvestDiv">
-						Expected Harvest:
+						{{ $t("cityArea.expectedHarvest") }}
 						<span v-if="country.getExpectedHarvestResources(playerIndexProp, city.hasWorkingUniqueBuilding(playerIndexProp, rf.BLDG_FORCED_LABOUR, false)).length > 0">
 							<img v-for="(res, idx) in country.getExpectedHarvestResources(playerIndexProp, city.hasWorkingUniqueBuilding(playerIndexProp, rf.BLDG_FORCED_LABOUR, false))" :key="idx" class="expectedHarvestRes" :src="view.getImage('res_' + String(res))" />
 						</span>
-						<span v-else>None</span>
+						<span v-else>{{ $t("cityArea.none") }}</span>
 					</div>
-					<button v-if="store.sandboxMode && store.players[playerIndexProp].cities.length < 4" @click="sandboxAddCity" class="actionsLineButton">Sandbox: Add city</button>
-					<button v-if="store.sandboxMode" @click="sandboxAddGrave" class="actionsLineButton">Sandbox: Add Grave</button>
-					<button v-if="store.sandboxMode && store.players[playerIndexProp].cities.some((city) => city.graves.length > 0)" @click="sandboxRemoveGrave" class="actionsLineButton">Sandbox: Remove Grave</button>
+					<button v-if="store.sandboxMode && store.players[playerIndexProp].cities.length < 4" @click="sandboxAddCity" class="actionsLineButton">{{ $t("cityArea.sandboxAddCity") }}</button>
+					<button v-if="store.sandboxMode" @click="sandboxAddGrave" class="actionsLineButton">{{ $t("cityArea.sandboxAddGrave") }}</button>
+					<button v-if="store.sandboxMode && store.players[playerIndexProp].cities.some((city) => city.graves.length > 0)" @click="sandboxRemoveGrave" class="actionsLineButton">{{ $t("cityArea.sandboxRemoveGrave") }}</button>
 
 					<template v-if="personal.canPlay() && store.gameflow.subPhase !== rf.SUB_PHASE_CHOOSE_SAINT">
 						<button v-if="personal.canPlay() && controller.shouldShowActivePlayerInfo(playerIndexProp) && store.gameflow.phase === rf.PHASE_CITY_BUILDING && (store.gameflow.subPhase === rf.SUB_PHASE_ADD_BUILDINGS || store.gameflow.subPhase === rf.SUB_PHASE_MOVE_BUILDINGS)" @click="menDivButton" class="actionsLineButton">
-							<span v-if="store.context.action === rf.ACT_HOSPITAL_GRAVES">Stop Removing Graves</span>
-							<span v-else-if="personal.canPlay() && store.gameflow.subPhase === rf.SUB_PHASE_ADD_BUILDINGS && controller.shouldShowActivePlayerInfo(playerIndexProp)">(Re)move Buildings</span>
-							<span v-else>Stop (Re)moving</span>
+							<span v-if="store.context.action === rf.ACT_HOSPITAL_GRAVES">{{ $t("cityArea.stopRemovingGraves") }}</span>
+							<span v-else-if="personal.canPlay() && store.gameflow.subPhase === rf.SUB_PHASE_ADD_BUILDINGS && controller.shouldShowActivePlayerInfo(playerIndexProp)">{{ $t("cityArea.moveBuildings") }}</span>
+							<span v-else>{{ $t("cityArea.stopMoving") }}</span>
 						</button>
-						<button v-if="canManAllBuildings() && controller.shouldShowActivePlayerInfo(playerIndexProp)" @click="localManAllBuildings" class="actionsLineButton">Man All</button>
+						<button v-if="canManAllBuildings() && controller.shouldShowActivePlayerInfo(playerIndexProp)" @click="localManAllBuildings" class="actionsLineButton">{{ $t("cityArea.manAll") }}</button>
 						<button v-if="controller.shouldShowActivePlayerInfo(playerIndexProp) && ((canUnManAnyBuilding() && store.context.action !== rf.ACT_UNMAN_BUILDING) || store.context.action === rf.ACT_UNMAN_BUILDING)" @click="unmanButton" class="actionsLineButton">
-							<span v-if="store.context.action === rf.ACT_UNMAN_BUILDING">Cancel</span>
-							<span v-else-if="store.context.action === rf.ACT_MAN_BLDG">Cancel</span>
-							<span v-else>Un-man</span>
+							<span v-if="store.context.action === rf.ACT_UNMAN_BUILDING">{{ $t("cityArea.cancel") }}</span>
+							<span v-else-if="store.context.action === rf.ACT_MAN_BLDG">{{ $t("cityArea.cancel") }}</span>
+							<span v-else>{{ $t("cityArea.unman") }}</span>
 						</button>
 					</template>
 					<template v-else-if="personal.canPlay() && store.gameflow.subPhase === rf.SUB_PHASE_CHOOSE_SAINT">
-						Please choose a saint (See above city screen)
+						{{ $t("cityArea.chooseSaintHint") }}
 					</template>
 					<br />
 					<span v-if="store.players[playerIndexProp].availableMen <= 0">
-						No Available Men
+						{{ $t("cityArea.noAvailableMen") }}
 						<span v-if="store.players[playerIndexProp].availableMen < 0" class="redText">
 							<br />
-							You have removed a house after using the man
+							{{ $t("cityArea.removedHouseAfterMan") }}
 							<br />
-							A house must be readded before ending your turn
+							{{ $t("cityArea.houseMustBeReadded") }}
 						</span>
 					</span>
 					<span v-else-if="store.gameflow.subPhase !== rf.SUB_PHASE_CHOOSE_SAINT">
-						Available Men:
+						{{ $t("cityArea.availableMen") }}
 						<div
 							v-for="manNum in store.players[playerIndexProp].availableMen"
 							:key="manNum"
@@ -525,7 +591,7 @@ function clickedManOnBuilding(bldg) {
 					</span>
 					<template v-if="personal.canPlay() && controller.shouldShowActivePlayerInfo(playerIndexProp) && store.context.gravesLeftToPlace > 0">
 						<br />
-						Graves:
+						{{ $t("cityArea.graves") }}
 						<div v-for="graveNum in store.context.gravesLeftToPlace" :key="graveNum" class="availableGrave" @click="city.startGravePlacement(playerIndexProp)">
 							<img :src="view.getImage('grave')" />
 						</div>
@@ -548,14 +614,14 @@ function clickedManOnBuilding(bldg) {
 						<transition name="fadeOut">
 							<div class="bldgPlaceErrorPopup" v-if="showErrorPopup > 0" :style="{ top: popupPosition.y + 'px', left: popupPosition.x + 'px' }" @mouseover="hideErrorPopup">
 								<span v-if="showErrorPopup === 1">
-									Building Must
+									{{ $t("cityArea.buildingMust") }}
 									<br />
-									Fit in City
+									{{ $t("cityArea.fitInCity") }}
 								</span>
 								<span v-if="showErrorPopup === 2">
-									Must be Placed
+									{{ $t("cityArea.mustBePlaced") }}
 									<br />
-									on Free Space
+									{{ $t("cityArea.onFreeSpace") }}
 								</span>
 							</div>
 						</transition>
@@ -567,14 +633,16 @@ function clickedManOnBuilding(bldg) {
 
 							<!-- LAYER 1 -- BUILDINGS -- THIS NEEDS TO BE IN A SEPARATE SVG TAG OR WEIRD THINGS HAPPEN FOR SOME REASAON -->
 							<g v-for="(bldg, idx) in cityObj.buildings" :key="idx">
-								<!-- PLACED BUILDINGS -->
-								<path v-if="bldg.bldgNum <= 17" class="cityBuildingSVGpath" :fill="`url(#${rf.BLDG_DATA[rf.BLDG_ARRAY[bldg.bldgNum]].imgName})`" :d="getBldgPath(rf.BLDG_ARRAY[bldg.bldgNum], bldg.index % cityObj.size, Math.floor(bldg.index / cityObj.size))" :transform="getCityBuildingRotation(bldg, cityObj.size)" :class="[getCityBuildingStrokeClass(cityIndex, bldg), getCityBuildingFilterClass(cityIndex, bldg)]" @click="clickedCityBuilding(cityIndex, bldg)" @mouseover="setCityBuildingStrokeClassHighlight(cityIndex, bldg)" @mouseleave="store.topMenuViews.strokeSelectableHighlightCity = [-1, -1, -1]" />
+								<g v-plop-building="bldg">
+									<!-- PLACED BUILDINGS -->
+									<path v-if="bldg.bldgNum <= 17" class="cityBuildingSVGpath" :fill="`url(#${rf.BLDG_DATA[rf.BLDG_ARRAY[bldg.bldgNum]].imgName})`" :d="getBldgPath(rf.BLDG_ARRAY[bldg.bldgNum], bldg.index % cityObj.size, Math.floor(bldg.index / cityObj.size))" :transform="getCityBuildingRotation(bldg, cityObj.size)" :class="[getCityBuildingStrokeClass(cityIndex, bldg), getCityBuildingFilterClass(cityIndex, bldg)]" v-tooltip="getBuildingTooltip(bldg)" @click="clickedCityBuilding(cityIndex, bldg)" @mouseover="setCityBuildingStrokeClassHighlight(cityIndex, bldg)" @mouseleave="store.topMenuViews.strokeSelectableHighlightCity = [-1, -1, -1]" />
 
-								<!-- PLACED STORAGE -->
-								<path v-else-if="bldg.bldgNum === rf.BLDG_STORAGE" class="cityBuildingSVGpath" :fill="`url(#b_storage_${bldg.width}${bldg.height})`" :d="getStoragePath(bldg.index % cityObj.size, Math.floor(bldg.index / cityObj.size), bldg.width, bldg.height)" :class="[getCityBuildingStrokeClass(cityIndex, bldg), getCityBuildingFilterClass(cityIndex, bldg)]" @click="clickedCityBuilding(cityIndex, bldg)" @mouseover="setCityBuildingStrokeClassHighlight(cityIndex, bldg)" @mouseleave="store.topMenuViews.strokeSelectableHighlightCity = [-1, -1, -1]" />
+									<!-- PLACED STORAGE -->
+									<path v-else-if="bldg.bldgNum === rf.BLDG_STORAGE" class="cityBuildingSVGpath" :fill="`url(#b_storage_${bldg.width}${bldg.height})`" :d="getStoragePath(bldg.index % cityObj.size, Math.floor(bldg.index / cityObj.size), bldg.width, bldg.height)" :class="[getCityBuildingStrokeClass(cityIndex, bldg), getCityBuildingFilterClass(cityIndex, bldg)]" v-tooltip="getBuildingTooltip(bldg)" @click="clickedCityBuilding(cityIndex, bldg)" @mouseover="setCityBuildingStrokeClassHighlight(cityIndex, bldg)" @mouseleave="store.topMenuViews.strokeSelectableHighlightCity = [-1, -1, -1]" />
 
-								<!-- PLACED HOUSES -->
-								<path v-else class="cityBuildingSVGpath strokeBlack" :fill="`url(#${view.getCityHouseImg(bldg.bldgNum)})`" :d="getBldgPath('HOUSE', bldg.index % cityObj.size, Math.floor(bldg.index / cityObj.size))" @click="clickedCityBuilding(cityIndex, bldg)" :class="[getCityBuildingStrokeClass(cityIndex, bldg)]" @mouseover="setCityBuildingStrokeClassHighlight(cityIndex, bldg)" @mouseleave="store.topMenuViews.strokeSelectableHighlightCity = [-1, -1, -1]" />
+									<!-- PLACED HOUSES -->
+									<path v-else class="cityBuildingSVGpath strokeBlack" :fill="`url(#${view.getCityHouseImg(bldg.bldgNum)})`" :d="getBldgPath('HOUSE', bldg.index % cityObj.size, Math.floor(bldg.index / cityObj.size))" v-tooltip="getBuildingTooltip(bldg)" @click="clickedCityBuilding(cityIndex, bldg)" :class="[getCityBuildingStrokeClass(cityIndex, bldg)]" @mouseover="setCityBuildingStrokeClassHighlight(cityIndex, bldg)" @mouseleave="store.topMenuViews.strokeSelectableHighlightCity = [-1, -1, -1]" />
+								</g>
 
 								<!-- MEN ON BUILDINGS -->
 								<rect
@@ -645,7 +713,7 @@ function clickedManOnBuilding(bldg) {
 										height: rf.SMALL_SQ - 2 + 'px',
 									}"
 									oncontextmenu="return false;"
-									@click="clickedOnSquare(cityIndex, index)"
+									@click="clickedOnSquare($event, cityIndex, index)"
 									@mouseover="changeGhost($event, index, true, cityIndex)"
 									@touchstart="handleTouchStart($event, cityIndex, index)" />
 							</g>
@@ -670,13 +738,20 @@ function clickedManOnBuilding(bldg) {
 				:style="{
 					width: store.permanentSettings.housesInNumberOrder === 2 ? '890px' : '790px',
 				}">
-				<span class="infoSpan" id="famineSpan">Famine Level: {{ model.getFamineLevel() }}</span>
+				<div id="citySummaryStrip">
+					<span><b>{{ $t("aqyUi.summary.houses") }}</b> {{ housesBuilt() }}</span>
+					<span><b>{{ $t("aqyUi.summary.men") }}</b> {{ store.players[playerIndexProp].availableMen }}</span>
+					<span><b>{{ $t("aqyUi.summary.carts") }}</b> {{ cartsBuilt() }}</span>
+					<span><b>{{ $t("aqyUi.summary.freeSquares") }}</b> {{ freeCitySquares() }}</span>
+					<span><b>{{ $t("aqyUi.summary.storage") }}</b> {{ storageCapacity() }}</span>
+				</div>
+				<span class="infoSpan" id="famineSpan">{{ $t("cityArea.famineLevel", { level: model.getFamineLevel() }) }}</span>
 				<span class="infoSpan" id="pollutionSpan">
-					- Pollution:
+					{{ $t("cityArea.pollution") }}
 					<span>{{ country.getPendingPollution(playerIndexProp) }}</span>
 				</span>
 				<span class="infoSpan" id="graveSpan">
-					- Graves:
+					{{ $t("cityArea.gravesCount") }}
 					<span>{{ city.getTotalGravesToPlace(playerIndexProp) }}</span>
 				</span>
 				<br />
@@ -713,7 +788,7 @@ function clickedManOnBuilding(bldg) {
 				<img class="countryCostResImg" :src="view.getImage('res_' + String(rf.RES_FISH))" />
 				)
 			-->
-				Countryside Costs: Woodcutter: W, Mine: W, Fishery: W, Farm: Seed, City: W+S+F+2DL, Inn: F
+				{{ $t("cityArea.countrysideCosts") }}
 			</b>
 			<br />
 			<template v-for="idx in Array.from({ length: store.players.length }, (_, idx) => idx)" :key="idx">
@@ -730,6 +805,44 @@ function clickedManOnBuilding(bldg) {
 	min-height: 200px;
 	box-sizing: border-box;
 	padding: 5px;
+}
+
+#viewingCityBanner {
+	background-color: lightgoldenrodyellow;
+	color: #333;
+	font-weight: bolder;
+	padding: 5px;
+	margin: 4px 0px;
+}
+
+#citySummaryStrip {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	justify-content: center;
+	font-weight: bolder;
+	margin-bottom: 4px;
+}
+
+.building-plop-active {
+	animation: building-plop 0.4s ease-out;
+	transform-box: fill-box;
+	transform-origin: center;
+}
+
+@keyframes building-plop {
+	0% {
+		transform: scale(0.8);
+		opacity: 0;
+	}
+	60% {
+		transform: scale(1.1);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
 }
 
 #availableMenDiv {

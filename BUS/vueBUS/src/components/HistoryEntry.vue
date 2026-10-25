@@ -11,6 +11,8 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 const personal = usePersonalStore()
 
+import i18n from "../i18n"
+
 defineProps(["entry", "entry_ID"])
 
 function addHighlight(e, entering, id) {
@@ -78,41 +80,44 @@ function getBridgeCount(entry3) {
 }
 
 function getAddLineText(entry3) {
-	if (isBridgeEntry(entry3)) return "places a bridge"
+	const t = i18n.global.t
+	if (isBridgeEntry(entry3)) return t("history.placesBridge")
 	let bridgeCount = getBridgeCount(entry3)
-	if (bridgeCount > 0) return "adds " + entry3.length + " lines (including " + bridgeCount + " bridge" + (bridgeCount > 1 ? "s" : "") + ")"
-	if (entry3.length === 1) return "adds 1 line"
-	return "adds " + entry3.length + " lines"
+	if (bridgeCount > 0) return t(bridgeCount > 1 ? "history.addsLinesWithBridgesPlural" : "history.addsLinesWithBridges", { count: entry3.length, bridges: bridgeCount })
+	if (entry3.length === 1) return t("history.addsOneLine")
+	return t("history.addsLines", { count: entry3.length })
 }
 
 function getActionText(entry3) {
+	const t = i18n.global.t
 	let text = ""
 
-	if (entry3[0] === 10) return "to pass"
-	if (entry3[0] === 11) return "to pass (auto)"
+	if (entry3[0] === 10) return t("history.actionToPass")
+	if (entry3[0] === 11) return t("history.actionToPassAuto")
 
-	if (entry3[0] === 0) text += '"Line Expansion"'
-	if (entry3[0] === 1) text += '"New Bus"'
-	if (entry3[0] === 2) text += '"Add Passengers"'
-	if (entry3[0] === 3) text += '"New Buildings"'
-	if (entry3[0] === 4) text += '"Alter Time"'
-	if (entry3[0] === 5) text += '"Vrrooomm"'
-	if (entry3[0] === 6) text += '"Starting Player"'
+	if (entry3[0] === 0) text += t("history.actionLineExpansion")
+	if (entry3[0] === 1) text += t("history.actionNewBus")
+	if (entry3[0] === 2) text += t("history.actionAddPassengers")
+	if (entry3[0] === 3) text += t("history.actionNewBuildings")
+	if (entry3[0] === 4) text += t("history.actionAlterTime")
+	if (entry3[0] === 5) text += t("history.actionVroom")
+	if (entry3[0] === 6) text += t("history.actionStartingPlayer")
 
 	const forwardChars = ["A", "B", "C", "D", "E", "F"]
 	const reverseChars = ["F", "E", "D", "C", "B", "A"]
 
 	if (entry3[0] === 0 || entry3[0] === 3) {
-		text += " at position: " + reverseChars[entry3[1]]
+		text += t("history.atPosition", { position: reverseChars[entry3[1]] })
 	} else if (entry3[0] === 2 || entry3[0] === 5) {
-		text += " at position: " + forwardChars[entry3[1]]
+		text += t("history.atPosition", { position: forwardChars[entry3[1]] })
 	}
 
 	return text
 }
 function getAddPassengersText(entry3) {
+	const t = i18n.global.t
 	let text = ""
-	if (entry3[0] === -1) return "adds no Passengers - none remaining"
+	if (entry3[0] === -1) return t("history.addsNoPassengers")
 	let junction10 = 0
 	let junction25 = 0
 	let designers = []
@@ -123,55 +128,57 @@ function getAddPassengersText(entry3) {
 		else if (entry3[i] === 25 || (personal.selectedBoard === rf.BOARD_PITTS && entry3[i] === 30)) junction25++
 		else if (entry3[i] === -1) runOut = true
 	}
-	if (junction10 >= 2) text += "adds " + String(junction10) + " passengers to the top station"
-	else if (junction10 === 1) text += " adds a passenger to the top station"
+	if (junction10 >= 2) text += t("history.addsPassengersTop", { count: junction10 })
+	else if (junction10 === 1) text += t("history.addsPassengerTop")
 
-	if (junction10 > 0 && junction25 > 0) text += ", and "
+	if (junction10 > 0 && junction25 > 0) text += t("history.and")
 
-	if (junction25 >= 2) text += "adds " + String(junction25) + " passengers to the " + (personal.selectedBoard === rf.BOARD_PITTS ? "Airport" : "bottom station")
-	else if (junction25 === 1) text += " adds a passenger to the " + (personal.selectedBoard === rf.BOARD_PITTS ? "Airport" : "bottom station")
+	if (junction25 >= 2) text += t("history.addsPassengersBottom", { count: junction25, station: personal.selectedBoard === rf.BOARD_PITTS ? t("history.airport") : t("history.bottomStation") })
+	else if (junction25 === 1) text += t("history.addsPassengerBottom", { station: personal.selectedBoard === rf.BOARD_PITTS ? t("history.airport") : t("history.bottomStation") })
 
 	for (let i = 0; i < designers.length; i++) {
-		if (designers[i][1] === rf.DESIGNER_JEROEN) text += ", brings the designer Jeroen into play at the Airport"
-		else if (designers[i][1] === rf.DESIGNER_JORIS) text += ", brings the designer Joris into play at the Airport"
-		else text += ", brings a designer into play at the Airport"
+		if (designers[i][1] === rf.DESIGNER_JEROEN) text += t("history.bringsJeroen")
+		else if (designers[i][1] === rf.DESIGNER_JORIS) text += t("history.bringsJoris")
+		else text += t("history.bringsDesigner")
 	}
 
-	if (runOut) text += ", but then ran out of Passengers"
+	if (runOut) text += t("history.ranOutPassengers")
 
 	return text
 }
 function getAlterTimeText(entry1, entry3) {
-	if (entry1 === -1) return "Time passes. New Destination: "
-	if (entry3[1] === 0) return "chooses not to Stop Time. New Destination: "
-	else return "stops Time! Destination remains: "
+	const t = i18n.global.t
+	if (entry1 === -1) return t("history.timePasses")
+	if (entry3[1] === 0) return t("history.choosesNotStopTime")
+	else return t("history.stopsTime")
 }
 function geVromText(entry3) {
+	const t = i18n.global.t
 	// We know that there is at least 1 valid VROM, and it either ends in VROM or unable
 	let designerMoves = 0
 	for (let i = 0; i < entry3.length; i++) {
 		if (entry3[i].length > 3) designerMoves++
 	}
-	if (entry3.length === 1 && designerMoves === 0) return "moves 1 Passenger"
-	if (designerMoves === entry3.length && entry3[entry3.length - 1].length !== 1) return designerMoves === 1 ? "moves 1 Designer" : "moves " + String(designerMoves) + " Designers"
-	if (entry3.length === 1 && designerMoves === 0) return "moves 1 Passenger"
+	if (entry3.length === 1 && designerMoves === 0) return t("history.movesOnePassenger")
+	if (designerMoves === entry3.length && entry3[entry3.length - 1].length !== 1) return designerMoves === 1 ? t("history.movesOneDesigner") : t("history.movesDesigners", { count: designerMoves })
+	if (entry3.length === 1 && designerMoves === 0) return t("history.movesOnePassenger")
 	if (entry3[entry3.length - 1].length !== 1) {
-		if (designerMoves === 0) return "moves " + String(entry3.length) + " Passengers"
+		if (designerMoves === 0) return t("history.movesPassengers", { count: entry3.length })
 		let paxNum = entry3.length - designerMoves
 		let text = ""
-		if (paxNum > 1) text += "moves " + String(paxNum) + " Passengers"
-		else if (paxNum === 1) text += "moves 1 Passenger"
-		if (designerMoves > 1) text += " and " + String(designerMoves) + " Designers"
-		else text += " and 1 Designer"
+		if (paxNum > 1) text += t("history.movesPassengers", { count: paxNum })
+		else if (paxNum === 1) text += t("history.movesOnePassenger")
+		if (designerMoves > 1) text += t("history.andDesigners", { count: designerMoves })
+		else text += t("history.andOneDesigner")
 		return text
 	}
 	// Now there must be some valid and then unable
 	let movedPaxNum = entry3.length - 1
 	let text = ""
-	if (movedPaxNum > 1) text += "moves " + String(movedPaxNum) + " Passengers"
-	else if (movedPaxNum === 1) text += "moves 1 Passenger"
-	if (entry3[entry3.length - 1][0] === 1) text += ", but ran out of Passengers"
-	if (entry3[entry3.length - 1][0] === 2) text += ", but ran out of Buildings"
+	if (movedPaxNum > 1) text += t("history.movesPassengers", { count: movedPaxNum })
+	else if (movedPaxNum === 1) text += t("history.movesOnePassenger")
+	if (entry3[entry3.length - 1][0] === 1) text += t("history.butRanOutPassengers")
+	if (entry3[entry3.length - 1][0] === 2) text += t("history.butRanOutBuildings")
 
 	return text
 }
@@ -192,7 +199,7 @@ function clickedEntry(index) {
 		<!-- New Turn -->
 		<template v-if="entry[0] === rf.HIST_NEW_TURN">
 			<div class="log separator mainEntry" :id="'logEntry' + String(entry_ID)" @click="clickedEntry(entry_ID)" @mouseover="addHighlight($event, true, entry_ID)" @mouseleave="addHighlight($event, false, entry_ID)">
-				<div class="new_turn">Start of turn {{ entry[3][0] }}</div>
+				<div class="new_turn">{{ $t('history.startOfTurn', { num: entry[3][0] }) }}</div>
 			</div>
 		</template>
 
@@ -202,7 +209,7 @@ function clickedEntry(index) {
 				<div class="header">
 					<span>{{ funcs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
 				</div>
-				<div class="mainEntry rewind">Game rewound to here by {{ store.players[entry[1]].name }}</div>
+				<div class="mainEntry rewind">{{ $t('history.rewoundBy', { name: store.players[entry[1]].name }) }}</div>
 			</div>
 		</template>
 
@@ -212,7 +219,7 @@ function clickedEntry(index) {
 				<div class="header">
 					<span>{{ funcs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
 				</div>
-				<div class="mainEntry rewind">{{ store.players[entry[1]].name }} Resigns</div>
+				<div class="mainEntry rewind">{{ $t('history.resigns', { name: store.players[entry[1]].name }) }}</div>
 			</div>
 		</template>
 
@@ -222,7 +229,7 @@ function clickedEntry(index) {
 				<div class="header">
 					<span>{{ funcs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
 				</div>
-				<div class="mainEntry rewind">{{ store.players[entry[3][0]].name }} was kicked out</div>
+				<div class="mainEntry rewind">{{ $t('history.kickedOut', { name: store.players[entry[3][0]].name }) }}</div>
 			</div>
 		</template>
 
@@ -233,21 +240,21 @@ function clickedEntry(index) {
 					<span>{{ funcs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
 				</div>
 				<div class="mainEntry new_turn">
-					Game Ended
+					{{ $t('history.gameEnded') }}
 					<br />
 					<br />
-					Winner: {{ model.getWinnerName()[0] }}
+					{{ $t('history.winner', { name: model.getWinnerName()[0] }) }}
 					<br />
 					<br />
-					<span v-if="model.getWinnerName()[1] === 0">Highest Score</span>
-					<span v-if="model.getWinnerName()[1] === 1">Joint score with more Time Stones</span>
-					<span v-if="model.getWinnerName()[1] === 2">Joint score, same Time Stones, achieved score first</span>
+					<span v-if="model.getWinnerName()[1] === 0">{{ $t('history.highestScore') }}</span>
+					<span v-if="model.getWinnerName()[1] === 1">{{ $t('history.jointMoreStones') }}</span>
+					<span v-if="model.getWinnerName()[1] === 2">{{ $t('history.jointScoreFirst') }}</span>
 					<br />
 					<br />
-					<span v-if="store.gameflow.gameEnded === 1">No More Timestones</span>
-					<span v-if="store.gameflow.gameEnded === 2">No More Building Spots</span>
-					<span v-if="store.gameflow.gameEnded === 3">Only One Player with Actions</span>
-					<span v-if="store.gameflow.gameEnded === 4">Last player standing</span>
+					<span v-if="store.gameflow.gameEnded === 1">{{ $t('history.noMoreTimeStones') }}</span>
+					<span v-if="store.gameflow.gameEnded === 2">{{ $t('history.noMoreBuildingSpots') }}</span>
+					<span v-if="store.gameflow.gameEnded === 3">{{ $t('history.onlyOnePlayerActions') }}</span>
+					<span v-if="store.gameflow.gameEnded === 4">{{ $t('history.lastPlayerStanding') }}</span>
 				</div>
 			</div>
 		</template>
@@ -264,7 +271,7 @@ function clickedEntry(index) {
 					</span>
 				</div>
 				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ store.players[entry[1]].displayName }}</span>
-				builds
+				{{ $t('history.builds') }}
 				<template v-for="(line, index) in entry[3]" v-bind:key="index">
 					<img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="hist_buildingImg" :src="view.getImage('building' + String(line[0]))" alt="buildingHist" />
 					<img v-if="personal.selectedBoard === rf.BOARD_OG" class="hist_buildingImg_orig" :src="view.getImage('building' + String(line[0]) + '_orig')" alt="buildingHist" />
@@ -279,7 +286,7 @@ function clickedEntry(index) {
 					</span>
 				</div>
 				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ store.players[entry[1]].displayName }}</span>
-				passes "New Building" - Max Buses too low
+				{{ $t('history.passesNewBuilding') }}
 			</div>
 		</template>
 
@@ -305,7 +312,7 @@ function clickedEntry(index) {
 				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">
 					{{ store.players[entry[1]].displayName }}
 				</span>
-				passes "Line Expansion" - Max Buses too low
+				{{ $t('history.passesLineExpansion') }}
 			</div>
 		</template>
 
@@ -320,7 +327,7 @@ function clickedEntry(index) {
 				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">
 					{{ store.players[entry[1]].displayName }}
 				</span>
-				chooses {{ getActionText(entry[3]) }}
+				{{ $t('history.chooses') }} {{ getActionText(entry[3]) }}
 			</div>
 		</template>
 
@@ -335,7 +342,8 @@ function clickedEntry(index) {
 				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">
 					{{ store.players[entry[1]].displayName }}
 				</span>
-				increases buses to {{ entry[3][0] }}
+				<span v-if="entry[3].length > 1 && entry[3][1] === 0">{{ $t('history.newBusNoEffect') }}</span>
+				<span v-else>{{ $t('history.increasesBuses', { count: entry[3][0] }) }}</span>
 			</div>
 		</template>
 
@@ -363,7 +371,7 @@ function clickedEntry(index) {
 				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">
 					{{ store.players[entry[1]].displayName }}
 				</span>
-				passes "Add Passenger" - Max Buses too low
+				{{ $t('history.passesAddPassenger') }}
 			</div>
 		</template>
 
@@ -395,8 +403,8 @@ function clickedEntry(index) {
 				<span v-if="entry[1] !== -1" :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">
 					{{ store.players[entry[1]].displayName }}
 				</span>
-				<span v-if="entry[1] === -1">Action Round Starting Player moves to the Left. New Turn Order:</span>
-				<span v-else>becomes the Starting Player. New Turn Order:</span>
+				<span v-if="entry[1] === -1">{{ $t('history.startingPlayerMovesLeft') }}</span>
+				<span v-else>{{ $t('history.becomesStartingPlayer') }}</span>
 
 				<span v-for="(player, indexSP) in entry[3]" v-bind:key="indexSP" :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[player].colour)]">
 					{{ store.players[player].displayName }}
@@ -429,8 +437,8 @@ function clickedEntry(index) {
 					</span>
 				</div>
 				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ store.players[entry[1]].displayName }}</span>
-				<span v-if="entry[3][0][0] === 1">is unable to VRROOOMM - no available Passengers</span>
-				<span v-if="entry[3][0][0] === 2">is unable to VRROOOMM - no desired destination</span>
+				<span v-if="entry[3][0][0] === 1">{{ $t('history.unableNoPassengers') }}</span>
+				<span v-if="entry[3][0][0] === 2">{{ $t('history.unableNoDestination') }}</span>
 			</div>
 		</template>
 
@@ -443,7 +451,7 @@ function clickedEntry(index) {
 					</span>
 				</div>
 				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ store.players[entry[1]].displayName }}</span>
-				<span>ERROR: {{ entry[3] }}</span>
+				<span>{{ $t('history.error', { error: entry[3] }) }}</span>
 			</div>
 		</template>
 	</template>

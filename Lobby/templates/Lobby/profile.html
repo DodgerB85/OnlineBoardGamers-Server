@@ -75,18 +75,19 @@
                         <div class="row-flex" style="flex-wrap:wrap; margin-bottom: 6px;">
                             <button type="button"
                                     class="button button-primary button-sm"
-                                    onclick="window.location.href='https://discord.com/api/oauth2/authorize?client_id={{ discord_client_id }}&redirect_uri=https%3A%2F%2Fwww.onlineboardgamers.com%2Fdiscord%2Fcallback%2F&response_type=code&scope=identify%20guilds.join'">
+                                    onclick="window.location.href='https://discord.com/api/oauth2/authorize?client_id={{ discord_client_id }}&redirect_uri=https%3A%2F%2Fwww.onlineboardgamers.com%2Fdiscord%2Fcallback%2F&response_type=code&scope=identify%20guilds.join&state={{ discord_oauth_state }}'">
                                 <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle; margin-right:4px;">
                                     <path fill="currentColor" d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
                                 </svg>
                                 {% translate "Add Discord DMs" %}
                             </button>
                             {% if discord_id %}
-                                <button type="button"
-                                        class="button button-danger button-sm"
-                                        onclick="window.location.href='{% url 'stop_discord_dms' %}'">
-                                    {% translate "Stop Discord DMs" %}
-                                </button>
+                                <form method="post" action="{% url 'stop_discord_dms' %}" style="display:inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="button button-danger button-sm">
+                                        {% translate "Stop Discord DMs" %}
+                                    </button>
+                                </form>
                             {% endif %}
                         </div>
                         <p class="" style="font-size: 12px; margin: 0;">
@@ -271,7 +272,6 @@
                                         <option value="DC">Discord</option>
                                         <option value="SL">Slack</option>
                                         <option value="TG">Telegram</option>
-                                        <option value="OT">Other</option>
                                     </select>
                                 </td>
                                 <td>
@@ -351,6 +351,17 @@
                 </div>
 
                 <div class="form-row">
+                    <label class="form-label">{% translate "FCM Reduced Motion" %}</label>
+                    <div class="field">
+                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="checkbox" class="myCheckbox" id="FCMprefersReducedMotion" name="FCMprefersReducedMotion"
+                                   value="FCMprefersReducedMotion" {% if FCMprefersReducedMotion %}checked{% endif %} />
+                            {% translate "Reduce animations and motion" %}
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-row">
                     <label class="form-label">{% translate "HLC Colour" %}</label>
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favHLCchoice">
@@ -388,28 +399,27 @@
                         <div class="favBusColour">
                             <label for="busRadM1">{% translate "None" %}</label>
                             <input type="radio" id="busRadM1" name="busColour" value="-1"
-                                   {% if preferredBusColour == -1 %}checked{% endif %}
-                                   {% if not preferredBusColour %}checked{% endif %} />
+                                   {% if busOptColour == -1 %}checked{% endif %} />
                         </div>
                         <div class="favBusColour">
                             <label for="busRad0"><img src="{% static 'Lobby/images/bus_blue.png' %}" /></label>
-                            <input type="radio" id="busRad0" name="busColour" value="0" {% if preferredBusColour == 0 %}checked{% endif %} />
+                            <input type="radio" id="busRad0" name="busColour" value="0" {% if busOptColour == 0 %}checked{% endif %} />
                         </div>
                         <div class="favBusColour">
                             <label for="busRad1"><img src="{% static 'Lobby/images/bus_green.png' %}" alt="Green Bus" /></label>
-                            <input type="radio" id="busRad1" name="busColour" value="1" {% if preferredBusColour == 1 %}checked{% endif %} />
+                            <input type="radio" id="busRad1" name="busColour" value="1" {% if busOptColour == 1 %}checked{% endif %} />
                         </div>
                         <div class="favBusColour">
                             <label for="busRad2"><img src="{% static 'Lobby/images/bus_purple.png' %}" alt="Purple Bus" /></label>
-                            <input type="radio" id="busRad2" name="busColour" value="2" {% if preferredBusColour == 2 %}checked{% endif %} />
+                            <input type="radio" id="busRad2" name="busColour" value="2" {% if busOptColour == 2 %}checked{% endif %} />
                         </div>
                         <div class="favBusColour">
                             <label for="busRad3"><img src="{% static 'Lobby/images/bus_red.png' %}" alt="Red Bus" /></label>
-                            <input type="radio" id="busRad3" name="busColour" value="3" {% if preferredBusColour == 3 %}checked{% endif %} />
+                            <input type="radio" id="busRad3" name="busColour" value="3" {% if busOptColour == 3 %}checked{% endif %} />
                         </div>
                         <div class="favBusColour">
                             <label for="busRad4"><img src="{% static 'Lobby/images/bus_yellow.png' %}" alt="Yellow Bus" /></label>
-                            <input type="radio" id="busRad4" name="busColour" value="4" {% if preferredBusColour == 4 %}checked{% endif %} />
+                            <input type="radio" id="busRad4" name="busColour" value="4" {% if busOptColour == 4 %}checked{% endif %} />
                         </div>
                     </div>
                 </div>
@@ -419,16 +429,27 @@
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favBusMap">
                             <label for="BusBoard0"><img src="{% static 'BUS/images/Board_orig.jpg' %}" /></label>
-                            <input type="radio" id="BusBoard0" name="BusBoard" value="1" {% if preferredBusBoard == 1 %}checked{% endif %} />
+                            <input type="radio" id="BusBoard0" name="BusBoard" value="1" {% if busOptBoard == 1 %}checked{% endif %} />
                         </div>
                         <div class="favBusMap">
                             <label for="BusBoard1"><img src="{% static 'BUS/images/Board_20A.jpg' %}" /></label>
-                            <input type="radio" id="BusBoard1" name="BusBoard" value="0" {% if preferredBusBoard == 0 %}checked{% endif %} />
+                            <input type="radio" id="BusBoard1" name="BusBoard" value="0" {% if busOptBoard == 0 %}checked{% endif %} />
                         </div>
                         <div class="favBusMap">
                             <label for="BusBoard2"><img src="{% static 'BUS/images/Board_20AC_fav.jpg' %}" /></label>
-                            <input type="radio" id="BusBoard2" name="BusBoard" value="2" {% if preferredBusBoard == 2 %}checked{% endif %} />
+                            <input type="radio" id="BusBoard2" name="BusBoard" value="2" {% if busOptBoard == 2 %}checked{% endif %} />
                         </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">{% translate "Bus High Contrast" %}</label>
+                    <div class="field">
+                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="checkbox" class="myCheckbox" id="BUShighContrast" name="BUShighContrast"
+                                   value="BUShighContrast" {% if BUShighContrast %}checked{% endif %} />
+                            {% translate "Add patterns and initials to bus lines for colour-blind players" %}
+                        </label>
                     </div>
                 </div>
 
@@ -471,6 +492,17 @@
                             <input type="checkbox" class="myCheckbox" id="TGZminimalText" name="TGZminimalText"
                                    value="TGZminimalText" {% if TGZminimalText %}checked{% endif %} />
                             {% translate "Remove god and specialist descriptions below the cards" %}
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">{% translate "TGZ Animations" %}</label>
+                    <div class="field">
+                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="checkbox" class="myCheckbox" id="TGZprefersReducedMotion" name="TGZprefersReducedMotion"
+                                   value="TGZprefersReducedMotion" {% if TGZprefersReducedMotion %}checked{% endif %} />
+                            {% translate "Reduce animations and motion" %}
                         </label>
                     </div>
                 </div>

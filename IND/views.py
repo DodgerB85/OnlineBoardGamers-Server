@@ -19,6 +19,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, GamePlayer, User
+from Lobby.sharedFunctions.permissions import can_act_in_game
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_updateFlexiTime,
@@ -28,11 +29,10 @@ from Lobby.sharedFunctions.sharedNotifications import (
 )
 
 from .common import create_ind_game
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 if TYPE_CHECKING:
     from Lobby.presenters import INDpresenter
-
-INDsuperUsers = ["BotKickStarter"]
 
 
 def index(request):
@@ -78,7 +78,7 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False)),
             "currentPlayers": presenter.getArrayOfIsCurrentPlayers(),
             "finishedGame": currentGame.gameStatus == "FINISHED",
-            "preferredINDoptions": [-1, 0, 0, 1, 1, 1, 0],
+            "preferredINDoptions": [-1, 0, 0, 1, 1, 1, 0, 0],
             "pov": -99,
             "preMoves": "",
             "sideData": "",
@@ -91,10 +91,12 @@ def showINDgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData.update(result["auth_data"])
     returnData["pov"] = -9
 
-    preferredINDoptions = json.loads(result["user_profile"].preferredINDoptions) if result["user_profile"].preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1, 0]
+    preferredINDoptions = json.loads(result["user_profile"].preferredINDoptions) if result["user_profile"].preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1, 0, 0]
     if len(preferredINDoptions) < 7:
         preferredINDoptions.extend([0] * (7 - len(preferredINDoptions)))
         preferredINDoptions[6] = 0
+    if len(preferredINDoptions) < 8:
+        preferredINDoptions.append(0)
     # Option 4 (goods icon) must be 1 or 2, for the edition. Check it hasn't slipped to 0.
     if preferredINDoptions[4] == 0:
             preferredINDoptions[4] = 1
@@ -174,7 +176,7 @@ def showINDhistory(request, game_id=1):
             "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False)),
             "currentPlayers": presenter.getArrayOfIsCurrentPlayers(),
             "finishedGame": currentGame.gameStatus == "FINISHED",
-            "preferredINDoptions": [-1, 0, 0, 1, 1, 1, 0],
+            "preferredINDoptions": [-1, 0, 0, 1, 1, 1, 0, 0],
             "pov": -99,
             "preMoves": "",
             "sideData": "",
@@ -188,10 +190,12 @@ def showINDhistory(request, game_id=1):
     returnData.update(result["auth_data"])
     returnData["pov"] = -9
 
-    preferredINDoptions = json.loads(result["user_profile"].preferredINDoptions) if result["user_profile"].preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1, 0]
+    preferredINDoptions = json.loads(result["user_profile"].preferredINDoptions) if result["user_profile"].preferredINDoptions != "" else [-1, 0, 0, 1, 1, 1, 0, 0]
     if len(preferredINDoptions) < 7:
         preferredINDoptions.extend([0] * (7 - len(preferredINDoptions)))
         preferredINDoptions[6] = 0
+    if len(preferredINDoptions) < 8:
+        preferredINDoptions.append(0)
     if preferredINDoptions[4] == 0:
             preferredINDoptions[4] = 1
     returnData["preferredINDoptions"] = preferredINDoptions
@@ -243,6 +247,9 @@ def _processINDturn(request):
         raise Http404(gettext("Game does not exist")) from None
 
     presenter = cast("INDpresenter", currentGame.presenter())
+
+    if not can_act_in_game(request.user, currentGame):
+        return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
@@ -546,7 +553,7 @@ def _processINDturn(request):
             return JsonResponse({"syncError": True}, safe=False)
 
         # decompress the move data array
-        # moveDataArray = json.loads(gzip.decompress(bytearray(base64.b64decode(jsonData["data"]))).decode("utf-8"))
+        # moveDataArray = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(jsonData["data"]))).decode("utf-8"))
         moveDataArray = jsonData["data"]
 
         # First, check for deletion
@@ -666,8 +673,17 @@ def _sendChatMessage(request):
         base64_data = currentGame.chatData if currentGame.chatData else ""
         if len(base64_data) > 0:
             compressed_data = base64.b64decode(base64_data)
-            unzipped = gzip.decompress(compressed_data).decode("utf-8")
+            unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
             currentChatData = json.loads(unzipped)
+        new_entry = jsonData["newEntry"]
+        if (
+            not isinstance(new_entry, list)
+            or len(new_entry) < 3
+            or not isinstance(new_entry[2], str)
+            or len(new_entry[2]) > 2000
+        ):
+            return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
+        new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
 
         json_string = json.dumps(currentChatData)

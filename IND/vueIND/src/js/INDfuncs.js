@@ -18,6 +18,8 @@ import { useModelStore } from "../stores/INDstore.js"
 import { usePersonalStore } from "../stores/INDpersonal.js"
 import { toRaw } from "vue"
 
+import i18n from "../i18n"
+
 export function arraysEqual(a, b) {
 	if (a === b) return true
 	if (a == null || b == null) return false
@@ -151,7 +153,7 @@ export function decompressChatData(data) {
 		var chatArray = JSON.parse(decompressedData)
 	} else chatArray = []
 
-	chatArray.push(["WelcomeBot", 0, "Welcome to Indonesia Online!SNLBSNLBIf you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"])
+	chatArray.push(["WelcomeBot", 0, i18n.global.t("io.welcomeBot")])
 
 	return chatArray
 }

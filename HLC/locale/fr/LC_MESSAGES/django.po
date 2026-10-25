@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-16 19:49+0800\n"
+"POT-Creation-Date: 2026-10-23 00:35+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,12 +35,11 @@ msgid "Rules"
 msgstr "Règles"
 
 #: .\HLC\templates\HLC\HLChelp.html:12
+#, python-format
 msgid ""
-"Horseless Carriage rules available <a href=\"https://boardgamegeek.com/"
-"filepage/251309/first-edition-english-rulebook\" target=\"_blank\">here</a>"
+"Horseless Carriage rules available <a href=\"%(hlc_rules_url)s\" target=\"_blank\">here</a>"
 msgstr ""
-"Règles de Horseless Carriage disponibles <a href=\"https://boardgamegeek.com/"
-"filepage/251309/first-edition-english-rulebook\" target=\"_blank\">ici</a>"
+"Règles de Horseless Carriage disponibles <a href=\"%(hlc_rules_url)s\" target=\"_blank\">ici</a>"
 
 #: .\HLC\templates\HLC\HLChelp.html:19
 msgid ""
@@ -498,11 +497,15 @@ msgstr ""
 "Les préférences de notification peuvent être modifiées dans votre profil\n"
 "\n"
 
-#: .\HLC\views.py:45 .\HLC\views.py:85
+#: .\HLC\views.py:46 .\HLC\views.py:86
 msgid "Game does not exist"
 msgstr "Le jeu n'existe pas"
 
-#: .\HLC\views.py:540
+#: .\HLC\views.py:91
+msgid "You are not a player in this game"
+msgstr "Vous n'êtes pas un joueur dans cette partie"
+
+#: .\HLC\views.py:544
 msgid ""
 "<b>No rewind data. Rewind limit reached. Please play on to generate more "
 "rewind data </b>"
@@ -510,6 +513,6 @@ msgstr ""
 "<b>Aucune donnée de rembobinage. Limite de rembobinage atteinte. Continuez à "
 "jouer pour générer plus de données de rembobinage </b>"
 
-#: .\HLC\views.py:545
+#: .\HLC\views.py:549
 msgid "<b>Permissions missing. Please reload the page and check again</b>"
 msgstr "<b>Autorisations manquantes. "

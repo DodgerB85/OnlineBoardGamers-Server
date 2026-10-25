@@ -9,11 +9,9 @@
     <h2>{% translate "Rules" %}</h2>
     <div class="help-qa">
       <p>
+        {% static 'rules/Indonesia_Rules.pdf' as ind_rules_url %}
         {% blocktrans trimmed %}
-          Indonesia Rules Available <a class="linkOther"
-    href="https://tesera.ru/images/items/174714/indonesia_E.pdf"
-    target="_blank"
-    download>here</a>
+          Indonesia Rules Available <a class="linkOther" href="{{ ind_rules_url }}" target="_blank" download>here</a>
         {% endblocktrans %}
       </p>
     </div>
@@ -30,7 +28,7 @@
              alt="Box Icon" />
       </p>
       <p>
-        {% translate "Change the map using the Settings icon. The maps all function identically - it is just a visual change" %}
+        {% translate "Change the base map using the Settings icon. The three base maps are only a visual change - the game and territory layout are identical. Fan maps (Aegean and Pilipinas) are chosen when the game is created and cannot be switched in-game." %}
         <img src="{% static 'IND/images/icon-cog.svg' %}"
              width="38"
              height="38"
@@ -94,11 +92,11 @@
         {% blocktranslate trimmed %}
           Cards will automatically be discarded if there is no valid territory to place a city.
           They will also be discarded if there are no more size 1 cities available (very rare).
-          You can check the history if you are unsure why you turn was skipped.
+          You can check the history if you are unsure why your turn was skipped.
         {% endblocktranslate %}
       </p>
       <b><u>{% translate "Turn order:" %}</u></b>
-      <p>{% translate "Remeber - you only get 1 chance to bid." %}</p>
+      <p>{% translate "Remember - you only get 1 chance to bid." %}</p>
       <b><u>{% translate "Mergers:" %}</u></b>
       <p>
         {% blocktranslate trimmed %}
@@ -143,7 +141,7 @@
       <p>
         {% blocktranslate trimmed %}
           If you only have un-operated shipping companies that cannot expand, your turn will be skipped and one of those
-          companies will be operated at random.
+          companies will be marked as operated automatically.
         {% endblocktranslate %}
       </p>
       <p>
@@ -198,7 +196,7 @@
       </p>
       <p>
         {% blocktranslate trimmed %}
-          Note: In the above exmple, if C had cost 20 instead, then the algorithm would randomly pick between player B and C, because your relative
+          Note: In the above example, if C had cost 20 instead, then the algorithm would randomly pick between player B and C, because your relative
           change to player B would be -20 (either player B gains 10 and you pay 10, or else you pay player C 20).
         {% endblocktranslate %}
       </p>
@@ -210,6 +208,12 @@
         {% endblocktranslate %}
       </p>
       <b><u>{% translate "Visual Guide" %}</u></b>
+      <p>
+        <b>{% translate "Keyboard shortcuts:" %}</b>
+        {% blocktranslate trimmed %}
+          Enter = confirm / end turn, Esc = reset turn, + / - = adjust the turn-order bid, A = show available companies and your era-card provinces.
+        {% endblocktranslate %}
+      </p>
       <p>
         <img src="{% static 'Lobby/images/help/ind_help_gfx.jpg' %}"
              width="1300"
@@ -224,7 +228,7 @@
   <div class="card section">
     <h2>{% translate "When can I resign?" %}</h2>
     <div class="help-qa">
-      <p>{% translate "You can resign durng your 'Turn Order Bid' phase." %}</p>
+      <p>{% translate "You can resign during your 'Turn Order Bid' phase." %}</p>
     </div>
   </div>
   <div class="card section">

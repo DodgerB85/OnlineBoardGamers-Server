@@ -44,6 +44,12 @@ watch(
 )
 
 const currentPlayerObj = computed(() => controller.currentPlayerObj())
+const waitingFor = computed(() => {
+	if (personal.canPlay() || personal.haltPlay || store.viewSettings.showGameLoader) return ""
+	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return ""
+	if (store.gameflow.turnOrder.length === 0) return ""
+	return controller.getCurrentPlayersArray().filter(Boolean).join(", ")
+})
 const timedOutPlayerIndex = computed(() => (store.gameflow.turnOrder.length > 0 ? store.gameflow.turnOrder[0] : -1))
 // The kickout panel and its buttons act on the timed-out player, not on the
 // viewer: in simul phases personal.pov can still be in the turn order, so
@@ -160,6 +166,11 @@ function localClickResign() {
 	} else Bot.actionResign()
 }
 
+function retryFailedSave() {
+	const retry = store.gameMessages.retrySave
+	if (retry) retry()
+}
+
 function localEndTurn() {
 	// If choosing res card, set that on the player
 	if (store.context.selectedReserveCard !== rf.RES_CARD_NOT_CHOSEN) {
@@ -211,9 +222,9 @@ const computedUnfireableMarketers = computed(() =>
 
 /** CEO Bonus */
 const ceoBonuses = [
-	{ id: rf.CEO_ACTION_PRICE_MINUS_3, label: "Price -3" },
-	{ id: rf.CEO_ACTION_RECRUITING_MANAGER, label: "2x: Hire 1 person or $5 less salary" },
-	{ id: rf.CEO_ACTION_COACH, label: "2 training slots. May train the same person two steps" },
+	{ id: rf.CEO_ACTION_PRICE_MINUS_3, labelKey: "playerDetails.priceMinus3" },
+	{ id: rf.CEO_ACTION_RECRUITING_MANAGER, labelKey: "actionArea.ceoLabelRecruiting" },
+	{ id: rf.CEO_ACTION_COACH, labelKey: "employees.coachDesc" },
 ]
 
 const computedPayResources = computed(() => [...controller.currentPlayerObj().resources].sort().filter((resource) => resource !== rf.COFFEE))
@@ -392,9 +403,16 @@ function skipModuleAndEndTurn() {
 
 <template>
 	<div v-if="store.viewSettings.showGameLoader" id="fLoadingBar">
-		{{ $t("actionArea.savingGame") }}
-		<br />
-		<img :src="view.getImage('loading-bar-black')" />
+		<template v-if="store.gameMessages.retrySave">
+			{{ $t("actionArea.saveErrorRetry") }}
+			<br />
+			<button class="actionsLineButton" @click="retryFailedSave">{{ $t("actionArea.retrySave") }}</button>
+		</template>
+		<template v-else>
+			{{ $t("actionArea.savingGame") }}
+			<br />
+			<img :src="view.getImage('loading-bar-black')" />
+		</template>
 	</div>
 
 	<div id="actionAreaDiv">
@@ -758,7 +776,7 @@ function skipModuleAndEndTurn() {
 
 						<template v-if="store.context.selectedReserveCard !== rf.RES_CARD_NOT_CHOSEN">
 							<br />
-							<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+							<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 							<button class="actionsLineButton" @click="localEndTurn">{{ $t("workingDay.endTurn") }}</button>
 						</template>
 					</div>
@@ -770,7 +788,7 @@ function skipModuleAndEndTurn() {
 						<p>{{ $t("actionArea.confirmNoMoreEmployees") }}</p>
 
 						<button v-if="!personal.trainingGame" class="actionsLineButton" @click="localClickResign">{{ $t("actionArea.resign") }}</button>
-						<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+						<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 						<span v-if="unionOrganizerPlacementRequired" class="blockingActionMessage">{{ $t("laborMarket.unionMustWork") }}</span>
 						<button v-else class="actionsLineButton" @click="controller.endPlayerTurn(true, false)">{{ $t("workingDay.endTurn") }}</button>
 					</template>
@@ -822,7 +840,7 @@ function skipModuleAndEndTurn() {
 						<br />
 
 						<button v-if="!personal.trainingGame" class="actionsLineButton" @click="localClickResign">{{ $t("actionArea.resign") }}</button>
-						<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+						<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 						<button class="actionsLineButton" @click="controller.autoFillEmployees()">{{ $t("actionArea.autoFillStructure") }}</button>
 						<span v-if="unionOrganizerPlacementRequired" class="blockingActionMessage">{{ $t("laborMarket.unionMustWork") }}</span>
 						<button v-else class="actionsLineButton" @click="localEndTurn">{{ $t("workingDay.endTurn") }}</button>
@@ -847,7 +865,7 @@ function skipModuleAndEndTurn() {
 							<button v-if="store.highlights.indexesToHighlightYellow.length === 0" class="actionsLineButton" @click="controller.skipPizzaBombMarketer()">{{ $t("workingDay.neverMind") }}</button>
 						</template>
 						<template v-else>
-							<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+							<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 							<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">{{ $t("workingDay.endTurn") }}</button>
 						</template>
 					</div>
@@ -863,6 +881,7 @@ function skipModuleAndEndTurn() {
 								<div class="ceoBonusActionDiv">
 									<img class="ceoBonusActionImg" :src="view.getImage('ceo_action_' + bonus.id)" />
 								</div>
+								<div class="ceoBonusLabel">{{ $t(bonus.labelKey) }}</div>
 							</div>
 						</div>
 						<p v-if="currentPlayerObj.ceoAction === rf.CEO_ACTION_HIRE_1">{{ $t("actionArea.ceoMustChoose") }}</p>
@@ -884,7 +903,7 @@ function skipModuleAndEndTurn() {
 							{{ $t("workingDay.coffeeShopPlacementRules") }}
 						</p>
 						<p v-if="store.context.coffeeShopMSAction === 'remove'">{{ $t("workingDay.noMoreCoffeeShopsMove") }}</p>
-						<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+						<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 						<button class="actionsLineButton" @click="controller.skipCoffeeMS()">{{ $t("actionArea.skipCoffeeMilestone") }}</button>
 						<button v-if="store.context.coffeeShopMSAction === ''" class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">{{ $t("workingDay.endTurn") }}</button>
 					</div>
@@ -918,7 +937,7 @@ function skipModuleAndEndTurn() {
 							</div>
 
 							<div v-if="rules.canPayWithMoney(controller.currentPlayerIndex(), computedPaysLeft)">
-								<button class="actionsLineButton paydayResetButton" @click="resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+								<button class="actionsLineButton paydayResetButton" @click="resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 								<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">{{ $t("actionArea.payRestInMoney") }}</button>
 							</div>
 						</template>
@@ -926,7 +945,7 @@ function skipModuleAndEndTurn() {
 							<div class="reminder fireLine">
 								<img v-for="(resource, idx) in store.context.preMoveData[0][1]" :key="idx" :src="view.getImage(`item_${resource}`)" class="payFoodToken paidToken" @click="undoPaySalaryWithResource(idx)" />
 							</div>
-							<button class="actionsLineButton paydayResetButton" @click="resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+							<button class="actionsLineButton paydayResetButton" @click="resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 							<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">{{ $t("workingDay.endTurn") }}</button>
 						</template>
 					</div>
@@ -976,7 +995,7 @@ function skipModuleAndEndTurn() {
 						</div>
 
 						<br />
-						<button class="actionsLineButton paydayResetButton" @click="resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+						<button class="actionsLineButton paydayResetButton" @click="resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 						<button v-if="!computedCanAffordPayDay && plyr.hasMilestone(controller.currentPlayerIndex(), rf.FIRST_TRAINER_USED)" class="actionsLineButton" @click="confirmTrainerKeepAll()">{{ $t("actionArea.okThankYou") }}</button>
 						<button v-else-if="computedCanAffordPayDay && plyr.hasMilestone(controller.currentPlayerIndex(), rf.FIRST_BEER_SOLD)" class="actionsLineButton" @click="chooseBeerPayment()">{{ $t("prePhase.choosePaymentType") }}</button>
 						<button v-else-if="computedCanAffordPayDay" class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">{{ $t("workingDay.endTurn") }}</button>
@@ -990,7 +1009,7 @@ function skipModuleAndEndTurn() {
 							<img :src="view.getImage('fired')" class="firedImg" />
 						</div>
 						<p v-if="store.context.justFired.length > 0" style="color: #f00"><b>{{ $t("actionArea.cautionFireAll") }}</b></p>
-						<button class="actionsLineButton paydayResetButton" @click="resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+						<button class="actionsLineButton paydayResetButton" @click="resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 						<button class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">{{ $t("workingDay.endTurn") }}</button>
 					</div>
 				</template>
@@ -1032,7 +1051,7 @@ function skipModuleAndEndTurn() {
 							</div>
 
 							<div class="fridgeButtons">
-								<button class="actionsLineButton" @click="resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+								<button class="actionsLineButton" @click="resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 								<button v-if="cleanupResources.length <= 10" class="actionsLineButton" @click="controller.endPlayerTurn(false, false)">{{ $t("workingDay.endTurn") }}</button>
 							</div>
 						</div>
@@ -1047,7 +1066,7 @@ function skipModuleAndEndTurn() {
 
 				<!-- CONFIRM END TURN -->
 				<template v-if="store.context.action === rf.ACT_CONFORM_END_TURN">
-					<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeTurn") }}</button>
+					<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 					<button class="actionsLineButton" @click="localEndTurn">{{ $t("workingDay.endTurn") }}</button>
 				</template>
 
@@ -1070,6 +1089,10 @@ function skipModuleAndEndTurn() {
 					</i18n-t>
 				</div>
 				</template>
+			</template>
+
+			<template v-else-if="waitingFor">
+				<div id="waitingForDiv">{{ $t("actionArea.waitingFor", { names: waitingFor }) }}</div>
 			</template>
 		</div>
 
@@ -1164,6 +1187,17 @@ function skipModuleAndEndTurn() {
 	text-align: center;
 	font-size: 40px;
 	font-weight: bolder;
+}
+
+#fLoadingBar .actionsLineButton {
+	font-size: 18px;
+}
+
+#waitingForDiv {
+	padding: 24px 12px;
+	font-size: 20px;
+	font-weight: bolder;
+	text-align: center;
 }
 
 #gameEndDiv {
@@ -1501,6 +1535,14 @@ function skipModuleAndEndTurn() {
 	margin: auto;
 	width: 100%;
 	background-color: #d4eafd;
+}
+
+.ceoBonusLabel {
+	font-size: 13px;
+	font-weight: bold;
+	text-align: center;
+	margin-top: 4px;
+	max-width: 150px;
 }
 
 .ceoBonusOptionDiv {

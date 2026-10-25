@@ -333,12 +333,12 @@
 ////////////////////////////////
 
 //////////////////////////
-{%if not gameData %}global.displayNames = {{ displayNames|safe }};{% endif %}
+{%if not gameData %}global.displayNames = JSON.parse('{{ displayNames|escapejs }}');{% endif %}
 ////////////////////////
 
     global.chat = { "chat": [{{ chatData | safe }}], "testInfo": [] };
 
-    {% if gameData %}global.load = '{{ gameData|safe }}';{% endif %}
+    {% if gameData %}global.load = '{{ gameData|escapejs }}';{% endif %}
 
     {% if now %}global.now = {{ now }};{% endif %}
 
@@ -362,7 +362,7 @@
 
 
     {% if currentNotes %}
-    global.notes = "{{ currentNotes | safe }}";
+    global.notes = "{{ currentNotes | escapejs }}";
     {% endif %}
 
     {% if chatNotification %}

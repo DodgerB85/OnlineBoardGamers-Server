@@ -6,6 +6,8 @@ import * as view from "./BUSview.js"
 import { useModelStore } from "../stores/BUSstore.js"
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 
+import i18n from "../i18n"
+
 export function removeItemAll(arr, value) {
 	var arrCopy = [...arr]
 	var i = 0
@@ -17,14 +19,6 @@ export function removeItemAll(arr, value) {
 		}
 	}
 	return arrCopy
-}
-
-export function sleepPause(miliseconds) {
-	var currentTime = new Date().getTime()
-
-	while (currentTime + miliseconds >= new Date().getTime()) {
-		// Do Nothing
-	}
 }
 
 export function sleep(ms) {
@@ -470,9 +464,9 @@ export function exportBUSmodel(forGameOver, saveContext) {
 	// 5 - desired Building
 	temp.push(store.desiredBuilding)
 
-	// 6 - Pittsburgh-specific status (jeroenStatus, jorisStatus, bridges, remainingBridgeMarkers, bridgeEnds)
+	// 6 - Pittsburgh-specific status (jeroenStatus, jorisStatus, bridges, remainingBridgeMarkers)
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
-		temp.push([store.jeroenStatus, store.jorisStatus, store.bridges, store.remainingBridgeMarkers, store.bridgeEnds])
+		temp.push([store.jeroenStatus, store.jorisStatus, store.bridges, store.remainingBridgeMarkers])
 	}
 
 	// 7 - gameflow // NOT GAME ENDED
@@ -629,28 +623,23 @@ export function importBUSmodel(inputBase64, forGameOver, restoreContext, history
 	// 5 - desiredBuilding
 	store.desiredBuilding = inputModel[5]
 
-	// 6 - Pittsburgh-specific status (jeroenStatus, jorisStatus, bridges, remainingBridgeMarkers, bridgeEnds)
+	// 6 - Pittsburgh-specific status (jeroenStatus, jorisStatus, bridges, remainingBridgeMarkers)
+	// Older saves may contain a fifth bridgeEnds entry; it is ignored.
 	let pittsStatusIndex = 6
 	if (personal.selectedBoard === rf.BOARD_PITTS && inputModel.length > 6 && Array.isArray(inputModel[6]) && inputModel[6].length >= 2) {
 		store.jeroenStatus = inputModel[6][0]
 		store.jorisStatus = inputModel[6][1]
-		// Import bridge data if available (newer format)
-		if (inputModel[6].length >= 5) {
+		if (inputModel[6].length >= 4) {
 			store.bridges.splice(0)
 			store.bridges.push(...inputModel[6][2])
 			store.remainingBridgeMarkers = inputModel[6][3]
-			Object.assign(store.bridgeEnds, inputModel[6][4])
 		}
 		pittsStatusIndex = 7
 	} else {
 		store.jeroenStatus = -1
 		store.jorisStatus = -1
-		// Reset bridge data if not present
 		store.bridges.splice(0)
 		store.remainingBridgeMarkers = 5
-		for (const key in store.bridgeEnds) {
-			delete store.bridgeEnds[key]
-		}
 	}
 
 	// 7 - gameflow (was 6, now 7 if Pittsburgh data present)
@@ -670,7 +659,7 @@ export function importBUSmodel(inputBase64, forGameOver, restoreContext, history
 	} else store.gameflow.gameEnded = 3
 
 	// 8 - context (was 7, now 8 if Pittsburgh data present)
-	if (restoreContext && inputModel.length >= pittsStatusIndex + 1) Object.assign(store.context, inputModel[pittsStatusIndex + 1])
+	if (restoreContext && inputModel.length > pittsStatusIndex + 1) Object.assign(store.context, inputModel[pittsStatusIndex + 1])
 
 	store.remainingPassengers = 11
 	store.remainingTimeStones = 5
@@ -689,7 +678,7 @@ export function importBUSmodel(inputBase64, forGameOver, restoreContext, history
 		// P=Remaining Actions
 		else if (histEntry[0] === rf.HIST_CHOOSE_ACTION && histEntry[3][0] <= 6) store.players[histEntry[1]].remainingActions--
 		// p=Buses
-		else if (histEntry[0] === rf.HIST_ADD_BUS) store.players[histEntry[1]].buses++
+		else if (histEntry[0] === rf.HIST_ADD_BUS && (histEntry[3][1] === undefined || histEntry[3][1] === 1)) store.players[histEntry[1]].buses++
 		// p=Time Stones / remainingTimeStones
 		else if (histEntry[0] === rf.HIST_ALTER_TIME && histEntry[1] !== -1 && histEntry[3][1] !== 0) {
 			store.players[histEntry[1]].timeStones++
@@ -719,16 +708,7 @@ export function importBUSmodel(inputBase64, forGameOver, restoreContext, history
 	if (forGameOver) {
 		store.gameflow.phase = rf.PHASE_GAME_OVER
 
-		const finalPositionsIndices = store.players
-			.map((_, index) => index) // Create [0, 1, 2, ...]
-			.sort((a, b) => {
-				const playerA = store.players[a]
-				const playerB = store.players[b]
-
-				// Primary sort: Score (Descending)
-				// Secondary sort: Time Stones (Descending)
-				return playerB.score - playerA.score || playerB.timeStones - playerA.timeStones
-			})
+		const finalPositionsIndices = model.getFinalRankingIndices()
 
 		store.gameflow.fullTurnOrder = [...finalPositionsIndices]
 		store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
@@ -896,7 +876,7 @@ export function decompressChatData(data) {
 		var chatArray = JSON.parse(step1)
 	} else chatArray = []
 
-	chatArray.push(["WelcomeBot", 0, "Welcome to Bus Online!SNLBSNLBIf you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"])
+	chatArray.push(["WelcomeBot", 0, i18n.global.t("io.welcomeBot")])
 
 	return chatArray
 }

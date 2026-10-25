@@ -25,6 +25,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
+from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -34,6 +35,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 
 from . import URRconstants as rfURR
 from .common import create_urr_game
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 URR_DB_LOCK_NAME = "lockURRgame_"
 
@@ -72,7 +74,7 @@ def showURRgame(request, game_id=1, spoilerFree=False, replayStep=1):
     presenter = cast("URRpresenter", currentGame.presenter())
 
     returnData = {**result["base_data"]}
-    # The URR client reads the whole model as plain JSON out of gameData.
+    # The client decompresses its own gzip+base64 model from gameData.
     returnData["gameData"] = returnData["gameData"] if returnData["gameData"] else "{}"
 
     returnData["missingPlayers"] = json.dumps(presenter.getMissingPlayersNamesArray())
@@ -139,9 +141,8 @@ def _processURRturn(request):
 
     jsonData = json.loads(request.body)
     if "gameDataCompressed" in jsonData:
-        # Compress only the transfer: saved positions and legacy callers retain
-        # the plain JSON format used by show pages, history, and rewind.
-        jsonData["gameData"] = gzip.decompress(base64.b64decode(jsonData["gameDataCompressed"])).decode("utf-8")
+        # The client's gzip+base64 model is stored as-is.
+        jsonData["gameData"] = jsonData["gameDataCompressed"]
     game_id = jsonData["gameID"]
     latest_update = str(jsonData.get("latestUpdate", 0))
 
@@ -152,15 +153,22 @@ def _processURRturn(request):
 
     presenter = cast("URRpresenter", currentGame.presenter())
 
+    if not can_act_in_game(request.user, currentGame):
+        return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
+
     if jsonData["action"] == "saveGame":
         return performSaveURRGame(request, currentGame, jsonData)
 
     elif jsonData["action"] == "resign":
+        # Settlement only, on your own turn: nobody can resign once the final rainy season is decided.
+        is_current = currentGame.players.filter(player=request.user, is_current=True, is_missing=False, is_kicked=False).exists()
+        if currentGame.phase != rfURR.PHASE_SETTLEMENT or not is_current:
+            return JsonResponse({"error": gettext("You can only resign on your own turn in the settlement phase.")}, status=400)
         _missingPlayer = User.objects.get(username=request.user.username)
         presenter.addMissingPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
         currentGame.save()
-        return JsonResponse({"latestUpdate": currentGame.latestUpdate}, safe=False)
+        return JsonResponse({"latestUpdate": currentGame.latestUpdate, "missingPlayers": presenter.getMissingPlayersNamesArray()}, safe=False)
 
     elif jsonData["action"] == "kickout":
         participant = currentGame.players.filter(player=request.user, is_missing=False, is_kicked=False).exists()
@@ -241,8 +249,7 @@ def _processURRturn(request):
         presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
         presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
         currentGame.gameData = jsonData["gameData"]
-        # The client may compact a legacy history when confirming the loaded position.
-        # Keep the redo anchor in the same representation to avoid a duplicate point.
+        # Keep the redo anchor in the same representation as the loaded model.
         if currentGame.rewindTempData:
             currentGame.rewindTempData = currentGame.gameData
 
@@ -277,7 +284,7 @@ def performSaveURRGame(request, currentGame, jsonData):
         return JsonResponse({"syncError": True}, safe=False)
 
     nameToUse = request.user.username
-    if request.user.username == "BotKickStarter":
+    if is_game_admin(request.user):
         nameToUse = jsonData.get("BKSN", nameToUse)
     check_name = jsonData.get("checkName", "")
     if check_name:
@@ -337,62 +344,71 @@ def performSaveURRGame(request, currentGame, jsonData):
     )
 
 
-def compressRewindPoint(point):
-    if point.startswith("gzip:"):
-        return point
-    return "gzip:" + base64.b64encode(gzip.compress(point.encode("utf-8"), compresslevel=6, mtime=0)).decode("ascii")
-
-
 def decompressRewindPoint(point):
     if point.startswith("gzip:"):
-        return gzip.decompress(base64.b64decode(point[5:])).decode("utf-8")
+        return safe_gzip_decompress(base64.b64decode(point[5:])).decode("utf-8")
     return point
 
 
-def openingPosition(gameData):
-    """Rebuild the start of the game from a save's own first history entry.
+def decodeGameData(gameData):
+    if not gameData:
+        return None
+    try:
+        return json.loads(gameData)
+    except (json.JSONDecodeError, TypeError):
+        return json.loads(safe_gzip_decompress(base64.b64decode(gameData)).decode("utf-8"))
 
-    The client creates the opening position, so a game that has never been
-    saved has no earlier position on the server yet. Without this the first
-    rewind of a game would have nothing to go back to.
+
+def openingPosition(gameData):
+    """Return the client's opening marker for the first rewind point.
+
+    The client rebuilds the opening from its own createGame + replayStart, so
+    the server only has to hand back the names and opening changes.
     """
     try:
-        history = json.loads(gameData).get("history") or []
-        if not history:
+        data = decodeGameData(gameData)
+        if isinstance(data, dict) and data.get("players"):
+            if "replay" in data:
+                return json.dumps({"opening": True, "players": [player["name"] for player in data["players"]], "replayStart": data.get("replayStart", [])})
+            history = data.get("history") or []
+            if not history:
+                return ""
+            opening = json.loads(history[0][2])
+            opening["history"] = [history[0]]
+            return json.dumps(opening)
+        if not isinstance(data, list) or not data:
             return ""
-        opening = json.loads(history[0][2])
-        opening["history"] = [history[0]]
-        return json.dumps(opening)
-    except (json.JSONDecodeError, IndexError, TypeError):
+        players = data[0] or []
+        names = [entry[0] for entry in players]
+        if not names or any(name is None for name in names):
+            return ""
+        replay_start = data[11] if len(data) > 11 else []
+        return json.dumps({"opening": True, "players": names, "replayStart": replay_start})
+    except (json.JSONDecodeError, IndexError, KeyError, TypeError, ValueError, OSError):
         return ""
 
 
 def doSaveRewind(currentGame, jsonData, previousGameData):
-    # Each point holds the complete replay history, so keep them gzipped.
     # Points are the positions from *before* each move: the position after the
-    # latest move is already currentGame.gameData, and storing it too would
-    # leave the first rewind of a game with nothing to step back to.
+    # latest move is already currentGame.gameData.
     currentRewindData = []
     if currentGame.rewindData:
         try:
-            currentRewindData = [compressRewindPoint(point) for point in json.loads(currentGame.rewindData)]
+            currentRewindData = json.loads(currentGame.rewindData)
         except json.JSONDecodeError:
             currentRewindData = []
 
     if currentGame.rewindTempData:
         # Put back the position we rewound to, so playing on from it does not
         # lose the ability to rewind there again.
-        temp_point = compressRewindPoint(currentGame.rewindTempData)
-        if not currentRewindData or decompressRewindPoint(currentRewindData[-1]) != decompressRewindPoint(temp_point):
-            currentRewindData.append(temp_point)
+        if not currentRewindData or decompressRewindPoint(currentRewindData[-1]) != decompressRewindPoint(currentGame.rewindTempData):
+            currentRewindData.append(currentGame.rewindTempData)
         currentGame.rewindTempData = ""
 
     if not previousGameData:
         previousGameData = openingPosition(jsonData["gameData"])
-    if previousGameData:
-        previous_point = compressRewindPoint(previousGameData)
-        if not currentRewindData or decompressRewindPoint(currentRewindData[-1]) != decompressRewindPoint(previous_point):
-            currentRewindData.append(previous_point)
+    if previousGameData and (not currentRewindData or decompressRewindPoint(currentRewindData[-1]) != decompressRewindPoint(previousGameData)):
+        currentRewindData.append(previousGameData)
 
     if len(currentRewindData) > 20:
         currentRewindData = currentRewindData[-20:]
@@ -422,6 +438,15 @@ def _sendChatMessageURR(request):
             raise Http404(gettext("Game does not exist")) from None
 
         currentChatData = _decompressGenericChat(currentGame.chatData)
+        new_entry = jsonData["newEntry"]
+        if (
+            not isinstance(new_entry, list)
+            or len(new_entry) < 3
+            or not isinstance(new_entry[2], str)
+            or len(new_entry[2]) > 2000
+        ):
+            return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
+        new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
         currentGame.chatData = _compressGenericChat(currentChatData)
 
@@ -438,7 +463,7 @@ def _decompressGenericChat(base64_data):
     currentChatData = []
     if base64_data and len(base64_data) > 0:
         compressed_data = base64.b64decode(base64_data)
-        unzipped = gzip.decompress(compressed_data).decode("utf-8")
+        unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
         currentChatData = json.loads(unzipped)
     return currentChatData
 

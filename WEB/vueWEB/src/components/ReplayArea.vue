@@ -11,6 +11,9 @@ import { usePersonalStore } from "../stores/WEBpersonal.js"
 const personal = usePersonalStore()
 
 import { ref } from "vue"
+import { useI18n } from "vue-i18n"
+
+const { t } = useI18n()
 
 const copyMessage = ref("")
 
@@ -31,7 +34,7 @@ function copyToClipboard() {
 
 	document.body.removeChild(textarea)
 
-	copyMessage.value = textToCopy + " Copied to Clipboard"
+	copyMessage.value = t("replay.copied", { url: textToCopy })
 
 	const button = document.getElementById("copyURLbutton")
 	const popup = document.getElementById("popup")
@@ -60,7 +63,7 @@ function copyToClipboard() {
 
 <template>
 	<template v-if="store.viewSettings.showReplay">
-		<button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-999)">Back to my last move</button>
+		<button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-999)">{{ $t("replay.backToMyLastMove") }}</button>
 		<button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-99)">|&lt;</button>
 		<button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-9)">&lt;&lt;</button>
 		<button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-1)">&lt;</button>
@@ -70,9 +73,9 @@ function copyToClipboard() {
 		<button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1" @click="performStep(99)">&gt;|</button>
 
 		<br />
-		Use the arrows to step through the game. This will not alter the current game in any way
+		{{ $t("replay.useArrows") }}
 		<br />
-		<button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">Copy URL to this move to clipboard</button>
+		<button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">{{ $t("replay.copyUrl") }}</button>
 		<div id="popup" class="popup">{{ copyMessage }}</div>
 
 		<div v-if="!store.viewSettings.generatingReplay" class="replayHistoryEntry">

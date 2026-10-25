@@ -30,7 +30,7 @@ function clickedAvailableTile(tileID) {
 <template>
 	<div id="availableTilesDiv">
     <span v-if="store.context.action === rf.ACT_CHOOSE_ACTION && personal.canPlay() && store.context.remainingActions > 0">
-      <b>Taking a tile reveals hidden information<br/>The game will be saved and you will not be able to undo this action</b>
+      <b>{{ $t("action.newTileRevealsInfo") }}<br/>{{ $t("action.savedNoUndo") }}</b>
     </span>
 		<div class="groupDiv" v-for="(group, groupIdx) in getAvailableTileGroups()" :key="groupIdx">
 			<div class="pileDiv" v-for="(pile, pileIdx) in group" :key="pileIdx">

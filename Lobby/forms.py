@@ -6,7 +6,6 @@ from django.contrib.auth.forms import (
     SetPasswordForm,
     UserCreationForm,
 )
-from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy
 
 from .models import Profile, changelog
@@ -147,52 +146,6 @@ class NewUserForm(UserCreationForm):
 
 
 class UpdateProfileForm(forms.ModelForm):
-    restaurantChoices = (
-        (-1, mark_safe("None")),
-        (
-            0,
-            mark_safe(
-                '<div class="column"><img src="/static/FCM/Images/p_fried_geese.jpg" alt="Fried Geese" title="Fried Geese"></div>'
-            ),
-        ),
-        (
-            1,
-            mark_safe(
-                '<div class="column"><img src="/static/FCM/Images/p_gluttony_inc.jpg" alt="Gluttony Inc" title="Gluttony Inc"></div>'
-            ),
-        ),
-        (
-            2,
-            mark_safe(
-                '<div class="column"><img src="/static/FCM/Images/p_duck_dinner.jpg" alt="Duck Diner" title="Duck Diner"></div>'
-            ),
-        ),
-        (
-            3,
-            mark_safe(
-                '<div class="column"><img src="/static/FCM/Images/p_santa_maria.jpg" alt="Santa Maria" title="Santa Maria"></div>'
-            ),
-        ),
-        (
-            4,
-            mark_safe(
-                '<div class="column"><img src="/static/FCM/Images/p_xango_blues.jpg" alt="Xango Blues" title="Xango Blues"></div>'
-            ),
-        ),
-        (
-            5,
-            mark_safe(
-                '<img src="/static/FCM/Images/p_siap_faji.jpg" alt="Siap Faji" title="Siap Faji">'
-            ),
-        ),
-    )
-
-    preferredRestaurantColour = forms.ChoiceField(
-        choices=restaurantChoices,
-        initial=0,
-        widget=forms.RadioSelect,
-    )
-
     class Meta:
         model = Profile
-        fields = ["preferredRestaurantColour", "sendEmailNotificationOnTurn"]
+        fields = ["sendEmailNotificationOnTurn"]

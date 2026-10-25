@@ -5,6 +5,7 @@ import json
 import math
 import time
 from collections import Counter
+from urllib.parse import urlparse
 
 from django.utils.translation import gettext, gettext_lazy
 
@@ -54,6 +55,22 @@ SR_WEBHOOK_CHOICES = {
     TELEGRAM: gettext_lazy("Telegram"),
     OTHER: gettext_lazy("Other"),
 }
+
+SR_WEBHOOK_HOSTS = {
+    DISCORD: {"discord.com", "www.discord.com", "ptb.discord.com", "canary.discord.com", "discordapp.com"},
+    SLACK: {"hooks.slack.com"},
+}
+
+
+def SR_valid_webhook_url(webhook_type, url):
+    try:
+        parsed = urlparse(url)
+    except ValueError:
+        return False
+    if parsed.scheme != "https" or parsed.hostname not in SR_WEBHOOK_HOSTS.get(webhook_type, set()):
+        return False
+    path_prefix = "/api/webhooks/" if webhook_type == DISCORD else "/services/"
+    return parsed.path.startswith(path_prefix)
 
 
 OPEN = "OP"
@@ -761,7 +778,8 @@ def SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds):
         latestUpdateElapsedTimeString += " " + str(elapsedHours) + "h"
         # if (elapsedHours > 1): latestUpdateElapsedTimeString += "s"
     if elapsedmins > 0:
-        latestUpdateElapsedTimeString += " " + str(elapsedmins) + "m"
+        # "min", not "m": in Italian "m" reads as metres.
+        latestUpdateElapsedTimeString += " " + str(elapsedmins) + "min"
     latestUpdateElapsedTimeString += " " + str(elapsedTotalSeconds) + "s"
     return latestUpdateElapsedTimeString
 
@@ -1249,8 +1267,24 @@ def SR_getRNBstartingOptionsHTML(startingOptionsArr):
         if option == rf.SO_EXPERIENCED_GAME:
             # usedOptions += 1
             startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
+        if option == rfRNB.SO_ELECTRICITY:
+            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/RNB_electricity.svg' title='" + gettext("Electricity") + "'>"
+        if option == rfRNB.SO_MANAGEMENT:
+            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/RNB_management.svg' title='" + gettext("Management") + "'>"
+        if option == rfRNB.SO_ART:
+            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/RNB_art.svg' title='" + gettext("Art") + "'>"
+        if option == rfRNB.SO_TRADE:
+            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/RNB_trade.svg' title='" + gettext("Trade") + "'>"
+        if option == rfRNB.SO_FUNDAMENTAL_RESEARCH:
+            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/RNB_fundamentalResearch.svg' title='" + gettext("Fundamental Research") + "'>"
+        if option == rfRNB.SO_PLANES:
+            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/RNB_planes.svg' title='" + gettext("Planes") + "'>"
+        if option == rfRNB.SO_BOMBS:
+            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/RNB_bombs.svg' title='" + gettext("Bombs") + "'>"
+        if option == rfRNB.SO_JUMP_START:
+            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/RNB_jumpStart.svg' title='" + gettext("Jump Start") + "'>"
         if option == rfRNB.SO_USE_SOLO_MINE_RULES:
-            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/RNB_useSokoMineRules.svg' title='" + gettext("Solo Mine Rules\nFixed Mine Output") + "'>"
+            startingOptionsHTML += "<img class='startingOption' src='/static/Lobby/images/startingOptions/RNB_useSoloMineRules.svg' title='" + gettext("Solo Mine Rules\nFixed Mine Output") + "'>"
 
     return startingOptionsHTML
 

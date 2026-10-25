@@ -5,6 +5,8 @@ import * as controller from "./TGZcontroller"
 
 import { useModelStore } from "../stores/TGZstore.js"
 import { usePersonalStore } from "../stores/TGZpersonal"
+import i18n from "../i18n"
+const t = i18n.global.t
 
 // Helper functions for multi-god support
 export function getPlayer_gods(player) {
@@ -98,7 +100,7 @@ export function setupPlaceMonument() {
 	if (has_god(controller.currentPlayerObj(), rf.OBATALA)) store.context.monumentsToPlace = 2
 	store.context.indexesToHighlightClick.splice(0)
 	store.context.indexesToHighlightClick = map.getSpacesForMonument(hasNomads(controller.currentPlayerObj()), false)
-	if (store.context.indexesToHighlightClick.length === 0) store.context.actionError = "No Space Left for Any Monuments"
+	if (store.context.indexesToHighlightClick.length === 0) store.context.actionError = t("model.noSpaceMonuments")
 }
 
 export function setupChoosegod() {
@@ -122,7 +124,7 @@ export function setupUseSpec() {
 	store.clearVars(true)
 	store.context.actionError = ""
 	if (controller.currentPlayerObj().specialists.length === 0) {
-		store.context.actionError = "Choose a Specialist first"
+		store.context.actionError = t("model.chooseSpecFirst")
 		return
 	}
 
@@ -148,7 +150,7 @@ export function setupUseSingleSpec(spec) {
 	} else if (spec[0] === rf.RAIN_CEREMONY) {
 		if (store.remainingItems[rf.WATER_TILE] <= 0) {
 			store.context.itemBeingAdded = -1
-			store.context.actionError = "No More Water Tiles"
+			store.context.actionError = t("model.noMoreWater")
 			return
 		}
 		if (spec[1] === 0) {
@@ -172,7 +174,7 @@ export function setupUseSingleSpec(spec) {
 		else if (store.remainingItems[rf.DIAMOND_TILE] !== 0) store.context.itemBeingAdded = rf.DIAMOND_TILE
 		else {
 			store.context.itemBeingAdded = -1
-			store.context.actionError = "No More Resource Tiles"
+			store.context.actionError = t("model.noMoreResources")
 		}
 		store.context.action = rf.ACT_BUILD_RES
 		if (store.context.itemBeingAdded !== -1) store.context.indexesToHighlightClick = map.getSpacesForResource()
@@ -235,7 +237,7 @@ export function setupRaiseMonument(keepReset) {
 
 	if (store.context.canSelectRaiseMonument.length === 0 && store.context.upgradingMonumentProcess.length === 0) {
 		// NB THIS EXACT TEXT IS LINKED TO IN ACTIONAREA
-		store.context.actionError = "No monument to raise (No more monuments / not enough cows / not enough available craftsmen)"
+		store.context.actionError = t("model.noMonumentToRaise")
 		//return
 	}
 
@@ -713,8 +715,8 @@ export function getValidCraftsmenToRaiseMonument(startingZone, simulateOnly) {
 	}
 	if (!simulateOnly) {
 		store.context.craftsmenIndexesToHighlight = validCraftsmenWithMultipleTG
-		if (store.context.craftsmenIndexesToHighlight.length === 0 && resFound === false) store.context.actionError = "No Craftsmen available with Resources"
-		if (store.context.craftsmenIndexesToHighlight.length === 0 && resFound === true) store.context.actionError = "Not enough cows for any available Craftsman"
+		if (store.context.craftsmenIndexesToHighlight.length === 0 && resFound === false) store.context.actionError = t("model.noCraftsmenResources")
+		if (store.context.craftsmenIndexesToHighlight.length === 0 && resFound === true) store.context.actionError = t("model.notEnoughCowsCraftsman")
 	}
 
 	// RE-UPDATE RANGE HERE
@@ -944,7 +946,7 @@ export function setgod(god) {
 	// VR check
 	if (getVR(controller.currentPlayerObj()) > 40) {
 		store.clearVars()
-		store.context.actionError = "Doing this would increase your VR over 40"
+		store.context.actionError = t("model.vrOver40")
 		return
 	}
 
@@ -958,18 +960,16 @@ export function setgod(god) {
 		if (controller.currentPlayerObj().craftsmen.length === 0) {
 			store.clearVars(true)
 			store.context.action = rf.ACT_NONE
-			store.context.actionError = "You have chosen Dziva, but have no craftsmen to change prices for"
+			store.context.actionError = t("model.dzivaNoCraftsmen")
 		}
 	} else if (has_god(controller.currentPlayerObj(), rf.ANYANWU)) {
 		store.context.action = rf.ACT_CHOOSE_ANYANWU_MON
 		for (let i = 0; i < controller.currentPlayerObj().monuments.length; i++) {
-			if (controller.currentPlayerObj().monuments[i][1] <= 3) store.context.canSelectRaiseMonument.push(controller.currentPlayerObj().monuments[i][0])
+			if (controller.currentPlayerObj().monuments[i][1] === 1 || controller.currentPlayerObj().monuments[i][1] === 2) store.context.canSelectRaiseMonument.push(controller.currentPlayerObj().monuments[i][0])
 		}
 		if (store.context.canSelectRaiseMonument.length === 0) {
-			// NB THIS EXACT TEXT IS LINKED TO IN ACTIONAREA
-			store.context.actionError = "You don't have a monument lower than level 4"
-			//store.clearVars(true) // NO - this will remove error text
-			store.context.action = rf.ACT_NONE
+			// Keep the state open so the UI can show the empty option and a Continue button.
+			store.context.actionError = ""
 		}
 	} else {
 		store.clearVars(true)
@@ -1033,13 +1033,13 @@ export function addSpecialist(spec) {
 	// VR check
 	if (getVR(controller.currentPlayerObj()) + rf.SPEC_VR[spec] > 40) {
 		store.clearVars(true)
-		store.context.actionError = "Doing this would increase your VR over 40"
+		store.context.actionError = t("model.vrOver40")
 		return
 	}
 	// Cow check
 	if (controller.currentPlayerObj().cows - rf.SPEC_COST[spec] < 0) {
 		store.clearVars(true)
-		store.context.actionError = "You must be able to pay the cow cost to take a Specialist"
+		store.context.actionError = t("model.paySpecCost")
 		return
 	}
 	addSpecialist_core(spec)
@@ -1206,7 +1206,7 @@ export function getTurnEndCows(playerIndex, incomeType) {
 	return income
 }
 
-export function getVR(playerObj, withoutClamping = false) {
+export function getVR(playerObj, withoutClamping = false, candidateGod = rf.NO_god) {
 	const store = useModelStore()
 
 	if (playerObj.displayName === rf.BOT_NAME) return 41
@@ -1218,13 +1218,15 @@ export function getVR(playerObj, withoutClamping = false) {
 	for (let g = 0; g < gods.length; g++) {
 		if (gods[g][0] !== rf.NO_god) VR += rf.gods_VR[gods[g][0]]
 	}
+	if (candidateGod !== rf.NO_god) VR += rf.gods_VR[candidateGod]
 	// Add Specs
 	for (let i = 0; i < playerObj.specialists.length; i++) {
 		VR += rf.SPEC_VR[playerObj.specialists[i][0]]
 	}
 	// Add Techs
+	const hasGu = has_god(playerObj, rf.GU) || candidateGod === rf.GU
 	for (let i = 0; i < playerObj.techs.length; i++) {
-		if (has_god(playerObj, rf.GU)) VR++
+		if (hasGu) VR++
 		else VR += rf.TECH_VR[playerObj.techs[i][0]]
 	}
 	// Add ALIJIRE penalty

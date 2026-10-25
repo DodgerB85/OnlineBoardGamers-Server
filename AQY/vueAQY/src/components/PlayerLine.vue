@@ -58,11 +58,12 @@ function showCurrentPlayerGlow(playerIndex) {
 			<img class="playerInnImg" :src="view.getImage('c_inn_PNG_' + personal.getCorrectedColour(store.players[playerIndex].colour))" />
 			<br />
 			<span class="playerNameSpan" :class="{ currentPlayerNameGlow: playerIndex === store.gameflow.turnOrder[0] }">{{ store.players[playerIndex].displayName }}</span>
+			<span v-if="showCurrentPlayerGlow(playerIndex)" class="playingBadge">{{ $t("aqyUi.status.playing") }}</span>
 			<br />
 			<span v-if="store.players[playerIndex].saint !== rf.SAINT_NONE">
 				{{ rf.SAINT_INFO[store.players[playerIndex].saint].name }}
 			</span>
-			<span v-else>No Saint</span>
+			<span v-else>{{ $t("playerLine.noSaint") }}</span>
 		</div>
 	</div>
 
@@ -80,7 +81,7 @@ function showCurrentPlayerGlow(playerIndex) {
 			<br />
 			<span class="playerNameSpan">{{ store.players[playerIndex].displayName }}</span>
 			<br />
-			No Saint
+			{{ $t("playerLine.noSaint") }}
 		</div>
 	</div>
 </template>
@@ -93,11 +94,18 @@ function showCurrentPlayerGlow(playerIndex) {
 
 .currentPlayerGlow {
 	border: 2px solid lightgreen !important;
-	box-shadow: 0px 0px 20px 10px lightgreen;
-	background-color: rgba(144, 238, 144, 0.5);
-	/*box-sizing: border-box;*/
-	/*  outline: 4px solid lightgreen;*/
+	box-shadow: 0px 0px 8px 3px lightgreen;
+	animation: current-player-pulse 0.45s ease-out;
 	z-index: 1000 !important;
+}
+
+@keyframes current-player-pulse {
+	0% {
+		box-shadow: 0px 0px 0px 0px lightgreen;
+	}
+	100% {
+		box-shadow: 0px 0px 8px 3px lightgreen;
+	}
 }
 
 /*.currentPlayerNameGlow {
@@ -114,7 +122,7 @@ function showCurrentPlayerGlow(playerIndex) {
 	padding-bottom: 5px;
 	width: 150px;
 	height: 91px;
-
+	position: relative;
 	white-space: nowrap;
 	/*overflow: hidden;*/
 	text-overflow: ellipsis;
@@ -143,6 +151,20 @@ function showCurrentPlayerGlow(playerIndex) {
 	height: 25px;
 }
 .selectedPlayer {
-	outline: 3px solid lightgreen !important;
+	outline: 3px solid gold !important;
+	outline-offset: -5px;
+}
+
+.playingBadge {
+	position: absolute;
+	top: 1px;
+	right: 2px;
+	background-color: black;
+	color: lightgreen;
+	border: 1px solid lightgreen;
+	border-radius: 3px;
+	font-size: 9px;
+	padding: 0px 3px;
+	line-height: 12px;
 }
 </style>

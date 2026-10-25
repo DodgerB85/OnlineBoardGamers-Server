@@ -9,7 +9,7 @@ import { usePersonalStore } from "../stores/TGZpersonal.js"
 const personal = usePersonalStore()
 
 import { defineProps } from 'vue'
-const props = defineProps(["playerIndex"])
+defineProps(["playerIndex"])
 
 function getRemainigItems(tech0) {
 	if (tech0 === rf.BLACKSMITH_TECH) return store.remainingItems[rf.BLACKSMITH_TILE]
@@ -85,7 +85,7 @@ function getStatsFor_god(god) {
 			:style="{
 				'border-color': personal.getCorrectedColour(store.players[playerIndex].colour) === rf.BLACK ? 'white' : 'black',
 			}">
-			No god
+			{{ $t("playerDetails.noGod") }}
 		</div>
 
 		<!-- SPECIALISTS -->

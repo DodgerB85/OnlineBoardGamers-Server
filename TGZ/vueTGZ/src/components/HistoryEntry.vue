@@ -11,6 +11,9 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/TGZpersonal.js"
 const personal = usePersonalStore()
 
+import i18n from "../i18n"
+const t = i18n.global.t
+
 defineProps(["entry", "entry_ID"])
 
 function clickedHistoryEntry(action, entry3, entry_id) {
@@ -58,16 +61,16 @@ function getTotalRaiseCostHTML(entry3, entry1) {
 			}
 		}
 	}
-	let ret = "<b><u>Summary:</u> " + String(hubCosts) + "</b> hub" + (hubCosts !== 1 ? "s" : "") + " "
+	let ret = "<b><u>" + t("history.summary") + "</u> " + String(hubCosts) + "</b> " + t(hubCosts !== 1 ? "history.hubs" : "history.hub") + " "
 	for (let i = 0; i < cmenCosts.length; i++) {
 		if (cmenCosts[i] !== 0) {
-			ret += '<span class="mainEntryPlayer" style="background-color: ' + personal.getCorrectedColourHex(store.players[i].colour) + ";color: " + (personal.getCorrectedColour(store.players[i].colour) === rf.WHITE || personal.getCorrectedColour(store.players[i].colour) === rf.YELLOW ? "black" : "white") + '">' + store.players[i].displayName + "</span><b>" + String(cmenCosts[i]) + "</b> "
+			ret += '<span class="mainEntryPlayer" style="background-color: ' + personal.getCorrectedColourHex(store.players[i].colour) + ";color: " + (personal.getCorrectedColour(store.players[i].colour) === rf.WHITE || personal.getCorrectedColour(store.players[i].colour) === rf.YELLOW ? "black" : "white") + '">' + refFuncs.escapeHtml(store.players[i].displayName) + "</span><b>" + String(cmenCosts[i]) + "</b> "
 		}
 	}
 	// Total
-	ret += " Total: <b>" + String(cmenCosts.reduce((a, b) => a + b, 0) + hubCosts + OVIAcows) + "</b> "
+	ret += " " + t("history.totalLabel") + " <b>" + String(cmenCosts.reduce((a, b) => a + b, 0) + hubCosts + OVIAcows) + "</b> "
 
-	if (OVIAused) ret += '<br/> <span class="mainEntryPlayer" style="background-color: ' + personal.getCorrectedColourHex(store.players[entry1].colour) + ";color: " + (personal.getCorrectedColour(store.players[entry1].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry1].colour) === rf.YELLOW ? "black" : "white") + '">' + store.players[entry1].displayName + "</span>'s <b>Ovia:</b> +" + String(OVIAcows) + " "
+	if (OVIAused) ret += '<br/> <span class="mainEntryPlayer" style="background-color: ' + personal.getCorrectedColourHex(store.players[entry1].colour) + ";color: " + (personal.getCorrectedColour(store.players[entry1].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry1].colour) === rf.YELLOW ? "black" : "white") + '">' + refFuncs.escapeHtml(store.players[entry1].displayName) + "</span>" + t("history.oviaPossessive") + " <b>" + String(OVIAcows) + "</b> "
 	return ret
 }
 
@@ -172,7 +175,7 @@ function getResImgName(input) {
 	<template v-if="entry[0] === rf.HIST_NEW_GAME">
 		<div class="log separator mainEntry" :class="{ selectableHistory: store.topMenuViews.showReplay }" @click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
 			<div class="new_turn">
-				Welcome to Africa!
+				{{ $t("history.welcome") }}
 				<br />
 				<span v-for="(playerIndex, idx) in entry[3][0]" :key="idx">
 					<img class="newGameTribeImg" :src="view.getPlayerTribeImage(personal.getCorrectedColour(store.players[playerIndex].colour))" alt="TRIBE" />
@@ -202,10 +205,10 @@ function getResImgName(input) {
 				}">
 				{{ store.players[entry[1]].displayName }}
 			</span>
-			builds
-			<span v-if="entry[3].length == 1">a monument</span>
-			<span v-if="entry[3].length == 2">monuments</span>
-			at co-ordinates
+			{{ $t("history.builds") }}
+			<span v-if="entry[3].length == 1">{{ $t("history.aMonument") }}</span>
+			<span v-if="entry[3].length == 2">{{ $t("history.monuments") }}</span>
+			{{ $t("history.atCoordinates") }}
 			<template v-for="(index, indexAM) in entry[3]" :key="indexAM">
 				<span class="noBreak">{{ getHistoryCoordsForIndex(index) }}</span>
 				&nbsp;
@@ -234,10 +237,10 @@ function getResImgName(input) {
 				}">
 				{{ store.players[entry[1]].displayName }}
 			</span>
-			builds a monument at co-ordinates
+			{{ $t("history.buildsMonumentAt") }}
 			<span class="noBreak">{{ getHistoryCoordsForIndex(entry[3][0]) }}</span>
 			<br />
-			Using ritual good:
+			{{ $t("history.usingRitualGood") }}
 			<div class="RaiseGoodsRow">
 				<template v-for="(ritualGoodRow, index1) in entry[3].slice(1, entry[3].length)" :key="index1">
 					<!--R G ROW: {{ ritualGoodRow }}-->
@@ -254,8 +257,8 @@ function getResImgName(input) {
 							&nbsp;
 							<span class="noBreak">{{ getHistoryCoordsForIndex(item[0]) }}</span>
 							&nbsp;
-							<span v-if="item[1] === 1">(1 hub</span>
-							<span v-if="item[1] !== 1">({{ item[1] }} hubs</span>
+							<span v-if="item[1] === 1">(1 {{ $t("history.hub") }}</span>
+							<span v-if="item[1] !== 1">({{ item[1] }} {{ $t("history.hubs") }}</span>
 							&nbsp;
 							<span v-if="item[2] === 1">
 								+1
@@ -328,16 +331,16 @@ function getResImgName(input) {
 				{{ store.players[entry[1]].displayName }}
 			</span>
 			<template v-if="entry[3][0] > 0">
-				bids {{ entry[3][0] }}
-				<span v-if="entry[3][0] !== 1">cows</span>
-				<span v-else>cow</span>
-				<span v-if="entry[3][2] > 0"> (Elegua gives {{ entry[3][2] }} free)</span>
-				<span v-if="entry[3][2] === -1"> (Bid goes to Aja)</span>
+				{{ $t("history.bids") }} {{ entry[3][0] }}
+				<span v-if="entry[3][0] !== 1">{{ $t("common.cows") }}</span>
+				<span v-else>{{ $t("common.cow") }}</span>
+				<span v-if="entry[3][2] > 0"> {{ $t("history.eleguaFree", { count: entry[3][2] }) }}</span>
+				<span v-if="entry[3][2] === -1"> {{ $t("history.ajaBid") }}</span>
 			</template>
-			<template v-else-if="entry[3][0] === 0">passes. New position: {{ entry[3][1] + 1 }}</template>
-			<template v-else-if="entry[3][0] === -1">passes - Not enough cows to bid. New position: {{ entry[3][1] + 1 }}</template>
-			<template v-else-if="entry[3][0] === -2">is the most generous. New position: 1</template>
-			<template v-else-if="entry[3][0] === -3">performs a free pass with Aja</template>
+			<template v-else-if="entry[3][0] === 0">{{ $t("history.passesPosition", { position: entry[3][1] + 1 }) }}</template>
+			<template v-else-if="entry[3][0] === -1">{{ $t("history.passesNotEnough", { position: entry[3][1] + 1 }) }}</template>
+			<template v-else-if="entry[3][0] === -2">{{ $t("history.mostGenerous") }}</template>
+			<template v-else-if="entry[3][0] === -3">{{ $t("history.freePassAja") }}</template>
 		</div>
 	</template>
 
@@ -357,12 +360,12 @@ function getResImgName(input) {
 						}">
 						{{ store.players[playerIdx].displayName }}
 					</span>
-					gains {{ entry[3][1][idx] }}
-					<span v-if="entry[3][1][idx] !== 1">cows</span>
-					<span v-else>cow</span>
-					. Total: {{ entry[3][2][idx] }}
-					<span v-if="entry[3][2][idx] !== 1">cows</span>
-					<span v-else>cow</span>
+					{{ $t("history.gains") }} {{ entry[3][1][idx] }}
+					<span v-if="entry[3][1][idx] !== 1">{{ $t("common.cows") }}</span>
+					<span v-else>{{ $t("common.cow") }}</span>
+					. {{ $t("history.total") }} {{ entry[3][2][idx] }}
+					<span v-if="entry[3][2][idx] !== 1">{{ $t("common.cows") }}</span>
+					<span v-else>{{ $t("common.cow") }}</span>
 					.
 					<br />
 				</template>
@@ -392,9 +395,9 @@ function getResImgName(input) {
 				}">
 				{{ store.players[entry[1]].displayName }}
 			</span>
-			<span v-if="entry[3][0] === rf.OGUN"> chooses Ogun and takes the Blacksmith technology card. </span><span v-else> chooses {{ rf.god_NAMES[entry[3][0]] }}. </span>
+			<span v-if="entry[3][0] === rf.OGUN"> {{ $t("history.choosesOgun") }} </span><span v-else> {{ $t("history.chooses") }} {{ rf.god_NAMES[entry[3][0]] }}. </span>
 			
-			VR increases by: {{ rf.gods_VR[entry[3][0]] }}
+			{{ $t("history.vrIncreases") }} {{ rf.gods_VR[entry[3][0]] }}
 		</div>
 	</template>
 
@@ -419,9 +422,9 @@ function getResImgName(input) {
 				}">
 				{{ store.players[entry[1]].displayName }}
 			</span>
-			raises monument at co-ordinates
+			{{ $t("history.raisesMonumentAt") }}
 			<span class="noBreak">{{ getHistoryCoordsForIndex(entry[3]) }}</span>
-			&nbsp; to level 3
+			&nbsp; {{ $t("history.toLevel3") }}
 		</div>
 	</template>
 
@@ -447,7 +450,7 @@ function getResImgName(input) {
 				}">
 				{{ store.players[entry[1]].displayName }}
 			</span>
-			chooses {{ rf.SPEC_NAMES[entry[3][0]] }} ({{ rf.SPEC_COST[entry[3][0]] }} cows) VR +{{ rf.SPEC_VR[entry[3][0]] }}
+			{{ $t("history.chooses") }} {{ rf.SPEC_NAMES[entry[3][0]] }} ({{ rf.SPEC_COST[entry[3][0]] }} {{ $t("common.cows") }}) VR +{{ rf.SPEC_VR[entry[3][0]] }}
 		</div>
 	</template>
 
@@ -473,7 +476,7 @@ function getResImgName(input) {
 				}">
 				{{ store.players[entry[1]].displayName }}
 			</span>
-			adds {{ entry[3][1] }} to Herd. New size: {{ entry[3][0] }}
+			{{ $t("history.addsToHerd", { count: entry[3][1], size: entry[3][0] }) }}
 		</div>
 	</template>
 
@@ -498,10 +501,10 @@ function getResImgName(input) {
 				}">
 				{{ store.players[entry[1]].displayName }}
 			</span>
-			<span v-if="entry[3][2] > 0">activates Shaman with {{ entry[3][2] }} cows and</span>
-			builds
+			<span v-if="entry[3][2] > 0">{{ $t("history.activatesShaman", { count: entry[3][2] }) }}</span>
+			{{ $t("history.builds") }}
 			<img class="historyResourceImg" :src="view.getImage('res' + String(entry[3][1]))" alt="RRR" />
-			at co-ordinates
+			{{ $t("history.atCoordinates") }}
 			<span class="noBreak">{{ getHistoryCoordsForIndex(entry[3][0]) }}</span>
 		</div>
 	</template>
@@ -527,8 +530,8 @@ function getResImgName(input) {
 				}">
 				{{ store.players[entry[1]].displayName }}
 			</span>
-			<span v-if="entry[3][2] > 0">activates Rain Ceremony with {{ entry[3][2] }} cows and</span>
-			builds
+			<span v-if="entry[3][2] > 0">{{ $t("history.activatesRain", { count: entry[3][2] }) }}</span>
+			{{ $t("history.builds") }}
 			<img
 				class="historyWaterImg"
 				:src="view.getImage('res' + String(rf.WATER_TILE) + (entry[3][1] === 1 ? '_v' : ''))"
@@ -537,7 +540,7 @@ function getResImgName(input) {
 					width: entry[3][1] === 0 ? '50px' : '25px',
 					height: entry[3][1] === 0 ? '25px' : '50px',
 				}" />
-			at co-ordinates
+			{{ $t("history.atCoordinates") }}
 			<span class="noBreak">{{ getHistoryCoordsForIndex(entry[3][0]) }}</span>
 		</div>
 	</template>
@@ -564,7 +567,7 @@ function getResImgName(input) {
 				}">
 				{{ store.players[entry[1]].displayName }}
 			</span>
-			activates {{ rf.SPEC_NAMES[entry[3][0]] }} with {{ entry[3][1] }} cows
+			{{ $t("history.activates") }} {{ rf.SPEC_NAMES[entry[3][0]] }} {{ $t("history.withCows", { count: entry[3][1] }) }}
 		</div>
 	</template>
 
@@ -589,17 +592,17 @@ function getResImgName(input) {
 				}">
 				{{ store.players[entry[1]].displayName }}
 			</span>
-			builds
+			{{ $t("history.builds") }}
 			<img class="historyCraftsmanImg" :class="'r' + String(entry[3][2])" :src="view.getImage('craftsman' + String(entry[3][1]))" alt="Cman" />
-			at
+			{{ $t("common.at") }}
 			<span class="noBreak">{{ getHistoryCoordsForIndex(entry[3][0]) }}</span>
 			.
 			{{ rf.COW_COST_TO_BUILD_CMAN[entry[3][1]] }}
 			<img class="miniCowImg" :src="view.getImage('cows1')" alt="Cows" />
-			<span v-if="entry[3][3] !== 0">(Builder +{{ entry[3][3] }})</span>
+			<span v-if="entry[3][3] !== 0">{{ $t("history.builderPlus", { count: entry[3][3] }) }}</span>
 			<span v-if="entry[3][4] !== -1">
 				<br />
-				Tech +{{ rf.TECH_VR[entry[3][4]] }} VR
+				{{ $t("history.techVr", { count: rf.TECH_VR[entry[3][4]] }) }}
 				<img class="historyTechImg" :src="view.getImage('tech' + String(entry[3][4]))" alt="Tech" />
 			</span>
 		</div>
@@ -628,14 +631,14 @@ function getResImgName(input) {
 				}">
 				{{ store.players[entry[1]].displayName }}
 			</span>
-			raises monument at
+			{{ $t("history.raisesMonumentAtShort") }}
 			<span class="noBreak">{{ getHistoryCoordsForIndex(entry[3][0][0]) }}</span>
-			to level
+			{{ $t("common.toLevel") }}
 			{{ entry[3][0][1] }}
 			<br />
 			<template v-if="YEMOJAused(entry) >= 0">
 				<b>Yemoja</b>
-				raised
+				{{ $t("history.yemojaRaised") }}
 				<span
 					:class="['mainEntryPlayer']"
 					:style="{
@@ -644,7 +647,7 @@ function getResImgName(input) {
 					}">
 					{{ store.players[YEMOJAused(entry)].displayName }}
 				</span>
-				's monument
+				{{ $t("history.possessiveMonument") }}
 				<br />
 			</template>
 			<div class="RaiseGoodsRow">
@@ -666,8 +669,8 @@ function getResImgName(input) {
 								&nbsp;
 								<span class="noBreak">{{ getHistoryCoordsForIndex(item[0]) }}</span>
 								&nbsp;
-								<span v-if="item[1] === 1">(1 hub</span>
-								<span v-if="item[1] !== 1">({{ item[1] }} hubs</span>
+								<span v-if="item[1] === 1">({{ $t("history.hub") }}</span>
+								<span v-if="item[1] !== 1">({{ $t("history.hubs") }}</span>
 								&nbsp;
 								<span v-if="item[2] === 1">
 									+1
@@ -684,7 +687,7 @@ function getResImgName(input) {
 								&nbsp;
 								<span v-if="item.length > 3 && item[3] === -3">
 									<br />
-									WATERTOLL toll paid for Craftsman
+									{{ $t("history.watertollCraftsman") }}
 									<br />
 								</span>
 							</template>
@@ -698,7 +701,7 @@ function getResImgName(input) {
 								<!-- NOW CHECK FOR COMPLETE PRIMARY SKIP -->
 								<template v-if="index2 === 1 && ritualGoodRow.length === 2 && rf.SEC_CRAFTSMEN.includes(getCrafsmsnTileFromPriSq_Hist(ritualGoodRow[0][0]))">
 									<br />
-									(Primary Ritual good skipped with god power)
+									{{ $t("history.primaryGoodSkipped") }}
 								</template>
 
 								<template v-if="(index2 === 3 || ritualGoodRow.length === 2) && index1 !== entry[3].length - 2">
@@ -716,17 +719,17 @@ function getResImgName(input) {
 										&nbsp;
 										<span class="noBreak">{{ getHistoryCoordsForIndex(res) }}</span>
 									</span>
-									<span v-else-if="res === -3">WATERTOLL Toll Paid for Resource</span>
+									<span v-else-if="res === -3">{{ $t("history.watertollResource") }}</span>
 								</template>
 								<!-- NOW CHECK FOR COMPLETE PRIMARY SKIP -->
 								<template v-if="index2 === 1 && ritualGoodRow.length === 2 && rf.SEC_CRAFTSMEN.includes(getCrafsmsnTileFromPriSq_Hist(ritualGoodRow[0][0]))">
 									<br />
-									(Primary Ritual good skipped with god power)
+									{{ $t("history.primaryGoodSkipped") }}
 								</template>
 
 								<!-- Check if 0 paid to pri - ie AS power -->
 								<template v-else-if="index2 === 3 && ritualGoodRow[2][2] === 0">
-									<br/>(Primary craftsman cost skipped with god power)<br/>
+									<br/>{{ $t("history.primaryCostSkipped") }}<br/>
 								</template>
 
 								<template v-else><br /></template>
@@ -734,7 +737,7 @@ function getResImgName(input) {
 							<!-- RESOURCE SKIP -->
 							<template v-else-if="(index2 === 1 || index2 === 3) && item.length === 0">
 								<br />
-								(Resource skipped with god power)
+								{{ $t("history.resourceSkipped") }}
 								<br />
 							</template>
 						</template>
@@ -745,7 +748,7 @@ function getResImgName(input) {
 			</div>
 			<template v-if="TIURAKHused(entry)">
 				<b>Tiurakh</b>
-				reduced the number of ritual goods required by 1
+				{{ $t("history.tiurakhReduced") }}
 				<br />
 			</template>
 			<span v-html="getTotalRaiseCostHTML(entry[3].slice(1, entry[3].length), entry[1])"></span>
@@ -754,7 +757,7 @@ function getResImgName(input) {
 			<template v-for="(ritualGoodRow, index1) in entry[3].slice(1, entry[3].length)" :key="index1">
 				<template v-if="ritualGoodRow[0] === -1">
 					<b>Ekwensu</b>
-					paid for {{ ritualGoodRow[1] }}
+					{{ $t("history.ekwensuPaid", { count: ritualGoodRow[1] }) }}
 					<img class="miniCowImg" :src="view.getImage('cows1')" alt="Cows" />
 				</template>
 			</template>
@@ -783,7 +786,7 @@ function getResImgName(input) {
 				}">
 				{{ store.players[entry[1]].displayName }}
 			</span>
-			sets prices:
+			{{ $t("history.setsPrices") }}
 			<template v-for="(craftsmanPrice, index1) in entry[3]" :key="index1">
 				<template
 					v-if="
@@ -814,7 +817,7 @@ function getResImgName(input) {
 				</span>
 			</div>
 			<span class="centreSpan">
-				<b><u>Revenue (in New Bidding Order)</u></b>
+				<b><u>{{ $t("history.revenueTitle") }}</u></b>
 			</span>
 			<template v-for="(entry, idx) in entry[3]" :key="idx">
 				<span
@@ -825,11 +828,11 @@ function getResImgName(input) {
 					}">
 					{{ store.players[entry[0]].displayName }}
 				</span>
-				+{{ entry.reduce((a, b) => a + b, 0) - entry[5] - entry[0] }} Total: {{ entry[5] }} (
-				<span v-if="entry[1] !== 0">+{{ entry[1] }} god,</span>
-				<span v-if="entry[2] !== 0">+{{ entry[2] }} specialists,</span>
-				<span v-if="entry[3] !== 0">+{{ entry[3] }} techs,</span>
-				+{{ entry[4] }} monument)
+				+{{ entry.reduce((a, b) => a + b, 0) - entry[5] - entry[0] }} {{ $t("history.total") }} {{ entry[5] }} (
+				<span v-if="entry[1] !== 0">{{ $t("history.revenueGod", { count: entry[1] }) }}</span>
+				<span v-if="entry[2] !== 0">{{ $t("history.revenueSpecs", { count: entry[2] }) }}</span>
+				<span v-if="entry[3] !== 0">{{ $t("history.revenueTechs", { count: entry[3] }) }}</span>
+				{{ $t("history.revenueMonument", { count: entry[4] }) }})
 				<br />
 			</template>
 		</div>
@@ -844,7 +847,7 @@ function getResImgName(input) {
 				</span>
 			</div>
 			<span class="centreSpan">
-				<b><u>Let Us Compare Mythologies (Best First)</u></b>
+				<b><u>{{ $t("history.compareTitle") }}</u></b>
 			</span>
 			<template v-for="(scoreObj, idx) in entry[3]" :key="idx">
 				<span
@@ -866,7 +869,7 @@ function getResImgName(input) {
 	<!-- New Turn -->
 	<template v-if="entry[0] === rf.HIST_NEW_TURN">
 		<div class="log separator mainEntry" :class="{ selectableHistory: store.topMenuViews.showReplay }" @click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
-			<div class="new_turn">Start of turn {{ entry[3][0] }}</div>
+			<div class="new_turn">{{ $t("history.startOfTurn", { turn: entry[3][0] }) }}</div>
 		</div>
 	</template>
 
@@ -877,16 +880,16 @@ function getResImgName(input) {
 				<span>{{ refFuncs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
 			</div>
 			<div class="mainEntry new_turn">
-				Game Ended
+				{{ $t("history.gameEnded") }}
 				<br />
 				<br />
-				Winner: {{ store.players[entry[3][0][1]].displayName }}
+				{{ $t("history.winner") }} {{ store.players[entry[3][0][1]].displayName }}
 				<br />
 				<br />
-				<span v-if="entry[3][0][2] === 1">Highest Difference Between VP / VR</span>
-				<span v-if="entry[3][0][2] === 2">Xango wins ties with same difference between VP / VR</span>
-				<span v-if="entry[3][0][2] === 3">Highest Total VP</span>
-				<span v-if="entry[3][0][2] === 4">Earlier in Turn Order</span>
+				<span v-if="entry[3][0][2] === 1">{{ $t("history.highestDifference") }}</span>
+				<span v-if="entry[3][0][2] === 2">{{ $t("history.xangoTie") }}</span>
+				<span v-if="entry[3][0][2] === 3">{{ $t("history.highestTotalVp") }}</span>
+				<span v-if="entry[3][0][2] === 4">{{ $t("history.earlierTurnOrder") }}</span>
 			</div>
 		</div>
 	</template>
@@ -897,7 +900,7 @@ function getResImgName(input) {
 			<div class="header">
 				<span>{{ refFuncs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
 			</div>
-			<div class="mainEntry rewind">Game rewound to here by {{ store.players[entry[3][0]].name }}</div>
+			<div class="mainEntry rewind">{{ $t("history.rewoundBy", { name: store.players[entry[3][0]].name }) }}</div>
 		</div>
 	</template>
 
@@ -907,7 +910,7 @@ function getResImgName(input) {
 			<div class="header">
 				<span>{{ refFuncs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
 			</div>
-			<div class="mainEntry rewind">{{ entry[3][0] }} Resigns</div>
+			<div class="mainEntry rewind">{{ $t("history.resigns", { name: entry[3][0] }) }}</div>
 		</div>
 	</template>
 
@@ -917,7 +920,7 @@ function getResImgName(input) {
 			<div class="header">
 				<span>{{ refFuncs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}</span>
 			</div>
-			<div class="mainEntry rewind">{{ entry[3][0] }} was kicked out</div>
+			<div class="mainEntry rewind">{{ $t("history.kickedOut", { name: entry[3][0] }) }}</div>
 		</div>
 	</template>
 </template>

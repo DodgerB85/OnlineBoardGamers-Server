@@ -162,16 +162,16 @@ export const useModelStore = defineStore("store", () => {
 
 	// Media Line mod - published headlines. Each headline is written during a
 	// working day and modifies every sale price at the NEXT turn's dinner only.
-	// Milestone 2 (First TV Announcer Used): doubleCampaign is the one campaign
-	// of the holder's that pushes 2 cards per house per night; doubleUsed is the
-	// one-shot latch (the reward applies to the holder's first TV campaign only).
+	// Milestone 2 (First TV Announcer Used): every holder doubles their own first
+	// TV campaign. doubleCampaigns are the campaigns currently pushing doubles;
+	// doubleUsedBy is the per-player one-shot latch.
 	// Milestone 1 (First Telemarketer Used) needs the per-night accumulator in
 	// the saved state: campaigns register their groups at payday, dinner settles
 	// them a turn later - a page reload in between must not lose the bonus.
 	const mediaLine = reactive({
 		headlines: [], // { turn, playerIndex, value } with value +5 / -5
-		doubleCampaign: -1,
-		doubleUsed: false,
+		doubleCampaigns: [],
+		doubleUsedBy: [],
 		night: { groups: {}, aLinePushers: [] }, // campaign num -> { owner, houses[] }; players whose own A-line campaigns ran
 	})
 
@@ -247,10 +247,12 @@ export const useModelStore = defineStore("store", () => {
 		indexes: [],
 		edges: [],
 		producer: -1,
+		routeTargets: [],
 		hawkerRouteActive: false,
 		showingHawkerRoute: -1,
 		selectedModuleIndex: 0,
 		marketer: -1,
+		marketerSelectionMilestones: [],
 		refusePlaneDouble: false,
 		firstCampaignDuration: 1,
 		firstCampaignCampaign: 11,
@@ -384,6 +386,7 @@ export const useModelStore = defineStore("store", () => {
 		errorText: "",
 		bugErrorText: "",
 		turnEndText: "", // Store text to display after an auto-action
+		retrySave: null, // closure that retries the exact failed save
 
 		endTurnMessage: "", // store text to display AFTER YOU ENDED YOUR TURN
 	})
@@ -394,6 +397,7 @@ export const useModelStore = defineStore("store", () => {
 		gameMessages.bugErrorText = ""
 		gameMessages.successText = ""
 		gameMessages.turnEndText = ""
+		gameMessages.retrySave = null
 
 		if (!keepEndTurnMessage) gameMessages.endTurnMessage = ""
 	}

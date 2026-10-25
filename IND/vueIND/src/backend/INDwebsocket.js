@@ -5,6 +5,8 @@ import * as IO from "./IND_IO"
 //import * as funcs from "../js/INDfuncs"
 import * as view from "../js/INDview"
 
+import i18n from "../i18n"
+
 export var INDwebSocket
 let INDconnectionPromise = null // Track the in-progress connection
 let retryCount = 0
@@ -135,7 +137,7 @@ async function INDwebSocketOnInfo(IncomingInfo) {
 						let decodedGameName = tempElement.textContent
 
 						Notification.requestPermission(function (status) {
-							const title = "It is your turn in Indonesia"
+							const title = i18n.global.t("websocket.yourTurn")
 
 							const options = {
 								body: "" + decodedGameName + ": " + store.gameflow.turn + " - " + view.phaseStr(),

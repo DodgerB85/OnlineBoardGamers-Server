@@ -2,6 +2,7 @@
 import * as IO from "../backend/KFW_IO"
 import * as rf from "../js/KFWreference"
 import * as controller from "../js/KFWcontroller"
+import i18n from "../i18n"
 
 import SupplyArea from "./SupplyArea.vue"
 import PlayerItems from "./PlayerItems.vue"
@@ -42,12 +43,12 @@ function getOrdinalForIdx1(idx1) {
 			num++
 		}
 	}
-	if (num === 2) return "2nd"
-	else if (num === 3) return "3rd"
-	else if (num === 4) return "4th"
-	else if (num === 5) return "5th"
-	else if (num === 6) return "6th"
-	return "Unknown"
+	if (num === 2) return i18n.global.t("common.ordinal2")
+	else if (num === 3) return i18n.global.t("common.ordinal3")
+	else if (num === 4) return i18n.global.t("common.ordinal4")
+	else if (num === 5) return i18n.global.t("common.ordinal5")
+	else if (num === 6) return i18n.global.t("common.ordinal6")
+	return i18n.global.t("common.unknown")
 }
 </script>
 
@@ -77,16 +78,16 @@ function getOrdinalForIdx1(idx1) {
 				<template v-if="store.gameflow.phase === rf.PHASE_GAME_OVER">
 					<!-- THIS IS THE MAIN AREA FOR GAME OVER -->
 					<div id="gameEndDiv">
-						Game Over
+						{{ $t("mainArea.gameOver") }}
 						<template v-if="store.context.finalPositions[0].includes(personal.pov)">
-							<h1>Congratulations!</h1>
+							<h1>{{ $t("mainArea.congratulations") }}</h1>
 						</template>
 						<template v-else>
 							<br />
 							<br />
 						</template>
 						<template v-if="store.context.finalPositions[0].length === 1">
-							Winner:
+							{{ $t("mainArea.winner") }}
 							<span
 								class="mainEntryPlayer"
 								:style="{
@@ -99,7 +100,7 @@ function getOrdinalForIdx1(idx1) {
 							<br />
 						</template>
 						<template v-if="store.context.finalPositions[0].length > 1">
-							Winners:
+							{{ $t("mainArea.winners") }}
 							<span
 								v-for="(playerIndex, idx) in store.context.finalPositions[0]"
 								:key="idx"
@@ -129,9 +130,9 @@ function getOrdinalForIdx1(idx1) {
 							<br />
 						</template>
 						<br />
-						Fancy a
-						<a :href="'/createKFWpage/' + String(personal.gameID) + '/'">rematch</a>
-						?
+						<i18n-t keypath="mainArea.fancyARematch" tag="span" scope="global">
+							<template #rematch><a :href="'/createKFWpage/' + String(personal.gameID) + '/'">{{ $t("mainArea.rematch") }}</a></template>
+						</i18n-t>
 						<br />
 						<br />
 						<div id="finalScoreTableDiv">
@@ -154,36 +155,36 @@ function getOrdinalForIdx1(idx1) {
 								<tbody>
 									<template v-if="store.players.some((player) => player.goldScore > 0)">
 										<tr>
-											<td>Gold Score</td>
+											<td>{{ $t("mainArea.goldScore") }}</td>
 											<td v-for="(playerIndex, idx) in store.gameflow.fullTurnOrder" :key="idx">{{ store.players[playerIndex].goldScore }}</td>
 										</tr>
 									</template>
 									<template v-if="store.players.some((player) => player.requireItmesScore > 0)">
 										<tr>
-											<td>Item set Score</td>
+											<td>{{ $t("mainArea.itemSetScore") }}</td>
 											<td v-for="(playerIndex, idx) in store.gameflow.fullTurnOrder" :key="idx">{{ store.players[playerIndex].requireItmesScore }}</td>
 										</tr>
 									</template>
 									<template v-if="store.players.some((player) => player.contractScore > 0)">
 										<tr>
-											<td>Contract Score</td>
+											<td>{{ $t("mainArea.contractScore") }}</td>
 											<td v-for="(playerIndex, idx) in store.gameflow.fullTurnOrder" :key="idx">{{ store.players[playerIndex].contractScore }}</td>
 										</tr>
 									</template>
 									<template v-if="store.players.some((player) => player.manualScoreScore > 0)">
 										<tr>
-											<td>Manually Scoring Tiles</td>
+											<td>{{ $t("mainArea.manualScoringTiles") }}</td>
 											<td v-for="(playerIndex, idx) in store.gameflow.fullTurnOrder" :key="idx">{{ store.players[playerIndex].manualScoreScore }}</td>
 										</tr>
 									</template>
 									<template v-if="store.players.some((player) => player.autoScoreScore > 0)">
 										<tr>
-											<td>Auto Scoring Tiles</td>
+											<td>{{ $t("mainArea.autoScoringTiles") }}</td>
 											<td v-for="(playerIndex, idx) in store.gameflow.fullTurnOrder" :key="idx">{{ store.players[playerIndex].autoScoreScore }}</td>
 										</tr>
 									</template>
 									<tr>
-										<td class="totalTD">Total</td>
+										<td class="totalTD">{{ $t("mainArea.total") }}</td>
 										<td v-for="(playerIndex, idx) in store.gameflow.fullTurnOrder" :key="idx" class="totalTD">{{ store.players[playerIndex].finalScore }}</td>
 									</tr>
 								</tbody>

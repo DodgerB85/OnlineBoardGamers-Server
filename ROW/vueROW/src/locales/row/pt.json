@@ -56,11 +56,35 @@
       "NO_SUCH_TOWN": "Esta cidade não existe.",
       "STATION_MASTER_NOT_AVAILABLE": "Esta ficha de mestre da estação não está disponível.",
       "TOWN_NOT_ACCESSIBLE": "Esta cidade não é acessível.",
-      "INVALID_CATTLE_TYPE": "Este tipo de carta de gado não é válido para esta ação."
+      "INVALID_CATTLE_TYPE": "Este tipo de carta de gado não é válido para esta ação.",
+      "NOT_ENOUGH_CARDS": "Não há cartas suficientes para comprar.",
+      "GAME_NOT_ENDED": "O jogo ainda não terminou.",
+      "HAZARD_MUST_BE_OF_TYPE": "Este perigo não é do tipo exigido.",
+      "HAZARD_NOT_ON_TRAIL": "Este perigo não está na trilha.",
+      "JOB_MARKET_CLOSED": "O mercado de trabalho está fechado para esta ação.",
+      "LOCATION_EMPTY": "Não há nada neste local para interagir.",
+      "LOCATION_NOT_EMPTY": "Este local não está vazio.",
+      "MUST_MOVE_AT_LEAST_STEPS": "Você deve mover pelo menos o número de passos indicado.",
+      "NOT_PAIR": "Você deve selecionar um par de cartas de gado.",
+      "NOT_AT_LOCATION": "Você não está neste local.",
+      "NOT_AT_STATION": "Você não está nesta estação.",
+      "REPLACEMENT_BUILDING_MUST_BE_PLAYER_BUILDING": "Só pode substituir um dos seus próprios edifícios.",
+      "STATION_NOT_UPGRADED_BY_PLAYER": "Você não melhorou esta estação.",
+      "STATION_NOT_ON_TRACK": "Esta estação não está na linha.",
+      "BID_INVALID_POSITION": "Este lance não é válido para esta posição.",
+      "NOT_CURRENT_PLAYER": "Não é o seu turno.",
+      "NO_TILES_LEFT": "Não restam peças.",
+      "CANNOT_UPGRADE_SIMMENTAL": "Não é possível melhorar esta carta Simmental.",
+      "STATION_MUST_BE_DIFFERENT": "Você deve escolher uma estação diferente.",
+      "NO_AUTOMA_STATE": "Não há estado de automa para este jogador.",
+      "NOT_IMPLEMENTED": "Esta ação ainda não foi implementada."
     },
     "bidding": {
       "position": "#{{position}}",
-      "placeBid": "Dar {{points}} PV"
+      "placeBid": "Dar {{points}} PV",
+      "title": "Licitação pela ordem de turno — dê um lance em PV (quanto maior o lance, mais cedo você joga; um lance custa o seu valor em PV)",
+      "bid": "Licitar",
+      "waiting": "Aguardando os lances dos outros jogadores…"
     },
     "buildingsDialog": "Construções Disponíveis",
     "objectivesDialog": "Objetivos e Fichas",
@@ -80,7 +104,16 @@
     "totalBreedingValue": "Rendimento total",
     "cattleMarket": {
       "select": "Escolha uma única carta de gado ou um par de cartas de gado e clique em confirmar.<br/>Você pode repetir esta ação contanto que tenha dólares e cowboys suficientes.",
-      "buy": "Comprar cartas de gado"
+      "buy": "Comprar cartas de gado",
+      "takeThree": "Pegue uma carta de valor de criação 3",
+      "selectToBuy": "Selecione carta(s) para comprar",
+      "notEnough": "Dólares ou cowboys insuficientes para comprar gado",
+      "drawTwoHint": "Clique no monte de compra para comprar 2 cartas de gado por 1 cowboy ({cowboys} restantes)",
+      "confirmBuy": "Comprar",
+      "drawTwoTitle": "Comprar 2 cartas de gado por 1 cowboy",
+      "drawPileTitle": "Monte de compra ({count}) — cartas de gado ainda a serem viradas para o mercado",
+      "drawTwo": "Comprar 2",
+      "cowboyCost": "1 cowboy"
     },
     "buyCattleDialog": "Compre cartas de gado",
     "computerExplanation": "Sou um computador usando a variante <a href=\"https://boardgamegeek.com/filepage/151608/garth-specialized-automa-row-solo-play\" target=\"_new\">Garth</a>.",
@@ -559,6 +592,71 @@
           "true": "Sim"
         }
       }
+    },
+    "status": {
+      "garthThinking": "Garth está pensando…"
+    },
+    "actionArea": {
+      "moveStepsLeft": "Mover — clique num local destacado ({steps} passos restantes; amarelo = próximo passo, ciano = mais adiante)",
+      "moveAtMost": "Mover — clique num local destacado (no máximo {limit} passos)",
+      "hireWorker": "Contratar trabalhador",
+      "placeBuildingHint": "Colocar edifício — escolha um local e depois coloque um edifício. Estes são os seus edifícios disponíveis.",
+      "placeBranchletHint": "Rails to the North — clique numa cidade destacada na faixa",
+      "clickTown": "Clique numa cidade",
+      "clickWorker": "Clique num trabalhador no seu tabuleiro",
+      "clickCardToDiscard": "Clique numa carta no seu tabuleiro para descartá-la",
+      "cardActionsHint": "Ações de carta — selecione e depois clique numa carta no seu tabuleiro",
+      "otherActions": "Outras ações"
+    },
+    "buildingInfo": {
+      "label": "{building} — artesãos: {craftsmen}; {hand}; pontos: {points}",
+      "handNone": "sem limite de mão",
+      "handGreen": "mão verde",
+      "handBlack": "mão preta",
+      "handBoth": "mão verde ou preta"
+    },
+    "debug": {
+      "title": "Depuração",
+      "showGameData": "Mostrar dados do jogo",
+      "current": "atual:",
+      "status": "estado:",
+      "actions": "ações:"
+    },
+    "ended": {
+      "title": "Fim de jogo",
+      "total": "Total",
+      "breakdown": "Discriminação",
+      "tie": "Empate entre {players}"
+    },
+    "history": {
+      "empty": "Ainda sem ações",
+      "undo": "Desfazer",
+      "endTurn": "Encerrar turno",
+      "skip": "Pular",
+      "resign": "Desistir"
+    },
+    "map": {
+      "removeHazard": "Remover perigo",
+      "tradeWithTribe": "Negociar com a tribo",
+      "placeBuilding": "Colocar edifício {building}",
+      "useBuilding": "Usar o edifício {building}",
+      "moveHere": "Mover para aqui ({cost}$)",
+      "moveHereWithFees": "Mover para aqui ({cost}$; {fees})",
+      "playerFee": "{fee}$ para {player}",
+      "deliveryOption": "Certificados: {certificates} → ${payout}",
+      "stayHere": "Ficar aqui"
+    },
+    "playerTable": {
+      "handValue": "valor da mão {value}",
+      "certs": "certificados {temp}/{total}",
+      "engine": "locomotiva {space}",
+      "drawPileTitle": "Monte de compra ({count}) — clique para inspecionar",
+      "discardPileTitle": "Monte de descarte ({count}) — clique para inspecionar",
+      "jobMarketToken": "Ficha do mercado de trabalho",
+      "hazardTitle": "{type} ({hand}) {points} pts",
+      "teepeeTitle": "tenda {teepee}",
+      "drawPileValueOrder": "Monte de compra (ordenado por valor)",
+      "discardPile": "Monte de descarte"
     }
   },
   "row2": {
@@ -613,6 +711,9 @@
         "11a": "Construção 11a<br/><strong>Ação:</strong> Remova um perigo por $2<br/><strong>Ação:</strong> Remova um perigo por $2",
         "13a": "Construção 13a<br/><strong>Ação:</strong> Ganhe 1 dólar por artífice que possuir<br/><strong>Ação:</strong> Mova seu peão 1 passo para frente",
         "13b": "Construção 13b<br/><strong>Ação:</strong> Ganhe 2 dólares por estação aprimorada<br/><strong>Ação:</strong> Ganhe uma ficha de troca"
+      },
+      "location": {
+        "FLOOD-RISK-1": "<br/><br/><strong>Ação de risco:</strong> Descarte uma carta de gado para mover seu marcador de certificado 1 espaço para frente"
       }
     }
   }

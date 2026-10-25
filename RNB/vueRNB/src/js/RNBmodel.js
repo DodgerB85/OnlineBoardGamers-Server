@@ -51,6 +51,7 @@ import * as context from "./RNBcontext.js"
 import * as stack from "./RNBstack.js"
 import * as highlight from "./RNBhighlight.js"
 import * as view from "./RNBview.js"
+import i18n from "../i18n"
 
 export async function initGame() {
 	const store = useModelStore()
@@ -130,6 +131,10 @@ export async function initGame() {
 		heading.textContent = "The game has not yet started"
 		var body = document.body
 		body.appendChild(heading)
+		// Logged-out / not-started viewers still get the starting map (the server sends it);
+		// without this the early return skipped importStartingMap and left a blank board.
+		store.mapData.externalMapData = [...window.initData.startingMap]
+		funcs.importStartingMap(window.initData.startingMap)
 		return
 	}
 
@@ -155,6 +160,9 @@ export async function initGame() {
 		// Non-involved player but game data exists (Spectator load)
 		await initLoadGame(gameDataB64)
 	}
+
+	// Trains is map-defined: any rail track on the map enables the expansion.
+	map.refreshUseTrainsFlag()
 
 	// Shared post-initialization code run across all branches
 	if (store.players.length === 1) {
@@ -1058,7 +1066,7 @@ export function dropAllGeeseForPlayerIndex(playerIndex, event = null) {
 		if (loc.isSeaVertexLocation(followedTransporterLocation) && !map.hasOilRigOnHexID(followedTransporterHexID)) {
 			let clientX = event ? event.clientX : window.innerWidth / 2
 			let clientY = event ? event.clientY : window.innerHeight / 2
-			let htmlMessage = "Geese cannot end<br/>turn at sea<br/>following transporter"
+			let htmlMessage = i18n.global.t("action.geeseCannotEndAtSea")
 			showPopup("error", clientX, clientY, htmlMessage)
 			store.context.errorUnableToDropGeeseAtSea = true
 			return

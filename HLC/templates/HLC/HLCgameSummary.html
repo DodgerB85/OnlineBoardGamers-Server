@@ -37,7 +37,7 @@
 
 	global.gameName = '{{ gameName }}';
 
-	{% if gameData %}global.load = '{{ gameData|safe }}';{% endif %}
+	{% if gameData %}global.load = '{{ gameData|escapejs }}';{% endif %}
 
 	global.HLCgameSummary = true;
     </script>

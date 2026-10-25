@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, onUnmounted, ref, watch } from "vue"
+import i18n from "../../i18n"
 
 const props = defineProps({
 	gameId: { type: [Number, String], required: true },
@@ -17,12 +18,12 @@ async function refreshTargets() {
 	const currentRequest = ++requestNumber
 	try {
 		const response = await fetch(`/gameMomentum/${props.gameId}/`, { headers: { Accept: "application/json" } })
-		if (!response.ok) throw new Error("Unable to load turn reminders.")
+		if (!response.ok) throw new Error(i18n.global.t("turnNudge.unableLoad"))
 		const data = await response.json()
 		if (currentRequest === requestNumber) {
 			targets.value = data.isActive ? data.targets : []
 			receivedNudge.value = data.nudge || ""
-			streakText.value = data.streak?.days > 0 && data.isActive ? `🔥 ${data.streak.days} day streak · Best: ${data.streak.best}. ${data.streak.hasMovedToday ? "Today's goal is met." : "One turn by anyone before midnight UTC meets today's goal."}` : ""
+			streakText.value = data.streak?.days > 0 && data.isActive ? `${i18n.global.t("turnNudge.streak", { days: data.streak.days, best: data.streak.best })} ${data.streak.hasMovedToday ? i18n.global.t("turnNudge.goalMet") : i18n.global.t("turnNudge.goalPending")}` : ""
 		}
 	} catch (error) {
 		if (currentRequest === requestNumber) {
@@ -35,7 +36,7 @@ async function refreshTargets() {
 
 async function sendNudge(target) {
 	isSending.value = true
-	message.value = "Sending…"
+	message.value = i18n.global.t("turnNudge.sending")
 	const csrfToken = document.cookie.split("; ").find(cookie => cookie.startsWith("csrftoken="))?.slice("csrftoken=".length)
 	try {
 		const response = await fetch(`/nudgePlayer/${props.gameId}/`, {
@@ -48,7 +49,7 @@ async function sendNudge(target) {
 		if (response.ok) target.canNudge = false
 		await refreshTargets()
 	} catch (error) {
-		message.value = "Unable to send the nudge. Please try again."
+		message.value = i18n.global.t("turnNudge.unableSend")
 		console.error(error)
 	} finally {
 		isSending.value = false
@@ -76,8 +77,8 @@ onUnmounted(() => {
 	<div v-if="targets.length || message || receivedNudge" class="turnNudge">
 		<p v-if="streakText">{{ streakText }}</p>
 		<p v-if="receivedNudge">{{ receivedNudge }}</p>
-		<button v-for="target in targets" :key="target.id" type="button" class="actionsLineButton" :disabled="isSending || !target.canNudge" :title="target.canNudge ? 'Send a turn reminder' : 'Nudges disabled or a nudge was sent within the last 24 hours'" @click="sendNudge(target)">Nudge {{ target.name }}</button>
-		<p v-if="targets.length">Each player can receive one nudge per game every 24 hours.</p>
+		<button v-for="target in targets" :key="target.id" type="button" class="actionsLineButton" :disabled="isSending || !target.canNudge" :title="target.canNudge ? $t('turnNudge.sendReminder') : $t('turnNudge.nudgesDisabled')" @click="sendNudge(target)">{{ $t('turnNudge.nudgePlayer', { name: target.name }) }}</button>
+		<p v-if="targets.length">{{ $t('turnNudge.oneNudgePerDay') }}</p>
 		<p v-if="message" role="status" aria-live="polite">{{ message }}</p>
 	</div>
 </template>

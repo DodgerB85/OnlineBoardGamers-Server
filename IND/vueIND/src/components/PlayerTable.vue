@@ -5,10 +5,43 @@ import * as model from "../js/INDmodel.js"
 import * as funcs from "../js/INDfuncs.js"
 import * as controller from "../js/INDcontroller.js"
 
+import { reactive, watch, onUnmounted } from "vue"
+
+import i18n from "../i18n"
+
 import { useModelStore } from "../stores/INDstore.js"
 const store = useModelStore()
 import { usePersonalStore } from "../stores/INDpersonal.js"
 const personal = usePersonalStore()
+
+const moneyDeltas = reactive({})
+const moneyDeltaTimers = {}
+let previousCash = store.players.map((player) => player.moneyCash)
+
+watch(
+	() => store.players.map((player) => player.moneyCash),
+	(newValues) => {
+		if (store.topMenuViews.showLoader || store.topMenuViews.showReplay || personal.haltPlay) {
+			previousCash = newValues.slice()
+			return
+		}
+		for (let i = 0; i < newValues.length; i++) {
+			const delta = newValues[i] - (previousCash[i] ?? newValues[i])
+			if (delta === 0) continue
+			if (store.hiddenMoney && i !== personal.pov && !personal.trainingGame) continue
+			moneyDeltas[i] = delta
+			clearTimeout(moneyDeltaTimers[i])
+			moneyDeltaTimers[i] = setTimeout(() => {
+				delete moneyDeltas[i]
+			}, 1200)
+		}
+		previousCash = newValues.slice()
+	}
+)
+
+onUnmounted(() => {
+	for (const timer of Object.values(moneyDeltaTimers)) clearTimeout(timer)
+})
 
 function canSelectSlot(playerIndex, slotIdx, companySlot) {
 	if (!personal.canPlay()) return false
@@ -53,37 +86,39 @@ function canSelectSlot(playerIndex, slotIdx, companySlot) {
 }
 
 function generateMergerSingleErrors(reasonArr) {
-	if (reasonArr.invalidType) return "Invalid merger type"
-	if (reasonArr.alreadyMerged) return "Company has already merged this turn"
-	if (reasonArr.insufficientMerger) return "Your merger tech is too low"
-	if (reasonArr.noFreeSlot) return "You do not have a free slot, or own a merging company"
-	if (reasonArr.lowCash) return "Not enough cash"
-	if (reasonArr.tooEarlyForSiap) return "Siap Saji mergers can only be done in Era B or later"
-	return "UNKNOWN REASON"
+	const t = i18n.global.t
+	if (reasonArr.invalidType) return t("playerTable.mergeInvalidType")
+	if (reasonArr.alreadyMerged) return t("playerTable.mergeAlreadyMerged")
+	if (reasonArr.insufficientMerger) return t("playerTable.mergeTechLow")
+	if (reasonArr.noFreeSlot) return t("playerTable.mergeNoFreeSlot")
+	if (reasonArr.lowCash) return t("playerTable.mergeLowCash")
+	if (reasonArr.tooEarlyForSiap) return t("playerTable.mergeSiapEarly")
+	return t("playerTable.mergeUnknown")
 }
 
 function generateMergerMultiErrors(reasonArr) {
+	const t = i18n.global.t
 	// Check EVERYTHING already merged
 	let errorArr = []
 
-	if (reasonArr.every((x) => x.invalidType)) return "No other company to merge with"
+	if (reasonArr.every((x) => x.invalidType)) return t("playerTable.mergeNoOtherCompany")
 
-	if (reasonArr.every((x) => x.alreadyMerged)) return "Already merged this turn"
+	if (reasonArr.every((x) => x.alreadyMerged)) return t("playerTable.mergeAlreadyMergedTurn")
 
-	if (reasonArr.every((x) => x.insufficientMerger)) return "Your merger tech is too low for any merger with this company"
+	if (reasonArr.every((x) => x.insufficientMerger)) return t("playerTable.mergeTechLowAny")
 	else if (reasonArr.some((x) => x.insufficientMerger)) errorArr.push(2) // SOME insufficient merger tech
 
-	if (reasonArr.every((x) => x.noFreeSlot)) return "You do not have a free slot for any merger with this company"
+	if (reasonArr.every((x) => x.noFreeSlot)) return t("playerTable.mergeNoFreeSlotAny")
 	else if (reasonArr.some((x) => x.noFreeSlot)) errorArr.push(4) // SOME insufficient slot tech
 
-	if (reasonArr.every((x) => x.lowCash)) return "You do not have enough cash for any merger with this company"
+	if (reasonArr.every((x) => x.lowCash)) return t("playerTable.mergeLowCashAny")
 	else if (reasonArr.some((x) => x.lowCash)) errorArr.push(6) // SOME insufficient cash
 
 	// Now record all the partials
 	let errorStr = ""
-	if (errorArr.includes(2)) errorStr += "Insufficient merger tech, "
-	if (errorArr.includes(4)) errorStr += "No free slot, "
-	if (errorArr.includes(6)) errorStr += "Not enough cash, "
+	if (errorArr.includes(2)) errorStr += t("playerTable.mergeInsufficientTech") + ", "
+	if (errorArr.includes(4)) errorStr += t("playerTable.mergeNoFreeSlotShort") + ", "
+	if (errorArr.includes(6)) errorStr += t("playerTable.mergeLowCashShort") + ", "
 	errorStr = errorStr.slice(0, -2)
 	return errorStr
 }
@@ -106,7 +141,7 @@ function clickedSlot(companySlot, slotIdx, playerIndex) {
 				} else if (store.ongoingVars.selectedMergerInfo.length === 1) {
 					// Did you click the same slot twice?
 					if (playerIndex === store.ongoingVars.selectedMergerInfo[0][0] && slotIdx === store.ongoingVars.selectedMergerInfo[0][1]) {
-						store.gameMessages.actionError = "You cannot select the same slot twice"
+						store.gameMessages.actionError = i18n.global.t("playerTable.mergeSameSlot")
 					}
 					// Otherwise, find the entry in store.context.mergerStatusArray
 					// Filter the main array for the first subArr
@@ -177,23 +212,47 @@ function getRNDfontSize() {
 	else if (store.useMergerSubsidy && store.useShippingSubsidy) return 12
 	return 16
 }
+
+function companiesLeftToOperate() {
+	if (store.gameflow.turnOrder.length === 0) return 0
+	const player = store.players[store.gameflow.turnOrder[0]]
+	let left = 0
+	for (const slot of player.slots) {
+		if (slot.length > 0 && !model.getActiveCompanyDataFromID(slot[0]).operated) left++
+	}
+	return left
+}
+
+function getRndTooltip(playerIndex) {
+	const p = store.players[playerIndex]
+	const parts = [
+		`${i18n.global.t("playerTable.bid")}: ×${model.getRndDisplayValue(rf.RnD_BID_IDX, p.RnD[rf.RnD_BID_IDX])}`,
+		`${i18n.global.t("playerTable.slots")}: ${p.RnD[rf.RnD_SLOTS_IDX]}`,
+		`${i18n.global.t("playerTable.merger")}: ${p.RnD[rf.RnD_MERGER_IDX]}`,
+		`${i18n.global.t("playerTable.expansion")}: ${p.RnD[rf.RnD_EXPANSION_IDX]}`,
+		`${i18n.global.t("playerTable.hull")}: ${p.RnD[rf.RnD_HULL_IDX]}`,
+	]
+	if (store.useMergerSubsidy) parts.push(`${i18n.global.t("playerTable.mergerSubsidy")}: ${model.getRndDisplayValue(rf.RnD_MERGER_SUBSIDY_IDX, p.RnD[rf.RnD_MERGER_SUBSIDY_IDX])}`)
+	if (store.useShippingSubsidy) parts.push(`${i18n.global.t("playerTable.shippingSubsidy")}: ${model.getRndDisplayValue(rf.RnD_SHIPPING_SUBSIDY_IDX, p.RnD[rf.RnD_SHIPPING_SUBSIDY_IDX])}`)
+	return parts.join(", ")
+}
 </script>
 
 <template>
 	<b>
-		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_NEW_ERA }">1) New Era</span>
+		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_NEW_ERA }" :title="$t('playerTable.phaseHelpNewEra')">1) {{ $t('playerTable.newEra') }}</span>
 		►
-		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_BID_TURN_ORDER }">2) Turn Order Bidding</span>
+		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_BID_TURN_ORDER }" :title="$t('playerTable.phaseHelpBidTurnOrder')">2) {{ $t('playerTable.bidTurnOrder') }}</span>
 		►
-		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_MERGERS || store.gameflow.phase === rf.PHASE_MERGER_BIDDING }">3) Mergers</span>
+		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_MERGERS || store.gameflow.phase === rf.PHASE_MERGER_BIDDING }" :title="$t('playerTable.phaseHelpMergers')">3) {{ $t('playerTable.mergers') }}</span>
 		►
-		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ACQUISITIONS }">4) Acquisitions</span>
+		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_ACQUISITIONS }" :title="$t('playerTable.phaseHelpAcquisitions')">4) {{ $t('playerTable.acquisitions') }}</span>
 		►
-		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_R_AND_D }">5) R&D</span>
+		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_R_AND_D }" :title="$t('playerTable.phaseHelpRnd')">5) {{ $t('playerTable.rnd') }}</span>
 		►
-		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_OPERATIONS }">6) Operations</span>
+		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_OPERATIONS }" :title="$t('playerTable.phaseHelpOperations')">6) {{ $t('playerTable.operations') }}<template v-if="store.gameflow.phase === rf.PHASE_OPERATIONS"> ({{ $t('playerTable.companiesLeft', { count: companiesLeftToOperate() }) }})</template></span>
 		►
-		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_CITY_GROWTH }">7) City Growth</span>
+		<span :class="{ currentPhaseGlow: store.gameflow.phase === rf.PHASE_CITY_GROWTH }" :title="$t('playerTable.phaseHelpCityGrowth')">7) {{ $t('playerTable.cityGrowth') }}</span>
 	</b>
 	<div id="container">
 		<div id="topAreaContainerDiv">
@@ -201,14 +260,14 @@ function getRNDfontSize() {
 				<table id="playerTable">
 					<thead>
 						<tr>
-							<th><b>Player</b></th>
-							<th><b>Money</b></th>
-							<th><b>R & D</b></th>
-							<th><b>Slot 1</b></th>
-							<th><b>Slot 2</b></th>
-							<th><b>Slot 3</b></th>
-							<th><b>Slot 4</b></th>
-							<th><b>Slot 5</b></th>
+							<th><b>{{ $t('playerTable.player') }}</b></th>
+							<th><b>{{ $t('playerTable.money') }}</b></th>
+							<th><b>{{ $t('playerTable.rndHeader') }}</b></th>
+							<th><b>{{ $t('playerTable.slot', { num: 1 }) }}</b></th>
+							<th><b>{{ $t('playerTable.slot', { num: 2 }) }}</b></th>
+							<th><b>{{ $t('playerTable.slot', { num: 3 }) }}</b></th>
+							<th><b>{{ $t('playerTable.slot', { num: 4 }) }}</b></th>
+							<th><b>{{ $t('playerTable.slot', { num: 5 }) }}</b></th>
 						</tr>
 					</thead>
 					<tr v-for="(playerIndex, idx) in store.gameflow.fullTurnOrder" :key="idx">
@@ -221,59 +280,62 @@ function getRNDfontSize() {
 							<div class="money-row">
 								<span class="money-label">💵</span>
 								<span class="money-value">{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyCash) }}</span>
-								<span v-if="store.players[playerIndex].moneyRoundIncome > 0" class="income">+{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyRoundIncome) }}</span>
+								<span v-if="moneyDeltas[playerIndex]" class="moneyDelta" :class="moneyDeltas[playerIndex] > 0 ? 'positive' : 'negative'">{{ moneyDeltas[playerIndex] > 0 ? '+' : '' }}{{ view.getMoneyString(playerIndex, moneyDeltas[playerIndex]) }}</span>
+								<span v-if="store.players[playerIndex].moneyRoundIncome !== 0 && (!store.hiddenMoney || playerIndex === personal.pov || personal.trainingGame)" :title="$t('playerTable.roundIncomeTooltip')" :class="store.players[playerIndex].moneyRoundIncome < 0 ? 'negativeIncome' : 'income'"><template v-if="store.gameflow.phase === rf.PHASE_GAME_OVER">{{ $t('playerTable.lastRoundIncome') }} </template><template v-if="store.players[playerIndex].moneyRoundIncome > 0">+</template>{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyRoundIncome) }}</span>
 							</div>
 						</td>
 						<td v-else class="money-cell">
 							<div class="money-row">
 								<span v-if="store.options.playerTableStyle === 0" class="money-label">💵</span>
-								<span v-else>Cash: </span>
+								<span v-else>{{ $t('playerTable.cash') }} </span>
 								<span class="money-value">{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyCash) }}</span>
-								<span v-if="store.players[playerIndex].moneyRoundIncome > 0" class="income">+{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyRoundIncome) }}</span>
+								<span v-if="moneyDeltas[playerIndex]" class="moneyDelta" :class="moneyDeltas[playerIndex] > 0 ? 'positive' : 'negative'">{{ moneyDeltas[playerIndex] > 0 ? '+' : '' }}{{ view.getMoneyString(playerIndex, moneyDeltas[playerIndex]) }}</span>
+								<span v-if="store.players[playerIndex].moneyRoundIncome !== 0 && (!store.hiddenMoney || playerIndex === personal.pov || personal.trainingGame)" :title="$t('playerTable.roundIncomeTooltip')" :class="store.players[playerIndex].moneyRoundIncome < 0 ? 'negativeIncome' : 'income'"><template v-if="store.gameflow.phase === rf.PHASE_GAME_OVER">{{ $t('playerTable.lastRoundIncome') }} </template><template v-if="store.players[playerIndex].moneyRoundIncome > 0">+</template>{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyRoundIncome) }}</span>
 							</div>
 							<div class="money-row">
 								<span v-if="store.options.playerTableStyle === 0" class="money-label">🏦</span>
-								<span v-else>Bank: </span>
+								<span v-else>{{ $t('playerTable.bank') }} </span>
 								<span class="money-value">{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyBank) }}</span>
 							</div>
 							<div class="money-row total-row">
 								<span v-if="store.options.playerTableStyle === 0" class="money-label">💰</span>
-								<span v-else>Total: </span>
+								<span v-else>{{ $t('playerTable.total') }} </span>
 								<span class="money-value total-value">{{ view.getMoneyString(playerIndex, store.players[playerIndex].moneyCash + store.players[playerIndex].moneyBank) }}</span>
 							</div>
 						</td>
 						<!-- R & D -->
-						<td v-if="store.topMenuViews.minimalPlayerTable" class="rightAlign">
-							{{ store.players[playerIndex].RnD[rf.RnD_BID_IDX] }}-{{ store.players[playerIndex].RnD[rf.RnD_SLOTS_IDX] }}-{{ store.players[playerIndex].RnD[rf.RnD_MERGER_IDX] }}-{{ store.players[playerIndex].RnD[rf.RnD_EXPANSION_IDX] }}-{{ store.players[playerIndex].RnD[rf.RnD_HULL_IDX] }}
+						<td v-if="store.topMenuViews.minimalPlayerTable" class="rightAlign" :title="getRndTooltip(playerIndex)">
+							×{{ model.getRndDisplayValue(rf.RnD_BID_IDX, store.players[playerIndex].RnD[rf.RnD_BID_IDX]) }}-{{ store.players[playerIndex].RnD[rf.RnD_SLOTS_IDX] }}-{{ store.players[playerIndex].RnD[rf.RnD_MERGER_IDX] }}-{{ store.players[playerIndex].RnD[rf.RnD_EXPANSION_IDX] }}-{{ store.players[playerIndex].RnD[rf.RnD_HULL_IDX] }}
 							<span v-if="store.useMergerSubsidy || store.useShippingSubsidy">-</span>
 							<span v-if="store.useMergerSubsidy">
-								{{ store.players[playerIndex].RnD[rf.RnD_MERGER_SUBSIDY_IDX] }}
+								{{ model.getRndDisplayValue(rf.RnD_MERGER_SUBSIDY_IDX, store.players[playerIndex].RnD[rf.RnD_MERGER_SUBSIDY_IDX]) }}
 								<span v-if="store.useShippingSubsidy">-</span>
 							</span>
-							<span v-if="store.useShippingSubsidy">{{ store.players[playerIndex].RnD[rf.RnD_SHIPPING_SUBSIDY_IDX] }}</span>
+							<span v-if="store.useShippingSubsidy">{{ model.getRndDisplayValue(rf.RnD_SHIPPING_SUBSIDY_IDX, store.players[playerIndex].RnD[rf.RnD_SHIPPING_SUBSIDY_IDX]) }}</span>
 						</td>
 						<td
 							v-else
 							class="rightAlign"
+							:title="getRndTooltip(playerIndex)"
 							:style="{
 								fontSize: String(getRNDfontSize()) + 'px',
 							}">
-							Bid: {{ store.players[playerIndex].RnD[rf.RnD_BID_IDX] }}
+							{{ $t('playerTable.bid') }}: ×{{ model.getRndDisplayValue(rf.RnD_BID_IDX, store.players[playerIndex].RnD[rf.RnD_BID_IDX]) }}
 							<br />
-							Slots: {{ store.players[playerIndex].RnD[rf.RnD_SLOTS_IDX] }}
+							{{ $t('playerTable.slots') }}: {{ store.players[playerIndex].RnD[rf.RnD_SLOTS_IDX] }}
 							<br />
-							Merger: {{ store.players[playerIndex].RnD[rf.RnD_MERGER_IDX] }}
+							{{ $t('playerTable.merger') }}: {{ store.players[playerIndex].RnD[rf.RnD_MERGER_IDX] }}
 							<br />
-							Expansion: {{ store.players[playerIndex].RnD[rf.RnD_EXPANSION_IDX] }}
+							{{ $t('playerTable.expansion') }}: {{ store.players[playerIndex].RnD[rf.RnD_EXPANSION_IDX] }}
 							<br />
-							Hull: {{ store.players[playerIndex].RnD[rf.RnD_HULL_IDX] }}
+							{{ $t('playerTable.hull') }}: {{ store.players[playerIndex].RnD[rf.RnD_HULL_IDX] }}
 							<br v-if="store.useMergerSubsidy || store.useShippingSubsidy" />
 							<template v-if="store.useMergerSubsidy">
-								Merger Subsidy: {{ store.players[playerIndex].RnD[rf.RnD_MERGER_SUBSIDY_IDX] }}
+								{{ $t('playerTable.mergerSubsidy') }}: {{ model.getRndDisplayValue(rf.RnD_MERGER_SUBSIDY_IDX, store.players[playerIndex].RnD[rf.RnD_MERGER_SUBSIDY_IDX]) }}
 								<br />
 							</template>
 							<template v-if="store.useShippingSubsidy">
-								Shipping Subsidy: {{ store.players[playerIndex].RnD[rf.RnD_SHIPPING_SUBSIDY_IDX] }}
+								{{ $t('playerTable.shippingSubsidy') }}: {{ model.getRndDisplayValue(rf.RnD_SHIPPING_SUBSIDY_IDX, store.players[playerIndex].RnD[rf.RnD_SHIPPING_SUBSIDY_IDX]) }}
 								<br />
 							</template>
 						</td>
@@ -281,7 +343,7 @@ function getRNDfontSize() {
 						<template v-for="(companySlot, slotIdx) in store.players[playerIndex].slots" :key="slotIdx">
 							<td v-if="store.topMenuViews.minimalPlayerTable" :style="{ 'min-width': companySlot.length * 20 - (5 * companySlot.length - 2) + 'px' }">
 								<template v-if="companySlot.length > 0">
-									<div class="slotImgsMinimalDiv" :class="[{ selectableSlot: canSelectSlot(playerIndex, slotIdx, companySlot) }, { selectedSlotToOperate: controller.currentPlayerIndex() === playerIndex && store.context.selectedSlotToOperate === slotIdx }]" @click="clickedSlot(companySlot, slotIdx, playerIndex)" :style="{ width: companySlot.length * 20 + 5 * (companySlot.length - 1) + 'px' }">
+									<div class="slotImgsMinimalDiv" :class="[{ selectableSlot: canSelectSlot(playerIndex, slotIdx, companySlot) }, { selectedSlotToOperate: controller.currentPlayerIndex() === playerIndex && store.context.selectedSlotToOperate === slotIdx }, { mergedSlotPulse: model.getActiveCompanyDataFromID(companySlot[0]).mergedThisPhase }]" @click="clickedSlot(companySlot, slotIdx, playerIndex)" :style="{ width: companySlot.length * 20 + 5 * (companySlot.length - 1) + 'px' }">
 										<template v-for="(companyID, idx2) in companySlot" :key="idx2">
 											<img class="companyCardMinimalIMG" :src="view.getImage(view.getCompanyGfxFromID(companyID))" alt="Company" :style="{ left: idx2 * 20 + (5 * idx2 - 1) + 'px' }" />
 											<div :class="{ crossBackground: model.getActiveCompanyDataFromID(companyID).operated }"></div>
@@ -289,7 +351,7 @@ function getRNDfontSize() {
 									</div>
 								</template>
 								<template v-else-if="slotIdx + 1 > store.players[playerIndex].RnD[rf.RnD_SLOTS_IDX]">
-									<b>N/A</b>
+									<b>{{ $t('playerTable.notAvailable') }}</b>
 								</template>
 								<template v-else>
 									<b>-</b>
@@ -299,7 +361,7 @@ function getRNDfontSize() {
 							<td v-else>
 								<template v-if="companySlot.length > 0">
 									<div class="slotsTDdiv">
-										<div class="slotImgsDiv" :class="[{ selectableSlot: canSelectSlot(playerIndex, slotIdx, companySlot) }, { unMergeableSlot: companySlot.length > 0 && model.getActiveCompanyDataFromID(companySlot[0]).mergedThisPhase }, { selectedSlotToOperate: playerIndex === controller.currentPlayerIndex() && store.context.selectedSlotToOperate === slotIdx }]" @click="clickedSlot(companySlot, slotIdx, playerIndex)" :style="{ height: companySlot.length > 1 ? 79 + 20 * (companySlot.length - 1) + 'px' : '81px' }">
+										<div class="slotImgsDiv" :class="[{ selectableSlot: canSelectSlot(playerIndex, slotIdx, companySlot) }, { unMergeableSlot: companySlot.length > 0 && model.getActiveCompanyDataFromID(companySlot[0]).mergedThisPhase }, { mergedSlotPulse: model.getActiveCompanyDataFromID(companySlot[0]).mergedThisPhase }, { selectedSlotToOperate: playerIndex === controller.currentPlayerIndex() && store.context.selectedSlotToOperate === slotIdx }]" @click="clickedSlot(companySlot, slotIdx, playerIndex)" :style="{ height: companySlot.length > 1 ? 79 + 20 * (companySlot.length - 1) + 'px' : '81px' }">
 											<template v-for="(companyID, idx2) in companySlot" :key="idx2">
 												<img class="companyCardIMG" :src="view.getImage(view.getCompanyGfxFromID(companyID))" alt="Company" :style="{ top: (companySlot.length - 1 - idx2) * 20 + 'px' }" />
 												<div :class="{ crossBackground: model.getActiveCompanyDataFromID(companyID).operated }"></div>
@@ -313,11 +375,11 @@ function getRNDfontSize() {
 										</div>
 
 										<div class="companyInfoDiv">
-											<span v-if="model.getActiveCompanyDataFromID(companySlot[0]).type === rf.COMPANY_SHIPPING" :class="{ redText: model.getSlotTerrSize(playerIndex, slotIdx) >= model.getActiveCompanyDataFromID(companySlot[0]).combinedCapacity[store.gameflow.currentEra] }">Size: {{ model.getSlotTerrSize(playerIndex, slotIdx) }} / {{ model.getActiveCompanyDataFromID(companySlot[0]).combinedCapacity[store.gameflow.currentEra] }}</span>
-											<span v-else>Size: {{ model.getSlotTerrSize(playerIndex, slotIdx) }}</span>
+											<span v-if="model.getActiveCompanyDataFromID(companySlot[0]).type === rf.COMPANY_SHIPPING" :class="{ redText: model.getSlotTerrSize(playerIndex, slotIdx) >= model.getActiveCompanyDataFromID(companySlot[0]).combinedCapacity[store.gameflow.currentEra] }">{{ $t('playerTable.size') }}: {{ model.getSlotTerrSize(playerIndex, slotIdx) }} / {{ model.getActiveCompanyDataFromID(companySlot[0]).combinedCapacity[store.gameflow.currentEra] }}</span>
+											<span v-else>{{ $t('playerTable.size') }}: {{ model.getSlotTerrSize(playerIndex, slotIdx) }}</span>
 											<br />
 											<template v-if="model.getActiveCompanyDataFromID(companySlot[0]).type === rf.COMPANY_SHIPPING">
-												<b><u>Max Size</u></b>
+												<b><u>{{ $t('playerTable.maxSize') }}</u></b>
 												<br />
 												<span :class="{ lightGreenBackground: store.gameflow.currentEra === rf.ERA_A }">
 													<span v-if="model.getActiveCompanyDataFromID(companySlot[0]).combinedCapacity[0] !== 0">{{ model.getActiveCompanyDataFromID(companySlot[0]).combinedCapacity[0] }}</span>
@@ -328,25 +390,25 @@ function getRNDfontSize() {
 												,
 												<span :class="{ lightGreenBackground: store.gameflow.currentEra === rf.ERA_C }">{{ model.getActiveCompanyDataFromID(companySlot[0]).combinedCapacity[2] }}</span>
 												<br />
-												Hull: {{ model.getActiveCompanyDataFromID(companySlot[0]).hullCapacity }}
+												{{ $t('playerTable.hullInfo') }}: {{ model.getActiveCompanyDataFromID(companySlot[0]).hullCapacity }}
 												<br />
 											</template>
-											Value: {{ model.getNominalValueFromSlotID(playerIndex, slotIdx, false) }}
+											{{ $t('playerTable.value') }}: {{ model.getNominalValueFromSlotID(playerIndex, slotIdx, false) }}
 											<!--<span
 												v-if="rf.LAND_COMPANIES.includes(model.getActiveCompanyDataFromID(companySlot[0]).type)"><br />Good:
 												{{
 													model.getActiveCompanyDataFromID(companySlot[0]).goodValue }}</span>
 											-->
 											<br />
-											Income: {{ getSlotIncome(playerIndex, slotIdx) }}
+											<span :title="$t('playerTable.companyIncomeTooltip')">{{ $t('playerTable.income') }}: {{ getSlotIncome(playerIndex, slotIdx) }}</span>
 										</div>
 									</div>
 								</template>
 								<template v-else-if="slotIdx + 1 > store.players[playerIndex].RnD[rf.RnD_SLOTS_IDX]">
-									<b>N/A</b>
+									<b>{{ $t('playerTable.notAvailable') }}</b>
 								</template>
 								<template v-else>
-									<b>- Empty -</b>
+									<b>{{ $t('playerTable.empty') }}</b>
 								</template>
 							</td>
 						</template>
@@ -355,8 +417,8 @@ function getRNDfontSize() {
 			</div>
 			<div id="infoDiv">
 				<button class="actionsLineButton" @click="store.topMenuViews.minimalPlayerTable = !store.topMenuViews.minimalPlayerTable">
-					<span v-if="store.topMenuViews.minimalPlayerTable">Expand Player Table</span>
-					<span v-else>Minimize Player Table</span>
+					<span v-if="store.topMenuViews.minimalPlayerTable">{{ $t('playerTable.expandTable') }}</span>
+					<span v-else>{{ $t('playerTable.minimizeTable') }}</span>
 				</button>
 			</div>
 		</div>
@@ -398,6 +460,8 @@ function getRNDfontSize() {
 	border: 2px solid black;
 	width: 75px;
 	height: 75px;
+	animation: acquireDeedIn 0.25s ease-out;
+	transform-origin: center;
 }
 
 .slotImgsMinimalDiv {
@@ -413,6 +477,19 @@ function getRNDfontSize() {
 	height: 20px;
 	box-sizing: border-box;
 	top: 0px;
+	animation: acquireDeedIn 0.25s ease-out;
+	transform-origin: center;
+}
+
+@keyframes acquireDeedIn {
+	0% {
+		opacity: 0.5;
+		transform: scale(0.82);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
 }
 
 .shipCompanyBackground {
@@ -524,6 +601,22 @@ function getRNDfontSize() {
 	border: 3px solid lightgreen !important;
 }
 
+.mergedSlotPulse {
+	animation: mergerSlotPulse 0.35s ease-out;
+}
+
+@keyframes mergerSlotPulse {
+	0% {
+		box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.75);
+	}
+	70% {
+		box-shadow: 0 0 0 7px rgba(40, 167, 69, 0);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+	}
+}
+
 .crossBackground {
 	z-index: 20;
 	position: absolute;
@@ -552,6 +645,17 @@ function getRNDfontSize() {
 
 .currentPhaseGlow {
 	background-color: lightgreen;
+	animation: phaseHighlightIn 0.35s ease-out;
+	transition: background-color 0.2s ease-in-out;
+}
+
+@keyframes phaseHighlightIn {
+	0% {
+		background-color: transparent;
+	}
+	100% {
+		background-color: lightgreen;
+	}
 }
 
 /* New styles for improved layout */
@@ -571,6 +675,42 @@ function getRNDfontSize() {
 .money-cell {
 	padding: 4px !important;
 	text-align: right;
+	position: relative;
+}
+
+.moneyDelta {
+	position: absolute;
+	right: 4px;
+	top: 0;
+	font-size: 11px;
+	font-weight: bold;
+	pointer-events: none;
+	animation: moneyDeltaFade 1.2s ease-out forwards;
+}
+
+.moneyDelta.positive {
+	color: #28a745;
+}
+
+.moneyDelta.negative {
+	color: #c0392b;
+}
+
+@keyframes moneyDeltaFade {
+	0% {
+		opacity: 0;
+		transform: translateY(3px);
+	}
+	15% {
+		opacity: 1;
+	}
+	70% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		transform: translateY(-3px);
+	}
 }
 
 .money-row {
@@ -604,6 +744,12 @@ function getRNDfontSize() {
 
 .income {
 	color: #28a745;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+.negativeIncome {
+	color: #c0392b;
 	font-size: 12px;
 	font-weight: bold;
 }

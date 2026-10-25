@@ -20,6 +20,7 @@ from Lobby.sharedFunctions.hotStreaks import record_hot_streak
 from Lobby.sharedFunctions.sharedRefs import (
     SR_currentTurnString,
 )
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 
 class GamePresenter:
@@ -962,7 +963,7 @@ class AQYpresenter(GamePresenter):
             gp.save()
             return
 
-        current_data = json.loads(gzip.decompress(bytearray(base64.b64decode(gp.currentMoveData))).decode("utf-8"))
+        current_data = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(gp.currentMoveData))).decode("utf-8"))
         index_to_remove = next(
             (index for index, entry in enumerate(current_data) if entry.get("phase") == phase),
             None,
@@ -1039,7 +1040,7 @@ class AQYpresenter(GamePresenter):
         if self.gameObj.playerTradeData == "":
             return
 
-        playerTradeData = json.loads(gzip.decompress(bytearray(base64.b64decode(self.gameObj.playerTradeData))).decode("utf-8"))
+        playerTradeData = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(self.gameObj.playerTradeData))).decode("utf-8"))
 
         for subarray in playerTradeData["playerTrades"]:
             if subarray == entry:
@@ -1053,11 +1054,11 @@ class AQYpresenter(GamePresenter):
         import json
 
         if self.gameObj.playerTradeData != "":
-            playerTradeData = json.loads(gzip.decompress(bytearray(base64.b64decode(self.gameObj.playerTradeData))).decode("utf-8"))
+            playerTradeData = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(self.gameObj.playerTradeData))).decode("utf-8"))
 
             for i, player in enumerate(playerTradeData["playerCityLockedData"]):
                 if len(player) > 0:
-                    playerData = json.loads(gzip.decompress(bytearray(base64.b64decode(player))).decode("utf-8"))
+                    playerData = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(player))).decode("utf-8"))
                     for playerPromise in playerData[8]:
                         if playerPromise == promise:
                             playerData[8].remove(promise)
@@ -1065,7 +1066,7 @@ class AQYpresenter(GamePresenter):
 
             self.gameObj.playerTradeData = base64.b64encode(gzip.compress(json.dumps(playerTradeData).encode("utf-8"))).decode("utf-8")
 
-        raw_data = json.loads(gzip.decompress(bytearray(base64.b64decode(self.gameObj.gameData))).decode("utf-8"))
+        raw_data = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(self.gameObj.gameData))).decode("utf-8"))
         for playerData in raw_data[1]:
             for playerPromise in playerData[9]:
                 if playerPromise == promise:
@@ -1712,7 +1713,7 @@ class RNBpresenter(GamePresenter):
             gp.save()
             return
 
-        current_data = json.loads(gzip.decompress(bytearray(base64.b64decode(gp.currentMoveData))).decode("utf-8"))
+        current_data = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(gp.currentMoveData))).decode("utf-8"))
         index_to_remove = next(
             (index for index, entry in enumerate(current_data) if entry.get("phase") == phase),
             None,
@@ -1896,6 +1897,14 @@ class URRpresenter(GamePresenter):
 
 
 class DDLpresenter(GamePresenter):
+    # DDL is client-owned: the whole state lives in Game.gameData, so there is
+    # no server-side move data.
+    def getCurrentMoveDataForPlayer(self, name):
+        return {}
+
+    def getAllMyMoveDataForPlayer(self, name):
+        return []
+
     def startGame(self, request):
         from Lobby.models import GamePlayer
 
@@ -1926,44 +1935,52 @@ class DDLpresenter(GamePresenter):
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
-        winner_user = User.objects.get(username=_winnerUsername)
-        winner_gp = self.gameObj.players.filter(player=winner_user).first()
-        if winner_gp:
-            winner_gp.winner = True
-            winner_gp.save()
+        winner_usernames = _winnerUsername if isinstance(_winnerUsername, (list, tuple)) else [_winnerUsername]
+        for username in winner_usernames:
+            winner_user = User.objects.filter(username=username).first()
+            if not winner_user:
+                continue
+            winner_gp = self.gameObj.players.filter(player=winner_user).first()
+            if winner_gp:
+                winner_gp.winner = True
+                winner_gp.save()
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
 
-        finalPositionsArr = []
-        for seatPos in _finalPositions:
-            finalPositionsArr.append(self.getAllPlayersOrderedySeatInArray()[seatPos])
+        names = self.getAllPlayersOrderedySeatInArray(True)
+        if _finalPositions and isinstance(_finalPositions[0], (list, tuple)):
+            groups = _finalPositions
+        else:
+            groups = [[seat] for seat in _finalPositions]
 
-        convertedFinalPositions = []
-        for pos, username in enumerate(finalPositionsArr):
-            if pos == 0:
-                posText = "1st - Congratulations!"
-            elif pos == 1:
-                posText = "2nd"
-            elif pos == 2:
-                posText = "3rd"
-            elif pos == 3:
-                posText = "4th"
-            elif pos == 4:
-                posText = "5th"
-            elif pos == 5:
-                posText = "6th"
-            else:
-                posText = "Last"
-            convertedFinalPositions.append([username, posText, pos])
+        finalResults = []
+        for pos, group in enumerate(groups):
+            for seat in group:
+                username = names[seat] if 0 <= seat < len(names) else "Unknown"
+                if pos == 0:
+                    posText = "1st - Congratulations!" if len(group) == 1 else "Joint 1st - Congratulations!"
+                elif pos == 1:
+                    posText = "Runner Up" if len(group) == 1 else "Joint Runner Up"
+                elif pos == 2:
+                    posText = "3rd"
+                elif pos == 3:
+                    posText = "4th"
+                elif pos == 4:
+                    posText = "5th"
+                elif pos == 5:
+                    posText = "6th"
+                else:
+                    posText = "Last"
+                finalResults.append([username, posText, pos])
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists() and self.gameObj.maxPlayers > 1:
-            async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "DDL", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
+            async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "DDL", finalResults, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 
             if self.gameObj.relatedMainTournament:
-                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMainTournament, self.gameObj, [_winnerUsername], _tournamentData)
+                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMainTournament, self.gameObj, winner_usernames, _tournamentData)
             if self.gameObj.relatedMiniTournament:
-                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMiniTournament, self.gameObj, [_winnerUsername], _tournamentData)
+                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMiniTournament, self.gameObj, winner_usernames, _tournamentData)
 
 
 class ROWpresenter(GamePresenter):
@@ -2741,6 +2758,17 @@ class HLCpresenter(GamePresenter):
         current_players_arr = json.loads(self.gameObj.currentPlayersInTurnOrder) if self.gameObj.currentPlayersInTurnOrder and self.gameObj.currentPlayersInTurnOrder is not None and self.gameObj.currentPlayersInTurnOrder != "" else []
         return current_players_arr
 
+    def getArrayOfIsCurrentPlayers(self):
+        if self.gameObj.phase == 3:
+            # Build Factory is simultaneous but processed in turn order, and early
+            # submissions stay secret - so only the head of the queue is actually
+            # blocking, and only they should get reminders/timeout emails
+            for name in self.getCurrentPlayersInOrderArrHLC():
+                if name != "HcBot" and not self.hasMoveData(name):
+                    return [name]
+            return []
+        return super().getArrayOfIsCurrentPlayers()
+
     def isMyMove(self, loggedInPlayerUsername=None):
         currentPlayers = self.getCurrentPlayersInOrderArrHLC()
         if len(currentPlayers) == 0:
@@ -2880,6 +2908,11 @@ class HLCpresenter(GamePresenter):
                         _currentPlayers.append("HcBot")
                     else:
                         _currentPlayers.append(gp.player.username)
+
+        # Return in queue order, not seat order, so [0] is always the head of the
+        # factory queue - the kickout panel targets currentPlayers[0]
+        queue = self.getCurrentPlayersInOrderArrHLC()
+        _currentPlayers.sort(key=lambda n: queue.index(n) if n in queue else len(queue))
 
         return _currentPlayers
 
@@ -3313,10 +3346,13 @@ class KFWpresenter(GamePresenter):
                 allPlayerReturnData.append({"timestamp": int(player_time), "content": player_data})
 
         readyWithBots = False
+        absent_names = {gp.player.username for gp in self.gameObj.players.select_related("player") if gp.player and (gp.is_missing or gp.is_kicked)}
+        # Never finish on an empty slot: a submit while nobody is current would otherwise end the game without that player's scoring data
+        allRequiredMovesIn = all(playerMoveData[2] != "" for playerMoveData in playersMoveDataArr if playerMoveData[0] not in absent_names)
 
-        if all(readyPlayers) or readyWithBots:
+        if (all(readyPlayers) and allRequiredMovesIn) or readyWithBots:
             jsonResponse.append({"allPlayerReturnData": allPlayerReturnData})
-            self.clearAllMoveData()
+            # Not cleared here: if the client's saveEndGame never arrives, endGame() cannot recover the moves, so keep them for a retry
 
             ### GAME DATA 1
             playersHiddenDataArr = json.loads(self.gameObj.KFWplayersHiddenData)
@@ -3405,7 +3441,7 @@ class KFWpresenter(GamePresenter):
         return base64.b64encode(gzip.compress(json.dumps(data_to_compress).encode("utf-8"))).decode("utf-8")
 
     def decompressData(self, string_to_decompress):
-        return json.loads(gzip.decompress(bytearray(base64.b64decode(string_to_decompress))).decode("utf-8"))
+        return json.loads(safe_gzip_decompress(bytearray(base64.b64decode(string_to_decompress))).decode("utf-8"))
 
     def getGameData3compressed(self):
         if self.gameObj.KFWserverData == "":

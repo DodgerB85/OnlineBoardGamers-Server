@@ -37,7 +37,7 @@ function zoom(dir) {
 }
 
 function resignGame() {
-	if (!window.confirm("Are you sure you want to resign? You will not be able to continue.")) return
+	if (!window.confirm(t("app.confirmResign"))) return
 	void controller.resignGame()
 }
 
@@ -104,14 +104,14 @@ function playerColor(color) {
 				:class="['topMenuItem', { selected: store.viewSettings.showVotes }]"
 				@click="toggle('showVotes')"
 			>
-				<img :src="view.getImage('icon-stop')" /><span>Vote</span>
+				<img :src="view.getImage('icon-stop')" /><span>{{ t('app.vote') }}</span>
 			</span>
 			<span
 				v-if="store.game?.isEnded()"
 				class="topMenuItem"
 				@click="store.viewSettings.showEndedDialog = true"
 			>
-				<img :src="view.getImage('icon-info')" /><span>Results</span>
+				<img :src="view.getImage('icon-info')" /><span>{{ t('app.results') }}</span>
 			</span>
 			<div class="menuDivider"></div>
 			<span :class="['topMenuItem', { selected: store.viewSettings.showReplay }]" @click="toggleReplay">
@@ -132,9 +132,9 @@ function playerColor(color) {
 		<div id="topInfos">
 			<div class="infoSpanDiv">
 				<span>{{ gameName }}</span>
-				<span v-if="store.turn">&nbsp;|&nbsp; Turn {{ store.turn }}</span>
+				<span v-if="store.turn">&nbsp;|&nbsp; {{ t('app.turn', { turn: store.turn }) }}</span>
 				<span v-if="store.currentPlayer">&nbsp;|&nbsp; {{ store.currentPlayer }}</span>
-				<span v-if="store.missingPlayers.length" class="missing">&nbsp;|&nbsp; Missing: {{ store.missingPlayers.join(", ") }}</span>
+				<span v-if="store.missingPlayers.length" class="missing">&nbsp;|&nbsp; {{ t('app.missing', { players: store.missingPlayers.join(", ") }) }}</span>
 				<span v-if="store.gameMessages.errorText" class="error">&nbsp;|&nbsp; {{ store.gameMessages.errorText }}</span>
 				<span v-if="store.gameMessages.rewindErrorText" class="error">&nbsp;|&nbsp; {{ store.gameMessages.rewindErrorText }}</span>
 			</div>

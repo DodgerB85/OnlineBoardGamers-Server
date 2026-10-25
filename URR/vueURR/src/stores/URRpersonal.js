@@ -3,7 +3,7 @@
  */
 
 import { defineStore } from "pinia"
-import * as rf from "../js/URRreference"
+import * as rf from "../js/URRreference.js"
 import { useModelStore } from "./URRstore.js"
 
 export const usePersonalStore = defineStore("personal", () => {
@@ -48,6 +48,8 @@ export const usePersonalStore = defineStore("personal", () => {
 		if (this.pov < 0 || store.players[this.pov]?.isMissing) return false
 		if (this.trainingGame) return false
 		if (this.soloGame) return false
+		// Settlement only, so nobody can resign once a final rainy season is under way.
+		if (store.gameflow.phase !== rf.PHASE_SETTLEMENT) return false
 		if (this.canPlay() && store.gameflow.turnOrder[0] === this.pov) return true
 		return false
 	}

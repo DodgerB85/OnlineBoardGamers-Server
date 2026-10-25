@@ -18,6 +18,7 @@ import * as util from "./RNButil"
 import * as model from "./RNBmodel"
 import * as build from "./RNBbuild"
 import * as map from "./RNBmap"
+import i18n from "../i18n"
 import * as loc from "./RNBlocation.js"
 import * as graph from "./RNBgraph.js"
 import * as controller from "./RNBcontroller"
@@ -25,6 +26,7 @@ import * as context from "./RNBcontext"
 import * as produce from "./RNBproduce"
 import * as wonder from "./RNBwonder"
 import * as stack from "./RNBstack"
+import * as train from "./RNBtrain"
 
 export function deselectTransporter() {
 	const store = useModelStore()
@@ -93,7 +95,7 @@ export function higlightTilesForStartTile() {
 	// If you have valid options, highlight those
 	if (store.context.hexPiecesToHighlight.length > 0) return
 
-	store.gameMessages.actionError = "No valid start tile found - allowing anywhere"
+	store.gameMessages.actionError = i18n.global.t("io.noValidStartTile")
 	for (let i = 0; i < store.mapData.hexData.length; i++) {
 		const hex = store.mapData.hexData[i]
 		for (const bucketId of util.uniqueOnly(hex.bucketIdsCurrent)) {
@@ -205,11 +207,16 @@ export function updateAllHighlightsForTransporterMode() {
 		// Planes: if a mode was already chosen (Taxi/Takeoff), skip the reset and proceed to movement highlights
 		const savedPlaneMode = store.context.selectedPlaneMode
 		const savedPlaneInFlight = store.context.planeInFlight
+		// Trains: a chosen mode and a chosen fare survive the reset so the highlights can be rebuilt
+		const savedTrainMode = store.context.selectedTrainMode
+		const savedTrainFareResID = store.context.selectedTrainFareResID
 		context.resetContextAndHighlights()
 
 		store.context.action = rf.ACT_TM_SELECT_PICKUP_DROP_MOVE
 
 		store.context.selectedTransporterIDforTM = transporterID
+		store.context.selectedTrainMode = savedTrainMode
+		store.context.selectedTrainFareResID = savedTrainFareResID
 
 		const isPlane = transporterObj.type === rf.PLANE
 
@@ -247,6 +254,34 @@ export function updateAllHighlightsForTransporterMode() {
 			// You can drop transporters
 			highlightEligibleTransportersForTransporterDrop(store.context.selectedTransporterIDforTM)
 			return
+		}
+
+		// Offer the ride whenever a land transporter sits on a live track.
+		// While the mode is on, the same bubble becomes the way back out.
+		store.context.trainModeSelectionActive = train.canTransporterUseTrain(transporterID)
+		// Trains: a selected mode skips normal movement - the ride is the whole action
+		if (store.context.selectedTrainMode) {
+			if (store.context.trainModeSelectionActive) {
+				// A fare picked for one transporter means nothing to another
+				const fare = store.context.selectedTrainFareResID === -1 ? null : model.getResByID(store.context.selectedTrainFareResID)
+				if (!fare || !train.isFareAccessible(fare, transporterObj)) store.context.selectedTrainFareResID = -1
+
+				// Step 1: no good picked yet - offer the goods that can pay
+				if (store.context.selectedTrainFareResID === -1) {
+					store.context.action = rf.ACT_TM_SELECT_TRAIN_FARE
+					for (const eligible of train.getEligibleTrainFares(transporterID)) context.addResourceToHighlight(eligible.id)
+					return
+				}
+				// Step 2: good picked - offer the tiles the ride can reach
+				store.context.action = rf.ACT_TM_TAKE_TRAIN
+				const destinations = train.getTrainDestinations(transporterID).map(([hexID, bucketID]) => [rf.LOCATION_LAND_VERTEX, hexID, loc.getAnyVertexInHexIDbucketID(hexID, bucketID)])
+				highlightLocations(destinations)
+				// The mode carries over to another selected transporter, as plane modes do
+				highlightEligibleTransportersForTransporterPickup(store.context.selectedTransporterIDforTM)
+				return
+			}
+			store.context.selectedTrainMode = false
+			store.context.selectedTrainFareResID = -1
 		}
 
 		// You can load other transporters

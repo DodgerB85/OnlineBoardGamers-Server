@@ -10,18 +10,18 @@ const nextEra = computed(() => purchaseEra.value > store.era ? purchaseEra.value
 </script>
 
 <template>
-	<section class="equipmentSupply" aria-label="Equipment era cards">
+	<section class="equipmentSupply" :aria-label="$t('supply.aria')">
 		<div class="eraCard currentEra">
-			<span><b>Era {{ store.era === 5 ? 'M' : store.era }}</b> · {{ store.era === 5 ? 'Unlimited' : `${store.cardSupply[store.era]} left` }}</span>
-			<ArtworkCard :src="assets.getEquipmentCardImage(store.era)" :alt="`Era ${store.era === 5 ? 'M' : store.era} equipment`" />
+			<span><b>{{ $t("supply.era", { era: store.era === 5 ? 'M' : store.era }) }}</b> · {{ store.era === 5 ? $t("supply.unlimited") : $t("supply.left", { count: store.cardSupply[store.era] }) }}</span>
+			<ArtworkCard :src="assets.getEquipmentCardImage(store.era)" :alt="$t('supply.eraEquipment', { era: store.era === 5 ? 'M' : store.era })" />
 		</div>
-		<p v-if="purchaseEra > store.era" class="eraTrigger">Next purchase starts Era {{ nextEra === 5 ? 'M' : nextEra }}.</p>
+		<p v-if="purchaseEra > store.era" class="eraTrigger">{{ $t("supply.nextPurchase", { era: nextEra === 5 ? "M" : nextEra }) }}</p>
 		<details class="allEras">
-			<summary>All eras</summary>
+			<summary>{{ $t("supply.allEras") }}</summary>
 			<div class="eraCards">
 				<div v-for="era in [1, 2, 3, 4, 5].filter((era) => era !== store.era)" :key="era" class="eraCard">
-					<span><b>Era {{ era === 5 ? 'M' : era }}</b> · {{ era === 5 ? 'Unlimited' : `${store.cardSupply[era]} left` }}</span>
-					<ArtworkCard :src="assets.getEquipmentCardImage(era)" :alt="`Era ${era === 5 ? 'M' : era} equipment`" />
+					<span><b>{{ $t("supply.era", { era: era === 5 ? 'M' : era }) }}</b> · {{ era === 5 ? $t("supply.unlimited") : $t("supply.left", { count: store.cardSupply[era] }) }}</span>
+					<ArtworkCard :src="assets.getEquipmentCardImage(era)" :alt="$t('supply.eraEquipment', { era: era === 5 ? 'M' : era })" />
 				</div>
 			</div>
 		</details>

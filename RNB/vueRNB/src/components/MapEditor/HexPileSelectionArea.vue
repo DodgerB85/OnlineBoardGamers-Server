@@ -25,6 +25,9 @@ import * as funcs from "../../js/RNBfuncs"
 //import * as stack from "../../js/RNBstack"
 
 import { ref, reactive, computed } from "vue"
+import { useI18n } from "vue-i18n"
+
+const { t } = useI18n()
 
 // Props to receive from parent component
 const props = defineProps({
@@ -38,7 +41,7 @@ const props = defineProps({
 	},
 })
 
-const emit = defineEmits(["update:playerCount", "update:canReplaceMap"])
+const emit = defineEmits(["update:playerCount", "update:canReplaceMap", "showCustomRules"])
 
 // Computed property that includes admin exception for canReplaceMap
 const effectiveCanReplaceMap = computed(() => props.canReplaceMap || personal.name === "admin")
@@ -112,22 +115,23 @@ function saveMap() {
 	ME.saveMapToDB(mapName.value, mapDescription.value, props.playerCount, isVerified.value)
 		.then((success) => {
 			if (success) {
-				saveMessage.value = "Map saved successfully - you can now select it when creating a game"
+				saveMessage.value = t("mapEditor.mapSaved")
 				messageType.value = "success"
 				context.resetContextAndHighlights()
 				funcs.clearMap()
+				store.CUSTOM_RULES.splice(0)
 				mapName.value = ""
 				mapDescription.value = ""
 				isVerified.value = false
 				fetchExistingMaps()
 			} else {
-				saveMessage.value = "Failed to save map. Please try again."
+				saveMessage.value = t("mapEditor.mapSaveFailed")
 				messageType.value = "error"
 			}
 		})
 		.catch((error) => {
 			console.error("Save error:", error)
-			saveMessage.value = "Error saving map. Please try again."
+			saveMessage.value = t("mapEditor.mapSaveError")
 			messageType.value = "error"
 		})
 }
@@ -136,7 +140,7 @@ function replaceMap() {
 	clearMessages()
 
 	if (!selectedMapId.value) {
-		saveMessage.value = "No map selected to replace"
+		saveMessage.value = t("mapEditor.noMapSelectedReplace")
 		messageType.value = "error"
 		return
 	}
@@ -144,17 +148,17 @@ function replaceMap() {
 	ME.replaceMapInDB(parseInt(selectedMapId.value), mapName.value, mapDescription.value, props.playerCount, isVerified.value)
 		.then((success) => {
 			if (success) {
-				saveMessage.value = "Map replaced successfully"
+				saveMessage.value = t("mapEditor.mapReplaced")
 				messageType.value = "success"
 				fetchExistingMaps()
 			} else {
-				saveMessage.value = "Failed to replace map. Please try again."
+				saveMessage.value = t("mapEditor.mapReplaceFailed")
 				messageType.value = "error"
 			}
 		})
 		.catch((error) => {
 			console.error("Replace error:", error)
-			saveMessage.value = "Error replacing map. Please try again."
+			saveMessage.value = t("mapEditor.mapReplaceError")
 			messageType.value = "error"
 		})
 }
@@ -163,34 +167,35 @@ function deleteMap() {
 	clearMessages()
 
 	if (!selectedMapId.value) {
-		saveMessage.value = "No map selected to delete"
+		saveMessage.value = t("mapEditor.noMapSelectedDelete")
 		messageType.value = "error"
 		return
 	}
 
-	if (!confirm("Are you sure you want to delete this map? This action cannot be undone.")) {
+	if (!confirm(t("mapEditor.deleteConfirm"))) {
 		return
 	}
 
 	ME.deleteMapFromDB(parseInt(selectedMapId.value))
 		.then((success) => {
 			if (success) {
-				saveMessage.value = "Map deleted successfully"
+				saveMessage.value = t("mapEditor.mapDeleted")
 				messageType.value = "success"
 				selectedMapId.value = ""
 				fetchExistingMaps()
 				funcs.clearMap()
+				store.CUSTOM_RULES.splice(0)
 				mapName.value = ""
 				mapDescription.value = ""
 				isVerified.value = false
 			} else {
-				saveMessage.value = "Failed to delete map. Please try again."
+				saveMessage.value = t("mapEditor.mapDeleteFailed")
 				messageType.value = "error"
 			}
 		})
 		.catch((error) => {
 			console.error("Delete error:", error)
-			saveMessage.value = "Error deleting map. Please try again."
+			saveMessage.value = t("mapEditor.mapDeleteError")
 			messageType.value = "error"
 		})
 }
@@ -235,16 +240,18 @@ async function loadMap() {
 
 	try {
 		funcs.importStartingMap(selectedMap.hexData)
+		store.CUSTOM_RULES = store.mapData.setupData.CR ? [...store.mapData.setupData.CR] : []
+		if (store.CUSTOM_RULES.length > 0) emit("showCustomRules")
 		mapName.value = selectedMap.name
 		mapDescription.value = selectedMap.description
 		isVerified.value = selectedMap.isVerified || false
 		emit("update:playerCount", selectedMap.playerCount)
 		emit("update:canReplaceMap", selectedMap.canReplace || personal.name === "admin")
-		saveMessage.value = "Map loaded successfully"
+		saveMessage.value = t("mapEditor.mapLoaded")
 		messageType.value = "success"
 	} catch (error) {
 		console.error("Error loading map:", error)
-		saveMessage.value = "Error loading map. Please try again."
+		saveMessage.value = t("mapEditor.mapLoadFailed")
 		messageType.value = "error"
 	}
 }
@@ -266,7 +273,7 @@ const errorText = computed(() => {
 	store.mapUpdateTrigger.value
 
 	// Need min size
-	if (store.mapData.hexData.length < props.playerCount * 3) return "Map Too Small"
+	if (store.mapData.hexData.length < props.playerCount * 3) return t("mapEditor.mapTooSmall")
 	// Can't have disconnected areas - check if all hexes are in one connected component
 	if (store.mapData.hexData.length > 0) {
 		const visited = new Set()
@@ -286,7 +293,7 @@ const errorText = computed(() => {
 
 		// If we didn't visit all hexes, there are disconnected areas
 		if (visited.size !== store.mapData.hexData.length) {
-			return "Cannot have unconnected Tiles"
+			return t("mapEditor.unconnectedTiles")
 		}
 	}
 	// Check that all rivers are properly connected
@@ -328,18 +335,18 @@ const errorText = computed(() => {
 				}
 
 				// If none of the above, river is improperly connected
-				if (neighborHex.baseTerrain === rf.TERR_VOID) return "Rivers cannot connect to void"
-				return "Rivers cannot connect to land"
+				if (neighborHex.baseTerrain === rf.TERR_VOID) return t("mapEditor.riversToVoid")
+				return t("mapEditor.riversToLand")
 			}
 		}
 	}
 	// Must have no home markers, or at least enough for player count
 	const allHomeMarkers = store.ALL_HOME_MARKERS.length
-	if (allHomeMarkers > 0 && allHomeMarkers < props.playerCount) return "Not enough home markers for player count"
+	if (allHomeMarkers > 0 && allHomeMarkers < props.playerCount) return t("mapEditor.notEnoughHomeMarkers")
 	// Need a map title
-	if (!mapName.value) return "Please enter a map name"
+	if (!mapName.value) return t("mapEditor.enterMapName")
 	// Need a map description
-	if (!mapDescription.value) return "Please enter a map description"
+	if (!mapDescription.value) return t("mapEditor.enterMapDescription")
 
 	return ""
 })
@@ -347,12 +354,16 @@ const errorText = computed(() => {
 
 <template>
 	<div id="wholeArea">
-		<div class="mapEditorBanner">For map verification info see <a href="/RNB/RNBmapHelp/" target="_blank">Here</a></div>
+		<div class="mapEditorBanner">
+			<i18n-t keypath="mapEditor.verificationInfo" tag="span" scope="global">
+				<template #here><a href="/RNB/RNBmapHelp/" target="_blank">{{ $t("mapEditor.here") }}</a></template>
+			</i18n-t>
+		</div>
 
 		<!-- Available Hexes to Place -->
 		<div id="hexOptionDiv">
 			<div v-for="(hexTerrainID, idx) in hexTerrainIDs" :key="idx" class="newSingleHexDiv" :class="{ voidHexContainer: hexTerrainID === String(rf.BLANK_1) }">
-				<span class="voidHexLabel" v-if="hexTerrainID === String(rf.BLANK_1)">Void<br/>hexes</span>
+				<span class="voidHexLabel" v-if="hexTerrainID === String(rf.BLANK_1)">{{ $t("mapEditor.voidLabel") }}<br/>{{ $t("mapEditor.hexesLabel") }}</span>
 
 				<svg class="newSingleHexagon" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
 					<polygon @click="clickedNewHexOption(idx)" points="433,250 433,-250 0,-500 -433,-250 -433,250 0,500" :fill="`url(#pattern${`hex_${hexTerrainID}`})`" :transform="`rotate(${store.hexStyle === rf.POINTY ? hexRotations[idx] * 60 : hexRotations[idx] * 60 + 30} 0 0)`" stroke="black" class="selectableHex" :class="{ lightGreen: store.context.hexTerrainIDbeingAdded === parseInt(hexTerrainID) }" />
@@ -369,7 +380,7 @@ const errorText = computed(() => {
 		</div>
 
 		<div v-if="store.viewSettings.showLoader" id="fLoadingBar">
-			Saving Map
+			{{ $t("mapEditor.savingMap") }}
 			<br />
 			<img :src="view.getImage('loading-bar-black')" />
 		</div>
@@ -379,16 +390,16 @@ const errorText = computed(() => {
 			<!-- Load Map Section -->
 			<div id="loadMapDiv">
 				<select v-model="selectedMapId" class="mapSelectDropdown">
-					<option value="">Select a map to load...</option>
-					<option v-for="map in existingMaps" :key="map.id" :value="map.id" :style="{ color: map.isVerified ? 'darkgreen' : '#D35400' }">{{ map.name }}{{ map.isVerified ? " [Verified]" : "" }} ({{ map.playerCount === 1 ? "Solo" : map.playerCount + " players" }})</option>
+					<option value="">{{ $t("mapEditor.selectMapToLoad") }}</option>
+					<option v-for="map in existingMaps" :key="map.id" :value="map.id" :style="{ color: map.isVerified ? 'darkgreen' : '#D35400' }">{{ map.name }}{{ map.isVerified ? " " + $t("mapEditor.verified") : "" }} ({{ map.playerCount === 1 ? $t("mapEditor.solo") : $t("mapEditor.players", { count: map.playerCount }) }})</option>
 				</select>
-				<button @click="loadMap" class="loadMapButton" :disabled="!selectedMapId">Load</button>
+				<button @click="loadMap" class="loadMapButton" :disabled="!selectedMapId">{{ $t("mapEditor.load") }}</button>
 			</div>
 
 			<!-- Map Info Section -->
 			<div id="mapInfoDiv">
-				<input type="text" v-model="mapName" placeholder="Map Name" class="mapNameInput" />
-				<div class="descriptionHolderDiv"><textarea v-model="mapDescription" placeholder="Map Description" class="mapDescriptionTextarea"></textarea></div>
+				<input type="text" v-model="mapName" :placeholder="$t('mapEditor.mapName')" class="mapNameInput" />
+				<div class="descriptionHolderDiv"><textarea v-model="mapDescription" :placeholder="$t('mapEditor.mapDescription')" class="mapDescriptionTextarea"></textarea></div>
 			</div>
 			<!-- Selected Hex -->
 			<div v-if="store.context.hexTerrainIDbeingAdded != -1" class="selectedHexDiv">
@@ -408,7 +419,7 @@ const errorText = computed(() => {
 					<img @click="rotateNewHexTile(0, 1, true)" :src="view.getImage('rot_clockwise')" />
 				</div>
 			</div>
-			<div v-else id="noSelectedHexDiv">Select a tile to add to the map</div>
+			<div v-else id="noSelectedHexDiv">{{ $t("mapEditor.selectTile") }}</div>
 
 			<!-- Save Map Section -->
 			<div
@@ -419,26 +430,26 @@ const errorText = computed(() => {
 				<span v-if="errorText !== ''" class="mapErrorText">{{ errorText }}</span>
 				<div v-else class="saveButtonsRow">
 					<button v-if="effectiveCanReplaceMap" @click="replaceMap" class="actionsLineButton saveMapButton">
-						<img :src="view.getImage('replaceMap')" class="saveIcon" alt="Replace Map" />
+						<img :src="view.getImage('replaceMap')" class="saveIcon" :alt="$t('mapEditor.replaceMap')" />
 					</button>
 					<button @click="saveMap" class="actionsLineButton saveMapButton">
-						<img :src="view.getImage('saveMap')" class="saveIcon" alt="Save Map" />
+						<img :src="view.getImage('saveMap')" class="saveIcon" :alt="$t('mapEditor.saveMap')" />
 					</button>
 				</div>
 				<template v-if="effectiveCanReplaceMap && errorText === ''">
-					<span>Replace or save New</span>
+					<span>{{ $t("mapEditor.replaceOrSaveNew") }}</span>
 				</template>
 			</div>
 
 			<!-- Admin-only isVerified checkbox -->
 			<div v-if="personal.name === 'admin'" class="isVerifiedCheckbox">
 				<input type="checkbox" id="isVerified" v-model="isVerified" />
-				<label for="isVerified">Verified Map</label>
+				<label for="isVerified">{{ $t("mapEditor.verifiedMap") }}</label>
 			</div>
 
 			<!-- Admin-only delete map button -->
 			<div v-if="personal.name === 'admin'" class="deleteMapButtonContainer">
-				<button @click="deleteMap" class="deleteMapButton" :disabled="!selectedMapId" title="Delete Map">
+				<button @click="deleteMap" class="deleteMapButton" :disabled="!selectedMapId" :title="$t('mapEditor.deleteMap')">
 					<span class="deleteMapX">×</span>
 				</button>
 			</div>

@@ -20,13 +20,23 @@ import * as rf from "./TGZreference"
 import * as model from "./TGZmodel"
 
 import { useModelStore } from "../stores/TGZstore.js"
-
+import i18n from "../i18n"
+const t = i18n.global.t
 export const shuffle = (array) => {
 	for (let i = array.length - 1; i > 0; i--) {
 		let j = Math.floor(Math.random() * (i + 1))
 		;[array[i], array[j]] = [array[j], array[i]]
 	}
 	return array
+}
+
+export function escapeHtml(value) {
+	return String(value ?? "")
+		.replaceAll("&", "&amp;")
+		.replaceAll("<", "&lt;")
+		.replaceAll(">", "&gt;")
+		.replaceAll('"', "&quot;")
+		.replaceAll("'", "&#39;")
 }
 
 export function removeItemAll(arr, value) {
@@ -128,7 +138,7 @@ export function decompressChatData(data) {
     }*/
 	} else chatArray = []
 
-	chatArray.push(["WelcomeBot", 0, "Welcome to The Great Zimbabwe Online!SNLBSNLBIf you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!"])
+	chatArray.push(["WelcomeBot", 0, t("io.welcomeBot")])
 
 	return chatArray
 }
@@ -642,6 +652,7 @@ export var LZString = (function () {
 					A = { val: e(0), position: n, index: 1 }
 				for (i = 0; 3 > i; i += 1) f[i] = i
 				for (p = 0, c = Math.pow(2, 2), a = 1; a != c; ) (u = A.val & A.position), (A.position >>= 1), 0 == A.position && ((A.position = n), (A.val = e(A.index++))), (p |= (u > 0 ? 1 : 0) * a), (a <<= 1)
+				// eslint-disable-next-line no-unused-vars
 				switch ((t = p)) {
 					case 0:
 						for (p = 0, c = Math.pow(2, 8), a = 1; a != c; ) (u = A.val & A.position), (A.position >>= 1), 0 == A.position && ((A.position = n), (A.val = e(A.index++))), (p |= (u > 0 ? 1 : 0) * a), (a <<= 1)

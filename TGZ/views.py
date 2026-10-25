@@ -24,6 +24,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
+from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_updateFlexiTime,
@@ -39,6 +40,21 @@ if TYPE_CHECKING:
     from Lobby.presenters import TGZpresenter
 
 TGZ_DB_LOCK_NAME = "lockTGZgame_"
+
+
+def _preferred_tgz_options(profile):
+    options = []
+    if profile is not None and getattr(profile, "preferredTGZoptions", ""):
+        try:
+            options = json.loads(profile.preferredTGZoptions)
+        except (TypeError, ValueError):
+            options = []
+    if not isinstance(options, list):
+        options = []
+    options = options[:3]
+    while len(options) < 3:
+        options.append([-1, 0, 0][len(options)])
+    return options
 
 
 def index(request):
@@ -69,9 +85,6 @@ def createTGZgame(request):
 
 
 def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
-    # TGZ has TGZtourneyAdmin as additional super user
-    super_users = ["BotKickStarter"]
-
     result = build_show_game_data(
         request,
         game_id,
@@ -79,7 +92,6 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
         default_zoom=240,
         settings_debug_key="TGZ_USE_SOURCE_CODE",
         extra_select_related=["relatedMainTournament"],
-        super_users=super_users,
     )
     if isinstance(result, HttpResponseRedirect):
         return result
@@ -93,6 +105,7 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
     returnData["settingsDEBUG"] = returnData.pop("settingsDebug")
     # TGZ includes latestUpdateLiteral in base data
     returnData["latestUpdateLiteral"] = currentGame.latestUpdate
+    returnData["preferredTGZoptions"] = _preferred_tgz_options(result.get("user_profile"))
     returnData.update(
         {
             "spoilerFree": spoilerFree,
@@ -110,7 +123,6 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
 
     returnData.update(result["auth_data"])
     returnData["nextURL"] = f"/nextGame?current_id={currentGame.id}&current_code={presenter.getGameCode()}"
-    returnData["TGZminimalText"] = result["user_profile"].TGZminimalText
 
     if not is_involved:
         return render(request, "TGZ/showTGZgame.html", returnData)
@@ -143,9 +155,9 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
             }
         )
 
-    # TGZ: BotKickStarter gets pov=0
+    # TGZ: game admins get pov=0
     pov = result["pov"] if result["is_involved"] else returnData["pov"]
-    if username == "BotKickStarter":
+    if is_game_admin(request.user):
         pov = 0
         returnData["pov"] = pov
 
@@ -161,7 +173,6 @@ def showTGZgame(request, game_id, spoilerFree=False, replayStep=1):
 
     startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
     returnData["startingOptions"] = startingOptions
-    returnData["preferredTGZcolour"] = result["user_profile"].preferredTGZcolour
 
     autoPass = "false"
     if hasattr(currentGame, "autoMoves") and currentGame.autoMoves is not None:
@@ -222,6 +233,9 @@ def _processTGZturn(request):
     except Game.DoesNotExist:
         raise Http404(gettext("Game does not exist")) from None
 
+    if not can_act_in_game(request.user, currentGame):
+        return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
+
     # Helper function to update current players
     def set_current_players(next_player_str, acting_username=None, old_latest_update=None):
         """Update current players for Game model"""
@@ -276,6 +290,8 @@ def _processTGZturn(request):
         return JsonResponse(response_data, safe=False)
 
     elif action == "replaceExternalTournamentPlayer":
+        if not is_game_admin(request.user):
+            return JsonResponse({"error": gettext("Permissions missing")}, status=403)
         # Check if old version is older than DB version, and if so, return
         if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             turn = jsonData.get("turn", "N/A")
@@ -495,7 +511,7 @@ def _processTGZturn(request):
     elif action == "resign":
         # Always do this
         usernameToUse = request.user.username
-        if usernameToUse == "BotKickStarter":
+        if is_game_admin(request.user):
             usernameToUse = jsonData["BKSN"]
         _missingPlayer = User.objects.get(username=usernameToUse)
 
@@ -688,7 +704,16 @@ def _sendChatMessage(request):
                 # Handle potential errors during decompression or JSON parsing
                 print(f"Error processing chat data: {e}")
                 currentChatData = []  # Or handle the error as appropriate
-        currentChatData.insert(0, jsonData["newEntry"])
+        new_entry = jsonData["newEntry"]
+        if (
+            not isinstance(new_entry, list)
+            or len(new_entry) < 3
+            or not isinstance(new_entry[2], str)
+            or len(new_entry[2]) > 2000
+        ):
+            return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
+        new_entry[0] = request.user.username
+        currentChatData.insert(0, new_entry)
 
         # save chat data.
         compressedChatData = LZS.compressToEncodedURIComponent(json.dumps(currentChatData))

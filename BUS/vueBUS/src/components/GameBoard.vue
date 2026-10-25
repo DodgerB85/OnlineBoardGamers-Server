@@ -65,11 +65,9 @@ function getBoardWidth() {
 }
 
 function getWholeBoardMinWidth() {
-	if (personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL) return (store.refSize * (getBoardWidth() + 279 + 8)) / 100
+	if (personal.selectedBoard === rf.BOARD_20A_CAPSTONE) return (store.refSize * (getBoardWidth() + 8)) / 100
 	if (personal.selectedBoard === rf.BOARD_OG) return (store.refSize * (getBoardWidth() + 279 + 9)) / 100
-	if (personal.selectedBoard === rf.BOARD_PITTS) return (store.refSize * (getBoardWidth() + 279 + 8)) / 100
-	// WHY IS THIS REPEATED????? TODO
-	if (personal.selectedBoard === rf.BOARD_OG) return (store.refSize * (getBoardWidth() + 0 + 9)) / 100
+	return (store.refSize * (getBoardWidth() + 279 + 8)) / 100
 }
 
 // Repeats
@@ -84,10 +82,16 @@ function highlight(e, entering) {
 		e.target.style["background-color"] = ""
 	}
 }
+function isNewMarker(action, index) {
+	const marker = store.context.lastActionMarker
+	return marker !== null && marker[0] === action && marker[1] === index
+}
+
 function clickedActionOption(action, index) {
 	store.context.historyObj.push(action, index)
 	controller.currentPlayerObj().remainingActions--
 	store.actionAreaData[action][index] = controller.currentPlayerObj().colour
+	store.context.lastActionMarker = [action, index]
 	store.context.actionChosen = true
 }
 
@@ -162,7 +166,7 @@ function getCorrectedBusIndex(position) {
 							<div
 								v-if="marker !== -1"
 								class="actionDisc"
-								:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_LINE_EXPANSION && index === 6 - store.gameflow.turnOrder.length }]"
+								:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_LINE_EXPANSION && index === 6 - store.gameflow.turnOrder.length, markerIn: isNewMarker(0, index) }]"
 								:style="{
 									width: (store.refSize * 70) / 400 + 'px',
 									height: (store.refSize * 70) / 400 + 'px',
@@ -173,7 +177,7 @@ function getCorrectedBusIndex(position) {
 							<!-- Else IF action time, add a circle -->
 							<div
 								v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && (index === 5 || store.actionAreaData[0][index + 1] !== -1)"
-								class="actionDiscOption"
+								class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 								:style="{
 									width: (store.refSize * 70) / 400 + 'px',
 									height: (store.refSize * 70) / 400 + 'px',
@@ -194,7 +198,7 @@ function getCorrectedBusIndex(position) {
 						<div
 							v-if="store.actionAreaData[1][0] !== -1"
 							class="actionDisc"
-							:class="['actionDisc' + personal.getCorrectedColour(store.actionAreaData[1][0]), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_BUS }]"
+							:class="['actionDisc' + personal.getCorrectedColour(store.actionAreaData[1][0]), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_BUS, markerIn: isNewMarker(1, 0) }]"
 							:style="{
 								width: (store.refSize * 70) / 400 + 'px',
 								height: (store.refSize * 70) / 400 + 'px',
@@ -205,7 +209,7 @@ function getCorrectedBusIndex(position) {
 						<!-- Else IF action time, add a circle -->
 						<div
 							v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && store.actionAreaData[1][0] === -1"
-							class="actionDiscOption"
+							class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 							:style="{
 								width: (store.refSize * 70) / 400 + 'px',
 								height: (store.refSize * 70) / 400 + 'px',
@@ -223,7 +227,7 @@ function getCorrectedBusIndex(position) {
 							<div
 								v-if="marker !== -1"
 								class="actionDisc"
-								:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_PAX && index === store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length }]"
+								:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_PAX && index === store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length, markerIn: isNewMarker(2, index) }]"
 								:style="{
 									width: (store.refSize * 70) / 400 + 'px',
 									height: (store.refSize * 70) / 400 + 'px',
@@ -234,7 +238,7 @@ function getCorrectedBusIndex(position) {
 							<!-- Else IF action time, add a circle -->
 							<div
 								v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && ((index === 0 && store.actionAreaData[2][0] === -1) || (store.actionAreaData[2][index] === -1 && store.actionAreaData[2][index - 1] !== -1))"
-								class="actionDiscOption"
+								class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 								:style="{
 									width: (store.refSize * 70) / 400 + 'px',
 									height: (store.refSize * 70) / 400 + 'px',
@@ -256,7 +260,7 @@ function getCorrectedBusIndex(position) {
 							<div
 								v-if="marker !== -1"
 								class="actionDisc"
-								:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_BLDGS && index === 6 - store.gameflow.turnOrder.length }]"
+								:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_BLDGS && index === 6 - store.gameflow.turnOrder.length, markerIn: isNewMarker(3, index) }]"
 								:style="{
 									width: (store.refSize * 70) / 400 + 'px',
 									height: (store.refSize * 70) / 400 + 'px',
@@ -267,7 +271,7 @@ function getCorrectedBusIndex(position) {
 							<!-- Else IF action time, add a circle -->
 							<div
 								v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && (index === 5 || store.actionAreaData[3][index + 1] !== -1)"
-								class="actionDiscOption"
+								class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 								:style="{
 									width: (store.refSize * 70) / 400 + 'px',
 									height: (store.refSize * 70) / 400 + 'px',
@@ -288,7 +292,7 @@ function getCorrectedBusIndex(position) {
 						<div
 							v-if="store.actionAreaData[4][0] !== -1"
 							class="actionDisc"
-							:class="['actionDisc' + personal.getCorrectedColour(store.actionAreaData[4][0]), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ALTER_TIME }]"
+							:class="['actionDisc' + personal.getCorrectedColour(store.actionAreaData[4][0]), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ALTER_TIME, markerIn: isNewMarker(4, 0) }]"
 							:style="{
 								width: (store.refSize * 70) / 400 + 'px',
 								height: (store.refSize * 70) / 400 + 'px',
@@ -299,7 +303,7 @@ function getCorrectedBusIndex(position) {
 						<!-- Else IF action time, add a circle -->
 						<div
 							v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && store.actionAreaData[4][0] === -1"
-							class="actionDiscOption"
+							class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 							:style="{
 								width: (store.refSize * 70) / 400 + 'px',
 								height: (store.refSize * 70) / 400 + 'px',
@@ -309,15 +313,13 @@ function getCorrectedBusIndex(position) {
 							}"
 							@mouseover="highlight($event, true)"
 							@mouseleave="highlight($event, false)"
-							@click="clickedActionOption(4, 0)">
-							{{ computedReverseChars[0] }}
-						</div>
+							@click="clickedActionOption(4, 0)"></div>
 						<template v-for="(marker, index) in store.actionAreaData[5]" v-bind:key="index">
 							<!-- Add a marker -->
 							<div
 								v-if="marker !== -1"
 								class="actionDisc"
-								:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_VROM && index === store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length }]"
+								:class="['actionDisc' + personal.getCorrectedColour(marker), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_VROM && index === store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length, markerIn: isNewMarker(5, index) }]"
 								:style="{
 									width: (store.refSize * 70) / 400 + 'px',
 									height: (store.refSize * 70) / 400 + 'px',
@@ -328,7 +330,7 @@ function getCorrectedBusIndex(position) {
 							<!-- Else IF action time, add a circle -->
 							<div
 								v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && ((index === 0 && store.actionAreaData[5][0] === -1) || (store.actionAreaData[5][index] === -1 && store.actionAreaData[5][index - 1] !== -1))"
-								class="actionDiscOption"
+								class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 								:style="{
 									width: (store.refSize * 70) / 400 + 'px',
 									height: (store.refSize * 70) / 400 + 'px',
@@ -340,7 +342,7 @@ function getCorrectedBusIndex(position) {
 								@mouseover="highlight($event, true)"
 								@mouseleave="highlight($event, false)"
 								@click="clickedActionOption(5, index)">
-								{{ controller.currentPlayerObj().buses + (controller.currentPlayerObj().colour === store.actionAreaData[1][0] ? 1 : 0) }}
+								{{ Math.min(5, controller.currentPlayerObj().buses + (controller.currentPlayerObj().colour === store.actionAreaData[1][0] ? 1 : 0)) }}
 							</div>
 						</template>
 
@@ -349,7 +351,7 @@ function getCorrectedBusIndex(position) {
 						<div
 							v-if="store.actionAreaData[6][0] !== -1"
 							class="actionDisc"
-							:class="['actionDisc' + personal.getCorrectedColour(store.actionAreaData[6][0]), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_ADD_BUS }]"
+							:class="['actionDisc' + personal.getCorrectedColour(store.actionAreaData[6][0]), { currentPlayerGlow: store.gameflow.phase === rf.PHASE_CHANGE_START_PLAYER, markerIn: isNewMarker(6, 0) }]"
 							:style="{
 								width: (store.refSize * 70) / 400 + 'px',
 								height: (store.refSize * 70) / 400 + 'px',
@@ -360,7 +362,7 @@ function getCorrectedBusIndex(position) {
 						<!-- Else IF action time, add a circle -->
 						<div
 							v-else-if="store.gameflow.phase === rf.PHASE_CHOOSE_ACTIONS && personal.canPlay() && controller.currentPlayerObj().remainingActions > 0 && !store.context.confirmEndTurn && !store.context.actionChosen && store.actionAreaData[6][0] === -1"
-							class="actionDiscOption"
+							class="actionDiscOption" role="button" tabindex="0" :aria-label="$t('actionSelection.chooseAction')" @keydown.enter.prevent="$event.currentTarget.click()" @keydown.space.prevent="$event.currentTarget.click()"
 							:style="{
 								width: (store.refSize * 70) / 400 + 'px',
 								height: (store.refSize * 70) / 400 + 'px',
@@ -435,6 +437,7 @@ function getCorrectedBusIndex(position) {
 								v-for="i in player.buses"
 								v-bind:key="i"
 								class="busDiv"
+								:class="{ busIn: store.context.lastBusPlayer === index && store.context.lastBusIndex === i }"
 								:style="{
 									width: (store.refSize * 97.6) / 400 + 'px',
 									height: (store.refSize * 56) / 400 + 'px',
@@ -561,8 +564,17 @@ function getCorrectedBusIndex(position) {
 	position: absolute;
 	box-shadow: 0px 0px 10px 5px lightgreen;
 	background-color: rgba(144, 238, 144, 0.5);
-	/*opacity: 0.7;*/
 	z-index: 20;
+	animation: glowIn 0.2s ease-out;
+}
+
+@keyframes glowIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 .busDiv,
@@ -572,6 +584,21 @@ function getCorrectedBusIndex(position) {
 }
 .timestoneDiv {
 	position: absolute;
+}
+
+.busIn {
+	animation: busIn 0.25s ease-out;
+}
+
+@keyframes busIn {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 .busImg {
@@ -606,6 +633,19 @@ function getCorrectedBusIndex(position) {
 .actionDisc {
 	position: absolute;
 	border-radius: 100%;
+}
+
+.actionDisc.markerIn {
+	animation: markerIn 0.15s ease-out;
+}
+
+@keyframes markerIn {
+	from {
+		transform: scale(0.6);
+	}
+	to {
+		transform: scale(1);
+	}
 }
 
 .actionDisc0 {
@@ -648,5 +688,15 @@ function getCorrectedBusIndex(position) {
 	background-color: grey;
 	opacity: 0.7;
 	border-radius: 100%;
+	animation: stoneFade 0.2s ease-out;
+}
+
+@keyframes stoneFade {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 0.7;
+	}
 }
 </style>

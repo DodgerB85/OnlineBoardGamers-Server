@@ -178,13 +178,13 @@ function setDebug_god(godType) {
 	model.add_godToPlayer(controller.currentPlayerObj(), godType)
 }
 
-function swapTile(item, index) {
+function swapTile(_item, index) {
 	store.mapTiles[index * 2]++
 	if (store.mapTiles[index * 2] === 11) store.mapTiles[index * 2] = 1
 	map.initCoords()
 	controller.startPlayerTurn()
 }
-function rotateTile(item, index) {
+function rotateTile(_item, index) {
 	store.mapTiles[index * 2 + 1]++
 	if (store.mapTiles[index * 2 + 1] === 4) store.mapTiles[index * 2 + 1] = 0
 	map.initCoords()

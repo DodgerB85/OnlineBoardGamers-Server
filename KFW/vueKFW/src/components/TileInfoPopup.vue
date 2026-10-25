@@ -1,6 +1,7 @@
 <script setup>
 import * as rf from "../js/KFWreference.js"
 import * as view from "../js/KFWview.js"
+import i18n from "../i18n"
 
 import { useModelStore } from "../stores/KFWstore.js"
 const store = useModelStore()
@@ -175,7 +176,7 @@ const computedPopupData = computed(() => {
 	let winterBoatText = ""
 	let turnOrderText = ""
 	let winterText = ""
-	let upgradeCostHTML = "Upgrade Cost: "
+	let upgradeCostHTML = i18n.global.t("action.upgradeCost")
 	let summerBoatTextSingle = ""
 	let meeplesOnBoat = []
 	let skillsOnBoat = []

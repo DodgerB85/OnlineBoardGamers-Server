@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-16 19:49+0800\n"
+"POT-Creation-Date: 2026-10-23 00:35+0800\n"
 "PO-Revision-Date: 2023-10-07 20:03+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -35,12 +35,11 @@ msgid "Rules"
 msgstr "规则"
 
 #: .\HLC\templates\HLC\HLChelp.html:12
+#, python-format
 msgid ""
-"Horseless Carriage rules available <a href=\"https://boardgamegeek.com/"
-"filepage/251309/first-edition-english-rulebook\" target=\"_blank\">here</a>"
+"Horseless Carriage rules available <a href=\"%(hlc_rules_url)s\" target=\"_blank\">here</a>"
 msgstr ""
-"Horseless Carriage 规则见 <a href=\"https://boardgamegeek.com/filepage/"
-"251309/first-edition-english-rulebook\" target=\"_blank\">此处</a>"
+"Horseless Carriage 规则见 <a href=\"%(hlc_rules_url)s\" target=\"_blank\">此处</a>"
 
 #: .\HLC\templates\HLC\HLChelp.html:19
 msgid ""
@@ -448,17 +447,21 @@ msgstr ""
 "通知偏好可在你的个人资料中修改\n"
 "\n"
 
-#: .\HLC\views.py:45 .\HLC\views.py:85
+#: .\HLC\views.py:46 .\HLC\views.py:86
 msgid "Game does not exist"
 msgstr "游戏不存在"
 
-#: .\HLC\views.py:540
+#: .\HLC\views.py:91
+msgid "You are not a player in this game"
+msgstr "你不是本局游戏的玩家"
+
+#: .\HLC\views.py:544
 msgid ""
 "<b>No rewind data. Rewind limit reached. Please play on to generate more "
 "rewind data </b>"
 msgstr "<b>没有倒回数据。已达到倒回限制。请继续进行游戏以生成更多倒回数据</b>"
 
-#: .\HLC\views.py:545
+#: .\HLC\views.py:549
 msgid "<b>Permissions missing. Please reload the page and check again</b>"
 msgstr "<b>权限丢失。请重新加载页面并再次检查</b>"
 

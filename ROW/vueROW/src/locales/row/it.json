@@ -2,7 +2,10 @@
   "row": {
     "bidding": {
       "position": "#{{position}}",
-      "placeBid": "Punta {{points}} PV"
+      "placeBid": "Punta {{points}} PV",
+      "title": "Offerta per l'ordine di turno — offri PV (più alta è l'offerta, prima giochi; un'offerta costa il suo valore in PV)",
+      "bid": "Offri",
+      "waiting": "In attesa delle offerte degli altri giocatori…"
     },
     "buildingsDialog": "Edifici Disponibili",
     "objectivesDialog": "Obiettivi e Tessere",
@@ -20,7 +23,16 @@
     "totalBreedingValue": "Totale dei certificati",
     "cattleMarket": {
       "select": "Scegli una o due carte mucca e clicca Conferma.<br/>Puoi ripetere quest'azione finchè hai abbastanza soldi e cowboy.",
-      "buy": "Compra mucche"
+      "buy": "Compra mucche",
+      "takeThree": "Prendi una carta con valore di allevamento 3",
+      "selectToBuy": "Seleziona la carta o le carte da acquistare",
+      "notEnough": "Dollari o cowboy insufficienti per acquistare bovini",
+      "drawTwoHint": "Fai clic sul mazzo di pesca per pescare 2 carte bovino per 1 cowboy ({cowboys} rimasti)",
+      "confirmBuy": "Acquista",
+      "drawTwoTitle": "Pesca 2 carte bovino per 1 cowboy",
+      "drawPileTitle": "Mazzo di pesca ({count}) — carte bovino ancora da girare sul mercato",
+      "drawTwo": "Pesca 2",
+      "cowboyCost": "1 cowboy"
     },
     "buyCattleDialog": "Compra mucche",
     "popover": {
@@ -539,8 +551,172 @@
       "STATION_MASTER_NOT_AVAILABLE": "Questa tessera stazione non è disponibile.",
       "TOWN_NOT_ACCESSIBLE": "Questa città non è accessibile.",
       "INVALID_CATTLE_TYPE": "Questa mucca non è valida per effettuare questa azione.",
-      "NOT_ENOUGH_COWBOYS": "Non hai abbastanza cowboy per svolgere questa azione."
+      "NOT_ENOUGH_COWBOYS": "Non hai abbastanza cowboy per svolgere questa azione.",
+      "CANNOT_FORCE_END_TURN": "Il turno del giocatore non può essere terminato forzatamente finché l'azione corrente non è ancora completata.",
+      "NOT_ENOUGH_CARDS": "Non ci sono abbastanza carte da pescare.",
+      "GAME_NOT_ENDED": "La partita non è ancora terminata.",
+      "HAZARD_MUST_BE_OF_TYPE": "Questo pericolo non è del tipo richiesto.",
+      "HAZARD_NOT_ON_TRAIL": "Questo pericolo non è sul sentiero.",
+      "JOB_MARKET_CLOSED": "Il mercato del lavoro è chiuso per questa azione.",
+      "LOCATION_EMPTY": "Non c'è nulla con cui interagire in questo luogo.",
+      "LOCATION_NOT_EMPTY": "Questo luogo non è vuoto.",
+      "MUST_MOVE_AT_LEAST_STEPS": "Devi muoverti di almeno il numero di passi indicato.",
+      "NOT_PAIR": "Devi selezionare una coppia di carte bovino.",
+      "NOT_AT_LOCATION": "Non sei in questo luogo.",
+      "NOT_AT_STATION": "Non sei in questa stazione.",
+      "REPLACEMENT_BUILDING_MUST_BE_PLAYER_BUILDING": "Puoi sostituire solo un tuo edificio.",
+      "STATION_NOT_UPGRADED_BY_PLAYER": "Non hai potenziato questa stazione.",
+      "STATION_NOT_ON_TRACK": "Questa stazione non è sulla linea.",
+      "BID_INVALID_POSITION": "Questa offerta non è valida per questa posizione.",
+      "NOT_CURRENT_PLAYER": "Non è il tuo turno.",
+      "NO_TILES_LEFT": "Non restano tessere.",
+      "CANNOT_UPGRADE_SIMMENTAL": "Non puoi potenziare questa carta Simmental.",
+      "STATION_MUST_BE_DIFFERENT": "Devi scegliere una stazione diversa.",
+      "NO_AUTOMA_STATE": "Non esiste uno stato automa per questo giocatore.",
+      "NOT_IMPLEMENTED": "Questa azione non è ancora implementata."
     },
-    "confirmCannotUndo": "Non puoi annullare questa azione. Sei sicuro di voler procedere?"
+    "confirmCannotUndo": "Non puoi annullare questa azione. Sei sicuro di voler procedere?",
+    "drawStackRandomized": "Queste carte sono nel mazzo di pesca, ma non sono mostrate nell'ordine effettivo. L'ordine effettivo è noto solo al server, quindi non puoi sapere quale carta verrà pescata successivamente.",
+    "computerExplanation": "Sono un computer e uso le regole della <a href=\"https://boardgamegeek.com/filepage/151608/garth-specialized-automa-row-solo-play\" target=\"_new\">variante in solitario di Garth</a>.",
+    "statsHeader": "Risultati dettagliati",
+    "stats": {
+      "seat": "Posto",
+      "turns": "Turni",
+      "cowboys": "Cowboy",
+      "craftsmen": "Artigiani",
+      "engineers": "Ingegneri",
+      "stepLimit": "Limite di passi",
+      "handLimit": "Limite di mano",
+      "permCerts": "Certificati permanenti",
+      "tempCerts": "Certificati temporanei",
+      "tempCertLimit": "Limite di certificati",
+      "deliveries": "Consegne a",
+      "stops": "Soste agli edifici",
+      "stopsTeepee": "Soste ai tipi",
+      "stopsHazard": "Soste ai pericoli"
+    },
+    "status": {
+      "garthThinking": "Garth sta pensando…"
+    },
+    "actionArea": {
+      "moveStepsLeft": "Muovi — fai clic su un punto evidenziato ({steps} passi rimasti; giallo = passo successivo, ciano = più lontano)",
+      "moveAtMost": "Muovi — fai clic su un punto evidenziato (al massimo {limit} passi)",
+      "hireWorker": "Assumi un lavoratore",
+      "placeBuildingHint": "Posiziona edificio — scegli un punto, poi posiziona un edificio. Questi sono i tuoi edifici disponibili.",
+      "placeBranchletHint": "Rails to the North — fai clic su una città evidenziata sulla striscia",
+      "clickTown": "Fai clic su una città",
+      "clickWorker": "Fai clic su un lavoratore sulla tua plancia",
+      "clickCardToDiscard": "Fai clic su una carta della tua plancia per scartarla",
+      "cardActionsHint": "Azioni carta — seleziona, poi fai clic su una carta della tua plancia",
+      "otherActions": "Altre azioni"
+    },
+    "buildingInfo": {
+      "label": "{building} — artigiani: {craftsmen}; {hand}; punti: {points}",
+      "handNone": "nessun limite di mano",
+      "handGreen": "mano verde",
+      "handBlack": "mano nera",
+      "handBoth": "mano verde o nera"
+    },
+    "debug": {
+      "title": "Debug",
+      "showGameData": "Mostra i dati della partita",
+      "current": "attuale:",
+      "status": "stato:",
+      "actions": "azioni:"
+    },
+    "ended": {
+      "title": "Partita finita",
+      "total": "Totale",
+      "breakdown": "Dettaglio",
+      "tie": "Parità tra {players}"
+    },
+    "history": {
+      "empty": "Ancora nessuna azione",
+      "undo": "Annulla",
+      "endTurn": "Termina turno",
+      "skip": "Salta",
+      "resign": "Abbandonare"
+    },
+    "map": {
+      "removeHazard": "Rimuovi pericolo",
+      "tradeWithTribe": "Commercia con la tribù",
+      "placeBuilding": "Posiziona l'edificio {building}",
+      "useBuilding": "Usa l'edificio {building}",
+      "moveHere": "Muovi qui ({cost}$)",
+      "moveHereWithFees": "Muovi qui ({cost}$; {fees})",
+      "playerFee": "{fee}$ a {player}",
+      "deliveryOption": "Certificati: {certificates} → ${payout}",
+      "stayHere": "Resta qui"
+    },
+    "playerTable": {
+      "handValue": "valore mano {value}",
+      "certs": "certificati {temp}/{total}",
+      "engine": "locomotiva {space}",
+      "drawPileTitle": "Mazzo di pesca ({count}) — fai clic per ispezionare",
+      "discardPileTitle": "Pila degli scarti ({count}) — fai clic per ispezionare",
+      "jobMarketToken": "Segnalino del mercato del lavoro",
+      "hazardTitle": "{type} ({hand}) {points} pt",
+      "teepeeTitle": "tipi {teepee}",
+      "drawPileValueOrder": "Mazzo di pesca (ordinato per valore)",
+      "discardPile": "Pila degli scarti"
+    }
+  },
+  "row2": {
+    "actions": {
+      "buttons": {
+        "DISCARD_1_DUTCH_BELT_TO_MOVE_ENGINE_2_FORWARD": "Scarta 1 Dutch Belt per avanzare la locomotiva di 2",
+        "DISCARD_1_CATTLE_CARD_TO_GAIN_6_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND": "Scarta 1 carta mucca per ottenere 6 dollari e aggiungere 1 carta obiettivo alla mano",
+        "DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS": "Scarta 1 carta mucca per ottenere 7 dollari",
+        "MOVE_ENGINE_2_FORWARD": "Avanza la locomotiva di 2",
+        "MOVE_ENGINE_1_BACKWARDS_TO_REMOVE_1_CARD_AND_GAIN_1_DOLLAR": "Arretra la locomotiva di 1 per rimuovere 1 carta e ottenere 1 dollaro",
+        "MOVE_ENGINE_2_BACKWARDS_TO_REMOVE_2_CARDS_AND_GAIN_2_DOLLARS": "Arretra la locomotiva di 2 per rimuovere 2 carte e ottenere 2 dollari",
+        "UPGRADE_SIMMENTAL": "Potenzia la carta Simmental"
+      },
+      "descriptions": {
+        "DISCARD_1_DUTCH_BELT_TO_MOVE_ENGINE_2_FORWARD": "Scarta 1 Dutch Belt per avanzare la locomotiva di 2",
+        "DISCARD_1_CATTLE_CARD_TO_GAIN_6_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND": "Scarta 1 carta mucca per ottenere 6 dollari e aggiungere 1 carta obiettivo alla mano",
+        "DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS": "Scarta 1 carta mucca per ottenere 7 dollari",
+        "MOVE_ENGINE_2_FORWARD": "Avanza la locomotiva di 2",
+        "MOVE_ENGINE_1_BACKWARDS_TO_REMOVE_1_CARD_AND_GAIN_1_DOLLAR": "Arretra la locomotiva di 1 per rimuovere 1 carta e ottenere 1 dollaro",
+        "MOVE_ENGINE_2_BACKWARDS_TO_REMOVE_2_CARDS_AND_GAIN_2_DOLLARS": "Arretra la locomotiva di 2 per rimuovere 2 carte e ottenere 2 dollari",
+        "UPGRADE_SIMMENTAL": "Potenzia la carta Simmental"
+      },
+      "instructions": {
+        "DISCARD_1_DUTCH_BELT_TO_MOVE_ENGINE_2_FORWARD": "Scarta 1 Dutch Belt per avanzare la locomotiva di 2",
+        "DISCARD_1_CATTLE_CARD_TO_GAIN_6_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND": "Scarta 1 carta mucca per ottenere 6 dollari e aggiungere 1 carta obiettivo alla mano",
+        "DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS": "Scarta 1 carta mucca per ottenere 7 dollari",
+        "MOVE_ENGINE_2_FORWARD": "Avanza la locomotiva di 2",
+        "MOVE_ENGINE_1_BACKWARDS_TO_REMOVE_1_CARD_AND_GAIN_1_DOLLAR": "Arretra la locomotiva di 1 per rimuovere 1 carta e ottenere 1 dollaro",
+        "MOVE_ENGINE_2_BACKWARDS_TO_REMOVE_2_CARDS_AND_GAIN_2_DOLLARS": "Arretra la locomotiva di 2 per rimuovere 2 carte e ottenere 2 dollari",
+        "UPGRADE_SIMMENTAL": "Seleziona una carta mucca Simmental in mano per potenziarla"
+      }
+    },
+    "cattleType": {
+      "SIMMENTAL": "Simmental"
+    },
+    "option": {
+      "simmental": {
+        "label": "Variante Simmental",
+        "value": {
+          "true": "Sì",
+          "false": "No"
+        }
+      }
+    },
+    "popover": {
+      "building": {
+        "2b": "Edificio 2b<br/><strong>Azione:</strong> Scarta 1 carta mucca Dutch Belt e avanza la locomotiva di 2 spazi<br/><strong>Azione:</strong> Scarta 1 carta mucca Jersey e ottieni 2 dollari",
+        "5a": "Edificio 5a<br/><strong>Azione:</strong> Scarta 1 carta mucca con valore di allevamento 3 e ottieni $7<br/><strong>Azione:</strong> Esegui un'azione ausiliaria singola o doppia",
+        "6a": "Edificio 6a<br/><strong>Azione:</strong> Assumi 1 lavoratore (costo ridotto di $1)<br/><strong>Azione:</strong> Avanza la locomotiva fino a un numero di spazi pari ai tuoi ingegneri",
+        "6b": "Edificio 6b<br/><strong>Azione:</strong> Copia le azioni di un edificio adiacente",
+        "8b": "Edificio 8b<br/><strong>Azione:</strong> Scarta 1 carta mucca per ottenere 6 dollari e aggiungere 1 carta obiettivo direttamente alla tua mano",
+        "11a": "Edificio 11a<br/><strong>Azione:</strong> Rimuovi un pericolo per $2<br/><strong>Azione:</strong> Rimuovi un pericolo per $2",
+        "13a": "Edificio 13a<br/><strong>Azione:</strong> Ottieni 1 dollaro per artigiano<br/><strong>Azione:</strong> Avanza il ranchero di 1",
+        "13b": "Edificio 13b<br/><strong>Azione:</strong> Ottieni 2 dollari per stazione potenziata<br/><strong>Azione:</strong> Prendi un gettone scambio"
+      },
+      "location": {
+        "FLOOD-RISK-1": "<br/><br/><strong>Azione Rischio:</strong> Scarta 1 mucca qualsiasi per guadagnare 1 certificato"
+      }
+    }
   }
 }

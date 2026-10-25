@@ -601,7 +601,7 @@ const computedMaxNeutralBricks = computed(() => {
 			],
 		</div>
 		<!-- END VERTEX POSITIONING -->
-		<div id="noZoomHexDiv" v-if="store.mapData.zoomData.hexID === -1">Mouse over or long press a hex to view it in detail</div>
+		<div id="noZoomHexDiv" v-if="store.mapData.zoomData.hexID === -1">{{ $t("zoom.mouseOverHex") }}</div>
 		<div v-else>
 			<div id="zoomHexDiv">
 				<svg @mousemove="doDrag" @mouseup="draggingIdx = null" @mouseleave="draggingIdx = null" v-if="store.mapData.zoomData.hexID >= 0" id="zoomSVG" :viewBox="store.hexStyle === rf.POINTY ? '-400 -464 800 928' : '-462.692 -401.000 925 802'">
@@ -700,6 +700,10 @@ const computedMaxNeutralBricks = computed(() => {
 								<feFuncA type="linear" slope="4" intercept="-1" />
 							</feComponentTransfer>
 						</filter>
+						<mask id="zoomTrainTrackMask" maskUnits="userSpaceOnUse" x="-1000" y="-1000" width="2000" height="2000">
+							<rect x="-1000" y="-1000" width="2000" height="2000" fill="white" />
+							<path :d="computedZoomData.fullTrainTrackPathZP" stroke="black" stroke-width="84" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+						</mask>
 					</defs>
 					<!-- MAP LAYER 0 - THE BIG HEX, ROTATED AS REQUIRED-->
 					<!-- IN THE ZOOM PANEL, THIS SHOULD BE JUST THE TERRAIN IMAGE -->
@@ -784,6 +788,10 @@ const computedMaxNeutralBricks = computed(() => {
 						<!-- ROADS-->
 						<path :d="computedZoomData.fullRoadPathZP" stroke="#1C2526" stroke-width="60" stroke-linejoin="round" stroke-linecap="round" />
 						<path :d="computedZoomData.fullRoadPathZP" stroke="#F5F5F5" stroke-width="7" stroke-dasharray="25 20" fill="none" />
+						<!-- TRAIN TRACKS -->
+						<g v-if="store.gameOptions.useTrains && computedZoomData.fullTrainTrackPathZP">
+							<path :d="computedZoomData.fullTrainTrackPathZP" stroke="#1A237E" stroke-width="124" stroke-linejoin="round" stroke-linecap="butt" fill="none" mask="url(#zoomTrainTrackMask)" />
+						</g>
 						<g v-if="store.gameOptions.useElectricity && computedZoomData.fullPowerLinePathZP">
 							<path :d="computedZoomData.fullPowerLinePathZP" stroke="#B22222" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" fill="none" />
 							<path :d="computedZoomData.fullPowerLinePathZP" stroke="#FFD700" stroke-width="3" stroke-dasharray="8 14" fill="none" />

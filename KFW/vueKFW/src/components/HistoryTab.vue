@@ -23,15 +23,15 @@ function historyToggle() {
 		<div id="history" v-if="store.viewSettings.showHistory">
 			<!-- TOGGLE DIV-->
 			<div id="historyToggleDiv">
-				<label class="textLabel">Oldest First</label>
+				<label class="textLabel">{{ $t("history.oldestFirst") }}</label>
 				<label class="switch">
 					<input type="checkbox" checked @click="historyToggle" />
 
 					<span class="slider round"></span>
 				</label>
-				<label class="textLabel">Newest First</label>
+				<label class="textLabel">{{ $t("history.newestFirst") }}</label>
 			</div>
-			<div v-if="store.viewSettings.showReplay"><b>Replay Mode - click an entry to jump to that point in time</b></div>
+			<div v-if="store.viewSettings.showReplay"><b>{{ $t("history.replayMode") }}</b></div>
 			<div id="historyMainDiv" class="reverseHistory">
 				<template v-for="(entry, index1) in store.computedHistory" :key="index1">
 					<HistoryEntry :entry="entry" :entry_-i-d="index1" />

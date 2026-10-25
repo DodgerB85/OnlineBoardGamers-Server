@@ -4,6 +4,7 @@
  * objective-cards.component (GPL-3.0, Tom Wetjens).
  */
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import * as rf from "../js/ROWreference"
 import * as controller from "../js/ROWcontroller"
 import * as view from "../js/ROWview"
@@ -11,6 +12,7 @@ import { useModelStore } from "../stores/ROWstore.js"
 import CardView from "./CardView.vue"
 
 const { ActionType } = rf
+const { t } = useI18n()
 const store = useModelStore()
 
 const game = computed(() => {
@@ -41,7 +43,7 @@ function takeFromDrawStack() {
 
 <template>
 	<div id="objectivesMarket" v-if="game">
-		<div v-if="canTake" class="hint">Take an objective card</div>
+		<div v-if="canTake" class="hint">{{ t('row.actions.buttons.TAKE_OBJECTIVE_CARD') }}</div>
 		<CardView
 			v-for="card in available"
 			:key="card.id"

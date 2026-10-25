@@ -2,12 +2,14 @@
 import PlayerMarker from "./PlayerMarker.vue"
 import ArtworkCard from "./ArtworkCard.vue"
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import * as rf from "../js/URRreference"
 import * as rules from "../js/URRrules"
 import * as view from "../js/URRview"
 import * as assets from "../js/URRassets"
 import { useModelStore } from "../stores/URRstore.js"
 const store = useModelStore()
+const { t } = useI18n()
 const emit = defineEmits(["inspect"])
 function inspectPlayer(index) {
 	store.viewSettings.inspectedPlayer = index
@@ -39,53 +41,53 @@ function ownsEridu(stateId) { return nations(stateId).some((nation) => nation.id
 function crewCount(state) { return state.diggers.length + (ownsEridu(state.id) ? 1 : 0) }
 function isCrewUnavailable(crew) { return store.gameflow.phase !== rf.PHASE_SETTLEMENT && crew.hasDug }
 function crewLabel(crew, stateId) {
-	if (isCrewUnavailable(crew)) return "Unavailable"
-	if (store.gameflow.phase === rf.PHASE_SETTLEMENT || (store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep === "digging" && isCurrentState(stateId))) return "Ready"
-	return "Unused"
+	if (isCrewUnavailable(crew)) return t("map.crewUnavailable")
+	if (store.gameflow.phase === rf.PHASE_SETTLEMENT || (store.gameflow.phase === rf.PHASE_DEVELOPMENT && store.gameflow.developmentStep === "digging" && isCurrentState(stateId))) return t("map.crewReady")
+	return t("map.crewUnused")
 }
-function crewStatus(crew) { return store.gameflow.phase === rf.PHASE_SETTLEMENT ? "Available for upcoming development" : crew.hasDug ? "Unavailable for digging this round" : "Unused this round" }
+function crewStatus(crew) { return store.gameflow.phase === rf.PHASE_SETTLEMENT ? t("map.crewUpcoming") : crew.hasDug ? t("map.crewUnavailableRound") : t("map.crewUnusedRound") }
 function crewTiles(capacity) { return capacity === "1+1" ? ["1", "1"] : [capacity] }
 </script>
 
 <template>
-	<section class="stateStrip" aria-label="State treasuries">
+	<section class="stateStrip" :aria-label="$t('stateStrip.aria')">
 		<details v-for="state in visibleStates" :key="state.id" class="stateCard" open :class="{ currentState: state.isActive && isCurrentState(state.id), inactive: !state.isActive }" :style="{ '--state-color': rf.STATE_COLOURS[state.id] }">
 			<summary>
 				<span class="treasuryHeader"><img :src="assets.getStateOrderImage(state.id)" alt="" /></span>
 				<span class="stateSummary">
-					<span v-if="store.viewSettings.inspectedState !== null" class="stateMeta inspectionLabel">Inspecting state</span>
-					<span class="stateName"><b>{{ rf.STATE_NAMES[state.id] }}</b><button v-if="store.viewSettings.inspectedState !== null" class="followState" @click.prevent="store.viewSettings.inspectedState = null">{{ view.currentStateId(store) === null ? 'Close' : 'Follow turn' }}</button></span>
-					<span class="stateMeta"><template v-if="state.king !== null">{{ state.isActive ? 'Monarch:' : 'Leading:' }} <PlayerMarker :index="state.king" /></template><template v-else>{{ state.isActive ? 'No monarch' : 'No ownership leader' }}</template><template v-if="state.isActive"> · {{ landCount(state.id) }} colonized</template></span>
-					<span v-if="!state.isActive" class="stateMeta">{{ landCount(state.id) }}/{{ rf.LAND_FOR_STATE_TO_ACTIVATE }} colonized</span>
-					<span v-if="state.isActive" class="stateMeta summaryTreasury">Treasury {{ state.money }} SPL</span>
+					<span v-if="store.viewSettings.inspectedState !== null" class="stateMeta inspectionLabel">{{ $t("stateStrip.inspectingState") }}</span>
+					<span class="stateName"><b>{{ rf.STATE_NAMES[state.id] }}</b><button v-if="store.viewSettings.inspectedState !== null" class="followState" @click.prevent="store.viewSettings.inspectedState = null">{{ view.currentStateId(store) === null ? $t("common.close") : $t("holdings.followTurn") }}</button></span>
+					<span class="stateMeta"><template v-if="state.king !== null">{{ state.isActive ? $t("stateStrip.monarch") : $t("stateStrip.leading") }} <PlayerMarker :index="state.king" /></template><template v-else>{{ state.isActive ? $t("stateStrip.noMonarch") : $t("stateStrip.noOwnershipLeader") }}</template><template v-if="state.isActive"> · {{ $t("stateStrip.colonized", { count: landCount(state.id) }) }}</template></span>
+					<span v-if="!state.isActive" class="stateMeta">{{ $t("stateStrip.colonizedCount", { count: landCount(state.id), total: rf.LAND_FOR_STATE_TO_ACTIVATE }) }}</span>
+					<span v-if="state.isActive" class="stateMeta summaryTreasury">{{ $t("stateStrip.treasury", { amount: state.money }) }}</span>
 				</span>
 			</summary>
-			<div class="landowners" v-if="landowners(state.id).length && (store.gameflow.phase === rf.PHASE_SETTLEMENT || store.viewSettings.inspectedState !== null || (state.isActive && rules.maintenanceShortfall(store, state.id) > store.players[state.king].money))"><small>Landowners</small><button @click="inspectPlayer(owner.index)" v-for="owner in landowners(state.id)" :key="owner.index" :class="{ monarch: owner.index === state.king, inspected: store.viewSettings.inspectedPlayer === owner.index }" :aria-pressed="store.viewSettings.inspectedPlayer === owner.index" :aria-label="`${owner.name}: ${owner.count} owned lands${owner.index === state.king ? ' · Monarch' : ''}`" :title="`${owner.name}: ${owner.count} owned lands${owner.index === state.king ? ' · Monarch' : ''}`"><img :src="assets.getPlayerMarkerImage(owner.index)" :alt="owner.name" /><b>{{ owner.count }}</b></button></div>
+			<div class="landowners" v-if="landowners(state.id).length && (store.gameflow.phase === rf.PHASE_SETTLEMENT || store.viewSettings.inspectedState !== null || (state.isActive && rules.maintenanceShortfall(store, state.id) > store.players[state.king].money))"><small>{{ $t("stateStrip.landowners") }}</small><button @click="inspectPlayer(owner.index)" v-for="owner in landowners(state.id)" :key="owner.index" :class="{ monarch: owner.index === state.king, inspected: store.viewSettings.inspectedPlayer === owner.index }" :aria-pressed="store.viewSettings.inspectedPlayer === owner.index" :aria-label="$t('stateStrip.ownerTitle', { name: owner.name, count: owner.count, monarch: owner.index === state.king ? ' · ' + $t('overview.monarch') : '' })" :title="$t('stateStrip.ownerTitle', { name: owner.name, count: owner.count, monarch: owner.index === state.king ? ' · ' + $t('overview.monarch') : '' })"><img :src="assets.getPlayerMarkerImage(owner.index)" :alt="owner.name" /><b>{{ owner.count }}</b></button></div>
 			<div v-if="state.isActive" class="stateDetails">
 				<div class="treasuryChart">
-					<img :src="assets.getStateTreasuryImage(state.id)" :alt="`${rf.STATE_NAMES[state.id]} treasury chart`" />
+					<img :src="assets.getStateTreasuryImage(state.id)" :alt="$t('stateStrip.treasuryChart', { state: rf.STATE_NAMES[state.id] })" />
 					<div class="chartColumn treasury"><b>{{ state.money }}</b><span>SPL</span></div>
-					<div class="chartColumn diggers" :class="{ crewCount: crewCount(state) > 2 }" role="group" :aria-label="`${rf.STATE_NAMES[state.id]} digging crews`">
-						<template v-if="crewCount(state) > 2"><b>{{ crewCount(state) }}</b><span>crews</span></template>
-						<template v-else><span v-for="crew in state.diggers" :key="crew.id" class="crewTile" :class="{ used: isCrewUnavailable(crew), splitCrew: crew.capacity === '1+1' }" :title="crewStatus(crew)" role="img" :aria-label="`${crew.capacity} digging crew. ${crewStatus(crew)}`"><img v-for="(capacity, tileIndex) in crewTiles(crew.capacity)" :key="tileIndex" :src="assets.getWaterworkImage(state.id, capacity)" alt="" /><span v-if="crew.capacity === '1+1'">+</span></span><span v-if="!crewCount(state)">No crews</span><span v-if="ownsEridu(state.id)" class="crewTile" title="Eridu: special 2-point crew; also maintains canals"><img :src="assets.getWaterworkImage(state.id, 2)" alt="Eridu 2-point crew" /></span></template>
+					<div class="chartColumn diggers" :class="{ crewCount: crewCount(state) > 2 }" role="group" :aria-label="$t('stateStrip.diggingCrews', { state: rf.STATE_NAMES[state.id] })">
+						<template v-if="crewCount(state) > 2"><b>{{ crewCount(state) }}</b><span>{{ $t("common.crews") }}</span></template>
+						<template v-else><span v-for="crew in state.diggers" :key="crew.id" class="crewTile" :class="{ used: isCrewUnavailable(crew), splitCrew: crew.capacity === '1+1' }" :title="crewStatus(crew)" role="img" :aria-label="$t('stateStrip.crewAria', { capacity: crew.capacity, status: crewStatus(crew) })"><img v-for="(capacity, tileIndex) in crewTiles(crew.capacity)" :key="tileIndex" :src="assets.getWaterworkImage(state.id, capacity)" alt="" /><span v-if="crew.capacity === '1+1'">+</span></span><span v-if="!crewCount(state)">{{ $t("stateStrip.noCrews") }}</span><span v-if="ownsEridu(state.id)" class="crewTile" :title="$t('stateStrip.eriduCrewTitle')"><img :src="assets.getWaterworkImage(state.id, 2)" :alt="$t('stateStrip.eriduCrewAlt')" /></span></template>
 					</div>
-					<div class="chartColumn harvest"><b>{{ rules.harvestAmount(store, state.id) }}</b><span>SPL harvest</span></div>
+					<div class="chartColumn harvest"><b>{{ rules.harvestAmount(store, state.id) }}</b><span>{{ $t("stateStrip.splHarvest") }}</span></div>
 				</div>
 				<details v-if="crewCount(state) > 2" class="crewInventory" :open="store.viewSettings.inspectedState === state.id || (store.gameflow.phase === rf.PHASE_DEVELOPMENT && isCurrentState(state.id) && ['digging', 'eridu'].includes(store.gameflow.developmentStep))">
-					<summary>Digging crews · {{ crewCount(state) }}</summary>
+					<summary>{{ $t("stateStrip.diggingCrewsCount", { count: crewCount(state) }) }}</summary>
 					<div class="crewInventoryGrid">
 						<div v-for="crew in state.diggers" :key="crew.id" class="crewInventoryItem" :title="crewStatus(crew)">
-							<span class="crewTile" :class="{ used: isCrewUnavailable(crew), splitCrew: crew.capacity === '1+1' }" role="img" :aria-label="`${crew.capacity} digging crew. ${crewStatus(crew)}`"><img v-for="(capacity, tileIndex) in crewTiles(crew.capacity)" :key="tileIndex" :src="assets.getWaterworkImage(state.id, capacity)" alt="" /><span v-if="crew.capacity === '1+1'">+</span></span>
-							<small>Crew {{ crew.id + 1 }} · {{ crewLabel(crew, state.id) }}</small>
+							<span class="crewTile" :class="{ used: isCrewUnavailable(crew), splitCrew: crew.capacity === '1+1' }" role="img" :aria-label="$t('stateStrip.crewAria', { capacity: crew.capacity, status: crewStatus(crew) })"><img v-for="(capacity, tileIndex) in crewTiles(crew.capacity)" :key="tileIndex" :src="assets.getWaterworkImage(state.id, capacity)" alt="" /><span v-if="crew.capacity === '1+1'">+</span></span>
+							<small>{{ $t("stateStrip.crewName", { number: crew.id + 1, status: crewLabel(crew, state.id) }) }}</small>
 						</div>
-						<div v-if="ownsEridu(state.id)" class="crewInventoryItem" title="Eridu: special 2-point crew; also maintains canals"><span class="crewTile"><img :src="assets.getWaterworkImage(state.id, 2)" alt="Eridu 2-point crew" /></span><small>Eridu</small></div>
+						<div v-if="ownsEridu(state.id)" class="crewInventoryItem" :title="$t('stateStrip.eriduCrewTitle')"><span class="crewTile"><img :src="assets.getWaterworkImage(state.id, 2)" :alt="$t('stateStrip.eriduCrewAlt')" /></span><small>{{ $t("nationName.eridu") }}</small></div>
 					</div>
 				</details>
 				<div class="stateNations"><ArtworkCard v-for="nation in relevantNations(state.id)" :key="nation.id" :src="assets.getNationCardImage(nation.id)" :alt="rf.NATION_NAMES[nation.id]" /></div>
-				<details v-if="otherNations(state.id).length" class="nationInventory"><summary>{{ relevantNations(state.id).length ? 'Other nations' : 'Independent nations' }} · {{ otherNations(state.id).length }}</summary><div class="stateNations"><ArtworkCard v-for="nation in otherNations(state.id)" :key="nation.id" :src="assets.getNationCardImage(nation.id)" :alt="rf.NATION_NAMES[nation.id]" /></div></details>
-				<div class="stateFoot">{{ rules.ownedLand(store, state.id).length }} owned lands<template v-if="state.diggers.length"> · {{ state.diggers.length }} hired crew{{ state.diggers.length === 1 ? '' : 's' }}</template><span v-if="state.hasRevolted"> · Revolution</span></div>
+				<details v-if="otherNations(state.id).length" class="nationInventory"><summary>{{ relevantNations(state.id).length ? $t("stateStrip.otherNations") : $t("nationMarket.aria") }} · {{ otherNations(state.id).length }}</summary><div class="stateNations"><ArtworkCard v-for="nation in otherNations(state.id)" :key="nation.id" :src="assets.getNationCardImage(nation.id)" :alt="rf.NATION_NAMES[nation.id]" /></div></details>
+				<div class="stateFoot">{{ $t("stateStrip.ownedLands", { count: rules.ownedLand(store, state.id).length }) }}<template v-if="state.diggers.length"> · {{ $t("stateStrip.hiredCrews", { count: state.diggers.length }) }}</template><span v-if="state.hasRevolted"> · {{ $t("stateStrip.revolution") }}</span></div>
 			</div>
-			<div v-else class="inactiveDetails">Treasury: {{ state.money }} SPL. Activates at the end of settlement with {{ rf.LAND_FOR_STATE_TO_ACTIVATE }} colonized lands.</div>
+			<div v-else class="inactiveDetails">{{ $t("stateStrip.inactive", { amount: state.money, count: rf.LAND_FOR_STATE_TO_ACTIVATE }) }}</div>
 		</details>
 	</section>
 </template>

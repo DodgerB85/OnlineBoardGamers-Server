@@ -1,8 +1,5 @@
 /**
- * All communication with the Django backend for the DDL scaffold.
- *
- * Generic actions supported: save turn, resign, kickout, chat, notes, bug
- * report, votes, rewind and polling for the latest data. Extend as needed.
+ * All communication with the Django backend for Duck Dealer.
  */
 
 import * as funcs from "../js/DDLfuncs.js"
@@ -12,38 +9,56 @@ import * as controller from "../js/DDLcontroller.js"
 import * as WS from "./DDLwebsocket.js"
 import { useModelStore } from "../stores/DDLstore.js"
 import { usePersonalStore } from "../stores/DDLpersonal.js"
+import i18n from "../i18n.js"
+
+const t = i18n.global.t
 
 export async function sendDiscordWebhook(message) {
-	let csrftoken = funcs.getCookie("csrftoken")
+	const csrftoken = funcs.getCookie("csrftoken")
 	fetch("/sendAdminMessage/", {
 		method: "POST",
 		headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
-		body: JSON.stringify({ message: message }),
+		body: JSON.stringify({ message }),
 	}).catch((error) => console.error("Error sending webhook:", error))
 }
 
 export function getNextCurrentPlayers() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-
-	if (personal.trainingGame) {
-		return {
-			allIsCurrentPlayers: [personal.name],
-			allRemainingPlayersInTurnOrder: [personal.name],
-			pendingPlayersArr: [],
-		}
+	if (!store.players.length || !store.gameflow.turnOrder.length) {
+		return { allIsCurrentPlayers: [], allRemainingPlayersInTurnOrder: [], pendingPlayersArr: [] }
 	}
-
-	const allIsCurrentPlayers = []
-	if (store.gameflow.turnOrder.length > 0) allIsCurrentPlayers.push(store.players[store.gameflow.turnOrder[0]].name)
 	const allRemainingPlayersInTurnOrder = store.gameflow.turnOrder.map((idx) => store.players[idx].name)
+	const allIsCurrentPlayers = [allRemainingPlayersInTurnOrder[0]]
 	return { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, pendingPlayersArr: [] }
 }
 
-export async function saveGame(saveRewind = true) {
+function buildTournamentData() {
+	const store = useModelStore()
+	const groups = store.gameflow.finalPositions
+	const result = []
+	for (let i = 0; i < groups.length; i++) {
+		for (const idx of groups[i]) {
+			result.push(i === 0 ? [store.players[idx].name] : [store.players[idx].name, store.gameflow.tournamentScores?.[idx] ?? store.players[idx].score])
+		}
+	}
+	return result
+}
+
+// Saves are queued so two actions in quick succession cannot drop one: the old
+// code returned early while a previous save was still in flight.
+let saveQueue = Promise.resolve()
+
+export function saveGame(saveRewind = true, options = {}) {
+	const run = saveQueue.then(() => performSave(saveRewind, options))
+	saveQueue = run.catch(() => {})
+	return run
+}
+
+async function performSave(saveRewind = true, options = {}) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-
+	if (personal.haltPlay) return
 	let wsConnecting = null
 	if (personal.liveWS) wsConnecting = WS.StartWebSocket()
 
@@ -52,26 +67,32 @@ export async function saveGame(saveRewind = true) {
 
 	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, pendingPlayersArr } = getNextCurrentPlayers()
 
-	let postData = {
+	const postData = {
 		action: "saveGame",
 		latestUpdate: personal.latestUpdate,
-		gameData: JSON.stringify(model.exportGameData()),
+		gameData: model.exportGameData(),
 		turn: store.gameflow.turn,
 		phase: store.gameflow.phase,
 		status: "ACTIVE",
 		gameID: personal.gameID,
 		saveRewind: saveRewind,
-		allIsCurrentPlayers: allIsCurrentPlayers,
-		allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
-		pendingPlayersArr: pendingPlayersArr,
+		allIsCurrentPlayers,
+		allRemainingPlayersInTurnOrder,
+		pendingPlayersArr,
+		noNotify: options.noNotify === true,
+	}
+
+	if (options.checkName) postData.checkName = options.checkName
+	if (personal.removeCurrentFlexTime && personal.removeCurrentFlexTimeName) {
+		postData.checkName = personal.removeCurrentFlexTimeName
 	}
 
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
 		postData.status = "FINISHED"
 		postData.saveRewind = false
-		postData.finalPositions = [...store.gameflow.fullTurnOrder]
-		postData.winnerUsername = store.players[store.gameflow.fullTurnOrder[0]].name
-		postData.tournamentData = store.gameflow.fullTurnOrder.map((playerIdx, i) => (i === 0 ? [store.players[playerIdx].name] : [store.players[playerIdx].name, store.players[playerIdx].score]))
+		postData.winnerUsername = store.gameflow.winnerNames
+		postData.finalPositions = store.gameflow.finalPositions
+		postData.tournamentData = buildTournamentData()
 	}
 
 	try {
@@ -83,30 +104,56 @@ export async function saveGame(saveRewind = true) {
 		if (!response.ok) throw new Error("Network response was not ok")
 		const data = await response.json()
 		if (data.syncError === true) {
-			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.errorText = t("errors.staleVersion")
+			store.viewSettings.showLoader = false
+			personal.haltPlay = false
 			return
 		}
 		personal.latestUpdate = data.latestUpdate
 		window.initData.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
-
 		if (personal.liveWS) WS.broadcastGameUpdate(wsConnecting)
-
 		store.viewSettings.showLoader = false
 		personal.haltPlay = false
 		controller.startPlayerTurn()
 	} catch (error) {
 		console.error("Error saving game:", error)
-		store.gameMessages.errorText = "Error saving the game"
+		store.gameMessages.errorText = t("errors.saveGame")
 		store.viewSettings.showLoader = false
 		personal.haltPlay = false
 	}
 }
 
-// Alias used by the generic post-stack save flow. The scaffold has no server
-// side stack processing, so this behaves exactly like a normal save.
-export async function saveAndUpdateNotifictionsAfterStack() {
-	return saveGame(false)
+export async function saveBid(bid, round = 1, tiedPlayers = []) {
+	const personal = usePersonalStore()
+	try {
+		const response = await fetch("/DDL/processDDLturn/", {
+			method: "POST",
+			body: JSON.stringify({ action: "saveBid", gameID: personal.gameID, bid, round, tiedPlayers }),
+			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
+		})
+		if (!response.ok) throw new Error("Network response was not ok")
+		return await response.json()
+	} catch (error) {
+		console.error("Error saving bid:", error)
+		return { ok: false, error: t("errors.couldNotSaveBid") }
+	}
+}
+
+export async function getBids(round = 1, tiedPlayers = []) {
+	const personal = usePersonalStore()
+	try {
+		const response = await fetch("/DDL/processDDLturn/", {
+			method: "POST",
+			body: JSON.stringify({ action: "getBids", gameID: personal.gameID, round, tiedPlayers }),
+			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
+		})
+		if (!response.ok) throw new Error("Network response was not ok")
+		return await response.json()
+	} catch (error) {
+		console.error("Error getting bids:", error)
+		return { ready: false }
+	}
 }
 
 export async function sendChatMessage(newEntry) {
@@ -116,16 +163,16 @@ export async function sendChatMessage(newEntry) {
 	try {
 		const response = await fetch("/DDL/sendChatMessageDDL/", {
 			method: "POST",
-			body: JSON.stringify({ action: "sendChatMessage", player: personal.name, gameID: personal.gameID, newEntry: newEntry }),
+			body: JSON.stringify({ action: "sendChatMessage", player: personal.name, gameID: personal.gameID, newEntry }),
 			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
 		})
 		if (!response.ok) throw new Error("Network response was not ok")
 		const data = await response.json()
-		store.chatData = funcs.decompressChatData(data.chatData)
+		store.chatData = funcs.decompressChatData(data.chatData, personal.gameCreationTimestamp)
 		if (personal.liveWS) WS.broadcastChatUpdate()
 	} catch (error) {
 		console.error("Error sending chat:", error)
-		store.gameMessages.errorText = "Error sending chat message"
+		store.gameMessages.errorText = t("errors.sendChat")
 	}
 	store.viewSettings.showLoader = false
 }
@@ -141,7 +188,7 @@ export async function reloadChatData() {
 		})
 		if (!response.ok) throw new Error("Network response was not ok")
 		const data = await response.json()
-		store.chatData = funcs.decompressChatData(data.chatData)
+		store.chatData = funcs.decompressChatData(data.chatData, personal.gameCreationTimestamp)
 		store.viewSettings.showChat = true
 	} catch (error) {
 		console.error("Error fetching chat data:", error)
@@ -190,12 +237,12 @@ export async function saveNotes() {
 		}
 		if (!response.ok) throw new Error("Network response was not ok")
 		if (!data.notePosted) {
-			store.gameMessages.errorText = "Sorry, there was a problem. Please email the webmaster directly"
+			store.gameMessages.errorText = t("errors.webmaster")
 			return
 		}
 	} catch (error) {
 		console.error("Error saving notes:", error)
-		store.gameMessages.errorText = "Error saving notes"
+		store.gameMessages.errorText = t("errors.saveNotes")
 	}
 	store.viewSettings.showLoader = false
 }
@@ -214,7 +261,7 @@ export async function resign() {
 		await response.json()
 	} catch (error) {
 		console.error("Error resigning:", error)
-		store.gameMessages.errorText = "Error resigning"
+		store.gameMessages.errorText = t("errors.resigning")
 	}
 	store.viewSettings.showLoader = false
 }
@@ -223,7 +270,7 @@ export async function kickout() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.viewSettings.showLoader = true
-	const kickedPlayerObj = controller.timedOutPlayerObj()
+	const kickedPlayerObj = controller.currentPlayerObj()
 	try {
 		const response = await fetch("/DDL/processDDLturn/", {
 			method: "POST",
@@ -233,12 +280,12 @@ export async function kickout() {
 		if (!response.ok) throw new Error("Network response was not ok")
 		const data = await response.json()
 		if (data.syncError) {
-			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.errorText = t("errors.staleVersion")
 			return
 		}
 		if (data.voteCast) {
 			store.kickoutVotesData = data.votesData
-			store.gameMessages.successText = "Kickout vote recorded"
+			store.gameMessages.successText = t("messages.kickoutVote")
 			return data
 		}
 		personal.latestUpdate = data.latestUpdate
@@ -246,7 +293,7 @@ export async function kickout() {
 		return data
 	} catch (error) {
 		console.error("Error kicking:", error)
-		rf.doAdminAlrt("Error kicking player")
+		rf.doAdminAlrt(t("errors.kicking"))
 	} finally {
 		store.viewSettings.showLoader = false
 	}
@@ -259,7 +306,7 @@ export async function castVote(topic) {
 	try {
 		const response = await fetch("/DDL/castVote/", {
 			method: "POST",
-			body: JSON.stringify({ action: "castVote", topic: topic, gameID: personal.gameID }),
+			body: JSON.stringify({ action: "castVote", topic, gameID: personal.gameID }),
 			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
 		})
 		if (!response.ok) throw new Error("Network response was not ok")
@@ -273,10 +320,10 @@ export async function castVote(topic) {
 				personal.votedToExclude = true
 				store.statsExcludeVotesData = JSON.parse(data.votesData)
 			}
-		} else store.gameMessages.errorText = "Error casting vote; contact admin"
+		} else store.gameMessages.errorText = t("errors.castingVote")
 	} catch (error) {
 		console.error("Error casting vote:", error)
-		store.gameMessages.errorText = "Error casting vote; contact admin"
+		store.gameMessages.errorText = t("errors.castingVote")
 	}
 	store.viewSettings.showLoader = false
 }
@@ -315,18 +362,18 @@ export async function submitBug(bugContent) {
 	try {
 		const response = await fetch("/DDL/bugEntry/", {
 			method: "POST",
-			body: JSON.stringify({ gameID: personal.gameID, action: "bugentry", description: bugContent, gameData: JSON.stringify(model.exportGameData()) }),
+			body: JSON.stringify({ gameID: personal.gameID, action: "bugentry", description: bugContent, gameData: model.exportGameData() }),
 			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
 		})
 		if (!response.ok) throw new Error("Network response was not ok")
 		const data = await response.json()
 		if (data.bugEntrySuccess) {
-			store.gameMessages.successText = "Your bug report has been submitted"
+			store.gameMessages.successText = t("messages.bugSubmitted")
 			store.viewSettings.showBug = false
-		} else store.gameMessages.bugErrorText = "Sorry, there was a problem. Please email the webmaster directly"
+		} else store.gameMessages.bugErrorText = t("errors.webmaster")
 	} catch (error) {
 		console.error("Error submitting bug:", error)
-		store.gameMessages.bugErrorText = "Sorry, there was a problem. Please email the webmaster directly"
+		store.gameMessages.bugErrorText = t("errors.webmaster")
 	}
 	store.viewSettings.showLoader = false
 }
@@ -344,7 +391,7 @@ export async function loadRewind() {
 		if (!response.ok) throw new Error("Network response was not ok")
 		const data = await response.json()
 		if (data.syncError) {
-			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.errorText = t("errors.staleVersion")
 			return
 		}
 		if (data.errorMessage) {
@@ -355,10 +402,10 @@ export async function loadRewind() {
 		personal.latestUpdate = data.latestUpdate
 		window.initData.latestUpdate = data.latestUpdate
 		await updateDataFromLoadRewind()
-		store.gameMessages.successText = "Game loaded from rewind"
+		store.gameMessages.successText = t("messages.rewindLoaded")
 	} catch (error) {
 		console.error("Error rewinding:", error)
-		store.gameMessages.errorText = "Error rewinding the game"
+		store.gameMessages.errorText = t("errors.rewind")
 	} finally {
 		store.viewSettings.showLoader = false
 		store.viewSettings.performingRewind = false
@@ -375,12 +422,12 @@ async function updateDataFromLoadRewind() {
 			body: JSON.stringify({
 				action: "updateDataFromLoadRewind",
 				turn: store.gameflow.turn,
-				allIsCurrentPlayers: allIsCurrentPlayers,
-				allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
-				pendingPlayersArr: pendingPlayersArr,
+				allIsCurrentPlayers,
+				allRemainingPlayersInTurnOrder,
+				pendingPlayersArr,
 				gameID: personal.gameID,
 				phase: store.gameflow.phase,
-				gameData: JSON.stringify(model.exportGameData()),
+				gameData: model.exportGameData(),
 			}),
 			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
 		})

@@ -9,12 +9,15 @@ import * as model from "../js/WEBmodel"
 //import HistoryEntry from './HistoryEntry.vue'
 
 import { ref } from "vue"
+import { useI18n } from "vue-i18n"
 
 import { useModelStore } from "../stores/WEBstore.js"
 const store = useModelStore()
 
 import { usePersonalStore } from "../stores/WEBpersonal.js"
 const personal = usePersonalStore()
+
+const { t } = useI18n()
 
 const chatMessage = ref("")
 const bugReportText = ref("")
@@ -97,7 +100,7 @@ async function submitBug() {
 	store.gameMessages.bugSuccessText = ""
 
 	if (bugReportText.value.length === 0) {
-		store.gameMessages.bugErrorText = "Please enter a bug report"
+		store.gameMessages.bugErrorText = t("topMenuViews.bugEnterReport")
 		submittingBug.value = false
 		return
 	}
@@ -125,13 +128,13 @@ function getReserveTileIDs() {
 
 function getStatsExcludeVotes(returnPlayers = false) {
 	let votes = 0
-	let players = "None"
+	let players = ""
 
 	for (const player in store.statsExcludeVotesData) {
 		// Use const or let for player
 		if (store.statsExcludeVotesData[player] === true) {
 			votes += 1
-			if (players === "None") players = String(player)
+			if (players === "") players = String(player)
 			else players += ", " + player
 		}
 	}
@@ -141,13 +144,13 @@ function getStatsExcludeVotes(returnPlayers = false) {
 
 function getDeleteVotes(returnPlayers = false) {
 	let votes = 0
-	let players = "None"
+	let players = ""
 
 	for (const player in store.deleteVotesData) {
 		// Use const or let for player
 		if (store.deleteVotesData[player] === true) {
 			votes += 1
-			if (players === "None") players = String(player)
+			if (players === "") players = String(player)
 			else players += ", " + player
 		}
 	}
@@ -164,7 +167,7 @@ function localCastVote(topic) {
 	<!-- BUG REPORT -->
 	<transition name="slideBug">
 		<div id="bugReport" v-if="store.viewSettings.showBug">
-			<h1>Bug Report</h1>
+			<h1>{{ $t("topMenuViews.bugReport") }}</h1>
 			<template v-if="store.gameMessages.bugErrorText !== ''">
 				<h2 id="bugErrorText" v-html="store.gameMessages.bugErrorText"></h2>
 			</template>
@@ -172,22 +175,22 @@ function localCastVote(topic) {
 				<h2 id="bugSuccessText" v-html="store.gameMessages.bugSuccessText"></h2>
 			</template>
 			<p>
-				Please submit a bug report if you encounter any issues, giving as much detail as possbile.
+				{{ $t("topMenuViews.bugIntro") }}
 				<br />
-				The game data will be submitted along with your report.
+				{{ $t("topMenuViews.bugData") }}
 				<br />
-				You can also report it on the OBG discord. Click
-				<a href="https://discord.gg/hCU7Fr77yV" class="linkOther" target="_blank">Here</a>
-				to join
+				<i18n-t keypath="topMenuViews.bugDiscord" tag="span" scope="global">
+					<template #here><a href="https://discord.gg/hCU7Fr77yV" class="linkOther" target="_blank">{{ $t("topMenuViews.here") }}</a></template>
+				</i18n-t>
 			</p>
 
 			<div><textarea cols="150" rows="10" name="bugContent" id="bugContent" v-model="bugReportText"></textarea></div>
 			<div>
 				<button class="actionsLineButton" id="submitBug" @click="submitBug" :disabled="submittingBug">
-					<span v-if="submittingBug">Submitting Bug Report...</span>
-					<span v-else>Submit</span>
+					<span v-if="submittingBug">{{ $t("topMenuViews.submittingBug") }}</span>
+					<span v-else>{{ $t("topMenuViews.submit") }}</span>
 				</button>
-				<button class="actionsLineButton" id="resetBug" @click="toggleBug">Cancel</button>
+				<button class="actionsLineButton" id="resetBug" @click="toggleBug">{{ $t("topMenuViews.cancel") }}</button>
 			</div>
 		</div>
 	</transition>
@@ -195,13 +198,13 @@ function localCastVote(topic) {
 	<!-- NOTES -->
 	<transition name="slideNotes">
 		<div id="notesBox" v-if="store.viewSettings.showNotes">
-			<h2>Personal game notes</h2>
-			<p>Only you can see these notes</p>
+			<h2>{{ $t("topMenuViews.notesTitle") }}</h2>
+			<p>{{ $t("topMenuViews.notesPrivate") }}</p>
 			<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes" maxlength="5000"></textarea></div>
 			<div>
-				<button class="actionsLineButton" id="submitNotes" @click="IO.saveNotes">Save</button>
-				<button class="actionsLineButton" id="clearNotes" @click="clearNotes">Clear</button>
-				<button class="actionsLineButton" id="closeNotes" @click="toggleNotes">Close</button>
+				<button class="actionsLineButton" id="submitNotes" @click="IO.saveNotes">{{ $t("topMenuViews.save") }}</button>
+				<button class="actionsLineButton" id="clearNotes" @click="clearNotes">{{ $t("topMenuViews.clear") }}</button>
+				<button class="actionsLineButton" id="closeNotes" @click="toggleNotes">{{ $t("topMenuViews.close") }}</button>
 			</div>
 		</div>
 	</transition>
@@ -210,9 +213,9 @@ function localCastVote(topic) {
 	<transition name="fade">
 		<div id="wholeChat" v-if="store.viewSettings.showChat">
 			<div id="chatBox">
-				<h2>Send a message</h2>
+				<h2>{{ $t("topMenuViews.chatTitle") }}</h2>
 				<div><textarea rows="6" name="chatMessage" id="chatMessage" v-model="chatMessage"></textarea></div>
-				<div><button class="actionsLineButton" @click="sendChatMessage">Send</button></div>
+				<div><button class="actionsLineButton" @click="sendChatMessage">{{ $t("topMenuViews.send") }}</button></div>
 			</div>
 			<div id="messageList">
 				<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
@@ -231,40 +234,40 @@ function localCastVote(topic) {
 	<!-- REWIND PANEL -->
 	<transition name="fade">
 		<div id="rewindPanel" v-if="store.viewSettings.showRewindPanel">
-			Any player can rewind the game at any time.
+			{{ $t("topMenuViews.rewindIntro") }}
 			<br />
-			Please be courteous and rewind only if absolutely neessary - send a chat message to inform the other players.
+			{{ $t("topMenuViews.rewindCourtesy") }}
 			<br />
-			Misuse of this feature will result in rewinds requiring permission from all players.
+			{{ $t("topMenuViews.rewindMisuse") }}
 
 			<br />
 			<br />
 			<span v-if="model.revealedHiddenInformationForRewind()" class="rewindCautionSpan">
-				Caution: You are rewinding after reveling hidden information
+				{{ $t("topMenuViews.rewindCaution") }}
 				<br />
-				This will be added as a note in the history
+				{{ $t("topMenuViews.rewindCautionHistory") }}
 				<br />
 				<br />
 			</span>
 
 			<span class="topMenuItem" @click="loadRewind()">
 				<img src="@static/WEB/images/icon-rewind.svg" />
-				<span>Rewind</span>
+				<span>{{ $t("topMenuViews.rewindButton") }}</span>
 			</span>
 			<hr />
 			<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
-				If all players agree, this game can be excluded from the stats (won't count towards wins/losses)
+				{{ $t("topMenuViews.statsExcludeIntro") }}
 				<br />
-				Votes: {{ getStatsExcludeVotes(false) }} - Players: {{ getStatsExcludeVotes(true) }}
+				{{ $t("topMenuViews.votesPlayers", { votes: getStatsExcludeVotes(false), players: getStatsExcludeVotes(true) || $t("common.none") }) }}
 				<br />
-				<button v-if="!personal.votedToExclude" class="actionsLineButton" @click="localCastVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">Vote to Exclude Game from Stats</button>
+				<button v-if="!personal.votedToExclude" class="actionsLineButton" @click="localCastVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">{{ $t("topMenuViews.voteExclude") }}</button>
 			</div>
 			<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
-				If all players agree, this game will be deleted
+				{{ $t("topMenuViews.deleteIntro") }}
 				<br />
-				Votes: {{ getDeleteVotes(false) }} - Players: {{ getDeleteVotes(true) }}
+				{{ $t("topMenuViews.votesPlayers", { votes: getDeleteVotes(false), players: getDeleteVotes(true) || $t("common.none") }) }}
 				<br />
-				<button v-if="!personal.votedToDelete" class="actionsLineButton" @click="localCastVote(rf.DELETE_VOTE_TOPIC)">Vote to Delete Game</button>
+				<button v-if="!personal.votedToDelete" class="actionsLineButton" @click="localCastVote(rf.DELETE_VOTE_TOPIC)">{{ $t("topMenuViews.voteDelete") }}</button>
 			</div>
 		</div>
 	</transition>
@@ -273,7 +276,7 @@ function localCastVote(topic) {
 	<transition name="slideRes">
 		<div id="reserve" v-if="store.viewSettings.showReserve">
 			<!-- DRAW PILE -->
-			<h2>Unused Tiles - including opponents' stored tiles and draw piles (where you haven't seen the number of actions)</h2>
+			<h2>{{ $t("topMenuViews.reserveTitle") }}<br />{{ $t("topMenuViews.reserveSubtitle") }}</h2>
 			<div id="allReserveTilesDiv">
 				<template v-for="(tileID, idx) in getReserveTileIDs()" :key="idx">
 					<div class="tileAndActionsNumberDiv">
@@ -291,7 +294,7 @@ function localCastVote(topic) {
 
 			<!-- FLEXI-TIMES -->
 			<div id="timesDiv">
-				Flexi-Times:
+				{{ $t("topMenuViews.flexiTimes") }}
 				<span v-for="(player, idx) in store.players" :key="idx">{{ player.displayName }}: {{ getFlexiTimeString(player.name) }}&nbsp;&nbsp;&nbsp;</span>
 				&nbsp;&nbsp;&nbsp;
 			</div>

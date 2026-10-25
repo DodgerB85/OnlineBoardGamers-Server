@@ -1,7 +1,9 @@
 <script setup>
+import { useI18n } from "vue-i18n"
 import * as model from "../js/ROWmodel"
 import { useModelStore } from "../stores/ROWstore.js"
 
+const { t } = useI18n()
 const store = useModelStore()
 
 function showState() {
@@ -11,10 +13,10 @@ function showState() {
 
 <template>
 	<div id="debugArea">
-		<h4>Debug</h4>
-		<div>current: {{ store.currentPlayer }} | status: {{ store.state?.status }}</div>
-		<div>actions: {{ store.actions.join(", ") }}</div>
-		<button @click="showState">Show game data</button>
+		<h4>{{ t('row.debug.title') }}</h4>
+		<div>{{ t('row.debug.current') }} {{ store.currentPlayer }} | {{ t('row.debug.status') }} {{ store.state?.status }}</div>
+		<div>{{ t('row.debug.actions') }} {{ store.actions.join(", ") }}</div>
+		<button @click="showState">{{ t('row.debug.showGameData') }}</button>
 	</div>
 </template>
 

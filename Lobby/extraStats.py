@@ -1,5 +1,4 @@
 import base64
-import gzip
 import json
 import logging
 from collections import Counter
@@ -16,6 +15,7 @@ from lzstring import LZString
 import Lobby.sharedFunctions.constants as rf
 from Lobby.models import Game
 from Lobby.sharedFunctions.sharedRefs import SR_GAMES_CODES_AND_NAMES_CHOICES
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ def decode_game_data(game):
         return json.loads(LZString().decompressFromEncodedURIComponent(game.gameData))
     if game.gameData.lstrip().startswith(("[", "{")):
         return json.loads(game.gameData)
-    raw = gzip.decompress(base64.b64decode(game.gameData))
+    raw = safe_gzip_decompress(base64.b64decode(game.gameData))
     if game.gameCode == "BUS" and not raw.lstrip().startswith((b"[", b"{")):
         return msgpack.unpackb(raw, raw=False)
     return json.loads(raw)
@@ -68,8 +68,19 @@ def read_history(game, data):
                 entries.append((entry[0], timestamp))
             return entries
         raise ValueError("Unrecognized FCM history format")
-    if code in {"DDL", "URR"}:
-        return [(entry[1], entry[4] if code == "URR" and len(entry) > 4 else None) for entry in data["history"]]
+    if code == "URR":
+        if not isinstance(data, list) or len(data) < 11:
+            raise ValueError("Unrecognized URR history format")
+        timestamp = created
+        entries = []
+        for entry in data[10]:
+            delta = entry[2]
+            if delta is not None:
+                timestamp += delta
+            entries.append((entry[1], timestamp))
+        return entries
+    if code == "DDL":
+        return [(entry[1], None) for entry in data["history"]]
     if code == "BUS":
         # The MessagePack export uses nested name/display-name pairs and moves
         # history to slot 4; the legacy JSON export keeps names flat and uses 8.

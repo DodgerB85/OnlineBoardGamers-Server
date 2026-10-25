@@ -3,6 +3,7 @@
  * Mirrors the role of FCMcontroller / RNBcontroller.
  */
 import * as model from "./ROWmodel"
+import i18n from "../i18n"
 import { deserializeGame, serializeGame } from "./ROWfuncs"
 import { useModelStore } from "../stores/ROWstore"
 import { usePersonalStore } from "../stores/ROWpersonal"
@@ -10,6 +11,13 @@ import { decompress, loadChat, loadRewind, reloadGameData, resign, saveGame, sav
 import { broadcastGameUpdate } from "../backend/ROWwebsocket"
 import { ActionType, PHASE_MAIN, PHASE_GAME_OVER } from "./ROWreference"
 import { AI_NAME, playAutomaTurns } from "./automa/index"
+
+/** Engine errors are ROWError codes; show the translated text when there is one. */
+function errorText(error) {
+	const code = error?.error ?? error?.message
+	const key = `row.errors.${code}`
+	return i18n.global.te(key) ? i18n.global.t(key) : String(error?.message ?? error ?? "")
+}
 
 /** Only the seat whose turn it is may act (practice games excepted). */
 export function canAct() {
@@ -33,14 +41,14 @@ export function submit(action) {
 	const g = store.getGame()
 	store.gameMessages.errorText = ""
 	if (!canAct()) {
-		store.gameMessages.errorText = "It is not your turn"
+		store.gameMessages.errorText = i18n.global.t("error.notYourTurn")
 		return false
 	}
 	const before = captureUndo()
 	try {
 		g.perform(g.currentPlayer, action, model.getRng())
 	} catch (err) {
-		store.gameMessages.errorText = err.message
+		store.gameMessages.errorText = errorText(err)
 		return false
 	}
 	store.clearAction()
@@ -85,7 +93,7 @@ export async function endTurn() {
 	const g = store.getGame()
 	store.gameMessages.errorText = ""
 	if (!canAct()) {
-		store.gameMessages.errorText = "It is not your turn"
+		store.gameMessages.errorText = i18n.global.t("error.notYourTurn")
 		return
 	}
 	const endingPlayer = g.currentPlayer
@@ -100,7 +108,7 @@ export async function endTurn() {
 	} catch (err) {
 		// The engine rejected or the automa got stuck: roll the whole local advance back
 		// so the client never drifts ahead of the persisted position, and report it.
-		store.gameMessages.errorText = err?.message ?? "Could not end the turn"
+		store.gameMessages.errorText = errorText(err) || i18n.global.t("error.couldNotEndTurn")
 		model.restoreRng(before)
 		store.setGame(deserializeGame(before))
 		store.wholeTurnResetData = prevTurnSnapshot
@@ -143,7 +151,7 @@ export function skip() {
 	const store = useModelStore()
 	const g = store.getGame()
 	if (!canAct()) {
-		store.gameMessages.errorText = "It is not your turn"
+		store.gameMessages.errorText = i18n.global.t("error.notYourTurn")
 		return
 	}
 	g.skip(g.currentPlayer)
@@ -170,11 +178,11 @@ export async function rewind() {
 	const personal = usePersonalStore()
 	if (personal.gameID < 0) return
 	if (store.viewSettings.showReplay) {
-		store.gameMessages.rewindErrorText = "Exit replay mode first"
+		store.gameMessages.rewindErrorText = i18n.global.t("error.exitReplayFirst")
 		return
 	}
 	if (store.getGame().isEnded()) {
-		store.gameMessages.rewindErrorText = "The game has ended"
+		store.gameMessages.rewindErrorText = i18n.global.t("error.gameEnded")
 		return
 	}
 	if (store.viewSettings.performingRewind) return
@@ -183,11 +191,11 @@ export async function rewind() {
 	try {
 		const data = await loadRewind(personal.gameID, personal.latestUpdate)
 		if (data.syncError) {
-			store.gameMessages.rewindErrorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.rewindErrorText = i18n.global.t("error.olderVersion")
 			return
 		}
 		if (data.errorMessage || !data.gameData) {
-			store.gameMessages.rewindErrorText = data.errorMessage ?? "No rewind data available"
+			store.gameMessages.rewindErrorText = data.errorMessage ?? i18n.global.t("error.noRewindData")
 			return
 		}
 		let parsed = data.gameData
@@ -223,7 +231,7 @@ export async function rewind() {
 			allRemainingPlayersInTurnOrder: rotated,
 		})
 		if (result.syncError) {
-			store.gameMessages.rewindErrorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.rewindErrorText = i18n.global.t("error.olderVersion")
 			return
 		}
 		personal.latestUpdate = Number(result.latestUpdate)
@@ -233,7 +241,7 @@ export async function rewind() {
 		store.touch()
 	} catch (error) {
 		console.error("Error rewinding the game:", error)
-		store.gameMessages.rewindErrorText = "Error rewinding the game"
+		store.gameMessages.rewindErrorText = i18n.global.t("error.rewinding")
 	} finally {
 		store.viewSettings.performingRewind = false
 	}
@@ -264,7 +272,7 @@ export async function persistTurn() {
 			finalPositions: ended ? g.ranking().map((name) => g.state.players.findIndex((p) => p.name === name)) : undefined,
 		})
 		if (result.syncError) {
-			store.gameMessages.errorText = "It appears you have an older version of the game. Please refresh the page"
+			store.gameMessages.errorText = i18n.global.t("error.olderVersion")
 			return false
 		}
 		personal.latestUpdate = Number(result.latestUpdate)
@@ -274,7 +282,7 @@ export async function persistTurn() {
 		return true
 	} catch (error) {
 		console.error("Error saving game:", error)
-		store.gameMessages.errorText = "Error saving the game"
+		store.gameMessages.errorText = i18n.global.t("error.savingGame")
 		return false
 	}
 }
@@ -336,7 +344,7 @@ export async function runAutomaIfNeeded() {
 		await persistTurn()
 	} catch (error) {
 		console.error("Error running the automa:", error)
-		store.gameMessages.errorText = "Error running the automa"
+		store.gameMessages.errorText = i18n.global.t("error.runningAutoma")
 	} finally {
 		store.saving = false
 	}
@@ -378,7 +386,7 @@ export async function resignGame() {
 		await reloadFromServer()
 	} catch (error) {
 		console.error("Error resigning:", error)
-		store.gameMessages.errorText = "Error resigning from the game"
+		store.gameMessages.errorText = i18n.global.t("error.resigning")
 	}
 }
 

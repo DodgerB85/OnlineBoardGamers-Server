@@ -1,18 +1,20 @@
 <script setup>
 /** Client-side replay bar: step through recorded turn-start frames, then exit. */
+import { useI18n } from "vue-i18n"
 import * as replay from "../js/ROWreplay"
 import { useModelStore } from "../stores/ROWstore.js"
 
+const { t } = useI18n()
 const store = useModelStore()
 </script>
 
 <template>
 	<div v-if="store.viewSettings.showReplay" id="replayPanel">
 		<div class="replayBar">
-			<button :disabled="store.replayIndex <= 0" @click="replay.performStep(-1)">&lt; Back</button>
-			<span class="frame">Frame {{ store.replayIndex + 1 }} / {{ store.replayFrames.length }}</span>
-			<button :disabled="store.replayIndex >= store.replayFrames.length - 1" @click="replay.performStep(1)">Forward &gt;</button>
-			<button class="exit" @click="replay.exitReplay()">Exit Replay</button>
+			<button :disabled="store.replayIndex <= 0" @click="replay.performStep(-1)">&lt; {{ t('app.back') }}</button>
+			<span class="frame">{{ t('app.frame', { current: store.replayIndex + 1, total: store.replayFrames.length }) }}</span>
+			<button :disabled="store.replayIndex >= store.replayFrames.length - 1" @click="replay.performStep(1)">{{ t('app.forward') }} &gt;</button>
+			<button class="exit" @click="replay.exitReplay()">{{ t('app.exitReplay') }}</button>
 		</div>
 	</div>
 </template>

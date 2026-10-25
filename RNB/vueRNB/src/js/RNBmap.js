@@ -41,6 +41,8 @@ import * as prod from "./RNBproduce"
 import * as stack from "./RNBstack"
 import * as produce from "./RNBproduce"
 import * as atelier from "./RNBatelier"
+import * as train from "./RNBtrain"
+import i18n from "../i18n"
 
 import { useModelStore } from "../stores/RNBstore.js"
 import { usePersonalStore } from "../stores/RNBpersonal.js"
@@ -79,6 +81,7 @@ export function addNewEdge(hexIds) {
 		],
 		hasRoad: hasRiver || cityRiverNeighbour ? [false, false] : [false], // Road either side of the river,
 		hasPowerLine: hasRiver || cityRiverNeighbour ? [false, false] : [false], // Power line either side of the river,
+		hasTrainTrack: hasRiver || cityRiverNeighbour ? [false, false] : [false], // Rail track either side of the river,
 		hasRiver: hasRiver,
 	})
 
@@ -221,12 +224,14 @@ function addRedundantPaths(hexId, edgeHasKey) {
 	}
 }
 
-export function updateHexInternalRoadsViaNode(hexId, hexGraph, initialEntryPoints, nodeId, edgeHasKey = "edgeHasRoad") {
+export function updateHexInternalRoadsViaNode(hexId, hexGraph, initialEntryPoints, nodeId, edgeHasKey = "edgeHasRoad", includeBridges = true, anchorNodes = null) {
 	const hex = model.getHexByID(hexId)
 	let isEntryPoint = initialEntryPoints.slice()
-	for (const bridge of hex.builtBridges) {
-		for (const node of bridge) {
-			isEntryPoint[node] = true
+	if (includeBridges) {
+		for (const bridge of hex.builtBridges) {
+			for (const node of bridge) {
+				isEntryPoint[node] = true
+			}
 		}
 	}
 	isEntryPoint[nodeId] = false
@@ -242,7 +247,7 @@ export function updateHexInternalRoadsViaNode(hexId, hexGraph, initialEntryPoint
 
 	let entryPointIndices = indices.filter((i) => loc.isNonRiverVertexLocation(pathfind.locations[i]) && isEntryPoint[pathfind.locations[i][2]])
 	if (entryPointIndices.length === 0) {
-		let anchorIndices = indices.filter((i) => loc.isNonRiverVertexLocation(pathfind.locations[i]) && hex.nodeIsRoadAnchor[pathfind.locations[i][2]])
+		let anchorIndices = indices.filter((i) => loc.isNonRiverVertexLocation(pathfind.locations[i]) && (anchorNodes ? anchorNodes.includes(pathfind.locations[i][2]) : hex.nodeIsRoadAnchor[pathfind.locations[i][2]]))
 		if (anchorIndices.length > 0) {
 			let dest = anchorIndices[0]
 			while (dest !== pathfind.previous[dest]) {
@@ -283,6 +288,58 @@ export function updateHexInternalPowerLines(hexId, nodeIds) {
 	for (const nodeId of nodeIds) {
 		if (nodeId < 0) continue
 		updateHexInternalRoadsViaNode(hexId, hexGraph, isEntryPoint, nodeId, "edgeHasPowerLine")
+	}
+}
+
+export function existingTrainTrackEntryPoints(hexId) {
+	const store = useModelStore()
+	const hex = model.getHexByID(hexId)
+	let isEntryPoint = util.makeArrayOfSizeWithFill(hex.nodeBucketIds.length, false)
+	for (const side of util.indexArray(6)) {
+		const edgeId = hex.edgeLookup[side]
+		if (edgeId !== -1) {
+			const edge = store.mapData.edgeData[edgeId]
+			const lanes = edge.hasTrainTrack || []
+			if (lanes.length === 1) {
+				isEntryPoint[hex.sideNodeIds[side]] = lanes[0]
+			} else {
+				let offset = hexId === edge.edgeHexIDs[0] ? 0 : 1
+				for (const k of [0, 1].filter((k) => lanes[k])) {
+					if (hex.hexTerrainID === rf.CITY) {
+						const node = lanes.length === 2 ? cityBankNodeForEdgeSlot(hex, side, edge, k) : hex.sideNodeIds[side]
+						isEntryPoint[node] = true
+					} else isEntryPoint[hex.cornerNodeIds[side][(k + offset) % 2]] = true
+				}
+			}
+		}
+	}
+	return isEntryPoint
+}
+
+export function updateHexInternalTrainTracks(hexId, nodeIds) {
+	const hex = model.getHexByID(hexId)
+	if (!hex.edgeHasTrainTrack) hex.edgeHasTrainTrack = util.makeArrayOfSizeWithFill(hex.nodeEdges.length, false)
+
+	// Sea/wet polders use the simplified water graph, which only has vertex moves.
+	// Draw a direct line from each entry node to the tile centre instead.
+	if (rf.TERR_ACTS_LIKE_WATER.includes(hex.currentTerrain)) {
+		for (const nodeId of nodeIds) {
+			if (nodeId < 0) continue
+			const edgeIdx = hex.nodeEdges.findIndex((nodes) => (nodes[0] === 0 && nodes[1] === nodeId) || (nodes[1] === 0 && nodes[0] === nodeId))
+			if (edgeIdx !== -1) hex.edgeHasTrainTrack[edgeIdx] = true
+		}
+		return
+	}
+
+	const hexGraph = graph.createCompleteGraph([hex], [], -1)
+	const isEntryPoint = existingTrainTrackEntryPoints(hexId)
+	// Land hexes without road anchors (none currently) fall back to the centre node
+	const anchorNodes = (hex.nodeIsRoadAnchor || []).some(Boolean) ? null : [0]
+
+	for (const nodeId of nodeIds) {
+		if (nodeId < 0) continue
+		// Tracks never use bridges: includeBridges = false
+		updateHexInternalRoadsViaNode(hexId, hexGraph, isEntryPoint, nodeId, "edgeHasTrainTrack", false, anchorNodes)
 	}
 }
 
@@ -391,6 +448,15 @@ export function clickedHighlight(entry, event = null) {
 			const strictDrop = store.context.action === rf.ACT_TM_ANY_PHASE_STRICT_DROP_RES_OR_TRANSPORT
 			const strictDeposit = store.context.action === rf.ACT_TM_CHOOSE_GOOSE_DEPOSIT_LOCATION
 			dropResOrTransporterOnLocation(clickedLocation, strictDrop, strictDeposit)
+			return
+		}
+		if (store.context.action === rf.ACT_TM_TAKE_TRAIN) {
+			// Ride the train to the clicked tile area. Read the CURRENT bucket off the
+			// clicked vertex - the highlight entry only carries initial bucket ids.
+			const toBucketLocation = loc.convertLocationToBucket(clickedLocation)
+			const fare = model.getResByID(store.context.selectedTrainFareResID)
+			train.takeTrain(store.context.selectedTransporterIDforTM, toBucketLocation[1], toBucketLocation[2], fare)
+			context.createUndoPoint()
 			return
 		}
 		if (store.context.action === rf.ACT_TM_SELECT_PICKUP_DROP_MOVE) {
@@ -851,6 +917,143 @@ export function addPowerLineToMap_core([fromHexID, fromBucketId], [toHexID, toBu
 	}
 }
 
+// ============================================================================
+// TRAIN TRACKS (map editor only - gameplay is not implemented yet)
+// ============================================================================
+
+export function refreshUseTrainsFlag() {
+	const store = useModelStore()
+	store.gameOptions.useTrains = store.mapData.edgeData.some((edge) => (edge.hasTrainTrack || []).some(Boolean))
+}
+
+// Map editor: build one track edge between the two clicked tile areas.
+// A river edge carries one track lane per bank (like roads); a track never
+// switches banks, so it never crosses the river. Sea <-> land is allowed.
+export function addTrainTrackToMap_core([fromHexID, fromBucketId], [toHexID, toBucketId]) {
+	const store = useModelStore()
+	const fromHex = model.getHexByID(fromHexID)
+	const toHex = model.getHexByID(toHexID)
+	// City moats are never crossed: a track has no bridge option
+	if (fromHex.hexTerrainID === rf.CITY || toHex.hexTerrainID === rf.CITY) return false
+	const fromHexSide = hd.getJoiningSide(fromHex.coord, toHex.coord)
+	const toHexSide = (fromHexSide + 3) % 6
+	const edgeData = store.mapData.edgeData[fromHex.edgeLookup[fromHexSide]]
+	if (!edgeData) return false
+	if (!edgeData.hasTrainTrack || edgeData.hasTrainTrack.length !== edgeData.hasRoad.length) edgeData.hasTrainTrack = util.makeArrayOfSizeWithFill(edgeData.hasRoad.length, false)
+
+	// One lane: the only option. Otherwise the clicked buckets pick the bank. Both
+	// are checked, because a sea tile is a single bucket and cannot tell the banks apart.
+	let lane = 0
+	if (edgeData.hasTrainTrack.length > 1) {
+		const laneCount = edgeData.hasTrainTrack.length
+		const inClickedBucket = (hex, node, bucketId) => node >= 0 && hex.bucketIdsInitial[hex.nodeBucketIds[node]] === bucketId
+		lane = util
+			.indexArray(laneCount)
+			.find((k) => inClickedBucket(fromHex, getTrainTrackEntryNode(fromHex, fromHexSide, k, laneCount, edgeData), fromBucketId) && inClickedBucket(toHex, getTrainTrackEntryNode(toHex, toHexSide, k, laneCount, edgeData), toBucketId))
+		if (lane === undefined) return false
+	}
+	if (edgeData.hasTrainTrack[lane]) return true
+
+	edgeData.hasTrainTrack[lane] = true
+	const laneCount = edgeData.hasTrainTrack.length
+	updateHexInternalTrainTracks(fromHexID, [getTrainTrackEntryNode(fromHex, fromHexSide, lane, laneCount, edgeData)])
+	updateHexInternalTrainTracks(toHexID, [getTrainTrackEntryNode(toHex, toHexSide, lane, laneCount, edgeData)])
+	refreshUseTrainsFlag()
+	return true
+}
+
+// Which tile areas can the chain continue to from this tile area?
+export function allVertexBucketsWithoutTrainTracksAdjacentTo(hexID, bucketIds) {
+	const store = useModelStore()
+	const hex = model.getHexByID(hexID)
+	function inBucket(nodeId) {
+		return nodeId >= 0 && bucketIds.includes(hex.bucketIdsInitial[hex.nodeBucketIds[nodeId]])
+	}
+	let res = []
+	for (const side of util.indexArray(6).filter((side) => hex.hexLookup[side] !== -1)) {
+		const edge = store.mapData.edgeData[hex.edgeLookup[side]]
+		const otherHexId = hex.hexLookup[side]
+		const otherHex = model.getHexByID(otherHexId)
+		const otherSide = (side + 3) % 6
+		if (!rf.TERR_ANY.includes(hex.currentTerrain) || !rf.TERR_ANY.includes(otherHex.currentTerrain)) continue
+		// Tracks never cross city moats, and have no bridge option
+		if (hex.hexTerrainID === rf.CITY || otherHex.hexTerrainID === rf.CITY) continue
+		if (!edge.hasTrainTrack || edge.hasTrainTrack.length !== edge.hasRoad.length) edge.hasTrainTrack = util.makeArrayOfSizeWithFill(edge.hasRoad.length, false)
+		const laneCount = edge.hasTrainTrack.length
+		// Same edge, same bank: a track on one side of a river carries on to the
+		// same bank on the neighbour, so it never crosses the river.
+		if (laneCount === 1) {
+			if (edge.hasTrainTrack[0]) continue
+			if (hex.sideNodeIds[side] === -1 || otherHex.sideNodeIds[otherSide] === -1) continue
+			if (!inBucket(hex.sideNodeIds[side])) continue
+			res.push([otherHexId, [otherHex.bucketIdsInitial[otherHex.nodeBucketIds[otherHex.sideNodeIds[otherSide]]]]])
+		} else {
+			const cornerSide = edge.edgeHexIDs[0] === hexID ? [0, 1] : [1, 0]
+			const otherCornerSide = cornerSide.map((i) => (i + 1) % 2)
+			for (const k of [0, 1].filter((k) => !edge.hasTrainTrack[k] && inBucket(hex.cornerNodeIds[side][cornerSide[k]]))) {
+				const otherNodeId = otherHex.cornerNodeIds[otherSide][otherCornerSide[k]]
+				if (otherNodeId === undefined || otherNodeId < 0) continue
+				res.push([otherHexId, [otherHex.bucketIdsInitial[otherHex.nodeBucketIds[otherNodeId]]]])
+			}
+		}
+	}
+	return res
+}
+
+// Map storage format: [[x1, y1, x2, y2, lane], ...], one entry per active lane.
+// Coordinates (not hex IDs) keep tracks attached to the same tiles when hexes
+// are removed or reordered in the editor.
+export function compressTrainTracksForMap() {
+	const store = useModelStore()
+	const res = []
+	for (const edge of store.mapData.edgeData) {
+		const lanes = edge.hasTrainTrack || []
+		for (let lane = 0; lane < lanes.length; lane++) {
+			if (!lanes[lane]) continue
+			const hex1 = model.getHexByID(edge.edgeHexIDs[0])
+			const hex2 = model.getHexByID(edge.edgeHexIDs[1])
+			res.push([hex1.coord[0], hex1.coord[1], hex2.coord[0], hex2.coord[1], lane])
+		}
+	}
+	return res
+}
+
+// Entry node for one track lane on one of the edge's hexes (same node roads use).
+function getTrainTrackEntryNode(hex, side, lane, laneCount, edge) {
+	if (laneCount === 1) return hex.sideNodeIds[side]
+	const offset = hex.hexID === edge.edgeHexIDs[0] ? 0 : 1
+	if (hex.hexTerrainID === rf.CITY) return cityBankNodeForEdgeSlot(hex, side, edge, lane)
+	return hex.cornerNodeIds[side][(lane + offset) % 2]
+}
+
+export function applyTrainTracksFromMap(tnData) {
+	const store = useModelStore()
+	if (!tnData) return
+	const entryNodesByHex = {}
+	for (const [x1, y1, x2, y2, lane] of tnData) {
+		const hex1 = store.mapData.hexData.find((h) => h.coord[0] === x1 && h.coord[1] === y1)
+		const hex2 = store.mapData.hexData.find((h) => h.coord[0] === x2 && h.coord[1] === y2)
+		if (!hex1 || !hex2) continue
+		const edge = store.mapData.edgeData.find((e) => e.edgeHexIDs.includes(hex1.hexID) && e.edgeHexIDs.includes(hex2.hexID))
+		if (!edge || lane >= edge.hasRoad.length) continue
+		if (!edge.hasTrainTrack || edge.hasTrainTrack.length !== edge.hasRoad.length) edge.hasTrainTrack = util.makeArrayOfSizeWithFill(edge.hasRoad.length, false)
+		edge.hasTrainTrack[lane] = true
+
+		const laneCount = edge.hasRoad.length
+		for (const hex of [hex1, hex2]) {
+			const side = hex.hexID === edge.edgeHexIDs[0] ? edge.joiningSides[0] : edge.joiningSides[1]
+			const node = getTrainTrackEntryNode(hex, side, lane, laneCount, edge)
+			if (node < 0) continue
+			if (!entryNodesByHex[hex.hexID]) entryNodesByHex[hex.hexID] = []
+			entryNodesByHex[hex.hexID].push(node)
+		}
+	}
+	for (const [hexID, nodes] of Object.entries(entryNodesByHex)) {
+		updateHexInternalTrainTracks(Number(hexID), nodes)
+	}
+	refreshUseTrainsFlag()
+}
+
 export function clickedBridgeOption(entry) {
 	const store = useModelStore()
 	const hexID = entry[0]
@@ -1153,15 +1356,14 @@ export function clickedBombOption(buildingID) {
 	const transporterObj = model.getTransporterByID(transporterID)
 	const buildingObj = model.getBuildingByID(buildingID)
 	if (!buildingObj || buildingObj.strengthened) return
-	// A bomb must be carried by the transporter
-	const bomb = model.resourcesOnTransport(transporterID).find((r) => r.type === rf.RES_BOMB)
-	if (!bomb) return
 	const hexID = buildingObj.location[1]
 	const bucketID = buildingObj.location[2]
 	// Target must be on the transporter's hex
 	if (transporterObj.location[1] !== hexID) return
-	// Take the carried bomb off the board
-	bomb.location = loc.setOOBlocation()
+	// The bomb must be accessible, not necessarily carried
+	let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], true)
+	if (errorFlag !== 0) return
+	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
 	// A bomb destroys exactly one building; strengthened buildings survive
 	model.removeBuildingByID(buildingObj.id)
 	// Add to stack (the building identifier keeps city targets unambiguous on replay)
@@ -1786,6 +1988,12 @@ export function clickedRes(event, _hexID, resID) {
 
 	// Exit if it's not highlighted
 	if (!store.context.resourceIDsToHighlight.includes(resID)) return
+	// Trains: picking which good pays for the ride. Nothing moves until the
+	// destination is clicked, so backing out here leaves the good where it was.
+	if (store.context.action === rf.ACT_TM_SELECT_TRAIN_FARE) {
+		train.selectTrainFare(resID)
+		return
+	}
 	if (store.context.action === rf.ACT_TM_SELECT_PICKUP_DROP_MOVE || store.context.action === rf.ACT_TM_BUILD_SELECT_BRIDGE_ROAD_WALL_BUILDING_RES_PICKUP_DROP) {
 		let transporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
 		// Planes & Aeroports: a plane may only load goods/geese at the start of the movement phase
@@ -1811,7 +2019,7 @@ export function clickedRes(event, _hexID, resID) {
 		if (model.transporterCarriesTransporter(transporterObj.id)) {
 			let clientX = event.clientX
 			let clientY = event.clientY
-			let htmlMessage = "Transporter is<br/>already full<br/>Max Capacity: 1"
+			let htmlMessage = i18n.global.t("action.transporterFull")
 			model.showPopup("error", clientX, clientY, htmlMessage)
 			if (isGoose) spaceToLoadGoose = false
 			else {
@@ -1837,7 +2045,7 @@ export function clickedRes(event, _hexID, resID) {
 			else {
 				let clientX = event.clientX
 				let clientY = event.clientY
-				let htmlMessage = "Transporter is<br/>already full<br/>Max Capacity: " + transporterStats.maxCapacity
+				let htmlMessage = i18n.global.t("action.transporterFullCapacity", { capacity: transporterStats.maxCapacity })
 				if (showPopup) model.showPopup("error", clientX, clientY, htmlMessage)
 				// Now set up for a possible ferry
 				const buckets = getPossibleDropBucketsForResourceOnTransporter(resID)
@@ -1859,7 +2067,7 @@ export function clickedRes(event, _hexID, resID) {
 			resObj.location = loc.setFollowerLocation(transporterObj.id)
 			let clientX = event.clientX
 			let clientY = event.clientY
-			let htmlMessage = "Transporter is<br/>already full<br/>Max Capacity: " + transporterStats.maxCapacity
+			let htmlMessage = i18n.global.t("action.transporterFullCapacity", { capacity: transporterStats.maxCapacity })
 			if (showPopup) model.showPopup("info", clientX, clientY, htmlMessage)
 			// create the stack
 			const compressedTransporterLocation = stack.compressLocation(transporterObj.location)
@@ -1888,7 +2096,7 @@ export function clickedRes(event, _hexID, resID) {
 		if (transporterObj.type === rf.EXHIBITION_TRANSPORTER && !atelier.canCaravanCarry(transporterObj, resObj.type)) {
 			let clientX = event.clientX
 			let clientY = event.clientY
-			let htmlMessage = "Exhibition caravans can only carry artwork, one of each type"
+			let htmlMessage = i18n.global.t("action.exhibitionCaravanArtwork")
 			model.showPopup("error", clientX, clientY, htmlMessage)
 			return
 		}
@@ -2259,6 +2467,13 @@ export function clickedResOnTransporter(transporterID, resourceID) {
 	const store = useModelStore()
 	if (store.context.action === rf.ACT_CONFIRM_END_TURN) return
 
+	// Trains: a good carried aboard may pay too
+	if (store.context.action === rf.ACT_TM_SELECT_TRAIN_FARE) {
+		if (!store.context.resourceIDsToHighlight.includes(resourceID)) return
+		train.selectTrainFare(resourceID)
+		return
+	}
+
 	if (store.context.action === rf.ACT_TM_SELECT_PICKUP_DROP_MOVE || store.context.action === rf.ACT_TM_BUILD_SELECT_BRIDGE_ROAD_WALL_BUILDING_RES_PICKUP_DROP) {
 		// If you are clicking a resource on another transporter, then try to steal it
 		if (transporterID !== store.context.selectedTransporterIDforTM) {
@@ -2270,7 +2485,7 @@ export function clickedResOnTransporter(transporterID, resourceID) {
 			if (model.transporterCarriesTransporter(selectedTransporterObj.id)) {
 				let clientX = event.clientX
 				let clientY = event.clientY
-				let htmlMessage = "Transporter is<br/>already full<br/>Max Capacity: 1"
+				let htmlMessage = i18n.global.t("action.transporterFull")
 				model.showPopup("error", clientX, clientY, htmlMessage)
 				return
 			}
@@ -2279,7 +2494,7 @@ export function clickedResOnTransporter(transporterID, resourceID) {
 			if (resourcesOnTransporter.length >= transporterStats.maxCapacity) {
 				let clientX = event.clientX
 				let clientY = event.clientY
-				let htmlMessage = "Transporter is<br/>already full<br/>Max Capacity: " + transporterStats.maxCapacity
+				let htmlMessage = i18n.global.t("action.transporterFullCapacity", { capacity: transporterStats.maxCapacity })
 				model.showPopup("error", clientX, clientY, htmlMessage)
 				return
 			}
@@ -2288,7 +2503,7 @@ export function clickedResOnTransporter(transporterID, resourceID) {
 			if (selectedTransporterObj.type === rf.EXHIBITION_TRANSPORTER && !atelier.canCaravanCarry(selectedTransporterObj, stolenResObj.type)) {
 				let clientX = event.clientX
 				let clientY = event.clientY
-				let htmlMessage = "Exhibition caravans can only carry artwork, one of each type"
+				let htmlMessage = i18n.global.t("action.exhibitionCaravanArtwork")
 				model.showPopup("error", clientX, clientY, htmlMessage)
 				return
 			}

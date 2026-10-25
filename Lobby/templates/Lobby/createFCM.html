@@ -1146,10 +1146,12 @@
   {% endif %}
   {% block script %}
     {% compress js %}
+      <script src="{% static 'Lobby/createGamePage.js' %}"></script>
       <script src="{% static 'Lobby/createFCMgame.js' %}"></script>
     {% endcompress %}
     <script>
 	    var global = {};
+	    {% include "Lobby/kickoutOptions.html" %}
 	    document.querySelectorAll(".paceHelpIcon").forEach((icon) => {
 	        const toggleTooltip = () => {
 	            const isOpen = icon.classList.contains("is-open")
@@ -1227,7 +1229,7 @@
             {% if fillData %}
             //alert("Filling Data")
             var setupData = {};
-            setupData.gameName = "{{ gameName|safe }}";
+            setupData.gameName = "{{ gameName|escapejs }}";
             setupData.gameDescription = "{{ gameDescription }}";
             setupData.gamePace = {{ gamePace }};
             setupData.kickoutDuration = "{{ kickoutDuration }}";

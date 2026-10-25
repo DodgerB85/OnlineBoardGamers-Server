@@ -25,6 +25,7 @@ import * as WS from "../backend/KFWwebsocket.js"
 import * as view from "./KFWview.js"
 import * as village from "./KFWvillage.js"
 import * as rules from "./KFWrules.js"
+import i18n from "../i18n.js"
 
 export function addHistory(event, playerIndex, timeOffset, params) {
 	const personal = usePersonalStore()
@@ -127,12 +128,12 @@ export async function initGame() {
 
 	// If NOT your game, and NO game data, then game hasn't started
 	if (window.initData.pov < 0 && window.initData.gameData === "") {
-		store.viewSettings.errorText = "The game has not yet started"
+		store.viewSettings.errorText = i18n.global.t("io.gameNotStarted")
 		// Create the <h1> element
 		var heading = document.createElement("h1")
 
 		// Set the text content of the <h1> element
-		heading.textContent = "The game has not yet started"
+		heading.textContent = i18n.global.t("io.gameNotStarted")
 
 		// Get a reference to the body element
 		var body = document.body
@@ -346,6 +347,12 @@ export async function initGame() {
 			}
 			// If training game and in final scoring, always work through in numerical order
 			if (personal.trainingGame && store.gameflow.phase === rf.PHASE_FINAL_SCORING) store.gameflow.turnOrder.sort((a, b) => a - b)
+		}
+
+		// All final scoring moves are in but the game-over save never landed - re-send ours to retry it
+		if (!personal.trainingGame && store.gameflow.phase === rf.PHASE_FINAL_SCORING && store.gameflow.turnOrder.length === 0 && personal.pov >= 0 && window.initData.move !== "") {
+			await IO.saveFinalScoringMove(personal.pov, window.initData.move)
+			return
 		}
 
 		doturnStartHighlights()
@@ -1324,14 +1331,14 @@ export function processTileAction(tile) {
 				store.context.action2 = rf.ACT_CONFIRM_END_TURN
 				return
 			}
-			message = "You got "
+			message = i18n.global.t("model.youGot")
 			for (let i = 0; i < incomingRes.length; i++) {
 				message += `<img class="resourceInMessage" src="${view.getImage("res_" + incomingRes[i])}" />`
 			}
 			// Add the history
 			addHistory(rf.HIST_ACT_ON_TILE, controller.currentPlayerIndex(), 0, [...store.context.historyObj])
 		} else if (action === rf.ACT_TILE_GET_RANDOM_MEEPLE) {
-			message = "End your turn to get "
+			message = i18n.global.t("model.endTurnToGet")
 			for (let i = 0; i < tile.action[tile.upgraded + 1]; i++) message += `<img class="meepleInMessage" src="${view.getImage("meeple_random")}" />`
 			for (let i = 0; i < tile.action[tile.upgraded + 1]; i++) histData.push(rf.MEEPLE_RANDOM)
 			store.context.historyObj.push([...histData])
@@ -1339,7 +1346,7 @@ export function processTileAction(tile) {
 			store.context.endTurnActions.push([controller.currentPlayerIndex(), rf.SERV_GET_RADOM_MEEPLES_FROM_BAG_TO_PLAYER, tile.action[tile.upgraded + 1], store.history.length - 1, [...histData]])
 			controller.currentPlayerObj().knownHiddenMeeples[4] += tile.action[tile.upgraded + 1]
 		} else if (action === rf.ACT_TILE_GET_RANDOM_SKILL_TILE) {
-			message = "End your turn to get "
+			message = i18n.global.t("model.endTurnToGet")
 			for (let i = 0; i < tile.action[tile.upgraded + 1]; i++) message += `<img class="skillTileInMessage" src="${view.getImage("skillTile_random")}" />`
 			for (let i = 0; i < tile.action[tile.upgraded + 1]; i++) histData.push(rf.SKILL_ANY_RANDOM)
 			store.context.historyObj.push([...histData])
@@ -1350,7 +1357,7 @@ export function processTileAction(tile) {
 		// SUMMER ACTION
 		else if (action === rf.ACT_TILE_SKILL_FOR_RES) {
 			if (controller.currentPlayerObj().hiddenSkillTiles[actionParams[0]] === 0) {
-				store.gameMessages.errorText = "You do not have the skill tile"
+				store.gameMessages.errorText = i18n.global.t("model.noSkillTile")
 				return
 			}
 			//message = getResForSkillTile_core(controller.currentPlayerIndex(), isInMyVillage, tile.id)
@@ -1380,14 +1387,14 @@ export function processTileAction(tile) {
 				store.context.action2 = rf.ACT_CONFIRM_END_TURN
 				return
 			}
-			message = "You got "
+			message = i18n.global.t("model.youGot")
 			for (let i = 0; i < incomingRes.length; i++) {
 				message += `<img class="resourceInMessage" src="${view.getImage("res_" + incomingRes[i])}" />`
 			}
 
 			addHistory(rf.HIST_ACT_ON_TILE, controller.currentPlayerIndex(), 0, [...store.context.historyObj])
 		} else {
-			alert("you would get the [AUTO] tile action now. that's not done yet")
+			alert(i18n.global.t("model.autoTileNotDone"))
 		}
 		store.gameMessages.turnEndText = message
 		store.context.action = rf.ACT_CONFIRM_END_TURN
@@ -1464,7 +1471,7 @@ export function processTileAction(tile) {
 				store.context.meeplesRemoved.splice(0)
 				store.context.historyObj.splice(0)
 			} else if (meepleSources === 0) {
-				store.gameMessages.actionError = "You do not have the correct meeple to exchange"
+				store.gameMessages.actionError = i18n.global.t("model.noCorrectMeeple")
 				return
 			}
 		}
@@ -1486,7 +1493,7 @@ export function processTileAction(tile) {
 					store.context.action2 = rf.ACT_CONFIRM_END_TURN
 					return
 				}
-				let message = "You got "
+				let message = i18n.global.t("model.youGot")
 				for (let i = 0; i < incomingRes.length; i++) {
 					message += `<img class="resourceInMessage" src="${view.getImage("res_" + incomingRes[i])}" />`
 				}
@@ -1503,7 +1510,7 @@ export function processTileAction(tile) {
 		} else if (action === rf.ACT_TILE_GET_MEEPLE_AND_OR_SKILL) {
 			// If the tile is upgraded, it becomes an auto-action
 			if (tile.upgraded === 1) {
-				message = "End your turn to get "
+				message = i18n.global.t("model.endTurnToGet")
 				message += `<img class="meepleInMessage" src="${view.getImage("meeple_random")}" /> `
 				message += `<img class="skillTileInMessage" src="${view.getImage("skillTile_random")}" />`
 
@@ -1794,7 +1801,7 @@ export function deductAutoItemPicks(tile_id) {
 export function payAnyCosts_core(playerIndex, meepleCostArr, skillsCostArr, resCostArr, tile_id) {
 	const store = useModelStore()
 	if (!canAutoProcessResources(playerIndex, meepleCostArr, skillsCostArr, resCostArr, tile_id)) {
-		alert("RES PROCESS ERROR")
+		alert(i18n.global.t("model.resProcessError"))
 		return
 	}
 	let playerObj = store.players[playerIndex]
@@ -1994,7 +2001,7 @@ export function exchangeOutbidMeeples(tileID, playerIndex) {
 	store.removeAllActiveHighlights()
 	unhighlightOutbidMeeples()
 
-	message = "End your turn to get "
+	message = i18n.global.t("model.endTurnToGet")
 	for (let i = 0; i < amount; i++) message += `<img class="meepleInMessage" src="${view.getImage("meeple_random")}" /> `
 	store.gameMessages.turnEndText = message
 	store.context.action = rf.ACT_CONFIRM_END_TURN
@@ -2023,7 +2030,7 @@ export function exchangeChosenMeeple(colour) {
 	store.context.endTurnActions.push([controller.currentPlayerIndex(), rf.SERV_GET_RADOM_MEEPLES_FROM_BAG_TO_PLAYER, amount, store.history.length - 1, [...histData]])
 	controller.currentPlayerObj().knownHiddenMeeples[4] += amount
 
-	let message = "End your turn to get "
+	let message = i18n.global.t("model.endTurnToGet")
 	for (let i = 0; i < amount; i++) message += `<img class="meepleInMessage" src="${view.getImage("meeple_random")}" /> `
 	store.gameMessages.turnEndText = message
 	store.context.action = rf.ACT_CONFIRM_END_TURN
@@ -2049,7 +2056,7 @@ export function exchangeSkillTileForSkillTiles(idx) {
 	store.context.endTurnActions.push([controller.currentPlayerIndex(), rf.SERV_GET_RADOM_SKILLS_FROM_BAG_TO_PLAYER, amount, store.history.length - 1, [...histData]])
 	controller.currentPlayerObj().knownHiddenSkillTiles[3] += amount
 
-	let message = "End your turn to get "
+	let message = i18n.global.t("model.endTurnToGet")
 	for (let i = 0; i < amount; i++) message += `<img class="skillTileInMessage" src="${view.getImage("skillTile_random")}" /> `
 	store.gameMessages.turnEndText = message
 	store.context.action = rf.ACT_CONFIRM_END_TURN
@@ -2076,7 +2083,7 @@ export function exchangeSkillTileForMeeples(idx) {
 	store.context.endTurnActions.push([controller.currentPlayerIndex(), rf.SERV_GET_RADOM_MEEPLES_FROM_BAG_TO_PLAYER, amount, store.history.length - 1, [...histData]])
 	controller.currentPlayerObj().knownHiddenMeeples[4] += amount
 
-	let message = "End your turn to get "
+	let message = i18n.global.t("model.endTurnToGet")
 	for (let i = 0; i < amount; i++) message += `<img class="meepleInMessage" src="${view.getImage("meeple_random")}" /> `
 	store.gameMessages.turnEndText = message
 	store.context.action = rf.ACT_CONFIRM_END_TURN
@@ -2115,14 +2122,14 @@ export function exchangeSkillTileForGreen_core(playerIndex, idx, numGreen) {
 	for (let i = 0; i < numGreen; i++) numGreenArr.push(rf.MEEPLE_GREEN)
 	store.context.endTurnActions.push([controller.currentPlayerIndex(), rf.SERV_MEEPLES_JUST_TO_PLAYER, numGreenArr])
 
-	let message = "You gained "
+	let message = i18n.global.t("model.youGained")
 	for (let i = 0; i < numGreen; i++) {
 		if (store.availableGreenMeeples > 0) {
 			controller.currentPlayerObj().hiddenMeeples[rf.MEEPLE_GREEN]++
 			controller.currentPlayerObj().knownHiddenMeeples[rf.MEEPLE_GREEN]++
 			store.availableGreenMeeples--
 			message += `<img class="meepleInMessage" src="${view.getImage("meeple_green")}" /> `
-		} else message + -` (No more green meeples available)`
+		} else message += i18n.global.t("model.noMoreGreen")
 	}
 	return message
 }
@@ -2194,11 +2201,11 @@ export function exchangeMeeples_core(playerIndex, meepleArray, singleMeepleSourc
 			} else numIncomingGreens--
 		}
 
-		let message = "You traded "
+		let message = i18n.global.t("model.youTraded")
 		for (let i = 0; i < meeplesRemoved.length; i++) {
 			message += `<img class="meepleInMessage" src="${view.getImage("meeple_" + meeplesRemoved[i])}" />`
 		}
-		message += ` for `
+		message += i18n.global.t("model.for")
 		for (let i = 0; i < numIncomingGreens; i++) {
 			message += `<img class="meepleInMessage" src="${view.getImage("meeple_green")}" />`
 		}
@@ -2217,7 +2224,7 @@ export function exchangeMeeples_core(playerIndex, meepleArray, singleMeepleSourc
 		store.context.endTurnActions.push([controller.currentPlayerIndex(), rf.SERV_GET_RADOM_MEEPLES_FROM_BAG_TO_PLAYER, amount, store.history.length - 1, [...histData]])
 		controller.currentPlayerObj().knownHiddenMeeples[4] += amount
 
-		let message = "End your turn to get "
+		let message = i18n.global.t("model.endTurnToGet")
 		for (let i = 0; i < amount; i++) message += `<img class="meepleInMessage" src="${view.getImage("meeple_random")}" /> `
 		store.gameMessages.turnEndText = message
 		store.context.action = rf.ACT_CONFIRM_END_TURN
@@ -2249,7 +2256,7 @@ export function exchangeMeeples_core(playerIndex, meepleArray, singleMeepleSourc
 
 	// Remove the first element as that is the skill tile gone
 	let incomingRes = tile.action[store.context.selectedTile.upgraded + 1].slice(1)
-	let message = "You got "
+	let message = i18n.global.t("model.youGot")
 	for (let i = 0; i < incomingRes.length; i++) {
 		message += `<img class="resourceInMessage" src="${view.getImage("res_" + incomingRes[i])}" />`
 		if (isInMyVillage) tile.resources[incomingRes[i]]++
@@ -2363,7 +2370,7 @@ export function chooseContract_core(playerIndex, id) {
 		/*ret = store.hiddenContracts.pop()
 		let newContract = rf.ALL_CONTRACTS.find((c) => c.id === ret)
 		store.players[playerIndex].hiddenContracts.push(JSON.parse(JSON.stringify(newContract)))*/
-		if (store.gameMessages.turnEndText === "") store.gameMessages.turnEndText = "End your turn to get "
+		if (store.gameMessages.turnEndText === "") store.gameMessages.turnEndText = i18n.global.t("model.endTurnToGet")
 		store.gameMessages.turnEndText += `<svg viewBox="77 131.5 55.5 34" class="contractInMessage">
 					<image width="52.916668" height="31.75" preserveAspectRatio="none" xlink:href="${view.getImage("c_back")}" x="78.386688" y="132.625" style="clip-path: url(#conttractClipPath)" />
 					<path d="${rf.CONTRACT_PATH_D}" class="contractPathGLOBAL"  />
@@ -2409,7 +2416,7 @@ export function exchangeContractAuto_core(playerIndex, contract_id, keyNum, item
 			store.availableResources[item]--
 			village.addResourcesToVillage(playerIndex, -1, [item])
 		} else {
-			store.gameMessages.actionError = "There are no moure of that resource available"
+			store.gameMessages.actionError = i18n.global.t("model.noMoreResource")
 		}
 	}
 	// Remove the contract

@@ -2,9 +2,9 @@
 import * as history from "../js/TGZhistory"
 import * as IO from "../js/TGZ_IO"
 import * as rf from "../js/TGZreference"
-import * as model from "../js/TGZmodel"
-
 import HistoryEntry from "./HistoryEntry.vue"
+import MapInspectorButton from "./utils/MapInspectorButton.vue"
+import HubRangeLegend from "./utils/HubRangeLegend.vue"
 
 import { useModelStore } from "../stores/TGZstore.js"
 const store = useModelStore()
@@ -12,10 +12,12 @@ import { usePersonalStore } from "../stores/TGZpersonal.js"
 const personal = usePersonalStore()
 
 import { ref } from "vue"
+import i18n from "../i18n"
+const t = i18n.global.t
 
 const spinoffSuccessText = ref("")
 const spinoffErrorText = ref("")
-const copyMessage = ref("https://www.onlineboardgamers.com/TGZ/110/replay/5 Copied to Clipboard")
+const copyMessage = ref("")
 
 function performStep(amount) {
 	spinoffSuccessText.value = ""
@@ -29,7 +31,7 @@ async function localCopyGameToPracticeGame2() {
 	if (store.replayStep === store.replayData.length - 1) {
 		// Need to check if at data end AND game is over
 		if (store.history[store.history.length - 1][0] === rf.HIST_GAME_END) {
-			spinoffErrorText.value = "Please step back to a player move before copying the game"
+			spinoffErrorText.value = t("replay.stepBackBeforeCopy")
 			return
 		}
 		copyStep = store.replayStep + 1
@@ -44,8 +46,8 @@ async function localCopyGameToPracticeGame2() {
 	}
 
 	let result = await IO.copyGameToNewPracticeGame(copyStep)
-	if (result.response) spinoffSuccessText.value = 'Game Created. View in Lobby or click <a href="/TGZ/' + String(result.newID) + '/show/" target="_blank"/>Here</a>'
-	else spinoffErrorText.value = "Error Creating a New Game"
+	if (result.response) spinoffSuccessText.value = t("replay.gameCreated") + ' <a href="/TGZ/' + String(result.newID) + '/show/" target="_blank"/>' + t("replay.here") + "</a>"
+	else spinoffErrorText.value = t("replay.errorCreating")
 }
 
 function copyToClipboard() {
@@ -60,7 +62,7 @@ function copyToClipboard() {
 
 	document.body.removeChild(textarea)
 
-	copyMessage.value = textToCopy + " Copied to Clipboard"
+	copyMessage.value = t("replay.copiedToClipboard", { url: textToCopy })
 
 	const button = document.getElementById("copyURLbutton")
 	const popup = document.getElementById("popup")
@@ -105,77 +107,54 @@ function moveReplayUIsplitScreen() {
 
 <template>
 	<template v-if="store.topMenuViews.showReplay">
-		<div id="mapInspectorButtonDiv">
-			<button @click="model.toggleMapInspector" class="actionsLineButton">
-				<span v-if="!store.topMenuViews.mapInspectorMode">Enable</span>
-				<span v-else>Disable</span>
-				<br />
-				Map
-				<br />
-				Inspector
-			</button>
-			<template v-if="store.topMenuViews.mapInspectorMode">
-				<br />
-				<input type="checkbox" id="mapInspectorEshuCheckbox" v-model="store.topMenuViews.mapInspectorEshu" />
-				<label for="mapInspectorEshuCheckbox">Use Eshu</label>
-			</template>
-		</div>
+		<MapInspectorButton prefix="replay" show-eshu />
 		<button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="store.replayStep === 0"
-			@click="performStep(-999)">Back to my last move</button>
-		<button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-99)">|&lt;</button>
-		<button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-9)">&lt;&lt;</button>
-		<button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-1)">&lt;</button>
+			@click="performStep(-999)">{{ $t("replay.backToMyLastMove") }}</button>
+		<button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-99)" :title="$t('replay.first')" :aria-label="$t('replay.first')">|&lt;</button>
+		<button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-9)" :title="$t('replay.backFive')" :aria-label="$t('replay.backFive')">&lt;&lt;</button>
+		<button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-1)" :title="$t('replay.backOne')" :aria-label="$t('replay.backOne')">&lt;</button>
 		{{ store.replayStep + 1 }} / {{ store.replayData.length }}
 		<button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
-			@click="performStep(1)">&gt;</button>
+			@click="performStep(1)" :title="$t('replay.forwardOne')" :aria-label="$t('replay.forwardOne')">&gt;</button>
 		<button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
-			@click="performStep(9)">&gt;&gt;</button>
+			@click="performStep(9)" :title="$t('replay.forwardFive')" :aria-label="$t('replay.forwardFive')">&gt;&gt;</button>
 		<button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
-			@click="performStep(99)">&gt;|</button>
+			@click="performStep(99)" :title="$t('replay.last')" :aria-label="$t('replay.last')">&gt;|</button>
 
 		<div class="copyGameButtonDiv" v-if="personal.name != undefined">
 			<button @click="localCopyGameToPracticeGame2()" class="actionsLineButton">
-				Copy This Game
+				{{ $t("replay.copyThisGame") }}
 				<br />
-				To New Game
+				{{ $t("replay.toNewGame") }}
 			</button>
 			<button v-if="store.topMenuViews.replayUIlocation !== 2" @click="moveReplayUIupDown()"
 				class="actionsLineButton">
 				<template v-if="store.topMenuViews.replayUIlocation === 0">
-					Move UI
-					<br />
-					to Bottom
+					{{ $t("replay.moveUiToBottom") }}
 					<b>▼</b>
 				</template>
 				<template v-if="store.topMenuViews.replayUIlocation === 1">
-					Move UI
-					<br />
-					to Top
+					{{ $t("replay.moveUiToTop") }}
 					<b>▲</b>
 				</template>
 			</button>
 			<button @click="moveReplayUIsplitScreen()" class="actionsLineButton">
 				<template v-if="store.topMenuViews.replayUIlocation !== 2">
 					<b>◀</b>
-					Split
+					{{ $t("replay.splitScreen") }}
 					<b>▶</b>
-					<br />
-					Screen UI
 				</template>
 				<template v-if="store.topMenuViews.replayUIlocation === 2">
 					<b>▶</b>
-					Single
+					{{ $t("replay.singleScreen") }}
 					<b>◀</b>
-					<br />
-					Screen UI
 				</template>
 			</button>
 		</div>
 		<br />
-		Use the arrows to step through the game. This will not alter the current game in any way
+		{{ $t("replay.useArrows") }}
 		<br />
-		<button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">Copy URL to this move to
-			clipboard</button>
+		<button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">{{ $t("replay.copyUrl") }}</button>
 		<div id="popup" class="popup">{{ copyMessage }}</div>
 
 		<div v-if="spinoffSuccessText !== ''" class="spinoffSuccessText" v-html="spinoffSuccessText"></div>
@@ -186,12 +165,8 @@ function moveReplayUIsplitScreen() {
 
 		<template v-if="store.topMenuViews.mapInspectorMode && store.topMenuViews.showReplay">
 			<br />
-			Click an item to view ranges. Hubs Used:
-			<span class="hubRangeSq hubRangeSq0">0</span>
-			<span v-for="idx in Math.max(store.topMenuViews.hubRangesToHighlight.length - 1, 0)" :key="idx"
-				class="hubRangeSq" :class="'hubRangeSq' + String(idx % 8)">
-				{{ idx }}
-			</span>
+			{{ $t("replay.clickItemRanges") }}
+			<HubRangeLegend :ranges="store.topMenuViews.hubRangesToHighlight" />
 			<br />
 			<br />
 		</template>

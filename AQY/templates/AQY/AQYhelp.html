@@ -9,11 +9,9 @@
     <h2>{% translate "Rules" %}</h2>
     <div class="help-qa">
       <p>
+        {% static 'rules/Antiquity_Rules.pdf' as aqy_rules_url %}
         {% blocktranslate trimmed %}
-          Antiquity Rules Available <a class="linkOther"
-    href="https://tesera.ru/images/items/188574/Antiquity_Rules.pdf"
-    target="_blank"
-    download>here</a>
+          Antiquity Rules Available <a class="linkOther" href="{{ aqy_rules_url }}" target="_blank" download>here</a>
         {% endblocktranslate %}
       </p>
     </div>

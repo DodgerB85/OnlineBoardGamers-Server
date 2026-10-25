@@ -162,25 +162,24 @@ function toggleCheckbox(playerIndexToggled) {
 
 <template>
 	<div class="sideBySide" id="autoShipDiv">
-		<span v-if="store.context.historyObj.length === 1">You can ship the most possible goods in the cheapest way as
-			follows:</span>
-		<span v-else>You can ship the remaining goods in the cheapest way as follows:</span>
+		<span v-if="store.context.historyObj.length === 1">{{ $t('shipping.mostPossible') }}</span>
+		<span v-else>{{ $t('shipping.remainingGoods') }}</span>
 		<br />
-		(Click a row to view that good movement)
+		{{ $t('shipping.clickRow') }}
 		<table id="autoShipPlayerTable">
 			<thead>
 				<tr>
-					<th><b>Player</b></th>
-					<th><b>Ships</b></th>
-					<th><b>Ship cost</b></th>
-					<th><b>Net Income</b></th>
-					<th><b>City</b></th>
-					<th><b>Ship Good</b></th>
+					<th><b>{{ $t('shipping.player') }}</b></th>
+					<th><b>{{ $t('shipping.ships') }}</b></th>
+					<th><b>{{ $t('shipping.shipCost') }}</b></th>
+					<th><b>{{ $t('shipping.netIncome') }}</b></th>
+					<th><b>{{ $t('shipping.city') }}</b></th>
+					<th><b>{{ $t('shipping.shipGood') }}</b></th>
 				</tr>
 			</thead>
 			<tbody>
 				<!-- journeys.push([].concat([goodId, shipCompany.player, shipCompany.id], trace, [city])) -->
-				<tr v-for="(entry, idx) in store.context.maxPossData" :key="idx">
+				<tr v-for="(entry, idx) in store.context.maxPossData" :key="idx" :title="$t('actionArea.shippingAutoExplain')">
 					<!-- Player-->
 					<td @click="localClickedShippingRow(entry)">
 						<span class="mainEntryPlayer"
@@ -217,7 +216,7 @@ function toggleCheckbox(playerIndexToggled) {
 			</tbody>
 		</table>
 		<template v-if="store.context.maxPossData.length > 0">
-			Total Income:
+			{{ $t('shipping.totalIncome') }}
 			<template v-for="(incomeEntry, idx) in getAutoShipTotalIncomes()" :key="idx">
 				&nbsp;
 				<span class="mainEntryPlayer"
@@ -225,17 +224,17 @@ function toggleCheckbox(playerIndexToggled) {
 						store.players[incomeEntry[0]].displayName }}</span>
 				{{ incomeEntry[1] }}
 				<span v-if="incomeEntry[2] > 0">
-					(+{{ incomeEntry[2] }} Subsidy)
+					{{ $t('shipping.subsidy', { amount: incomeEntry[2] }) }}
 				</span>
 			</template>
 			<br />
 
-			There may be more than 1 lowest cost solution
+			{{ $t('shipping.moreThanOneSolution') }}
 			<br />
 			<div class="expertDiv" v-if="store.players.length > 2">
-				<b><u>Expert Option</u></b>
+				<b><u>{{ $t('shipping.expertOption') }}</u></b>
 				<br />
-				Favour these players to ship
+				{{ $t('shipping.favourPlayers') }}
 				<br />
 				<template v-for="(player, playerIndex) in store.players" :key="playerIndex">
 					<template v-if="playerIndex !== controller.currentPlayerIndex()">
@@ -251,42 +250,42 @@ function toggleCheckbox(playerIndexToggled) {
 					</template>
 				</template>
 				<br />
-				Altering this could end up in lower net income - see
-				<a class="linkOther" href="/IND/help/#navShipPlayerPreference" target="_blank">Help</a>
-				for info
+				{{ $t('shipping.alteringLower') }}
+				<a class="linkOther" href="/IND/help/#navShipPlayerPreference" target="_blank">{{ $t('shipping.help') }}</a>
+				{{ $t('shipping.forInfo') }}
 			</div>
-			<button class="actionsLineButton" @click="localRecalcMaxPoss">Recalculate</button>
+			<button class="actionsLineButton" @click="localRecalcMaxPoss">{{ $t('shipping.recalculate') }}</button>
 			<!--<button class="actionsLineButton" @click="localShowShipping">Show Shipping</button>-->
-			<button class="actionsLineButton" @click="localShowCities">Show Destination Cities</button>
+			<button class="actionsLineButton" @click="localShowCities">{{ $t('shipping.showCities') }}</button>
 			<button class="actionsLineButton" @click="localShipAuto">
-				<span v-if="store.context.historyObj.length === 1">Auto Ship</span>
-				<span v-else>Auto Ship Remaining Goods</span>
+				<span v-if="store.context.historyObj.length === 1">{{ $t('shipping.autoShip') }}</span>
+				<span v-else>{{ $t('shipping.autoShipRemaining') }}</span>
 			</button>
 		</template>
 		<template
 			v-else-if="store.context.maxPossData.length === 0 && store.context.historyObj.length - 1 === store.context.maxPoss">
 			<br />
-			You have shipped all possible goods
+			{{ $t('shipping.allShipped') }}
 		</template>
 		<template v-else>
 			<br />
 			<span class="deliveryTooSmallError">
-				Your manual shipping has blocked some deliveries
+				{{ $t('shipping.blockedDeliveries') }}
 				<br />
-				As per the rules, you must ship at least {{ store.context.maxPoss }}
-				<span v-if="store.context.maxPoss === 1">good</span>
-				<span v-else>goods</span>
+				{{ $t('shipping.mustShipAtLeast', { count: store.context.maxPoss }) }}
+				<span v-if="store.context.maxPoss === 1">{{ $t('shipping.good') }}</span>
+				<span v-else>{{ $t('shipping.goods') }}</span>
 			</span>
 		</template>
 		<template
 			v-if="store.context.maxPossData.length > 0 && store.context.maxPossData.length + store.context.historyObj.length - 1 < store.context.maxPoss">
 			<br />
 			<span class="deliveryTooSmallError">
-				Your manual shipping has blocked some deliveries
+				{{ $t('shipping.blockedDeliveries') }}
 				<br />
-				As per the rules, you must ship at least {{ store.context.maxPoss }}
-				<span v-if="store.context.maxPoss === 1">good</span>
-				<span v-else>goods</span>
+				{{ $t('shipping.mustShipAtLeast', { count: store.context.maxPoss }) }}
+				<span v-if="store.context.maxPoss === 1">{{ $t('shipping.good') }}</span>
+				<span v-else>{{ $t('shipping.goods') }}</span>
 			</span>
 		</template>
 	</div>

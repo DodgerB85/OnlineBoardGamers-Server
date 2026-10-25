@@ -1,6 +1,8 @@
 {% load static %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE|default:'en-gb' }}">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -137,9 +139,10 @@
   var initData = {};
   
   ///////////////////////
+  initData.locale = "{{ LANGUAGE_CODE|default:'en-gb' }}";
   initData.gameID = {{ gameID }};
   initData.gameName = "{{ gameName }}";
-  initData.gameData = '{{ gameData|safe }}';
+  initData.gameData = '{{ gameData|escapejs }}';
   initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
   initData.myZoomLevel = {{ myZoomLevel }};
   initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
@@ -148,7 +151,7 @@
   initData.preferredINDoptions = {{ preferredINDoptions }};
   initData.pov = {{ pov }};
   initData.preMoves = "{{ preMoves }}";
-  initData.sideData = "{{ sideData|safe }}";
+  initData.sideData = "{{ sideData|escapejs }}";
 
   initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
   initData.deleteVotesData = {{ deleteVotesData | safe }};
@@ -193,13 +196,13 @@
   {% if kickoutRequired > 0 and not myMove %}
   initData.kickoutRequired = {{kickoutRequired}};
   {% endif %}
-  initData.notes = '{{ notes | safe }}';
+  initData.notes = '{{ notes | escapejs }}';
   initData.yourTurnAudioType = {{ yourTurnAudioType }};
 
   /////////////////////
   {% if not gameData %}
   {% if displayNames %}
-  initData.displayNames = {{ displayNames | safe }};
+  initData.displayNames = JSON.parse('{{ displayNames|escapejs }}');
   {% endif %}
   initData.playerNames = {{ allPlayerListBySeat | safe }};
   {% endif %}

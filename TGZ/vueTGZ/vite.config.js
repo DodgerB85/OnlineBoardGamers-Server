@@ -134,8 +134,6 @@ export default defineConfig(({ command }) => ({
           const info = assetInfo.name.split('.')
           const extType = info[info.length - 1]
 
-          console.log(assetInfo); // Log asset name to the console
-
           if (/\.(jpg|png|jpe?g|gif|svg|webp|webm|mp3)$/.test(assetInfo.name)) {
             if (assetInfo.originalFileNames[0].startsWith('../../static/TGZ/images/expansion/')) {
               return `images/expansion/[name].${extType}`;

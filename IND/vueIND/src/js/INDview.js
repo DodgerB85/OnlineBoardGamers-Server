@@ -16,6 +16,8 @@ import * as map from "./INDmap"
 import { useModelStore } from "../stores/INDstore.js"
 import { usePersonalStore } from "../stores/INDpersonal.js"
 
+import i18n from "../i18n"
+
 export function kickoutTimerTicker() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
@@ -58,20 +60,21 @@ export function kickoutFlexiTimerTicker() {
 
 export function phaseStr() {
 	const store = useModelStore()
+	const t = i18n.global.t
 
-	if (store.gameflow.phase === rf.PHASE_NEW_ERA) return "New Era"
-	else if (store.gameflow.phase === rf.PHASE_BID_TURN_ORDER) return "Bid Turn Order"
-	else if (store.gameflow.phase === rf.PHASE_MERGERS) return "Mergers"
-	else if (store.gameflow.phase === rf.PHASE_MERGER_BIDDING) return "Mergers - Bid"
-	else if (store.gameflow.phase === rf.PHASE_MERGER_REMOVE_SIAP_FAJI_TERRS) return "Mergers - Siap Saji"
-	else if (store.gameflow.phase === rf.PHASE_ACQUISITIONS) return "Acquisitions"
-	else if (store.gameflow.phase === rf.PHASE_R_AND_D) return "Research & Development"
-	else if (store.gameflow.phase === rf.PHASE_OPERATIONS) return "Operations"
-	else if (store.gameflow.phase === rf.PHASE_CITY_GROWTH) return "City Growth"
-	else if (store.gameflow.phase === rf.PHASE_GAME_OVER) return "Game Over"
-	else if (store.gameflow.phase === rf.PHASE_MERGER_SHIP_REDEPLOYMENT) return "Ship Redeployment"
+	if (store.gameflow.phase === rf.PHASE_NEW_ERA) return t("phase.newEra")
+	else if (store.gameflow.phase === rf.PHASE_BID_TURN_ORDER) return t("phase.bidTurnOrder")
+	else if (store.gameflow.phase === rf.PHASE_MERGERS) return t("phase.mergers")
+	else if (store.gameflow.phase === rf.PHASE_MERGER_BIDDING) return t("phase.mergersBid")
+	else if (store.gameflow.phase === rf.PHASE_MERGER_REMOVE_SIAP_FAJI_TERRS) return t("phase.mergersSiap")
+	else if (store.gameflow.phase === rf.PHASE_ACQUISITIONS) return t("phase.acquisitions")
+	else if (store.gameflow.phase === rf.PHASE_R_AND_D) return t("phase.rnd")
+	else if (store.gameflow.phase === rf.PHASE_OPERATIONS) return t("phase.operations")
+	else if (store.gameflow.phase === rf.PHASE_CITY_GROWTH) return t("phase.cityGrowth")
+	else if (store.gameflow.phase === rf.PHASE_GAME_OVER) return t("phase.gameOver")
+	else if (store.gameflow.phase === rf.PHASE_MERGER_SHIP_REDEPLOYMENT) return t("phase.shipRedeployment")
 
-	return "NOT FOUND"
+	return t("phase.notFound")
 }
 
 export function getGoodColour(good) {

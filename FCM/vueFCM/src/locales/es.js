@@ -144,7 +144,7 @@ export default {
 		"title": "¡Bienvenido a Food Chain Magnate Online!",
 		"contact": "Si tiene alguna sugerencia, pregunta o comentario, comuníquese con el webmaster en",
 		"instructions": {
-			"placeItem": "Para colocar un elemento en el tablero, haga clic en cualquiera de los cuadrados resaltados en rojo.",
+			"placeItem": "Para colocar un elemento en el tablero, haga clic en cualquiera de los cuadrados resaltados en amarillo.",
 			"rotateItem": "Para rotar un elemento, use las flechas que se muestran al lado del elemento justo encima del tablero.",
 			"viewEmployees": "Para ver los empleados de cualquier jugador y su estructura actual, haz clic en su nombre en la barra negra en la parte superior de la pantalla.",
 			"viewReserve": "Para ver los empleados restantes, los hitos y otros elementos, haga clic en \"Reservar\" en el menú en la parte superior",
@@ -450,7 +450,6 @@ export default {
 	"workingDay": {
 		"remainingPoints": "{count} punto restante | {count} puntos restantes",
 		"salaryPoints": "Se puede utilizar 1 punto para reducir los salarios en 5 dólares | Se pueden utilizar {count} puntos para reducir los salarios en ${amount}",
-		"resetWorkingDay": "Restablecer día laborable",
 		"finishRecruiting": "Terminar de reclutar",
 		"trainedLabel": "Entrenado:",
 		"nightShiftTrainTwice": "Su Night Shift Manager permite que cada entrenador trabaje dos veces",
@@ -495,7 +494,7 @@ export default {
 		"setHawkerRoute": "Establecer ruta del vendedor ambulante",
 		"hawkerRouteRangeLeft": "Establecer ruta del vendedor ambulante: rango {count} restante",
 		"hawkerRouteNoRange": "Establecer ruta de Hawker: rango 0: haga clic en un cuadrado resaltado para detenerse",
-		"doneDrawingRoute": "Ruta de dibujo terminada",
+		"doneDrawingRoute": "Detener el cami?n ambulante",
 		"addHawkerTruck": "Agregar camión ambulante",
 		"placeCampaign": "Colocar campaña",
 		"clickToPlaceCampaign": "Haga clic en un cuadrado resaltado en el mapa para colocar su campaña.",
@@ -551,7 +550,6 @@ export default {
 		"canReduceSalary": "({count} se puede utilizar para reducir el salario)",
 		"confirmWorkingDay": "Estás a punto de confirmar toda la jornada laboral",
 		"warningNoHires": "ADVERTENCIA: NO HAS CONTRATADO A NADIE",
-		"resetWholeTurn": "Restablecer todo el turno",
 		"endTurn": "Finalizar turno",
 		"paydaySkipped": "Se omitirá el día de pago ya que no tienes salario que pagar y es el turno 1 o 2.",
 		"paydayTurnOrder": "El día de pago se jugará en orden de turno.",

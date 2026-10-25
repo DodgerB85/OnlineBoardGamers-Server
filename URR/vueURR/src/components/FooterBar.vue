@@ -5,12 +5,13 @@ import * as assets from "../js/URRassets"
 <template>
 	<div id="footer">
 		<div class="content">
-			<img :src="assets.getAsset('ur-box.jpg')" class="cover" alt="UR: 1830 BC game box" />
+			<img :src="assets.getAsset('ur-box.jpg')" class="cover" :alt="$t('footer.boxAlt')" />
 			<p>
-				UR: 1830 BC is a board game by Jeroen Doumen and Joris Wiersinga, published by
+				{{ $t("footer.credit") }}
 				<a target="_blank" href="https://www.splottershop.com/">Splotter Spellen</a>.
 			</p>
-			<p>Permissions provided. Menu icons from <a href="http://game-icons.net">game-icons.net</a></p>
+			<p>{{ $t("footer.implementation") }}</p>
+			<p>{{ $t("footer.icons") }} <a href="http://game-icons.net">game-icons.net</a></p>
 		</div>
 	</div>
 </template>

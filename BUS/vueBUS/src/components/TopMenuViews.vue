@@ -12,7 +12,9 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 const personal = usePersonalStore()
 
-import { ref } from "vue"
+import i18n from "../i18n"
+
+import { onMounted, onUnmounted, ref } from "vue"
 
 const chatMessage = ref("")
 
@@ -24,7 +26,7 @@ function toggleBug() {
 async function submitBug() {
 	let bugContent = document.getElementById("bugContent").value
 	if (bugContent.length === 0) {
-		alert("Please enter a bug report")
+		store.topMenuViews.errorText = i18n.global.t("topMenuViews.bugErrorRequired")
 		return
 	}
 
@@ -46,10 +48,11 @@ async function submitBug() {
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
-		if (data.bugEntrySuccess) alert("Your bug report has been submitted")
-		else alert("Sorry, there was a problem. Please email the webmaster directly")
+		if (data.bugEntrySuccess) store.successText = i18n.global.t("io.bugReportSubmitted")
+		else store.topMenuViews.errorText = i18n.global.t("io.webmasterProblem")
 	} catch (error) {
 		console.error("Error fetching data:", error)
+		store.topMenuViews.errorText = i18n.global.t("io.webmasterProblem")
 	}
 
 	store.topMenuViews.showLoader = false
@@ -65,19 +68,30 @@ function parseMessage(message) {
 	return message
 }
 
+function updateHistoryHeight() {
+	const el = document.getElementById("history")
+	if (!el) return
+	const cs = getComputedStyle(el)
+	const footerTop = document.getElementById("footer").getBoundingClientRect().top
+	const historyTop = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
+	el.style["max-height"] = String(Math.max(0, parseInt(footerTop - historyTop))) + "px"
+}
+
 function historyToggle() {
 	setTimeout(function () {
-		if (document.getElementById("historyMainDiv").classList.contains("reverseHistory")) document.getElementById("historyMainDiv").classList.remove("reverseHistory")
-		else document.getElementById("historyMainDiv").classList.add("reverseHistory")
-
-		//document.getElementById('boardContainer').classList.add('historyShowing');
-		var el = document.getElementById("history")
-		var cs = getComputedStyle(el)
-		var b = document.getElementById("footer").getBoundingClientRect().top
-		var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
-		el.style["max-height"] = String(parseInt(b - a)) + "px"
+		const mainDiv = document.getElementById("historyMainDiv")
+		if (mainDiv.classList.contains("reverseHistory")) mainDiv.classList.remove("reverseHistory")
+		else mainDiv.classList.add("reverseHistory")
+		updateHistoryHeight()
 	}, 400)
 }
+
+function resizeHistory() {
+	if (store.topMenuViews.showHistory) updateHistoryHeight()
+}
+
+onMounted(() => window.addEventListener("resize", resizeHistory))
+onUnmounted(() => window.removeEventListener("resize", resizeHistory))
 
 function sendChatMessage() {
 	if (chatMessage.value === "") return
@@ -105,13 +119,13 @@ function getRewindPanelLeft() {
 
 function getStatsExcludeVotes(returnPlayers = false) {
 	let votes = 0
-	let players = "None"
+	let players = i18n.global.t("topMenuViews.none")
 
 	for (const player in store.statsExcludeVotesData) {
 		// Use const or let for player
 		if (store.statsExcludeVotesData[player] === true) {
 			votes += 1
-			if (players === "None") players = String(player)
+			if (players === i18n.global.t("topMenuViews.none")) players = String(player)
 			else players += ", " + player
 		}
 	}
@@ -121,13 +135,13 @@ function getStatsExcludeVotes(returnPlayers = false) {
 
 function getDeleteVotes(returnPlayers = false) {
 	let votes = 0
-	let players = "None"
+	let players = i18n.global.t("topMenuViews.none")
 
 	for (const player in store.deleteVotesData) {
 		// Use const or let for player
 		if (store.deleteVotesData[player] === true) {
 			votes += 1
-			if (players === "None") players = String(player)
+			if (players === i18n.global.t("topMenuViews.none")) players = String(player)
 			else players += ", " + player
 		}
 	}
@@ -144,34 +158,34 @@ function localCastVote(topic) {
 <template>
 	<!-- BUG REPORT -->
 	<div id="bugReport" v-if="store.topMenuViews.showBug">
-		<h2>Bug Report</h2>
+		<h2>{{ $t('topMenuViews.bugReportTitle') }}</h2>
 		<p>
-			Please submit a bug report if you encounter any issues, giving as much detail as possbile.
+			{{ $t('topMenuViews.bugIntro') }}
 			<br />
-			The game data will be submitted along with your report.
+			{{ $t('topMenuViews.bugData') }}
 			<br />
-			You can also report it on the OBG discord. Click
-			<a href="https://discord.gg/hCU7Fr77yV" class="linkOther" target="_blank">Here</a>
-			to join
+			{{ $t('topMenuViews.discordInvite') }}
+			<a href="https://discord.gg/hCU7Fr77yV" class="linkOther" target="_blank">{{ $t('topMenuViews.here') }}</a>
+			{{ $t('topMenuViews.toJoin') }}
 		</p>
 
 		<div><textarea cols="150" rows="10" name="bugContent" id="bugContent"></textarea></div>
 		<div>
-			<button class="actionsLineButton" id="submitBug" @click="submitBug()">Submit</button>
+			<button class="actionsLineButton" id="submitBug" @click="submitBug()">{{ $t('topMenuViews.submit') }}</button>
 			&nbsp;&nbsp;&nbsp;&nbsp;
-			<button class="actionsLineButton" id="resetBug" @click="toggleBug()">Cancel</button>
+			<button class="actionsLineButton" id="resetBug" @click="toggleBug()">{{ $t('topMenuViews.cancel') }}</button>
 		</div>
 	</div>
 
 	<!-- NOTES -->
 	<div id="notesBox" v-if="store.topMenuViews.showNotes">
-		<h2>Personal game notes</h2>
-		<p>Only you can see these notes</p>
+		<h2>{{ $t('topMenuViews.notesTitle') }}</h2>
+		<p>{{ $t('topMenuViews.notesPrivate') }}</p>
 		<div><textarea cols="120" rows="10" id="notes" v-model="personal.notes" maxlength="5000"></textarea></div>
 		<div>
-			<button class="actionsLineButton" id="submitNotes" @click="IO.saveNotes()">Save</button>
-			<button class="actionsLineButton" id="clearNotes" @click="clearNotes()">Clear</button>
-			<button class="actionsLineButton" id="closeNotes" @click="toggleNotes">Close</button>
+			<button class="actionsLineButton" id="submitNotes" @click="IO.saveNotes()">{{ $t('topMenuViews.save') }}</button>
+			<button class="actionsLineButton" id="clearNotes" @click="clearNotes()">{{ $t('topMenuViews.clear') }}</button>
+			<button class="actionsLineButton" id="closeNotes" @click="toggleNotes">{{ $t('topMenuViews.close') }}</button>
 		</div>
 	</div>
 
@@ -179,9 +193,9 @@ function localCastVote(topic) {
 	<transition name="fade">
 		<div id="wholeChat" v-if="store.topMenuViews.showChat">
 			<div id="chatBox">
-				<h2>Send a message</h2>
+				<h2>{{ $t('topMenuViews.chatTitle') }}</h2>
 				<div><textarea rows="6" name="chatMessage" id="chatMessage" v-model="chatMessage"></textarea></div>
-				<div><button class="actionsLineButton" @click="sendChatMessage()">Send</button></div>
+				<div><button class="actionsLineButton" @click="sendChatMessage()">{{ $t('topMenuViews.send') }}</button></div>
 			</div>
 			<div id="messageList">
 				<div class="chatentry" v-for="(message, index) in store.chatData" v-bind:key="index">
@@ -202,43 +216,37 @@ function localCastVote(topic) {
 		<div id="rewindPanel" v-if="store.topMenuViews.showRewindPanel" :style="{
 			left: getRewindPanelLeft() + 'px',
 		}">
-			Any player can rewind the game at any time.
+			{{ $t('topMenuViews.rewindAnyone') }}
 			<br />
-			Please be courteous and rewind only if absolutely neessary - send a chat message to inform the other
-			players.
+			{{ $t('topMenuViews.rewindCourtesy') }}
 			<br />
-			Misuse of this feature will result in rewinds requiring permission from all players.
+			{{ $t('topMenuViews.rewindMisuse') }}
 
 			<br />
 			<br />
 
 			<span class="topMenuItem" @click="loadRewind()">
 				<img :src="view.getImage('icon-rewind')" />
-				<span>Rewind</span>
+				<span>{{ $t('topMenuViews.rewind') }}</span>
 			</span>
 			<hr />
 			<div
 				v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov != undefined && personal.pov >= 0">
-				If all players agree, this game can be excluded from the stats (won't count towards wins/losses)
+				{{ $t('topMenuViews.statsExcludeIntro') }}
 				<br />
-				Votes: {{ getStatsExcludeVotes(false) }} - Players: {{ getStatsExcludeVotes(true) }}
+				{{ $t('topMenuViews.votesPlayers', { votes: getStatsExcludeVotes(false), players: getStatsExcludeVotes(true) }) }}
 				<br />
 				<button v-if="!personal.votedToExclude" class="actionsLineButton"
-					@click="localCastVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">Vote to
-					Exclude
-					Game from Stats</button>
+					@click="localCastVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">{{ $t('topMenuViews.voteExclude') }}</button>
 			</div>
 			<div
 				v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
-				If all players agree, this game will be deleted
+				{{ $t('topMenuViews.deleteGameIntro') }}
 				<br />
-				Votes: {{ getDeleteVotes(false) }} - Players: {{ getDeleteVotes(true) }}
+				{{ $t('topMenuViews.votesPlayers', { votes: getDeleteVotes(false), players: getDeleteVotes(true) }) }}
 				<br />
 				<button v-if="!personal.votedToDelete" class="actionsLineButton"
-					@click="localCastVote(rf.DELETE_VOTE_TOPIC)">Vote
-					to
-					Delete
-					Game</button>
+					@click="localCastVote(rf.DELETE_VOTE_TOPIC)">{{ $t('topMenuViews.voteDelete') }}</button>
 			</div>
 		</div>
 	</transition>
@@ -247,22 +255,20 @@ function localCastVote(topic) {
 	<transition name="fade">
 		<div id="history" v-if="store.topMenuViews.showHistory">
 			<div id="historyToggleDiv">
-				<label class="textLabel">Oldest First</label>
+				<label class="textLabel">{{ $t('topMenuViews.oldestFirst') }}</label>
 				<label class="switch">
 					<input type="checkbox" checked @click="historyToggle()" />
 
 					<span class="slider round"></span>
 				</label>
-				<label class="textLabel">Newest First</label>
+				<label class="textLabel">{{ $t('topMenuViews.newestFirst') }}</label>
 				<br />
-				<span v-if="store.topMenuViews.showReplay">Click entry to jump to that point in the replay</span>
-				<span v-else>Click Lines / Buildings / VRROOOMM to highlight board</span>
-				<!--<br /><button @click="toggleReplayMode()"><span v-if="store.topMenuViews.showReplay">Exit</span><span
-            v-else>Enter</span> Replay Mode</button>-->
+				<span v-if="store.topMenuViews.showReplay">{{ $t('topMenuViews.clickEntryReplay') }}</span>
+				<span v-else>{{ $t('topMenuViews.clickEntryHighlight') }}</span>
 			</div>
 			<div id="historyMainDiv" class="reverseHistory">
-				<template v-for="(entry, index1) in store.history" v-bind:key="index1">
-					<HistoryEntry :entry="entry" :entry_-i-d="index1" />
+				<template v-for="(entry, index) in store.history" v-bind:key="index">
+					<HistoryEntry :entry="entry" :entry_-i-d="index" />
 				</template>
 			</div>
 			<div id="historyButtonDiv"></div>
@@ -287,7 +293,7 @@ function localCastVote(topic) {
 	/*display: none;*/
 	position: absolute;
 	left: 2px;
-	top: 62px;
+	top: 60px;
 	width: 450px;
 	z-index: 9999;
 	border: 2px solid black;
@@ -369,7 +375,7 @@ function localCastVote(topic) {
 	position: absolute;
 	padding-top: 5px;
 	left: 2px;
-	top: 62px;
+	top: 60px;
 	width: 450px;
 	z-index: 9999;
 	border: 2px solid black;
@@ -482,7 +488,7 @@ function localCastVote(topic) {
 .topMenuItem img {
 	/*filter: brightness(0) saturate(100%) invert(100%) sepia(17%) saturate(6440%) hue-rotate(174deg) brightness(98%) contrast(102%);
 */
-	width: 38x;
+	width: 38px;
 	height: 38px;
 }
 

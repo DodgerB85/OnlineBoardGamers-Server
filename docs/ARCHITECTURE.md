@@ -11,6 +11,7 @@ Other docs in this folder:
 - [Big picture](#big-picture)
 - [Apps and URL layout](#apps-and-url-layout)
 - [Core models](#core-models)
+- [Admin flags](#admin-flags)
 - [Presenters](#presenters)
 - [Page shell and the game client](#page-shell-and-the-game-client)
 - [Turn processing and stale-write protection](#turn-processing-and-stale-write-protection)
@@ -52,13 +53,42 @@ Each game app's `urls.py` exposes its API under its prefix, always with the same
 
 All in `Lobby/models.py`:
 
-- **`User`** (`AbstractUser`) with a one-to-one **`Profile`**: email/notification preferences (per notification type), webhooks (Discord/Slack/Telegram), per-game display preferences (colours etc.), availability tracking arrays.
+- **`User`** (`AbstractUser`) with a one-to-one **`Profile`**: email/notification preferences (per notification type), webhooks (Discord/Slack/Telegram), per-game display preferences (colours etc.), availability tracking arrays. Admin rights are explicit `Profile.is_site_admin` / `is_game_admin` flags only — Django superusers get neither by default, and grant themselves the flags the same way anyone else does (Django admin); views never authorize by username.
 - **`Game`**: `gameCode` (3-char choice), `gameName`, `creator`, `host`, `maxPlayers`, `gameStatus` (`AVAILABLE` / `WAITING` / `PRIVATE` / `ACTIVE` / `FINISHED`), `turn`/`phase`, `gameData` (opaque per-game state the client produced, often gzip+base64), `latestUpdate` (monotonic ms timestamp), `startingOptions` (JSON array of option ints), `kickoutDuration`, `zoomLevels`, plus per-game blob fields (`XXXplayersMoveData`, rewind data, ...).
 - **`GamePlayer`**: row per (game, human/bot) seat — `seat_order`, `is_current`, `is_kicked`, `is_missing`, `winner`, private `notes`. Unique on (game, player).
 - **`Tournament`**: rounds of `Game`s per game code (`Main`/`Mini` categories, `RR`/`PL`/`TL`/`MG` types), `tournamentProgressionData`/`PointsData`/`SideData` JSON, `nextRoundPlayers` M2M.
 - **`Lock`**: row backing `db_mutex` (see below).
 
 `Game` has a `PRESENTER_MAP` …→ per-game presenter class (see next section).
+
+## Admin flags
+
+Two independent booleans on `Profile` (`is_site_admin`, `is_game_admin`), read only through `Lobby/sharedFunctions/permissions.py` (`is_site_admin(user)`, `is_game_admin(user)`, `can_act_in_game(user, game)`). **`is_superuser` grants neither** — a superuser gets exactly what its Profile flags say, so grant it the flags like anyone else. The flags are the only source: views never authorize by username. Change them at `/admin` → *Lobby → Profiles* (both columns are list-filterable).
+
+### `is_site_admin` — the site, never a running game
+
+Gates whole pages; false ⇒ 404/403:
+
+- `/userStats` (`Lobby/views.py`) — signups-per-day and last-login charts.
+- `/DBO` and `DBO_deleteGame` — browse every game of every type, hard-delete one (unauthorised attempts are webhookbed to the admin Discord).
+- Posting a changelog entry.
+- Starting a Main tournament.
+- `/FCM/gameAdmin` + `gameAdminGetMoveData` (`FCM/views.py`) — the FCM move-data tool.
+- RNB maps: set `isVerified`, edit another creator's map, delete a map.
+
+It grants nothing inside a game: no turns, kickouts or rewinds.
+
+### `is_game_admin` — moderating any game
+
+Three overlapping powers, each repeated per game in its `views.py`:
+
+1. **Treated as in the game.** `Lobby/gameViewHelpers.build_show_game_data` forces `involvedPlayer = True` for a game admin, so the show page renders for them (as `pov = -1` observer unless they hold a seat) and `myMove` is computed — an admin can be *offered a turn* in a game they do not play. `GamePresenter.isMyMove` also returns `True` for everybody while no player is `is_current`, so idle games look like everyone's move. FCM (`FCM/views.py`) and TGZ re-check the flag after the helper.
+2. **Passes the write gate.** `can_act_in_game(user, game)` = "game admin **or** a seated player" is the standard check at the top of every `processXXXturn` endpoint.
+3. **Acts as somebody else, and moderates.** Submit a move under another player's name via the `BKSN` field (FCM, AQY, RNB, DDL); host-level rewind controls without being the host; `resetGame`; skipping the `passKickoutFor` route; flexi-time bookkeeping; `replaceExternalTournamentPlayer` (TGZ); starting-option bypasses (KFW).
+
+It grants no `is_site_admin` page above.
+
+Client-side footnote: HLC's template sets `global.superuser = true` for the literal username `BotKickStarter` (`HLC/templates/HLC/HLCtemplate.html`) — a hardcoded per-game name, unrelated to Django's `is_superuser`.
 
 ## Presenters
 
@@ -102,7 +132,7 @@ History entries have been extended over time, so every reader detects old vs new
 
 URR’s opening nation division uses a central six-card grid and a compact side map. The map opens in a dialog fitted to the window using the same live map component, preserving nation highlights and hex inspection. Offer and purchase confirmation stays inline beneath the grid, with bidding controls disabled until confirmation or Undo. During review, the top bar, player strip, and holdings panel continue to show the draft’s acting player; the next player appears after confirmation. Cards contain the offer/purchase controls and Map button; printed card artwork supplies the name, treaty price, and income. Nation cards show interested-player icons in bidding order, with an amount only beside the highest bidder. Player names appear in the top player-order strip; other identity displays use markers with names in tooltips and accessible labels. The acting bidder is highlighted during auctions; withdrawn players leave the list. All bidder markers remain in game data to determine auction eligibility and order. Treasury displays distinguish available money from highest-bid reservations, which are released when outbid and paid when awarded. Later phases retain the board-centered layout. Action buttons share a global appearance in `App.vue`, including preview dialogs; hover, focus, selected, and disabled states use the same styling across panels.
 
-URR keeps full replay positions in browser memory, but saves full snapshots only at the opening and turn/phase boundaries. Other entries use tagged `urr-history-delta-v1` records containing changed property paths and values; a path without a value deletes that property. `URRhistoryStorage.js` expands these losslessly on import and caches compact records for subsequent saves. Legacy full-snapshot histories remain readable. Every committed turn saves its current position and creates a rewind point; individual actions remain available in replay. URR holds uncommitted actions in local `turnDraft` checkpoints until End Turn, with Undo and Reset Turn restoring both state and history. Settlement land actions use an editable ordered timeline with same-terrain sale batches, one replaceable purchase, and previews of cash, markets, and leadership. Complete Turn submits that timeline through the existing `tradeLand` before/buy/after format and saves once. Sale lockouts appear on the board and purchase controls; primogeniture bids and passes commit directly. Development tracing starts on the map and selects the smallest fitting unused crew, with a manual override. Equipment choices highlight legal sites and preview treasury, private contributions, consent, and era/maintenance consequences. Waterwork agreement requests remain editable during construction; End Turn sends queued requests to landowners. The final acceptance finishes the state’s development; a decline restores editable construction checkpoints and blocks that site for the current state turn. The saved development plan retains earlier approvals when rebuilding those checkpoints. Mandatory crew funding previews partial same-terrain sale batches through the same sale validator used on submission; its turn confirmation resolves the sales, hires the crew, and finishes development in one save. Decision boundaries include actor, state, phase, routing source, and consent changes, including successive turns belonging to the same player. Importing a newer saved position discards a stale draft; saves retain the existing stale-write protection. Completed water-routing history offers automatic or manual playback built by rerunning the recorded allocations on a copy. Optional routing trace callbacks describe river movement, diversions, irrigation, returns and outflow; playback uses the historical board and never mutates live state. Uncommitted routing completions do not offer playback. URR rewind points retain the existing `gzip:` format and use compression level 6. Both practice-game and regular-game rewind controls require confirmation before loading and saving a previous turn.
+URR stores only compact replay records in `store.history` and derives positions on demand with a non-persisted cache; saves copy those records directly (`URRhistoryStorage.js`). Each move stores a numeric action code, the player, the seconds since the previous entry, and only the action's parameters, so a pass is three numbers. Saved models are gzip+base64 positional arrays: `URRfuncs.js` owns export/import, the board stores index-keyed deltas with trailing defaults omitted, and game-over saves keep only the final screen's state plus replay. Opening corrections are retained in finished-game replay. Privately owned Barahshum can be exchanged only before the normal action on its owner’s settlement turn, without consuming that turn; assimilated Barahshum remains available during its owning state’s development turn. Development proceeds without Barahshum interruptions or skip-prompt controls. Existing saves are not migrated; the project is still in development. Old between-state positions automatically advance to the next state. Every committed turn saves its previous position as a rewind point; individual actions remain available in replay. URR holds uncommitted actions in local `turnDraft` checkpoints until End Turn, with Undo and Reset Turn restoring both state and history. Skipping Eridu commits the turn directly; Eridu canal review offers Undo without the duplicate Reset Turn control. Barahshum canal selection can be canceled to return to the normal turn actions. Selected hex details remain in map tooltips rather than a separate footer. Settlement land actions use an editable ordered timeline with same-terrain sale batches, one replaceable purchase, and previews of cash, markets, and leadership. Complete Turn submits that timeline through the existing `tradeLand` before/buy/after format and saves once. Sale lockouts appear on the board and purchase controls; primogeniture bids and passes commit directly. Development tracing starts on the map and selects the smallest fitting unused crew, with a manual override. Equipment choices highlight legal sites and preview treasury, private contributions, consent, and era/maintenance consequences. Waterwork agreement requests remain editable during construction; End Turn sends queued requests to landowners. The final acceptance finishes the state’s development; a decline restores editable construction checkpoints and blocks that site for the current state turn. The saved development plan retains earlier approvals when rebuilding those checkpoints. Mandatory crew funding previews partial same-terrain sale batches through the same sale validator used on submission; its turn confirmation resolves the sales, hires the crew, and finishes development in one save. Decision boundaries include actor, state, phase, routing source, and consent changes, including successive turns belonging to the same player. Importing a newer saved position discards a stale draft; saves retain the existing stale-write protection. Completed water-routing history offers automatic or manual playback built by rerunning the recorded allocations on a copy. Optional routing trace callbacks describe river movement, diversions, irrigation, returns and outflow; playback uses the historical board and never mutates live state. Uncommitted routing completions do not offer playback. New URR rewind points reuse the compressed client model. Both practice-game and regular-game rewind controls require confirmation before loading and saving a previous turn.
 
 ## Turn processing and stale-write protection
 
@@ -111,6 +141,8 @@ Every mutating endpoint goes through `process_game_with_mutex(request, handler, 
 - POST + JSON body required, `gameID` extracted.
 - Acquires a DB mutex (row in the `Lock` table, `Lobby/sharedFunctions/db_mutex.py`) so two players submitting simultaneously cannot interleave.
 - Inside, the handler compares the request's `latestUpdate` with the DB's. If the request is older → the server replies with a `syncError` payload instead of applying the write; the client re-syncs from the data endpoint. This is the core defence against double-submits and stale tabs.
+
+- The handler also checks that the caller is a player in that game (or a game admin) via `Lobby.sharedFunctions.permissions.can_act_in_game`. `latestUpdate` is visible to spectators, so it is not an authorization control. Read-only actions (`load`, `refreshChat`, `getBoatMeeplesAndSkills`) stay open to spectators. DDL is still being reworked and is not covered yet.
 
 RNB adds one more layer: during multi-step "stack" moves the game holds a `transactionID`; a disconnect can be recovered by re-posting the same transaction (see `tests/test_rnb_transaction_recovery.py`).
 

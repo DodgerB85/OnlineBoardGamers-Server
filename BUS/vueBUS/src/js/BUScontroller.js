@@ -9,6 +9,8 @@ import * as view from "./BUSview.js"
 import { useModelStore } from "../stores/BUSstore.js"
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 
+import i18n from "../i18n"
+
 export function canPlayerVrom(forceCheck) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
@@ -34,7 +36,7 @@ export function canPlayerVrom(forceCheck) {
 		}
 	}
 	if (!anyPax) {
-		store.context.turnEndingErrorMessage = "No available passengers in your network"
+		store.context.turnEndingErrorMessage = i18n.global.t("actionArea.noPassengersNetwork")
 		if (store.context.historyObj.length === 0 || store.context.historyObj[store.context.historyObj.length - 1].length !== 1) store.context.historyObj.push([1])
 		return false
 	}
@@ -48,7 +50,7 @@ export function canPlayerVrom(forceCheck) {
 		}
 	}
 	if (!anyBldg) {
-		store.context.turnEndingErrorMessage = "No available buildings of the desired type in your network"
+		store.context.turnEndingErrorMessage = i18n.global.t("actionArea.noDesiredBuildingsNetwork")
 		// if the end isn't a single item, push a single item
 		if (store.context.historyObj.length === 0 || store.context.historyObj[store.context.historyObj.length - 1].length !== 1) store.context.historyObj.push([2])
 		return false
@@ -72,7 +74,7 @@ function canPlayerVromPitts(player, store) {
 	}
 
 	if (paxJunctions.length === 0) {
-		store.context.turnEndingErrorMessage = "No available passengers in your network"
+		store.context.turnEndingErrorMessage = i18n.global.t("actionArea.noPassengersOrDesignersNetwork")
 		if (store.context.historyObj.length === 0 || store.context.historyObj[store.context.historyObj.length - 1].length !== 1) store.context.historyObj.push([1])
 		return false
 	}
@@ -82,7 +84,7 @@ function canPlayerVromPitts(player, store) {
 
 	// Check if any passenger can reach a building with the desired type
 	if (store.context.eligibleJunctionsToVromPitts.length === 0) {
-		store.context.turnEndingErrorMessage = "No passengers can reach the desired building type"
+		store.context.turnEndingErrorMessage = i18n.global.t("actionArea.noPassengerReach")
 		if (store.context.historyObj.length === 0 || store.context.historyObj[store.context.historyObj.length - 1].length !== 1) store.context.historyObj.push([2])
 		return false
 	}
@@ -264,7 +266,7 @@ export function currentPlayerObj() {
 	const store = useModelStore()
 	if (store.gameflow.turnOrder.length > 0) return store.players[store.gameflow.turnOrder[0]]
 	else {
-		if (!store.topMenuViews.generatingReplay && !store.topMenuViews.showReplay && store.gameflow.phase !== rf.PHASE_SETUP_BLDGS) alert("CP() Error")
+		if (!store.topMenuViews.generatingReplay && !store.topMenuViews.showReplay && store.gameflow.phase !== rf.PHASE_SETUP_BLDGS && store.gameflow.phase !== rf.PHASE_GAME_OVER && store.gameflow.gameEnded === 0) alert("CP() Error")
 		return 0
 	}
 }
@@ -330,7 +332,7 @@ export function startPlayerTurn() {
 	// Add Pax
 	else if (store.gameflow.phase === rf.PHASE_ADD_PAX) {
 		store.context.passengersLeftToPlace = model.maxBuses() - (store.gameflow.fullActionTurnOrder.length - store.gameflow.turnOrder.length)
-		if (store.remainingPassengers <= 0 && (personal.selectedBoard !== rf.BOARD_PITTS || !pitts.canStillPlaceDesigner())) store.context.turnEndingErrorMessage = "No More Passengers"
+		if (store.remainingPassengers <= 0 && (personal.selectedBoard !== rf.BOARD_PITTS || !pitts.canStillPlaceDesigner())) store.context.turnEndingErrorMessage = i18n.global.t("actionArea.noMorePassengers")
 	}
 	// Add Bldgs
 	else if (store.gameflow.phase === rf.PHASE_ADD_BLDGS) {
@@ -441,6 +443,7 @@ export function endPlayerTurn() {
 	if (store.gameflow.turnOrder.length === 0) {
 		if (store.remainingTimeStones === 0) {
 			store.gameflow.gameEnded = 1
+			store.gameflow.phase = rf.PHASE_GAME_OVER
 			model.endGame()
 		} else {
 			endCurrentPhase()
@@ -501,8 +504,14 @@ export function endCurrentPhase() {
 	// Phase Add Bus
 	else if (store.gameflow.phase === rf.PHASE_ADD_BUS) {
 		if (store.actionAreaData[1][0] !== -1) {
-			getPlayerByColour(store.actionAreaData[1][0]).buses++
-			store.history.push([rf.HIST_ADD_BUS, getPlayerIndexFromColour(store.actionAreaData[1][0]), Math.round(new Date().getTime() / 1000 - personal.gameCreationTimestamp), [getPlayerByColour(store.actionAreaData[1][0]).buses]])
+			const busPlayer = getPlayerByColour(store.actionAreaData[1][0])
+			const addedBus = busPlayer.buses < 5
+			if (addedBus) {
+				busPlayer.buses++
+				store.context.lastBusPlayer = getPlayerIndexFromColour(store.actionAreaData[1][0])
+				store.context.lastBusIndex = busPlayer.buses
+			}
+			store.history.push([rf.HIST_ADD_BUS, getPlayerIndexFromColour(store.actionAreaData[1][0]), Math.round(new Date().getTime() / 1000 - personal.gameCreationTimestamp), [busPlayer.buses, addedBus ? 1 : 0]])
 		}
 		endCurrentPhase()
 		// Re running this loop, so start turn after

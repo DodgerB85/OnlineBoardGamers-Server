@@ -9,7 +9,8 @@
     <h2>{% translate "Rules" %}</h2>
     <div class="help-qa">
       <p>
-        {% blocktranslate %}Roads & Boats Rules Available <a class='linkOther' href='https://www.splotter.nl/downloads/RB3Erules.pdf' target='_blank' download>here</a>{% endblocktranslate %}
+        {% static 'rules/Roads_and_Boats_Rules.pdf' as rnb_rules_url %}
+        {% blocktranslate %}Roads & Boats Rules Available <a class='linkOther' href='{{ rnb_rules_url }}' target='_blank' download>here</a>{% endblocktranslate %}
       </p>
       <p>
         {% blocktranslate %}&c Rules Available <a class="linkOther" href="/static/RNB/help/&C_Rules.pdf" target="_blank" download>here</a> (coming SOON&trade;){% endblocktranslate %}

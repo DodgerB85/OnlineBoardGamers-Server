@@ -16,6 +16,8 @@
 import { useModelStore } from "../stores/INDstore.js"
 import { usePersonalStore } from "../stores/INDpersonal.js"
 
+import i18n from "../i18n"
+
 import * as rf from "./INDreference.js"
 import * as map from "./INDmap.js"
 import * as controller from "./INDcontroller.js"
@@ -218,7 +220,7 @@ export async function initGame() {
 
 	// If new and no data, give an error; otherwise if new, save, otherwise, import data
 	if (window.initData.pov < 0 && window.initData.gameData === "") {
-		store.topMenuViews.rewindErrorText = "The game has not yet started"
+		store.topMenuViews.rewindErrorText = i18n.global.t("io.gameNotStarted")
 		// Create the <h1> element
 		var heading = document.createElement("h1")
 
@@ -433,28 +435,26 @@ export function completeMerger() {
 		}
 		SFneighbours = [...new Set(SFneighbours)]
 		// Now remove any terrs that are in the SF neighbours
+		let preRemovedTerrs = []
 		for (let i = 0; i < store.players[winningPlayerIndex].slots[newSlotIdx].length; i++) {
 			let company = getActiveCompanyDataFromID(store.players[winningPlayerIndex].slots[newSlotIdx][i])
 			for (let j = company.territories.length - 1; j >= 0; j--) {
 				if (SFneighbours.includes(company.territories[j][0])) {
+					preRemovedTerrs.push(company.territories[j][0])
 					company.territories.splice(j, 1)
 					terrsToRemove--
 				}
 			}
 		}
 		if (terrsToRemove <= 0) {
-			// Now a merger is complete, so end that players merger turn
-			// Moved to above
-			//store.gameflow.turnOrder.push(store.gameflow.turnOrder.shift())
+			// No further choice: record all removals so replays can recreate the company
+			if (preRemovedTerrs.length > 0) addHistory(rf.HIST_MERGER_REMOVE_SIAP_FAJI_TERRS, winningPlayerIndex, 0, [newSlotIdx, ...preRemovedTerrs])
 			store.gameflow.phase = rf.PHASE_MERGERS
 		} else if (terrsToRemove > 0) {
-			// End the current player merger turn
-			// moved to above
-			//store.gameflow.turnOrder.push(store.gameflow.turnOrder.shift())
 			// Add the winning player to front of the turn order
 			store.gameflow.turnOrder.unshift(winningPlayerIndex)
-			// Need to remove more territories
-			store.ongoingVars.siapFajiOrShippingTerrsToRemoveData = [winningPlayerIndex, [...store.players[winningPlayerIndex].slots[newSlotIdx]], terrsToRemove]
+			// Need to remove more territories; keep the automatic removals for the history entry
+			store.ongoingVars.siapFajiOrShippingTerrsToRemoveData = [winningPlayerIndex, [...store.players[winningPlayerIndex].slots[newSlotIdx]], terrsToRemove, preRemovedTerrs]
 			store.gameflow.phase = rf.PHASE_MERGER_REMOVE_SIAP_FAJI_TERRS
 		}
 	} // End siap faji merger
@@ -638,7 +638,7 @@ export function setupPaidExpansion() {
 	store.context.territoriesToHighlight = [...getValidTerrsForExpansionFromLandSlotIdx(slotIdx)]
 
 	if (store.context.territoriesToHighlight.length === 0) {
-		store.gameMessages.actionError = "There are no valid territories to expand into"
+		store.gameMessages.actionError = i18n.global.t("actionArea.noValidExpansionTerritories")
 		return
 	}
 }
@@ -669,7 +669,7 @@ export function setupExpansionHighlights(slotIdx) {
 		store.context.remainingExpansions = Math.min(store.context.remainingExpansions, remainingShipCompanyExpansions)
 
 		if (store.context.remainingExpansions <= 0) {
-			store.gameMessages.actionError = "No more expansions for this company"
+			store.gameMessages.actionError = i18n.global.t("actionArea.noMoreExpansions")
 			store.context.action = rf.ACT_CONFIRM_END_TURN
 			return
 		}
@@ -719,7 +719,7 @@ export function setupExpansionHighlights(slotIdx) {
 		// Otherwise, add a new entry
 		else store.context.historyObj.push([...store.context.currentGoodJourney])
 
-		store.gameMessages.actionError = "There are no valid territories to expand into"
+		store.gameMessages.actionError = i18n.global.t("actionArea.noValidExpansionTerritories")
 		store.context.action = rf.ACT_CONFIRM_END_TURN
 		return
 	}
@@ -845,6 +845,9 @@ export function acquireCompany_core(playerIndex, companyID) {
 	}
 	store.availableCompanies = store.availableCompanies.filter((company) => company.id !== companyID)
 
+	// An acquisition can block the last valid starting area of another company.
+	markActiveCompaniesWithNoStartTerritoriesForRemoval()
+
 	// For replay only
 	return firstEmptySlotIndex
 }
@@ -898,6 +901,7 @@ export function expandCompany(slotIdx, terrID) {
 		if (company.type === rf.COMPANY_SHIPPING) store.context.historyObj.push(view.SHIP_GFX_TO_NUM(company.shipGfx))
 		addHistory(rf.HIST_ACQUIRE_COMPANY, controller.currentPlayerIndex(), 0, [...store.context.historyObj])
 		store.context.historyObj.splice(0)
+		markActiveCompaniesWithNoStartTerritoriesForRemoval()
 		store.clearVars()
 		store.context.action = rf.ACT_CONFIRM_END_TURN
 		return
@@ -1104,7 +1108,7 @@ export function setupSlotToOperate(playerIndex, slotIdx) {
 	// Check if any can be shipped
 	if (!map.canShipGoodFromSlotIDX(controller.currentPlayerIndex(), slotIdx)) {
 		store.context.prodMarkerTerritoriesToHighlight.splice(0)
-		store.gameMessages.actionError = "You cannot ship any goods with this company"
+		store.gameMessages.actionError = i18n.global.t("actionArea.cannotShipGoods")
 		store.context.action = rf.ACT_DECIDE_PAID_EXPANSION
 		return
 	}
@@ -1188,7 +1192,7 @@ export function checkForResponseAfterDeliverGoodsToCity(slotContent, preventMaxP
 		store.context.territoriesToHighlightBlue = [...getAllTerrIDsForSlot(slotContent)]
 		store.context.territoriesToHighlight = [...getValidTerrsForExpansionFromLandSlotIdx(slotIdx)]
 		if (store.context.territoriesToHighlight.length === 0) {
-			store.gameMessages.actionError = "There are no valid territories to expand into"
+			store.gameMessages.actionError = i18n.global.t("actionArea.noValidExpansionTerritories")
 			store.context.action = rf.ACT_CONFIRM_END_TURN
 			store.context.historyObj.push(-1)
 		}*/
@@ -1228,12 +1232,12 @@ export function checkForResponseAfterDeliverGoodsToCity(slotContent, preventMaxP
 		store.context.prodMarkerTerritoriesToHighlight.splice(0)
 		//store.context.action = rf.ACT_DECIDE_PAID_EXPANSION
 		store.context.action = rf.ACT_CONFIRM_ALL_DELIVERIES
-		store.gameMessages.actionError = "You cannot ship any more goods with this company"
+		store.gameMessages.actionError = i18n.global.t("actionArea.cannotShipMoreGoods")
 	}
 	// OTHERWISE, NO MORE SHIPPING, AND NOT MET THE MAX POSS
 	else if (!map.canShipGoodFromSlotIDX(controller.currentPlayerIndex(), slotIdx) && soldCount < store.context.maxPoss) {
 		store.context.prodMarkerTerritoriesToHighlight.splice(0)
-		store.gameMessages.actionError = "You cannot ship any more goods with this company, but you did not ship the most possible. Please restart your turn or remove a manual delivery"
+		store.gameMessages.actionError = i18n.global.t("actionArea.cannotShipMoreGoodsIncomplete")
 	}
 	/*else {
 		
@@ -1352,8 +1356,14 @@ export function UNdeliverGoodsToCity_core(playerIndex, goodJourney) {
 	let shippingOwnerIndex = getActiveCompanyDataFromID(goodJourney[2]).ownerIndex
 	store.players[shippingOwnerIndex].moneyCash -= shipsUsed * 5
 	store.players[shippingOwnerIndex].moneyRoundIncome -= shipsUsed * 5
-	// Add shipping income to shipping co
-	getActiveCompanyDataFromID(goodJourney[2]).incomeThisTurn -= shipsUsed * 5
+	let subsidy = 0
+	if (store.useShippingSubsidy && shippingOwnerIndex !== playerIndex) {
+		subsidy = (store.players[shippingOwnerIndex].RnD[rf.RnD_SHIPPING_SUBSIDY_IDX] - 1) * rf.SHIPPING_SUBSIDY_MULTIPLIER
+		store.players[shippingOwnerIndex].moneyCash -= subsidy
+		store.players[shippingOwnerIndex].moneyRoundIncome -= subsidy
+	}
+	// Remove shipping income from shipping co
+	getActiveCompanyDataFromID(goodJourney[2]).incomeThisTurn -= shipsUsed * 5 + subsidy
 }
 
 // 	model.autoShip(controller.currentPlayerIndex(), store.context.selectedSlotToOperate, store.context.maxPossData)
@@ -1775,6 +1785,12 @@ export function getBidMultiplierAmount(playerIndex) {
 export function getRndDisplayValue(rnd, level) {
 	if (rnd === rf.RnD_BID_IDX) {
 		return rf.RND_BID_MULTIPLIER[level]
+	}
+	if (rnd === rf.RnD_MERGER_SUBSIDY_IDX) {
+		return Math.max(level - 1, 0) * rf.MERGER_SUBSIDY_MULTIPLIER
+	}
+	if (rnd === rf.RnD_SHIPPING_SUBSIDY_IDX) {
+		return Math.max(level - 1, 0) * rf.SHIPPING_SUBSIDY_MULTIPLIER
 	}
 	return level
 }
