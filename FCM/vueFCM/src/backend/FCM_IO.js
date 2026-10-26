@@ -1025,6 +1025,7 @@ export async function kickout(kickedPlayerIndex) {
 // alert them through the webhook instead of kicking. Message text mirrors what
 // the raw-JS client sent (IO.nudgeTourneyAdmins).
 export async function alertTourneyAdmins(timedOutPlayerName) {
+	if (!rf.IS_ANY_CURRENT_TOURNAMENT_MODERATOR) return
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.viewSettings.showGameLoader = true

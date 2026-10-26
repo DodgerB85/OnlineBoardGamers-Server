@@ -87,6 +87,7 @@ function cancelKickout() {
 
 // Tournament game: no kickout - send the admins a webhook so they can stand in
 function alertAdmins() {
+	if (!rf.IS_ANY_CURRENT_TOURNAMENT_MODERATOR) return
 	IO.alertTourneyAdmins(currentKickoutTarget())
 }
 
@@ -463,7 +464,7 @@ function skipModuleAndEndTurn() {
 				<div v-else id="kickoutDiv">
 					<br />
 					<!-- Tournament game: the admins stand in for a timed-out player, so alert them -->
-					<template v-if="personal.tournamentGame">
+					<template v-if="personal.tournamentGame && rf.IS_ANY_CURRENT_TOURNAMENT_MODERATOR">
 						<i18n-t keypath="actionArea.playerTimedOut" tag="div" scope="global">
 							<template #name><b>{{ kickoutTargetObj.name }}</b></template>
 						</i18n-t>

@@ -16,6 +16,8 @@ export const BOT_NAME = "FcmBot"
 // human who was kicked out or resigned, an AI_NAME seat plays itself.
 export const AI_NAME = "FcmAI"
 export const TOURNAMENT_ADMIN_NAME = "FCMtourneyAdmin"
+// Feature flag: set to true when a tournament moderator is available to handle alerts
+export const IS_ANY_CURRENT_TOURNAMENT_MODERATOR = false
 export const DELETE_VOTE_TOPIC = "delete_game_votes"
 export const STATS_EXCLUDE_VOTE_TOPIC = "stats_exclude_votes"
 export const REWIND_CONSENT_VOTE_TOPIC = "rewind_consent_votes"
