@@ -14,7 +14,6 @@ const store = useModelStore()
 const personal = usePersonalStore()
 const { t } = useI18n()
 defineProps({ isBoardLayout: { type: Boolean, default: false } })
-const emit = defineEmits(["locateNation"])
 const amounts = reactive({})
 const displayedNations = computed(() => store.nations)
 const hasPendingBids = computed(() => displayedNations.value.some((nation) => nation.bids.length))
@@ -38,7 +37,6 @@ function amountError(nation) {
 	return ""
 }
 function isAuction(nation) { return auction.value?.nation === nation.id }
-function nationState(nation) { return store.board.areas.find((area) => area.nation === nation.id).state }
 let ending = false
 async function endTurnWith(action) {
 	if (ending || store.viewSettings.isSaving) return
@@ -55,9 +53,9 @@ watch([() => auction.value?.nation, () => auction.value?.amount, () => actor.val
 
 <template>
 	<section class="nationMarket" :class="{ boardLayout: isBoardLayout, hasPendingBids }" :aria-label="$t('nationMarket.aria')">
-		<p class="marketHeading"><b>{{ auction ? $t("nationMarket.auction", { nation: rf.NATION_NAMES[auction.nation] }) : $t("nationMarket.aria") }}</b><span>{{ $t("nationMarket.available", { amount: available }) }}</span></p>
-		<p v-if="reservedMoney" class="moneySummary" :title="$t('nationMarket.reservedTitle')">{{ $t("nationMarket.reserved", { amount: reservedMoney }) }}<br>{{ $t("nationMarket.total", { amount: totalMoney }) }}</p>
-		<p v-if="auction" class="auctionInfo">{{ $t("nationMarket.highBid", { amount: auction.amount }) }}<br><PlayerMarker :index="auction.highPlayer" /></p>
+		<p class="marketHeading"><b>{{ auction ? $t("nationMarket.auction", { nation: rf.NATION_NAMES[auction.nation] }) : $t("nationMarket.aria") }}</b><span><CurrencyText :text="$t('nationMarket.available', { amount: available })" /></span></p>
+		<p v-if="reservedMoney" class="moneySummary" :title="$t('nationMarket.reservedTitle')"><CurrencyText :text="$t('nationMarket.reserved', { amount: reservedMoney })" /><br><CurrencyText :text="$t('nationMarket.total', { amount: totalMoney })" /></p>
+		<p v-if="auction" class="auctionInfo"><CurrencyText :text="$t('nationMarket.highBid', { amount: auction.amount })" /><br><PlayerMarker :index="auction.highPlayer" /></p>
 		<p v-else-if="!store.turnDraft.ready" class="marketHint">{{ $t("nationMarket.hint") }} <b>{{ $t("nationMarket.endsTurn") }}</b></p>
 		<div class="nationList">
 			<article v-for="nation in displayedNations" :key="nation.id" class="nationRow" :aria-label="rf.NATION_NAMES[nation.id]" :class="{ current: isAuction(nation) || (!auction && treaty?.id === nation.id), acquired: nation.ownerType !== null, ashur: nation.id === rf.NATION_ASHUR }">
@@ -65,32 +63,31 @@ watch([() => auction.value?.nation, () => auction.value?.amount, () => actor.val
 				<p v-if="nation.ownerType !== null" class="nationOwner">{{ $t("nationMarket.ownedBy") }} <PlayerMarker :index="nation.owner" /></p>
 				<ol v-if="nation.bids.length" class="nationBids" :aria-label="isAuction(nation) ? $t('nationMarket.auctionParticipants') : $t('nationMarket.interestedPlayers')">
 					<li v-for="(offer, position) in nation.bids" :key="offer.player" :class="{ currentBidder: isAuction(nation) && offer.player === actor }" :aria-current="isAuction(nation) && offer.player === actor ? 'step' : undefined">
-						<span class="bidPosition">{{ position + 1 }}</span><PlayerMarker :index="offer.player" /><b v-if="offer.player === highestBid(nation).player" :aria-label="$t('nationMarket.highestOffer')" :title="$t('nationMarket.highestOffer')">{{ offer.amount }} SPL</b>
+						<span class="bidPosition">{{ position + 1 }}</span><PlayerMarker :index="offer.player" /><b v-if="offer.player === highestBid(nation).player" :aria-label="$t('nationMarket.highestOffer')" :title="$t('nationMarket.highestOffer')">{{ offer.amount }} <CurrencyIcon /></b>
 					</li>
 				</ol>
 				<div class="nationActions">
-					<button type="button" class="nationLocation" :aria-label="$t('nationMarket.findNation', { nation: rf.NATION_NAMES[nation.id], state: rf.STATE_NAMES[nationState(nation)] })" :title="`${rf.NATION_NAMES[nation.id]} · ${rf.STATE_NAMES[nationState(nation)]}`" @click.stop.prevent="emit('locateNation', nation.id)"><img :src="assets.getStateOrderImage(nationState(nation))" alt="" />{{ $t("nationMarket.map") }}</button>
 				<template v-if="nation.ownerType === null">
 					<form v-if="!auction && treaty?.id !== nation.id" @submit.prevent="bid(nation)">
-						<label :for="`nation-bid-${nation.id}`">{{ auction ? $t("nationMarket.bid") : $t("nationMarket.offer") }} SPL</label>
+						<label :for="`nation-bid-${nation.id}`">{{ auction ? $t("nationMarket.bid") : $t("nationMarket.offer") }} <CurrencyIcon /></label>
 						<input :id="`nation-bid-${nation.id}`" type="number" inputmode="numeric" :value="amount(nation)" @input="amounts[nation.id] = Number($event.target.value)" :min="minimum(nation)" :max="moneyForBid(nation)" step="1" required :disabled="!personal.canPlay()" />
 						<template v-if="nation.bids.length"><button v-for="increment in [1, 5, 10]" :key="increment" type="button" class="bidAdjustment" :aria-label="$t('nationMarket.raiseBy', { amount: increment })" :disabled="!personal.canPlay() || amount(nation) + increment > moneyForBid(nation)" @click="adjustBid(nation, increment)">+{{ increment }}</button></template>
 						<button :disabled="!personal.canPlay() || amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)">{{ auction ? $t("nationMarket.bid") : $t("nationMarket.makeOffer") }}</button>
 					</form>
-					<p v-if="!auction && treaty?.id !== nation.id && amountError(nation)" class="amountError" role="status">{{ amountError(nation) }}</p>
+					<p v-if="!auction && treaty?.id !== nation.id && amountError(nation)" class="amountError" role="status"><CurrencyText :text="amountError(nation)" /></p>
 				</template>
 				<div v-if="nation.ownerType === null && !auction && treaty?.id === nation.id" class="marketControls treatyControls">
-					<button class="primaryAction" :disabled="!personal.canPlay() || available < price(nation)" @click="endTurnWith({ type: 'buyNation', nation: nation.id })">{{ $t("nationMarket.buyFor", { price: price(nation) }) }}</button>
+					<button class="primaryAction" :disabled="!personal.canPlay() || available < price(nation)" @click="endTurnWith({ type: 'buyNation', nation: nation.id })"><CurrencyText :text="$t('nationMarket.buyFor', { price: price(nation) })" /></button>
 					<button class="passButton" :disabled="!personal.canPlay()" @click="endTurnWith({ type: 'pass' })">{{ $t("nationMarket.pass") }}</button>
 				</div>
 				<div v-if="nation.ownerType === null && isAuction(nation)" class="marketControls auctionControls">
 					<form @submit.prevent="bid(nation)">
-						<label :for="`nation-bid-${nation.id}`">{{ $t("nationMarket.bidSpl") }}</label>
+						<label :for="`nation-bid-${nation.id}`"><CurrencyText :text="$t('nationMarket.bidSpl')" /></label>
 						<input :id="`nation-bid-${nation.id}`" type="number" inputmode="numeric" :value="amount(nation)" @input="amounts[nation.id] = Number($event.target.value)" :min="minimum(nation)" :max="moneyForBid(nation)" step="1" required :disabled="!personal.canPlay()" />
 						<button v-for="increment in [1, 5, 10]" :key="increment" type="button" class="bidAdjustment" :aria-label="$t('nationMarket.raiseBy', { amount: increment })" :disabled="!personal.canPlay() || amount(nation) + increment > moneyForBid(nation)" @click="adjustBid(nation, increment)">+{{ increment }}</button>
-						<button class="primaryAction" :disabled="!personal.canPlay() || amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)">{{ $t("nationMarket.bidEndTurn", { amount: amount(nation) }) }}</button>
+						<button class="primaryAction" :disabled="!personal.canPlay() || amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)"><CurrencyText :text="$t('nationMarket.bidEndTurn', { amount: amount(nation) })" /></button>
 					</form>
-					<p v-if="amountError(nation)" class="amountError" role="status">{{ amountError(nation) }}</p>
+					<p v-if="amountError(nation)" class="amountError" role="status"><CurrencyText :text="amountError(nation)" /></p>
 					<button class="passButton" :disabled="!personal.canPlay()" @click="endTurnWith({ type: 'pass' })">{{ $t("nationMarket.withdrawEndTurn") }}</button>
 				</div>
 				</div>
@@ -103,7 +100,6 @@ watch([() => auction.value?.nation, () => auction.value?.amount, () => actor.val
 <style scoped>
 .cardHeading { margin-bottom: 7px; }.cardHeading img { width: 100%; display: block; }
 .nationRow.ashur .cardHeading { width: 180px; max-width: 100%; margin: 0 auto 7px; }
-.nationLocation { flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; min-height: 40px; font: inherit; font-size: 16px; font-weight: 400; }.nationLocation img { width: 22px; height: 22px; }
 .nationMarket { text-align: left; color: #263238; font-size: 16px; font-weight: 400; }.nationMarket p { margin: 5px 0; }.marketHeading { display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #c8c2b4; }.marketHeading span { color: #52616a; }.auctionInfo { padding: 5px 7px; background: #e8f2f6; border-left: 3px solid #177daf; }
 .nationList { display: flex; flex-direction: column; gap: 5px; margin: 7px 0; }.nationRow { min-width: 0; padding: 7px; background: #f7f5ef; border: 1px solid #c9c2b2; border-radius: 4px; }.nationRow.current { border-color: #177daf; box-shadow: inset 3px 0 #177daf; }.nationRow.acquired { background: #ece9df; }
 ol { padding-left: 18px; margin: 4px 0; color: #52616a; }form { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }form label { font-size: 16px; font-weight: 400; }input { width: 58px; min-width: 0; }button { cursor: pointer; }button:disabled { cursor: default; }.passButton { width: 100%; margin-top: 3px; }
@@ -127,7 +123,6 @@ ol { padding-left: 18px; margin: 4px 0; color: #52616a; }form { display: flex; f
 .boardLayout .nationOwner { margin-top: auto; color: #52616a; }
 .boardLayout .nationRow.acquired { opacity: .7; }
 .boardLayout form label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.boardLayout .nationLocation { min-height: 32px; }
 .boardLayout .bidAdjustment { min-width: 32px; padding: 4px; }
 .nationActions { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 4px; margin-top: auto; }
 .nationActions > form, .nationActions > .marketControls { flex: 1; min-width: 0; }

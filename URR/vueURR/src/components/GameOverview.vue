@@ -28,7 +28,7 @@ function hasEridu(id) { return store.nations.some((nation) => nation.id === rf.N
 		<div class="overviewHeading"><b>{{ $t("overview.title") }}</b><button @click="close">{{ $t("overview.close") }}</button></div>
 		<div class="overviewTables">
 			<div class="tableScroll"><table class="statesTable">
-				<caption>{{ $t("overview.statesCaption") }}</caption>
+				<caption><CurrencyText :text="$t('overview.statesCaption')" /></caption>
 				<thead><tr><th scope="col">{{ $t("overview.state") }}</th><th scope="col">{{ $t("overview.monarchLeader") }}</th><th scope="col">{{ $t("overview.treasury") }}</th><th scope="col">{{ $t("overview.ownedLands") }}</th><th scope="col">{{ $t("overview.crews") }}</th><th scope="col">{{ $t("overview.harvest") }}</th><th scope="col">{{ $t("overview.order") }}</th></tr></thead>
 				<tbody><tr v-for="state in store.states" :key="state.id" :class="{ current: view.currentStateId(store) === state.id }">
 					<th scope="row"><button @click="inspect('state', state.id)">{{ rf.STATE_NAMES[state.id] }}</button><small v-if="!state.isActive">{{ $t("overview.emerging") }}</small></th>

@@ -120,9 +120,8 @@ const actingLabel = computed(() => {
 	if (store.turnDraft.ready) return t("app.reviewing")
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return ""
 	const player = store.players[store.gameflow.turnOrder[0]]
-	const stateId = view.currentStateId(store)
 	const context = store.gameflow.pendingOffer ? t("app.responding") : store.gameflow.developmentStep === "betweenStates" ? t("app.nextStep") : t("app.acting")
-	return `${context}: ${stateId === null ? '' : `${rf.STATE_NAMES[stateId]}\n`}${player ? '' : t("app.automaticResolution")}`
+	return `${context}: ${player ? '' : t("app.automaticResolution")}`
 })
 const actionPanelTitle = computed(() => {
 	const game = actionPanelGame(store)
@@ -148,7 +147,6 @@ const actionPanelTitle = computed(() => {
 function selectArea(id) {
 	selectedArea.value = id
 }
-function locateNation(id) { map.value.locateNation(id) }
 function revealStatus(type) {
 	if (type === "player") nextTick(() => statusPanels.value.querySelector(".holdingsPanel").scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" }))
 }
@@ -225,7 +223,7 @@ function showDebug() {
 			</div>
 			<aside v-if="!store.viewSettings.showReplay" class="actionSidebar">
 				<div v-if="!isNationDivision" class="actionPanelHeading"><small class="actingLabel">{{ actingLabel }} <PlayerMarker v-if="actingPlayer !== undefined" :index="actingPlayer" /></small>{{ actionPanelTitle }}</div>
-				<div class="actionPanelBody"><NationMarket v-if="isNationDivision" :is-board-layout="isNationDivision" @locate-nation="locateNation" />
+				<div class="actionPanelBody"><NationMarket v-if="isNationDivision" :is-board-layout="isNationDivision" />
 				<GameActions v-else ref="gameActions" :key="store.turnDraft.revision" @select-area="selectedArea = $event" @change-map-action="mapAction = $event" @change-action-targets="actionTargets = $event" :selected-area="selectedArea" :path="canalPath" @clear-path="map.finishDig()" @change-removal="removalArea = $event" @change-land-draft="landDraft = $event" @change-turn-action="turnAction = $event" @change-dig-capacity="digCapacity = $event" /></div>
 				<TurnControls :is-nation-division="isNationDivision" :turn-action="turnAction" :land-draft="landDraft" @end-turn="finishTurn" />
 			</aside>
@@ -302,7 +300,7 @@ body {
 	transform: translate(-50%, -50%);
 	font-size: 36px;
 }
-.actingLabel { white-space: pre-line; display: block; font-size: 16px; font-weight: 400; color: #655a42; margin-bottom: 5px; }
+.actingLabel { display: flex; justify-content: center; align-items: center; gap: 6px; white-space: pre-line; font-size: 16px; font-weight: 400; color: #655a42; margin-bottom: 5px; }
 .welcomeHelper { margin-bottom: 10px; padding: 8px; background: #edf5e4; border: 1px solid #c1cdb1; border-radius: 4px; }
 .welcomeHelper > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .welcomeHelper button { flex-shrink: 0; min-width: 40px; min-height: 40px; font: inherit; font-size: 20px; }
@@ -314,7 +312,7 @@ body {
 .welcomeHelper button { position: absolute; right: 0; }
 
 /* Nation selection uses the middle of the screen; the map remains a reference. */
-.nationDivision .turnOrder .phaseLabel, .nationDivision .turnOrder > .orderRow + .orderRow { display: none; }
+.nationDivision .turnOrder > .orderRow + .orderRow { display: none; }
 #mainAreaLessHistory.nationDivisionLayout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 10px; max-width: 1800px; }
 .nationDivisionLayout > aside { position: static; }
 .nationDivisionLayout .actionSidebar { grid-column: 1; grid-row: 1 / span 2; padding: 10px; }

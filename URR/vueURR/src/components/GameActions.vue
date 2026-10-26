@@ -10,7 +10,7 @@ import * as rf from "../js/URRreference"
 import * as rules from "../js/URRrules"
 import * as controller from "../js/URRcontroller"
 import * as model from "../js/URRmodel"
-import { actionPanelGame } from "../js/URRturnDraft.js"
+import { actionPanelGame, groupedDraftSteps, crewRemovalIndices } from "../js/URRturnDraft.js"
 import { applyAction, previewMaintenanceSales } from "../js/URRgame"
 import * as boardRules from "../js/URRmap"
 import * as view from "../js/URRview"
@@ -273,16 +273,44 @@ const equipSites = computed(() => {
 	}).map((land) => land.id)
 })
 watch(equipSites, (sites) => emit("changeActionTargets", sites), { immediate: true })
-const crewError = computed(() => preview({ type: "buyCard", kind: "digger" }))
+const crewError = computed(() => {
+	try {
+		applyAction(maintenancePreview.value?.game || previewState.value, actor.value, { type: "buyCard", kind: "digger" })
+		return maintenancePreview.value?.error || ""
+	} catch (error) { return error.message }
+})
 const siteCost = computed(() => ({ pump: cardData.value.pump, reservoir: cardData.value.reservoir }))
 const noSiteReason = computed(() => {
 	const cheapest = Math.min(cardData.value.pump[1], cardData.value.reservoir[1])
 	return state.value.money < cheapest && !useCalah.value ? t("actions.treasuryCannotAfford", { money: state.value.money, cheapest }) : t("actions.noSite")
 })
 const crewSteps = computed(() => store.turnDraft.steps.map((step, index) => ({ step, index })).filter(({ step }) => step.action?.type === "buyCard"))
-const crewCount = computed(() => crewSteps.value.length)
-const removeCrew = () => controller.removeDraftStep(crewSteps.value.at(-1).index)
-const draftLabels = computed(() => store.turnDraft.steps.map((step) => step.label))
+const hasRequiredHire = computed(() => state.value && !rules.hasMaintenanceCrew(game.value, state.value.id))
+const crewCount = computed(() => crewSteps.value.length + Number(hasRequiredHire.value))
+const canRemoveCrew = computed(() => {
+	const last = crewSteps.value.at(-1)
+	return !!last && (crewSteps.value.length > 1 || rules.hasMaintenanceCrew(last.step.state, state.value.id))
+})
+async function addCrew() {
+	if (hasRequiredHire.value && !await controller.submitAction({ type: "buyCard", kind: "digger" })) return
+	await submit({ type: "buyCard", kind: "digger" })
+}
+async function removeCrew(index = crewSteps.value.at(-1).index) {
+	for (const position of crewRemovalIndices(store.turnDraft.steps, index, state.value.id)) {
+		const previousCount = store.turnDraft.steps.length
+		await controller.removeDraftStep(position)
+		if (store.turnDraft.steps.length !== previousCount - 1) return
+	}
+}
+const draftGroups = computed(() => groupedDraftSteps(hasRequiredHire.value
+	? [...store.turnDraft.steps, { state: game.value, action: { type: "buyCard", kind: "digger" } }]
+	: store.turnDraft.steps))
+const treasuryBefore = computed(() => store.turnDraft.start ? store.turnDraft.start.state.states[state.value.id].money : state.value.money)
+const treasuryAfter = computed(() => maintenancePreview.value?.game?.states[state.value.id].money ?? state.value.money)
+const treasuryChange = computed(() => {
+	const spent = treasuryBefore.value - treasuryAfter.value
+	return `${spent < 0 ? "+" : "−"} ${Math.abs(spent)}`
+})
 function equipClick(id) {
 	if (store.viewSettings.actionIntent !== "equip" || !personal.canPlay() || store.turnDraft.ready) return
 	const staged = store.turnDraft.steps.findIndex((step) => ["requestWaterwork", "exchangeCalah"].includes(step.action?.type) && step.action.area === id)
@@ -438,29 +466,29 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 		<div v-if="game.gameflow.endReason && game.gameflow.phase !== rf.PHASE_GAME_OVER" class="endNotice" role="status"><b>{{ $t("actions.finalRound") }}</b> {{ game.gameflow.endReason === 'invasion' ? $t("actions.invasionEnd") : $t("actions.revolutionEnd") }}</div>
 		<template v-if="game.gameflow.phase === rf.PHASE_GAME_OVER">
 			<b>{{ game.gameflow.endReason === 'revolution' ? $t("actions.gameEndedRevolution") : $t("actions.invasion") }}</b>
-			<ol class="finalStandings"><li v-for="index in game.gameflow.finalPositions" :key="index"><PlayerMarker :index="index" /><b>{{ game.players[index].score }} SPL</b></li></ol><p>{{ $t("actions.finalAssets") }}</p>
+			<ol class="finalStandings"><li v-for="index in game.gameflow.finalPositions" :key="index"><PlayerMarker :index="index" /><b>{{ game.players[index].score }} <CurrencyIcon /></b></li></ol><p>{{ $t("actions.finalAssets") }}</p>
 		</template>
 		<template v-else-if="game.gameflow.pendingOffer">
-			<div class="offerHeading"><img :src="assets.getStateOrderImage(pendingOffer.state)" alt="" /><b v-if="pendingOffer.action.type === 'offerNation'">{{ $t("actions.offerNation", { state: rf.STATE_NAMES[pendingOffer.state], amount: pendingOffer.action.amount, nation: rf.NATION_NAMES[pendingOffer.action.nation] }) }}</b><b v-else>{{ $t("actions.offerWaterwork", { state: rf.STATE_NAMES[pendingOffer.state], kind: pendingOffer.action.kind, area: label(pendingOffer.action.area) }) }}</b></div>
-			<template v-if="pendingOffer.action.type === 'offerNation'"><ArtworkCard class="consentNationCard" :src="assets.getNationCardImage(pendingOffer.action.nation)" :alt="rf.NATION_NAMES[pendingOffer.action.nation]" /><p>{{ $t("actions.sellNation", { nation: rf.NATION_NAMES[pendingOffer.action.nation] }) }}<b>{{ pendingOffer.action.amount }} SPL</b>?</p><div class="paymentRow nationSaleRecipient"><img :src="nationSaleRecipient.src" alt="" /><span>{{ nationSaleRecipient.label }}</span><b>{{ nationSaleRecipient.before }} → {{ nationSaleRecipient.after }} SPL</b></div></template>
-			<template v-else><div class="offeredWork"><img :src="assets.getWaterworkImage(pendingOffer.state, cardData[pendingOffer.action.kind][0])" :title="view.waterworkMeasure({ kind: pendingOffer.action.kind, capacity: cardData[pendingOffer.action.kind][0] })" :alt="$t('actions.proposedWork', { kind: pendingOffer.action.kind, measure: view.waterworkMeasure({ kind: pendingOffer.action.kind, capacity: cardData[pendingOffer.action.kind][0] }) })" /><img v-if="offeredLand && !offeredLand.isRiver" :src="assets.getTerrainImage(offeredLand.landType, offeredLand.isCity)" :alt="offeredLand.isCity ? $t('actions.landCity', { land: rf.LAND_NAMES[offeredLand.landType] }) : $t('actions.landLand', { land: rf.LAND_NAMES[offeredLand.landType] })" /><span><b>{{ label(pendingOffer.action.area) }}</b><small class="workMeasure"><template v-if="offeredLand && !offeredLand.isRiver">{{ offeredLand.isCity ? $t("actions.landCity", { land: rf.LAND_NAMES[offeredLand.landType] }) : $t("actions.landLand", { land: rf.LAND_NAMES[offeredLand.landType] }) }}{{ ' ' }}</template>{{ pendingOffer.action.kind }}</small></span></div><p>{{ $t("actions.siteCost", { amount: pendingOffer.action.type === 'exchangeCalah' ? 0 : cardData[pendingOffer.action.kind][1] }) }}</p><div v-if="offeredLand && offeredLand.owner !== null" class="paymentRow consentIncome"><img :src="assets.getPlayerMarkerImage(offeredLand.owner)" alt="" /><span>{{ $t("actions.ifIrrigated") }}</span><b>+{{ offeredLandIncome }} SPL</b></div></template>
+			<div class="offerHeading"><img :src="assets.getStateOrderImage(pendingOffer.state)" alt="" /><b v-if="pendingOffer.action.type === 'offerNation'"><CurrencyText :text="$t('actions.offerNation', { state: rf.STATE_NAMES[pendingOffer.state], amount: pendingOffer.action.amount, nation: rf.NATION_NAMES[pendingOffer.action.nation] })" /></b><b v-else>{{ $t("actions.offerWaterwork", { state: rf.STATE_NAMES[pendingOffer.state], kind: pendingOffer.action.kind, area: label(pendingOffer.action.area) }) }}</b></div>
+			<template v-if="pendingOffer.action.type === 'offerNation'"><ArtworkCard class="consentNationCard" :src="assets.getNationCardImage(pendingOffer.action.nation)" :alt="rf.NATION_NAMES[pendingOffer.action.nation]" /><p>{{ $t("actions.sellNation", { nation: rf.NATION_NAMES[pendingOffer.action.nation] }) }}<b>{{ pendingOffer.action.amount }} <CurrencyIcon /></b>?</p><div class="paymentRow nationSaleRecipient"><img :src="nationSaleRecipient.src" alt="" /><span><CurrencyText :text="nationSaleRecipient.label" /></span><b>{{ nationSaleRecipient.before }} → {{ nationSaleRecipient.after }} <CurrencyIcon /></b></div></template>
+			<template v-else><div class="offeredWork"><img :src="assets.getWaterworkImage(pendingOffer.state, cardData[pendingOffer.action.kind][0])" :title="view.waterworkMeasure({ kind: pendingOffer.action.kind, capacity: cardData[pendingOffer.action.kind][0] })" :alt="$t('actions.proposedWork', { kind: pendingOffer.action.kind, measure: view.waterworkMeasure({ kind: pendingOffer.action.kind, capacity: cardData[pendingOffer.action.kind][0] }) })" /><img v-if="offeredLand && !offeredLand.isRiver" :src="assets.getTerrainImage(offeredLand.landType, offeredLand.isCity)" :alt="offeredLand.isCity ? $t('actions.landCity', { land: rf.LAND_NAMES[offeredLand.landType] }) : $t('actions.landLand', { land: rf.LAND_NAMES[offeredLand.landType] })" /><span><b>{{ label(pendingOffer.action.area) }}</b><small class="workMeasure"><template v-if="offeredLand && !offeredLand.isRiver">{{ offeredLand.isCity ? $t("actions.landCity", { land: rf.LAND_NAMES[offeredLand.landType] }) : $t("actions.landLand", { land: rf.LAND_NAMES[offeredLand.landType] }) }}{{ ' ' }}</template>{{ pendingOffer.action.kind }}</small></span></div><p><CurrencyText :text="$t('actions.siteCost', { amount: pendingOffer.action.type === 'exchangeCalah' ? 0 : cardData[pendingOffer.action.kind][1] })" /></p><div v-if="offeredLand && offeredLand.owner !== null" class="paymentRow consentIncome"><img :src="assets.getPlayerMarkerImage(offeredLand.owner)" alt="" /><span>{{ $t("actions.ifIrrigated") }}</span><b>+{{ offeredLandIncome }} <CurrencyIcon /></b></div></template>
 			<div class="buttonRow consentControls"><button class="primaryAction" :disabled="!personal.canPlay() || ending || store.viewSettings.isSaving" @click="confirmAgreement(true)">{{ $t("actions.acceptEnd") }}</button><button :disabled="!personal.canPlay() || ending || store.viewSettings.isSaving" @click="confirmAgreement(false)">{{ $t("actions.declineEnd") }}</button></div>
 		</template>
 		<fieldset v-else-if="game.gameflow.phase === rf.PHASE_SETTLEMENT" :disabled="!personal.canPlay()">
 			<p class="hint settlementBox">{{ $t("actions.settlementHint") }}</p>
 			<ol v-if="hasTrade" class="turnPlan" :aria-label="$t('actions.settlementTurnAria')">
-				<li v-for="(step, index) in tradeSteps" :key="index">{{ tradeStepLabel(step, index) }}
+				<li v-for="(step, index) in tradeSteps" :key="index"><CurrencyText :text="tradeStepLabel(step, index)" />
 					<span class="planButtons"><button v-if="canMergeUp(index)" @click="mergeUp(index)" :title="$t('actions.sellTogether')">{{ $t("actions.above") }}</button><button v-if="step.type === 'sell' && step.areas.length > 1" @click="splitStep(index)" :title="$t('actions.sellLastSeparately')">{{ $t("actions.split") }}</button><button :disabled="index === 0" @click="moveTradeStep(index, -1)" :aria-label="$t('actions.moveUp')">↑</button><button :disabled="index === tradeSteps.length - 1" @click="moveTradeStep(index, 1)" :aria-label="$t('actions.moveDown')">↓</button><button @click="tradeSteps.splice(index, 1)" :aria-label="$t('actions.removeFromPlan')">×</button></span>
 				</li>
 			</ol>
 			<label v-if="canExchangeDer"><input type="checkbox" v-model="exchangeDer" /> {{ $t("actions.freeWithDer") }}</label>
-			<p v-if="exchangeDer && purchase" class="hint">{{ $t("actions.derDissolves", { income: rf.NATION_INCOMES[rf.NATION_DER] }) }}</p>
-			<p v-if="tradeError" class="error">{{ tradeError }}</p>
-			<div v-if="tradePreview?.game" class="tradeBalance">{{ $t("actions.cashAfterPlan") }} <b>{{ tradePreview.game.players[actor].money }} SPL</b><small>{{ tradePreview.game.players[actor].money - game.players[actor].money >= 0 ? '+' : '' }}{{ tradePreview.game.players[actor].money - game.players[actor].money }} SPL</small><small :title="$t('actions.assetsAfterTitle')">{{ $t("actions.assetsAfter", { assets: tradeAssetsAfter, change: (tradeAssetsChange >= 0 ? '+' : '') + tradeAssetsChange }) }}</small></div>
+			<p v-if="exchangeDer && purchase" class="hint"><CurrencyText :text="$t('actions.derDissolves', { income: rf.NATION_INCOMES[rf.NATION_DER] })" /></p>
+			<p v-if="tradeError" class="error"><CurrencyText :text="tradeError" /></p>
+			<div v-if="tradePreview?.game" class="tradeBalance">{{ $t("actions.cashAfterPlan") }} <b>{{ tradePreview.game.players[actor].money }} <CurrencyIcon /></b><small>{{ tradePreview.game.players[actor].money - game.players[actor].money >= 0 ? '+' : '' }}{{ tradePreview.game.players[actor].money - game.players[actor].money }} <CurrencyIcon /></small><small :title="$t('actions.assetsAfterTitle')"><CurrencyText :text="$t('actions.assetsAfter', { assets: tradeAssetsAfter, change: (tradeAssetsChange >= 0 ? '+' : '') + tradeAssetsChange })" /></small></div>
 			<MarketForecast v-if="tradePreview?.game" :before="game" :after="tradePreview.game" />
 			<StateLeadership v-for="change in tradeLeadershipChanges" :key="change.id" :change="change" />
 			<button v-if="hasTrade" @click="resetTrade">{{ $t("actions.clearPlan") }}</button>
-			<form v-if="!hasTrade" class="primogenitureBid" @submit.prevent="confirmSettlementBid"><p class="orLabel">{{ $t("actions.or") }}</p><div class="bidBox"><label for="primogeniture">{{ $t("actions.bidPrimogeniture") }}</label><div class="buttonRow"><input id="primogeniture" type="number" inputmode="numeric" v-model.number="primogenitureAmount" :min="(game.gameflow.primogenitureBid?.amount || 0) + 1" :max="primogenitureBudget" step="1" required /><button :disabled="!!primogenitureError || ending || store.viewSettings.isSaving">{{ $t("actions.bidEndTurn", { amount: primogenitureAmount }) }}</button><small>{{ $t("actions.availableAmount", { amount: primogenitureBudget }) }}<br>{{ $t("actions.refunded") }}</small><span v-if="game.gameflow.primogenitureBid"><PlayerMarker :index="game.gameflow.primogenitureBid.player" /> {{ $t("actions.holdsHighBid", { amount: game.gameflow.primogenitureBid.amount }) }}</span><span v-if="primogenitureError" class="error">{{ primogenitureError }}</span></div></div></form>
+			<form v-if="!hasTrade" class="primogenitureBid" @submit.prevent="confirmSettlementBid"><p class="orLabel">{{ $t("actions.or") }}</p><div class="bidBox"><label for="primogeniture">{{ $t("actions.bidPrimogeniture") }}</label><div class="buttonRow"><input id="primogeniture" type="number" inputmode="numeric" v-model.number="primogenitureAmount" :min="(game.gameflow.primogenitureBid?.amount || 0) + 1" :max="primogenitureBudget" step="1" required /><button :disabled="!!primogenitureError || ending || store.viewSettings.isSaving"><CurrencyText :text="$t('actions.bidEndTurn', { amount: primogenitureAmount })" /></button><small><CurrencyText :text="$t('actions.availableAmount', { amount: primogenitureBudget })" /><br>{{ $t("actions.refunded") }}</small><span v-if="game.gameflow.primogenitureBid"><PlayerMarker :index="game.gameflow.primogenitureBid.player" /> <CurrencyText :text="$t('actions.holdsHighBid', { amount: game.gameflow.primogenitureBid.amount })" /></span><span v-if="primogenitureError" class="error"><CurrencyText :text="primogenitureError" /></span></div></div></form>
 		</fieldset>
 		<fieldset v-else-if="game.gameflow.phase === rf.PHASE_DEVELOPMENT" class="developmentActions plain" :disabled="!personal.canPlay()">
 			<template v-if="game.gameflow.developmentStep === 'betweenStates'">
@@ -474,7 +502,7 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 					<b v-if="game.gameflow.developmentStep === 'eridu'">{{ $t("actions.eriduFreeCrew") }}<br>{{ $t("actions.eriduDigPoints") }}</b>
 					<label v-else>{{ $t("actions.crewLabel") }} <select v-model="selectedCrew" @change="setIntent('dig')"><option :value="null">{{ $t("actions.automaticCrew") }}</option><option v-for="crew in state.diggers" :key="crew.id" :value="crew.id" :disabled="crew.hasDug">{{ $t("actions.crewOption", { points: crew.capacity, number: crew.id + 1 }) }}{{ crew.hasDug ? " " + $t("actions.crewUsed") : "" }}</option></select></label>
 					<p v-if="path.length">{{ path.map(label).join(' → ') }}</p>
-					<div v-if="path.length >= 2" class="hint" role="status"><template v-if="digPreview.cost">{{ $t("actions.canalPoints", { canals: digPreview.cost.canals, junctions: digPreview.cost.junctions }) }}</template><span v-if="chosenCrew && !digError"> {{ $t("actions.usesCrew", { points: chosenCrew.capacity, number: chosenCrew.id + 1 }) }}</span><p v-if="digError" class="error">{{ digError }}</p></div>
+					<div v-if="path.length >= 2" class="hint" role="status"><template v-if="digPreview.cost">{{ $t("actions.canalPoints", { canals: digPreview.cost.canals, junctions: digPreview.cost.junctions }) }}</template><span v-if="chosenCrew && !digError"> {{ $t("actions.usesCrew", { points: chosenCrew.capacity, number: chosenCrew.id + 1 }) }}</span><p v-if="digError" class="error"><CurrencyText :text="digError" /></p></div>
 					<div v-if="fittingCrews.length > 1" class="buttonRow fittingCrews"><span>{{ $t("actions.otherFittingCrews") }}</span><button v-for="crew in fittingCrews.filter((entry) => entry.id !== chosenCrew?.id)" :key="crew.id" :aria-label="$t('actions.useCrewAria', { points: crew.capacity, number: crew.id + 1 })" @click="useFittingCrew(crew)">{{ $t("actions.useCrew", { points: crew.capacity, number: crew.id + 1 }) }}</button></div>
 					<button v-if="path.length >= 2" ref="digButton" class="digAction primaryAction" :disabled="!!digError" @click="submitDig">{{ $t("actions.addCanal") }}<small>{{ path.map(label).join(' → ') }}</small></button>
 					<button v-if="path.length" @click="emit('clearPath')">{{ $t("actions.clearCanalDraft") }}</button>
@@ -482,49 +510,43 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 					<button v-else :disabled="!!path.length" @click="finishDigging">{{ $t("actions.doneDigging") }}</button>
 				</div>
 				<template v-if="game.gameflow.developmentStep !== 'eridu'">
-					<div v-if="!rules.hasMaintenanceCrew(game, state.id)" class="actionGroup crewFunding" :aria-label="$t('actions.requiredCrewFunding')">
-						<template v-if="canFinishDevelopment && !maintenanceSales.length && !maintenanceSelection.length">
-							<b>{{ $t("actions.crewHired", { capacity: cardData.digger[0] }) }}<br>{{ cardData.digger[1] }} SPL</b>
-							<p>{{ maintenanceContribution ? $t("actions.crewStatePaysShort", { state: Math.min(state.money, cardData.digger[1]), private: maintenanceContribution }) : $t("actions.crewStatePaysFull", { before: state.money, after: state.money - cardData.digger[1] }) }}</p>
-						</template>
-						<template v-else>
-						<b>{{ $t("actions.requiredCrew", { capacity: cardData.digger[0] }) }}<br>{{ cardData.digger[1] }} SPL</b>
-						<p>{{ $t("actions.statePays", { amount: Math.min(state.money, cardData.digger[1]), private: maintenanceContribution }) }}</p>
-						<p v-if="maintenanceSales.length">{{ $t("actions.privateAfterSales", { amount: maintenanceFundingGame.players[state.king].money }) }}</p>
-						<p role="status" class="fundingGap">{{ willRevolt ? $t("actions.crewCannotCover") : maintenanceGap ? $t("actions.needMore", { amount: maintenanceGap }) : maintenanceError ? $t("actions.reviewSales") : $t("actions.crewCovered") }}</p>
+					<div v-if="!rules.hasMaintenanceCrew(game, state.id) && (!canFinishDevelopment || maintenanceSales.length || maintenanceSelection.length)" class="actionGroup crewFunding" :aria-label="$t('actions.requiredCrewFunding')">
+						<b>{{ $t("actions.requiredCrew", { capacity: cardData.digger[0] }) }}<br>{{ cardData.digger[1] }} <CurrencyIcon /></b>
+						<p><CurrencyText :text="$t('actions.statePays', { amount: Math.min(state.money, cardData.digger[1]), private: maintenanceContribution })" /></p>
+						<p v-if="maintenanceSales.length"><CurrencyText :text="$t('actions.privateAfterSales', { amount: maintenanceFundingGame.players[state.king].money })" /></p>
+						<p role="status" class="fundingGap"><CurrencyText :text="willRevolt ? $t('actions.crewCannotCover') : maintenanceGap ? $t('actions.needMore', { amount: maintenanceGap }) : maintenanceError ? $t('actions.reviewSales') : $t('actions.crewCovered')" /></p>
 						<template v-if="!canFinishDevelopment">
 							<button v-if="store.viewSettings.actionIntent !== 'sell' && maintenanceGap" @click="setIntent('sell')">{{ $t("actions.selectFundingLand") }}</button>
-							<div v-for="group in maintenanceGroups" :key="group.type" class="fundingTerrain"><b>{{ rf.LAND_NAMES[group.type] }}</b><div class="buttonRow"><button v-for="land in group.lands" :key="land.id" :aria-pressed="maintenanceSelection.includes(land.id)" @click="toggleMaintenanceLand(land.id)">{{ label(land.id) }}<br>+{{ rules.landPrice(maintenanceFundingGame, land) }} SPL</button></div></div>
-							<button v-if="maintenanceSelection.length" class="primaryAction" @click="addMaintenanceBatch">{{ $t("actions.addSale", { count: maintenanceSelection.length, amount: maintenanceSelectionValue }) }}</button>
+							<div v-for="group in maintenanceGroups" :key="group.type" class="fundingTerrain"><b>{{ rf.LAND_NAMES[group.type] }}</b><div class="buttonRow"><button v-for="land in group.lands" :key="land.id" :aria-pressed="maintenanceSelection.includes(land.id)" @click="toggleMaintenanceLand(land.id)">{{ label(land.id) }}<br>+{{ rules.landPrice(maintenanceFundingGame, land) }} <CurrencyIcon /></button></div></div>
+							<button v-if="maintenanceSelection.length" class="primaryAction" @click="addMaintenanceBatch"><CurrencyText :text="$t('actions.addSale', { count: maintenanceSelection.length, amount: maintenanceSelectionValue })" /></button>
 							<p v-if="maintenanceChoices.length" class="hint">{{ $t("actions.saleHint") }}</p>
 							<ol v-if="maintenanceSales.length" :aria-label="$t('actions.crewFundingSalesAria')"><li v-for="(batch, index) in maintenanceSales" :key="index">{{ $t("actions.saleNumber", { number: index + 1 }) }}<button v-for="id in batch" :key="id" :aria-label="$t('actions.removeFromSale', { land: label(id) })" @click="removeSale(maintenanceSales, index, id)">{{ label(id) }} ×</button></li></ol>
 							<button v-if="maintenanceSales.length" @click="maintenanceSales = []; maintenanceSelection = []">{{ $t("actions.clearFundingSales") }}</button>
 						</template>
-						<p v-if="maintenanceError && maintenanceSales.length" class="error">{{ maintenanceError }}</p>
-						<div v-if="maintenancePreview?.game && !willRevolt" class="tradeBalance">{{ $t("actions.afterCrew") }}<b>{{ $t("actions.privateAmount", { amount: maintenancePreview.game.players[state.king].money }) }}</b><small>{{ $t("actions.stateTreasuryAmount", { amount: maintenancePreview.game.states[state.id].money }) }}</small></div>
+						<p v-if="maintenanceError && maintenanceSales.length" class="error"><CurrencyText :text="maintenanceError" /></p>
+						<div v-if="maintenancePreview?.game && !willRevolt" class="tradeBalance">{{ $t("actions.afterCrew") }}<b><CurrencyText :text="$t('actions.privateAmount', { amount: maintenancePreview.game.players[state.king].money })" /></b><small><CurrencyText :text="$t('actions.stateTreasuryAmount', { amount: maintenancePreview.game.states[state.id].money })" /></small></div>
 						<MarketForecast v-if="maintenanceSales.length && maintenanceSalePreview.game" :before="game" :after="maintenanceSalePreview.game" />
 						<StateLeadership v-for="change in maintenanceLeadershipChanges" :key="change.id" :change="change" />
 						<p v-if="willRevolt" class="eraChange">{{ $t("actions.revoltWarning") }}</p>
-						</template>
 					</div>
 					<details v-if="game.era === 3 && assimilationChoices.length" class="actionGroup" :open="activeSection === 'nations'"><summary @click.prevent="chooseSection('nations')">{{ $t("actions.buyNation") }}</summary><form class="nationOffer" @submit.prevent="submit({ type: 'offerNation', nation: nationToBuy, amount: nationPrice })">
 						<label>{{ $t("actions.assimilate") }} <select v-model="nationToBuy" required><option :value="null">{{ $t("actions.chooseNation") }}</option><option v-for="nation in assimilationChoices" :key="nation.id" :value="nation.id">{{ rf.NATION_NAMES[nation.id] }}</option></select></label>
-						<div v-if="selectedNation" class="nationOfferPreview"><ArtworkCard :src="assets.getNationCardImage(selectedNation.id)" :alt="rf.NATION_NAMES[selectedNation.id]" /><div><b>{{ $t("actions.seller") }} <PlayerMarker v-if="selectedNation.ownerType === 'player'" :index="selectedNation.owner" /><template v-else>{{ rf.STATE_NAMES[selectedNation.owner] }}</template></b><p>{{ $t("actions.allowedOffer", { min: rf.NATION_PRICES[selectedNation.id] / 2, max: rf.NATION_PRICES[selectedNation.id] * 2 }) }}</p><label>{{ $t("actions.offerSpl") }} <input type="number" inputmode="numeric" v-model.number="nationPrice" :min="rf.NATION_PRICES[selectedNation.id] / 2" :max="rf.NATION_PRICES[selectedNation.id] * 2" step="1" required /></label><p v-if="!nationOfferError">{{ $t("actions.treasuryAfter", { state: rf.STATE_NAMES[state.id], amount: state.money - nationPrice }) }}</p><p v-else class="error">{{ nationOfferError }}</p></div><div v-if="!nationOfferError" class="paymentRow nationPurchaseRecipient"><img :src="nationPurchaseRecipient.src" alt="" /><span>{{ nationPurchaseRecipient.label }}</span><b>{{ nationPurchaseRecipient.before }} → {{ nationPurchaseRecipient.after }} SPL</b></div><button class="nationPurchaseButton" :disabled="!!nationOfferError">{{ requiresNationConsent ? $t("actions.requestAgreement") : $t("actions.buyNationName", { nation: rf.NATION_NAMES[selectedNation.id] }) }}</button></div>
+						<div v-if="selectedNation" class="nationOfferPreview"><ArtworkCard :src="assets.getNationCardImage(selectedNation.id)" :alt="rf.NATION_NAMES[selectedNation.id]" /><div><b>{{ $t("actions.seller") }} <PlayerMarker v-if="selectedNation.ownerType === 'player'" :index="selectedNation.owner" /><template v-else>{{ rf.STATE_NAMES[selectedNation.owner] }}</template></b><p><CurrencyText :text="$t('actions.allowedOffer', { min: rf.NATION_PRICES[selectedNation.id] / 2, max: rf.NATION_PRICES[selectedNation.id] * 2 })" /></p><label><CurrencyText :text="$t('actions.offerSpl')" /> <input type="number" inputmode="numeric" v-model.number="nationPrice" :min="rf.NATION_PRICES[selectedNation.id] / 2" :max="rf.NATION_PRICES[selectedNation.id] * 2" step="1" required /></label><p v-if="!nationOfferError"><CurrencyText :text="$t('actions.treasuryAfter', { state: rf.STATE_NAMES[state.id], amount: state.money - nationPrice })" /></p><p v-else class="error"><CurrencyText :text="nationOfferError" /></p></div><div v-if="!nationOfferError" class="paymentRow nationPurchaseRecipient"><img :src="nationPurchaseRecipient.src" alt="" /><span><CurrencyText :text="nationPurchaseRecipient.label" /></span><b>{{ nationPurchaseRecipient.before }} → {{ nationPurchaseRecipient.after }} <CurrencyIcon /></b></div><button class="nationPurchaseButton" :disabled="!!nationOfferError">{{ requiresNationConsent ? $t("actions.requestAgreement") : $t("actions.buyNationName", { nation: rf.NATION_NAMES[selectedNation.id] }) }}</button></div>
 					</form></details>
 					<p v-if="game.gameflow.offerDeclined && state" role="status">{{ $t("actions.agreementDeclined", { area: label(game.gameflow.offerDeclined) }) }}</p>
 					<div v-if="showEquipment" class="actionGroup equipmentShop">
 						<b>{{ $t("actions.buyEquipment") }}</b>
 						<p class="hint">{{ $t("actions.eraSupply", { era: cardEra === 5 ? 'M' : cardEra }) }} - {{ cardEra === 5 ? $t("actions.unlimitedSupply") : $t("actions.cardsLeft", { count: game.cardSupply[cardEra] }) }}</p>
-						<p class="equipLegend"><span class="swatch pump"></span><span>{{ $t("actions.pump", { price: siteCost.pump[1] }) }}<br>{{ $t("actions.reach", { reach: siteCost.pump[0], tokens: rules.remainingWaterworkTokens(game, state.id, siteCost.pump[0]) }) }}</span></p>
-						<p class="equipLegend"><span class="swatch reservoir"></span><span>{{ $t("actions.reservoir", { price: siteCost.reservoir[1] }) }}<br>{{ $t("actions.holds", { capacity: siteCost.reservoir[0], tokens: rules.remainingWaterworkTokens(game, state.id, siteCost.reservoir[0]) }) }}</span></p>
-						<label v-if="ownedCalah"><input type="checkbox" v-model="useCalah" /> {{ $t("actions.useCalah", { income: rf.NATION_INCOMES[rf.NATION_CALAH] }) }}</label>
-						<p v-if="!store.turnDraft.ready && !equipSites.length" class="hint">{{ noSiteReason }}</p>
-						<div class="crewStepper"><span>{{ $t("actions.crewStepper", { capacity: cardData.digger[0] }) }}<br>{{ cardData.digger[1] }} SPL</span><span class="stepper"><button :disabled="!crewCount" :aria-label="$t('actions.removeCrew')" @click="removeCrew">−</button><b>{{ crewCount }}</b><button :disabled="!!crewError" :aria-label="$t('actions.addCrew')" @click="submit({ type: 'buyCard', kind: 'digger' })">+</button></span></div>
-						<p v-if="crewError" class="hint">{{ crewError }}</p>
+						<div class="equipLegend"><span class="swatch pump"></span><div><span class="shopItemLine"><CurrencyText :text="$t('actions.pump', { price: siteCost.pump[1] })" /> · {{ $t("actions.reach", { reach: siteCost.pump[0] }) }}</span><small>{{ $t("actions.tokensLeft", { tokens: rules.remainingWaterworkTokens(game, state.id, siteCost.pump[0]) }) }}</small></div></div>
+						<div class="equipLegend"><span class="swatch reservoir"></span><div><span class="shopItemLine"><CurrencyText :text="$t('actions.reservoir', { price: siteCost.reservoir[1] })" /> · {{ $t("actions.holds", { capacity: siteCost.reservoir[0] }) }}</span><small>{{ $t("actions.tokensLeft", { tokens: rules.remainingWaterworkTokens(game, state.id, siteCost.reservoir[0]) }) }}</small></div></div>
+						<label v-if="ownedCalah"><input type="checkbox" v-model="useCalah" /> <CurrencyText :text="$t('actions.useCalah', { income: rf.NATION_INCOMES[rf.NATION_CALAH] })" /></label>
+						<p v-if="!store.turnDraft.ready && !equipSites.length" class="hint"><CurrencyText :text="noSiteReason" /></p>
+						<div class="crewStepper"><span>{{ $t("actions.crewStepper", { era: cardEra === 5 ? 'M' : cardEra, capacity: cardData.digger[0] }) }}<br>{{ cardData.digger[1] }} <CurrencyIcon /></span><span class="stepper"><button :disabled="!canRemoveCrew" :aria-label="$t('actions.removeCrew')" @click="removeCrew()">−</button><b>{{ crewCount }}</b><button :disabled="!!crewError" :aria-label="$t('actions.addCrew')" @click="addCrew">+</button></span></div>
+						<p v-if="crewError" class="hint"><CurrencyText :text="crewError" /></p>
 						<button v-if="game.gameflow.developmentStep === 'digging' && unusedCrews.length" @click="diggingDone = false">{{ $t("actions.backToDigging") }}</button>
 						<p v-if="cardEra > game.era" class="eraChange">{{ $t("actions.eraStarts", { era: cardEra === 5 ? 'M' : cardEra }) }}<template v-if="cardEra >= 3">{{ $t("actions.eraRetire", { era: cardEra - 2 }) }}</template><template v-if="cardEra === 3">{{ $t("actions.nationsAssimilated") }}</template><template v-if="cardEra === 4">{{ $t("actions.nationsDissolve") }}</template></p>
-						<ul v-if="draftLabels.length" class="draftList" :aria-label="$t('actions.yourDraft')"><li v-for="(text, index) in draftLabels" :key="index">{{ text }} <button v-if="!store.turnDraft.ready" @click="controller.removeDraftStep(index)" :aria-label="$t('actions.removeFromDraft')">×</button></li></ul>
-						<p>{{ $t("actions.remainingTreasury", { amount: state.money }) }}</p>
+						<ul v-if="draftGroups.length" class="draftList" :aria-label="$t('actions.yourDraft')"><li v-for="group in draftGroups" :key="group.index"><span><CurrencyText :text="group.label" /></span> <button v-if="!store.turnDraft.ready" :disabled="group.era && (!canRemoveCrew || group.index >= store.turnDraft.steps.length)" @click="group.era ? removeCrew(group.index) : controller.removeDraftStep(group.index)" :aria-label="group.era ? $t('actions.removeCrew') : $t('actions.removeFromDraft')" :title="group.era ? $t('actions.removeCrew') : $t('actions.removeFromDraft')">{{ group.era ? "−" : "×" }}</button></li></ul>
+						<p><CurrencyText :text="$t('actions.treasuryCalculation', { before: treasuryBefore, change: treasuryChange, after: treasuryAfter })" /></p>
 					</div>
 				</template>
 			</template>
@@ -537,30 +559,30 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 					<label>{{ $t("actions.destination") }} <select v-model="waterTarget" @change="emit('selectArea', waterTarget)" required><option :value="null">{{ $t("actions.clickMapOrChoose") }}</option><option v-for="(choice, index) in waterOptions" :key="choice.area" :value="choice.area">{{ index + 1 }}. {{ label(choice.area) }} · {{ choice.kind === 'pump' ? $t("actions.sendToPump") : $t("actions.irrigate") }}</option></select></label>
 					<div v-if="targetWaterwork" class="offeredWork"><img :src="assets.getWaterworkImage(targetWaterwork.state, targetWaterwork.capacity)" :alt="$t('actions.destinationPump')" /><span>{{ $t("actions.pumpOf", { state: rf.STATE_NAMES[targetWaterwork.state] }) }}<br>{{ view.waterworkMeasure(targetWaterwork) }}</span></div>
 				</div>
-				<div v-if="irrigationLand" class="offeredWork irrigationPreview"><img :src="assets.getTerrainImage(irrigationLand.landType, irrigationLand.isCity)" :alt="`${rf.LAND_NAMES[irrigationLand.landType]}${irrigationLand.isCity ? ' ' + $t('common.city') : ''}`" /><img :src="assets.getPlayerMarkerImage(irrigationLand.owner)" :alt="game.players[irrigationLand.owner].displayName" /><span><small>{{ $t("actions.privateIncome", { amount: irrigationIncome }) }}</small><small>{{ $t("actions.stateHarvest", { state: rf.STATE_NAMES[irrigationState], before: rules.harvestAmount(game, irrigationState), after: rules.harvestAmount(game, irrigationState) + irrigationYield }) }}</small></span></div>
-				<div class="buttonRow routingControls"><label v-if="chosenWater?.kind === 'pump'">{{ $t("actions.water") }} (max {{ frame.water }}) <input type="number" inputmode="numeric" v-model.number="waterAmount" min="1" :max="frame.water" step="1" required /></label><button class="primaryAction" :disabled="!chosenWater">{{ !chosenWater ? $t("actions.chooseDestination") : chosenWater.kind === 'pump' ? $t("actions.sendWater") : $t("actions.irrigateOne") }}<small v-if="chosenWater"><template v-if="chosenWater.kind === 'pump'">{{ waterAmount }} → </template>{{ label(chosenWater.area) }}<template v-if="chosenWater.kind === 'irrigate'"><br>{{ $t("actions.irrigationYield", { amount: irrigationYield }) }}</template></small></button></div>
+				<div v-if="irrigationLand" class="offeredWork irrigationPreview"><img :src="assets.getTerrainImage(irrigationLand.landType, irrigationLand.isCity)" :alt="`${rf.LAND_NAMES[irrigationLand.landType]}${irrigationLand.isCity ? ' ' + $t('common.city') : ''}`" /><img :src="assets.getPlayerMarkerImage(irrigationLand.owner)" :alt="game.players[irrigationLand.owner].displayName" /><span><small><CurrencyText :text="$t('actions.privateIncome', { amount: irrigationIncome })" /></small><small><CurrencyText :text="$t('actions.stateHarvest', { state: rf.STATE_NAMES[irrigationState], before: rules.harvestAmount(game, irrigationState), after: rules.harvestAmount(game, irrigationState) + irrigationYield })" /></small></span></div>
+				<div class="buttonRow routingControls"><label v-if="chosenWater?.kind === 'pump'">{{ $t("actions.water") }} (max {{ frame.water }}) <input type="number" inputmode="numeric" v-model.number="waterAmount" min="1" :max="frame.water" step="1" required /></label><button class="primaryAction" :disabled="!chosenWater">{{ !chosenWater ? $t("actions.chooseDestination") : chosenWater.kind === 'pump' ? $t("actions.sendWater") : $t("actions.irrigateOne") }}<small v-if="chosenWater"><template v-if="chosenWater.kind === 'pump'">{{ waterAmount }} → </template>{{ label(chosenWater.area) }}<template v-if="chosenWater.kind === 'irrigate'"><br><CurrencyText :text="$t('actions.irrigationYield', { amount: irrigationYield })" /></template></small></button></div>
 			</form>
 		</fieldset>
 		<fieldset v-else-if="game.gameflow.phase === rf.PHASE_RAINY_SEASON && game.rain.step === 'harvest'" :disabled="!personal.canPlay()">
-			<legend>{{ $t("actions.harvestLegend", { state: rf.STATE_NAMES[state.id], amount: rules.harvestAmount(game, state.id) }) }}</legend>
+			<legend><CurrencyText :text="$t('actions.harvestLegend', { state: rf.STATE_NAMES[state.id], amount: rules.harvestAmount(game, state.id) })" /></legend>
 			<div class="harvestChoice">
 				<b>{{ $t("actions.distribute") }}</b>
-				<div class="paymentRow" v-for="payment in harvestPayments" :key="payment.index"><PlayerMarker :index="payment.index" /><span><small>{{ $t("actions.cashBeforeAfter", { before: game.players[payment.index].money, after: game.players[payment.index].money + payment.amount }) }}</small></span><b>+{{ payment.amount }} SPL</b></div>
-				<div v-if="harvest.retained > 0" class="paymentRow"><img :src="assets.getStateOrderImage(state.id)" alt="" /><span>{{ $t("actions.stateRetains") }}<small>{{ $t("actions.cashBeforeAfter", { before: state.money, after: state.money + harvest.retained }) }}</small></span><b>{{ harvest.retained }} SPL</b></div>
+				<div class="paymentRow" v-for="payment in harvestPayments" :key="payment.index"><PlayerMarker :index="payment.index" /><span><small><CurrencyText :text="$t('actions.cashBeforeAfter', { before: game.players[payment.index].money, after: game.players[payment.index].money + payment.amount })" /></small></span><b>+{{ payment.amount }} <CurrencyIcon /></b></div>
+				<div v-if="harvest.retained > 0" class="paymentRow"><img :src="assets.getStateOrderImage(state.id)" alt="" /><span>{{ $t("actions.stateRetains") }}<small><CurrencyText :text="$t('actions.cashBeforeAfter', { before: state.money, after: state.money + harvest.retained })" /></small></span><b>{{ harvest.retained }} <CurrencyIcon /></b></div>
 				<button :disabled="ending || store.viewSettings.isSaving" @click="confirmHarvest('distribute')">{{ $t("actions.distributeEnd") }}</button>
 			</div>
 			<div v-if="!state.hasRevolted" class="harvestChoice">
-				<b>{{ $t("actions.store") }}</b><div class="paymentRow"><img :src="assets.getStateOrderImage(state.id)" alt="" /><span>{{ rf.STATE_NAMES[state.id] }}<small>{{ $t("actions.cashBeforeAfter", { before: state.money, after: state.money + rules.harvestAmount(game, state.id) }) }}</small></span><b>+{{ rules.harvestAmount(game, state.id) }} SPL</b></div>
+				<b>{{ $t("actions.store") }}</b><div class="paymentRow"><img :src="assets.getStateOrderImage(state.id)" alt="" /><span>{{ rf.STATE_NAMES[state.id] }}<small><CurrencyText :text="$t('actions.cashBeforeAfter', { before: state.money, after: state.money + rules.harvestAmount(game, state.id) })" /></small></span><b>+{{ rules.harvestAmount(game, state.id) }} <CurrencyIcon /></b></div>
 				<label v-if="rules.harvestAmount(game, state.id) > 0 && removable.length" class="removeWork"><span>{{ $t("actions.removeSmallest") }}</span><span class="removalControl"><select v-model="removeWaterwork" @change="emit('selectArea', removeWaterwork)"><option v-for="id in removable" :key="id" :value="id">{{ label(id) }} · {{ game.board.areas.find((area) => area.id === id).waterwork.kind }} {{ game.board.areas.find((area) => area.id === id).waterwork.capacity }}</option></select><img v-if="removeWaterwork" class="piece" :src="assets.getWaterworkImage(state.id, game.board.areas.find((area) => area.id === removeWaterwork).waterwork.capacity)" :alt="$t('actions.waterworkToRemove')" /></span></label>
 				<button :disabled="ending || store.viewSettings.isSaving" @click="confirmHarvest('store')">{{ $t("actions.storeEnd") }}</button>
 			</div>
 		</fieldset>
-		<div v-if="store.turnDraft.ready && (game.gameflow.phase !== rf.PHASE_DEVELOPMENT || (!showDigging && !showEquipment))" class="turnSummary" role="status"><p v-for="(step, index) in store.turnDraft.steps" :key="index">{{ step.label }}</p></div>
+		<div v-if="store.turnDraft.ready && (game.gameflow.phase !== rf.PHASE_DEVELOPMENT || (!showDigging && !showEquipment))" class="turnSummary" role="status"><p v-for="(step, index) in store.turnDraft.steps" :key="index"><CurrencyText :text="step.label" /></p></div>
 		<div v-if="canExchangeBarahshum || (store.turnDraft.ready && store.turnDraft.steps.at(-1).action.type === 'exchangeBarahshum')" class="actionGroup">
 			<b><PlayerMarker v-if="game.nations[rf.NATION_BARAHSHUM].ownerType === 'player'" :index="game.nations[rf.NATION_BARAHSHUM].owner" /><template v-else>{{ rf.STATE_NAMES[game.nations[rf.NATION_BARAHSHUM].owner] }}</template> {{ $t("actions.barahshum") }}</b>
-			<p>{{ $t("actions.barahshumHint", { income: rf.NATION_INCOMES[rf.NATION_BARAHSHUM] }) }}</p>
+			<p><CurrencyText :text="$t('actions.barahshumHint', { income: rf.NATION_INCOMES[rf.NATION_BARAHSHUM] })" /></p>
 			<button v-if="store.viewSettings.actionIntent !== 'barahshum'" :disabled="store.turnDraft.ready" @click="setIntent('barahshum')">{{ $t("actions.chooseCanalSite") }}</button>
-			<template v-else><button @click="setIntent(game.gameflow.phase === rf.PHASE_DEVELOPMENT ? (showDigging ? 'dig' : 'equip') : '')">{{ $t("actions.cancelCanal") }}</button><p v-if="barahshumError" class="hint">{{ barahshumError }}</p><button v-else :disabled="store.turnDraft.ready" @click="submit({ type: 'exchangeBarahshum', from: barahshum.id, to: area.id })">{{ $t("actions.dissolveDig", { area: label(area.id) }) }}</button></template>
+			<template v-else><button @click="setIntent(game.gameflow.phase === rf.PHASE_DEVELOPMENT ? (showDigging ? 'dig' : 'equip') : '')">{{ $t("actions.cancelCanal") }}</button><p v-if="barahshumError" class="hint"><CurrencyText :text="barahshumError" /></p><button v-else :disabled="store.turnDraft.ready" @click="submit({ type: 'exchangeBarahshum', from: barahshum.id, to: area.id })">{{ $t("actions.dissolveDig", { area: label(area.id) }) }}</button></template>
 		</div>
 	</section>
 </template>
@@ -598,4 +620,14 @@ fieldset.plain { border: 0; padding: 0; }fieldset { border: 1px solid #c4b894; b
 .offerHeading, .offeredWork { display: flex; align-items: center; gap: 8px; margin: 8px 0; }.offerHeading img, .offeredWork img { width: 38px; height: 38px; }.offerHeading { padding-bottom: 8px; border-bottom: 1px solid #c4b894; font-size: 15px; }
 .nationOfferPreview { display: grid; grid-template-columns: minmax(0, 42%) minmax(0, 1fr); align-items: start; gap: 10px; margin-top: 8px; }.nationOfferPreview > :first-child { width: 100%; }.nationPurchaseRecipient, .nationPurchaseButton { grid-column: 1 / -1; }.nationPurchaseRecipient { margin: 0; }.nationOfferPreview > div { min-width: 0; overflow-wrap: anywhere; }.nationOffer select { max-width: 100%; }
 .turnPlan { margin: 4px 0 8px; padding-left: 22px; }.turnPlan li { margin: 5px 0; }.turnPlan li .planButtons { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }.turnPlan li button { min-height: 30px; padding: 0 9px; }
+.developmentActions > .actionGroup:first-child { border-top: 0; margin-top: 0; padding-top: 0; }
+.crewFunding, .equipmentShop { text-align: center; }
+.crewFunding > b { display: block; text-wrap: balance; }
+.queuedCrew { margin: 0; color: #24532c; }
+.equipLegend { justify-content: center; }
+.shopItemLine { white-space: nowrap; }
+.equipLegend small { display: block; color: #655a42; }
+.crewStepper { flex-direction: column; padding: 10px 0; border-block: 1px solid #c4b894; }
+.crewStepper > span:first-child { white-space: pre-line; text-wrap: balance; }
+.draftList li > span { white-space: pre-line; flex: 1; text-align: center; text-wrap: balance; }
 </style>

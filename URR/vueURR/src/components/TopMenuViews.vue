@@ -144,7 +144,7 @@ async function confirmResign() {
 	<div id="rewindPanel" v-if="store.viewSettings.showRewindPanel">
 		<div class="utilityHeading"><b>{{ $t("rewind.title") }}</b><button @click="store.viewSettings.showRewindPanel = false" :aria-label="$t('rewind.close')">×</button></div>
 		<p>{{ $t("rewind.intro") }}</p>
-		<p v-if="store.gameMessages.errorText" class="errorText" role="alert">{{ store.gameMessages.errorText }}</p>
+		<p v-if="store.gameMessages.errorText" class="errorText" role="alert"><CurrencyText :text="store.gameMessages.errorText" /></p>
 		<button class="topMenuItem" :disabled="!!store.turnDraft.start || store.viewSettings.showLoader || store.viewSettings.isSaving || personal.haltPlay || store.viewSettings.showReplay" :title="store.turnDraft.start ? $t('rewind.resetFirst') : $t('rewind.previousTurn')" @click="IO.loadRewind()">
 			<img :src="view.getImage('icon-rewind')" alt="" />
 			<span>{{ $t("rewind.rewind") }}</span>
@@ -171,7 +171,7 @@ async function confirmResign() {
 		<div class="utilityHeading"><b>{{ $t("resign.title") }}</b><button @click="store.viewSettings.showResignPanel = false" :aria-label="$t('resign.close')">×</button></div>
 		<p>{{ $t("resign.question") }}</p>
 		<p>{{ $t("resign.consequences") }} <b>{{ $t("resign.cannotBeUndone") }}</b></p>
-		<p v-if="store.gameMessages.errorText" class="errorText" role="alert">{{ store.gameMessages.errorText }}</p>
+		<p v-if="store.gameMessages.errorText" class="errorText" role="alert"><CurrencyText :text="store.gameMessages.errorText" /></p>
 		<button class="actionsLineButton" :disabled="!!store.turnDraft.start || store.viewSettings.showLoader || store.viewSettings.isSaving" :title="store.turnDraft.start ? $t('resign.resetFirst') : $t('resign.resignGame')" @click="confirmResign">{{ $t("resign.confirm") }}</button>
 		<button class="actionsLineButton" @click="store.viewSettings.showResignPanel = false">{{ $t("common.cancel") }}</button>
 	</div>

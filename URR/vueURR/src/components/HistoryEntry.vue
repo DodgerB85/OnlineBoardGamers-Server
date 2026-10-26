@@ -179,24 +179,24 @@ function jumpToEntry() {
 			<span v-if="isCurrentReplay" class="replayPosition">{{ $t("history.currentReplay") }}</span>
 			<template v-if="entry.administration">
 				<div class="administrationHeading">{{ entry.administration.title }}</div>
-				<p class="administrationExplanation">{{ entry.administration.text }}</p>
+				<p class="administrationExplanation"><CurrencyText :text="entry.administration.text" /></p>
 				<div v-if="canReplayWater" class="waterReplayControls"><button @click.stop="startWaterPlayback(true)">{{ $t("history.animate") }}</button><button @click.stop="startWaterPlayback(false)">{{ $t("history.stepThrough") }}</button><button @click.stop="startWaterPlayback(false, true)">{{ $t("history.showIrrigated") }}</button></div>
-				<p v-if="playbackError" role="alert">{{ playbackError }}</p>
+				<p v-if="playbackError" role="alert"><CurrencyText :text="playbackError" /></p>
 				<div class="administrationDetails" v-if="entry.administration.details.length">
 					<div v-for="(detail, detailIndex) in entry.administration.details" :key="detailIndex">
 						<PlayerMarker v-if="detail.player !== undefined" :index="detail.player" />
 						<img v-else-if="detail.state !== undefined" :src="assets.getStateOrderImage(detail.state)" alt="" />
 						<img v-else-if="detail.terrain !== undefined" :src="assets.getTerrainImage(detail.terrain)" alt="" />
-						<span>{{ detail.text }}</span>
+						<span><CurrencyText :text="detail.text" /></span>
 					</div>
 				</div>
 			</template>
-			<div v-else-if="entry[0] === rf.HIST_NEW_GAME" class="new_turn">{{ eventText }}</div>
+			<div v-else-if="entry[0] === rf.HIST_NEW_GAME" class="new_turn"><CurrencyText :text="eventText" /></div>
 			<template v-else>
-				<div class="container"><span class="header" v-if="player"><PlayerMarker :index="entry[1]" :name="player.displayName" /></span><img v-if="eventArtwork" :src="eventArtwork.src" :alt="eventArtwork.alt" :title="eventArtwork.alt" /><span>{{ eventText }}</span></div>
-				<div v-for="award in nationAwards" :key="award.id" class="nationAwardNotice"><PlayerMarker :index="award.owner" :name="after.players[award.owner].displayName" /><span>{{ $t("history.acquiredNation", { nation: rf.NATION_NAMES[award.id], amount: award.price }) }}</span></div>
+				<div class="container"><span class="header" v-if="player"><PlayerMarker :index="entry[1]" :name="player.displayName" /></span><img v-if="eventArtwork" :src="eventArtwork.src" :alt="eventArtwork.alt" :title="eventArtwork.alt" /><span><CurrencyText :text="eventText" /></span></div>
+				<div v-for="award in nationAwards" :key="award.id" class="nationAwardNotice"><PlayerMarker :index="award.owner" :name="after.players[award.owner].displayName" /><span><CurrencyText :text="$t('history.acquiredNation', { nation: rf.NATION_NAMES[award.id], amount: award.price })" /></span></div>
 				<StateLeadership v-for="change in leadershipChanges" :key="change.id" :change="change" />
-				<details class="balanceDetails" v-if="balanceChanges.length" @click.stop @keydown.enter.stop @keydown.space.stop><summary class="balanceChanges" :aria-label="$t('history.showBalances')"><span v-for="change in balanceChanges" :key="change.label" :title="change.title || change.label"><img :src="change.src" :alt="change.label" /><b>{{ change.amount > 0 ? '+' : '' }}{{ change.amount }} SPL</b></span></summary><div class="balanceBreakdown"><div v-for="change in balanceChanges" :key="change.label"><img :src="change.src" :alt="change.title || change.label" :title="change.title || change.label" /><span>{{ change.label }}</span></div></div></details>
+				<details class="balanceDetails" v-if="balanceChanges.length" @click.stop @keydown.enter.stop @keydown.space.stop><summary class="balanceChanges" :aria-label="$t('history.showBalances')"><span v-for="change in balanceChanges" :key="change.label" :title="change.title || change.label"><img :src="change.src" :alt="change.label" /><b>{{ change.amount > 0 ? '+' : '' }}{{ change.amount }} <CurrencyIcon /></b></span></summary><div class="balanceBreakdown"><div v-for="change in balanceChanges" :key="change.label"><img :src="change.src" :alt="change.title || change.label" :title="change.title || change.label" /><span><CurrencyText :text="change.label" /></span></div></div></details>
 				<div class="actionImages" :class="{ multipleCards: actionImages.filter((asset) => asset.card).length > 1 }" v-if="actionImages.length"><template v-for="(asset, idx) in actionImages" :key="idx"><div v-if="asset.card" class="historyCard"><ArtworkCard :src="asset.src" :alt="asset.alt" /></div><img v-else :src="asset.src" :alt="asset.alt" :title="asset.alt" /></template></div>
 				<div v-if="isGameEnd" class="new_turn">{{ after?.gameflow.endReason === 'invasion' ? $t("history.gameEndedInvasion") : after?.gameflow.endReason === 'revolution' ? $t("history.gameEndedRevolution") : $t("history.gameEnded") }}</div>
 			</template>
