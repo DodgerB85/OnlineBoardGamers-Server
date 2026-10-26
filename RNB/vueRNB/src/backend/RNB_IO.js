@@ -971,6 +971,12 @@ export async function saveAndUpdateNotifictionsAfterStack(currentPlayerNeedsToFi
 
 	clearUnfinalizedPreMoveBeforeExport()
 
+	// Also clear the stored currentMoveData so loadCurrentMove() below cannot reload
+	// the already-cleared preview and bake it into the exported gameDataB64.
+	// This prevents the "ghost turn" where a pending player gets an extra turn
+	// after an unrelated save (eg admin Save Game, WS broadcast, bot auto-move).
+	personal.currentMoveData = {}
+
 	personal.haltPlay = true
 	store.viewSettings.showLoader = true
 
