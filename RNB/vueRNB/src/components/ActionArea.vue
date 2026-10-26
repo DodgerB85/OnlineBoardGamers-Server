@@ -14,6 +14,7 @@ import * as map from "../js/RNBmap"
 import * as context from "../js/RNBcontext"
 import * as view from "../js/RNBview"
 import * as produce from "../js/RNBproduce"
+import * as productionSetup from "../js/RNBproductionSetup"
 import * as highlight from "../js/RNBhighlight"
 import * as loc from "../js/RNBlocation"
 import * as stack from "../js/RNBstack"
@@ -39,6 +40,7 @@ import { computed, ref, watch, onUnmounted } from "vue"
 import FailedStackEntry from "./Utils/FailedStackEntry.vue"
 import ActionAreaPrePhase from "./ActionAreaPrePhase.vue"
 import ConflictDecisionPanel from "./ConflictDecisionPanel.vue"
+import ProductionSetupPanel from "./ProductionSetupPanel.vue"
 
 function chosenStartTileIsPolder() {
 	const homeLoc = model.getPlayersHomeMarkerLocation(controller.currentPlayerIndex())
@@ -925,7 +927,12 @@ const getGameOverReason = computed(() => {
 			</div>
 
 			<!-- PRODUCTIONS -->
-			<div v-if="rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase) && store.context.action !== rf.ACT_CONFIRM_END_TURN && store.context.action !== rf.ACT_CONFIRM_RESIGN">
+			<div v-if="rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase) && productionSetup.isSetupPending()">
+				<ProductionSetupPanel />
+				<button class="actionsLineButton" @click="IO.resetGameStateToLoadedPreMove()" v-if="rf.ALL_PRE_PHASE_MAIN_PHASES.includes(store.gameflow.phase)">{{ $t("common.cancel") }}</button>
+				<button @click="resetWholeTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
+			</div>
+			<div v-else-if="rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase) && store.context.action !== rf.ACT_CONFIRM_END_TURN && store.context.action !== rf.ACT_CONFIRM_RESIGN">
 				<template v-if="store.context.action === rf.ACT_CHOOSE_BUILDING_TO_UPGRADE">
 					{{ $t("action.productionSelectUpgrade") }}
 					<br />

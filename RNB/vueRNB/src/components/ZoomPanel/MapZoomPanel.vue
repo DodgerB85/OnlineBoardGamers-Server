@@ -14,6 +14,7 @@ import * as model from "../../js/RNBmodel"
 import * as loc from "../../js/RNBlocation"
 import * as computes from "../../js/RNBcomputes"
 import * as vec from "../../js/RNBvector"
+import * as electricity from "../../js/RNBelectricity"
 //import * as coord from "../../js/RNBcoordinate"
 import * as hd from "../../js/RNBhex"
 
@@ -793,8 +794,8 @@ const computedMaxNeutralBricks = computed(() => {
 							<path :d="computedZoomData.fullTrainTrackPathZP" stroke="#1A237E" stroke-width="124" stroke-linejoin="round" stroke-linecap="butt" fill="none" mask="url(#zoomTrainTrackMask)" />
 						</g>
 						<g v-if="store.gameOptions.useElectricity && computedZoomData.fullPowerLinePathZP">
-							<path :d="computedZoomData.fullPowerLinePathZP" stroke="#B22222" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" fill="none" />
-							<path :d="computedZoomData.fullPowerLinePathZP" stroke="#FFD700" stroke-width="3" stroke-dasharray="8 14" fill="none" />
+							<path :d="computedZoomData.fullPowerLinePathZP" stroke="#333333" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" fill="none" />
+							<path :d="computedZoomData.fullPowerLinePathZP" :stroke="electricity.isHexPowered(computedZoomData.hexID) ? '#FFD700' : '#E53935'" stroke-width="4" stroke-dasharray="8 14" fill="none" />
 						</g>
 					</g>
 					<!-- BUILDINGS-->

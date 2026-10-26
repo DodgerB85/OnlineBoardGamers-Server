@@ -12,10 +12,13 @@
  *
  * State:
  *  - `bldg.powerActive`            transient flag: this plant is working this phase
- *  - `bldg.pendingTransporterFuel` optional transporter ID chosen by the player to
- *                                    supply 1 wood instead of free tile fuel
+ *  - `bldg.powerFuelType`          the wood type consumed this phase (for history)
  *  - `store.context.poweredHexIDs` hexes energised for the current production phase
- *  - `store.context.powerPlantsFueledTurn` idempotency guard (fuel once per turn)
+ *  - `store.context.powerPlantsFueledTurn` idempotency guard for tile fuel
+ *
+ * Tile fuel is consumed automatically at production start. A transporter can
+ * supply wood instead when there is none on the tile; that choice is announced
+ * in player order during the production setup step (RNBproductionSetup.js).
  */
 
 import { useModelStore } from "../stores/RNBstore.js"
@@ -106,7 +109,7 @@ export function isHexPowered(hexID) {
 // per the auto-consumption priority rule. "On the tile" means anywhere on the
 // plant's hex (any bucket) - fuel dropped by a departing transporter frequently
 // lands in a different bucket than the building itself.
-function findFreeFuelOnTile(hexID, bucketID) {
+export function findFreeFuelOnTile(hexID, bucketID) {
 	const resources = model.getAllInGameResources()
 	for (const fuelType of [rf.RES_BOARDS, rf.RES_TRUNKS]) {
 		// Prefer fuel in the plant's own bucket, but accept any fuel on the hex
@@ -119,7 +122,7 @@ function findFreeFuelOnTile(hexID, bucketID) {
 }
 
 // Fuel supplied from a transporter on the same tile (player override).
-function findFuelOnTransporterOnTile(transporterID, hexID) {
+export function findFuelOnTransporterOnTile(transporterID, hexID) {
 	if (transporterID === -1) return null
 	const transporterObj = model.getTransporterByID(transporterID)
 	if (!transporterObj) return null
@@ -137,6 +140,21 @@ function findFuelOnTransporterOnTile(transporterID, hexID) {
 export function setPowerPlantTransporterFuel(buildingID, transporterID) {
 	const bldg = model.getBuildingByID(buildingID)
 	if (bldg && isPowerPlant(bldg)) bldg.pendingTransporterFuel = transporterID
+}
+
+// Fuel one plant from a transporter during the owner's production setup.
+// Returns the consumed fuel's history entry, or null when the plant cannot fire.
+export function firePowerPlantFromTransporter(buildingID, transporterID) {
+	if (!isElectricityEnabled()) return null
+	const bldg = model.getBuildingByID(buildingID)
+	if (!bldg || !isPowerPlant(bldg) || bldg.powerActive === true) return null
+	const fuelRes = findFuelOnTransporterOnTile(transporterID, bldg.location[1])
+	if (!fuelRes) return null
+	bldg.powerActive = true
+	bldg.powerFuelType = fuelRes.type
+	fuelRes.location = loc.setOOBlocation()
+	computePoweredStateFromActivePlants()
+	return [bldg.id, stack.compressLocation(bldg.location), fuelRes.id]
 }
 
 // Fuel every power plant for this production phase. Called at the very start of

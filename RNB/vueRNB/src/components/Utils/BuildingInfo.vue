@@ -93,6 +93,16 @@ const buildingInputImages = computed(() => {
 	return ret
 })
 
+// Art & The Atelier: every recipe has its own output, so show them as pairs.
+const atelierRecipes = computed(() => {
+	const bldgStats = buildingStats.value
+	if (!bldgStats || bldgStats.building !== rf.BLDG_ATELIER || !bldgStats.recipes) return []
+	return bldgStats.recipes.map((recipe) => ({
+		inputs: recipe.inputs.map((input) => (input < rf.RES_UPPER_LIMIT ? `res_${input}` : `transporter_${input}_${transporterColour.value}`)),
+		output: recipe.output < rf.RES_UPPER_LIMIT ? `res_${recipe.output}` : `transporter_${recipe.output}_${transporterColour.value}`,
+	}))
+})
+
 const buildingOutputImages = computed(() => {
 	const bldgStats = buildingStats.value
 	let ret = []
@@ -421,44 +431,55 @@ function transporterLimitIssue() {
 					</template>
 					<!-- Don't show inputs / outputs for pseudo buildings-->
 					<template v-if="!rf.ALL_PSEUDO_BUILDINGS.includes(buildingStats.building)">
-						<template v-if="buildingInputImages[0].length === 0">
-							<span class="primaryTextSpan">{{ $t("buildingInfo.primary") }}</span>
-						</template>
-						<template v-else-if="buildingInputImages.length === 1">
-							<strong>{{ $t("buildingInfo.input") }}&nbsp;</strong>
-							<img v-for="(imgName, idx) in buildingInputImages[0]" :key="idx" :class="imgName.startsWith('transporter') ? 'transporterProdSummaryImg' : 'resProdSummaryImg'" :src="view.getImage(imgName)" />
+						<!-- Art & The Atelier: one input -> output pair per recipe -->
+						<template v-if="buildingStats.building === rf.BLDG_ATELIER">
+							<strong><u>{{ $t("buildingInfo.inputTitle") }}</u></strong>
+							<div v-for="(recipe, idx) in atelierRecipes" :key="idx" class="atelierRecipeRow">
+								<img v-for="(imgName, idx2) in recipe.inputs" :key="idx2" :class="imgName.startsWith('transporter') ? 'transporterProdSummaryImg' : 'resProdSummaryImgSmall'" :src="view.getImage(imgName)" />
+								<span>&nbsp;→&nbsp;</span>
+								<img :class="recipe.output.startsWith('transporter') ? 'transporterProdSummaryImg' : 'resProdSummaryImgSmall'" :src="view.getImage(recipe.output)" />
+							</div>
 						</template>
 						<template v-else>
-							<strong><u>{{ $t("buildingInfo.inputTitle") }}</u></strong>
-							<br />
-							<template v-for="(resSet, idx) in buildingInputImages" :key="idx">
-								<span v-if="idx > 0">&nbsp;/&nbsp;</span>
-								<img v-for="(imgName, idx) in resSet" :key="idx" :class="imgName.startsWith('transporter') ? 'transporterProdSummaryImg' : 'resProdSummaryImgSmall'" :src="view.getImage(imgName)" />
+							<template v-if="buildingInputImages[0].length === 0">
+								<span class="primaryTextSpan">{{ $t("buildingInfo.primary") }}</span>
 							</template>
-						</template>
+							<template v-else-if="buildingInputImages.length === 1">
+								<strong>{{ $t("buildingInfo.input") }}&nbsp;</strong>
+								<img v-for="(imgName, idx) in buildingInputImages[0]" :key="idx" :class="imgName.startsWith('transporter') ? 'transporterProdSummaryImg' : 'resProdSummaryImg'" :src="view.getImage(imgName)" />
+							</template>
+							<template v-else>
+								<strong><u>{{ $t("buildingInfo.inputTitle") }}</u></strong>
+								<br />
+								<template v-for="(resSet, idx) in buildingInputImages" :key="idx">
+									<span v-if="idx > 0">&nbsp;/&nbsp;</span>
+									<img v-for="(imgName, idx) in resSet" :key="idx" :class="imgName.startsWith('transporter') ? 'transporterProdSummaryImg' : 'resProdSummaryImgSmall'" :src="view.getImage(imgName)" />
+								</template>
+							</template>
 
-						<div style="margin-top: auto">
-							<strong>{{ $t("buildingInfo.output") }}&nbsp;</strong>
-							<template v-if="buildingStats.building !== rf.BLDG_MINE">
-								<img v-for="(imgName, idx) in buildingOutputImages" :key="idx" :class="imgName.startsWith('transporter') ? 'transporterProdSummaryImg' : 'resProdSummaryImg'" :src="view.getImage(imgName)" />
-							</template>
-							<template v-else-if="buildingStats.building === rf.BLDG_MINE">
-								<template v-if="props.highlightWholeBuilding">
-									<template v-if="store.context.mineSelectionType === 0 || store.context.mineSelectionType === 3">
-										<img class="resProdSummaryImg" :src="view.getImage(`res_${rf.RES_IRON}`)" />
-										/
-										<img class="resProdSummaryImg" :src="view.getImage(`res_${rf.RES_GOLD}`)" />
+							<div style="margin-top: auto">
+								<strong>{{ $t("buildingInfo.output") }}&nbsp;</strong>
+								<template v-if="buildingStats.building !== rf.BLDG_MINE">
+									<img v-for="(imgName, idx) in buildingOutputImages" :key="idx" :class="imgName.startsWith('transporter') ? 'transporterProdSummaryImg' : 'resProdSummaryImg'" :src="view.getImage(imgName)" />
+								</template>
+								<template v-else-if="buildingStats.building === rf.BLDG_MINE">
+									<template v-if="props.highlightWholeBuilding">
+										<template v-if="store.context.mineSelectionType === 0 || store.context.mineSelectionType === 3">
+											<img class="resProdSummaryImg" :src="view.getImage(`res_${rf.RES_IRON}`)" />
+											/
+											<img class="resProdSummaryImg" :src="view.getImage(`res_${rf.RES_GOLD}`)" />
+										</template>
+										<img v-else-if="store.context.mineSelectionType === 1" class="resProdSummaryImg" :src="view.getImage(`res_${rf.RES_IRON}`)" />
+										<img v-else-if="store.context.mineSelectionType === 2" class="resProdSummaryImg" :src="view.getImage(`res_${rf.RES_GOLD}`)" />
 									</template>
-									<img v-else-if="store.context.mineSelectionType === 1" class="resProdSummaryImg" :src="view.getImage(`res_${rf.RES_IRON}`)" />
-									<img v-else-if="store.context.mineSelectionType === 2" class="resProdSummaryImg" :src="view.getImage(`res_${rf.RES_GOLD}`)" />
+									<template v-else-if="props.bldg !== undefined">
+										<img v-if="props.bldg.remainingMineContent[1] > 0" class="resProdSummaryImg" :src="view.getImage(`res_${rf.RES_IRON}`)" />
+										<span v-if="props.bldg.remainingMineContent[0] > 0 && props.bldg.remainingMineContent[1] > 0">/</span>
+										<img v-if="props.bldg.remainingMineContent[0] > 0" class="resProdSummaryImg" :src="view.getImage(`res_${rf.RES_GOLD}`)" />
+									</template>
 								</template>
-								<template v-else-if="props.bldg !== undefined">
-									<img v-if="props.bldg.remainingMineContent[1] > 0" class="resProdSummaryImg" :src="view.getImage(`res_${rf.RES_IRON}`)" />
-									<span v-if="props.bldg.remainingMineContent[0] > 0 && props.bldg.remainingMineContent[1] > 0">/</span>
-									<img v-if="props.bldg.remainingMineContent[0] > 0" class="resProdSummaryImg" :src="view.getImage(`res_${rf.RES_GOLD}`)" />
-								</template>
-							</template>
-						</div>
+							</div>
+						</template>
 					</template>
 					<!-- RE-SHAFT MINE TEXT-->
 					<template v-else-if="buildingStats.building === rf.BLDG_PSEUDO_RESHAFT_MINE">{{ $t("buildingInfo.addToMineStock") }}</template>
@@ -582,6 +603,13 @@ function transporterLimitIssue() {
 	justify-content: space-between;
 	height: 100%;
 	line-height: 32px;
+}
+
+.atelierRecipeRow {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	margin-bottom: 2px;
 }
 
 .resProdSummaryImg {

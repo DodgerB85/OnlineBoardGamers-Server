@@ -270,6 +270,7 @@ export const STACK_EXHIBITION = 27
 export const STACK_BOMB_BUILDING = 28
 export const STACK_STRENGTHEN_BUILDING = 29
 export const STACK_BUILD_ROAD_BRIDGE = 35 // CITY: build a bridge over the moat plus a road in one action
+export const STACK_PRODUCTION_SETUP = 36 // &c: manager activation + power plant fuel announced at production start
 
 // PRODUCTION ACTIONS
 export const STACK_MANUAL_PRODUCTION = 30

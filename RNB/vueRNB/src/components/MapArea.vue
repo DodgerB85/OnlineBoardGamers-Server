@@ -30,6 +30,7 @@ import * as context from "../js/RNBcontext"
 import * as highlight from "../js/RNBhighlight"
 import * as produce from "../js/RNBproduce"
 import * as atelier from "../js/RNBatelier"
+import * as electricity from "../js/RNBelectricity"
 
 import { useModelStore } from "../stores/RNBstore.js"
 const store = useModelStore()
@@ -611,10 +612,10 @@ function getAtelierRecipeGfx(recipeIdx) {
 						<g v-if="store.gameOptions.useTrains && hex.fullTrainTrackPath">
 							<path class="noClick" :d="hex.fullTrainTrackPath" stroke="#1A237E" :stroke-width="(124 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" :mask="`url(#mapAreaTrainTrackMask${hex.hexID})`" />
 						</g>
-						<!-- POWER LINES - narrow red line with yellow dots, drawn inside roads -->
+						<!-- POWER LINES - dotted blocks: red when unpowered, yellow when powered -->
 						<g v-if="store.gameOptions.useElectricity && hex.fullPowerLinePath">
-							<path class="noClick" :d="hex.fullPowerLinePath" stroke="#B22222" :stroke-width="(14 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="round" fill="none" />
-							<path class="noClick" :d="hex.fullPowerLinePath" stroke="#FFD700" :stroke-width="(3 * store.RATIO).toFixed(0)" :stroke-dasharray="`${(8 * store.RATIO).toFixed(0)} ${(14 * store.RATIO).toFixed(0)}`" fill="none" />
+							<path class="noClick" :d="hex.fullPowerLinePath" stroke="#333333" :stroke-width="(14 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="round" fill="none" />
+							<path class="noClick" :d="hex.fullPowerLinePath" :stroke="electricity.isHexPowered(hex.hexID) ? '#FFD700' : '#E53935'" :stroke-width="(4 * store.RATIO).toFixed(0)" :stroke-dasharray="`${(8 * store.RATIO).toFixed(0)} ${(14 * store.RATIO).toFixed(0)}`" fill="none" />
 						</g>
 					</g>
 					<!-- NOT FINE TO ROTATE TO FLAT-->

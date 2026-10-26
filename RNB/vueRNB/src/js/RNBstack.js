@@ -15,6 +15,8 @@ import * as funcs from "./RNBfuncs.js"
 import * as context from "./RNBcontext.js"
 import * as hd from "./RNBhex.js"
 import * as train from "./RNBtrain.js"
+import * as electricity from "./RNBelectricity.js"
+import * as productionSetup from "./RNBproductionSetup.js"
 //import * as IO from "../backend/RNB_IO.js"
 
 import { useModelStore } from "../stores/RNBstore.js"
@@ -1043,6 +1045,23 @@ export function verifySingleStackAction(stackActionData) {
 	if (!playerIndex && playerIndex !== 0) {
 		rf.doAdminAlrt(`missing PI in SAD - PI: ${playerIndex}`)
 		//console.log(JSON.stringify(stackActionData))
+	}
+
+	if (action === rf.STACK_PRODUCTION_SETUP) {
+		for (const [hexID, active] of stackAction[1] || []) {
+			if (typeof active !== "boolean") return 10
+			const hasManager = model
+				.getTransportersByPlayerIndexAndHexID(playerIndex, hexID)
+				.some((t) => model.resourcesOnTransport(t.id).some((r) => r.type === rf.RES_MANAGER))
+			if (!hasManager) return 10
+		}
+		for (const [bldgID, transporterID] of stackAction[2] || []) {
+			const bldg = model.getBuildingByID(bldgID)
+			if (!bldg || bldg.type !== rf.BLDG_POWER_PLANT) return 11
+			if (bldg.powerActive === true) continue
+			if (!electricity.findFuelOnTransporterOnTile(transporterID, bldg.location[1])) return 12
+		}
+		return 0
 	}
 
 	if (action === rf.STACK_TAKE_TRAIN) {
@@ -2112,6 +2131,11 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 	const action = stackActionData.action
 	const stackAction = stackActionData.historyEntry
 	const stackPlayerIndex = stackActionData.playerIndex
+
+	if (action === rf.STACK_PRODUCTION_SETUP) {
+		productionSetup.performSetupStackAction(stackAction, stackPlayerIndex)
+		return
+	}
 
 	if (action === rf.STACK_TAKE_TRAIN) {
 		if (swapIDs && typeof stackAction[1] === "string") {

@@ -49,10 +49,6 @@ export const useModelStore = defineStore("store", () => {
 	}
 	var CUSTOM_RULES = []
 
-	// MANAGEMENT: Owner's choice for whether their transporter-carried managers activate on a tile.
-	// { [playerIndex]: { [hexID]: true/false } }. Defaults to true (active) when not set.
-	var managerActivation = {}
-
 	// This var affects the ZOOM level
 	// So everything that will be affected by zooming should be referenced through this
 	const refSize = ref(2400) // default 2400
@@ -193,6 +189,9 @@ export const useModelStore = defineStore("store", () => {
 		wonderTurnOrder: [],
 		newWonderPrayingOrder: [],
 		newWonderTurnOrder: [],
+		// MANAGEMENT + ELECTRICITY: per-turn production choices made in player order.
+		// { [turn]: { [playerIndex]: { managers: { [hexID]: bool }, plants: { [bldgID]: transporterID } } } }
+		productionDecisions: {},
 	})
 
 	// Setting a pre-move alters gameflow.phase
@@ -244,6 +243,7 @@ export const useModelStore = defineStore("store", () => {
 		buildingPowerLine: false, // True while the player is placing power line segments
 		poweredHexIDs: [], // Hexes energised this production phase by a working power plant
 		powerPlantsFueledTurn: -1, // Turn the power plants were last fuelled for (idempotency guard)
+		productionSetupPending: false, // &c: block production actions until managers/plant fuel are announced
 
 		// Transporter Mode vars
 		selectedTransporterIDforTM: -1,
@@ -521,7 +521,6 @@ export const useModelStore = defineStore("store", () => {
 		trainingGameSkipConflictPhase,
 		stackControl,
 		gameOptions,
-		managerActivation,
 		conflictPreset,
 		allStackData,
 		internalStartingOptions,

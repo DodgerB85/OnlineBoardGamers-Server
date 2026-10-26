@@ -9,6 +9,7 @@ import * as rf from "./RNBreference"
 import * as model from "./RNBmodel"
 import * as produce from "./RNBproduce"
 import * as electricity from "./RNBelectricity"
+import * as productionSetup from "./RNBproductionSetup"
 //import * as map from "./RNBmap"
 import * as highlight from "./RNBhighlight"
 import * as funcs from "./RNBfuncs"
@@ -162,11 +163,13 @@ export function startPlayerTurn(loadedPreMove = false) {
 	}
 
 	context.resetContextAndHighlights()
+	store.context.productionSetupPending = false
 	if (store.gameflow.phase === rf.PHASE_CHOOSE_HOME_TILE) {
 		highlight.higlightTilesForStartTile()
 	} else if (rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase)) {
-		// Highlight transporters for TM
-		store.context.action = rf.ACT_TM_SELECT_TRANSPORTER
+		store.context.productionSetupPending = productionSetup.isSetupPending()
+		if (store.context.productionSetupPending) store.context.action = rf.ACT_NONE
+		else store.context.action = rf.ACT_TM_SELECT_TRANSPORTER
 		highlight.updateAllHighlightsForTransporterMode()
 	} else if (rf.PHASE_MOVEMENTS.includes(store.gameflow.phase)) {
 		store.context.researchHexIDpossibilities.splice(0)
@@ -213,10 +216,18 @@ export function startPlayerMainPhasePreTurn() {
 	}
 
 	context.resetContextAndHighlights()
+	store.context.productionSetupPending = false
 	if (rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase)) {
-		// Highlight transporters for TM
-		store.context.action = rf.ACT_TM_SELECT_TRANSPORTER
-		highlight.updateAllHighlightsForTransporterMode()
+		store.context.productionSetupPending = productionSetup.isSetupPending()
+		if (store.context.productionSetupPending) {
+			// &c: announce managers / power plant fuel before any production action
+			store.context.action = rf.ACT_NONE
+			highlight.updateAllHighlightsForTransporterMode()
+		} else {
+			// Highlight transporters for TM
+			store.context.action = rf.ACT_TM_SELECT_TRANSPORTER
+			highlight.updateAllHighlightsForTransporterMode()
+		}
 	} else if (rf.PHASE_MOVEMENTS.includes(store.gameflow.phase)) {
 		store.context.researchHexIDpossibilities.splice(0)
 		// Highlight transporters for TM
@@ -372,6 +383,7 @@ export function startPhase() {
 	const store = useModelStore()
 	let phase = store.gameflow.phase
 	if (rf.PHASE_PRODUCTIONS.includes(phase)) {
+		productionSetup.pruneProductionDecisions()
 		// Reset remaining production capacity here, BEFORE pre-production runs,
 		// so an active manager on a tile doubles the capacity for the whole phase
 		model.resetBuildingsAfterProduction()

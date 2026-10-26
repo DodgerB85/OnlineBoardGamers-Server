@@ -23,7 +23,7 @@ import { usePersonalStore } from "../stores/RNBpersonal.js"
 
 // NOTE: This outputs resources, and prevents out put of an unclaimed transporter production.
 // Player transporter production is handled seperately
-export function addBuildingOutputResourcesToGame_core(buildingID, forcedOutputRes = -1, playerIndex = 9, forPreTurn) {
+export function addBuildingOutputResourcesToGame_core(buildingID, forcedOutputRes = -1, playerIndex = 9, forPreTurn, ignorePower = false) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	const building = model.getBuildingByID(buildingID)
@@ -32,7 +32,7 @@ export function addBuildingOutputResourcesToGame_core(buildingID, forcedOutputRe
 
 	// ELECTRICITY: A powered primary producer produces twice as much. The powered
 	// hex set is deterministic, so this also doubles output correctly in replay.
-	const isPoweredPrimary = store.gameOptions.useElectricity && model.isPrimaryProducer(building) && electricity.isHexPowered(location[1])
+	const isPoweredPrimary = !ignorePower && store.gameOptions.useElectricity && model.isPrimaryProducer(building) && electricity.isHexPowered(location[1])
 
 	// Art & The Atelier: a quarry with 3+ stone on its tile and no marble yet produces
 	// marble instead of stone. Pure board-state function, so replay is deterministic.
@@ -383,24 +383,29 @@ export function processDonkeyReproduction(playerIndex) {
 // feasible artwork recipe in priority order. The donkey->caravan recipe is manual only.
 function doAutoAtelierProduction(bldg, hexID, bucketID, prePhase, ignoreHistory) {
 	const store = useModelStore()
-	if (bldg.remainingConversions <= 0) return
 	const atelierStats = atelier.getAtelierStats()
-	// Recipes 0-4 are the artwork recipes in the required priority order
-	for (let r = 0; r <= 4; r++) {
-		const inputRes = atelierStats.inputRes[r]
-		if (!map.doesBucketHaveAccessToResources(hexID, bucketID, inputRes, false)) continue
-		const histObj = [bldg.id, stack.compressLocation(bldg.location)]
-		if (r > 0) histObj.push(r)
-		if (!ignoreHistory) {
-			if (prePhase) store.context.historyObj[2].push([...histObj])
-			else store.context.historyObj[0].push([...histObj])
+	// Recipes 0-4 are the artwork recipes in the required priority order. Keep
+	// producing while capacity (doubled by an active manager) remains.
+	while (bldg.remainingConversions > 0) {
+		let produced = false
+		for (let r = 0; r <= 4; r++) {
+			const inputRes = atelierStats.inputRes[r]
+			if (!map.doesBucketHaveAccessToResources(hexID, bucketID, inputRes, false)) continue
+			const histObj = [bldg.id, stack.compressLocation(bldg.location)]
+			if (r > 0) histObj.push(r)
+			if (!ignoreHistory) {
+				if (prePhase) store.context.historyObj[2].push([...histObj])
+				else store.context.historyObj[0].push([...histObj])
+			}
+			model.removeResourcesFromGameUsingBucket_core(hexID, bucketID, inputRes)
+			bldg.remainingConversions--
+			store.context.atelierRecipeOutput = atelier.getRecipeOutput(r)
+			addBuildingOutputResourcesToGame_core(bldg.id, -1, 9)
+			store.context.atelierRecipeOutput = -1
+			produced = true
+			break
 		}
-		model.removeResourcesFromGameUsingBucket_core(hexID, bucketID, inputRes)
-		bldg.remainingConversions--
-		store.context.atelierRecipeOutput = atelier.getRecipeOutput(r)
-		addBuildingOutputResourcesToGame_core(bldg.id, -1, 9)
-		store.context.atelierRecipeOutput = -1
-		return
+		if (!produced) break
 	}
 }
 

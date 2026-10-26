@@ -2145,6 +2145,7 @@ export function clickedBuilding(buildingID, forcedInputGoods = []) {
 	// Exit if building is not highlighted
 	if (!store.context.buildingIDsToHighlight.includes(buildingID) && forcedInputGoods.length === 0) return
 	if (store.context.action === rf.ACT_CONFIRM_END_TURN) return
+	if (rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase) && store.context.productionSetupPending) return
 
 	// Handle bomb pseudo-building
 	if (store.context.eligibleBuildingsToBomb.includes(buildingID)) {
@@ -2641,6 +2642,7 @@ export function clickedTransporter(transporterID) {
 
 	if (!personal.canPlay()) return
 	if (store.context.action === rf.ACT_CONFIRM_END_TURN) return
+	if (rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase) && store.context.productionSetupPending) return
 
 	// If you are placing a new water transporter, ignore clicks on other transporters
 	if (store.context.action === rf.ACT_SELECT_WATER_FOR_NEW_TRANSPORTER) return

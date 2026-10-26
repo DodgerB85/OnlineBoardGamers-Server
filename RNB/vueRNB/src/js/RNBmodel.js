@@ -918,20 +918,23 @@ export function resetTransportersForNewTurn() {
 // MANAGEMENT MECHANIC: A Manager on a tile doubles the max production capacity of all
 // secondary producers on that tile. Only one manager applies per tile.
 // Managers placed directly on the tile are always active. Managers inside a transporter on
-// the tile are active unless the transporter's owner has de-activated them for that tile.
-export function isManagerActiveOnHex(hexID) {
+// the tile are active unless the transporter's owner announced otherwise for this turn.
+export function getManagerActivation(playerIndex, hexID) {
 	const store = useModelStore()
+	return store.gameflow.productionDecisions?.[store.gameflow.turn]?.[playerIndex]?.managers?.[hexID] ?? true
+}
 
+export function isManagerActiveOnHex(hexID) {
 	// Managers placed directly on the tile (bucket / vertex / docked / river)
 	const managersOnTile = getAllInGameResources().filter((r) => r.type === rf.RES_MANAGER && loc.isSpecificHexLocation(r.location, hexID))
 	if (managersOnTile.length > 0) return true
 
 	// Managers carried inside transporters that are on the tile - active unless the
-	// transporter owner has opted out for this tile (see store.managerActivation)
+	// transporter owner announced otherwise for this turn.
 	const transportersOnTile = getAllInGameTransporters().filter((t) => loc.isSpecificHexLocation(t.location, hexID))
 	for (const t of transportersOnTile) {
 		const carriedManager = resourcesOnTransport(t.id).find((r) => r.type === rf.RES_MANAGER)
-		if (carriedManager && (store.managerActivation[t.ownerIndex]?.[hexID] ?? true)) return true
+		if (carriedManager && getManagerActivation(t.ownerIndex, hexID)) return true
 	}
 	return false
 }
@@ -941,14 +944,26 @@ export function getManagerProductionMultiplierForHex(hexID) {
 	return isManagerActiveOnHex(hexID) ? 2 : 1
 }
 
-// Toggle whether the current player's transporter-carried managers on a tile activate.
-// Defaults to active (true). TODO: wire this up to the production phase UI.
-export function toggleManagerActivation(hexID) {
+// Record a manager choice and move each secondary producer's remaining capacity by the
+// difference, preserving conversions already used this phase.
+export function setManagerActivation(playerIndex, hexID, active) {
 	const store = useModelStore()
-	const playerIndex = controller.currentPlayerIndex()
-	store.managerActivation[playerIndex] = store.managerActivation[playerIndex] || {}
-	const currentlyActive = store.managerActivation[playerIndex][hexID] ?? true
-	store.managerActivation[playerIndex][hexID] = !currentlyActive
+	const turn = store.gameflow.turn
+	if (!store.gameflow.productionDecisions) store.gameflow.productionDecisions = {}
+	if (!store.gameflow.productionDecisions[turn]) store.gameflow.productionDecisions[turn] = {}
+	if (!store.gameflow.productionDecisions[turn][playerIndex]) store.gameflow.productionDecisions[turn][playerIndex] = { managers: {}, plants: {} }
+	const decisions = store.gameflow.productionDecisions[turn][playerIndex]
+	if (!decisions.managers) decisions.managers = {}
+	const oldMultiplier = getManagerProductionMultiplierForHex(hexID)
+	decisions.managers[hexID] = active
+	const newMultiplier = getManagerProductionMultiplierForHex(hexID)
+	if (oldMultiplier === newMultiplier) return
+	for (const bldg of getAllInGameBuildings().filter((b) => b.location[1] === hexID && isSecondaryProducer(b))) {
+		const bldgStats = getBuildingStatsFromBuildingID(bldg.id)
+		const used = bldgStats.maxConversions * oldMultiplier - bldg.remainingConversions
+		bldg.managerMultiplier = newMultiplier
+		bldg.remainingConversions = Math.max(0, bldgStats.maxConversions * newMultiplier - used)
+	}
 }
 
 export function resetBuildingsAfterProduction() {
@@ -958,6 +973,7 @@ export function resetBuildingsAfterProduction() {
 		const bldgStats = getBuildingStatsFromBuildingID(bldg.id)
 		// A Manager on the tile doubles the max production capacity of secondary producers there
 		const capacityMultiplier = isSecondaryProducer(bldg) ? getManagerProductionMultiplierForHex(bldg.location[1]) : 1
+		bldg.managerMultiplier = capacityMultiplier
 		bldg.remainingConversions = bldgStats.maxConversions * capacityMultiplier
 	}
 }

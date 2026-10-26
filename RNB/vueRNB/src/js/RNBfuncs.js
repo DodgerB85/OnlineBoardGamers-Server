@@ -793,7 +793,8 @@ export function exportRNBmodel(forGameOver) {
 		tempGameflow.push(JSON.parse(JSON.stringify(store.gameflow.wonderPrayingOrder))) // 3
 		tempGameflow.push(JSON.parse(JSON.stringify(store.gameflow.wonderTurnOrder))) // 4
 		tempGameflow.push(JSON.parse(JSON.stringify(store.gameflow.newWonderTurnOrder))) // 5
-		if (store.gameflow.newWonderPrayingOrder.length > 0 && store.gameflow.newWonderPrayingOrder.some((x) => x !== -1)) tempGameflow.push(JSON.parse(JSON.stringify(store.gameflow.newWonderPrayingOrder))) // 6
+		tempGameflow.push(JSON.parse(JSON.stringify(store.gameflow.newWonderPrayingOrder))) // 6
+		tempGameflow.push(JSON.parse(JSON.stringify(store.gameflow.productionDecisions || {}))) // 7 - &c production setup choices
 		temp.push(JSON.parse(JSON.stringify(tempGameflow)))
 
 		// 7 - ongoingVars
@@ -984,7 +985,9 @@ export function importRNBmodel(input, forGameOver) {
 		store.gameflow.wonderTurnOrder = JSON.parse(JSON.stringify(inputModel[6][4]))
 		store.gameflow.newWonderTurnOrder = JSON.parse(JSON.stringify(inputModel[6][5]))
 		store.gameflow.newWonderPrayingOrder = Array(store.players.length).fill(-1)
-		if (inputModel[6].length > 6) store.gameflow.newWonderPrayingOrder = JSON.parse(JSON.stringify(inputModel[6][6]))
+		if (inputModel[6].length > 6 && Array.isArray(inputModel[6][6]) && inputModel[6][6].length > 0) store.gameflow.newWonderPrayingOrder = JSON.parse(JSON.stringify(inputModel[6][6]))
+		store.gameflow.productionDecisions = {}
+		if (inputModel[6].length > 7) store.gameflow.productionDecisions = JSON.parse(JSON.stringify(inputModel[6][7]))
 
 		// Repair legacy conflict arrays that can carry -1 placeholders
 		// (players dropped from the turn order during an earlier conflict without praying)

@@ -12,6 +12,7 @@ import * as util from "../../js/RNButil"
 import * as stack from "../../js/RNBstack"
 import * as wonder from "../../js/RNBwonder"
 import * as electricity from "../../js/RNBelectricity"
+import * as productionSetup from "../../js/RNBproductionSetup"
 import * as atelier from "../../js/RNBatelier"
 import * as train from "../../js/RNBtrain"
 import i18n from "../../i18n"
@@ -187,6 +188,7 @@ async function resetDataForReplay() {
 	store.gameflow.turn = 1
 	store.gameflow.turnOrder.splice(0)
 	store.gameflow.fullTurnOrder.splice(0)
+	store.gameflow.productionDecisions = {}
 
 	for (let i = 0; i < store.players.length; i++) {
 		store.gameflow.turnOrder.push(i)
@@ -294,6 +296,7 @@ export const HIST_CONFLICT_TURN_ORDER = 6
 				else if (stackAction[0] === rf.STACK_STRENGTHEN_BUILDING) replayStackStrengthenBuilding(stackAction)
 				else if (stackAction[0] === rf.STACK_RESHAFT_MINE) replayStackReshaftMine(stackAction, store.computedHistory[i][1])
 				else if (stackAction[0] === rf.STACK_MANUAL_PRODUCTION) replayStackManualProduction(stackAction, store.computedHistory[i][1])
+				else if (stackAction[0] === rf.STACK_PRODUCTION_SETUP) productionSetup.performSetupStackAction(stackAction, store.computedHistory[i][1])
 				else if (stackAction[0] === rf.STACK_REMOVE_EXCESS_TRANSPORTER_AT_FACTORY) replayStackRemoveExcessTransporterAtFactory(stackAction, store.computedHistory[i][1])
 				else if (stackAction[0] === rf.STACK_DO_RESEARCH) replayStackDoResearch(stackAction, store.computedHistory[i][1])
 				else if (stackAction[0] === rf.STACK_UPGRADE_BUILDING) replayStackUpgradeBuilding(stackAction, store.computedHistory[i][1])
@@ -348,16 +351,15 @@ export const HIST_CONFLICT_TURN_ORDER = 6
 	} // END generating replay
 
 	store.replayData = replayData
-	//store.replayStep.computedHistoryIndex = store.computedHistory.length - 1
-	store.replayStep.computedHistoryIndex = 0
+	store.replayStep.index = replayData.length - 1
 
 	if (spoilerFree) {
-		if (window.initData.replayStep <= 0) store.replayStep.computedHistoryIndex = 0
-		else if (window.initData.replayStep >= store.replayData.length - 1) store.replayStep.computedHistoryIndex = store.replayData.length - 1
-		else store.replayStep.computedHistoryIndex = window.initData.replayStep
+		if (window.initData.replayStep <= 0) store.replayStep.index = 0
+		else if (window.initData.replayStep >= store.replayData.length - 1) store.replayStep.index = store.replayData.length - 1
+		else store.replayStep.index = window.initData.replayStep
 	}
 	if (store.replayData.length > 0) store.viewSettings.showReplay = true
-	goToReplayStep(store.replayStep.computedHistoryIndex)
+	goToReplayStep(store.replayStep.index)
 	store.viewSettings.generatingReplay = false
 }
 
@@ -423,6 +425,8 @@ function replayChooseHomeTile(_historyIndex, playerIndex, entry3) {
 }
 
 function replayPreProduction(_historyIndex, _playerIndex, entry3) {
+	// Match live play: capacities (and manager doubling) are reset at production start.
+	model.resetBuildingsAfterProduction()
 	// ELECTRICITY: powered power plants are recorded FIRST in the primary production
 	// entries ([bldgID, compressedLoc, fuelType, -3]). Restore their active state and
 	// consume their fuel before replaying primaries so powered output doubles.

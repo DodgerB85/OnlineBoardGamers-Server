@@ -987,6 +987,17 @@ const computedEntry3 = computed(() => {
 				Object.assign(thisStepHist, getHighlightData([fullLocation]))
 			}
 			//
+			else if (stackAction[0] === rf.STACK_PRODUCTION_SETUP) {
+				thisStepHist.action = rf.STACK_PRODUCTION_SETUP
+				const locations = []
+				for (const [hexID] of stackAction[1] || []) locations.push([rf.LOCATION_BUCKET, hexID, 0])
+				for (const [bldgID] of stackAction[2] || []) {
+					const bldg = history.getBuildingByID_HIST(bldgID)
+					if (bldg) locations.push(bldg.location)
+				}
+				Object.assign(thisStepHist, getHighlightData(locations))
+			}
+			//
 			else if (stackAction[0] === rf.STACK_DONKEY_REPRODUCTION) {
 				thisStepHist.action = rf.STACK_DONKEY_REPRODUCTION
 				thisStepHist.donkeyTileIDsAndBuckets = []
@@ -1705,6 +1716,12 @@ const computedEntry3 = computed(() => {
 							<img class="buildingProductionSummaryImg" :src="view.getImage(stackEntry.oldBldgGfx)" />
 							{{ $t("history.upgradedTo") }}&nbsp;
 							<img class="buildingProductionSummaryImg" :src="view.getImage(stackEntry.newBldgGfx)" />
+						</div>
+					</template>
+					<!-- &c PRODUCTION SETUP -->
+					<template v-if="stackEntry.action === rf.STACK_PRODUCTION_SETUP">
+						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, [], [], [], [])">
+							{{ $t("history.productionSetup") }}
 						</div>
 					</template>
 					<!-- DONKEY REPRODUCTION -->
