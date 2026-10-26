@@ -86,7 +86,8 @@ export async function generateReplayData(spoilerFree = false) {
 		else if (store.history[i][0] === rf.HIST_ADD_CITY) replayAddCity(i, store.history[i][1], store.history[i][3])
 		*/
 
-		replayData.push(funcs.exportKFWmodel(true))
+		// Context is not restored by replay steps (they import with includeContext=false).
+		replayData.push(funcs.exportKFWmodel(false))
 
 		if (i % 5 === 0 && pBarEl != null) {
 			let percent = (i / store.history.length) * 100

@@ -120,6 +120,10 @@ export function getPlayerFields(playerIndex) {
 		if (rootA.id !== rootB.id) rootB.parent = rootA.id
 	}
 
+	function isBoatTile(tile) {
+		return rf.TILE_BOATS.includes(tile.tileID[0]) || rf.TILE_BOATS_MERCHANTS.includes(tile.tileID[0]) || rf.TILE_SUMMER_BOATS.includes(tile.tileID[0])
+	}
+
 	for (let i = 0; i < nodes.length; i++) {
 		const node = nodes[i]
 		for (let e = 0; e < node.edges.length; e++) {
@@ -128,6 +132,8 @@ export function getPlayerFields(playerIndex) {
 			const neighbourCoord = getAdjacentCoordThroughSide(node.tile.coord, edge)
 			const neighbour = playerObj.villageTiles.find((t) => t.coord[0] === neighbourCoord[0] && t.coord[1] === neighbourCoord[1])
 			if (!neighbour) continue
+			// Rules: the corners of fields on boat tiles do not connect to adjacent boat tiles.
+			if (isBoatTile(node.tile) && isBoatTile(neighbour)) continue
 			const joiningSide = (edge + 3) % 6
 			if (neighbour.sides[joiningSide] !== rf.GRASS) continue
 			const neighbourField = getTileFieldIndexForEdge(neighbour, joiningSide)

@@ -649,12 +649,16 @@ function shouldShowIntroText() {
 						<button @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
 						<button @click="model.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length <= 1">{{ $t("action.undo") }}</button>
 						<button v-if="store.context.action === rf.ACT_MOVE_RES" class="actionsLineButton" @click="cancelMovingRes">{{ $t("action.cancelMovingResource") }}</button>
-						<button v-if="store.useFarmersExpansion && store.context.remainingMoves > 0 && controller.currentPlayerObj().wheat > 0" class="actionsLineButton" @click="model.spendWheatForMove()">{{ $t("action.spendWheatForMove", { count: controller.currentPlayerObj().wheat }) }}</button>
+						<button v-if="store.useFarmersExpansion && controller.currentPlayerObj().wheat > 0" class="actionsLineButton" @click="model.spendWheatForMove()">{{ $t("action.spendWheatForMove", { count: controller.currentPlayerObj().wheat }) }}</button>
 						<button class="actionsLineButton" @click="finishedMovingAndUpgrading">{{ $t("action.finishActionsEndTurn") }}</button>
 					</template>
 					<template v-else-if="store.context.action === rf.ACT_MOVE_ANIMAL">
 						{{ $t("action.chooseAnimalDestination") }}
 						<br />
+						<template v-if="store.context.animalMoveDestinations.length === 0">
+							{{ $t("action.noAnimalDestinations") }}
+							<br />
+						</template>
 						<button v-for="(field, idx) in store.context.animalMoveDestinations" :key="idx" class="actionsLineButton" @click="moveToAnimalField(field)">{{ fieldLabel(field) }}</button>
 						<br />
 						<button class="actionsLineButton" @click="model.finishMovingAnimal()">{{ $t("common.cancel") }}</button>
@@ -863,6 +867,7 @@ function shouldShowIntroText() {
 					<br />
 					<template v-if="controller.currentPlayerObj().hasPurpleMeeple">
 						{{ $t("action.clickPurpleWorker") }}
+						<template v-if="store.useFarmersExpansion"> {{ $t("action.purpleKeptScores") }}</template>
 						<br />
 					</template>
 					<button @click="resetWholePlayerTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>

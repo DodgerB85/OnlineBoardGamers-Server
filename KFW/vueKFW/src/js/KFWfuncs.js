@@ -1126,7 +1126,7 @@ export function importKFWmodelForGameOver(input) {
 
 	// Farmers supplies
 	let gameOverSupplyIdx = store.useMerchantsExpansion ? 7 : 6
-	if (store.useFarmersExpansion && inputModel.length > gameOverSupplyIdx) {
+	if (store.useFarmersExpansion && inputModel.length > gameOverSupplyIdx + 1) {
 		store.availableWheat = inputModel[gameOverSupplyIdx]
 		store.availableAnimals.splice(0, store.availableAnimals.length)
 		Object.assign(store.availableAnimals, inputModel[gameOverSupplyIdx + 1])

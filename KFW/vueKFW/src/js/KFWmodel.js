@@ -597,6 +597,12 @@ export function calculateAnimalFieldScore(playerIndex) {
 		if (animalType === rf.ANIMAL_PIG) return hasTruffle ? 5 : 2
 		return hasDairy ? 7 : 3
 	}
+	// All sheep in the shelter field may be allocated, or one left back so the Weaver scores the field.
+	const shelterScoreFor = (count) => {
+		if (count <= 0 || !shelter) return 0
+		const shelterValue = shelter.upgraded === 1 ? 2 : 1
+		return Math.max(count * shelterValue, (count - 1) * shelterValue + (hasWeaver ? 3 : 1))
+	}
 
 	let total = 0
 	const fieldScores = []
@@ -604,11 +610,7 @@ export function calculateAnimalFieldScore(playerIndex) {
 		const field = fields[i]
 		let score = 0
 		const shelterSheep = field.key === shelterFieldKey ? field.animals[rf.ANIMAL_SHEEP] : 0
-		if (shelter && shelterSheep > 0) {
-			const shelterValue = shelter.upgraded === 1 ? 2 : 1
-			// Optionally leave one sheep in the field so the Weaver scores the field instead.
-			score += Math.max(shelterSheep * shelterValue, (shelterSheep - 1) * shelterValue + (hasWeaver ? 3 : 1))
-		}
+		score += shelterScoreFor(shelterSheep)
 		for (let animalType = 0; animalType < 3; animalType++) {
 			let countForField = field.animals[animalType]
 			if (animalType === rf.ANIMAL_SHEEP && field.key === shelterFieldKey) countForField -= shelterSheep
@@ -618,23 +620,19 @@ export function calculateAnimalFieldScore(playerIndex) {
 		total += score
 	}
 
-	// The purple start player marker may be declared as one animal in any field.
+	// Rules: the purple marker may be declared as an animal of any type in any field.
+	// Declaring it as wheat instead is decided in scoreAutoProcessingTilesAndMoveResources.
 	let purpleScore = 0
-	if (playerObj.hasPurpleMeeple) {
-		if (fields.length === 0) {
-			// No field: it can still be declared as wheat (scored by Granary/Bakery).
-			purpleScore = 0
-		} else {
-			for (let animalType = 0; animalType < 3; animalType++) {
-				for (let i = 0; i < fields.length; i++) {
-					const field = fields[i]
-					if (field.animals[animalType] > 0) continue
-					// Adding a new type only scores if the field has no other animals, or boat 5a allows mixing.
-					const hasOtherType = field.animals.some((c, idx) => idx !== animalType && c > 0)
-					if (hasOtherType) continue
-					let value = pointValue(animalType)
-					if (shelter && animalType === rf.ANIMAL_SHEEP && field.key === shelterFieldKey) value = shelter.upgraded === 1 ? 2 : 1
-					purpleScore = Math.max(purpleScore, value)
+	if (playerObj.hasPurpleMeeple && !playerObj.purpleDeclaredWheat) {
+		for (let animalType = 0; animalType < 3; animalType++) {
+			for (let i = 0; i < fields.length; i++) {
+				const field = fields[i]
+				if (animalType === rf.ANIMAL_SHEEP && field.key === shelterFieldKey) {
+					const shelterSheep = field.animals[rf.ANIMAL_SHEEP]
+					purpleScore = Math.max(purpleScore, shelterScoreFor(shelterSheep + 1) - shelterScoreFor(shelterSheep))
+				} else if (field.animals[animalType] === 0) {
+					// The type does not score in this field yet, so declaring it adds one field's value.
+					purpleScore = Math.max(purpleScore, pointValue(animalType))
 				}
 			}
 		}
@@ -1846,6 +1844,7 @@ export function processTileAction(tile) {
 
 export function chooseFarmItem(itemType) {
 	const store = useModelStore()
+	if (!store.useFarmersExpansion) return
 	const tile = store.context.selectedTile
 	addHistory(rf.HIST_ACT_ON_TILE, controller.currentPlayerIndex(), 0, [...store.context.historyObj])
 	let message = ""
@@ -1856,14 +1855,16 @@ export function chooseFarmItem(itemType) {
 	store.context.action = rf.ACT_CONFIRM_END_TURN
 	store.removeAllActiveHighlights()
 	unhighlightOutbidMeeples()
+	createUndoPoint()
 }
 
 export function spendWheatForMove() {
 	const store = useModelStore()
 	if (!store.useFarmersExpansion) return
-	if (store.context.action !== rf.ACT_MOVE_AND_UPGRADE && store.context.action !== rf.ACT_MOVE_ANIMAL) return
+	if (store.context.action !== rf.ACT_MOVE_AND_UPGRADE && store.context.action !== rf.ACT_MOVE_RES && store.context.action !== rf.ACT_MOVE_ANIMAL) return
 	if (removeWheatFromPlayer(controller.currentPlayerIndex(), 1) === 0) return
 	store.context.remainingMoves++
+	createUndoPoint()
 }
 
 export function startMovingAnimal(fieldKey) {
@@ -1880,6 +1881,8 @@ export function finishMovingAnimal() {
 	const store = useModelStore()
 	store.context.animalMoveSource = null
 	store.context.animalMoveDestinations.splice(0)
+	// Without this the species stays locked for the rest of the turn.
+	store.context.animalMoveType = -1
 	store.context.action = rf.ACT_MOVE_AND_UPGRADE
 }
 
@@ -3433,7 +3436,7 @@ export function scoreAutoProcessingTilesAndMoveResources(playerIndex) {
 	// Farmers scoring tiles
 	if (store.useFarmersExpansion) {
 		const hasBoat5b = village.doesPlayerHaveTileID(playerIndex, rf.TILE_F_SUMMER_BOAT5_B)
-		const playerWheat = playerObj.wheat || 0
+		const baseWheat = playerObj.wheat || 0
 		let totalResources = 0
 		for (let i = 0; i < playerObj.villageTiles.length; i++) {
 			if (!SCORE_RES_ON_TILE.includes(playerObj.villageTiles[i].tileID[playerObj.villageTiles[i].upgraded])) {
@@ -3441,6 +3444,17 @@ export function scoreAutoProcessingTilesAndMoveResources(playerIndex) {
 			}
 		}
 		const totalSkills = playerObj.hiddenSkillTiles.reduce((sum, s) => sum + s, 0)
+		// Rules: the purple marker may be declared as a wheat tile instead of an animal.
+		// Auto-pick whichever scores more; a wheat declaration is then counted by Granary/Bakery below.
+		playerObj.purpleDeclaredWheat = false
+		if (playerObj.hasPurpleMeeple) {
+			const resFor5b = hasBoat5b ? totalResources : 0
+			const wheatDelta = Math.floor((baseWheat + 1 + resFor5b) / 2) * 3 - Math.floor((baseWheat + resFor5b) / 2) * 3
+			const bakerySets = hasBoat5b ? Math.min(Math.floor((baseWheat + totalResources) / 2), totalSkills) : Math.min(baseWheat, totalResources, totalSkills)
+			const bakerySetsPlus = hasBoat5b ? Math.min(Math.floor((baseWheat + 1 + totalResources) / 2), totalSkills) : Math.min(baseWheat + 1, totalResources, totalSkills)
+			playerObj.purpleDeclaredWheat = wheatDelta + (bakerySetsPlus - bakerySets) * 4 > calculateAnimalFieldScore(playerIndex).purpleScore
+		}
+		const playerWheat = baseWheat + (playerObj.purpleDeclaredWheat ? 1 : 0)
 		const fields = farmers.getPlayerFields(playerIndex)
 		for (let i = 0; i < playerObj.villageTiles.length; i++) {
 			const tile = playerObj.villageTiles[i]

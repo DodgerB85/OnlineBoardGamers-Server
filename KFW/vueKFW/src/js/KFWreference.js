@@ -121,7 +121,6 @@ export const ACT_END_TURN_FOR_MERCHANTS_B_CONTRACT = 33
 // Farmers
 export const ACT_CHOOSE_FARM_ITEM = 34
 export const ACT_MOVE_ANIMAL = 35
-export const ACT_CHOOSE_ANIMAL_FIELD = 36
 
 // Action "2" (action 2 is copy of old action), OR another flag
 export const ACT_CHOOSE_ITEMS = 40
