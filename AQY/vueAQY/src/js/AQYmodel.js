@@ -96,6 +96,8 @@ export function initiateGameVars(forReplay = false) {
 		store.gameflow.turnOrder.push(i)
 		store.gameflow.fullTurnOrder.push(i)
 	}
+	// AqyBot should never be in fullTurnOrder - filter out bots
+	store.gameflow.fullTurnOrder = Bot.filterBotsFromOrder(store.gameflow.fullTurnOrder)
 
 	store.gameflow.phase = rf.PHASE_FIRST_CITY
 	store.gameflow.subPhase = rf.SUB_PHASE_NONE

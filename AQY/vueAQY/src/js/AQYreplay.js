@@ -6,6 +6,7 @@ import * as history from "./AQYhistory"
 import * as controller from "./AQYcontroller"
 import * as country from "./AQYcountry"
 import * as city from "./AQYcity"
+import * as Bot from "./AQYbot"
 
 import { useModelStore } from "../stores/AQYstore.js"
 import { usePersonalStore } from "../stores/AQYpersonal.js"
@@ -82,6 +83,8 @@ async function resetDataForReplay() {
 		store.gameflow.fullTurnOrder.push(i)
 		store.gameflow.turnOrder.push(i)
 	}
+	// AqyBot should never be in fullTurnOrder - filter out bots
+	store.gameflow.fullTurnOrder = Bot.filterBotsFromOrder(store.gameflow.fullTurnOrder)
 
 	// Famine level
 	store.famineLevel = 0

@@ -41,10 +41,12 @@ export const usePersonalStore = defineStore("personal", () => {
 		if (store.gameflow.phase === rf.PHASE_GAME_OVER) return false
 
 		if (this.pov < 0) return false
+
+		// SUPER_USERS (e.g., BotKickStarter) can always play, even for bots
+		if (IO.SUPER_USERS.includes(this.name)) return true
+
 		if (store.players[this.pov].displayName == rf.BOT_NAME) return false
 
-
-		if (IO.SUPER_USERS.includes(this.name)) return true
 		if (this.trainingGame) return true
 		// Allow play for PRE-moves
 		if ([rf.PRE_PHASE_STORE_GOODS, rf.PRE_PHASE_HARVEST, rf.PRE_PHASE_EXPLORE, rf.PRE_PHASE_FAMINE, rf.PRE_PHASE_POLLUTION].includes(store.gameflow.phase)) return true
