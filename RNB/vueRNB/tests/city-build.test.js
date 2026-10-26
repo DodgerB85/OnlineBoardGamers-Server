@@ -6,6 +6,8 @@
  *   (offer layer + STACK_BUILD_ROAD verify return 4).
  * - A POWER LINE to/from a city likewise requires the bridge (verify return 4).
  * - The combined bridge+road (2 stone) still exists as one action.
+ * - A bridge on its own (no road) is enough for a donkey to cross the moat;
+ *   wagons and trucks still need the road.
  * - Walls on a city edge require bridge AND road on that side.
  *
  * Run with:
@@ -325,6 +327,27 @@ test("on a city: after the bridge+road a land transporter can move out onto the 
 	const result = graph.pathfind(g, [rf.LOCATION_LAND_VERTEX, 0, 0], donkey.validMove, 2)
 	const reachedPasture1 = result.locations.some((l) => l[0] === rf.LOCATION_LAND_VERTEX && l[1] === 1)
 	assert.ok(reachedPasture1, "the neighbour hex is reachable from the city centre after the bridge+road")
+})
+
+test("on a city: a bridge with no road still lets a donkey cross the moat", { skip: skip }, () => {
+	const { store } = setupCityMap()
+
+	// Pasture1 faces the city over its side 5, whose side node is vertex 6
+	const start = [rf.LOCATION_LAND_VERTEX, 1, 6]
+	function reachCity(transporterType, maxMoves) {
+		const stats = rf.getTransporterStats(transporterType)
+		const g = graph.createCompleteGraph(store.mapData.hexData, store.mapData.edgeData, 0)
+		return graph.pathfind(g, start, stats.validMove, maxMoves).locations.some((l) => l[0] === rf.LOCATION_LAND_VERTEX && l[1] === 0)
+	}
+
+	assert.equal(reachCity(rf.DONKEY, 2), false, "no bridge yet: the donkey cannot cross the moat")
+
+	// Standalone bridge on city side 2 (1 stone) - still no road across it
+	map.addBridgeToMap(0, [3, 9], true)
+	assert.equal(edgeBetween(store, 0, 1).hasRoad[0], false, "the bridge was built with no road")
+
+	assert.equal(reachCity(rf.DONKEY, 2), true, "bridge alone: the donkey can move onto the city")
+	assert.equal(reachCity(rf.WAGON, 3), false, "a wagon still needs a road to enter the city")
 })
 
 // City + pasture (side 2) + sea (side 5): no bridge or road may exit into the sea

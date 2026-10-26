@@ -93,7 +93,7 @@ globalThis.msgpack = globalThis.msgpack || {
 	decode: (buffer) => JSON.parse(new TextDecoder().decode(buffer)),
 }
 
-let rf, hd, map, graph, useModelStore, createPinia, setActivePinia, setupError
+let rf, hd, map, graph, wonder, useModelStore, createPinia, setActivePinia, setupError
 try {
 	await import("../src/pakoLib.js") // attaches the pako browser global used by RNB code
 	;({ createPinia, setActivePinia } = await import("pinia"))
@@ -102,6 +102,7 @@ try {
 	map = await import("../src/js/RNBmap.js")
 	graph = await import("../src/js/RNBgraph.js")
 	;({ useModelStore } = await import("../src/stores/RNBstore.js"))
+	wonder = await import("../src/js/RNBwonder.js")
 } catch (error) {
 	setupError = error
 }
@@ -207,4 +208,26 @@ test("graph stays clean with a drained polder - no edges reference out-of-range 
 			assert.ok(n >= 0 && n < nodeCount, `edge endpoint ${n} is a valid node index (nodeCount ${nodeCount})`)
 		}
 	}
+})
+
+// The end-turn reminder lists transporters with moves left. A transporter marooned by a polder
+// flip keeps its moves but has nowhere to spend them, so it must not be listed.
+test("transporters marooned by a polder flip are excluded from the remaining-moves reminder", { skip: skip }, () => {
+	const { store } = setupRiverPolderMap()
+	const onPolder = (type, locationType) => ({ type, location: [locationType, 1, 6] })
+
+	store.mapData.hexData[1].currentTerrain = rf.TERR_POLDER_DRY
+	assert.equal(wonder.isTransporterMarooned(onPolder(rf.RAFT, rf.LOCATION_LAND_VERTEX)), true, "a boat on a drained polder cannot move")
+	assert.equal(wonder.isTransporterMarooned(onPolder(rf.DONKEY, rf.LOCATION_LAND_VERTEX)), false, "a donkey on a drained polder can move")
+	assert.equal(wonder.isTransporterMarooned({ type: rf.RAFT, location: [rf.LOCATION_DOCKED, 1, 0, rf.BANK_NONE, rf.DOCKED_OFFSET_NONE] }), false, "a docked boat sits on land by design")
+	assert.equal(wonder.isTransporterMarooned(onPolder(rf.PLANE, rf.LOCATION_LAND_VERTEX)), false, "a plane can take off")
+
+	store.mapData.hexData[1].currentTerrain = rf.TERR_POLDER_WET
+	assert.equal(wonder.isTransporterMarooned(onPolder(rf.DONKEY, rf.LOCATION_SEA_VERTEX)), true, "a donkey on a flooded polder cannot move")
+	assert.equal(wonder.isTransporterMarooned(onPolder(rf.EXHIBITION_TRANSPORTER, rf.LOCATION_SEA_VERTEX)), true, "the exhibition caravan is a land mover")
+	assert.equal(wonder.isTransporterMarooned(onPolder(rf.RAFT, rf.LOCATION_SEA_VERTEX)), false, "a boat on a flooded polder can move")
+	assert.equal(wonder.isTransporterMarooned(onPolder(rf.PLANE, rf.LOCATION_SEA_VERTEX)), false, "a plane can take off from a flooded polder")
+
+	// Not a polder: nothing to flip, so nothing is marooned
+	assert.equal(wonder.isTransporterMarooned({ type: rf.RAFT, location: [rf.LOCATION_LAND_VERTEX, 0, 3] }), false, "a boat on a plain land hex is never marooned here")
 })

@@ -276,6 +276,20 @@ function ejectDockedBoatFromWalledWaterNeighbour(boat) {
 	if (!placeBoatOnWaterHex(boat, otherHexID)) rf.doAdminAlrt(`No free water vertex to move docked transporter ${boat.id} off wall onto flooded hex ${otherHexID}`)
 }
 
+// Is a transporter marooned by a polder flip? It still has moves left but nowhere to spend them: a
+// boat on a drained polder, a land mover on a flooded one. A docked boat sits on land by design, a
+// plane can fly off, and anything already loaded onto another transporter is not its own move.
+export function isTransporterMarooned(transporterObj) {
+	const location = transporterObj.location
+	if (!loc.isAnyHexLocation(location)) return false
+	const hex = model.getHexByID(location[1])
+	if (!hex || !rf.TERR_IS_POLDER.includes(hex.currentTerrain)) return false
+	const hexIsWet = hex.currentTerrain === rf.TERR_POLDER_WET
+	if (model.isWaterTransporter(transporterObj.type)) return !hexIsWet && !loc.isDockedLocation(location)
+	const isLandLike = rf.LAND_TRANSPORTERS.includes(transporterObj.type) || transporterObj.type === rf.EXHIBITION_TRANSPORTER
+	return isLandLike && hexIsWet
+}
+
 // Reconciles transporters with the current polder terrain. Polders flip between land and water in
 // the Wonder phase. A transporter caught on the wrong terrain is marooned: it keeps its spot but
 // cannot move until the polder flips back. To stay pick-up-able it sits on a LAND vertex while the

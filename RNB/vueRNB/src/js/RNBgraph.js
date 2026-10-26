@@ -509,18 +509,28 @@ export function createCompleteGraph(hexData, edgeData, playerIndex, ignoreWalls,
 							const gi = cityHexObj.cornerNodeIds[sides[cityIdx]][0] - 1
 							const bankNodes = [rf.CITY_BANK_NODE_BASE + 2 * gi, rf.CITY_BANK_NODE_BASE + 2 * gi + 1]
 							for (const k of [0, 1]) {
-								if (hasRoad.length !== 2 || !hasRoad[k]) continue
+								if (hasRoad.length !== 2) continue
+								const bankNode = bankNodes[(k + cityIdx) % 2]
+								// CITY: a bank bridge on its own is enough to cross the moat -
+								// a donkey (or caravan) needs no road, wagons and trucks do
+								const bridgeBuilt = util.includesArray(cityHexObj.builtBridges, [cityHexObj.cornerNodeIds[sides[cityIdx]][0], bankNode])
+								if (!hasRoad[k] && !bridgeBuilt) continue
 								const riverCornerIdx = otherIdx === 0 ? k : (k + 1) % 2
 								const riverCorners = hexes[otherIdx].cornerNodeIds[sides[otherIdx]]
-								addEdge(rf.MOVE_ROAD, [hexOffset[cityIdx] + bankNodes[(k + cityIdx) % 2], hexOffset[otherIdx] + riverCorners[riverCornerIdx]])
+								addEdge(hasRoad[k] ? rf.MOVE_ROAD : rf.MOVE_DONKEY, [hexOffset[cityIdx] + bankNode, hexOffset[otherIdx] + riverCorners[riverCornerIdx]])
 							}
-						} else if (hasRoad[0] && hexSideNodes[0] !== -1 && hexSideNodes[1] !== -1) {
-							// ...but land transporters may only cross where a bridge + road exists.
-							// River exit sides have no side node (-1), so no road edge can exist there.
-							addEdge(
-								rf.MOVE_ROAD,
-								[0, 1].map((k) => hexOffset[k] + hexSideNodes[k])
-							)
+						} else if (hexSideNodes[0] !== -1 && hexSideNodes[1] !== -1) {
+							// ...but land transporters may only cross where a bridge exists. The road
+							// upgrades the crossing to a road move; without one only a donkey-like
+							// transporter can cross. River exit sides have no side node (-1), so no
+							// edge can exist there.
+							const bridgeBuilt = hexes.every((h, k) => h.hexTerrainID !== rf.CITY || util.includesArray(h.builtBridges, h.cornerNodeIds[sides[k]]))
+							if (hasRoad[0] || bridgeBuilt) {
+								addEdge(
+									hasRoad[0] ? rf.MOVE_ROAD : rf.MOVE_DONKEY,
+									[0, 1].map((k) => hexOffset[k] + hexSideNodes[k])
+								)
+							}
 						}
 					}
 					// POLDER: a river side may border a polder. A flooded polder acts like

@@ -1,0 +1,30 @@
+Implemented the &c production decisions in vueRNB source. No dist build was run or touched.
+What changed
+- Production setup step (RNBproductionSetup.js, ProductionSetupPanel.vue, ActionArea.vue)
+- At the start of each player's production turn, before they can act, the current player announces:
+- whether each transported manager on a tile with a secondary producer is active
+- whether to fire an unfuelled power plant using wood from one of their transporters
+- The panel only appears when the relevant module is enabled and there is actually a decision to make.
+- Decisions are stored as the first action in the production stack (STACK_PRODUCTION_SETUP), so pre-set production moves carry them and they are re-verified when loaded. Invalid pre-sets fail normally and the player redoes them.
+- Manager choices adjust secondary-producer capacity without losing conversions already used.
+- Electricity
+- Added firePowerPlantFromTransporter(): consumes a board/trunk from the chosen transporter, activates the plant, and recalculates the powered network.
+- If the plant wasn't already powered when primaries produced, the missing second primary output is added at the announcement and recorded in history so replay matches.
+- Power-line indicators are now red when unpowered, yellow when powered in both the main map and zoom panel. The line base is dark so the indicator is visible either way.
+- Management
+- Removed the old store-level managerActivation placeholder and replaced it with per-turn gameflow.productionDecisions.
+- Loose managers remain always active; transported managers default active but can be switched off by their owner.
+- Capacity is recalculated correctly when activation changes mid-production.
+- Art
+- Verified artwork scoring is derived from saved players/resources (artShownAt, artBestShownHere) and therefore survives saves; scoring uses 1 + distinct shows as before.
+- Fixed unattended atelier auto-production so it uses its full capacity (2 when a manager is active), not just one recipe.
+- Building info now shows the atelier as six input → output recipe rows instead of pretending it only makes wood carvings.
+- Replay now resets production capacities at production start, matching live play.
+- Save/replay compatibility
+- productionDecisions is stored in gameflow and exported/imported with a fallback for older saves.
+- Replay applies the setup action before the player's production actions.
+Verification
+- ESLint passes on all changed RNB files (remaining errors are pre-existing in MapArea.vue/RNBstack.js).
+- A throwaway Vite build to a temp directory succeeded; the temp output was deleted and RNB/static/RNB/RNBvuedist was not touched.
+- The BGG link returns 403 to automated fetch, so I could not read the thread itself; the implementation follows the order you quoted.
+Known limit: decisions are applied when each player's production turn starts. An earlier player can therefore still take a primary before a later player announces/fires a connected plant; the later player's extra powered output is added then. Strict simultaneous announcement would require a server-side decision round. This is marked as a shortcut: in RNBproductionSetup.js.

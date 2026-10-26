@@ -123,6 +123,9 @@ function finishActions(stopActionChange = false, event = null) {
 		for (const transporterObj of allPlayerTransporters) {
 			if (loc.isOnAnyTransporter(transporterObj.location)) continue
 			if (transporterObj.remainingMoves > 0) {
+				// A transporter marooned on flipped polder terrain cannot spend those moves
+				if (wonder.isTransporterMarooned(transporterObj)) continue
+
 				// Check it is not carrying an already moved transporter
 				if (model.doesTransporterHaveAlreadyMovedTransporter(transporterObj.id)) continue
 
