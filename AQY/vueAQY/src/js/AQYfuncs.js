@@ -26,7 +26,6 @@ import * as model from "./AQYmodel.js"
 import * as IO from "../backend/AQY_IO.js"
 import * as country from "./AQYcountry.js"
 import * as rules from "./AQYrules.js"
-import * as Bot from "./AQYbot.js"
 import i18n from "../i18n"
 
 import { usePersonalStore } from "../stores/AQYpersonal.js"
@@ -817,8 +816,6 @@ export async function importModel(input, includeContext, keepNeighbours) {
 	store.gameflow.phase = inputModel[2][1]
 	store.gameflow.turnOrder = JSON.parse(JSON.stringify(inputModel[2][2]))
 	store.gameflow.fullTurnOrder = JSON.parse(JSON.stringify(inputModel[2][3]))
-	// AqyBot should never be in fullTurnOrder - filter out bots
-	store.gameflow.fullTurnOrder = Bot.filterBotsFromOrder(store.gameflow.fullTurnOrder)
 	store.gameflow.subPhase = rf.SUB_PHASE_NONE
 	store.gameflow.action = rf.ACT_NONE
 

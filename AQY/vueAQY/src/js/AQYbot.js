@@ -13,7 +13,6 @@ export function filterBotsFromOrder(order) {
 export function removeBotPlayers() {
 	const store = useModelStore()
 	store.gameflow.turnOrder = filterBotsFromOrder(store.gameflow.turnOrder)
-	store.gameflow.fullTurnOrder = filterBotsFromOrder(store.gameflow.fullTurnOrder)
 }
 
 export function performBotHarvest(playerIndex) {
@@ -131,8 +130,8 @@ export async function actionPlayerKickout() {
 
 		controller.currentPlayerObj().displayName = rf.BOT_NAME
 
-		// Remove kicked player (now a bot) from fullTurnOrder
-		store.gameflow.fullTurnOrder = filterBotsFromOrder(store.gameflow.fullTurnOrder)
+		// Remove kicked player (now a bot) from turnOrder only
+		store.gameflow.turnOrder = filterBotsFromOrder(store.gameflow.turnOrder)
 
 		controller.endPlayerTurn()
 	}
@@ -146,9 +145,9 @@ export async function actionGraveGameOver() {
 
 	controller.currentPlayerObj().displayName = rf.BOT_NAME
 
-	// Remove player (now a bot) from fullTurnOrder
+	// Remove player (now a bot) from turnOrder only
 	const store = useModelStore()
-	store.gameflow.fullTurnOrder = filterBotsFromOrder(store.gameflow.fullTurnOrder)
+	store.gameflow.turnOrder = filterBotsFromOrder(store.gameflow.turnOrder)
 
 	controller.endPlayerTurn()
 }
@@ -169,9 +168,8 @@ export async function actionResign() {
 	// This then ends and saves the game
 	//controller.endPlayerTurn()
 
-	// Reform the turnOrder and fullTurnOrder (remove bots)
-	store.gameflow.fullTurnOrder = filterBotsFromOrder(store.gameflow.fullTurnOrder)
-	store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
+	// Reform the turnOrder (remove bots from turnOrder only, keep in fullTurnOrder as placeholder)
+	store.gameflow.turnOrder = filterBotsFromOrder(store.gameflow.turnOrder)
 
 	// Check that there is more than 1 player left, otherwise end game
 	let nbNonPlayers = 0
