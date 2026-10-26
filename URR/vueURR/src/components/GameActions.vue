@@ -510,6 +510,7 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 					<button v-else :disabled="!!path.length" @click="finishDigging">{{ $t("actions.doneDigging") }}</button>
 				</div>
 				<template v-if="game.gameflow.developmentStep !== 'eridu'">
+					<p v-if="state.id === rf.STATE_AKKAD && !game.nations[rf.NATION_FIRST_AKKADIANS].isRemoved" class="eraChange" role="status">{{ $t("actions.firstAkkadiansWarning") }}</p>
 					<div v-if="!rules.hasMaintenanceCrew(game, state.id) && (!canFinishDevelopment || maintenanceSales.length || maintenanceSelection.length)" class="actionGroup crewFunding" :aria-label="$t('actions.requiredCrewFunding')">
 						<b>{{ $t("actions.requiredCrew", { capacity: cardData.digger[0] }) }}<br>{{ cardData.digger[1] }} <CurrencyIcon /></b>
 						<p><CurrencyText :text="$t('actions.statePays', { amount: Math.min(state.money, cardData.digger[1]), private: maintenanceContribution })" /></p>

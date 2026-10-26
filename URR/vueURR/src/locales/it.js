@@ -234,9 +234,10 @@ export default {
 		unlimited: "Illimitato",
 		eraEquipment: "Equipaggiamento dell'era {era}",
 		nextPurchase: "Il prossimo acquisto inizia l'Era {era}.",
-		allEras: "Tutte le ere",
+		allEras: "Carte era",
 	},
 	market: {
+		landPrices: "Prezzi dei terreni",
 		aria: "Mercato delle terre",
 		pricesAria: "Prezzi attuali di vendita delle terre",
 		priceTitle: "{land}: {price} SPL",
@@ -400,6 +401,7 @@ export default {
 		cancel: "Annulla",
 	},
 	actions: {
+		firstAkkadiansWarning: "Assumere la prima squadra di Akkad dissolve i Primi Accadi, anche con l’assunzione automatica a fine turno.",
 		aria: "Azioni di gioco",
 		finalRound: "Turno finale.",
 		invasionEnd: "L'acqua non ha raggiunto il sud. La partita termina dopo questi raccolti.",

@@ -234,9 +234,10 @@ export default {
 		unlimited: "Unbegrenzt",
 		eraEquipment: "Ausrüstung der Ära {era}",
 		nextPurchase: "Der nächste Einkauf beginnt Ära {era}.",
-		allEras: "Alle Ären",
+		allEras: "Ära-Karten",
 	},
 	market: {
+		landPrices: "Landpreise",
 		aria: "Landmarkt",
 		pricesAria: "Aktuelle Landverkaufspreise",
 		priceTitle: "{land}: {price} SPL",
@@ -400,6 +401,7 @@ export default {
 		cancel: "Abbrechen",
 	},
 	actions: {
+		firstAkkadiansWarning: "Das Anheuern von Akkads erster Mannschaft löst die Ersten Akkadier auf, auch beim automatischen Anheuern am Zugende.",
 		aria: "Spielaktionen",
 		finalRound: "Letzte Runde.",
 		invasionEnd: "Kein Wasser erreichte den Süden. Das Spiel endet nach diesen Ernten.",

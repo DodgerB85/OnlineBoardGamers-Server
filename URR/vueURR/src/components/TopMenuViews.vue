@@ -9,7 +9,6 @@ import { useI18n } from "vue-i18n"
 
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
-import PlayerTable from "./PlayerTable.vue"
 const store = useModelStore()
 const personal = usePersonalStore()
 const { t } = useI18n()
@@ -176,14 +175,6 @@ async function confirmResign() {
 		<button class="actionsLineButton" @click="store.viewSettings.showResignPanel = false">{{ $t("common.cancel") }}</button>
 	</div>
 
-	<!-- Info -->
-	<transition name="slidePanel">
-		<div id="info" v-if="store.viewSettings.showInfo">
-			<div class="utilityHeading infoHeading"><b>{{ $t("topMenu.info") }}</b><button @click="store.viewSettings.showInfo = false" :aria-label="$t('common.close')">×</button></div>
-			<PlayerTable :minimiseInfoForMainScreen="false" />
-			<p><b>{{ $t("app.gameName") }}:</b> {{ store.gameName }}</p>
-		</div>
-	</transition>
 </template>
 
 <style scoped>
@@ -204,14 +195,13 @@ async function confirmResign() {
 	background-color: lightgoldenrodyellow;
 	color: darkred;
 }
-#bugReport, #notesBox, #info {
+#bugReport, #notesBox {
 	text-align: center;
 	margin-bottom: 10px;
 	border: 2px solid black;
 	background-color: lightblue;
 }
-/* max-height rather than a fixed height, so the variable-height panels (info)
-   cannot be clipped by a magic number. */
+/* Variable-height panels must not be clipped by a fixed height. */
 .slidePanel-enter-active,
 .slidePanel-leave-active {
 	transition: all 0.2s ease-in-out, opacity 0.2s ease-in-out;
@@ -270,6 +260,5 @@ async function confirmResign() {
 .topMenuItem img { width: 38px; height: 38px; }
 .topMenuItem span { font-size: 16px; font-weight: bold; display: block; }
 .utilityHeading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }.utilityHeading button { border: 0; background: none; color: inherit; font-size: 26px; cursor: pointer; }.topMenuItem { border: 0; background: #303030; color: white; border-radius: 3px; }.topMenuItem:disabled { opacity: .5; cursor: default; }
-.infoHeading { position: sticky; top: 0; z-index: 2; background: lightblue; padding: 4px 12px; border-bottom: 1px solid #adc2d0; text-align: left; }
 @media (max-width: 1050px) { .chatHeading button, .utilityHeading button { min-width: 44px; min-height: 44px; box-sizing: border-box; } }
 </style>

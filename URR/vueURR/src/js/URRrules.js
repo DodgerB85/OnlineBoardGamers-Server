@@ -14,7 +14,13 @@ export function getAutomaticAction(game) {
 		if (choices.length === 0) return { type: "advanceWater" }
 		// With one destination, splitting the handoff only sends the rest there later.
 		if (choices.length === 1) return { type: "allocateWater", area: choices[0].area, amount: choices[0].kind === "pump" ? frame.water : 1 }
-		if (choices.every((choice) => choice.kind === "irrigate") && frame.water >= choices.length) return { type: "allocateWater", area: choices[0].area, amount: 1 }
+		// A terminal pump uses one water on its own land, just like direct irrigation.
+		const onlyIrrigation = choices.every((choice) => {
+			if (choice.kind === "irrigate") return true
+			const area = boardRules.getArea(game, choice.area)
+			return area.owner !== null && area.irrigatedBy === null && boardRules.getWaterworkReach(game, area.id).length === 0
+		})
+		if (onlyIrrigation && frame.water >= choices.length) return { type: "allocateWater", area: choices[0].area, amount: 1 }
 	}
 	if (game.rain.step === "harvest") {
 		const state = game.states[game.rain.harvestOrder[0]]

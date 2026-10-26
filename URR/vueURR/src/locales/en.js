@@ -234,9 +234,10 @@ export default {
 		unlimited: "Unlimited",
 		eraEquipment: "Era {era} equipment",
 		nextPurchase: "Next purchase starts Era {era}.",
-		allEras: "All eras",
+		allEras: "Era cards",
 	},
 	market: {
+		landPrices: "Land prices",
 		aria: "Land market",
 		pricesAria: "Current land sale prices",
 		priceTitle: "{land}: {price} SPL",
@@ -393,6 +394,7 @@ export default {
 		cancel: "Cancel",
 	},
 	actions: {
+		firstAkkadiansWarning: "Hiring Akkad’s first crew dissolves First Akkadians, including an automatic hire at the end of the turn.",
 		aria: "Game actions",
 		finalRound: "Final round.",
 		invasionEnd: "No water reached the south. The game ends after these harvests.",

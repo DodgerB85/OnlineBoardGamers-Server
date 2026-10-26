@@ -234,9 +234,10 @@ export default {
 		unlimited: "无限",
 		eraEquipment: "第 {era} 时代装备",
 		nextPurchase: "下次购买将进入第 {era} 时代。",
-		allEras: "所有时代",
+		allEras: "时代卡",
 	},
 	market: {
+		landPrices: "土地价格",
 		aria: "土地市场",
 		pricesAria: "当前土地售价",
 		priceTitle: "{land}：{price} SPL",
@@ -400,6 +401,7 @@ export default {
 		cancel: "取消",
 	},
 	actions: {
+		firstAkkadiansWarning: "阿卡德雇用第一支工队时，第一阿卡德人解散，包括回合结束时的自动雇用。",
 		aria: "游戏行动",
 		finalRound: "最后一轮。",
 		invasionEnd: "水没有到达南方。游戏将在这些收获后结束。",

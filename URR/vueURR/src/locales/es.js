@@ -234,9 +234,10 @@ export default {
 		unlimited: "Ilimitado",
 		eraEquipment: "Equipo de la era {era}",
 		nextPurchase: "La próxima compra inicia la Era {era}.",
-		allEras: "Todas las eras",
+		allEras: "Cartas de era",
 	},
 	market: {
+		landPrices: "Precios de tierras",
 		aria: "Mercado de tierras",
 		pricesAria: "Precios actuales de venta de tierras",
 		priceTitle: "{land}: {price} SPL",
@@ -400,6 +401,7 @@ export default {
 		cancel: "Cancelar",
 	},
 	actions: {
+		firstAkkadiansWarning: "Contratar la primera cuadrilla de Akkad disuelve a los Primeros Acadios, incluso si se contrata automáticamente al terminar el turno.",
 		aria: "Acciones de la partida",
 		finalRound: "Ronda final.",
 		invasionEnd: "El agua no llegó al sur. La partida termina tras estas cosechas.",

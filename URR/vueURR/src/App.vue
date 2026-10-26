@@ -56,6 +56,7 @@ const statusPanels = ref(null)
 const selectedArea = ref(null)
 const gameActions = ref(null)
 const mapAction = ref(null)
+watch(() => store.gameflow.phase === rf.PHASE_SETTLEMENT, (isTradingLand) => { store.viewSettings.showLandPrices = isTradingLand }, { immediate: true })
 const actionTargets = ref([])
 const removalArea = ref(null)
 const landDraft = ref(null)
@@ -205,6 +206,7 @@ function showDebug() {
 		<TopMenuViews />
 		<HistoryTab />
 		<div id="gameArea">
+		<EquipmentSupply v-if="store.viewSettings.showEquipmentSupply" />
 		<ReplayArea v-if="store.viewSettings.showReplay" />
 		<TurnOrder @inspect="revealStatus" />
 		<GameOverview @inspect="revealStatus" />
@@ -214,9 +216,9 @@ function showDebug() {
 			<p><a href="/URR/help/" target="_blank" rel="noopener">{{ $t("app.welcomeHelp") }}</a> {{ $t("app.welcomeHelpRest") }}</p>
 		</div>
 		<div id="mainAreaLessHistory" :class="{ nationDivisionLayout: isNationDivision }" ref="mainArea" :style="{ '--board-width': `${boardBaseWidth * store.viewSettings.boardZoom}px` }">
-			<aside ref="statusPanels" class="stateSidebar"><PlayerHoldings ref="holdings" /><EquipmentSupply v-if="!isNationDivision" /><StateStrip v-if="!isNationDivision" @inspect="revealStatus" /></aside>
+			<aside ref="statusPanels" class="stateSidebar"><PlayerHoldings ref="holdings" /><StateStrip v-if="!isNationDivision" @inspect="revealStatus" /></aside>
 			<div class="mapContainer" :title="isNationDivision ? $t('app.clickMapEnlarge') : undefined" @keydown.enter="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()" @keydown.space="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()" @click="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()">
-				<TerrainMarket />
+				<TerrainMarket v-if="store.viewSettings.showLandPrices" />
 				<Teleport to="#nationMapPreviewBody" :disabled="!isMapPreviewOpen">
 				<MapArea ref="map" :selected-hex="selectedArea" :map-action="mapAction" :action-targets="actionTargets" @confirm-action="gameActions?.confirmMapAction()" @cancel-action="gameActions?.cancelMapAction()" :highlighted-player="store.viewSettings.showOwnedLand ? holdings?.activePlayer ?? null : null" :removal-area="removalArea" :land-draft="landDraft" :waiting-player-index="waitingPlayerIndex" :dig-capacity="digCapacity" @select-area="selectArea" @click-area="gameActions?.planClick($event)" @change-path="canalPath = $event" />
 				</Teleport>

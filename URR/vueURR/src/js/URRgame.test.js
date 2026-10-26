@@ -39,6 +39,39 @@ test("A sole pump receives all water automatically and stops at its downstream c
 	assert.equal(getAutomaticAction(game), null)
 })
 
+test("Enough water for a terminal pump and direct land irrigates both automatically", () => {
+	const game = createGame(["A", "B", "C"])
+	for (const nation of game.nations) nation.isRemoved = true
+	Object.assign(game.gameflow, { phase: rf.PHASE_RAINY_SEASON, stateOrder: [0, 1], turnOrder: [2] })
+	Object.assign(game.states[0], { isActive: true, king: 2 })
+	Object.assign(game.states[1], { isActive: true, king: 1 })
+	const area = (id) => game.board.areas.find((entry) => entry.id === id)
+	const river = area("printed-6-2")
+	const pump = area("printed-6-1")
+	const land = area("printed-5-2")
+	river.waterwork = { state: 0, kind: "reservoir", capacity: 2 }
+	pump.waterwork = { state: 1, kind: "pump", capacity: 1 }
+	pump.owner = pump.markerOwner = 1
+	land.owner = land.markerOwner = 2
+	game.board.canals.push([river.id, pump.id], [river.id, land.id])
+	game.rain.step = "routing"
+	game.rain.routing = { sourceIndex: 1, river: null, arrivals: {}, outflow: 0, stack: [{ area: river.id, water: 2, downstreamWater: 4, visited: [river.id], originReservoir: river.id }] }
+	const automatic = getAutomaticAction(game)
+	assert.deepEqual(automatic, { type: "allocateWater", area: pump.id, amount: 1 })
+	const first = applyAction(game, 2, automatic)
+	assert.equal(first.board.areas.find((entry) => entry.id === pump.id).irrigatedBy, 1)
+	assert.deepEqual(getAutomaticAction(first), { type: "allocateWater", area: land.id, amount: 1 })
+	const after = applyAction(first, 2, getAutomaticAction(first))
+	assert.equal(after.board.areas.find((entry) => entry.id === land.id).irrigatedBy, 0)
+	game.rain.routing.stack[0].water = 1
+	assert.equal(getAutomaticAction(game), null)
+	game.rain.routing.stack[0].water = 2
+	const onward = area("printed-5-1")
+	onward.owner = onward.markerOwner = 1
+	game.board.canals.push([pump.id, onward.id])
+	assert.equal(getAutomaticAction(game), null)
+})
+
 test("Action review keeps the decision's panel state after a phase or player handoff", () => {
 	const start = createGame(["A", "B", "C"])
 	const beforeChoice = structuredClone(start)
