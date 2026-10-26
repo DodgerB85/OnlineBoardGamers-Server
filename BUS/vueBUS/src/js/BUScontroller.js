@@ -23,7 +23,7 @@ export function canPlayerVrom(forceCheck) {
 
 	// Pittsburgh map: use network traversal to check if passengers can reach buildings
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
-		return canPlayerVromPitts(player, store)
+		return canPlayerVromPittsCheck(player, store)
 	}
 
 	// Other boards: use simple anyPax/anyBldg logic
@@ -58,7 +58,8 @@ export function canPlayerVrom(forceCheck) {
 	return true
 }
 
-function canPlayerVromPitts(player, store) {
+// Pure check for Pittsburgh VROM - no side effects
+function canPlayerVromPittsCheck(player, store) {
 	const personal = usePersonalStore()
 	// Network includes placed bridges joined to the player's line, so passengers
 	// on the far side of a bridge are also candidates
@@ -79,10 +80,8 @@ function canPlayerVromPitts(player, store) {
 		return false
 	}
 
-	// Set up eligible junctions for Pittsburgh VROM
-	setUpPlayerVromPitts(paxJunctions, player, store)
-
 	// Check if any passenger can reach a building with the desired type
+	// Use pre-computed eligibleJunctionsToVromPitts (set up in startPlayerTurn)
 	if (store.context.eligibleJunctionsToVromPitts.length === 0) {
 		store.context.turnEndingErrorMessage = i18n.global.t("actionArea.noPassengerReach")
 		if (store.context.historyObj.length === 0 || store.context.historyObj[store.context.historyObj.length - 1].length !== 1) store.context.historyObj.push([2])
@@ -90,6 +89,28 @@ function canPlayerVromPitts(player, store) {
 	}
 
 	return true
+}
+
+// Pittsburgh VROM with side effect - sets up eligibleJunctionsToVromPitts
+// Call this once at start of VROM turn (from startPlayerTurn)
+export function setupPlayerVromPitts() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	const player = currentPlayerObj()
+
+	let networkJunctions = [...player.playerJunctions]
+	if (personal.selectedBoard === rf.BOARD_PITTS) networkJunctions = model.getPlayerNetworkJunctionsPitts(player)
+
+	// Find all junctions with passengers (or Splotter Designers)
+	let paxJunctions = []
+	for (let i = 0; i < networkJunctions.length; i++) {
+		if (store.junctions[networkJunctions[i]][rf.paxIdx] > 0 || pitts.getDesignerTransportJunction(store.jeroenStatus) === networkJunctions[i] || pitts.getDesignerTransportJunction(store.jorisStatus) === networkJunctions[i]) {
+			paxJunctions.push(networkJunctions[i])
+		}
+	}
+
+	// Set up eligible junctions for Pittsburgh VROM
+	setUpPlayerVromPitts(paxJunctions, player, store)
 }
 
 function setUpPlayerVromPitts(paxJunctions, player, store) {
@@ -341,7 +362,7 @@ export function startPlayerTurn() {
 	// VROM
 	else if (store.gameflow.phase === rf.PHASE_VROM) {
 		store.context.remainingVroms = currentPlayerObj().buses
-		canPlayerVrom()
+		setupPlayerVromPitts()
 	}
 
 	// Save Reset

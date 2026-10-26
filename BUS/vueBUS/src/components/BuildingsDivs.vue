@@ -260,18 +260,18 @@ function clickedDesignerToVrom(designerIdx, junction) {
 // A passenger can select this junction for VROOMM only when a regular desired building is reachable from it;
 // designer special rides (convention centre / Airport) never make a junction selectable for a passenger
 function paxSelectableForVrom(junction) {
-	if (personal.selectedBoard !== rf.BOARD_PITTS) return controller.canPlayerVrom() && controller.currentPlayerObj().playerJunctions.includes(junction)
-	return controller.canPlayerVrom() && store.context.eligibleJunctionsToVromPitts.includes(junction) && controller.canReachBuildingFromJunction(junction, controller.currentPlayerObj(), store, null)
+	if (personal.selectedBoard !== rf.BOARD_PITTS) return store.gameflow.phase === rf.PHASE_VROM && store.context.remainingVroms > 0 && controller.currentPlayerObj().playerJunctions.includes(junction)
+	return store.context.eligibleJunctionsToVromPitts.includes(junction) && controller.canReachBuildingFromJunction(junction, controller.currentPlayerObj(), store, null)
 }
 
 // A Splotter Designer can select this junction only when their own rides (and regular building rides) reach a destination
 function designerSelectableForVrom(junction, designerIdx) {
-	if (personal.selectedBoard !== rf.BOARD_PITTS) return controller.canPlayerVrom() && controller.currentPlayerObj().playerJunctions.includes(junction)
-	return controller.canPlayerVrom() && store.context.eligibleJunctionsToVromPitts.includes(junction) && controller.canReachBuildingFromJunction(junction, controller.currentPlayerObj(), store, designerIdx)
+	if (personal.selectedBoard !== rf.BOARD_PITTS) return store.gameflow.phase === rf.PHASE_VROM && store.context.remainingVroms > 0 && controller.currentPlayerObj().playerJunctions.includes(junction)
+	return store.context.eligibleJunctionsToVromPitts.includes(junction) && controller.canReachBuildingFromJunction(junction, controller.currentPlayerObj(), store, designerIdx)
 }
 
 function mouseOverPaxNumber(e, junction, entering) {
-	if (!controller.canPlayerVrom()) return
+	if (store.gameflow.phase !== rf.PHASE_VROM || store.context.remainingVroms === 0) return
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
 		if (!paxSelectableForVrom(junction)) return
 	} else {
