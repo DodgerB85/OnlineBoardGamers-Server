@@ -215,7 +215,8 @@ class GamePresenter:
 
     def clearKickoutVotes(self):
         if self.gameObj.activeVotes and rf.KICKOUT_VOTE_TOPIC in self.gameObj.activeVotes:
-            del self.gameObj.activeVotes[rf.KICKOUT_VOTE_TOPIC]
+            # Assign new dict to ensure JSONField change detection
+            self.gameObj.activeVotes = {k: v for k, v in self.gameObj.activeVotes.items() if k != rf.KICKOUT_VOTE_TOPIC}
 
     def canSoloKickout(self, voter_username, target_username):
         vote = self.getKickoutVotesData().get(voter_username)
@@ -273,6 +274,7 @@ class GamePresenter:
         gp = self.gameObj.players.filter(player=user).first()
         if gp and not gp.is_missing:
             gp.is_missing = True
+            gp.is_current = False
             gp.save()
 
     def addKickedPlayer(self, user):
@@ -280,6 +282,7 @@ class GamePresenter:
         gp = self.gameObj.players.filter(player=user).first()
         if gp and not gp.is_kicked:
             gp.is_kicked = True
+            gp.is_current = False
             gp.save()
 
     def setServerCurrentPlayerNamesInTurnOrder(self, playersInTurnOrderArray):

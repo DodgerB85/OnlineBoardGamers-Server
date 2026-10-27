@@ -1208,6 +1208,10 @@ def _processRNBturn(request):
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
 
+        # Cannot rewind past a kickout
+        currentGame.rewindData = ""
+        currentGame.rewindTempData = ""
+
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
@@ -1216,8 +1220,8 @@ def _processRNBturn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
+                "missingPlayers": presenter.getMissingPlayersNamesArray(),
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
-                # "nextPlayer": jsonData["nextPlayer"],
             },
             safe=False,
         )
