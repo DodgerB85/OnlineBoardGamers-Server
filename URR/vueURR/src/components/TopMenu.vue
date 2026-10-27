@@ -58,13 +58,12 @@ function toggleChat() {
 	}
 }
 
-function toggleInfo() {
-	store.viewSettings.showInfo = !store.viewSettings.showInfo
+function toggleOverview() {
+	store.viewSettings.showOverview = !store.viewSettings.showOverview
 }
 
 function toggleHistory() {
 	store.viewSettings.showChat = false
-	store.viewSettings.showInfo = false
 	if (store.viewSettings.showHistory) store.viewSettings.showHistory = false
 	else {
 		store.viewSettings.showHistory = true
@@ -143,9 +142,19 @@ function getKickoutTimerText() {
 				<span>{{ $t("topMenu.notes") }}</span>
 			</button>
 
-			<button type="button" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showInfo }]" :aria-expanded="store.viewSettings.showInfo" @click="toggleInfo">
+			<button type="button" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showEquipmentSupply }]" :aria-expanded="store.viewSettings.showEquipmentSupply" aria-controls="equipmentSupply" @click="store.viewSettings.showEquipmentSupply = !store.viewSettings.showEquipmentSupply">
+				<img :src="view.getImage('icon-hand-card')" alt="" />
+				<span>{{ $t("supply.allEras") }}</span>
+			</button>
+
+			<button type="button" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showLandPrices }]" :aria-expanded="store.viewSettings.showLandPrices" aria-controls="landPrices" @click="store.viewSettings.showLandPrices = !store.viewSettings.showLandPrices">
+				<img :src="view.getImage('icon-price-tag')" alt="" />
+				<span>{{ $t("market.landPrices") }}</span>
+			</button>
+
+			<button type="button" class="overviewToggle" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showOverview }]" :aria-expanded="store.viewSettings.showOverview" @click="toggleOverview">
 				<img :src="view.getImage('icon-info')" alt="" />
-				<span>{{ $t("topMenu.info") }}</span>
+				<span>{{ $t("turnOrder.overview") }}</span>
 			</button>
 
 			<div class="menuDivider"></div>
@@ -237,14 +246,16 @@ function getKickoutTimerText() {
 
 .topMenuItem {
 	display: inline-block;
-	width: 62px;
+	min-width: 62px;
+	width: max-content;
+	box-sizing: border-box;
 	height: 55px;
 	border-radius: 5px;
 	border: 0;
 	background: transparent;
 	color: inherit;
 	font: inherit;
-	padding: 0;
+	padding: 0 8px;
 	vertical-align: top;
 	cursor: pointer;
 	text-align: center;

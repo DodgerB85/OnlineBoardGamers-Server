@@ -51,3 +51,24 @@ test("appending computes only the new entries' display rows", () => {
 
 	assert.deepEqual(appended, full)
 })
+
+
+test("history reports First Akkadians dissolution for automatic and manual hiring without duplicates", () => {
+	for (const type of ["endDevelopment", "buyCard", "resolveMaintenance"]) {
+		for (const era of [1, 4]) {
+			const before = createGame(["A", "B", "C"])
+			before.gameflow.phase = rf.PHASE_DEVELOPMENT
+			before.nations[rf.NATION_FIRST_AKKADIANS].isRemoved = false
+			const after = structuredClone(before)
+			after.era = era
+			after.nations[rf.NATION_FIRST_AKKADIANS].isRemoved = true
+			const history = [[rf.HIST_NEW_GAME, -1, null], entry({ type, kind: "digger" }, 10)]
+			const rows = computeHistory(history, 1000, [before, after])
+			const dissolutions = rows.flatMap((row) => row.administration?.details || []).filter((detail) => detail.nation === rf.NATION_FIRST_AKKADIANS)
+			assert.equal(dissolutions.length, 1, `${type}, era ${era}`)
+			assert.match(dissolutions[0].text, /First Akkadians/)
+			const unchanged = computeHistory(history, 1000, [after, after])
+			assert.equal(unchanged.some((row) => row.administration?.kind === "firstAkkadians"), false)
+		}
+	}
+})

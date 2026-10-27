@@ -31,7 +31,11 @@ const currentStep = computed(() => {
 
 <style scoped>
 .developmentProgress { margin: 0 var(--page-margin) 12px; padding: 12px; border: 1px solid #aa9b77; border-radius: 5px; background: #fff9e9; font-size: 16px; font-weight: 400; }
-ol { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 32px; list-style: none; margin: 0; padding: 0; }li { position: relative; }li + li::before { content: '→'; position: absolute; left: -24px; font-weight: 400; color: #736950; }.current { font-weight: bold; }
-.developmentOrder { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.6fr); column-gap: 32px; }.developmentSteps { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; margin-top: 12px; padding-top: 12px; border-top: 1px solid #c4b894; text-align: left; }small { display: block; margin-top: 4px; font: inherit; color: #655a42; }
-.stateLoop { position: relative; grid-column: 3 / -1; height: 22px; margin: 8px 18px 10px; border: solid #736950; border-width: 0 1px 1px; border-radius: 0 0 8px 8px; text-align: center; color: #655a42; }.stateLoop::before { content: ''; position: absolute; left: -4px; top: -3px; width: 0; height: 0; border-left: 3px solid transparent; border-right: 3px solid transparent; border-bottom: 6px solid #736950; }.stateLoop span { position: relative; top: 12px; padding: 0 8px; background: #fff9e9; }
+ol { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 32px; list-style: none; margin: 0; padding: 0; }li { position: relative; }li + li::before { content: '→'; position: absolute; left: -16px; top: 0; transform: translateX(-50%); font-size: 24px; line-height: 1; font-weight: 400; color: #736950; }.current { font-weight: bold; }
+.developmentOrder { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 32px; }.developmentSteps { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; margin-top: 12px; padding-top: 12px; border-top: 1px solid #c4b894; text-align: left; }small { display: block; margin-top: 4px; font: inherit; color: #655a42; }
+.mainPhases { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); text-align: center; }
+.developmentSteps > li { text-align: center; }
+.developmentSteps > li:first-child { text-align: left; }
+.developmentSteps > li:last-child { text-align: right; }
+.stateLoop { position: relative; grid-column: 3 / -1; height: 22px; margin: 8px 0 10px calc((100% - 32px) / 4); border: solid #736950; border-width: 0 1px 1px; border-radius: 0 0 8px 8px; text-align: center; color: #655a42; }.stateLoop::before { content: ''; position: absolute; left: -4px; top: -3px; width: 0; height: 0; border-left: 3px solid transparent; border-right: 3px solid transparent; border-bottom: 6px solid #736950; }.stateLoop span { position: relative; top: 12px; padding: 0 8px; background: #fff9e9; }
 </style>

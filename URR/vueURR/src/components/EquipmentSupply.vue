@@ -10,24 +10,18 @@ const nextEra = computed(() => purchaseEra.value > store.era ? purchaseEra.value
 </script>
 
 <template>
-	<section class="equipmentSupply" :aria-label="$t('supply.aria')">
-		<div class="eraCard currentEra">
-			<span><b>{{ $t("supply.era", { era: store.era === 5 ? 'M' : store.era }) }}</b> · {{ store.era === 5 ? $t("supply.unlimited") : $t("supply.left", { count: store.cardSupply[store.era] }) }}</span>
-			<ArtworkCard :src="assets.getEquipmentCardImage(store.era)" :alt="$t('supply.eraEquipment', { era: store.era === 5 ? 'M' : store.era })" />
-		</div>
+	<section id="equipmentSupply" class="equipmentSupply" :aria-label="$t('supply.aria')">
+		<div class="supplyHeading"><b>{{ $t("supply.allEras") }}</b><button @click="store.viewSettings.showEquipmentSupply = false">{{ $t("common.close") }}</button></div>
 		<p v-if="purchaseEra > store.era" class="eraTrigger">{{ $t("supply.nextPurchase", { era: nextEra === 5 ? "M" : nextEra }) }}</p>
-		<details class="allEras">
-			<summary>{{ $t("supply.allEras") }}</summary>
-			<div class="eraCards">
-				<div v-for="era in [1, 2, 3, 4, 5].filter((era) => era !== store.era)" :key="era" class="eraCard">
-					<span><b>{{ $t("supply.era", { era: era === 5 ? 'M' : era }) }}</b> · {{ era === 5 ? $t("supply.unlimited") : $t("supply.left", { count: store.cardSupply[era] }) }}</span>
-					<ArtworkCard :src="assets.getEquipmentCardImage(era)" :alt="$t('supply.eraEquipment', { era: era === 5 ? 'M' : era })" />
-				</div>
+		<div class="eraCards">
+			<div v-for="era in [1, 2, 3, 4, 5]" :key="era" class="eraCard" :class="{ currentEra: era === store.era }">
+				<span><b>{{ $t("supply.era", { era: era === 5 ? 'M' : era }) }}</b> · {{ era === 5 ? $t("supply.unlimited") : $t("supply.left", { count: store.cardSupply[era] }) }}</span>
+				<ArtworkCard :src="assets.getEquipmentCardImage(era)" :alt="$t('supply.eraEquipment', { era: era === 5 ? 'M' : era })" />
 			</div>
-		</details>
+		</div>
 	</section>
 </template>
 
 <style scoped>
-.equipmentSupply { width: 100%; box-sizing: border-box; padding: 8px; border: 2px solid #8e805e; border-radius: 7px; background: #fff9df; text-align: left; font-size: 16px; font-weight: 400; }.eraCards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }.eraCard { min-width: 0; }.eraCard > span { display: block; margin-bottom: 4px; font-size: 16px; font-weight: 400; }.eraTrigger { font-size: 16px; font-weight: 400; line-height: 1.4; margin: 8px 0; }.allEras { border-top: 1px solid #c4b894; margin-top: 8px; }.allEras summary { padding: 8px 0; cursor: pointer; }
+.equipmentSupply { margin: 10px var(--page-margin) 0; box-sizing: border-box; padding: 8px; border: 2px solid #8e805e; border-radius: 7px; background: #fff9df; text-align: left; font-size: 16px; font-weight: 400; }.eraCards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 200px)); justify-content: space-evenly; gap: 8px; margin-top: 8px; }.eraCard { min-width: 0; }.eraCard > span { display: block; margin-bottom: 4px; font-size: 16px; font-weight: 400; }.eraTrigger { font-size: 16px; font-weight: 400; line-height: 1.4; margin: 8px 0; }.supplyHeading { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 </style>

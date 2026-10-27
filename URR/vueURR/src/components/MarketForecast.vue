@@ -19,7 +19,7 @@ async function revealChanges(event) {
 <template>
 	<details v-if="changes.length" class="marketForecast" @toggle="revealChanges">
 		<summary>{{ $t("market.forecastSummary") }}</summary>
-		<div class="priceChanges"><div v-for="change in changes" :key="`${change.type}-${change.isCity}`" :title="$t('market.forecastTitle', { land: rf.LAND_NAMES[change.type], city: change.isCity ? ' ' + $t('common.city') : '', previous: change.previous, next: change.next })"><img :src="assets.getTerrainImage(change.type, change.isCity)" :alt="`${rf.LAND_NAMES[change.type]}${change.isCity ? ' ' + $t('common.city') : ''}`" /><span>{{ change.previous }} → <b>{{ change.next }}</b> SPL</span></div></div>
+		<div class="priceChanges"><div v-for="change in changes" :key="`${change.type}-${change.isCity}`" :title="$t('market.forecastTitle', { land: rf.LAND_NAMES[change.type], city: change.isCity ? ' ' + $t('common.city') : '', previous: change.previous, next: change.next })"><img :src="assets.getTerrainImage(change.type, change.isCity)" :alt="`${rf.LAND_NAMES[change.type]}${change.isCity ? ' ' + $t('common.city') : ''}`" /><span>{{ change.previous }} → <b>{{ change.next }}</b> <CurrencyIcon /></span></div></div>
 	</details>
 </template>
 

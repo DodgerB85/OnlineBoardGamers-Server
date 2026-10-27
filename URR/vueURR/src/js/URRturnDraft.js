@@ -1,5 +1,6 @@
 import * as rf from "./URRreference.js"
 import * as water from "./URRwater.js"
+import { nextCardEra, hasMaintenanceCrew } from "./URRrules.js"
 import i18n from "../i18n.js"
 
 const t = i18n.global.t
@@ -40,8 +41,11 @@ export function actionSummary(before, after, action) {
 	let message
 	if (action.type === "allocateWater") message = before.board.areas.find((area) => area.id === action.area)?.waterwork ? t("turn.sentWater", { area: label(action.area), amount: action.amount }) : t("turn.irrigated", { area: label(action.area) })
 	else if (["dig", "digEridu", "exchangeBarahshum"].includes(action.type)) message = t("turn.canalPath", { path: (action.path || [action.from, action.to]).map(label).join(" → ") })
-	else if (action.type === "buyCard") message = t("turn.crew")
-	else if (["requestWaterwork", "exchangeCalah"].includes(action.type)) {
+	else if (action.type === "buyCard") {
+		const era = nextCardEra(before)
+		const [capacity, price] = rf.ERA_CARD_DATA[era].digger
+		message = t("turn.crew", { era: era === 5 ? "M" : era, capacity, price })
+	} else if (["requestWaterwork", "exchangeCalah"].includes(action.type)) {
 		const calah = action.type === "exchangeCalah" ? t("turn.calahVia") : ""
 		const agreement = after.gameflow.pendingOffer || after.gameflow.waterworkRequests?.some((offer) => offer.action.area === action.area) ? t("turn.agreementNeeded") : ""
 		message = t("turn.workRequest", { area: label(action.area), kind: kindLabel(action.kind), calah, agreement })
@@ -63,4 +67,34 @@ export function describeAction(before, after, action) {
 	if (endsDecision(before, after, action)) return message
 	const frame = water.currentWaterFrame(after)
 	return after.rain.step === "routing" && frame ? t("turn.waterRemaining", { message, water: frame.water }) : message
+}
+
+
+export function groupedDraftSteps(steps) {
+	const groups = []
+	for (const [index, step] of steps.entries()) {
+		if (step.action.type !== "buyCard") {
+			groups.push({ label: step.label, index })
+			continue
+		}
+		const era = nextCardEra(step.state)
+		let group = groups.find((entry) => entry.era === era)
+		if (!group) {
+			group = { era, count: 0 }
+			groups.push(group)
+		}
+		group.count++
+		group.index = index
+		const [capacity, price] = rf.ERA_CARD_DATA[era].digger
+		group.label = t("turn.crewGroup", { count: group.count, era: era === 5 ? "M" : era, capacity, total: price * group.count })
+	}
+	return groups
+}
+
+
+export function crewRemovalIndices(steps, index, stateId) {
+	const crews = steps.map((step, position) => ({ step, position })).filter(({ step }) => step.action.type === "buyCard")
+	if (crews.length !== 2 || hasMaintenanceCrew(crews[0].step.state, stateId)) return [index]
+	const remaining = crews.find((crew) => crew.position !== index).position
+	return [index, remaining - Number(index < remaining)]
 }

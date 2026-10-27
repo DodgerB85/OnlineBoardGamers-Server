@@ -80,9 +80,13 @@ export function computeHistory(history, creationTimestamp, snapshots = [], times
 			addSummary("endTrigger", invasion ? t("historyPage.finalInvasion") : t("historyPage.finalRevolution"), invasion ? t("historyPage.invasionText") : t("historyPage.revolutionText"), invasion ? [] : after.states.filter((state) => state.hasRevolted).map((state) => ({ state: state.id, text: t("historyPage.revolts", { state: rf.STATE_NAMES[state.id] }) })))
 		}
 
+		if (!before.nations[rf.NATION_FIRST_AKKADIANS].isRemoved && after.nations[rf.NATION_FIRST_AKKADIANS].isRemoved) {
+			addSummary("firstAkkadians", t("historyPage.nationDissolves", { nation: rf.NATION_NAMES[rf.NATION_FIRST_AKKADIANS] }), "", [{ nation: rf.NATION_FIRST_AKKADIANS, text: t("historyPage.nationDissolves", { nation: rf.NATION_NAMES[rf.NATION_FIRST_AKKADIANS] }) }])
+		}
+
 		if (after.era > before.era) {
 			const details = before.states.flatMap((state) => state.diggers.filter((crew) => !after.states[state.id].diggers.some((remaining) => remaining.id === crew.id)).map((crew) => ({ state: state.id, text: t("historyPage.crewRetires", { state: rf.STATE_NAMES[state.id], era: crew.era, points: crew.capacity }) })))
-			if (after.era >= 4) for (const nation of before.nations.filter((nation) => !nation.isRemoved && after.nations[nation.id].isRemoved)) details.push({ nation: nation.id, text: t("historyPage.nationDissolves", { nation: rf.NATION_NAMES[nation.id] }) })
+			if (after.era >= 4) for (const nation of before.nations.filter((nation) => !nation.isRemoved && nation.id !== rf.NATION_FIRST_AKKADIANS && after.nations[nation.id].isRemoved)) details.push({ nation: nation.id, text: t("historyPage.nationDissolves", { nation: rf.NATION_NAMES[nation.id] }) })
 			addSummary("era", t("historyPage.eraBegins", { era: after.era === 5 ? 'M' : after.era }), details.length ? t("historyPage.eraTextRetire") : t("historyPage.eraTextNone"), details)
 		}
 		// With no active state the whole development phase and rainy season resolve inside the move that ends settlement.

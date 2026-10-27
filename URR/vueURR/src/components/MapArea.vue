@@ -118,11 +118,8 @@ const mapDecisions = computed(() => {
 	return targets
 })
 
-const inspectedNation = ref(null)
-watch(() => store.gameflow.phase, () => { inspectedNation.value = null })
-const hasMapInspection = computed(() => inspectedNation.value !== null || store.viewSettings.inspectedState !== null || props.highlightedPlayer !== null)
+const hasMapInspection = computed(() => store.viewSettings.inspectedState !== null || props.highlightedPlayer !== null)
 const inspectionTargets = computed(() => new Set(store.board.areas.filter((area) =>
-	(inspectedNation.value !== null && area.nation === inspectedNation.value) ||
 	(store.viewSettings.inspectedState !== null && area.state === store.viewSettings.inspectedState) ||
 	(props.highlightedPlayer !== null && area.owner === props.highlightedPlayer)
 ).map((area) => area.id)))
@@ -249,19 +246,13 @@ async function locateArea(id, shouldSelect = false) {
 	hex.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" })
 	revealAboveActions(hex)
 }
-function locateNation(id) {
-	inspectedNation.value = id
-	store.viewSettings.inspectedState = null
-	store.viewSettings.showOwnedLand = false
-	return locateArea(store.board.areas.find((area) => area.nation === id).id)
-}
-defineExpose({ locateNation, finishDig, revealSelection, revealBoard, locateArea, isTracing: previewOpen })
+defineExpose({ finishDig, revealSelection, revealBoard, locateArea, isTracing: previewOpen })
 watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.stateIndex, store.gameflow.developmentStep, store.rain.step, store.rain.harvestOrder[0], water.currentWaterFrame(store)?.area], () => { finishDig(); selectedHexId.value = null; previewOpen.value = canTrace.value })
 </script>
 
 <template>
 	<div id="mapArea" ref="boardElement">
-		<div v-if="previewError" class="previewError" role="alert">{{ previewError }}</div>
+		<div v-if="previewError" class="previewError" role="alert"><CurrencyText :text="previewError" /></div>
 		<div class="mapSurface">
 			<svg :viewBox="`0 0 ${boardDisplay.MAP_WIDTH} ${boardDisplay.MAP_HEIGHT}`" :aria-label="$t('map.aria')"><title>{{ $t("map.keyboardHint") }}</title>
 				<defs>
@@ -272,9 +263,9 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 				<g v-if="!actualAreas.length" class="printedHexes"><polygon v-for="hex in boardDisplay.PRINTED_HEXES" :key="hex.id" :points="boardDisplay.hexPoints(hex.x, hex.y)" @click="inspectArea(hex.id)" /></g>
 				<polyline v-for="(canal, index) in savedCanals" :key="`canal-${index}`" :points="canal" class="savedCanal" />
 				<polyline v-if="draftLine" :points="draftLine" class="draftCanal" />
-				<g v-for="entry in renderedAreas" :key="entry.area.id" class="boardArea" :clip-path="selectedHexId === entry.area.id ? null : `url(#hex-clip-${entry.area.id})`" :class="{ hasDecision: !!mapDecisions[entry.area.id], showLabel: showCoordinates || (inspectedNation !== null && entry.area.nation === inspectedNation) || selectedHexId === entry.area.id || queuedPurchase === entry.area.id || queuedSales.includes(entry.area.id) || chosenRemoval === entry.area.id || draftPath.includes(entry.area.id) }">
+				<g v-for="entry in renderedAreas" :key="entry.area.id" class="boardArea" :clip-path="selectedHexId === entry.area.id ? null : `url(#hex-clip-${entry.area.id})`" :class="{ hasDecision: !!mapDecisions[entry.area.id], showLabel: showCoordinates || selectedHexId === entry.area.id || queuedPurchase === entry.area.id || queuedSales.includes(entry.area.id) || chosenRemoval === entry.area.id || draftPath.includes(entry.area.id) }">
 					<polygon v-if="inspectionTargets.has(entry.area.id)" :points="areaClips[entry.area.id]" class="inspectionHalo" />
-					<polygon v-if="(inspectedNation !== null && entry.area.nation === inspectedNation) || (store.viewSettings.inspectedState !== null && entry.area.state === store.viewSettings.inspectedState)" :points="areaClips[entry.area.id]" class="inspectionHighlight" />
+					<polygon v-if="(store.viewSettings.inspectedState !== null && entry.area.state === store.viewSettings.inspectedState)" :points="areaClips[entry.area.id]" class="inspectionHighlight" />
 					<polygon v-if="highlightedPlayer !== null && entry.area.owner === highlightedPlayer" :points="areaClips[entry.area.id]" class="inspectionHighlight ownedLandHighlight" />
 					<polygon :points="areaClips[entry.area.id]" class="areaHit" :class="[{ purchaseLocked: !store.viewSettings.showReplay && !!props.landDraft?.blocked?.[entry.area.id] }, hasMapInspection || store.turnDraft.ready || store.viewSettings.showReplay ? {} : { actionSite: actionTargets.includes(entry.area.id) && store.viewSettings.actionIntent !== 'equip', digComplete: digOptions[entry.area.id] && !digOptions[entry.area.id].error && digOptions[entry.area.id].isComplete, digContinue: digOptions[entry.area.id] && !digOptions[entry.area.id].error && !digOptions[entry.area.id].isComplete, selected: selectedHexId === entry.area.id, drafting: draftPath.includes(entry.area.id), reachable: reachable.includes(entry.area.id), waterDestination: waterDestinations.includes(entry.area.id), routing: routingArea === entry.area.id, maintenanceSale: maintenanceLand.includes(entry.area.id), barahshumSite: barahshumSites.includes(entry.area.id), calahSite: calahSites.includes(entry.area.id), harvestRemovalSite: harvestRemovalSites.includes(entry.area.id), removalTarget: chosenRemoval === entry.area.id, tradePurchase: queuedPurchase === entry.area.id, tradeSale: queuedSales.includes(entry.area.id), offerTarget: store.gameflow.pendingOffer?.action.area === entry.area.id }]" role="button" :tabindex="tabArea === entry.area.id ? 0 : -1" :data-area-id="entry.area.id" :aria-label="areaDescription(entry.area)" @focus="focusedHex = entry.area.id" @keydown="moveFocus($event, entry)" @click="inspectArea(entry.area.id)" @keydown.enter.prevent="inspectArea(entry.area.id)" @keydown.space.prevent="inspectArea(entry.area.id)"><title>{{ areaDescription(entry.area) }}</title></polygon>
 					<polygon v-if="mapDecisions[entry.area.id] && queuedPurchase === entry.area.id && queuedSales.includes(entry.area.id)" :points="areaClips[entry.area.id]" class="purchaseSaleOutline" />
@@ -303,7 +294,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 				<g v-for="border in stateBorders" :key="border.areaId" :stroke="boardDisplay.MAP_STATE_COLOURS[border.state]" fill="none" stroke-linecap="butt" pointer-events="none">
 					<path :d="border.path" :clip-path="`url(#hex-clip-${border.areaId})`" stroke-width="14" />
 				</g>
-				<path v-for="(border, index) in outerStateBorders" :key="`outer-${index}`" :d="border.path" :stroke="boardDisplay.MAP_STATE_COLOURS[border.state]" fill="none" stroke-width="14" stroke-linecap="butt" stroke-linejoin="miter" pointer-events="none" />
+				<path v-for="(border, index) in outerStateBorders" :key="`outer-${index}`" :d="border.path" :stroke="boardDisplay.MAP_STATE_COLOURS[border.state]" fill="none" stroke-width="7" stroke-linecap="butt" stroke-linejoin="miter" pointer-events="none" />
 				<template v-for="entry in renderedAreas" :key="`selection-${entry.area.id}`">
 					<g v-if="mapDecisions[entry.area.id] && (mapDecisions[entry.area.id].planned || selectedHexId === entry.area.id)" class="mapDecisionHighlight" :class="mapDecisions[entry.area.id].kind">
 						<polygon :points="areaClips[entry.area.id]" class="mapDecisionOutline selectionOutline" :class="{ source: mapDecisions[entry.area.id].source, chosen: (selectedHexId === entry.area.id && store.gameflow.phase !== rf.PHASE_SETTLEMENT) || chosenRemoval === entry.area.id, planned: mapDecisions[entry.area.id].planned }" />
@@ -313,7 +304,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 			</svg>
 			<WaterPlayback v-if="playback.state.visible" />
 			<div v-if="!playback.state.visible && mapAction && confirmationPosition && !hasMapInspection && !store.turnDraft.ready" class="mapConfirmation" :style="confirmationPosition">
-				<b>{{ mapAction.label }}</b><small>{{ mapAction.detail }}</small>
+				<b><CurrencyText :text="mapAction.label" /></b><small><CurrencyText :text="mapAction.detail" /></small>
 				<div><button :disabled="!mapAction.canConfirm" @click="emit('confirmAction')">{{ $t("map.confirm") }}</button><button @click="emit('cancelAction')">{{ $t("map.cancel") }}</button></div>
 			</div>
 		</div>
@@ -321,7 +312,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 		<div class="mapFooter" v-if="previewOpen">
 			<div class="controls" v-if="previewOpen"><button @click="undoDraft" :disabled="!draftPath.length">{{ $t("common.undo") }}</button><button @click="clearDraft" :disabled="!draftPath.length">{{ $t("common.clear") }}</button></div>
 		</div>
-		<div v-if="hasMapInspection" class="mapInspectionCue">{{ $t("map.inspecting") }} <span v-if="inspectedNation !== null">{{ $t("map.territory", { name: rf.NATION_NAMES[inspectedNation] }) }}</span><span v-if="store.viewSettings.inspectedState !== null">{{ $t("map.territory", { name: rf.STATE_NAMES[store.viewSettings.inspectedState] }) }}</span><span v-if="store.viewSettings.inspectedState !== null && highlightedPlayer !== null"> · </span><span v-if="highlightedPlayer !== null"><PlayerMarker :index="highlightedPlayer" /> {{ $t("map.ownedLand") }}</span>{{ $t("map.inspectionCue") }}<button @click="inspectedNation = null; store.viewSettings.inspectedState = null; store.viewSettings.showOwnedLand = false">{{ $t("map.clearInspection") }}</button></div>
+		<div v-if="hasMapInspection" class="mapInspectionCue">{{ $t("map.inspecting") }} <span v-if="store.viewSettings.inspectedState !== null">{{ $t("map.territory", { name: rf.STATE_NAMES[store.viewSettings.inspectedState] }) }}</span><span v-if="store.viewSettings.inspectedState !== null && highlightedPlayer !== null"> · </span><span v-if="highlightedPlayer !== null"><PlayerMarker :index="highlightedPlayer" /> {{ $t("map.ownedLand") }}</span>{{ $t("map.inspectionCue") }}<button @click="store.viewSettings.inspectedState = null; store.viewSettings.showOwnedLand = false">{{ $t("map.clearInspection") }}</button></div>
 		<div class="legendFooter">
 		<div class="boardLegend">
 			<div class="legendRow"><svg class="legendToken" viewBox="0 0 48 48" role="img" :aria-label="$t('map.soldLand')"><rect x="2" y="2" width="44" height="44" class="tokenFrame saleMarkerFrame" /></svg><span>{{ $t("map.soldLand") }}</span></div>

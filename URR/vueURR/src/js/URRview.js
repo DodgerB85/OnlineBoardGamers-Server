@@ -81,7 +81,9 @@ export function getImage(image) {
 	// Menu / generic icons
 	if (image === "icon-house") return new URL(`../../../static/URR/images/icon-house.svg`, import.meta.url).href
 	else if (image === "icon-nextGame") return new URL(`../../../static/URR/images/icon-nextGame.svg`, import.meta.url).href
+	else if (image === "icon-hand-card") return new URL(`../../../static/URR/images/icon-hand-card.svg`, import.meta.url).href
 	else if (image === "icon-rulebook") return new URL(`../../../static/URR/images/icon-rulebook.svg`, import.meta.url).href
+	else if (image === "icon-price-tag") return new URL(`../../../static/URR/images/icon-price-tag.svg`, import.meta.url).href
 	else if (image === "icon-info") return new URL(`../../../static/URR/images/icon-info.svg`, import.meta.url).href
 	else if (image === "icon-rewind") return new URL(`../../../static/URR/images/icon-rewind.svg`, import.meta.url).href
 	else if (image === "icon-chat") return new URL(`../../../static/URR/images/icon-chat.svg`, import.meta.url).href
