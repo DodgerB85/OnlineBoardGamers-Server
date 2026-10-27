@@ -55,6 +55,7 @@ CREATE_PAGE_FIELDS = {
     "createWEBpage": {"seats": [2, 3, 4], "seat_rows": [3, 4], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"]},
     "createKFWpage": {"seats": [2, 3, 4, 5, 6], "seat_rows": [3, 4, 5, 6], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"]},
     "createURRpage": {"seats": [2, 3, 4, 5, 6], "seat_rows": [2, 3, 4, 5, 6], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"]},
+    "createNTRpage": {"seats": [2, 3, 4, 5, 6, 7, 8], "seat_rows": [3, 4, 5, 6, 7, 8], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"], "extras": ['id="scenario1"', 'id="scenario2"', 'id="teamPlay"']},
 }
 
 

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 import os
+import sys
 from os.path import join
 from pathlib import Path
 
@@ -23,6 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = config("DEBUG", default=False, cast=bool)
 LOCAL_USER = config("LOCAL_USER", default=False, cast=bool)
 LOCAL_USER_SQLITE3 = config("LOCAL_USER_SQLITE3", default=False, cast=bool)
+
+# The test runner turns DEBUG off, which would make the hashed static storage
+# below demand a collected staticfiles.json. Tests render pages without it.
+TESTING = "test" in sys.argv
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -372,7 +377,11 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",  # For media files
     },
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if TESTING
+            else "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+        ),
     },
 }
 

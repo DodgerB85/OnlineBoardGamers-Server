@@ -56,7 +56,7 @@ from Lobby.models import (
 from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
 from user_visit.models import UserVisit
 
-GAME_CODES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB", "URR", "DDL", "ROW"]
+GAME_CODES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB", "URR", "DDL", "ROW", "NTR"]
 
 start_calc_time = time.perf_counter()
 deleted_games = 0  # Unused; consider removing unless used elsewhere

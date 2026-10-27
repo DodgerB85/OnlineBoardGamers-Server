@@ -20,6 +20,8 @@ import MapArea from "./components/MapArea.vue"
 import ActionArea from "./components/ActionArea.vue"
 import PlayerTable from "./components/PlayerTable.vue"
 
+import { onMounted, onUnmounted } from "vue"
+
 import { useModelStore } from "./stores/NTRstore.js"
 import i18n from "./i18n"
 const store = useModelStore()
@@ -36,6 +38,18 @@ import * as IO from "./backend/NTR_IO"
 import * as replay from "./js/NTRreplay"
 
 model.initGame()
+
+// Poll for other players' moves. The game has no websocket, so this is the
+// only way an opponent's save reaches this tab.
+let pollTimer = null
+onMounted(() => {
+  pollTimer = setInterval(() => {
+    if (!document.hidden) IO.checkForLatestData()
+  }, IO.POLL_INTERVAL_MS)
+})
+onUnmounted(() => {
+  if (pollTimer) clearInterval(pollTimer)
+})
 
 /********************************* */
 

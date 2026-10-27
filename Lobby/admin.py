@@ -29,6 +29,8 @@ from .modelProxies import (
     KFWgame,
     KFWMainTournament,
     KFWMiniTournament,
+    NTRgame,
+    NTRMiniTournament,
     RNBgame,
     RNBMainTournament,
     RNBMiniTournament,
@@ -602,6 +604,15 @@ class KFWgameAdmin(GameAdmin):
         app_label = "KFW"
 
 
+@admin.register(NTRgame)
+class NTRgameAdmin(GameAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="NTR")
+
+    class Meta:
+        app_label = "NTR"
+
+
 ################### END Register game objects to specific app
 
 
@@ -786,6 +797,15 @@ class KFWMainTournamentAdmin(TournamentAdmin):
 
     class Meta:
         app_label = "KFW"
+
+
+@admin.register(NTRMiniTournament)
+class NTRMiniTournamentAdmin(TournamentAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="NTR", tournamentCategory="Mini")
+
+    class Meta:
+        app_label = "NTR"
 
 
 ################### END Register Tournament objects to specific app

@@ -6,7 +6,7 @@ Other docs in this folder:
 
 - [ADDING_A_NEW_GAME.md](ADDING_A_NEW_GAME.md) — step-by-step checklist for adding a whole new game.
 - [ADDING_A_GAME_MODULE.md](ADDING_A_GAME_MODULE.md) — how optional expansion modules (eg FCM) are wired in.
-- [UNIT_TESTS.md](UNIT_TESTS.md) — the test suite inventory and how to run it.
+- [UNIT_TESTS.md](UNIT_TESTS.md) — how to run the backend suite, its conventions, the known expected failure and the frontend test runners.
 
 - [Big picture](#big-picture)
 - [Apps and URL layout](#apps-and-url-layout)

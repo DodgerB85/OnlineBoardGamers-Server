@@ -119,14 +119,12 @@
   initData.startingOptions = {{startingOptions}};
   initData.playerNames = {{ allPlayerListBySeat | safe }};
   initData.currentPlayers = {{ currentPlayers | safe }};
-  initData.preferredNTRoptions = {{ preferredNTRoptions }};
   initData.pov = {{ pov }};
   initData.turn = {{turn}};
   initData.phase = {{phase}};
   initData.deleteVotesData = {{ deleteVotesData | safe }};
   initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
-  initData.scenario = {{ scenario }};
-  initData.teamPlay = {{ teamPlay|yesno:"true,false" }};
+  initData.startingMap = '{{ startingMap|escapejs }}';
   initData.finishedGame = {{ finishedGame|yesno:"true,false" }};
   
   {% if spoilerFree %}

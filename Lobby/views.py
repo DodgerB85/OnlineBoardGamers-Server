@@ -64,6 +64,7 @@ from django.views.i18n import set_language as django_set_language
 from user_visit.models import UserVisit
 
 import Lobby.sharedFunctions.constants as rf
+import NTR.NTRconstants as rfNTR
 from FCM.common import buildFCMstartingOptions
 from Lobby.sharedFunctions.db_mutex import db_mutex
 from Lobby.sharedFunctions.loginThrottle import (
@@ -5756,14 +5757,16 @@ def createNTRminiTournament(request):
 
     startingOptions = []
 
-    if "scenario" in request.POST:
-        startingOptions.append(int(request.POST["scenario"]))
+    scenario = int(request.POST.get("scenario", rfNTR.DEFAULT_SCENARIO))
+    startingOptions.append(scenario if scenario in rfNTR.SCENARIO_SLUGS else rfNTR.DEFAULT_SCENARIO)
+    # Team play is decided by the per-game player count (4 or 8), not the checkbox,
+    # so every generated game matches the round its players were grouped into.
+    if int(request.POST["playersPerGameMT"]) > 2:
+        startingOptions.append(rfNTR.SO_TEAM_PLAY)
     if "frenchReinforcements" in request.POST:
-        startingOptions.append(10)  # SO_FRENCH_REINFORCEMENTS
+        startingOptions.append(rfNTR.SO_FRENCH_REINFORCEMENTS)
     if "santonFort" in request.POST:
-        startingOptions.append(11)  # SO_SANTON_FORT
-    if "teamPlay" in request.POST:
-        startingOptions.append(12)  # SO_TEAM_PLAY
+        startingOptions.append(rfNTR.SO_SANTON_FORT)
 
     invitedPlayers = json.loads(request.POST["invtedPlayersListMT"]) if request.POST["invtedPlayersListMT"] else []
 

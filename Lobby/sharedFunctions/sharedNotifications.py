@@ -1801,13 +1801,13 @@ def SN_sendAdminErrorMessage(message, webhook_key="WEBHOOK_ADMIN_ERROR_MSG"):
     # Never reach Discord from the test suite. Several error paths call this on
     # purpose - FCM's map-sync guard rejects saves that a test deliberately makes
     # mismatched, for one - and each one posts to the real admin webhook, so a
-    # test run spams the channel with genuine-looking traffic. Django points the
-    # default connection at test_<dbname> while testing, so that is the cheapest
-    # reliable signal available here.
+    # test run spams the channel with genuine-looking traffic. A MySQL test run
+    # uses test_<dbname>; the sqlite test run uses an in-memory database.
     try:
         from django.db import connection
 
-        if str(connection.settings_dict.get("NAME", "")).startswith("test_"):
+        db_name = str(connection.settings_dict.get("NAME", ""))
+        if db_name.startswith("test_") or "mode=memory" in db_name:
             return True
     except Exception:
         pass
