@@ -149,8 +149,8 @@ function getOrdinal(num) {
 						<div class="mainEntryPlayer" :style="{
               backgroundColor: personal.getCorrectedColourHex(store.players[playerIndex].colour),
               color: personal.getCorrectedColourText(store.players[playerIndex].colour),
-              borderColor: personal.getCorrectedColour(store.players[playerIndex].colour) === rf.BLACK ? 'white !important' : 'black',
-              }}">{{ personal.getHistoryName(playerIndex) }}</div>
+              borderColor: personal.getCorrectedColour(store.players[playerIndex].colour) === rf.BLACK ? 'white' : 'black',
+              }" :class="{ blackPlayerBorder: personal.getCorrectedColour(store.players[playerIndex].colour) === rf.BLACK }">{{ personal.getHistoryName(playerIndex) }}</div>
 						{{ $t("history.total", { score: cb.getScore(playerIndex) }) }}
 						<br />
 					</template>
@@ -345,5 +345,9 @@ function getOrdinal(num) {
 .singleTilePolygon {
 	stroke: black;
 	stroke-width: 1px;
+}
+
+.blackPlayerBorder {
+	border-color: white !important;
 }
 </style>
