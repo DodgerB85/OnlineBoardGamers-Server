@@ -137,9 +137,46 @@ export async function castVote(gameID, topic, choice = true) {
 
 /** Vote to kick out (or actually kick out) the timed-out player. */
 export async function kickout(gameID, kickedName, latestUpdate) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
 	const response = await post("/ROW/processROWturn/", { action: "kickout", gameID, kickedName, latestUpdate })
 	if (!response.ok) throw new Error("Network response was not ok")
-	return response.json()
+	const data = await response.json()
+
+	// Apply kickout result to local state so subsequent saves don't revert it
+	personal.latestUpdate = data.latestUpdate
+	personal.secondsToNextKickout = data.secondsToNextKickout
+
+	if (data.missingPlayers && data.missingPlayers.length > 0) {
+		// Find all missing player indices in the players array
+		const missingIndices = []
+		for (const missingName of data.missingPlayers) {
+			const idx = store.players.findIndex(p => p.name === missingName)
+			if (idx >= 0) {
+				missingIndices.push(idx)
+			}
+		}
+
+		// Remove from ACTIVE turn orders only (keep in fullTurnOrder as placeholders)
+		const filterTurnOrder = (arr) => arr.filter(idx => !missingIndices.includes(idx))
+		store.gameflow.turnOrder = filterTurnOrder(store.gameflow.turnOrder)
+		store.gameflow.fullTurnOrder = filterTurnOrder(store.gameflow.fullTurnOrder)
+		store.gameflow.wonderTurnOrder = filterTurnOrder(store.gameflow.wonderTurnOrder)
+		store.gameflow.wonderPrayingOrder = filterTurnOrder(store.gameflow.wonderPrayingOrder)
+		store.gameflow.newWonderTurnOrder = filterTurnOrder(store.gameflow.newWonderTurnOrder)
+		store.gameflow.newWonderPrayingOrder = filterTurnOrder(store.gameflow.newWonderPrayingOrder)
+		// NOTE: fullTurnOrder is NOT filtered - kicked players remain as placeholders
+
+		// Mark kicked players as bots
+		for (const idx of missingIndices) {
+			store.players[idx].displayName = rf.BOT_NAME
+		}
+
+		// Update wholeTurnResetData so resetWholeTurn() doesn't revert the kickout
+		store.wholeTurnResetData = funcs.simpleExportWholeWEBmodel()
+	}
+
+	return data
 }
 
 export async function submitBug(gameID, description, gameData) {
