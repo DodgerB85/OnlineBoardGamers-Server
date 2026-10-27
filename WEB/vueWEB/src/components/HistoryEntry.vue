@@ -150,7 +150,7 @@ function getOrdinal(num) {
               backgroundColor: personal.getCorrectedColourHex(store.players[playerIndex].colour),
               color: personal.getCorrectedColourText(store.players[playerIndex].colour),
               borderColor: personal.getCorrectedColour(store.players[playerIndex].colour) === rf.BLACK ? 'white !important' : 'black',
-              }">{{ store.players[playerIndex].displayName }}</div>
+              }}">{{ personal.getHistoryName(playerIndex) }}</div>
 						{{ $t("history.total", { score: cb.getScore(playerIndex) }) }}
 						<br />
 					</template>
@@ -171,7 +171,7 @@ function getOrdinal(num) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
+				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ personal.getHistoryName(entry[1]) }}</span>
 				{{ $t("history.addsTileVerb") }}
 				<div class="singleTileDiv">
 					<svg class="singleTileSVG" xmlns="http://www.w3.org/2000/svg" :viewBox="rf.ALL_RECT_TILES.includes(computedEntry3.tileID) ? '0 0 100 100' : '0 0 100 100'">
@@ -192,8 +192,8 @@ function getOrdinal(num) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				{{ $t("history.addsCable", { name: store.players[entry[1]].displayName, position: getDisplayCoordFromIndex(entry[3][0]) }) }}
+				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ personal.getHistoryName(entry[1]) }}</span>
+				{{ $t("history.addsCable", { name: personal.getHistoryName(entry[1]), position: getDisplayCoordFromIndex(entry[3][0]) }) }}
 				<span v-if="entry[3].length === 1">&nbsp;{{ $t("history.vertically") }}</span>
 				<span v-else>&nbsp;{{ $t("history.horizontally") }}</span>
 			</div>
@@ -209,8 +209,8 @@ function getOrdinal(num) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
-				{{ $t("history.addsCables", { name: store.players[entry[1]].displayName, available: entry[3][0], stored: entry[3][1] }) }}
+				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ personal.getHistoryName(entry[1]) }}</span>
+				{{ $t("history.addsCables", { name: personal.getHistoryName(entry[1]), available: entry[3][0], stored: entry[3][1] }) }}
 			</div>
 		</div>
 	</template>
@@ -224,7 +224,7 @@ function getOrdinal(num) {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
+				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ personal.getHistoryName(entry[1]) }}</span>
 				{{ $t("history.picksUpVerb") }}
 				<div class="singleTileDiv">
 					<svg class="singleTileSVG" xmlns="http://www.w3.org/2000/svg" :viewBox="rf.ALL_RECT_TILES.includes(computedEntry3.tileID) ? '0 0 100 100' : '0 0 100 100'">

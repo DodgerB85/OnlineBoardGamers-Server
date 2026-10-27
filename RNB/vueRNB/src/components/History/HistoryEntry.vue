@@ -1051,7 +1051,7 @@ const computedEntry3 = computed(() => {
 				thisStepHist.stagerIdx = stackAction[2]
 				thisStepHist.targetIdx = stackAction[3]
 				thisStepHist.beauty = stackAction[4]
-				thisStepHist.targetName = store.players[thisStepHist.targetIdx].displayName
+				thisStepHist.targetName = personal.getHistoryName(thisStepHist.targetIdx)
 			}
 			thisStepHist.singleStackEntryID = i - 1
 			ret.stackSteps.push(thisStepHist)
@@ -1098,7 +1098,7 @@ const computedEntry3 = computed(() => {
 				<template v-else>-->
 				<template v-for="(finalEntry, idx) in entry[3]" :key="idx">
 					{{ view.getOrdinal(idx + 1) }}:
-					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[finalEntry[0]].colour)">{{ store.players[finalEntry[0]].displayName }}</span>
+					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[finalEntry[0]].colour)">{{ personal.getHistoryName(finalEntry[0]) }}</span>
 					{{ $t("history.total", { score: finalEntry[1] }) }}
 					<br />
 				</template>
@@ -1282,7 +1282,7 @@ const computedEntry3 = computed(() => {
 			<div class="container">
 				{{ $t("history.conflictCalledBy") }}
 				<template v-for="(playerIndex, idx) in entry[3]" :key="idx">
-					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{ store.players[playerIndex].displayName }}</span>
+					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{ personal.getHistoryName(playerIndex) }}</span>
 				</template>
 			</div>
 		</div>
@@ -1300,14 +1300,14 @@ const computedEntry3 = computed(() => {
 				<b><u>{{ $t("history.conflictPraying") }}</u></b>
 				<br />
 				<template v-for="(entry, idx) in computedEntry3.playerOrderDataArrs" :key="idx">
-					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[0]].colour)">{{ store.players[entry[0]].displayName }}</span>
+					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[0]].colour)">{{ personal.getHistoryName(entry[0]) }}</span>
 					<span v-if="entry[1] === 1">{{ $t("history.cashesIn") }}</span>
 					<span v-else-if="entry[1] === 0">{{ $t("history.keepsPraying") }}</span>
 					<span v-if="entry.length > 2 && entry[2] === 1">&nbsp;{{ $t("history.preset") }}</span>
 					<br />
 				</template>
 				<template v-if="computedEntry3.missingPlayerIndex >= 0">
-					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[computedEntry3.missingPlayerIndex].colour)">{{ store.players[computedEntry3.missingPlayerIndex].displayName }}</span>
+					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[computedEntry3.missingPlayerIndex].colour)">{{ personal.getHistoryName(computedEntry3.missingPlayerIndex) }}</span>
 					{{ $t("history.lastPlayerKeepsPraying") }}
 				</template>
 				<template v-if="computedEntry3.newPrayingOrder.length > 0">
@@ -1315,7 +1315,7 @@ const computedEntry3 = computed(() => {
 					<b><u>{{ $t("history.newPrayingOrder") }}</u></b>
 					<br />
 					<template v-for="(playerIndex, idx) in computedEntry3.newPrayingOrder" :key="idx">
-						<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{ store.players[playerIndex].displayName }}</span>
+						<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{ personal.getHistoryName(playerIndex) }}</span>
 					</template>
 					<img class="templeIconImg" :src="view.getImage('temple_icon')" />
 				</template>
@@ -1335,13 +1335,13 @@ const computedEntry3 = computed(() => {
 				<b><u>{{ $t("history.conflictTurnOrder") }}</u></b>
 				<br />
 				<template v-for="(choiceEntry, idx) in computedEntry3.playerOrderData" :key="idx">
-					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[choiceEntry[0]].colour)">{{ store.players[choiceEntry[0]].displayName }}</span>
+					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[choiceEntry[0]].colour)">{{ personal.getHistoryName(choiceEntry[0]) }}</span>
 					{{ $t("history.choosesToPlay", { position: view.getOrdinal(choiceEntry[1] + 1) }) }}
 					<span v-if="choiceEntry.length > 2 && choiceEntry[2] === 1">{{ $t("history.preset") }}</span>
 					<br />
 				</template>
 				<template v-if="computedEntry3.missingPlayerData[0] >= 0">
-					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[computedEntry3.missingPlayerData[0]].colour)">{{ store.players[computedEntry3.missingPlayerData[0]].displayName }}</span>
+					<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[computedEntry3.missingPlayerData[0]].colour)">{{ personal.getHistoryName(computedEntry3.missingPlayerData[0]) }}</span>
 					{{ $t("history.hasToPlay", { position: view.getOrdinal(computedEntry3.missingPlayerData[1] + 1) }) }}
 				</template>
 				<template v-if="computedEntry3.newTurnOrder.length > 0">
@@ -1349,7 +1349,7 @@ const computedEntry3 = computed(() => {
 					<b><u>{{ $t("history.newTurnOrder") }}</u></b>
 					<br />
 					<template v-for="(playerIndex, idx) in computedEntry3.newTurnOrder" :key="idx">
-						<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{ store.players[playerIndex].displayName }}</span>
+						<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{ personal.getHistoryName(playerIndex) }}</span>
 					</template>
 				</template>
 			</div>
@@ -1396,7 +1396,7 @@ const computedEntry3 = computed(() => {
 			<div class="header">
 				<span>{{ funcs.timestampToString(entry[2]) }}</span>
 			</div>
-			<div class="mainEntry rewind">{{ $t("history.kickedOut", { name: store.players[entry[3][0]].displayName }) }}</div>
+			<div class="mainEntry rewind">{{ $t("history.kickedOut", { name: personal.getHistoryName(entry[3][0]) }) }}</div>
 		</div>
 	</template>
 
@@ -1413,7 +1413,7 @@ const computedEntry3 = computed(() => {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
+				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ personal.getHistoryName(entry[1]) }}</span>
 				<span v-if="entry[0] === rf.HIST_NO_PRODUCTION_ACTIONS">{{ $t("history.skipsProduction") }}</span>
 				<span v-else-if="entry[0] === rf.HIST_NO_MOVEMENT_ACTIONS">{{ $t("history.skipsMovement") }}</span>
 				<span v-else-if="entry[0] === rf.HIST_NO_BUILDING_ACTIONS">{{ $t("history.skipsBuilding") }}</span>
@@ -1433,7 +1433,7 @@ const computedEntry3 = computed(() => {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
+				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ personal.getHistoryName(entry[1]) }}</span>
 				{{ $t("history.choosesHomeTile") }}
 				<br />
 				<div class="flexContainer">
@@ -1455,7 +1455,7 @@ const computedEntry3 = computed(() => {
 				</span>
 			</div>
 			<div class="container">
-				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ store.players[entry[1]].displayName }}</span>
+				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ personal.getHistoryName(entry[1]) }}</span>
 				<strong v-if="computedEntry3.title">{{ computedEntry3.title }}</strong>
 				<br />
 				<template v-for="(stackEntry, idx) in computedEntry3.stackSteps" :key="idx">
@@ -1770,7 +1770,7 @@ const computedEntry3 = computed(() => {
 					<template v-if="stackEntry.action === rf.STACK_EXHIBITION">
 						<div class="flexContainer stackEntryDiv">
 							<i18n-t keypath="history.stagedExhibition" tag="span" scope="global">
-								<template #name><span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.stagerIdx].colour)">{{ store.players[stackEntry.stagerIdx].displayName }}</span></template>
+								<template #name><span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.stagerIdx].colour)">{{ personal.getHistoryName(stackEntry.stagerIdx) }}</span></template>
 								<template #target><span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.targetIdx].colour)">{{ stackEntry.targetName }}</span></template>
 								<template #beauty>{{ stackEntry.beauty }}</template>
 							</i18n-t>

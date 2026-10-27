@@ -23,6 +23,13 @@ function clickedHistoryEntry(action, entry3, entry_id) {
 	else history.goToReplayStep(entry_id)
 }
 
+/** Returns the name to show in history: uses player.name if displayName is BOT_NAME (kicked out), else displayName */
+function getHistoryName(playerIndex) {
+	const player = store.players[playerIndex]
+	if (!player) return "Unknown"
+	return player.displayName === rf.BOT_NAME ? player.name : player.displayName
+}
+
 // Take an index, return coords in [x, y]
 function getHistoryCoordsForIndex(index) {
 	let Sw = map.getSw()
@@ -64,13 +71,13 @@ function getTotalRaiseCostHTML(entry3, entry1) {
 	let ret = "<b><u>" + t("history.summary") + "</u> " + String(hubCosts) + "</b> " + t(hubCosts !== 1 ? "history.hubs" : "history.hub") + " "
 	for (let i = 0; i < cmenCosts.length; i++) {
 		if (cmenCosts[i] !== 0) {
-			ret += '<span class="mainEntryPlayer" style="background-color: ' + personal.getCorrectedColourHex(store.players[i].colour) + ";color: " + (personal.getCorrectedColour(store.players[i].colour) === rf.WHITE || personal.getCorrectedColour(store.players[i].colour) === rf.YELLOW ? "black" : "white") + '">' + refFuncs.escapeHtml(store.players[i].displayName) + "</span><b>" + String(cmenCosts[i]) + "</b> "
+			ret += '<span class="mainEntryPlayer" style="background-color: ' + personal.getCorrectedColourHex(store.players[i].colour) + ";color: " + (personal.getCorrectedColour(store.players[i].colour) === rf.WHITE || personal.getCorrectedColour(store.players[i].colour) === rf.YELLOW ? "black" : "white") + '">' + refFuncs.escapeHtml(getHistoryName(i)) + "</span><b>" + String(cmenCosts[i]) + "</b> "
 		}
 	}
 	// Total
 	ret += " " + t("history.totalLabel") + " <b>" + String(cmenCosts.reduce((a, b) => a + b, 0) + hubCosts + OVIAcows) + "</b> "
 
-	if (OVIAused) ret += '<br/> <span class="mainEntryPlayer" style="background-color: ' + personal.getCorrectedColourHex(store.players[entry1].colour) + ";color: " + (personal.getCorrectedColour(store.players[entry1].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry1].colour) === rf.YELLOW ? "black" : "white") + '">' + refFuncs.escapeHtml(store.players[entry1].displayName) + "</span>" + t("history.oviaPossessive") + " <b>" + String(OVIAcows) + "</b> "
+	if (OVIAused) ret += '<br/> <span class="mainEntryPlayer" style="background-color: ' + personal.getCorrectedColourHex(store.players[entry1].colour) + ";color: " + (personal.getCorrectedColour(store.players[entry1].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry1].colour) === rf.YELLOW ? "black" : "white") + '">' + refFuncs.escapeHtml(getHistoryName(entry1)) + "</span>" + t("history.oviaPossessive") + " <b>" + String(OVIAcows) + "</b> "
 	return ret
 }
 
@@ -203,7 +210,7 @@ function getResImgName(input) {
 					'background-color': personal.getCorrectedColourHex(store.players[entry[1]].colour),
 					color: personal.getCorrectedColour(store.players[entry[1]].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry[1]].colour) === rf.YELLOW ? 'black' : 'white',
 				}">
-				{{ store.players[entry[1]].displayName }}
+				{{ getHistoryName(entry[1]) }}
 			</span>
 			{{ $t("history.builds") }}
 			<span v-if="entry[3].length == 1">{{ $t("history.aMonument") }}</span>
@@ -235,7 +242,7 @@ function getResImgName(input) {
 					'background-color': personal.getCorrectedColourHex(store.players[entry[1]].colour),
 					color: personal.getCorrectedColour(store.players[entry[1]].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry[1]].colour) === rf.YELLOW ? 'black' : 'white',
 				}">
-				{{ store.players[entry[1]].displayName }}
+				{{ getHistoryName(entry[1]) }}
 			</span>
 			{{ $t("history.buildsMonumentAt") }}
 			<span class="noBreak">{{ getHistoryCoordsForIndex(entry[3][0]) }}</span>
@@ -328,7 +335,7 @@ function getResImgName(input) {
 					'background-color': personal.getCorrectedColourHex(store.players[entry[1]].colour),
 					color: personal.getCorrectedColour(store.players[entry[1]].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry[1]].colour) === rf.YELLOW ? 'black' : 'white',
 				}">
-				{{ store.players[entry[1]].displayName }}
+				{{ getHistoryName(entry[1]) }}
 			</span>
 			<template v-if="entry[3][0] > 0">
 				{{ $t("history.bids") }} {{ entry[3][0] }}
@@ -358,7 +365,7 @@ function getResImgName(input) {
 							'background-color': personal.getCorrectedColourHex(store.players[playerIdx].colour),
 							color: personal.getCorrectedColour(store.players[playerIdx].colour) === rf.WHITE || personal.getCorrectedColour(store.players[playerIdx].colour) === rf.YELLOW ? 'black' : 'white',
 						}">
-						{{ store.players[playerIdx].displayName }}
+						{{ getHistoryName(playerIdx) }}
 					</span>
 					{{ $t("history.gains") }} {{ entry[3][1][idx] }}
 					<span v-if="entry[3][1][idx] !== 1">{{ $t("common.cows") }}</span>
@@ -393,7 +400,7 @@ function getResImgName(input) {
 					'background-color': personal.getCorrectedColourHex(store.players[entry[1]].colour),
 					color: personal.getCorrectedColour(store.players[entry[1]].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry[1]].colour) === rf.YELLOW ? 'black' : 'white',
 				}">
-				{{ store.players[entry[1]].displayName }}
+				{{ getHistoryName(entry[1]) }}
 			</span>
 			<span v-if="entry[3][0] === rf.OGUN"> {{ $t("history.choosesOgun") }} </span><span v-else> {{ $t("history.chooses") }} {{ rf.god_NAMES[entry[3][0]] }}. </span>
 			
@@ -420,7 +427,7 @@ function getResImgName(input) {
 					'background-color': personal.getCorrectedColourHex(store.players[entry[1]].colour),
 					color: personal.getCorrectedColour(store.players[entry[1]].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry[1]].colour) === rf.YELLOW ? 'black' : 'white',
 				}">
-				{{ store.players[entry[1]].displayName }}
+				{{ getHistoryName(entry[1]) }}
 			</span>
 			{{ $t("history.raisesMonumentAt") }}
 			<span class="noBreak">{{ getHistoryCoordsForIndex(entry[3]) }}</span>
@@ -448,7 +455,7 @@ function getResImgName(input) {
 					'background-color': personal.getCorrectedColourHex(store.players[entry[1]].colour),
 					color: personal.getCorrectedColour(store.players[entry[1]].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry[1]].colour) === rf.YELLOW ? 'black' : 'white',
 				}">
-				{{ store.players[entry[1]].displayName }}
+				{{ getHistoryName(entry[1]) }}
 			</span>
 			{{ $t("history.chooses") }} {{ rf.SPEC_NAMES[entry[3][0]] }} ({{ rf.SPEC_COST[entry[3][0]] }} {{ $t("common.cows") }}) VR +{{ rf.SPEC_VR[entry[3][0]] }}
 		</div>
@@ -474,7 +481,7 @@ function getResImgName(input) {
 					'background-color': personal.getCorrectedColourHex(store.players[entry[1]].colour),
 					color: personal.getCorrectedColour(store.players[entry[1]].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry[1]].colour) === rf.YELLOW ? 'black' : 'white',
 				}">
-				{{ store.players[entry[1]].displayName }}
+				{{ getHistoryName(entry[1]) }}
 			</span>
 			{{ $t("history.addsToHerd", { count: entry[3][1], size: entry[3][0] }) }}
 		</div>
@@ -499,7 +506,7 @@ function getResImgName(input) {
 					'background-color': personal.getCorrectedColourHex(store.players[entry[1]].colour),
 					color: personal.getCorrectedColour(store.players[entry[1]].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry[1]].colour) === rf.YELLOW ? 'black' : 'white',
 				}">
-				{{ store.players[entry[1]].displayName }}
+				{{ getHistoryName(entry[1]) }}
 			</span>
 			<span v-if="entry[3][2] > 0">{{ $t("history.activatesShaman", { count: entry[3][2] }) }}</span>
 			{{ $t("history.builds") }}
@@ -528,7 +535,7 @@ function getResImgName(input) {
 					'background-color': personal.getCorrectedColourHex(store.players[entry[1]].colour),
 					color: personal.getCorrectedColour(store.players[entry[1]].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry[1]].colour) === rf.YELLOW ? 'black' : 'white',
 				}">
-				{{ store.players[entry[1]].displayName }}
+				{{ getHistoryName(entry[1]) }}
 			</span>
 			<span v-if="entry[3][2] > 0">{{ $t("history.activatesRain", { count: entry[3][2] }) }}</span>
 			{{ $t("history.builds") }}
@@ -565,7 +572,7 @@ function getResImgName(input) {
 					'background-color': personal.getCorrectedColourHex(store.players[entry[1]].colour),
 					color: personal.getCorrectedColour(store.players[entry[1]].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry[1]].colour) === rf.YELLOW ? 'black' : 'white',
 				}">
-				{{ store.players[entry[1]].displayName }}
+				{{ getHistoryName(entry[1]) }}
 			</span>
 			{{ $t("history.activates") }} {{ rf.SPEC_NAMES[entry[3][0]] }} {{ $t("history.withCows", { count: entry[3][1] }) }}
 		</div>
@@ -590,7 +597,7 @@ function getResImgName(input) {
 					'background-color': personal.getCorrectedColourHex(store.players[entry[1]].colour),
 					color: personal.getCorrectedColour(store.players[entry[1]].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry[1]].colour) === rf.YELLOW ? 'black' : 'white',
 				}">
-				{{ store.players[entry[1]].displayName }}
+				{{ getHistoryName(entry[1]) }}
 			</span>
 			{{ $t("history.builds") }}
 			<img class="historyCraftsmanImg" :class="'r' + String(entry[3][2])" :src="view.getImage('craftsman' + String(entry[3][1]))" alt="Cman" />
@@ -629,7 +636,7 @@ function getResImgName(input) {
 					'background-color': personal.getCorrectedColourHex(store.players[entry[1]].colour),
 					color: personal.getCorrectedColour(store.players[entry[1]].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry[1]].colour) === rf.YELLOW ? 'black' : 'white',
 				}">
-				{{ store.players[entry[1]].displayName }}
+				{{ getHistoryName(entry[1]) }}
 			</span>
 			{{ $t("history.raisesMonumentAtShort") }}
 			<span class="noBreak">{{ getHistoryCoordsForIndex(entry[3][0][0]) }}</span>
@@ -645,7 +652,7 @@ function getResImgName(input) {
 						'background-color': personal.getCorrectedColourHex(store.players[YEMOJAused(entry)].colour),
 						color: personal.getCorrectedColour(store.players[YEMOJAused(entry)].colour) === rf.WHITE || personal.getCorrectedColour(store.players[YEMOJAused(entry)].colour) === rf.YELLOW ? 'black' : 'white',
 					}">
-					{{ store.players[YEMOJAused(entry)].displayName }}
+					{{ getHistoryName(YEMOJAused(entry)) }}
 				</span>
 				{{ $t("history.possessiveMonument") }}
 				<br />
@@ -784,7 +791,7 @@ function getResImgName(input) {
 					'background-color': personal.getCorrectedColourHex(store.players[entry[1]].colour),
 					color: personal.getCorrectedColour(store.players[entry[1]].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry[1]].colour) === rf.YELLOW ? 'black' : 'white',
 				}">
-				{{ store.players[entry[1]].displayName }}
+				{{ getHistoryName(entry[1]) }}
 			</span>
 			{{ $t("history.setsPrices") }}
 			<template v-for="(craftsmanPrice, index1) in entry[3]" :key="index1">
@@ -826,7 +833,7 @@ function getResImgName(input) {
 						'background-color': personal.getCorrectedColourHex(store.players[entry[0]].colour),
 						color: personal.getCorrectedColour(store.players[entry[0]].colour) === rf.WHITE || personal.getCorrectedColour(store.players[entry[0]].colour) === rf.YELLOW ? 'black' : 'white',
 					}">
-					{{ store.players[entry[0]].displayName }}
+					{{ getHistoryName(entry[0]) }}
 				</span>
 				+{{ entry.reduce((a, b) => a + b, 0) - entry[5] - entry[0] }} {{ $t("history.total") }} {{ entry[5] }} (
 				<span v-if="entry[1] !== 0">{{ $t("history.revenueGod", { count: entry[1] }) }}</span>
@@ -856,7 +863,7 @@ function getResImgName(input) {
 						'background-color': personal.getCorrectedColourHex(store.players[scoreObj[1]].colour),
 						color: personal.getCorrectedColour(store.players[scoreObj[1]].colour) === rf.WHITE || personal.getCorrectedColour(store.players[scoreObj[1]].colour) === rf.YELLOW ? 'black' : 'white',
 					}">
-					{{ store.players[scoreObj[1]].displayName }}
+					{{ getHistoryName(scoreObj[1]) }}
 				</span>
 				{{ scoreObj[2] }} / {{ scoreObj[3] }} (
 				<span v-if="scoreObj[2] - scoreObj[3] >= 0">+</span>
@@ -883,7 +890,7 @@ function getResImgName(input) {
 				{{ $t("history.gameEnded") }}
 				<br />
 				<br />
-				{{ $t("history.winner") }} {{ store.players[entry[3][0][1]].displayName }}
+				{{ $t("history.winner") }} {{ getHistoryName(entry[3][0][1]) }}
 				<br />
 				<br />
 				<span v-if="entry[3][0][2] === 1">{{ $t("history.highestDifference") }}</span>

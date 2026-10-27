@@ -133,11 +133,19 @@ export const YELLOW = 5
 		return "none"
 	}
 
+	/** Returns the name to show in history: uses player.name if displayName is BOT_NAME (kicked out), else displayName */
+	function getHistoryName(playerIndex) {
+		const player = store.players[playerIndex]
+		if (!player) return "Unknown"
+		return player.displayName === rf.BOT_NAME ? player.name : player.displayName
+	}
+
 	return {
 		canResign,
 		canPlay,
 		getCorrectedColour,
 		getCorrectedColourHex,
+		getHistoryName,
 		//canEndTurn,
 		WSstatus,
 		haltPlay,

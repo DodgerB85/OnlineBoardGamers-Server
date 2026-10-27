@@ -70,7 +70,7 @@ function canSelectPirateEntry(entry3) {
       <div class="container">
         <span class="mainEntryPlayer"
           :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-            store.players[entry[1]].displayName }} </span>
+            personal.getHistoryName(entry[1]) }} </span>
         {{ $t("history.addsTiles", entry[3].length) }}
         <div class="singleHexDiv" v-for="(singleAdd, idx) in entry[3]" :key="idx">
           <svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
@@ -93,7 +93,7 @@ function canSelectPirateEntry(entry3) {
       <div class="container">
         <span class="mainEntryPlayer"
           :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-            store.players[entry[1]].displayName }} </span>
+            personal.getHistoryName(entry[1]) }} </span>
         {{ $t("history.stores") }}
         <div class="singleHexDiv">
           <svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
@@ -115,7 +115,7 @@ function canSelectPirateEntry(entry3) {
       </div>
       <span class="mainEntryPlayer"
         :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-          store.players[entry[1]].displayName }} </span>
+          personal.getHistoryName(entry[1]) }} </span>
       {{ getHistLinkText(entry[3]) }}
     </div>
   </template>
@@ -130,7 +130,7 @@ function canSelectPirateEntry(entry3) {
       </div>
       <span class="mainEntryPlayer"
         :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-          store.players[entry[1]].displayName }} </span>
+          personal.getHistoryName(entry[1]) }} </span>
       {{ $t("history.addsCigar") }}
       <template v-if="entry[3].length > 2">
         {{ $t("history.newResources") }}
@@ -153,7 +153,7 @@ function canSelectPirateEntry(entry3) {
       <div class="container">
         <span class="mainEntryPlayer"
           :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-            store.players[entry[1]].displayName }} </span>
+            personal.getHistoryName(entry[1]) }} </span>
         {{ $t("history.produces") }}
         <!-- FROM TILES -->
         <template v-for="(amount, index) in entry[3][0]" :key="index">
@@ -188,7 +188,7 @@ function canSelectPirateEntry(entry3) {
       </div>
       <span class="mainEntryPlayer"
         :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-          store.players[entry[1]].displayName }} </span>
+          personal.getHistoryName(entry[1]) }} </span>
       {{ $t("history.converts") }}
       <!-- Only One Res Input -->
       <template
@@ -218,7 +218,7 @@ function canSelectPirateEntry(entry3) {
       </div>
       <span class="mainEntryPlayer"
         :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-          store.players[entry[1]].displayName }} </span>
+          personal.getHistoryName(entry[1]) }} </span>
       {{ $t("history.increasesPrice") }}
       <img :src="view.getImage('res' + String(entry[3][0]))" class="movieImg" />
       <div class="rightArrow"></div>
@@ -237,7 +237,7 @@ function canSelectPirateEntry(entry3) {
       </div>
       <span class="mainEntryPlayer"
         :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-          store.players[entry[1]].displayName }} </span>
+          personal.getHistoryName(entry[1]) }} </span>
       {{ $t("history.sellsMoviesToCannes") }}<br>
       <template v-for="(amount, idx) in entry[3][0]" :key="idx">
         <div v-if="amount > 0" class="movieSalesDiv">
@@ -274,7 +274,7 @@ function canSelectPirateEntry(entry3) {
       </div>
       <span class="mainEntryPlayer"
         :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-          store.players[entry[1]].displayName }} </span>
+          personal.getHistoryName(entry[1]) }} </span>
       <!-- Multiple SALES, MOVE TO PARTY -->
       <template v-if="entry[3][0] === 0">
         {{ $t("history.pirates") }}
@@ -321,7 +321,7 @@ function canSelectPirateEntry(entry3) {
       <div class="container">
         <span class="mainEntryPlayer"
           :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-            store.players[entry[1]].displayName }} </span>
+            personal.getHistoryName(entry[1]) }} </span>
         {{ $t("history.movesPiratesTo") }}
         <div class="singleHexDiv">
           <svg class="singleHexSVG" xmlns="http://www.w3.org/2000/svg" viewBox="-515 -515 1015 1015">
@@ -345,7 +345,7 @@ function canSelectPirateEntry(entry3) {
       <div class="container">
         <span class="mainEntryPlayer"
           :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{
-            store.players[entry[1]].displayName }} </span>
+            personal.getHistoryName(entry[1]) }} </span>
         {{ $t("history.stores") }}
         <template v-for="(res, idx) in entry[3]" :key="idx">
           <div v-if="res >= 20" class="singleHexDiv">
@@ -373,7 +373,7 @@ function canSelectPirateEntry(entry3) {
         <div v-for="(score, idx) in entry[3][1]" :key="idx" class="playerScoreSummaryDiv">
           <span class="mainEntryPlayerNewTurn"
             :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[idx].colour)">{{
-              store.players[idx].displayName }} € {{ score }} M</span>
+              personal.getHistoryName(idx) }} € {{ score }} M</span>
         </div>
       </div>
     </div>
@@ -396,7 +396,7 @@ function canSelectPirateEntry(entry3) {
         <div class="playerScoreSummaryDiv">
           <span class="mainEntryPlayerNewTurn"
             :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][0][0]].colour)">{{
-              store.players[entry[3][0][0]].displayName }} € {{ store.players[entry[3][0][0]].score }} M</span>
+              personal.getHistoryName(entry[3][0][0]) }} € {{ store.players[entry[3][0][0]].score }} M</span>
         </div>
       </div>
     </div>

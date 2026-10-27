@@ -12,7 +12,9 @@ const { t } = useI18n()
 const store = useModelStore()
 
 function playerName() {
-	return props.entry[1] >= 0 && store.players[props.entry[1]] ? store.players[props.entry[1]].displayName : ""
+	return props.entry[1] >= 0 && store.players[props.entry[1]] 
+		? (store.players[props.entry[1]].displayName === rf.BOT_NAME ? store.players[props.entry[1]].name : store.players[props.entry[1]].displayName)
+		: ""
 }
 
 function eventText() {
@@ -49,7 +51,11 @@ function eventText() {
 	}
 	if (event === rf.HIST_PATHWAY) return t("history.pathway")
 	if (event === rf.HIST_TRADE_OFFER) {
-		if (params[0] === "propose") return t("history.offerTo", { player: store.players[params[1]] ? store.players[params[1]].displayName : t("history.anotherPlayer") })
+		if (params[0] === "propose") {
+			const player = store.players[params[1]]
+			const playerDisplayName = player ? (player.displayName === rf.BOT_NAME ? player.name : player.displayName) : t("history.anotherPlayer")
+			return t("history.offerTo", { player: playerDisplayName })
+		}
 		if (params[0] === "accept") return t("history.acceptTrade")
 		return t("history.declineTrade")
 	}

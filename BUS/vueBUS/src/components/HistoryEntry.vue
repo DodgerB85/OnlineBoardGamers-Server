@@ -270,7 +270,7 @@ function clickedEntry(index) {
 						{{ funcs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}
 					</span>
 				</div>
-				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ store.players[entry[1]].displayName }}</span>
+				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ personal.getHistoryName(entry[1]) }}</span>
 				{{ $t('history.builds') }}
 				<template v-for="(line, index) in entry[3]" v-bind:key="index">
 					<img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE || personal.selectedBoard === rf.BOARD_PITTS" class="hist_buildingImg" :src="view.getImage('building' + String(line[0]))" alt="buildingHist" />
@@ -285,7 +285,7 @@ function clickedEntry(index) {
 						{{ funcs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}
 					</span>
 				</div>
-				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ store.players[entry[1]].displayName }}</span>
+				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ personal.getHistoryName(entry[1]) }}</span>
 				{{ $t('history.passesNewBuilding') }}
 			</div>
 		</template>
@@ -298,7 +298,7 @@ function clickedEntry(index) {
 						{{ funcs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}
 					</span>
 				</div>
-				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ store.players[entry[1]].displayName }}</span>
+				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ personal.getHistoryName(entry[1]) }}</span>
 				<span>{{ getAddLineText(entry[3]) }}</span>
 			</div>
 		</template>
@@ -310,7 +310,7 @@ function clickedEntry(index) {
 					</span>
 				</div>
 				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">
-					{{ store.players[entry[1]].displayName }}
+					{{ personal.getHistoryName(entry[1]) }}
 				</span>
 				{{ $t('history.passesLineExpansion') }}
 			</div>
@@ -325,7 +325,7 @@ function clickedEntry(index) {
 					</span>
 				</div>
 				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">
-					{{ store.players[entry[1]].displayName }}
+					{{ personal.getHistoryName(entry[1]) }}
 				</span>
 				{{ $t('history.chooses') }} {{ getActionText(entry[3]) }}
 			</div>
@@ -340,7 +340,7 @@ function clickedEntry(index) {
 					</span>
 				</div>
 				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">
-					{{ store.players[entry[1]].displayName }}
+					{{ personal.getHistoryName(entry[1]) }}
 				</span>
 				<span v-if="entry[3].length > 1 && entry[3][1] === 0">{{ $t('history.newBusNoEffect') }}</span>
 				<span v-else>{{ $t('history.increasesBuses', { count: entry[3][0] }) }}</span>
@@ -356,7 +356,7 @@ function clickedEntry(index) {
 					</span>
 				</div>
 				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">
-					{{ store.players[entry[1]].displayName }}
+					{{ personal.getHistoryName(entry[1]) }}
 				</span>
 				{{ getAddPassengersText(entry[3]) }}
 			</div>
@@ -369,7 +369,7 @@ function clickedEntry(index) {
 					</span>
 				</div>
 				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">
-					{{ store.players[entry[1]].displayName }}
+					{{ personal.getHistoryName(entry[1]) }}
 				</span>
 				{{ $t('history.passesAddPassenger') }}
 			</div>
@@ -384,7 +384,7 @@ function clickedEntry(index) {
 					</span>
 				</div>
 				<span v-if="entry[1] !== -1" :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">
-					{{ store.players[entry[1]].displayName }}
+					{{ personal.getHistoryName(entry[1]) }}
 				</span>
 				{{ getAlterTimeText(entry[1], entry[3]) }}
 				<img v-if="personal.selectedBoard === rf.BOARD_20A_UNOFFICIAL || personal.selectedBoard === rf.BOARD_20A_CAPSTONE" class="hist_buildingImg" :src="view.getImage('building' + String(entry[3][0]))" alt="buildingOption" />
@@ -401,13 +401,13 @@ function clickedEntry(index) {
 					</span>
 				</div>
 				<span v-if="entry[1] !== -1" :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">
-					{{ store.players[entry[1]].displayName }}
+					{{ personal.getHistoryName(entry[1]) }}
 				</span>
 				<span v-if="entry[1] === -1">{{ $t('history.startingPlayerMovesLeft') }}</span>
 				<span v-else>{{ $t('history.becomesStartingPlayer') }}</span>
 
 				<span v-for="(player, indexSP) in entry[3]" v-bind:key="indexSP" :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[player].colour)]">
-					{{ store.players[player].displayName }}
+					{{ personal.getHistoryName(player) }}
 				</span>
 			</div>
 		</template>
@@ -422,7 +422,7 @@ function clickedEntry(index) {
 						{{ funcs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}
 					</span>
 				</div>
-				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ store.players[entry[1]].displayName }}</span>
+				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ personal.getHistoryName(entry[1]) }}</span>
 				<span>{{ geVromText(entry[3]) }}</span>
 			</div>
 		</template>
@@ -436,7 +436,7 @@ function clickedEntry(index) {
 						{{ funcs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}
 					</span>
 				</div>
-				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ store.players[entry[1]].displayName }}</span>
+				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ personal.getHistoryName(entry[1]) }}</span>
 				<span v-if="entry[3][0][0] === 1">{{ $t('history.unableNoPassengers') }}</span>
 				<span v-if="entry[3][0][0] === 2">{{ $t('history.unableNoDestination') }}</span>
 			</div>
@@ -450,7 +450,7 @@ function clickedEntry(index) {
 						{{ funcs.timestampToString((personal.gameCreationTimestamp + entry[2]) * 1000) }}
 					</span>
 				</div>
-				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ store.players[entry[1]].displayName }}</span>
+				<span :class="['mainEntryPlayer', 'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)]">{{ personal.getHistoryName(entry[1]) }}</span>
 				<span>{{ $t('history.error', { error: entry[3] }) }}</span>
 			</div>
 		</template>
