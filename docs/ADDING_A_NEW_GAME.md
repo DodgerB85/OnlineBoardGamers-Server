@@ -1,5 +1,7 @@
 # Adding A New Game To The Site
 
+For the implementation workflow, UI conventions and lessons from URR's development history, use [the add-new-game skill](add-new-game/SKILL.md). This page is the site-wiring checklist; verify specific commands and donor patterns against current code.
+
 Every game is one Django app named after its 3-letter game code, registered in a handful of shared lists. Use an existing simple game as your template — **`WEB`** (or `DDL`/`URR`) is the cleanest reference; `RNB` shows solo/map handling and `FCM` shows the most complex case (modules, stats).
 
 The values below are a checklist; grep each item to see it in use in existing games.
