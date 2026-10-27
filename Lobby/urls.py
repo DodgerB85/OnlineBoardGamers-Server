@@ -109,6 +109,13 @@ urlpatterns = [
         views.createWEBminiTournament,
         name="createWEBminiTournament",
     ),
+    path("createNTRpage/", views.createNTRpage, name="createNTRpage"),
+    path("createNTRpage/<int:gameID>/", views.createNTRpage, name="createNTRpage"),
+    path(
+        "createNTRminiTournament/",
+        views.createNTRminiTournament,
+        name="createNTRminiTournament",
+    ),
     path("createRNBpage/", views.createRNBpage, name="createRNBpage"),
     path("createRNBpage/<int:gameID>/", views.createRNBpage, name="createRNBpage"),
     path(

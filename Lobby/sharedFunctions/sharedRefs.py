@@ -45,6 +45,7 @@ SR_GAMES_CODES_AND_NAMES_CHOICES = [
     ("URR", gettext_lazy("UR: 1830 BC")),
     ("DDL", gettext_lazy("Duck Dealer")),
     ("ROW", gettext_lazy("Ranchers of the Old West")),
+    ("NTR", gettext_lazy("Napoleon's Triumph")),
 ]
 
 SR_WEBHOOK_CHOICES = {
@@ -684,6 +685,17 @@ def SR_currentTurnString(gameCode, turn, phase):
 
         return currentTurnString
 
+    elif gameCode == "NTR":
+        currentTurnString = gettext("Round") + " " + str(turn)
+        if phase == 0:
+            currentTurnString += " - " + gettext("Allied Turn")
+        elif phase == 1:
+            currentTurnString += " - " + gettext("French Turn")
+        elif phase == 2:
+            currentTurnString += " - " + gettext("Game End")
+
+        return currentTurnString
+
 
 def SR_gamePaceString(gamePace):
     gamePaceString = ""
@@ -1312,3 +1324,23 @@ def SR_getPointsForPosition(position, maxPlayers):
 
     # Return points for the given position
     return points_schemas[maxPlayers][position]
+
+
+def SR_getNTRstartingOptionsHTML(startingOptionsArr):
+    if not startingOptionsArr:
+        return ""
+    if len(startingOptionsArr) == 0:
+        return ""
+    startingOptionsHTML = ""
+    for option in startingOptionsArr:
+        if option == 10:
+            startingOptionsHTML += "<img class='startingOption' src='/static/NTR/images/so_frenchReinforcements.svg' title='" + gettext("French Reinforcements") + "'>"
+        if option == 11:
+            startingOptionsHTML += "<img class='startingOption' src='/static/NTR/images/so_santonFort.svg' title='" + gettext("Santon Fort") + "'>"
+        if option == 12:
+            startingOptionsHTML += "<img class='startingOption' src='/static/NTR/images/so_teamPlay.svg' title='" + gettext("Team Play") + "'>"
+        if option == rf.SO_LEARNING_GAME:
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
+        elif option == rf.SO_EXPERIENCED_GAME:
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
+    return startingOptionsHTML

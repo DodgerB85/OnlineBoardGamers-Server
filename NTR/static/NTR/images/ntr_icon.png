@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <circle cx="32" cy="32" r="30" fill="#1a252f" stroke="#e74c3c" stroke-width="2"/>
+  <text x="32" y="40" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">N</text>
+  <path d="M32 10 L32 18" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>
+  <path d="M46 32 L54 32" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>
+  <path d="M32 46 L32 54" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>
+  <path d="M10 32 L18 32" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>
+</svg>

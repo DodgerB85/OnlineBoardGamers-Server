@@ -1,0 +1,1 @@
+default_app_config = "NTR.apps.NtrConfig"

@@ -1,0 +1,166 @@
+{% load static %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en-gb' }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="title" content="Online Board Gamers - Napoleon's Triumph">
+    <meta name="description"
+          content="Play Napoleon's Triumph Online for free with others, or solo!">
+    <meta name="keywords"
+          content="Napoleon's Triumph,Online,Play,Board,Game,Games,Gamers,Austerlitz,Wargame">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="200 days">
+    <meta name="author" content="Online Board Gamers">
+    <link rel="icon"
+          type="image/png"
+          href="{% static 'NTR/images/ntr_icon.png' %}" />
+    <title>OBG - {{ gameName }}</title>
+    <style>
+    body {
+      margin: 0px !important;
+      background-color: #d4eafd;
+      font-family: Arial, sans-serif;
+    }
+
+    #loadingText {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 40px;
+      margin-top: 20px;
+      padding: 0 16px;
+      box-sizing: border-box;
+      z-index: 10;
+    }
+
+    #loadingAnimation {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+    }
+
+    /* Napoleon's silhouette loading animation */
+    .napoleon-silhouette {
+      width: 100%;
+      height: 100%;
+      background-image: url("{% static 'NTR/images/loading_napoleon.svg' %}");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+
+    .loading-subtext {
+      position: absolute;
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 16px;
+      color: #3474a9;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    /* For screens wider than 600px */
+    @media (min-width: 600.001px) {
+      #loadingAnimation { width: 300px; height: 300px; }
+    }
+    </style>
+    <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
+    {% if settingsDEBUG %}
+      <script type="module" src="http://localhost:3066/static/@vite/client"></script>
+      <script type="module" src="http://localhost:3066/static/main.js"></script>
+    {% else %}
+      <link href="{% static 'NTR/NTRvuedist/main.css' %}?" rel="stylesheet" />
+      <script type="module"
+              crossorigin=""
+              src="{% static 'NTR/NTRvuedist/main.js' %}"></script>
+    {% endif %}
+  </head>
+  <body>
+    <noscript>
+      <strong>{% translate "Please enable Javascript to continue." %}</strong>
+    </noscript>
+    <div id="app">
+      <div id="loadingText">{% translate "Napoleon's Triumph is loading..." %}</div>
+      <div id="loadingAnimation">
+        <div class="napoleon-silhouette"></div>
+        <div class="loading-subtext">{% translate "The Battle of Austerlitz awaits..." %}</div>
+      </div>
+    </div>
+  <div hidden>{% csrf_token %}</div>
+  </body>
+  <script>
+  var initData = {};
+  
+  initData.locale = "{{ LANGUAGE_CODE|default:'en-gb' }}";
+  initData.gameID = {{ gameID }};
+  initData.gameName = "{{ gameName }}";
+  initData.gameData = '{{ gameData|escapejs }}';
+  initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
+  initData.myZoomLevel = {{ myZoomLevel }};
+  initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
+  initData.startingOptions = {{startingOptions}};
+  initData.playerNames = {{ allPlayerListBySeat | safe }};
+  initData.currentPlayers = {{ currentPlayers | safe }};
+  initData.preferredNTRoptions = {{ preferredNTRoptions }};
+  initData.pov = {{ pov }};
+  initData.turn = {{turn}};
+  initData.phase = {{phase}};
+  initData.deleteVotesData = {{ deleteVotesData | safe }};
+  initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
+  initData.scenario = {{ scenario }};
+  initData.teamPlay = {{ teamPlay|yesno:"true,false" }};
+  initData.finishedGame = {{ finishedGame|yesno:"true,false" }};
+  
+  {% if spoilerFree %}
+  initData.spoilerFree = true;
+  initData.replayStep = {{replayStep}}-1;
+  {% endif %}
+
+  {% if user.is_authenticated %}
+  initData.name = '{{ name }}';
+  initData.chatData = "{{ chatData }}";
+  initData.latestUpdate = {{ latestUpdateLiteral }};
+  initData.nextURL = '{{ nextURL|safe }}';
+  {% if chatNotification %}
+  initData.chatNotification = true;
+  {% endif %}
+  {% endif %}
+
+  initData.kickoutVotesData = {{ kickoutVotesData | default:'{}' | safe }};
+  initData.kickoutVoteThreshold = {{ kickoutVoteThreshold | default:'0' }};
+
+  {% if involvedPlayer %}
+  initData.secondsToNextKickout = {{ secondsToNextKickout }};
+  {% if kickoutRequired > 0 and not myMove %}
+  initData.kickoutRequired = {{kickoutRequired}};
+  {% endif %}
+  initData.notes = '{{ notes | escapejs }}';
+  initData.yourTurnAudioType = {{ yourTurnAudioType }};
+
+  {% if not gameData %}
+  {% if displayNames %}
+  initData.displayNames = JSON.parse('{{ displayNames|escapejs }}');
+  {% endif %}
+  initData.playerNames = {{ allPlayerListBySeat | safe }};
+  {% endif %}
+  {% endif %}
+  </script>
+</html>

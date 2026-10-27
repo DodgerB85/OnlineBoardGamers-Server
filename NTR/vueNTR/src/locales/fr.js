@@ -1,0 +1,19 @@
+// French translations
+export const fr = {
+  common: { yes: 'Oui', no: 'Non', ok: 'OK', cancel: 'Annuler', save: 'Sauvegarder', load: 'Charger', delete: 'Supprimer', confirm: 'Confirmer', back: 'Retour', next: 'Suivant', previous: 'Précédent', close: 'Fermer', edit: 'Modifier', view: 'Voir', play: 'Jouer', pause: 'Pause', resume: 'Reprendre', restart: 'Recommencer', quit: 'Quitter', settings: 'Paramètres', help: 'Aide', about: 'À propos', version: 'Version', language: 'Langue', theme: 'Thème', notifications: 'Notifications', sound: 'Son', music: 'Musique', debug: 'Débogage' },
+  menu: { gameTitle: "Triomphe de Napoléon", newGame: 'Nouvelle partie', showReplay: 'Afficher la reprise', hideReplay: 'Masquer la reprise', downloadGame: 'Télécharger la partie', help: 'Aide', showChat: 'Afficher le chat', hideChat: 'Masquer le chat', kickoutImminent: 'Expulsion imminente!' },
+  views: { replay: 'Reprise', hideReplay: 'Masquer reprise', replayAtBottom: 'Reprise en bas', generatingReplay: 'Génération de la reprise...', replayStep: 'Étape de reprise' },
+  history: { title: 'Historique', empty: 'Pas d\'historique', more: 'autres entrées' },
+  replay: { title: 'Reprise', first: 'Premier', prev: 'Précédent', next: 'Suivant', last: 'Dernier', showing: 'Affichage:' },
+  footer: { chat: 'Chat', chatPlaceholder: 'Tapez un message...', send: 'Envoyer', version: 'Version', players: 'joueurs', kickoutWarning: 'Avertissement d\'expulsion!' },
+  player: { you: ' (Vous)', missing: ' (Absent)', kicked: ' (Expulsé)', alliedMorale: 'Moral allié', frenchMorale: 'Moral français', alliedTeam: 'Équipe alliée', frenchTeam: 'Équipe française' },
+  action: { title: 'Actions', commandPoints: 'Points de commandement', selectUnits: 'Cliquez sur les unités sur la carte', selectedUnits: 'Unités sélectionnées', targetLocale: 'Localité cible', clickLocale: 'Cliquez sur une localité', clear: 'Effacer', executeMove: 'Exécuter mouvement', executeAttack: 'Exécuter attaque', executeReveal: 'Révéler unités', passTurn: 'Passer', confirmPass: 'Passer le tour ? Cela termine votre phase.', move: 'Déplacer', attack: 'Attaquer', reveal: 'Révéler', special: 'Actions spéciales', reorganize: 'Réorganiser', forcedMarch: 'Marche forcée', artillery: 'Bombardement artillerie', alliedTurn: 'Tour allié', frenchTurn: 'Tour français', waiting: 'En attente de l\'adversaire...', gameOver: 'Fin de partie' },
+  map: { allied: 'Alliés', french: 'Français', objective: 'Objectif', fogged: 'Brouillard de guerre' },
+  debug: { title: 'Panneau debug', state: 'État', logs: 'Logs', console: 'Console', actions: 'Actions', gameState: 'État du jeu', filter: 'Filtrer les logs...', clear: 'Effacer', customCommand: 'Commande perso', commandPlaceholder: 'Code JS...', execute: 'Exécuter', quickActions: 'Actions rapides', exportState: 'Exporter état', forceSync: 'Forcer sync', toggleFog: 'Basculer brouillard', toggleReplay: 'Basculer reprise', nextTurn: 'Tour suivant', nextPhase: 'Phase suivante', damageAllied: 'Dommager alliés', damageFrench: 'Dommager français' },
+  units: { COMMANDER: 'Commandant', INFANTRY: 'Infanterie', GUARD_INFANTRY: 'Infanterie de garde', CAVALRY: 'Cavalerie', ARTILLERY: 'Artillerie' },
+  terrain: { clear: 'Dégagé', rough: 'Accidenté', wooded: 'Boisé', hill: 'Colline', town: 'Ville', fort: 'Fortification' },
+  approach: { wide: 'Large', narrow: 'Étroit' },
+  phases: { alliedTurn: 'Tour allié', frenchTurn: 'Tour français', gameOver: 'Fin de partie' },
+  victory: { demoralization: 'Victoire par démoralisation', territorial: 'Victoire territoriale', draw: 'Match nul' },
+  options: { frenchReinforcements: 'Renforts français', santonFort: 'Fort du Santon', teamPlay: 'Jeu en équipe', learningGame: 'Partie apprentissage', experiencedGame: 'Partie expérimenté', trainingGame: 'Partie entraînement' },
+}

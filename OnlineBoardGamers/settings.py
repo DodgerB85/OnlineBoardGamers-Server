@@ -121,6 +121,7 @@ INSTALLED_APPS = [
     "django_q",
     "FCM",
     "Lobby",
+    "NTR",
     "user_visit",
     "BUS",
     "HLC",
