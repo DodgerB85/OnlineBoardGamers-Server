@@ -88,6 +88,17 @@ class MomentumTests(TestCase):
         self.client.force_login(outsider)
         self.assertEqual(self.nudge().status_code, 403)
 
+    def test_superuser_can_view_momentum_without_being_player(self):
+        superuser = User.objects.create_superuser(username="admin", password="testpass123")
+        self.client.force_login(superuser)
+        with patch("Lobby.momentumViews.timezone.now", return_value=NOW):
+            response = self.client.get(reverse("gameMomentum", args=[self.game.id]))
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIsNone(data["nudge"])
+        self.assertIn("streak", data)
+        self.assertIn("targets", data)
+
     def test_nudge_respects_recipient_opt_out(self):
         self.other.profile.receiveTurnNudges = False
         self.other.profile.save()
