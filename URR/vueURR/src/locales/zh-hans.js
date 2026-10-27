@@ -700,8 +700,8 @@ export default {
 	},
 	history: {
 		welcome: "欢迎来到 UR: 1830 BC！",
-		kickedOut: "被踢出。其剩余回合将自动跳过",
-		resigned: "已认输。其剩余回合将自动跳过",
+		kickedOut: "{name} 被踢出。其剩余回合将自动跳过",
+		resigned: "{name} 已认输。其剩余回合将自动跳过",
 		gameEnded: "游戏结束",
 		playedMove: "进行了一步行动",
 		stateFallback: "城邦",

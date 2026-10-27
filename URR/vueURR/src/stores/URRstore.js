@@ -126,6 +126,11 @@ export const useModelStore = defineStore("store", () => {
 	// Display-only entries and metadata belong here, not in exported history.
 	const computedHistory = computed(() => historyRows.value)
 
+	// History highlight helpers (like RNB)
+	const historyHelpers = reactive({
+		areasToHighlight: [],
+	})
+
 	const viewSettings = reactive({
 		boardZoom: 1,
 		historyArea: null,
@@ -177,6 +182,7 @@ export const useModelStore = defineStore("store", () => {
 
 	function clearHistoryHelpers() {
 		viewSettings.historyArea = null
+		historyHelpers.areasToHighlight.length = 0
 	}
 
 	return {
@@ -193,6 +199,7 @@ export const useModelStore = defineStore("store", () => {
 		historyTimeAt,
 		setHistoryOpening,
 		computedHistory,
+		historyHelpers,
 		historyRiverReports: computed(() => riverReports.value),
 		refreshHistory,
 		viewSettings,

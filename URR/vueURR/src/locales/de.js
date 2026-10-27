@@ -700,8 +700,8 @@ export default {
 	},
 	history: {
 		welcome: "Willkommen bei UR: 1830 BC!",
-		kickedOut: "Wurde rausgeworfen. Die verbleibenden Züge werden automatisch weitergegeben",
-		resigned: "Hat aufgegeben. Die verbleibenden Züge werden automatisch weitergegeben",
+		kickedOut: "{name} wurde rausgeworfen. Die verbleibenden Züge werden automatisch weitergegeben",
+		resigned: "{name} hat aufgegeben. Die verbleibenden Züge werden automatisch weitergegeben",
 		gameEnded: "Spiel beendet",
 		playedMove: "Hat einen Zug gemacht",
 		stateFallback: "Staat",

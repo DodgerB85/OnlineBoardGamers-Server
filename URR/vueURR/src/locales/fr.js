@@ -700,8 +700,8 @@ export default {
 	},
 	history: {
 		welcome: "Bienvenue dans UR : 1830 BC !",
-		kickedOut: "A été exclu. Ses tours restants sont passés automatiquement",
-		resigned: "A démissionné. Ses tours restants sont passés automatiquement",
+		kickedOut: "{name} a été exclu. Ses tours restants sont passés automatiquement",
+		resigned: "{name} a démissionné. Ses tours restants sont passés automatiquement",
 		gameEnded: "Partie terminée",
 		playedMove: "A joué un coup",
 		stateFallback: "État",

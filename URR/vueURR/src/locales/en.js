@@ -693,8 +693,8 @@ export default {
 	},
 	history: {
 		welcome: "Welcome to UR: 1830 BC!",
-		kickedOut: "Was kicked out. Their remaining turns are passed automatically",
-		resigned: "Resigned. Their remaining turns are passed automatically",
+		kickedOut: "{name} was kicked out. Their remaining turns are passed automatically",
+		resigned: "{name} resigned. Their remaining turns are passed automatically",
 		gameEnded: "Game ended",
 		playedMove: "Played a move",
 		stateFallback: "State",

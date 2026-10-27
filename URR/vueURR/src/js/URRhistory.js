@@ -3,6 +3,8 @@ import * as rules from "./URRrules.js"
 import * as water from "./URRwater.js"
 import { historyAction } from "./URRhistoryActions.js"
 import i18n from "../i18n.js"
+import { useModelStore } from "../stores/URRstore.js"
+import { nextTick } from "vue"
 
 const t = i18n.global.t
 
@@ -124,4 +126,49 @@ export function computeHistory(history, creationTimestamp, snapshots = [], times
 		}
 	}
 	return result
+}
+
+export async function setupHistoryHighlight(action, _entry3, _computedEntry3, _entry_id) {
+	const store = useModelStore()
+	store.clearHistoryHelpers()
+	await nextTick()
+
+	if (!action) return
+
+	// Highlight areas affected by the action
+	const areasToHighlight = []
+
+	if (action.type === "dig" || action.type === "digEridu") {
+		if (action.path) {
+			for (const areaId of action.path) areasToHighlight.push(areaId)
+		}
+	} else if (action.type === "allocateWater") {
+		if (action.area) areasToHighlight.push(action.area)
+		const source = action.amount !== undefined ? null : null // source not tracked in action
+	} else if (action.type === "harvest") {
+		// Harvest affects the current state's areas
+		// The state is determined by the gameflow stateIndex
+	} else if (action.type === "buyNation" || action.type === "bidNation" || action.type === "offerNation") {
+		// Nations don't map to specific areas directly
+	} else if (action.type === "tradeLand") {
+		if (action.buy) areasToHighlight.push(action.buy)
+		if (action.sellBefore) areasToHighlight.push(...action.sellBefore.flat())
+		if (action.sellAfter) areasToHighlight.push(...action.sellAfter.flat())
+	} else if (action.type === "exchangeBarahshum") {
+		if (action.to) areasToHighlight.push(action.to)
+	} else if (action.type === "exchangeCalah") {
+		if (action.area) areasToHighlight.push(action.area)
+	} else if (action.type === "buildWork" || action.type === "requestWaterwork") {
+		if (action.area) areasToHighlight.push(action.area)
+	} else if (action.type === "resolveMaintenance") {
+		if (action.sales) {
+			for (const batch of action.sales) areasToHighlight.push(...batch.flat())
+		}
+	}
+
+	// Remove duplicates
+	const uniqueAreas = [...new Set(areasToHighlight)]
+	store.historyHelpers.areasToHighlight.push(...uniqueAreas)
+	// Also set the single historyArea for backward compatibility (map watches this)
+	if (uniqueAreas.length > 0) store.viewSettings.historyArea = uniqueAreas[0]
 }

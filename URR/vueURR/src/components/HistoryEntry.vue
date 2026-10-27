@@ -12,8 +12,11 @@ import * as rules from "../js/URRrules"
 import * as water from "../js/URRwater"
 import * as assets from "../js/URRassets"
 import { historyAction } from "../js/URRhistoryActions"
+import { setupHistoryHighlight } from "../js/URRhistory.js"
 import { useModelStore } from "../stores/URRstore.js"
+import { usePersonalStore } from "../stores/URRpersonal.js"
 const store = useModelStore()
+const personal = usePersonalStore()
 const { t } = useI18n()
 const props = defineProps({ entry: { type: Array, required: true }, index: { type: Number, required: true }, newestFirst: { type: Boolean, default: true } })
 
@@ -38,7 +41,7 @@ const balanceChanges = computed(() => {
 	const changes = []
 	for (const [index, player] of (after.value?.players || []).entries()) {
 		const privateBefore = before.value?.players[index]?.money
-		if (privateBefore !== undefined && player.money !== privateBefore) changes.push({ src: assets.getPlayerMarkerImage(index), title: player.displayName, label: t("history.privateCashChange", { before: privateBefore, after: player.money }), amount: player.money - privateBefore })
+		if (privateBefore !== undefined && player.money !== privateBefore) changes.push({ src: assets.getPlayerMarkerImage(index), title: personal.getHistoryName(index), label: t("history.privateCashChange", { before: privateBefore, after: player.money }), amount: player.money - privateBefore })
 	}
 	for (const state of after.value?.states || []) {
 		const treasuryBefore = before.value?.states[state.id]?.money
@@ -67,8 +70,8 @@ function saleLabels(batches = []) { return batches.flat().map(landLabel).join(",
 const eventText = computed(() => {
 	const event = props.entry[0]
 	if (event === rf.HIST_NEW_GAME) return t("history.welcome")
-	if (event === rf.HIST_KICKOUT) return t("history.kickedOut")
-	if (event === rf.HIST_RESIGN) return t("history.resigned")
+	if (event === rf.HIST_KICKOUT) return t("history.kickedOut", { name: personal.getHistoryName(props.entry[3][0]) })
+	if (event === rf.HIST_RESIGN) return t("history.resigned", { name: personal.getHistoryName(props.entry[1]) })
 	const move = action.value
 	if (!move) return t("history.playedMove")
 	const stateName = rf.STATE_NAMES[stateId.value] || t("history.stateFallback")
@@ -168,6 +171,9 @@ function startWaterPlayback(advancing, showIrrigated = false) {
 function jumpToEntry() {
 	if (!store.viewSettings.showReplay) return
 	store.replayStep.index = props.index
+	// Set up map highlights for this history entry (like RNB)
+	const action = historyAction(props.entry)
+	if (action) setupHistoryHighlight(action, props.entry[3], {}, props.index)
 }
 </script>
 
@@ -193,8 +199,8 @@ function jumpToEntry() {
 			</template>
 			<div v-else-if="entry[0] === rf.HIST_NEW_GAME" class="new_turn"><CurrencyText :text="eventText" /></div>
 			<template v-else>
-				<div class="container"><span class="header" v-if="player"><PlayerMarker :index="entry[1]" :name="player.displayName" /></span><img v-if="eventArtwork" :src="eventArtwork.src" :alt="eventArtwork.alt" :title="eventArtwork.alt" /><span><CurrencyText :text="eventText" /></span></div>
-				<div v-for="award in nationAwards" :key="award.id" class="nationAwardNotice"><PlayerMarker :index="award.owner" :name="after.players[award.owner].displayName" /><span><CurrencyText :text="$t('history.acquiredNation', { nation: rf.NATION_NAMES[award.id], amount: award.price })" /></span></div>
+				<div class="container"><span class="header" v-if="player"><PlayerMarker :index="entry[1]" :name="personal.getHistoryName(entry[1])" /></span><img v-if="eventArtwork" :src="eventArtwork.src" :alt="eventArtwork.alt" :title="eventArtwork.alt" /><span><CurrencyText :text="eventText" /></span></div>
+				<div v-for="award in nationAwards" :key="award.id" class="nationAwardNotice"><PlayerMarker :index="award.owner" :name="personal.getHistoryName(award.owner)" /><span><CurrencyText :text="$t('history.acquiredNation', { nation: rf.NATION_NAMES[award.id], amount: award.price })" /></span></div>
 				<StateLeadership v-for="change in leadershipChanges" :key="change.id" :change="change" />
 				<details class="balanceDetails" v-if="balanceChanges.length" @click.stop @keydown.enter.stop @keydown.space.stop><summary class="balanceChanges" :aria-label="$t('history.showBalances')"><span v-for="change in balanceChanges" :key="change.label" :title="change.title || change.label"><img :src="change.src" :alt="change.label" /><b>{{ change.amount > 0 ? '+' : '' }}{{ change.amount }} <CurrencyIcon /></b></span></summary><div class="balanceBreakdown"><div v-for="change in balanceChanges" :key="change.label"><img :src="change.src" :alt="change.title || change.label" :title="change.title || change.label" /><span><CurrencyText :text="change.label" /></span></div></div></details>
 				<div class="actionImages" :class="{ multipleCards: actionImages.filter((asset) => asset.card).length > 1 }" v-if="actionImages.length"><template v-for="(asset, idx) in actionImages" :key="idx"><div v-if="asset.card" class="historyCard"><ArtworkCard :src="asset.src" :alt="asset.alt" /></div><img v-else :src="asset.src" :alt="asset.alt" :title="asset.alt" /></template></div>
