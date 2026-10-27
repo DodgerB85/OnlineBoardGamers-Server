@@ -1604,37 +1604,12 @@ export async function kickout() {
 			return data
 		}
 
-		// Apply kickout result to local state so subsequent saves don't revert it
+		// Only update latestUpdate and secondsToNextKickout here.
+		// The caller (actionPlayerKickout in RNBbot.js) handles all local state changes
+		// (removing transporters/goods, updating displayName, filtering turnOrders)
+		// using timedOutPlayerIndex. This avoids double-modification and index mismatch.
 		personal.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
-
-		if (data.missingPlayers && data.missingPlayers.length > 0) {
-			// Find all missing player indices in the players array
-			const missingIndices = []
-			for (const missingName of data.missingPlayers) {
-				const idx = store.players.findIndex(p => p.name === missingName)
-				if (idx >= 0) {
-					missingIndices.push(idx)
-				}
-			}
-
-			// Remove from ACTIVE turn orders only (keep in fullTurnOrder as placeholders)
-			const filterTurnOrder = (arr) => arr.filter(idx => !missingIndices.includes(idx))
-			store.gameflow.turnOrder = filterTurnOrder(store.gameflow.turnOrder)
-			store.gameflow.wonderTurnOrder = filterTurnOrder(store.gameflow.wonderTurnOrder)
-			store.gameflow.wonderPrayingOrder = filterTurnOrder(store.gameflow.wonderPrayingOrder)
-			store.gameflow.newWonderTurnOrder = filterTurnOrder(store.gameflow.newWonderTurnOrder)
-			store.gameflow.newWonderPrayingOrder = filterTurnOrder(store.gameflow.newWonderPrayingOrder)
-			// NOTE: fullTurnOrder is NOT filtered - kicked players remain as placeholders
-
-			// Mark kicked players as bots
-			for (const idx of missingIndices) {
-				store.players[idx].displayName = rf.BOT_NAME
-			}
-
-			// Update wholeTurnResetData so resetWholeTurn() doesn't revert the kickout
-			store.wholeTurnResetData = funcs.simpleExportWholeRNBmodel()
-		}
 
 		store.viewSettings.showLoader = false
 		return data
