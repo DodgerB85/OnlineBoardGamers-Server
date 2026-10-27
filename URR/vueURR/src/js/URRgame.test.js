@@ -345,9 +345,9 @@ test("Draft groups combine identical crews and retain the right removal indices"
 		crew(secondEra),
 	])
 	assert.deepEqual(groups, [
-		{ era: 1, count: 2, index: 2, label: "2 × Era 1 crew\n1+1 digging points each · 100 SPL total" },
+		{ era: 1, count: 2, index: 2, label: "2 × Era 1 crew\n1+1 digging points · 100 SPL total" },
 		{ index: 1, label: "Pump at A1" },
-		{ era: 2, count: 1, index: 3, label: "1 × Era 2 crew\n2 digging points each · 100 SPL total" },
+		{ era: 2, count: 1, index: 3, label: "1 × Era 2 crew\n2 digging points · 100 SPL total" },
 	])
 	assert.deepEqual(groupedDraftSteps([]), [])
 })

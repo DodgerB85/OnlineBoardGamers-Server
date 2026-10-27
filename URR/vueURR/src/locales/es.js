@@ -460,6 +460,7 @@ export default {
 		useCrewAria: "Usar cuadrilla de excavación {number} de {points}",
 		addCanal: "Añadir canal",
 		clearCanalDraft: "Limpiar borrador de canal",
+		clearDiggingSelection: "Limpiar selección de excavación",
 		skipEridu: "Saltar Eridu y terminar turno",
 		doneDigging: "Terminar excavación",
 		requiredCrewFunding: "Financiación obligatoria de cuadrilla",
