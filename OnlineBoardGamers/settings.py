@@ -90,11 +90,9 @@ EMAIL_TIMEOUT = 20  # This protects your CPU budget
 EMAIL_HOST_USER_TURN = []
 EMAIL_HOST_PASSWORD_TURN = []
 
-# Email notifications for 500 errors
-ADMINS = [
-    ("Admin", config("OBG_EMAIL_HOST_USER")),
-]
-MANAGERS = ADMINS
+# Email notifications for 500 errors - DISABLED temporarily
+ADMINS = []
+MANAGERS = []
 
 # FIX: Safely splits "user@gmail.com" to produce "root@gmail.com"
 email_user = config("OBG_EMAIL_HOST_USER")
