@@ -369,7 +369,9 @@ export function getInternalLocationsReachableFromLocation(currentLocation, playe
 		const bucketID = isBucketLocation(currentLocation) ? currentLocation[2] : hex.nodeBucketIds[currentLocation[2]]
 		const currentBucketID = bucketIdsCurrent[bucketID]
 		const adjacentRiverIDS = util.indexArray(hex.riverAdjacencies.length).filter((i) => hex.riverAdjacencies[i].filter((n) => bucketIdsCurrent[n] === currentBucketID).length > 0)
-		return hexLocations.filter((location) => (isLandVertexLocation(location) && bucketIdsCurrent[hex.nodeBucketIds[location[2]]] === currentBucketID) || (isDockedLocation(location) && bucketIdsCurrent[getBucketIDadjacentToDockedLocation(location)] === currentBucketID) || (isRiverVertexLocation(location) && adjacentRiverIDS.includes(hex.riverVertexRiverIds[location[2]])) || (isBucketLocation(location) && bucketIdsCurrent[location[2]] === currentBucketID))
+		// Water vertices only occur here on water-like hexes (wet polder); a stranded land
+		// transporter must still reach them to interact with buildings/boats on the same bucket.
+		return hexLocations.filter((location) => (isLandVertexLocation(location) && bucketIdsCurrent[hex.nodeBucketIds[location[2]]] === currentBucketID) || (isDockedLocation(location) && bucketIdsCurrent[getBucketIDadjacentToDockedLocation(location)] === currentBucketID) || (isRiverVertexLocation(location) && adjacentRiverIDS.includes(hex.riverVertexRiverIds[location[2]])) || (isBucketLocation(location) && bucketIdsCurrent[location[2]] === currentBucketID) || (isWaterVertexLocation(location) && bucketIdsCurrent[hex.nodeBucketIds[location[2]]] === currentBucketID))
 	}
 	// in a river, adjacent land is reachable
 	else if (isRiverVertexLocation(currentLocation)) {

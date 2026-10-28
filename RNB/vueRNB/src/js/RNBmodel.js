@@ -1078,8 +1078,8 @@ export function dropAllGeeseForPlayerIndex(playerIndex, event = null) {
 		const followedTransporterID = resObj.location[1]
 		const followedTransporterLocation = playerTransportersOnMap.find((t) => t[0] === followedTransporterID)[1]
 		const followedTransporterHexID = followedTransporterLocation[1]
-		// Firstly, can only drop on sea IF there's an oil rig. In which case, the only bucket is 0
-		if (loc.isSeaVertexLocation(followedTransporterLocation) && !map.hasOilRigOnHexID(followedTransporterHexID)) {
+		// Firstly, can only drop on sea IF there's an oil rig or it's a wet polder (single bucket 0)
+		if (loc.isSeaVertexLocation(followedTransporterLocation) && !map.hasOilRigOnHexID(followedTransporterHexID) && getHexByID(followedTransporterHexID).currentTerrain !== rf.TERR_POLDER_WET) {
 			let clientX = event ? event.clientX : window.innerWidth / 2
 			let clientY = event ? event.clientY : window.innerHeight / 2
 			let htmlMessage = i18n.global.t("action.geeseCannotEndAtSea")
@@ -1087,8 +1087,8 @@ export function dropAllGeeseForPlayerIndex(playerIndex, event = null) {
 			store.context.errorUnableToDropGeeseAtSea = true
 			return
 		}
-		// Now we know there is an oil rig, so drop in bucket 0
-		else if (loc.isSeaVertexLocation(followedTransporterLocation) && map.hasOilRigOnHexID(followedTransporterHexID)) {
+		// Now we know there is an oil rig or wet polder, so drop in bucket 0
+		else if (loc.isSeaVertexLocation(followedTransporterLocation) && (map.hasOilRigOnHexID(followedTransporterHexID) || getHexByID(followedTransporterHexID).currentTerrain === rf.TERR_POLDER_WET)) {
 			resObj.location = loc.setBucketLocation(followedTransporterHexID, 0)
 		}
 		// On land, convert the transporters location to a bucket, and drop it in that

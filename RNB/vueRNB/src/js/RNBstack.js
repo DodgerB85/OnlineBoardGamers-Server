@@ -1393,7 +1393,7 @@ export function verifySingleStackAction(stackActionData) {
 		const transporterObj = model.getTransporterByID(transporterID)
 		const dropVertex = loc.getAnyVertexInHexIDbucketID(dropHexID, dropBucket)
 		const dropLocation = [rf.LOCATION_LAND_VERTEX, dropHexID, dropVertex]
-		if (hexObj.baseTerrain === rf.TERR_SEA) dropLocation[0] = rf.LOCATION_SEA_VERTEX
+		if (rf.TERR_ACTS_LIKE_WATER.includes(hexObj.currentTerrain)) dropLocation[0] = rf.LOCATION_SEA_VERTEX
 		const reachableLocs = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(transporterObj.location, false, "ssdr")
 		// Check you can reach the drop location.
 		// Planes & Aeroports: a plane may airdrop onto ANY land tile, so skip the
@@ -1448,7 +1448,7 @@ export function verifySingleStackAction(stackActionData) {
 		const transporterObj = model.getTransporterByID(transporterID)
 		const dropVertex = loc.getAnyVertexInHexIDbucketID(dropHexID, dropBucket)
 		const dropLocation = [rf.LOCATION_LAND_VERTEX, dropHexID, dropVertex]
-		if (hexObj.baseTerrain === rf.TERR_SEA) dropLocation[0] = rf.LOCATION_SEA_VERTEX
+		if (rf.TERR_ACTS_LIKE_WATER.includes(hexObj.currentTerrain)) dropLocation[0] = rf.LOCATION_SEA_VERTEX
 		const reachableLocs = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(transporterObj.location, false, "sdrf")
 		if (!util.includesArray(reachableLocs, dropLocation)) return 1
 		// Check all the res are following the trans
@@ -1507,7 +1507,7 @@ export function verifySingleStackAction(stackActionData) {
 		const dropVertex = loc.getAnyVertexInHexIDbucketID(dropHexID, dropBucket)
 		const dropLocation = [rf.LOCATION_LAND_VERTEX, dropHexID, dropVertex]
 		const hexObj = model.getHexByID(dropHexID)
-		if (hexObj.baseTerrain === rf.TERR_SEA) dropLocation[0] = rf.LOCATION_SEA_VERTEX
+		if (rf.TERR_ACTS_LIKE_WATER.includes(hexObj.currentTerrain)) dropLocation[0] = rf.LOCATION_SEA_VERTEX
 
 		// Allow a 2nd ferry in case it's a double ferry on brackets tile
 		let validLocations = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(transporterObj.location, true, "ssfr")
@@ -1857,7 +1857,7 @@ export function verifySingleStackAction(stackActionData) {
 		const vertex = loc.getAnyVertexInHexIDbucketID(hexID, bucketId)
 		let location = [rf.LOCATION_LAND_VERTEX, hexID, vertex]
 		const hexObj = model.getHexByID(hexID)
-		if (hexObj.baseTerrain === rf.TERR_SEA) location = [rf.LOCATION_SEA_VERTEX, hexID, vertex]
+		if (rf.TERR_ACTS_LIKE_WATER.includes(hexObj.currentTerrain)) location = [rf.LOCATION_SEA_VERTEX, hexID, vertex]
 		const transporterObj = model.getTransporterByID(transporterID)
 		// You can build over a ferry
 		const validLocations = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(transporterObj.location, true, "sbblg")
@@ -1911,7 +1911,8 @@ export function verifySingleStackAction(stackActionData) {
 		const hexID = fullLocation[1]
 		const bucketId = fullLocation[2]
 		const vertex = loc.getAnyVertexInHexIDbucketID(hexID, bucketId)
-		const landVertexLocation = [rf.LOCATION_LAND_VERTEX, hexID, vertex]
+		let landVertexLocation = [rf.LOCATION_LAND_VERTEX, hexID, vertex]
+		if (rf.TERR_ACTS_LIKE_WATER.includes(model.getHexByID(hexID).currentTerrain)) landVertexLocation[0] = rf.LOCATION_SEA_VERTEX
 		const transporterObj = model.getTransporterByID(transporterID)
 		// Allow ferry, in case of brackets hex
 		const validLocations = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(transporterObj.location, true, "sbblg")
@@ -2412,7 +2413,7 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 
 		const dropVertex = loc.getAnyVertexInHexIDbucketID(dropHexID, dropBucket)
 		const dropLocation = [rf.LOCATION_LAND_VERTEX, dropHexID, dropVertex]
-		if (hexObj.baseTerrain === rf.TERR_SEA) dropLocation[0] = rf.LOCATION_SEA_VERTEX
+		if (rf.TERR_ACTS_LIKE_WATER.includes(hexObj.currentTerrain)) dropLocation[0] = rf.LOCATION_SEA_VERTEX
 		// Planes & Aeroports: a plane may airdrop onto any land tile, so no reachability gate here.
 
 		for (let i = 0; i < stackAction[2].length; i++) {
@@ -2513,7 +2514,7 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 		const dropVertex = loc.getAnyVertexInHexIDbucketID(dropHexID, dropBucket)
 		const dropLocation = [rf.LOCATION_LAND_VERTEX, dropHexID, dropVertex]
 		const hexObj = model.getHexByID(dropHexID)
-		if (hexObj.baseTerrain === rf.TERR_SEA) dropLocation[0] = rf.LOCATION_SEA_VERTEX
+		if (rf.TERR_ACTS_LIKE_WATER.includes(hexObj.currentTerrain)) dropLocation[0] = rf.LOCATION_SEA_VERTEX
 
 		//const buckets = map.getPossibleDropBucketsForResourceOnTransporter(resID)
 

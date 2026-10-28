@@ -430,7 +430,7 @@ export function highlightEligibleItemsForTransporterDrop(transporterID) {
 	if (loc.isSeaVertexLocation(transporterObj.location)) {
 		if (transporterObj.type === rf.PLANE) {
 			if (!store.context.planeInFlight) return
-		} else if (!map.hasOilRigOnHexID(transporterObj.location[1])) return
+		} else if (!map.hasOilRigOnHexID(transporterObj.location[1]) && model.getHexByID(transporterObj.location[1]).currentTerrain !== rf.TERR_POLDER_WET) return
 	}
 	let resources = model.resourcesOnTransport(transporterObj.id)
 	let followerResources = model.resourcesFollowingTransporter(transporterID)

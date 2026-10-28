@@ -680,7 +680,7 @@ export function dropResOnLocation_core(resID, dropLocation) {
 	else if (loc.isLandVertexLocation(dropLocation)) {
 		const bucketID = loc.getBucketIDfromAnyHexIDandVertex(dropLocation[1], dropLocation[2])
 		res.location = [rf.LOCATION_BUCKET, dropLocation[1], bucketID]
-	} else if (loc.isSeaVertexLocation(dropLocation) && hasOilRigOnHexID(dropLocation[1])) {
+	} else if (loc.isSeaVertexLocation(dropLocation) && (hasOilRigOnHexID(dropLocation[1]) || model.getHexByID(dropLocation[1]).currentTerrain === rf.TERR_POLDER_WET)) {
 		const bucketID = loc.getBucketIDfromAnyHexIDandVertex(dropLocation[1], dropLocation[2])
 		res.location = [rf.LOCATION_BUCKET, dropLocation[1], bucketID]
 	} else rf.doAdminAlrt("Non land dropping location map-DROLC")
