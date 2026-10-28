@@ -249,8 +249,9 @@ function decodeGameflow(entry, playerCount) {
 	return flow
 }
 
-function encodeStates(states) {
+function encodeStates(states, forGameOver = false) {
 	return states.map((state) => {
+		if (forGameOver) return [state.money, state.king ?? -1]
 		const entry = [state.money, state.king ?? -1]
 		const diggers = state.diggers.map((crew) => {
 			const crewEntry = [crew.id, crew.era]
@@ -282,10 +283,14 @@ function ownerTypeCode(ownerType) {
 	return ownerType === "player" ? 0 : 1
 }
 
-function encodeNations(nations) {
+function encodeNations(nations, forGameOver = false) {
 	return nations.map((nation) => {
 		const bids = nation.bids.flatMap((bid) => [bid.player, bid.amount])
 		const entry = [ownerTypeCode(nation.ownerType), nation.owner ?? -1]
+		if (forGameOver) {
+			if (nation.isRemoved) entry.push(1)
+			return entry
+		}
 		if (nation.isRemoved || bids.length) {
 			entry.push(nation.isRemoved ? 1 : 0)
 			if (bids.length) entry.push(bids)
@@ -297,8 +302,8 @@ function encodeNations(nations) {
 function decodeNations(nations) {
 	return nations.map((entry, id) => ({
 		id,
-		ownerType: entry[0] === undefined || entry[0] < 0 ? null : entry[0] === 0 ? "player" : "state",
-		owner: entry[1] === undefined || entry[1] < 0 ? null : entry[1],
+		ownerType: entry[0] < 0 ? null : entry[0] === 0 ? "player" : "state",
+		owner: entry[1] < 0 ? null : entry[1],
 		isRemoved: !!entry[2],
 		bids: (entry[3] || []).reduce((bids, value, index, all) => {
 			if (index % 2 === 0) bids.push({ player: value, amount: all[index + 1] })
@@ -355,20 +360,28 @@ export function exportURRmodel(forGameOver = false) {
 	const state = snapshotState()
 	const areaIndex = historyStorage.printedAreaIndexMap()
 	const history = store.history
+
+	// Replay entries: actions + state-changing special events (kickout, resign).
+	// Excludes HIST_ACTION (3) summaries which are display-only.
+	function isReplayEntry(e) {
+		const code = e[0]
+		return code === rf.HIST_KICKOUT || code === rf.HIST_RESIGN || (code >= 10 && code <= 28) || code === 99
+	}
+
 	const entry = [
 		encodePlayers(state.players, forGameOver),
 		encodeGameflow(state.gameflow, forGameOver),
-		encodeStates(state.states),
-		encodeNations(state.nations),
-		historyStorage.compactBoard(state.board),
+		encodeStates(state.states, forGameOver),
+		encodeNations(state.nations, forGameOver),
+		historyStorage.compactBoard(state.board, forGameOver),
 		state.landPrices,
 		state.era,
 		encodeCardSupply(state.cardSupply),
 		forGameOver ? [] : encodeRain(state.rain, areaIndex),
 		forGameOver ? -1 : state.nextDiggerId,
-		// Action rows are re-encoded so the save carries one shape; slot 11 keeps
-		// the opening-only changes, not a full position.
-		history.slice(1).map(normalizeEntry),
+		// Replay slot: only entries that affect game state (actions + kickout + resign).
+		// HIST_ACTION summaries are display-only, reconstructed on load by computeHistory.
+		history.slice(1).filter(isReplayEntry).map(normalizeEntry),
 	]
 	entry.push(history[0]?.[3] ?? [])
 

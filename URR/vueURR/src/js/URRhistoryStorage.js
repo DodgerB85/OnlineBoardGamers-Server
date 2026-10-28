@@ -69,7 +69,7 @@ function decodeWaterwork(entry) {
 
 // The printed layout is rebuilt on load; areas are saved as index-keyed deltas
 // so the IDs and unchanged terrain never reach the database.
-export function compactBoard(current) {
+export function compactBoard(current, forGameOver = false) {
 	const printed = printedBoard()
 	const areaIndex = printedAreaIndexMap()
 	const areas = []
@@ -81,6 +81,13 @@ export function compactBoard(current) {
 		for (const [key, value] of Object.entries(area)) {
 			if (["owner", "markerOwner", "waterwork", "irrigatedBy"].includes(key)) continue
 			if (JSON.stringify(value) !== JSON.stringify(fresh[key])) extras[key] = value
+		}
+		if (forGameOver) {
+			// Game over: only ownership matters
+			const owner = area.owner ?? -1
+			const markerOwner = area.markerOwner ?? -1
+			if (owner !== -1 || markerOwner !== -1) areas.push([index, owner, markerOwner])
+			continue
 		}
 		const hasRuntime = area.owner != null || area.markerOwner != null || area.waterwork != null || area.irrigatedBy != null
 		if (!hasRuntime && !Object.keys(extras).length) continue
