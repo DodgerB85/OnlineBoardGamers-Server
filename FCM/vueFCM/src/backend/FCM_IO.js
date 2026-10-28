@@ -1783,15 +1783,18 @@ export function processSimulMoveData(data) {
 				store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminNameMismatchRestructuring")
 				sendDiscordWebhook(`JS ERROR: player name mismatch in PHASE_RESTRUCTURING - gameID: ${personal.gameID} player: ${store.players[i].name} decompressedData: ${JSON.stringify(decompressedData)}`)
 			}
-			// Blank entry (deleted/scaffolded) or wrong shape — no move to process
+			// Blank entry (deleted/scaffolded) or wrong shape — preserve current
+			// store state (which already has the player's move from the UI for the
+			// current player, or start-of-phase state for others) rather than
+			// wiping it. Only log the anomaly.
 			if (!content || content.length !== 3) {
 				store.gameMessages.errorText = i18n.global.t("FCM_IO.contactAdminDataErrorRestructuring")
 				sendDiscordWebhook(`JS ERROR: data-error in PHASE_RESTRUCTURING - gameID: ${personal.gameID} player: ${store.players[i].name} decompressedData: ${JSON.stringify(decompressedData)}`)
-				continue
+				// Do NOT continue; keep the beach/employees the player already has
+			} else {
+				store.players[i].beach = content[0]
+				store.players[i].employees = content[1]
 			}
-
-			store.players[i].beach = content[0]
-			store.players[i].employees = content[1]
 			store.players[i].OOBpreference = content[2]
 			if (store.startingOptions.laborMarket) rules.snapshotWorkedCount(i)
 			//alert(`name: ${store.players[i].name} beach: ${store.players[i].beach} employees: ${store.players[i].employees} OOBpreference: ${store.players[i].OOBpreference}`)
