@@ -12,10 +12,16 @@ MAIN_PHASES = [PHASE_ALLIED_TURN, PHASE_FRENCH_TURN]
 # Max rounds in the game
 MAX_ROUNDS = 10
 
-# Starting Options
+# Starting Options (102/110/120 are the shared practice/learning/experienced ids)
+SO_SCENARIO_DEC_01 = 1
+SO_SCENARIO_DEC_02 = 2
 SO_FRENCH_REINFORCEMENTS = 10
 SO_SANTON_FORT = 11
 SO_TEAM_PLAY = 12
+
+# Scenario starting options -> the slug the client uses in NTRmap.js
+SCENARIO_SLUGS = {SO_SCENARIO_DEC_01: "dec_01", SO_SCENARIO_DEC_02: "dec_02"}
+DEFAULT_SCENARIO = SO_SCENARIO_DEC_01
 
 # Unit Types
 UNIT_COMMANDER = "COMMANDER"
@@ -81,13 +87,9 @@ MORALE_LOSS_CAVALRY_FIRST_COMMIT = 1
 MORALE_LOSS_STEP_LOSS = 1
 MORALE_LOSS_RETREAT = 1
 
-# Scenarios
-SCENARIO_HISTORICAL = 0
-SCENARIO_ALTERNATE = 1
-
 SCENARIO_NAMES = {
-    SCENARIO_HISTORICAL: "Historical (Dec 2, 1805)",
-    SCENARIO_ALTERNATE: "Alternate Deployment",
+    SO_SCENARIO_DEC_01: "1 December 1805 (Evening)",
+    SO_SCENARIO_DEC_02: "2 December 1805 (Morning)",
 }
 
 # Approach Properties

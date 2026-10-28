@@ -10,9 +10,18 @@ const store = useModelStore()
 
 const svgRef = ref(null)
 const panZoom = ref({ x: 0, y: 0, scale: 1 })
-const selectedLocale = ref(null)
-const selectedUnit = ref(null)
 const dragState = ref({ active: false, startX: 0, startY: 0 })
+
+const selectedLocale = computed(() => store.selection.locale)
+const unitsAtLocale = computed(() => {
+  if (!selectedLocale.value) return []
+  return store.board.units.filter(u => u.locale === selectedLocale.value)
+})
+const isSelectedUnit = (unit) => store.selection.units.some(u => u.id === unit.id)
+
+function toggleUnit(unit) {
+  controller.selectUnit(unit.id)
+}
 
 // Board dimensions (Austerlitz map roughly)
 const BOARD_WIDTH = 1400
@@ -39,12 +48,10 @@ function handleSvgClick(event) {
     const dx = x - pos.x
     const dy = y - pos.y
     if (dx * dx + dy * dy < 400) { // 20px radius
-      selectedLocale.value = id
       controller.selectLocale(id)
       return
     }
   }
-  selectedLocale.value = null
   controller.clearSelection()
 }
 
@@ -89,7 +96,6 @@ function resetView() {
 onMounted(() => {
   window.addEventListener('mousemove', handleMouseMove)
   window.addEventListener('mouseup', handleMouseUp)
-  window.addEventListener('wheel', handleWheel, { passive: false })
 })
 
 // Cleanup
@@ -97,15 +103,9 @@ import { onUnmounted } from 'vue'
 onUnmounted(() => {
   window.removeEventListener('mousemove', handleMouseMove)
   window.removeEventListener('mouseup', handleMouseUp)
-  window.removeEventListener('wheel', handleWheel)
 })
 
 const transform = computed(() => `translate(${panZoom.value.x}, ${panZoom.value.y}) scale(${panZoom.value.scale})`)
-
-const unitsAtLocale = computed(() => {
-  if (!selectedLocale.value) return []
-  return store.board.units.filter(u => u.locale === selectedLocale.value)
-})
 </script>
 
 <template>
@@ -199,8 +199,12 @@ const unitsAtLocale = computed(() => {
         <rect x="-120" y="-100" width="240" height="180" fill="white" stroke="#2c3e50" stroke-width="2" rx="8" />
         <text x="0" y="-80" text-anchor="middle" font-weight="bold" font-size="14" fill="#2c3e50">{{ selectedLocale }}</text>
 
-        <g v-for="(unit, idx) in unitsAtLocale" :key="unit.id" :transform="`translate(0, ${-60 + idx * 22})`">
-          <rect x="-110" y="-8" width="220" height="18" :fill="unit.side === 'ALLIED' ? '#fadbd8' : '#d6eaf8'" rx="3" />
+        <g v-for="(unit, idx) in unitsAtLocale" :key="unit.id"
+           :transform="`translate(0, ${-60 + idx * 22})`"
+           class="unitRow"
+           @click.stop="toggleUnit(unit)">
+          <rect x="-110" y="-8" width="220" height="18" :fill="isSelectedUnit(unit) ? '#fff3cd' : (unit.side === 'ALLIED' ? '#fadbd8' : '#d6eaf8')"
+                :stroke="isSelectedUnit(unit) ? '#f39c12' : 'none'" stroke-width="2" rx="3" />
           <text x="-100" y="4" font-size="11" :fill="unit.side === 'ALLIED' ? '#c0392b' : '#1b4f72'">
             {{ view.getUnitDisplayName(unit) }}
           </text>
@@ -296,6 +300,8 @@ const unitsAtLocale = computed(() => {
 }
 
 .unitBadges text { pointer-events: none; }
+
+.unitRow { cursor: pointer; }
 
 .fogged { opacity: 0.3; }
 

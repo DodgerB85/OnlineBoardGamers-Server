@@ -1,102 +1,95 @@
+{% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
-{% get_current_language as LANGUAGE_CODE %}
-<!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE|default:'en-gb' }}">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% translate "Napoleon's Triumph Help" %} - Online Board Gamers</title>
-    <link rel="icon" type="image/png" href="{% static 'NTR/images/ntr_icon.png' %}" />
-    <style>
-      body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }
-      h1, h2, h3 { color: #2c3e50; }
-      .section { margin-bottom: 30px; padding: 15px; background: #f8f9fa; border-radius: 8px; }
-      .rule-link { display: inline-block; margin-top: 10px; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 4px; }
-      .rule-link:hover { background: #2980b9; }
-      ul { padding-left: 20px; }
-      code { background: #e9ecef; padding: 2px 6px; border-radius: 3px; }
-    </style>
-  </head>
-  <body>
-    <h1>{% translate "Napoleon's Triumph - Help & Rules" %}</h1>
-    
-    <div class="section">
-      <h2>{% translate "Quick Start" %}</h2>
-      <p>{% translate "Napoleon's Triumph is a 2-player (or up to 8 with Team Play) block wargame simulating the Battle of Austerlitz (December 2, 1805)." %}</p>
-      <p>{% translate "Each hourly round consists of an Allied Turn followed by a French Turn. The game ends at Round 10 or when one army is demoralized." %}</p>
+{% block page_title %}
+  {% translate "Napoleon's Triumph Help" %}
+{% endblock page_title %}
+{% block content %}
+  <div class="card section">
+    <h2>{% translate "Rules" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% blocktranslate %}Napoleon's Triumph is a block wargame by Bowen Simmons covering the Battle of Austerlitz (1&ndash;2 December 1805). The site transcribes the annotated rules below.{% endblocktranslate %}
+      </p>
+      <p>
+        <a class="linkOther" href="{% static 'NTR/rules/NT_Annotated_Rules_v1.4.pdf' %}" target="_blank" rel="noopener">{% translate "Open the annotated rulebook (PDF)" %}</a>
+        &middot; <a class="linkOther" href="https://boardgamegeek.com/boardgame/18098/napoleons-triumph" target="_blank" rel="noopener">{% translate "View on BoardGameGeek" %}</a>
+      </p>
+      <p>
+        {% translate "Quick reference:" %}
+        <a class="linkOther" href="{% static 'NTR/rules/QuickReferencepage1.jpg' %}" target="_blank" rel="noopener">{% translate "page 1" %}</a>
+        &middot; <a class="linkOther" href="{% static 'NTR/rules/QuickReferencepage2.jpg' %}" target="_blank" rel="noopener">{% translate "page 2" %}</a>
+        &middot; <a class="linkOther" href="{% static 'NTR/rules/QuickReferencepage3.jpg' %}" target="_blank" rel="noopener">{% translate "page 3" %}</a>
+      </p>
     </div>
+  </div>
 
-    <div class="section">
-      <h2>{% translate "Official Rules" %}</h2>
-      <p>{% translate "For the complete rules, please refer to the official rulebook:" %}</p>
-      <a href="https://boardgamegeek.com/boardgame/18098/napoleons-triumph" target="_blank" class="rule-link">
-        {% translate "View on BoardGameGeek" %}
-      </a>
-    </div>
+  <div class="card section">
+    <h2>{% translate "Playing the Game" %}</h2>
+    <div class="help-qa">
+      <h3>{% translate "Turns" %}</h3>
+      <p>{% translate "Each round is one Allied turn followed by one French turn. The game ends at Round 10 or as soon as one army is demoralized." %}</p>
 
-    <div class="section">
-      <h2>{% translate "Key Concepts" %}</h2>
       <h3>{% translate "Unit Types" %}</h3>
       <ul>
-        <li><strong>{% translate "Commanders" %}</strong>: {% translate "Leadership pieces (Napoleon, Kutuzov, Corps Generals). Required to issue command points and activate units. No combat strength." %}</li>
+        <li><strong>{% translate "Commanders" %}</strong>: {% translate "Leadership pieces (Napoleon, Kutuzov, corps generals). They issue command points and activate units, and have no combat strength." %}</li>
         <li><strong>{% translate "Infantry" %}</strong>: {% translate "Standard foot units, strength 1-3." %}</li>
         <li><strong>{% translate "Guard Infantry" %}</strong>: {% translate "Elite units with high combat value. Destroying them causes severe morale loss." %}</li>
-        <li><strong>{% translate "Cavalry" %}</strong>: {% translate "High mobility. First combat commitment incurs a one-time morale penalty." %}</li>
-        <li><strong>{% translate "Artillery" %}</strong>: {% translate "Operates on approaches between locales, not from locale centers." %}</li>
+        <li><strong>{% translate "Cavalry" %}</strong>: {% translate "High mobility. The first combat commitment incurs a one-time morale penalty." %}</li>
+        <li><strong>{% translate "Artillery" %}</strong>: {% translate "Operates on approaches between locales, not from locale centres." %}</li>
       </ul>
 
-      <h3>{% translate "Fog of War" %}</h3>
-      <p>{% translate "Units are hidden from the opponent until revealed by combat or reconnaissance. The game tracks hidden information server-side." %}</p>
+      <h3>{% translate "Hidden Units" %}</h3>
+      <p>{% translate "Units are hidden from the opponent until revealed by combat or reconnaissance. Unrevealed units stay hidden in the saved game data." %}</p>
 
-      <h3>{% translate "Morale System" %}</h3>
+      <h3>{% translate "Morale" %}</h3>
       <ul>
-        <li>{% translate "Allied starting morale: 12" %}</li>
-        <li>{% translate "French starting morale: 12" %}</li>
-        <li>{% translate "Morale drops from: step losses, retreats, Guard destruction, first Cavalry commitment" %}</li>
-        <li>{% translate "Morale reaching 0 = immediate Decisive Victory for opponent" %}</li>
+        <li>{% translate "Both armies start with 12 morale." %}</li>
+        <li>{% translate "Morale drops from step losses, retreats, Guard destruction and the first Cavalry commitment." %}</li>
+        <li>{% translate "Morale reaching 0 ends the game immediately." %}</li>
       </ul>
 
-      <h3>{% translate "Victory Conditions" %}</h3>
+      <h3>{% translate "Victory" %}</h3>
       <ul>
-        <li><strong>{% translate "Decisive Victory" %}</strong>: {% translate "Demoralize enemy army (morale hits 0)" %}</li>
-        <li><strong>{% translate "Marginal Victory" %}</strong>: {% translate "Control starred objective locales at end of Round 10. Requires Commander + Infantry/Artillery in locale." %}</li>
+        <li><strong>{% translate "Decisive Victory" %}</strong>: {% translate "demoralize the enemy army (morale reaches 0)." %}</li>
+        <li><strong>{% translate "Marginal Victory" %}</strong>: {% translate "control starred objective locales at the end of Round 10. A locale needs a commander plus infantry or artillery to count." %}</li>
       </ul>
     </div>
+  </div>
 
-    <div class="section">
-      <h2>{% translate "Game Options" %}</h2>
+  <div class="card section">
+    <h2>{% translate "Game Options" %}</h2>
+    <div class="help-qa">
       <ul>
-        <li><strong>{% translate "French Reinforcements" %}</strong>: {% translate "French must capture 3 objective locales instead of just defending" %}</li>
-        <li><strong>{% translate "Santon Fort" %}</strong>: {% translate "Adds defensive bonuses to Santon hill locale" %}</li>
-        <li><strong>{% translate "Team Play" %}</strong>: {% translate "Up to 8 players (4 per side), each commanding specific Corps" %}</li>
-        <li><strong>{% translate "Learning Game" %}</strong>: {% translate "Excluded from statistics, for new players" %}</li>
-        <li><strong>{% translate "Experienced Game" %}</strong>: {% translate "Excluded from statistics, for veterans" %}</li>
-        <li><strong>{% translate "Training Game" %}</strong>: {% translate "Solo practice vs AI (SHADOW opponent)" %}</li>
+        <li><strong>{% translate "French Reinforcements" %}</strong>: {% translate "the French must capture 3 objective locales instead of defending." %}</li>
+        <li><strong>{% translate "Santon Fort" %}</strong>: {% translate "adds defensive bonuses to the Santon hill locale." %}</li>
+        <li><strong>{% translate "Team Play" %}</strong>: {% translate "4 or 8 players, each commanding specific corps." %}</li>
+        <li><strong>{% translate "Practice Game" %}</strong>: {% translate "you play against a bot; practice games are excluded from statistics." %}</li>
+        <li><strong>{% translate "Learning Game" %}</strong>: {% translate "excluded from statistics, for new players." %}</li>
+        <li><strong>{% translate "Experienced Game" %}</strong>: {% translate "excluded from statistics, for veterans." %}</li>
       </ul>
     </div>
+  </div>
 
-    <div class="section">
-      <h2>{% translate "Scenarios" %}</h2>
+  <div class="card section">
+    <h2>{% translate "Scenarios" %}</h2>
+    <div class="help-qa">
       <ul>
-        <li><strong>{% translate "Historical" %}</strong>: {% translate "Standard Dec 2, 1805 deployment" %}</li>
-        <li><strong>{% translate "Alternate" %}</strong>: {% translate "Alternate deployment variant" %}</li>
+        <li><strong>{% translate "1 December 1805 (Evening)" %}</strong>: {% translate "the allied army is concentrated on the Pratzen Heights with the French deployed before Austerlitz." %}</li>
+        <li><strong>{% translate "2 December 1805 (Morning)" %}</strong>: {% translate "the morning of the battle; the allies have begun their move south." %}</li>
       </ul>
     </div>
+  </div>
 
-    <div class="section">
-      <h2>{% translate "Interface" %}</h2>
+  <div class="card section">
+    <h2>{% translate "Controls" %}</h2>
+    <div class="help-qa">
       <ul>
-        <li>{% translate "Left-click: Select unit/locale" %}</li>
-        <li>{% translate "Right-click: Context menu (move, attack, reveal)" %}</li>
-        <li>{% translate "Space: Pass turn" %}</li>
-        <li>{% translate "Arrow keys: Navigate replay" %}</li>
-        <li>{% translate "Mouse wheel: Zoom map" %}</li>
+        <li>{% translate "Click a locale on the map to inspect it and select it as the target." %}</li>
+        <li>{% translate "Pick units, then use Move, Attack, Reveal or Pass Turn in the action panel." %}</li>
+        <li>{% translate "Mouse wheel and the +/- buttons zoom the map; drag to pan." %}</li>
+        <li>{% translate "With the replay open, the arrow keys step through the history." %}</li>
       </ul>
     </div>
-
-    <p style="text-align: center; margin-top: 40px;">
-      <a href="/">{% translate "← Back to Lobby" %}</a>
-    </p>
-  </body>
-</html>
+  </div>
+{% endblock content %}

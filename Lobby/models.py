@@ -48,6 +48,7 @@ from .sharedFunctions.sharedRefs import (
     SR_getHLCstartingOptionsHTML,
     SR_getINDstartingOptionsHTML,
     SR_getKFWstartingOptionsHTML,
+    SR_getNTRstartingOptionsHTML,
     SR_getRNBstartingOptionsHTML,
     SR_getROWstartingOptionsHTML,
     SR_getTGZstartingOptionsHTML,
@@ -284,6 +285,8 @@ class Tournament(models.Model):
             startingOptionsHTML = SR_getKFWstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
         if self.gameCode == "TGZ":
             startingOptionsHTML = SR_getTGZstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
+        if self.gameCode == "NTR":
+            startingOptionsHTML = SR_getNTRstartingOptionsHTML(json.loads(self.startingOptions) if self.startingOptions else [])
 
         if startingOptionsHTML == "":
             startingOptionsHTML = "[None]"

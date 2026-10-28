@@ -16,7 +16,8 @@ from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
 
 class AdminErrorWebhookTest(TestCase):
     def test_does_not_post_while_testing(self):
-        self.assertTrue(str(connection.settings_dict.get("NAME", "")).startswith("test_"), "expected to be on a test database")
+        db_name = str(connection.settings_dict.get("NAME", ""))
+        self.assertTrue(db_name.startswith("test_") or "mode=memory" in db_name, "expected to be on a test database")
 
         with patch("Lobby.sharedFunctions.sharedNotifications.requests.post") as mock_post:
             SN_sendAdminErrorMessage("this must never reach discord")

@@ -1,5 +1,7 @@
 # Adding A New Game To The Site
 
+For the implementation workflow, UI conventions and lessons from URR's development history, use [the add-new-game skill](add-new-game/SKILL.md). This page is the site-wiring checklist; verify specific commands and donor patterns against current code.
+
 Every game is one Django app named after its 3-letter game code, registered in a handful of shared lists. Use an existing simple game as your template — **`WEB`** (or `DDL`/`URR`) is the cleanest reference; `RNB` shows solo/map handling and `FCM` shows the most complex case (modules, stats).
 
 The values below are a checklist; grep each item to see it in use in existing games.
@@ -15,9 +17,14 @@ The values below are a checklist; grep each item to see it in use in existing ga
 
 The code must appear everywhere the site enumerates games:
 
-- `Lobby/sharedFunctions/sharedRefs.py` → `SR_GAMES_CODES_AND_NAMES_CHOICES` (display name + code; drives choices, game name display and stats filters).
+- `Lobby/sharedFunctions/sharedRefs.py` → `SR_GAMES_CODES_AND_NAMES_CHOICES` (display name + code; drives choices, game name display and stats filters). Changing the choices also needs `manage.py makemigrations Lobby` — `makemigrations --check` fails otherwise.
 - `Lobby/models.py` → `Game.PRESENTER_MAP` (code → presenter class) and the `startingOptions` HTML helper import if you add one.
 - `Lobby/gameViewHelpers.py` / middleware — the `ForceTrailingSlashMiddleware` game-code list in `Lobby/middleware.py` if game pages live under `/XYZ/`.
+- Option icons: call your `SR_getXYZstartingOptionsHTML` from `SF_serializeGame` (`Lobby/sharedFunctions/sharedFunctions.py`) and from `Tournament.startingOptionsHTML` (`Lobby/models.py`), or lobby/tournament rows show `[None]`.
+- Admin: add `XYZgame` (and `XYZMiniTournament` if mini tournaments are supported) to `Lobby/modelProxies.py` and register them in `Lobby/admin.py`; proxies need an app migration.
+- `Lobby/templates/Lobby/gameDisplay/gameIcons.html` (game icon) and `Lobby/templates/Lobby/admin/DBO.html` (admin show-page link).
+- Tournaments: `start_next_any_tournament_round` in `Lobby/sharedFunctions/sharedFunctions.py` dispatches per game code — without a branch every generated game falls into the legacy call and 500s.
+- `siteUtils/AutoSiteSweeper.py` → `GAME_CODES` (stale-game deletion; add it to `SINGLE_WINNER_GAMES`/`AT_LEAST_ONE_WINNER_GAMES` only if its end-game always marks winners).
 - `siteUtils/AutoTournyStart.py` → `GAME_CODES` if season tournaments should be generated for it.
 - Stats scripts in `siteUtils/` if you want a stats page.
 
@@ -60,7 +67,7 @@ Mirroring `WEB/RNB`:
   - `sendChatMessageXYZ`, `saveNotesXYZ`, `saveZoom`, `castVote`, `bugEntry` — one-line wrappers around the shared helpers (`process_game_with_mutex` + `shared_*` functions),
   - `createXYZgame(request)` — POST-only wrapper delegating to `common.create_xyz_game`.
 - `XYZ/urls.py` with `app_name = "XYZ"` and the routes above.
-- `XYZ/templates/XYZ/showXYZgame.html` — shell template loading the client bundle and passing the init payload (copy `RNB/templates/RNB/showRNBgame.html`), plus a `XYZhelp.html`.
+- `XYZ/templates/XYZ/showXYZgame.html` — shell template loading the client bundle and passing the init payload (copy `RNB/templates/RNB/showRNBgame.html`; `WEB/templates/WEB/showWEBgame.html` shows the block structure), plus a `XYZhelp.html` that extends `Lobby/help_shell.html`. Every value must be valid JavaScript: quote strings with `escapejs` and pass JSON blobs as escaped strings the client parses, because one unquoted value breaks the whole init script (the client then never gets `latestUpdate`, `pov` or `name`).
 
 ## 6. Client
 

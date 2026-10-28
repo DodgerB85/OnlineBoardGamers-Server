@@ -3665,7 +3665,7 @@ class NTRpresenter(GamePresenter):
             playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
             self._sendStartGameNotification(request, playerListToNotify)
 
-    def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
+    def endGame(self, request, _winnerUsernames, _finalPositions, _gameID):
         from django_q.tasks import async_task
 
         from Lobby.models import User
@@ -3673,23 +3673,27 @@ class NTRpresenter(GamePresenter):
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
-        winner_user = User.objects.get(username=_winnerUsername)
-        winner_gp = self.gameObj.players.filter(player=winner_user).first()
-        if winner_gp:
-            winner_gp.winner = True
-            winner_gp.save()
+        # A team game has one winner per player on the winning side; a draw has none.
+        for username in _winnerUsernames:
+            winner_user = User.objects.get(username=username)
+            winner_gp = self.gameObj.players.filter(player=winner_user).first()
+            if winner_gp:
+                winner_gp.winner = True
+                winner_gp.save()
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
 
-        # _finalPositions is array of seat indexes
-        finalPositionsArr = []
-        for seatPos in _finalPositions:
-            finalPositionsArr.append(self.getAllPlayersOrderedySeatInArray()[seatPos])
-
+        # _finalPositions is an array of seat indexes, winners first.
+        seatNames = self.getAllPlayersOrderedySeatInArray()
         convertedFinalPositions = []
-        for pos, username in enumerate(finalPositionsArr):
-            if pos == 0:
+        for pos, seatPos in enumerate(_finalPositions):
+            username = seatNames[seatPos]
+            if not _winnerUsernames:
+                posText = "Draw"
+            elif pos == 0 and len(_winnerUsernames) > 1:
+                posText = "Joint 1st - Congratulations!"
+            elif pos == 0:
                 posText = "1st - Congratulations!"
             elif pos == 1:
                 posText = "2nd"
@@ -3708,21 +3712,29 @@ class NTRpresenter(GamePresenter):
 
         async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "NTR", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 
+        # Tournament rows: first row is the (joint) winning group, later rows are
+        # [username, tiebreak] pairs - a draw shares the first row.
+        finalPositionRows = [list(_winnerUsernames)] if _winnerUsernames else [seatNames]
+        for seatPos in _finalPositions:
+            username = seatNames[seatPos]
+            if username not in _winnerUsernames:
+                finalPositionRows.append([username, 0])
+
         if self.gameObj.relatedMainTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
-                [_winnerUsername],
-                _tournamentData,
+                _winnerUsernames,
+                finalPositionRows,
             )
         if self.gameObj.relatedMiniTournament:
             SF_M_ProcessAnyTournamentEndGame(
                 request,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
-                [_winnerUsername],
-                _tournamentData,
+                _winnerUsernames,
+                finalPositionRows,
             )
 
     def seatPosition(self, username, withoutBots=False):

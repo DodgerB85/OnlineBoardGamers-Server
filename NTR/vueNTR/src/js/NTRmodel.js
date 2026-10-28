@@ -2,14 +2,18 @@
 // Uses NTRmap.js for map topology and scenario definitions
 
 import { useModelStore } from '../stores/NTRstore'
+import { usePersonalStore } from '../stores/NTRpersonal'
 import * as rf from './NTRreference'
 import * as NTRmap from './NTRmap'
 
 export function initGame() {
   const store = useModelStore()
+  const personal = usePersonalStore()
   // Initialize from window.initData
   if (typeof window !== 'undefined' && window.initData) {
     const d = window.initData
+    personal.name = d.name || ''
+    personal.gameID = d.gameID || 0
     store.gameID = d.gameID || 0
     store.gameName = d.gameName || ''
     store.gameData = d.gameData || ''
@@ -21,7 +25,6 @@ export function initGame() {
     store.pov = d.pov || -99
     store.playerNames = d.playerNames || []
     store.currentPlayers = d.currentPlayers || []
-    store.preferredNTRoptions = d.preferredNTRoptions || [-1, 1]
 
     // Parse startingMap to get scenario and options
     let scenarioSlug = 'dec_01'
@@ -38,6 +41,7 @@ export function initGame() {
     store.scenario = scenarioSlug
     store.teamPlay = options.team_play || false
     store.options = options
+    if (store.players.length === 0) store.players = buildPlayers(store.playerNames, store.teamPlay)
 
     // Parse game data
     if (store.gameData) {
@@ -47,6 +51,18 @@ export function initGame() {
       initializeNewGame(scenarioSlug, options)
     }
   }
+}
+
+// Seat order decides the side: seat 0 is the Allies in a 2-player game, and the
+// first half of the seats are the Allies in a team game.
+export function buildPlayers(playerNames, teamPlay) {
+  const count = playerNames.length
+  return playerNames.map((name, seat) => ({
+    name,
+    username: name,
+    seat,
+    side: teamPlay ? (seat < count / 2 ? rf.SIDE_ALLIED : rf.SIDE_FRENCH) : seat === 0 ? rf.SIDE_ALLIED : rf.SIDE_FRENCH,
+  }))
 }
 
 function initializeNewGame(scenarioSlug, options) {
@@ -95,7 +111,7 @@ export function parseGameData(data) {
     if (parsed.fogOfWar) store.fogOfWar = parsed.fogOfWar
 
     // Update player data
-    if (parsed.players) {
+    if (parsed.players && parsed.players.length > 0) {
       store.players = parsed.players
     }
     if (parsed.gameflow) {
@@ -194,7 +210,7 @@ export function checkVictory() {
   if (store.board.morale.french <= 0) return { winner: 'ALLIED', type: 'demoralization' }
 
   // End of game (Round 10) - territorial objectives
-  if (store.turn > rf.MAX_ROUNDS) {
+  if (store.turn > rf.MAX_ROUNDS || store.phase === rf.PHASE_GAME_OVER) {
     let alliedObjectives = 0
     let frenchObjectives = 0
 

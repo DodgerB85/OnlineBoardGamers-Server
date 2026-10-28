@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING, cast
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
-from django.urls import reverse
 from django.utils.translation import gettext
 
+import Lobby.sharedFunctions.constants as rf
 from Lobby.gameViewHelpers import (
     build_show_game_data,
     process_game_with_mutex,
@@ -20,9 +20,9 @@ from Lobby.gameViewHelpers import (
 )
 from Lobby.models import Game, User
 from Lobby.sharedFunctions.permissions import can_act_in_game
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 from Lobby.sharedFunctions.sharedFunctions import SF_updateFlexiTime
 from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
-from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 if TYPE_CHECKING:
     from Lobby.presenters import NTRpresenter
@@ -67,10 +67,7 @@ def showNTRgame(request, game_id=1, spoilerFree=False, replayStep=1):
     if currentGame.phase in rfNTR.MAIN_PHASES:
         currentPlayersArr = json.dumps(presenter.getArrayOfIsCurrentPlayers())
 
-    startingMap = json.loads(currentGame.startingMap) if currentGame.startingMap else {}
-    # New structure: startingMap contains the full game state with board.options
-    scenario = startingMap.get("scenario", "dec_01")
-    teamPlay = startingMap.get("options", {}).get("team_play", False)
+    startingMap = currentGame.startingMap
 
     returnData.update(
         {
@@ -80,9 +77,6 @@ def showNTRgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(False, False)),
             "currentPlayers": currentPlayersArr,
             "startingMap": startingMap,
-            "scenario": scenario,
-            "teamPlay": teamPlay,
-            "preferredNTRoptions": [-1, 1],
         }
     )
 
@@ -91,25 +85,6 @@ def showNTRgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     returnData.update(result["auth_data"])
     returnData["pov"] = -9
-
-    profile_options = getattr(result["user_profile"], "preferredNTRoptions", "") or ""
-    preferredNTRoptions = json.loads(profile_options) if profile_options else [-1, 1]
-    if len(preferredNTRoptions) < 2:
-        preferredNTRoptions.extend([-1] * (2 - len(preferredNTRoptions)))
-
-    # Default for playerAid
-    if preferredNTRoptions[1] == -1:
-        preferredNTRoptions[1] = 1
-
-    returnData["preferredNTRoptions"] = preferredNTRoptions
-
-    # Chat notification
-    all_gps_including_kicked = list(currentGame.players.select_related("player").all())
-    chat_notify_ids_all = {gp.player.id for gp in all_gps_including_kicked if gp.player and gp.has_chat_notification}
-    if request.user.id in chat_notify_ids_all:
-        returnData["chatNotification"] = True
-        presenter.removeChatNotification(request.user)
-        currentGame.save()
 
     if not result["is_involved"]:
         return render(request, "NTR/showNTRgame.html", returnData)
@@ -149,7 +124,6 @@ def _processNTRturn(request):
 
     jsonData = json.loads(request.body)
     game_id = jsonData["gameID"]
-    latest_update = str(jsonData.get("latestUpdate", 0))
 
     try:
         currentGame = Game.objects.get(id=game_id, gameCode="NTR")
@@ -185,7 +159,7 @@ def performSaveGame(request, currentGame, jsonData, presenter):
         turn = jsonData.get("turn", "N/A")
         phase = jsonData.get("phase", "N/A")
         message = (
-            f"SYNC ERROR IN: NTR save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
+            f"SYNC ERROR IN: NTR save - gameID: {currentGame.id} - User: {request.user.username} - JSON_LU: {latest_update} "
             f"- DB_LU: {db_latest_update} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
             f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {', '.join(presenter.getArrayOfIsCurrentPlayers())}"
         )
@@ -217,16 +191,15 @@ def performSaveGame(request, currentGame, jsonData, presenter):
     if jsonData["status"] == "FINISHED":
         presenter.endGame(
             request,
-            jsonData["winner"],
-            jsonData["finalPositions"],
-            jsonData.get("tournamentData", []),
+            jsonData.get("winner", []),
+            jsonData.get("finalPositions", []),
             jsonData["gameID"],
         )
 
     else:
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         current_players = presenter.getArrayOfIsCurrentPlayers()
-        if len(current_players) > 0 and jsonData["status"] != "FINISHED" and rfNTR.SO_TRAINING_GAME not in loadedStartingOptions:
+        if len(current_players) > 0 and jsonData["status"] != "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
             playerListToNotify = [player.strip() for player in current_players]
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
@@ -276,7 +249,7 @@ def loadRewind(request, currentGame, jsonData, presenter):
         turn = jsonData.get("turn", "N/A")
         phase = jsonData.get("phase", "N/A")
         message = (
-            f"SYNC ERROR IN: NTR loadRewind - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
+            f"SYNC ERROR IN: NTR loadRewind - gameID: {currentGame.id} - User: {request.user.username} - JSON_LU: {latest_update} "
             f"- DB_LU: {currentGame.latestUpdate} -- JSON_turn: {turn} -- DB_turn: {currentGame.turn} "
             f"-- JSON_phase: {phase} -- DB_phase: {currentGame.phase} -- currentP: {', '.join(presenter.getArrayOfIsCurrentPlayers())}"
         )
@@ -372,6 +345,7 @@ def NTRdata(request, dataType=1):
                 "gameData": currentGame.gameData,
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
+                "finishedGame": currentGame.gameStatus == "FINISHED",
             }
         )
 

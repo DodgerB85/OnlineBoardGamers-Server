@@ -179,6 +179,17 @@ class WEBMainTournament(Tournament):
         return super().get_queryset(request).filter(gameCode="WEB", tournamentCategory="Main")
 
 
+class NTRMiniTournament(Tournament):
+    class Meta:
+        proxy = True
+        app_label = "NTR"
+        verbose_name = "NTR Mini Tournament"
+        verbose_name_plural = "NTR Mini Tournaments"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="NTR", tournamentCategory="Mini")
+
+
 class KFWMiniTournament(Tournament):
     class Meta:
         proxy = True
@@ -344,3 +355,12 @@ class ROWgame(Game):
         app_label = "ROW"
         verbose_name = "ROW_Game"
         verbose_name_plural = "ROW_Games"
+
+
+# NTR
+class NTRgame(Game):
+    class Meta(Game.Meta):
+        proxy = True
+        app_label = "NTR"
+        verbose_name = "NTR_Game"
+        verbose_name_plural = "NTR_Games"

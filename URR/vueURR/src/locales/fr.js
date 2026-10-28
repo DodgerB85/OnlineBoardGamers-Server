@@ -460,6 +460,7 @@ export default {
 		useCrewAria: "Utiliser l'équipe de creusement {number} de {points}",
 		addCanal: "Ajouter un canal",
 		clearCanalDraft: "Effacer le tracé de canal",
+		clearDiggingSelection: "Effacer la sélection de creusement",
 		skipEridu: "Passer Eridu et terminer le tour",
 		doneDigging: "Creusement terminé",
 		requiredCrewFunding: "Financement obligatoire de l'équipe",

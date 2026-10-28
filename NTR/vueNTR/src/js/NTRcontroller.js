@@ -1,23 +1,15 @@
-// NTRcontroller.js - Input handling and move validation
+// NTRcontroller.js - Input handling, move validation and server saves
 
 import { useModelStore } from '../stores/NTRstore'
 import * as model from './NTRmodel'
 import * as rf from './NTRreference'
+import * as IO from '../backend/NTR_IO'
 
-let selectedUnits = []
-let targetLocale = null
 let actionPhase = 'move' // 'move', 'attack', 'reveal'
 
 export function selectLocale(localeId) {
   const store = useModelStore()
-  if (!store.myMove) return false
-
-  // Toggle locale selection
-  if (targetLocale === localeId) {
-    targetLocale = null
-  } else {
-    targetLocale = localeId
-  }
+  store.selection.locale = store.selection.locale === localeId ? null : localeId
   return true
 }
 
@@ -30,24 +22,24 @@ export function selectUnit(unitId) {
 
   // Check if unit belongs to current player's side
   const isAlliedTurn = store.phase === rf.PHASE_ALLIED_TURN
-  const unitSide = unit.side
-  if ((isAlliedTurn && unitSide !== rf.SIDE_ALLIED) || (!isAlliedTurn && unitSide !== rf.SIDE_FRENCH)) {
+  if ((isAlliedTurn && unit.side !== rf.SIDE_ALLIED) || (!isAlliedTurn && unit.side !== rf.SIDE_FRENCH)) {
     return false
   }
 
   // Toggle unit selection
-  const idx = selectedUnits.findIndex(u => u.id === unitId)
+  const idx = store.selection.units.findIndex(u => u.id === unitId)
   if (idx >= 0) {
-    selectedUnits.splice(idx, 1)
+    store.selection.units.splice(idx, 1)
   } else {
-    selectedUnits.push(unit)
+    store.selection.units.push(unit)
   }
   return true
 }
 
 export function clearSelection() {
-  selectedUnits = []
-  targetLocale = null
+  const store = useModelStore()
+  store.selection.units = []
+  store.selection.locale = null
 }
 
 export function setActionPhase(phase) {
@@ -58,12 +50,6 @@ export function canMoveUnit(unit, targetLocaleId) {
   const store = useModelStore()
   if (!store.myMove) return { valid: false, reason: 'Not your turn' }
 
-  // Check if unit already moved this turn (would need move tracking)
-  // Check movement allowance
-  const movePoints = rf.UNIT_STATS[unit.type]?.move || 0
-  // Would need pathfinding to calculate actual cost
-
-  // Check if target is adjacent
   const currentLocale = unit.locale
   const adjacent = store.board.approaches.some(a =>
     (a.from === currentLocale && a.to === targetLocaleId) ||
@@ -96,7 +82,7 @@ export function canMoveUnit(unit, targetLocaleId) {
 export function canAttack(targetLocaleId) {
   const store = useModelStore()
   if (!store.myMove) return { valid: false, reason: 'Not your turn' }
-  if (selectedUnits.length === 0) return { valid: false, reason: 'No units selected' }
+  if (store.selection.units.length === 0) return { valid: false, reason: 'No units selected' }
   if (!targetLocaleId) return { valid: false, reason: 'No target locale' }
 
   // Check if enemy units present
@@ -107,7 +93,7 @@ export function canAttack(targetLocaleId) {
   if (enemyUnits.length === 0) return { valid: false, reason: 'No enemy units at target' }
 
   // Check if adjacent
-  const currentLocale = selectedUnits[0].locale
+  const currentLocale = store.selection.units[0].locale
   const adjacent = store.board.approaches.some(a =>
     (a.from === currentLocale && a.to === targetLocaleId) ||
     (a.to === currentLocale && a.from === targetLocaleId)
@@ -119,7 +105,6 @@ export function canAttack(targetLocaleId) {
 }
 
 export function executeMove(units, targetLocaleId) {
-  const store = useModelStore()
   const results = []
 
   for (const unit of units) {
@@ -129,13 +114,12 @@ export function executeMove(units, targetLocaleId) {
       continue
     }
 
-    // Move the unit
     model.moveUnit(unit.id, targetLocaleId)
     results.push({ unit: unit.id, success: true })
   }
 
   clearSelection()
-  saveGameState()
+  afterAction()
   return results
 }
 
@@ -176,9 +160,6 @@ export function executeAttack(units, targetLocaleId) {
     }
   }
 
-  // Check morale for retreat
-  const moraleLoss = attackerLosses * rf.MORALE_LOSS_STEP_LOSS + defenderLosses * rf.MORALE_LOSS_STEP_LOSS
-
   store.addHistoryEntry({
     turn: store.turn,
     phase: store.phase,
@@ -188,7 +169,7 @@ export function executeAttack(units, targetLocaleId) {
   })
 
   clearSelection()
-  saveGameState()
+  afterAction()
 
   return { success: true, attackerLosses, defenderLosses, results }
 }
@@ -214,7 +195,7 @@ export function executeReveal(units) {
   })
 
   clearSelection()
-  saveGameState()
+  afterAction()
 
   return { success: true }
 }
@@ -235,7 +216,7 @@ export function passTurn() {
   }
 
   clearSelection()
-  saveGameState()
+  afterAction()
   return true
 }
 
@@ -265,7 +246,7 @@ export function reorganize() {
     }
   }
 
-  saveGameState()
+  afterAction()
 }
 
 export function forcedMarch() {
@@ -285,32 +266,48 @@ export function forcedMarch() {
     side: store.phase === rf.PHASE_ALLIED_TURN ? rf.SIDE_ALLIED : rf.SIDE_FRENCH,
   })
 
-  saveGameState()
+  afterAction()
 }
 
 export function artilleryBombard() {
-  // Artillery can attack from 2 locales away
+  // Artillery can attack from 2 locales away; range-2 pathfinding is not
+  // implemented, so this spends nothing and sends nothing.
   const store = useModelStore()
   if (!store.myMove) return
-
-  const artilleryUnits = selectedUnits.filter(u => u.type === rf.UNIT_ARTILLERY)
-  if (artilleryUnits.length === 0) return
-
-  // Would need range-2 pathfinding
-  // For now, just mark as artillery attack
-  saveGameState()
 }
 
-function saveGameState() {
+// Every action ends here: persist the position, then decide whether the game is over.
+function afterAction() {
   const store = useModelStore()
-  const gameData = {
-    board: store.board,
-    turn: store.turn,
-    phase: store.phase,
-    morale: store.board.morale,
-    hiddenData: store.hiddenData,
-    corpsAssignments: store.corpsAssignments,
-    players: store.players,
+  model.saveGameState()
+
+  const victory = model.checkVictory()
+  if (!victory) {
+    IO.saveGame()
+    return
   }
-  store.gameData = JSON.stringify(gameData)
+
+  store.phase = rf.PHASE_GAME_OVER
+  store.finishedGame = true
+  store.victory = victory
+  const finish = buildFinishPayload(victory)
+  IO.saveGame({ status: 'FINISHED', winner: finish.winner, finalPositions: finish.finalPositions })
+}
+
+// The server marks winners by username and orders the result by seat index.
+function buildFinishPayload(victory) {
+  const store = useModelStore()
+  const seats = store.players.map((player, seat) => ({ player, seat }))
+
+  if (victory.winner === 'draw') {
+    // Nobody is marked as a winner; every seat shares the result.
+    return { winner: [], finalPositions: seats.map(({ seat }) => seat) }
+  }
+
+  const winners = seats.filter(({ player }) => player.side === victory.winner)
+  const losers = seats.filter(({ player }) => player.side !== victory.winner)
+  return {
+    winner: winners.map(({ player }) => player.username),
+    finalPositions: [...winners, ...losers].map(({ seat }) => seat),
+  }
 }

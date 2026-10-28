@@ -104,7 +104,7 @@
                     </div>
                     <div class="form-row">
                         <label class="form-label" for="playerNumber">{% translate "Number of players" %}</label>
-                        <select name="playerNumber" id="playerNumber" onchange="selectPlayers();">
+                        <select name="playerNumber" id="playerNumber" onchange="playerNumberChanged();">
                             <option value="2" selected="selected">2</option>
                             <option value="4">4 (Team Play)</option>
                             <option value="8">8 (Team Play)</option>
@@ -197,15 +197,15 @@
                     <label class="form-label">{% translate "Scenario" %}</label>
                     <div class="field">
                         <label class="radio-label">
-                            <input type="radio" name="scenario" value="0" checked>
-                            <span>{% translate "Historical (Dec 2, 1805)" %}</span>
+                            <input type="radio" name="scenario" id="scenario1" value="1" checked>
+                            <span>{% translate "1 December 1805 (Evening)" %}</span>
                         </label>
                         <label class="radio-label">
-                            <input type="radio" name="scenario" value="1">
-                            <span>{% translate "Alternate Deployment" %}</span>
+                            <input type="radio" name="scenario" id="scenario2" value="2">
+                            <span>{% translate "2 December 1805 (Morning)" %}</span>
                         </label>
                     </div>
-                    <div class="form-help">{% translate "Select the historical scenario for initial unit placement" %}</div>
+                    <div class="form-help">{% translate "The opening position for the first French and Allied turns" %}</div>
                 </div>
 
                 <div class="form-row">
@@ -222,12 +222,14 @@
                     </label>
                 </div>
 
+                {% if not MT_Creation %}
                 <div class="form-row">
                     <label class="check-label">
-                        <input type="checkbox" class="myCheckbox" id="teamPlay" name="teamPlay" value="1">
+                        <input type="checkbox" class="myCheckbox" id="teamPlay" name="teamPlay" value="12" onchange="validateOptions(this.id)">
                         <div><div>{% translate "Team Play" %}</div><div class="opt-help">{% translate "Up to 8 players (4 per side). Each player commands specific Corps. Requires 4 or 8 players." %}</div></div>
                     </label>
                 </div>
+                {% endif %}
 
             </div>
 

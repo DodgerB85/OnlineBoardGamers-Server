@@ -42,7 +42,7 @@ class TestForceTrailingSlashMiddleware(TestCase):
         self.assertIsNone(response)
 
     def test_redirects_all_game_codes(self):
-        game_codes = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "PPF", "WEB", "RNB"]
+        game_codes = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "PPF", "WEB", "RNB", "NTR"]
         for code in game_codes:
             request = self.factory.get(f"/{code}/game")
             response = self.middleware(request)

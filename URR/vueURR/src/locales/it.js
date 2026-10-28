@@ -460,6 +460,7 @@ export default {
 		useCrewAria: "Usa squadra di scavo {number} da {points}",
 		addCanal: "Aggiungi canale",
 		clearCanalDraft: "Pulisci bozza canale",
+		clearDiggingSelection: "Pulisci selezione di scavo",
 		skipEridu: "Salta Eridu e termina il turno",
 		doneDigging: "Scavo terminato",
 		requiredCrewFunding: "Finanziamento obbligatorio della squadra",
