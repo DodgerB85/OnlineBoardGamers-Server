@@ -1,9 +1,8 @@
 /**
  * Board graph and geometry helpers.
  *
- * A route of printed length N is modelled as N steps: the planet at one end,
- * N-1 mid-space "dot" nodes, then the planet at the other end. A highway on a
- * dot makes entering that dot free for its owner.
+ * Each branch links planets or shared junctions through its printed road cells.
+ * Entering a cell costs one step, or zero for the owner of its highway.
  */
 
 import * as rf from "./DDLreference.js"
@@ -12,64 +11,19 @@ import i18n from "../i18n.js"
 const t = i18n.global.t
 const SEGMENT_PREFIX = "S"
 
-function sampleCurve(points, samplesPerSection = 24) {
-	if (!points || points.length === 0) return []
-	if (points.length === 1) return [points[0]]
-	const out = []
-	for (let i = 0; i < points.length - 1; i++) {
-		const p0 = points[Math.max(0, i - 1)]
-		const p1 = points[i]
-		const p2 = points[i + 1]
-		const p3 = points[Math.min(points.length - 1, i + 2)]
-		for (let j = 0; j < samplesPerSection; j++) {
-			const t = j / samplesPerSection
-			const t2 = t * t
-			const t3 = t2 * t
-			out.push([
-				0.5 * (2 * p1[0] + (-p0[0] + p2[0]) * t + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3),
-				0.5 * (2 * p1[1] + (-p0[1] + p2[1]) * t + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3),
-			])
-		}
-	}
-	out.push(points[points.length - 1])
-	return out
-}
-
-function pointAtFraction(points, fraction) {
-	if (points.length === 1) return points[0]
-	let total = 0
-	const lengths = []
-	for (let i = 1; i < points.length; i++) {
-		const d = Math.hypot(points[i][0] - points[i - 1][0], points[i][1] - points[i - 1][1])
-		lengths.push(d)
-		total += d
-	}
-	if (total === 0) return points[0]
-	let target = total * fraction
-	for (let i = 0; i < lengths.length; i++) {
-		if (target <= lengths[i]) {
-			const t = lengths[i] === 0 ? 0 : target / lengths[i]
-			return [points[i][0] + (points[i + 1][0] - points[i][0]) * t, points[i][1] + (points[i + 1][1] - points[i][1]) * t]
-		}
-		target -= lengths[i]
-	}
-	return points[points.length - 1]
-}
-
-export const ROUTE_POINTS = {}
-export const SEGMENT_POSITIONS = {}
+export const SEGMENT_POSITIONS = rf.ROUTE_DOTS
+export const ROAD_POLYGONS = { ...rf.JUNCTION_CELLS }
 for (const route of rf.ROUTES) {
-	const points = sampleCurve(route.ctrl)
-	ROUTE_POINTS[route.id] = points
-	// Prefer the measured printed dots; the hand-drawn control points only
-	// describe the shape of the route, not where its dots landed on the art.
-	const measured = rf.ROUTE_DOTS[route.id]
-	SEGMENT_POSITIONS[route.id] = []
-	for (let i = 1; i < route.length; i++) {
-		const fallback = pointAtFraction(points, i / route.length)
-		const dot = measured && measured[i - 1] ? measured[i - 1] : fallback
-		SEGMENT_POSITIONS[route.id].push([dot[0], dot[1]])
-	}
+	for (let i = 1; i < route.length; i++) ROAD_POLYGONS[segmentNodeId(route.id, i)] = rf.ROAD_CELLS[route.id][i - 1]
+}
+export const ROAD_NODES = Object.keys(ROAD_POLYGONS)
+
+export function roadPolygon(nodeId) {
+	return ROAD_POLYGONS[nodeId].map((point) => point.join(",")).join(" ")
+}
+
+export function isRoadNode(nodeId) {
+	return Object.hasOwn(ROAD_POLYGONS, nodeId)
 }
 
 export function segmentNodeId(routeId, index) {
@@ -80,10 +34,6 @@ export function parseSegmentNode(nodeId) {
 	if (typeof nodeId !== "string" || !nodeId.startsWith(SEGMENT_PREFIX)) return null
 	const [routeId, index] = nodeId.slice(1).split(":")
 	return { routeId: Number(routeId), index: Number(index) }
-}
-
-export function isSegmentNode(nodeId) {
-	return parseSegmentNode(nodeId) !== null
 }
 
 export function nodePosition(nodeId) {
@@ -122,8 +72,8 @@ for (const route of rf.ROUTES) {
 	for (let i = 0; i < chain.length - 1; i++) {
 		const a = chain[i]
 		const b = chain[i + 1]
-		addAdj(a, b, route.id, isSegmentNode(b) ? b : null)
-		addAdj(b, a, route.id, isSegmentNode(a) ? a : null)
+		addAdj(a, b, route.id, isRoadNode(b) ? b : null)
+		addAdj(b, a, route.id, isRoadNode(a) ? a : null)
 	}
 }
 
@@ -131,21 +81,8 @@ export function neighbours(nodeId) {
 	return ADJACENCY[nodeId] || []
 }
 
-export function routePathD(route) {
-	const pts = ROUTE_POINTS[route.id]
-	if (!pts || pts.length === 0) return ""
-	let d = `M ${pts[0][0]} ${pts[0][1]}`
-	for (let i = 1; i < pts.length - 1; i++) {
-		const midX = (pts[i][0] + pts[i + 1][0]) / 2
-		const midY = (pts[i][1] + pts[i + 1][1]) / 2
-		d += ` Q ${pts[i][0]} ${pts[i][1]} ${midX} ${midY}`
-	}
-	d += ` L ${pts[pts.length - 1][0]} ${pts[pts.length - 1][1]}`
-	return d
-}
-
 function edgeCost(state, playerIndex, from, to) {
-	if (isSegmentNode(to)) {
+	if (isRoadNode(to)) {
 		const highway = state.board.highways[to]
 		if (highway === playerIndex) return 0
 	}
