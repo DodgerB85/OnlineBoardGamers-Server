@@ -136,14 +136,7 @@ const highlighted = computed(() => {
 		return new Set(map.reachableNodes(store, activePlayerIndex.value, store.players[activePlayerIndex.value].ship.node, store.gameflow.movement.remaining))
 	}
 	if (store.context.action === rf.ACT_PLACE_HIGHWAYS) {
-		const nodes = []
-		for (const route of rf.ROUTES) {
-			for (let i = 1; i < route.length; i++) {
-				const id = map.segmentNodeId(route.id, i)
-				if (store.board.highways[id] === undefined && map.shipsOnNode(store, id).length === 0) nodes.push(id)
-			}
-		}
-		return new Set(nodes)
+		return new Set(map.ROAD_NODES.filter((id) => store.board.highways[id] === undefined && map.shipsOnNode(store, id).length === 0))
 	}
 	return new Set()
 })
@@ -272,10 +265,6 @@ function privilegeColour(owner) {
 	<div class="boardWrap" ref="wrapEl" :style="{ maxHeight: wrapMaxHeight + 'px' }">
 		<div class="boardScaler" :style="{ width: boardWidth + 'px', height: boardHeight + 'px' }">
 		<div class="board" :style="[boardStyle, { transform: `scale(${scale})` }]">
-			<svg class="overlaySvg" viewBox="0 0 1800 1200" preserveAspectRatio="none">
-				<path v-for="route in rf.ROUTES" :key="route.id" :d="map.routePathD(route)" fill="none" stroke="#7fb8e8" stroke-width="18" stroke-opacity="0" />
-			</svg>
-
 			<div v-for="item in planetItems" :key="item.planet.id" class="planet" :class="{ startPlanet: item.planet.start, highlighted: highlightedPlanets.has(item.planet.id), selected: store.context.selectedPlanet === item.planet.id }" :style="item.style" @click="onPlanetClick(item.planet)">
 				<div class="planetDisc" :class="{ start: item.planet.start }" :title="item.planet.name"></div>
 				<div class="planetStatus">
@@ -306,7 +295,9 @@ function privilegeColour(owner) {
 
 			<div v-for="item in pathwayItems" :key="item.planetId + item.dir + item.owner" class="pathwayMarker" :class="item.dir" :style="{ ...item.style, borderColor: item.colour, color: item.colour }">{{ item.dir === "in" ? $t("map.in") : $t("map.out") }}</div>
 
-			<div v-for="node in highwayTargets" :key="node" class="dotTarget" :style="pct(map.nodePosition(node))" :title="map.nodeLabel(node)" @click="onNodeClick(node)"></div>
+			<svg class="overlaySvg" viewBox="0 0 1800 1200" preserveAspectRatio="none">
+				<polygon v-for="node in highwayTargets" :key="node" class="dotTarget" :data-node="node" :points="map.roadPolygon(node)" @click="onNodeClick(node)"><title>{{ map.nodeLabel(node) }}</title></polygon>
+			</svg>
 
 			<div v-for="card in consumerCards" :key="card.col + '-' + card.row" class="consumerCard" :class="{ empty: card.tileId === null, top: card.top }" :style="card.style">
 				<img v-if="card.tileId !== null" :src="funcs.goodImage(card.tileId)" :title="$t('map.cardTitle', { good: rf.goodName(card.tileId), value: card.value })" />
@@ -340,6 +331,7 @@ function privilegeColour(owner) {
 	overflow: hidden;
 }
 .overlaySvg {
+	z-index: 20;
 	position: absolute;
 	inset: 0;
 	width: 100%;
@@ -466,17 +458,13 @@ function privilegeColour(owner) {
 	z-index: 10;
 }
 .dotTarget {
-	position: absolute;
-	width: 14px;
-	height: 14px;
-	transform: translate(-50%, -50%);
-	border-radius: 50%;
-	background: rgba(255, 230, 0, 0.55);
-	border: 2px solid #ffe600;
+	fill: rgba(255, 230, 0, 0.45);
+	stroke: #ffe600;
+	stroke-width: 2;
 	cursor: pointer;
-	z-index: 20;
+	pointer-events: auto;
 }
-.dotTarget:hover { background: rgba(255, 230, 0, 0.9); }
+.dotTarget:hover { fill: rgba(255, 230, 0, 0.8); }
 .consumerCard {
 	position: absolute;
 	width: 4.6%;

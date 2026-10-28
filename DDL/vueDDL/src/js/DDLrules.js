@@ -448,7 +448,7 @@ export function spendEnergy(state, playerIndex, colour) {
 
 export function placeHighway(state, playerIndex, segmentNode, free = false) {
 	if (state.gameflow.turnType !== rf.TURN_ACTION) return { ok: false, message: t("errors.notActionTurn") }
-	if (!map.isSegmentNode(segmentNode)) return { ok: false, message: t("errors.highwayOnDot") }
+	if (!map.isRoadNode(segmentNode)) return { ok: false, message: t("errors.highwayOnDot") }
 	if (state.board.highways[segmentNode] !== undefined) return { ok: false, message: t("errors.dotHasHighway") }
 	const ships = map.shipsOnNode(state, segmentNode)
 	if (ships.length > 0) return { ok: false, message: t("errors.shipOnDot") }
