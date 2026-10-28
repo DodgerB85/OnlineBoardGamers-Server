@@ -1861,17 +1861,17 @@ def profile(request):
             profile.receiveTurnNudges = "receiveTurnNudges" in request.POST
 
             emailNotifications = [
-                int(request.POST["yourTurnEmail"]),
-                int(request.POST["gameInviteEmail"]),
-                int(request.POST["turnExpiredEmail"]),
-                int(request.POST["tournamentGameStartEmail"]),
-                int(request.POST["tournamentWinEmail"]),
-                int(request.POST["inviteDeclineEmail"]),
-                int(request.POST["gameStartEmail"]),
-                int(request.POST["gameEndEmail"]),
-                int(request.POST["twoHourReminderEmail"]),
-                int(request.POST["dailyReminderEmail"]),
-                int(request.POST["tournamentOpenEmail"]),
+                int(request.POST.get("yourTurnEmail", 1)),
+                int(request.POST.get("gameInviteEmail", 1)),
+                int(request.POST.get("turnExpiredEmail", 1)),
+                int(request.POST.get("tournamentGameStartEmail", 1)),
+                int(request.POST.get("tournamentWinEmail", 1)),
+                int(request.POST.get("inviteDeclineEmail", 1)),
+                int(request.POST.get("gameStartEmail", 1)),
+                int(request.POST.get("gameEndEmail", 1)),
+                int(request.POST.get("twoHourReminderEmail", 1)),
+                int(request.POST.get("dailyReminderEmail", 1)),
+                int(request.POST.get("tournamentOpenEmail", 1)),
             ]
             profile.emailNotifications = json.dumps(emailNotifications, separators=(",", ":"))
 

@@ -333,7 +333,7 @@ class BaseGame(models.Model):
 
     id = models.AutoField(primary_key=True)
 
-    gameName = models.CharField(max_length=120, blank=True)
+    gameName = models.CharField(max_length=200, blank=True)
     gameDescription = models.CharField(max_length=120, blank=True)
     gameStatus = models.CharField(
         max_length=9,
