@@ -8,7 +8,7 @@
  * - The combined bridge+road (2 stone) still exists as one action.
  * - A bridge on its own (no road) is enough for a donkey to cross the moat;
  *   wagons and trucks still need the road.
- * - Walls on a city edge require bridge AND road on that side.
+ * - Walls on a city edge require a moat BRIDGE on that side; the road is optional.
  *
  * Run with:
  *     node --test tests/city-build.test.js
@@ -175,7 +175,7 @@ test("on a fresh city: bridge and bridge+road offered, standalone road and wall 
 	assert.ok(options.includes(rf.BLDG_PSEUDO_BRIDGE), "bridge (1 stone) is offered")
 	assert.ok(options.includes(rf.BLDG_PSEUDO_ROAD_BRIDGE), "bridge+road (2 stone) is offered")
 	assert.ok(!options.includes(rf.BLDG_PSEUDO_ROAD), "standalone road is NOT offered before any bridge exists")
-	assert.ok(!options.includes(rf.BLDG_PSEUDO_WALL), "wall is NOT offered before a bridge+road exists")
+	assert.ok(!options.includes(rf.BLDG_PSEUDO_WALL), "wall is NOT offered before a bridge exists")
 })
 
 test("combined bridge+road from the city: walls gated to that side only", { skip: skip }, () => {
@@ -190,12 +190,12 @@ test("combined bridge+road from the city: walls gated to that side only", { skip
 	assert.equal(store.ALL_RESOURCES.filter((r) => r.type === rf.RES_STONE && r.location[0] !== rf.LOCATION_OOB).length, 1, "2 stone were deducted")
 
 	const edgeToPasture2 = edgeBetween(store, 0, 2)
-	assert.equal(map.cityEdgeHasBridgeAndRoad(0, edgeToPasture1), true, "bridge+road side is wall-eligible")
-	assert.equal(map.cityEdgeHasBridgeAndRoad(0, edgeToPasture2), false, "side without bridge+road is NOT wall-eligible")
+	assert.equal(map.cityEdgeHasBridge(0, edgeToPasture1), true, "bridged side is wall-eligible")
+	assert.equal(map.cityEdgeHasBridge(0, edgeToPasture2), false, "side without a bridge is NOT wall-eligible")
 
 	build.setEligibleItemsToBuild(0, 0)
 	const options = store.context.eligibleBuildingsToBuild
-	assert.ok(options.includes(rf.BLDG_PSEUDO_WALL), "wall option is offered after a bridge+road exists")
+	assert.ok(options.includes(rf.BLDG_PSEUDO_WALL), "wall option is offered once the bridge exists")
 	assert.ok(!options.includes(rf.BLDG_PSEUDO_ROAD_BRIDGE), "no further bridge+road offered (only 1 stone left)")
 	assert.ok(!options.includes(rf.BLDG_PSEUDO_ROAD), "standalone road still NOT offered (no bridge on the other side)")
 	assert.ok(options.includes(rf.BLDG_PSEUDO_BRIDGE), "bridge still offered for the remaining sides")
@@ -227,13 +227,79 @@ test("road to/from a city is rejected by verify without a bridge, allowed after 
 	// ...and verify now accepts the road
 	assert.equal(stack.verifySingleStackAction(roadActionNoBridge), 0, "road verify passes after the bridge")
 
-	// Build the road for real, then the wall rule unlocks on that side
-	map.addRoadToMap([0, 0], [2, 0], true)
+	// A bridge alone is already a usable crossing, so the wall unlocks without a road
 	const edgeToPasture2 = edgeBetween(store, 0, 2)
-	assert.equal(edgeToPasture2.hasRoad[0], true, "road built to pasture2")
-	assert.equal(map.cityEdgeHasBridgeAndRoad(0, edgeToPasture2), true, "bridge+road side is wall-eligible")
+	assert.equal(map.cityEdgeHasBridge(0, edgeToPasture2), true, "bridge-only side is wall-eligible")
 	build.setEligibleItemsToBuild(0, 0)
-	assert.ok(store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_WALL), "wall offered after bridge + road")
+	assert.ok(store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_WALL), "wall offered after a bridge alone (road optional)")
+
+	// The road still lands on the same edge and keeps the side wall-eligible
+	map.addRoadToMap([0, 0], [2, 0], true)
+	assert.equal(edgeToPasture2.hasRoad[0], true, "road built to pasture2")
+	build.setEligibleItemsToBuild(0, 0)
+	assert.ok(store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_WALL), "wall still offered after the road")
+})
+
+test("city side joined to a river: a bank bridge alone makes the edge wall-eligible", { skip: skip }, () => {
+	setActivePinia(createPinia())
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	personal.soloGame = true
+	personal.pov = 0
+
+	store.players.splice(0)
+	store.players.push({ name: "A", displayName: "", colour: 0, RnD: [0, 0, 0, 0, 0, 0, 0, 0] })
+	store.gameflow.turn = 1
+	store.gameflow.phase = rf.PHASE_BUILDING_TO
+	store.gameflow.turnOrder = [0]
+	store.gameflow.fullTurnOrder = [0]
+
+	store.mapData.hexData.splice(0)
+	store.mapData.edgeData.splice(0)
+	store.ALL_RESOURCES.splice(0)
+	store.ALL_BUILDINGS.splice(0)
+	store.ALL_TRANSPORTERS.splice(0)
+
+	// The river is hex 0 and the city is hex 1, so the edge is stored as [0, 1] with the
+	// city second - the order game 37327 has (edge 26<->56, city 56).
+	const river = hd.createActualHex([0, 1, -1], 0, rf.PASTURE_RIVER_STRAIGHT)
+	river.hexID = 0
+	store.mapData.hexData.push(river)
+	const city = hd.createActualHex([0, 0, 0], 0, rf.CITY)
+	city.hexID = 1
+	store.mapData.hexData.push(city)
+	map.addNewEdge([0, 1])
+
+	store.ALL_TRANSPORTERS.push({
+		id: 0,
+		type: rf.DONKEY,
+		uniqueID: "00031000000",
+		location: [rf.LOCATION_LAND_VERTEX, 1, 0],
+		remainingMoves: 2,
+		ownerIndex: 0,
+		movedThisTurn: false,
+		justPickedUpFromLocation: [],
+	})
+	for (let i = 0; i < 4; i++) model.addResourceToGame_core(rf.RES_STONE, [rf.LOCATION_BUCKET, 1, 0], 0)
+	store.context.selectedTransporterIDforTM = 0
+
+	// Build ONE bank's moat bridge and no road at all - the case the old gate rejected:
+	// with fewer than two road slots filled it fell through to a branch demanding a
+	// CENTRE bridge, which getCityBridgeOptions never offers on a river side. So the wall
+	// was never offered from the city (game 37327), only from the far bank.
+	const bankBridge = map.getCityBridgeOptions(1).find((o) => o.side === 2)
+	map.addBridgeToMap(1, bankBridge.bridgeArr, true)
+
+	const edge = edgeBetween(store, 0, 1)
+	assert.equal(edge.edgeHexIDs[1], 1, "the city is edgeHexIDs[1]")
+	assert.equal(edge.hasRoad.filter(Boolean).length, 0, "no road crosses the moat yet")
+	assert.equal(map.cityEdgeHasBridge(1, edge), true, "the wall is offered from the city")
+
+	// Adding the road keeps the side wall-eligible
+	map.addRoadToMap([1, 0], [0, 0], true)
+	assert.equal(edge.hasRoad.filter(Boolean).length, 1, "one bank now has its road")
+	build.setEligibleItemsToBuild(0, 0)
+	assert.ok(store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_WALL), "wall still offered after the road")
 })
 
 test("power line to/from a city requires the moat bridge", { skip: skip }, () => {

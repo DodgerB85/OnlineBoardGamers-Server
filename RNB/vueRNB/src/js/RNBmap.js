@@ -1253,19 +1253,17 @@ export function cityBankNodeForEdgeSlot(cityHex, citySide, edge, k) {
 	return bankNodes[(k + cityIdx) % 2]
 }
 
-// CITY: a wall on a city's edge may only be built on a side where a bridge AND road
-// already cross the moat (the wall stands on a built-up gate, not on the water).
-// On city-river edges one bank having both its bridge and road is enough.
-export function cityEdgeHasBridgeAndRoad(cityHexID, edge) {
+// CITY: a wall on a city's edge may only be built on a side that already has a moat
+// bridge across to it (the wall stands on a built-up gate, not on the water). Per the
+// rules a bridge alone is a usable crossing, so the road is not required. A river side
+// has only bank bridges (see getCityBridgeOptions), never a centre one.
+export function cityEdgeHasBridge(cityHexID, edge) {
 	const cityHex = model.getHexByID(cityHexID)
 	const sideIdx = edge.edgeHexIDs[0] === cityHexID ? 0 : 1
 	const citySide = edge.joiningSides[sideIdx]
 	const innerGate = cityHex.cornerNodeIds[citySide][0]
-	if (edge.hasRoad.length === 2) {
-		const bankNodes = cityBankNodesForSide(cityHex, citySide)
-		return bankNodes.some((node, bankIdx) => util.includesArray(cityHex.builtBridges, [innerGate, node]) && edge.hasRoad[(bankIdx + sideIdx) % 2])
-	}
-	return util.includesArray(cityHex.builtBridges, cityHex.cornerNodeIds[citySide]) && edge.hasRoad.some(Boolean)
+	const bankBridged = cityBankNodesForSide(cityHex, citySide).some((node) => util.includesArray(cityHex.builtBridges, [innerGate, node]))
+	return bankBridged || util.includesArray(cityHex.builtBridges, cityHex.cornerNodeIds[citySide])
 }
 
 // CITY: build a bridge across a city moat plus the road into the city, for 2 stone.

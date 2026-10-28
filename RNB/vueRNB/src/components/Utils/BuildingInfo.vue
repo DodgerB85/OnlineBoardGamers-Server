@@ -276,8 +276,8 @@ function clickedNewBuilding(bldgNum) {
 				if (hex1IsPolder && hex2IsPolder) continue
 				if ((hex1IsPolder || hex2IsPolder) && (hex1.currentTerrain === rf.TERR_SEA || hex2.currentTerrain === rf.TERR_SEA)) continue
 				// CITY: on a city tile, walls may only be BUILT on sides that already have a
-				// bridge and road crossing the moat (demolition is unaffected)
-				const cityWallSideOK = hexObj.hexTerrainID !== rf.CITY || map.cityEdgeHasBridgeAndRoad(hexID, edgeEntry)
+				// moat bridge crossing to them (demolition is unaffected)
+				const cityWallSideOK = hexObj.hexTerrainID !== rf.CITY || map.cityEdgeHasBridge(hexID, edgeEntry)
 				// If you own it or it's neutral, and you have level+1 stones, you can build there
 				if (!ownedByOpponent && cityWallSideOK && stoneOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater) {
 					context.addEligibleWallToBuild(hexIds)

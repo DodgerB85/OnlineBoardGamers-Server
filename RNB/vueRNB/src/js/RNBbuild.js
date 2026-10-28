@@ -105,8 +105,8 @@ export function setEligibleItemsToBuild(playerIndex, transporterID) {
 			if (eitherIsPolder && (hex1IsSea || hex2IsSea)) continue
 
 			// CITY: on a city tile, walls may only be BUILT on sides that already have a
-			// bridge and road crossing the moat (demolition is unaffected)
-			const cityWallSideOK = hexObj.hexTerrainID !== rf.CITY || map.cityEdgeHasBridgeAndRoad(hexID, edgeEntry)
+			// moat bridge crossing to them (demolition is unaffected)
+			const cityWallSideOK = hexObj.hexTerrainID !== rf.CITY || map.cityEdgeHasBridge(hexID, edgeEntry)
 
 			// If you own it or it's neutral, and you have level+1 stones, you can build there
 			if (!ownedByOpponent && cityWallSideOK && stoneOnHex >= edgeEntry.wall[0] + 1 + resIncreaseDueBuildingFromWater) {
