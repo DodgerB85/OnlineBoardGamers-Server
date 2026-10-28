@@ -23,6 +23,10 @@ export function canPlayerVrom(forceCheck) {
 
 	// Pittsburgh map: use network traversal to check if passengers can reach buildings
 	if (personal.selectedBoard === rf.BOARD_PITTS) {
+		// forceCheck callers (the skip loops in endPlayerTurn/endCurrentPhase, and the post-move
+		// checks) run before startPlayerTurn has set up the eligible list for the current player,
+		// so refresh it here or every player gets wrongly skipped
+		if (forceCheck) setupPlayerVromPitts()
 		return canPlayerVromPittsCheck(player, store)
 	}
 
