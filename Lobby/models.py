@@ -187,7 +187,7 @@ class Tournament(models.Model):
         default="FCM",
     )
 
-    tournamentName = models.CharField(max_length=120)
+    tournamentName = models.CharField(max_length=200)
     tournamentDescription = models.CharField(max_length=120, blank=True)
 
     tournamentStatus = models.CharField(
