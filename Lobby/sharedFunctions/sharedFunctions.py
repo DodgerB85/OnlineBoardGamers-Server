@@ -39,6 +39,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getHLCstartingOptionsHTML,
     SR_getINDstartingOptionsHTML,
     SR_getKFWstartingOptionsHTML,
+    SR_getNTRstartingOptionsHTML,
     SR_getPointsForPosition,
     SR_getRNBstartingOptionsHTML,
     SR_getROWstartingOptionsHTML,
@@ -242,6 +243,8 @@ def SF_serializeGame(game, user, player_context):
         startingOptionsHTML = SR_getROWstartingOptionsHTML(startingOptionsArr)
     if game_code == "RNB":
         startingOptionsHTML = SR_getRNBstartingOptionsHTML(startingOptionsArr)
+    if game_code == "NTR":
+        startingOptionsHTML = SR_getNTRstartingOptionsHTML(startingOptionsArr)
 
 
 
@@ -737,6 +740,7 @@ def start_next_any_tournament_round(
     from HLC.common import create_hlc_game
     from IND.common import create_ind_game
     from KFW.common import create_kfw_game
+    from NTR.common import create_ntr_game
     from RNB.common import create_rnb_game
     from TGZ.common import create_tgz_game
     from WEB.common import create_web_game
@@ -843,6 +847,8 @@ def start_next_any_tournament_round(
             newGameID = create_web_game(request, tournamentObj, tournamentGameName, currentPlayers)
         elif tournamentObj.gameCode == "KFW":
             newGameID = create_kfw_game(request, tournamentObj, tournamentGameName, currentPlayers)
+        elif tournamentObj.gameCode == "NTR":
+            newGameID = create_ntr_game(request, tournamentObj, tournamentGameName, currentPlayers)
         else:
             # LEGACY CODE FOR SEPERARTE TOURNAMENT MODELS
             # THIS WILL FAIL! THIS FUNCTION NO LONGER EXISTS

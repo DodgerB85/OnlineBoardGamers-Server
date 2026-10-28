@@ -13,6 +13,7 @@ import AQY.AQYconstants as rfAQY
 import DDL.DDLconstants as rfDDL
 import FCM.FCMconstants as rfFCM
 import Lobby.sharedFunctions.constants as rf
+import NTR.NTRconstants as rfNTR
 import RNB.RNBconstants as rfRNB
 import ROW.ROWconstants as rfROW
 import URR.URRconstants as rfURR
@@ -1333,14 +1334,14 @@ def SR_getNTRstartingOptionsHTML(startingOptionsArr):
         return ""
     startingOptionsHTML = ""
     for option in startingOptionsArr:
-        if option == 10:
+        if option == rfNTR.SO_FRENCH_REINFORCEMENTS:
             startingOptionsHTML += "<img class='startingOption' src='/static/NTR/images/so_frenchReinforcements.svg' title='" + gettext("French Reinforcements") + "'>"
-        if option == 11:
+        if option == rfNTR.SO_SANTON_FORT:
             startingOptionsHTML += "<img class='startingOption' src='/static/NTR/images/so_santonFort.svg' title='" + gettext("Santon Fort") + "'>"
-        if option == 12:
+        if option == rfNTR.SO_TEAM_PLAY:
             startingOptionsHTML += "<img class='startingOption' src='/static/NTR/images/so_teamPlay.svg' title='" + gettext("Team Play") + "'>"
         if option == rf.SO_LEARNING_GAME:
             startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
-        elif option == rf.SO_EXPERIENCED_GAME:
+        if option == rf.SO_EXPERIENCED_GAME:
             startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
     return startingOptionsHTML

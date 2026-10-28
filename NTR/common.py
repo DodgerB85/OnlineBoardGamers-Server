@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.utils.translation import gettext
 
+import Lobby.sharedFunctions.constants as rf
 from Lobby.models import Game, GamePlayer, User
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_getGameCreationJsonReturn,
@@ -16,8 +17,11 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_validatePlayers,
 )
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
-import Lobby.sharedFunctions.constants as rf
+
 from . import NTRconstants as rfNTR
+
+if TYPE_CHECKING:
+    from Lobby.presenters import NTRpresenter
 
 
 @login_required()
@@ -27,10 +31,7 @@ def create_ntr_game(
     tournamentGameName=None,
     current_players_usernames=None,
 ):
-    """
-    Create an NTR game, either for a tournament or regular play.
-    Supports 2-8 players (2 default, up to 8 with SO_TEAM_PLAY).
-    """
+    """Create an NTR game, either for a tournament or regular play."""
     is_main_tournament = tournamentObj and tournamentObj.tournamentCategory == "Main"
     is_mini_tournament = tournamentObj and tournamentObj.tournamentCategory == "Mini"
 
@@ -48,89 +49,76 @@ def create_ntr_game(
     max_players = 2
     game_status = "AVAILABLE"
     kickout_duration = 100
-    starting_map = ""
     shadowNameNotes = ""
     usernames_to_notify = []
     invited_usernames_objs = []
     stats_exclude = False
+    is_training_game = False
     player_order_seed = random.randint(1000, 32767)
     all_players = []
-    invited_usernames = []
-
-    # Default scenario slug
-    scenario_slug = "dec_01"
-    team_play = False
 
     # Setup Tournament Options
     if is_main_tournament or is_mini_tournament:
         if not tournamentObj or not tournamentGameName:
             raise ValueError("Tournament and tournamentGameName required for tournament games")
         game_name = tournamentGameName
-        game_description = ""
         creator = User.objects.get(username="admin")
         host = creator
         game_pace = 30
         kickout_duration = 50
         starting_options = json.loads(tournamentObj.startingOptions) if tournamentObj.startingOptions != "" else []
-        scenario_slug = "dec_01"  # default for tournaments, could be from tournament options
-        team_play = rfNTR.SO_TEAM_PLAY in starting_options
 
         game_status = "ACTIVE"
 
-        if is_mini_tournament and current_players_usernames:
-            max_players = len(current_players_usernames)
+        # Mini tournament games can have fewer players than maxGamePlayers
+        max_players = len(current_players_usernames) if is_mini_tournament and current_players_usernames else tournamentObj.maxGamePlayers
 
         all_players = [User.objects.get(username=username) for username in (current_players_usernames or []) if username]
-        usernames_to_notify = [username for username in (current_players_usernames or []) if username]
 
     # Else setup normal Options
     else:
-        game_name = request.POST.get("gameName", "")
-        game_description = request.POST.get("gameDescription", "")
+        game_description = request.POST["gameDescription"]
         creator = request.user
         host = request.user
-        game_pace = request.POST.get("pace", 40)
-        kickout_duration = request.POST.get("kickoutDuration", 100)
-        scenario_slug = request.POST.get("scenario", "dec_01")
-        team_play = "teamPlay" in request.POST
+        game_name = request.POST["gameName"]
+        game_pace = request.POST["pace"]
+        kickout_duration = request.POST["kickoutDuration"]
 
-        invited_usernames = [request.POST.get(f"player{i}") for i in range(2, 9) if request.POST.get(f"player{i}")]
+        # Practice is one human against one bot; the shared shadow accounts cannot
+        # fill a 4 or 8 seat team game.
+        is_training_game = "trainingGame" in request.POST
+        team_play = "teamPlay" in request.POST and not is_training_game
+        max_players = int(request.POST.get("playerNumber", "2"))
+        if team_play and max_players == 2:
+            max_players = 4
 
-        isTrainingGame = False
-        if "trainingGame" in request.POST:
-            isTrainingGame = True
-        if max_players == 1:
-            isTrainingGame = True
+        scenario = int(request.POST.get("scenario", rfNTR.DEFAULT_SCENARIO))
+        starting_options.append(scenario if scenario in rfNTR.SCENARIO_SLUGS else rfNTR.DEFAULT_SCENARIO)
 
-        if team_play:
-            max_players = 8
-        else:
-            max_players = int(request.POST.get("playerNumber", "2"))
-
-        if not isTrainingGame:
-            invited_usernames_objs = SF_validatePlayers(request, invited_usernames, max_players, allow_creator=False)
-            if invited_usernames_objs is None:
-                return HttpResponseRedirect(reverse("createNTRpage"))
-
-            if len(invited_usernames_objs) > 0:
-                game_status = "WAITING"
-                usernames_to_notify = [user.username for user in invited_usernames_objs]
-
-        if isTrainingGame:
+        if is_training_game:
             starting_options.append(rf.SO_TRAINING_GAME)
             game_status = "ACTIVE"
             stats_exclude = True
-            if max_players > 1:
-                shadow_users, shadowNameNotes = SF_setupTrainingGameShadows(request, max_players)
-                all_players.extend(shadow_users)
-        elif "learningGame" in request.POST:
+            max_players = 2
+            shadow_users, shadowNameNotes = SF_setupTrainingGameShadows(request, max_players)
+            all_players.append(request.user)
+            all_players.extend(shadow_users)
+        else:
+            usernames = [request.POST.get(f"player{i}", "") for i in range(2, 9)]
+            invited_usernames_objs = SF_validatePlayers(request, [username for username in usernames if username], max_players, allow_creator=False)
+            if invited_usernames_objs is None:
+                return HttpResponseRedirect(reverse("createNTRpage"))
+            all_players.append(request.user)
+            usernames_to_notify = [user.username for user in invited_usernames_objs]
+            if usernames_to_notify:
+                game_status = "WAITING"
+
+        if "learningGame" in request.POST:
             starting_options.append(rf.SO_LEARNING_GAME)
             stats_exclude = True
-        elif "experiencedGame" in request.POST:
+        if "experiencedGame" in request.POST:
             starting_options.append(rf.SO_EXPERIENCED_GAME)
             stats_exclude = True
-
-        # Custom NTR options
         if "frenchReinforcements" in request.POST:
             starting_options.append(rfNTR.SO_FRENCH_REINFORCEMENTS)
         if "santonFort" in request.POST:
@@ -138,20 +126,23 @@ def create_ntr_game(
         if team_play:
             starting_options.append(rfNTR.SO_TEAM_PLAY)
 
-        all_players.append(request.user)
+        if "privateGame" in request.POST:
+            game_status = "PRIVATE"
 
-    # Build starting map data - just pass scenario slug and options
-    # Client will build full initial game state on first load
-    options = {
-        "french_reinforcements": rfNTR.SO_FRENCH_REINFORCEMENTS in starting_options,
-        "santon_fort": rfNTR.SO_SANTON_FORT in starting_options,
-        "team_play": team_play,
-    }
-    starting_map = json.dumps({
-        "scenario": scenario_slug,
-        "options": options,
-        "version": 1,
-    })
+    # The client builds the opening position from this, and reads the option set
+    # from startingOptions afterwards.
+    scenario_option = next((option for option in starting_options if option in rfNTR.SCENARIO_SLUGS), rfNTR.DEFAULT_SCENARIO)
+    starting_map = json.dumps(
+        {
+            "scenario": rfNTR.SCENARIO_SLUGS[scenario_option],
+            "options": {
+                "french_reinforcements": rfNTR.SO_FRENCH_REINFORCEMENTS in starting_options,
+                "santon_fort": rfNTR.SO_SANTON_FORT in starting_options,
+                "team_play": rfNTR.SO_TEAM_PLAY in starting_options,
+            },
+            "version": 1,
+        }
+    )
 
     with transaction.atomic():
         new_game = Game(
@@ -174,8 +165,6 @@ def create_ntr_game(
             startingOptions=json.dumps(starting_options),
             playerOrderSeed=player_order_seed,
         )
-        if "privateGame" in request.POST:
-            new_game.gameStatus = "PRIVATE"
 
         if is_main_tournament:
             new_game.relatedMainTournament = tournamentObj
@@ -197,15 +186,8 @@ def create_ntr_game(
                 notes=shadowNameNotes if player == request.user else "",
             )
 
-        # Fix zoomLevels array size to match actual number of players
-        actual_player_count = len(all_players)
-        current_zoom_levels = json.loads(new_game.zoomLevels)
-        if len(current_zoom_levels) != actual_player_count:
-            new_game.zoomLevels = json.dumps([16] * actual_player_count)
-            new_game.save()
-
         # Start pre-populated games
-        if is_main_tournament or is_mini_tournament or isTrainingGame:
+        if is_main_tournament or is_mini_tournament or is_training_game:
             presenter = cast("NTRpresenter", new_game.presenter())
             presenter.startGame(request)
 
@@ -223,11 +205,9 @@ def create_ntr_game(
             "NTR",
         )
 
-    # Training Game return
-    if isTrainingGame:
+    if is_training_game:
         messages.success(request, gettext("Your Practice game has started"))
         return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "current"}))
 
-    # Otherwise, return normal game creation
     messages.success(request, SF_getGameCreationJsonReturn("NTR", new_game.id))
     return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))

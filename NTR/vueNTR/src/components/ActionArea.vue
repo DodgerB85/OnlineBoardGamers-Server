@@ -1,14 +1,24 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useModelStore } from '../stores/NTRstore'
+import * as rf from '../js/NTRreference'
 import { t } from '../i18n'
 
 const store = useModelStore()
 
-const actionPhase = ref('move') // 'move', 'attack', 'reveal', 'pass'
-const selectedUnits = ref([])
-const targetLocale = ref(null)
+const actionPhase = ref('move') // 'move', 'attack', 'reveal'
+const selectedUnits = computed(() => store.selection.units)
+const targetLocale = computed(() => store.selection.locale)
 const commandPoints = ref(3)
+
+const victoryText = computed(() => {
+  const victory = store.victory
+  if (!victory) return ''
+  if (victory.winner === 'draw') return t('victory.draw')
+  const side = victory.winner === rf.SIDE_ALLIED ? t('map.allied') : t('map.french')
+  const reason = victory.type === 'demoralization' ? t('victory.demoralization') : t('victory.territorial')
+  return `${side}: ${reason}`
+})
 
 function canMove() {
   return store.myMove && !store.isGameOver
@@ -73,9 +83,12 @@ function artilleryBombard() {
 }
 
 function clearAction() {
-  selectedUnits.value = []
-  targetLocale.value = null
   actionPhase.value = 'move'
+}
+
+function removeUnit(unit) {
+  const idx = store.selection.units.findIndex(u => u.id === unit.id)
+  if (idx >= 0) store.selection.units.splice(idx, 1)
 }
 
 function addCommandPoint() {
@@ -98,13 +111,18 @@ function spendCommandPoint() {
       </div>
     </div>
 
-    <div v-if="!store.myMove" class="notYourTurn">
-      {{ store.isAlliedTurn ? t('action.alliedTurn') : t('action.frenchTurn') }}
-      <span v-if="store.pov >= 0"> - {{ t('action.waiting') }}</span>
+    <div v-if="store.gameMessages.errorText" class="gameError">
+      {{ store.gameMessages.errorText }}
     </div>
 
-    <div v-else-if="store.isGameOver" class="gameOver">
+    <div v-if="store.isGameOver" class="gameOver">
       {{ t('action.gameOver') }}
+      <div v-if="victoryText" class="victoryText">{{ victoryText }}</div>
+    </div>
+
+    <div v-else-if="!store.myMove" class="notYourTurn">
+      {{ store.isAlliedTurn ? t('action.alliedTurn') : t('action.frenchTurn') }}
+      <span v-if="store.pov >= 0"> - {{ t('action.waiting') }}</span>
     </div>
 
     <template v-else>
@@ -134,7 +152,7 @@ function spendCommandPoint() {
           <div v-for="unit in selectedUnits" :key="unit.id" class="unitItem">
             <span class="unitType">{{ unit.type }}</span>
             <span class="unitStrength">Str {{ unit.strength }}</span>
-            <button @click="selectedUnits = selectedUnits.filter(u => u !== unit)" class="removeBtn">×</button>
+            <button @click="removeUnit(unit)" class="removeBtn">×</button>
           </div>
         </div>
       </div>
@@ -234,6 +252,17 @@ function spendCommandPoint() {
   padding: 20px;
   color: #7f8c8d;
   font-style: italic;
+}
+
+.victoryText { margin-top: 6px; color: #2c3e50; font-style: normal; font-weight: bold; }
+
+.gameError {
+  margin-bottom: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: #fdecea;
+  color: #c0392b;
+  font-size: 0.8rem;
 }
 
 .phaseTabs {

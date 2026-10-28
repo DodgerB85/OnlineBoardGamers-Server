@@ -69,6 +69,13 @@ export const useModelStore = defineStore('model', () => {
   const history = ref([])
   const replayIndex = ref(-1)
 
+  // Shared selection, driven by the map and shown in the action panel
+  const selection = ref({ units: [], locale: null })
+  // Set when checkVictory() decides the game is over
+  const victory = ref(null)
+  // Save/sync feedback shown to the player
+  const gameMessages = ref({ errorText: '', successText: '' })
+
   // Computed
   const isAlliedTurn = computed(() => phase.value === 0)
   const isFrenchTurn = computed(() => phase.value === 1)
@@ -148,6 +155,9 @@ export const useModelStore = defineStore('model', () => {
     }
     history.value = []
     replayIndex.value = -1
+    selection.value = { units: [], locale: null }
+    victory.value = null
+    gameMessages.value = { errorText: '', successText: '' }
   }
 
   return {
@@ -158,6 +168,7 @@ export const useModelStore = defineStore('model', () => {
     kickoutVoteThreshold, secondsToNextKickout, kickoutRequired,
     deleteVotesData, statsExcludeVotesData, chatData, notes,
     hiddenData, playerHiddenData, corpsAssignments, board, history, replayIndex,
+    selection, victory, gameMessages,
     // Computed
     isAlliedTurn, isFrenchTurn, isGameOver, currentTurnString, myMove,
     // Actions
