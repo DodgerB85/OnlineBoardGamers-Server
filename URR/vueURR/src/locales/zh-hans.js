@@ -460,6 +460,7 @@ export default {
 		useCrewAria: "使用 {points} 点挖掘工程队 {number}",
 		addCanal: "添加运河",
 		clearCanalDraft: "清除运河草稿",
+		clearDiggingSelection: "清除挖掘选择",
 		skipEridu: "跳过埃利都并结束回合",
 		doneDigging: "完成挖掘",
 		requiredCrewFunding: "必需的工程队资金",

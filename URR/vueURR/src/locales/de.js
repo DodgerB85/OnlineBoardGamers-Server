@@ -460,6 +460,7 @@ export default {
 		useCrewAria: "{points} Grabungstrupp {number} verwenden",
 		addCanal: "Kanal hinzufügen",
 		clearCanalDraft: "Kanalentwurf leeren",
+		clearDiggingSelection: "Grabungsauswahl leeren",
 		skipEridu: "Eridu überspringen und Zug beenden",
 		doneDigging: "Graben beendet",
 		requiredCrewFunding: "Erforderliche Truppfinanzierung",

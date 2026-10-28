@@ -505,7 +505,7 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 					<div v-if="path.length >= 2" class="hint" role="status"><template v-if="digPreview.cost">{{ $t("actions.canalPoints", { canals: digPreview.cost.canals, junctions: digPreview.cost.junctions }) }}</template><span v-if="chosenCrew && !digError"> {{ $t("actions.usesCrew", { points: chosenCrew.capacity, number: chosenCrew.id + 1 }) }}</span><p v-if="digError" class="error"><CurrencyText :text="digError" /></p></div>
 					<div v-if="fittingCrews.length > 1" class="buttonRow fittingCrews"><span>{{ $t("actions.otherFittingCrews") }}</span><button v-for="crew in fittingCrews.filter((entry) => entry.id !== chosenCrew?.id)" :key="crew.id" :aria-label="$t('actions.useCrewAria', { points: crew.capacity, number: crew.id + 1 })" @click="useFittingCrew(crew)">{{ $t("actions.useCrew", { points: crew.capacity, number: crew.id + 1 }) }}</button></div>
 					<button v-if="path.length >= 2" ref="digButton" class="digAction primaryAction" :disabled="!!digError" @click="submitDig">{{ $t("actions.addCanal") }}<small>{{ path.map(label).join(' → ') }}</small></button>
-					<button v-if="path.length" @click="emit('clearPath')">{{ $t("actions.clearCanalDraft") }}</button>
+					<button v-if="path.length" @click="emit('clearPath')">{{ $t(game.gameflow.developmentStep === 'digging' ? "actions.clearDiggingSelection" : "actions.clearCanalDraft") }}</button>
 					<button v-if="game.gameflow.developmentStep === 'eridu'" :disabled="ending || store.viewSettings.isSaving" @click="skipEridu">{{ $t("actions.skipEridu") }}</button>
 					<button v-else :disabled="!!path.length" @click="finishDigging">{{ $t("actions.doneDigging") }}</button>
 				</div>
