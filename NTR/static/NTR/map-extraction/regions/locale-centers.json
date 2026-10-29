@@ -1,0 +1,2054 @@
+{
+  "source": {
+    "image": "reference-numbered.png",
+    "size": [
+      1071,
+      1393
+    ]
+  },
+  "target": {
+    "image": "../images/map.jpg",
+    "size": [
+      5100,
+      6600
+    ]
+  },
+  "registration": {
+    "method": "Independent x/y scale between full reference and board dimensions; same framing verified visually at the map edges.",
+    "scale": [
+      4.761904761904762,
+      4.737975592246949
+    ],
+    "notes": "Centers are draft manual/OCR label centers, generally within about 10 reference pixels. Null means the number could not be confidently located or separated from adjacent/control-track numerals; do not treat as an absent locale."
+  },
+  "locales": [
+    {
+      "id": 1,
+      "source_point": [
+        61,
+        228
+      ],
+      "point": [
+        290.5,
+        1080.3
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 2,
+      "source_point": [
+        106,
+        220
+      ],
+      "point": [
+        504.8,
+        1042.4
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 3,
+      "source_point": [
+        165,
+        242
+      ],
+      "point": [
+        785.7,
+        1146.6
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 4,
+      "source_point": [
+        205,
+        249
+      ],
+      "point": [
+        976.2,
+        1179.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 5,
+      "source_point": [
+        209,
+        294
+      ],
+      "point": [
+        995.2,
+        1393.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 6,
+      "source_point": [
+        255,
+        248
+      ],
+      "point": [
+        1214.3,
+        1175.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 7,
+      "source_point": [
+        298,
+        251
+      ],
+      "point": [
+        1419.0,
+        1189.2
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 8,
+      "source_point": [
+        307,
+        96
+      ],
+      "point": [
+        1461.9,
+        454.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 9,
+      "source_point": [
+        309,
+        34
+      ],
+      "point": [
+        1471.4,
+        161.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 10,
+      "source_point": [
+        394.5,
+        41.2
+      ],
+      "point": [
+        1878.6,
+        195.2
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 11,
+      "source_point": [
+        407,
+        98
+      ],
+      "point": [
+        1938.1,
+        464.3
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 12,
+      "source_point": [
+        428.2,
+        165.5
+      ],
+      "point": [
+        2039.0,
+        784.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 13,
+      "source_point": [
+        455.5,
+        233.0
+      ],
+      "point": [
+        2169.0,
+        1103.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 14,
+      "source_point": [
+        487,
+        197
+      ],
+      "point": [
+        2319.0,
+        933.4
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 15,
+      "source_point": [
+        508.0,
+        201.2
+      ],
+      "point": [
+        2419.0,
+        953.3
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 16,
+      "source_point": [
+        524.0,
+        151.5
+      ],
+      "point": [
+        2495.2,
+        717.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 17,
+      "source_point": [
+        578,
+        44
+      ],
+      "point": [
+        2752.4,
+        208.5
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 18,
+      "source_point": [
+        665.8,
+        29.8
+      ],
+      "point": [
+        3170.5,
+        141.2
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 19,
+      "source_point": [
+        704.5,
+        49.2
+      ],
+      "point": [
+        3354.8,
+        233.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 20,
+      "source_point": [
+        758.0,
+        43.5
+      ],
+      "point": [
+        3609.5,
+        206.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 21,
+      "source_point": [
+        811.0,
+        51.2
+      ],
+      "point": [
+        3861.9,
+        242.6
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 22,
+      "source_point": [
+        830,
+        30
+      ],
+      "point": [
+        3952.4,
+        142.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 23,
+      "source_point": [
+        61,
+        261
+      ],
+      "point": [
+        290.5,
+        1236.6
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 24,
+      "source_point": [
+        138.8,
+        295.0
+      ],
+      "point": [
+        661.0,
+        1397.7
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 25,
+      "source_point": [
+        269.5,
+        314.0
+      ],
+      "point": [
+        1283.3,
+        1487.7
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 26,
+      "source_point": [
+        360.5,
+        248.5
+      ],
+      "point": [
+        1716.7,
+        1177.4
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 27,
+      "source_point": [
+        343.2,
+        154.0
+      ],
+      "point": [
+        1634.3,
+        729.6
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 28,
+      "source_point": [
+        343.0,
+        44.0
+      ],
+      "point": [
+        1633.3,
+        208.5
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 29,
+      "source_point": [
+        494.8,
+        271.8
+      ],
+      "point": [
+        2356.2,
+        1287.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 30,
+      "source_point": [
+        575.4,
+        137.2
+      ],
+      "point": [
+        2740.0,
+        650.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 31,
+      "source_point": [
+        606.5,
+        73.5
+      ],
+      "point": [
+        2888.1,
+        348.2
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 32,
+      "source_point": [
+        656.0,
+        74.0
+      ],
+      "point": [
+        3123.8,
+        350.6
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 33,
+      "source_point": [
+        701.5,
+        122.2
+      ],
+      "point": [
+        3340.5,
+        579.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 34,
+      "source_point": [
+        802.0,
+        110.0
+      ],
+      "point": [
+        3819.0,
+        521.2
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 35,
+      "source_point": [
+        844,
+        101
+      ],
+      "point": [
+        4019.0,
+        478.5
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 36,
+      "source_point": [
+        886.5,
+        76.2
+      ],
+      "point": [
+        4221.4,
+        361.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 37,
+      "source_point": [
+        67.0,
+        366.2
+      ],
+      "point": [
+        319.0,
+        1735.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 38,
+      "source_point": [
+        177.5,
+        382.0
+      ],
+      "point": [
+        845.2,
+        1809.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 39,
+      "source_point": [
+        273.4,
+        399.5
+      ],
+      "point": [
+        1301.9,
+        1892.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 40,
+      "source_point": [
+        400.2,
+        344.2
+      ],
+      "point": [
+        1905.7,
+        1630.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 41,
+      "source_point": [
+        451.8,
+        330.5
+      ],
+      "point": [
+        2151.4,
+        1565.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 42,
+      "source_point": [
+        544.2,
+        339.0
+      ],
+      "point": [
+        2591.4,
+        1606.2
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 43,
+      "source_point": [
+        600.8,
+        271.5
+      ],
+      "point": [
+        2861.0,
+        1286.4
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 44,
+      "source_point": [
+        559.0,
+        223.8
+      ],
+      "point": [
+        2661.9,
+        1060.4
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 45,
+      "source_point": [
+        571.0,
+        176.8
+      ],
+      "point": [
+        2719.0,
+        837.7
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 46,
+      "source_point": [
+        645,
+        116
+      ],
+      "point": [
+        3071.4,
+        549.6
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 47,
+      "source_point": [
+        656.0,
+        176.8
+      ],
+      "point": [
+        3123.8,
+        837.7
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 48,
+      "source_point": [
+        772.5,
+        168.2
+      ],
+      "point": [
+        3678.6,
+        796.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 49,
+      "source_point": [
+        860.8,
+        180.0
+      ],
+      "point": [
+        4099.0,
+        852.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 50,
+      "source_point": [
+        971.5,
+        69.8
+      ],
+      "point": [
+        4626.2,
+        330.7
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 51,
+      "source_point": [
+        109.5,
+        451.8
+      ],
+      "point": [
+        521.4,
+        2140.6
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 52,
+      "source_point": [
+        206.5,
+        472.0
+      ],
+      "point": [
+        983.3,
+        2236.3
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 53,
+      "source_point": [
+        328.0,
+        445.0
+      ],
+      "point": [
+        1561.9,
+        2108.4
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 54,
+      "source_point": [
+        508,
+        349
+      ],
+      "point": [
+        2419.0,
+        1653.6
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 55,
+      "source_point": [
+        594.5,
+        349.5
+      ],
+      "point": [
+        2831.0,
+        1655.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 56,
+      "source_point": [
+        669.2,
+        286.0
+      ],
+      "point": [
+        3186.7,
+        1355.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 57,
+      "source_point": [
+        782,
+        242
+      ],
+      "point": [
+        3723.8,
+        1146.6
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 58,
+      "source_point": [
+        926.2,
+        228.8
+      ],
+      "point": [
+        4410.5,
+        1084.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 59,
+      "source_point": [
+        1007.0,
+        127.8
+      ],
+      "point": [
+        4795.2,
+        605.5
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 60,
+      "source_point": [
+        1018.8,
+        35.0
+      ],
+      "point": [
+        4851.4,
+        165.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 61,
+      "source_point": [
+        165.0,
+        523.5
+      ],
+      "point": [
+        785.7,
+        2480.3
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 62,
+      "source_point": [
+        282.5,
+        510.8
+      ],
+      "point": [
+        1345.2,
+        2420.2
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 63,
+      "source_point": [
+        415.0,
+        483.5
+      ],
+      "point": [
+        1976.2,
+        2290.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 64,
+      "source_point": [
+        473.0,
+        457.8
+      ],
+      "point": [
+        2252.4,
+        2169.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 65,
+      "source_point": [
+        560.0,
+        496.2
+      ],
+      "point": [
+        2666.7,
+        2351.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 66,
+      "source_point": [
+        679.0,
+        376.5
+      ],
+      "point": [
+        3233.3,
+        1783.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 67,
+      "source_point": [
+        812.5,
+        294.0
+      ],
+      "point": [
+        3869.0,
+        1393.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 68,
+      "source_point": [
+        887.8,
+        274.8
+      ],
+      "point": [
+        4227.6,
+        1302.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 69,
+      "source_point": [
+        98.8,
+        614.2
+      ],
+      "point": [
+        470.5,
+        2910.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 70,
+      "source_point": [
+        211.0,
+        604.5
+      ],
+      "point": [
+        1004.8,
+        2864.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 71,
+      "source_point": [
+        285.8,
+        567.5
+      ],
+      "point": [
+        1361.0,
+        2688.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 72,
+      "source_point": [
+        412.2,
+        598.2
+      ],
+      "point": [
+        1962.9,
+        2834.3
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 73,
+      "source_point": [
+        495.8,
+        539.5
+      ],
+      "point": [
+        2361.0,
+        2556.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 74,
+      "source_point": [
+        524.5,
+        610.8
+      ],
+      "point": [
+        2497.6,
+        2894.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 75,
+      "source_point": [
+        678.2,
+        502.0
+      ],
+      "point": [
+        3229.5,
+        2378.5
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 76,
+      "source_point": [
+        772,
+        393
+      ],
+      "point": [
+        3676.2,
+        1862.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 77,
+      "source_point": [
+        857.8,
+        415.5
+      ],
+      "point": [
+        4084.8,
+        1968.6
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 78,
+      "source_point": [
+        944.8,
+        326.5
+      ],
+      "point": [
+        4499.0,
+        1546.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 79,
+      "source_point": [
+        89,
+        746
+      ],
+      "point": [
+        423.8,
+        3534.5
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 80,
+      "source_point": [
+        168.2,
+        684.2
+      ],
+      "point": [
+        801.0,
+        3241.7
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 81,
+      "source_point": [
+        256.5,
+        673.5
+      ],
+      "point": [
+        1221.4,
+        3191.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 82,
+      "source_point": [
+        380.5,
+        709.5
+      ],
+      "point": [
+        1811.9,
+        3361.6
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 83,
+      "source_point": [
+        475.5,
+        689.0
+      ],
+      "point": [
+        2264.3,
+        3264.5
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 84,
+      "source_point": [
+        686.8,
+        678.2
+      ],
+      "point": [
+        3270.5,
+        3213.3
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 85,
+      "source_point": [
+        647.0,
+        579.0
+      ],
+      "point": [
+        3081.0,
+        2743.3
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 86,
+      "source_point": [
+        747.2,
+        510.2
+      ],
+      "point": [
+        3558.1,
+        2417.3
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 87,
+      "source_point": [
+        918.8,
+        449.2
+      ],
+      "point": [
+        4375.2,
+        2128.3
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 88,
+      "source_point": [
+        999.2,
+        330.0
+      ],
+      "point": [
+        4758.1,
+        1563.5
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 89,
+      "source_point": [
+        47.8,
+        832.0
+      ],
+      "point": [
+        227.6,
+        3942.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 90,
+      "source_point": [
+        119.2,
+        832.2
+      ],
+      "point": [
+        567.6,
+        3942.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 91,
+      "source_point": [
+        210.8,
+        738.0
+      ],
+      "point": [
+        1003.8,
+        3496.6
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 92,
+      "source_point": [
+        329.8,
+        743.8
+      ],
+      "point": [
+        1570.5,
+        3524.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 93,
+      "source_point": [
+        401.0,
+        776.5
+      ],
+      "point": [
+        1909.5,
+        3679.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 94,
+      "source_point": [
+        454.0,
+        798.2
+      ],
+      "point": [
+        2161.9,
+        3781.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 95,
+      "source_point": [
+        588.8,
+        747.2
+      ],
+      "point": [
+        2803.8,
+        3540.2
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 96,
+      "source_point": [
+        731.0,
+        744.0
+      ],
+      "point": [
+        3481.0,
+        3525.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 97,
+      "source_point": [
+        715.8,
+        595.2
+      ],
+      "point": [
+        3408.6,
+        2820.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 98,
+      "source_point": [
+        840.5,
+        518.8
+      ],
+      "point": [
+        4002.4,
+        2458.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 99,
+      "source_point": [
+        956.8,
+        403.8
+      ],
+      "point": [
+        4556.2,
+        1913.2
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 100,
+      "source_point": [
+        69.5,
+        934.8
+      ],
+      "point": [
+        331.0,
+        4429.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 101,
+      "source_point": [
+        165.5,
+        913.5
+      ],
+      "point": [
+        788.1,
+        4328.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 102,
+      "source_point": [
+        238.2,
+        826.2
+      ],
+      "point": [
+        1134.3,
+        3914.5
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 103,
+      "source_point": [
+        315.8,
+        775.0
+      ],
+      "point": [
+        1503.8,
+        3671.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 104,
+      "source_point": [
+        362.8,
+        874.2
+      ],
+      "point": [
+        1727.6,
+        4141.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 105,
+      "source_point": [
+        437.2,
+        927.0
+      ],
+      "point": [
+        2081.9,
+        4392.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 106,
+      "source_point": [
+        544,
+        928
+      ],
+      "point": [
+        2590.5,
+        4396.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 107,
+      "source_point": [
+        581.4,
+        786.6
+      ],
+      "point": [
+        2768.6,
+        3726.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 108,
+      "source_point": [
+        644.8,
+        786.2
+      ],
+      "point": [
+        3070.5,
+        3725.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 109,
+      "source_point": [
+        702.0,
+        845.5
+      ],
+      "point": [
+        3342.9,
+        4006.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 110,
+      "source_point": [
+        777.2,
+        837.8
+      ],
+      "point": [
+        3701.0,
+        3969.5
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 111,
+      "source_point": [
+        821.0,
+        775.8
+      ],
+      "point": [
+        3909.5,
+        3675.7
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 112,
+      "source_point": [
+        830,
+        718
+      ],
+      "point": [
+        3952.4,
+        3401.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 113,
+      "source_point": [
+        794.2,
+        631.0
+      ],
+      "point": [
+        3781.9,
+        2989.7
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 114,
+      "source_point": [
+        844.0,
+        628.0
+      ],
+      "point": [
+        4019.0,
+        2975.4
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 115,
+      "source_point": [
+        932.5,
+        589.8
+      ],
+      "point": [
+        4440.5,
+        2794.5
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 116,
+      "source_point": [
+        94.5,
+        1021.8
+      ],
+      "point": [
+        450.0,
+        4841.3
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 117,
+      "source_point": [
+        154.5,
+        1033.2
+      ],
+      "point": [
+        735.7,
+        4895.3
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 118,
+      "source_point": [
+        276.0,
+        891.0
+      ],
+      "point": [
+        1314.3,
+        4221.5
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 119,
+      "source_point": [
+        410,
+        1040
+      ],
+      "point": [
+        1952.4,
+        4927.5
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 120,
+      "source_point": [
+        475.2,
+        1053.5
+      ],
+      "point": [
+        2262.9,
+        4991.5
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 121,
+      "source_point": [
+        575,
+        1000
+      ],
+      "point": [
+        2738.1,
+        4738.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 122,
+      "source_point": [
+        616.0,
+        934.8
+      ],
+      "point": [
+        2933.3,
+        4429.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 123,
+      "source_point": [
+        654.0,
+        921.5
+      ],
+      "point": [
+        3114.3,
+        4366.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 124,
+      "source_point": [
+        723.2,
+        931.2
+      ],
+      "point": [
+        3443.8,
+        4412.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 125,
+      "source_point": [
+        815,
+        819
+      ],
+      "point": [
+        3881.0,
+        3880.4
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 126,
+      "source_point": [
+        916.8,
+        756.0
+      ],
+      "point": [
+        4365.7,
+        3581.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 127,
+      "source_point": [
+        950,
+        718
+      ],
+      "point": [
+        4523.8,
+        3401.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 128,
+      "source_point": [
+        986.0,
+        688.0
+      ],
+      "point": [
+        4695.2,
+        3259.7
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 129,
+      "source_point": [
+        997.5,
+        797.2
+      ],
+      "point": [
+        4750.0,
+        3777.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 130,
+      "source_point": [
+        54.8,
+        1169.2
+      ],
+      "point": [
+        261.0,
+        5539.6
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 131,
+      "source_point": [
+        228.8,
+        1133.8
+      ],
+      "point": [
+        1089.5,
+        5371.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 132,
+      "source_point": [
+        269.2,
+        1022.5
+      ],
+      "point": [
+        1281.9,
+        4844.6
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 133,
+      "source_point": [
+        315,
+        1107
+      ],
+      "point": [
+        1500.0,
+        5244.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 134,
+      "source_point": [
+        332.8,
+        1041.8
+      ],
+      "point": [
+        1584.8,
+        4936.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 135,
+      "source_point": [
+        414.2,
+        1134.2
+      ],
+      "point": [
+        1972.4,
+        5373.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 136,
+      "source_point": [
+        571.8,
+        1064.0
+      ],
+      "point": [
+        2722.9,
+        5041.2
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 137,
+      "source_point": [
+        618.8,
+        1005.6
+      ],
+      "point": [
+        2946.7,
+        4764.5
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 138,
+      "source_point": [
+        679,
+        983
+      ],
+      "point": [
+        3233.3,
+        4657.4
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 139,
+      "source_point": [
+        83.2,
+        1248.2
+      ],
+      "point": [
+        396.2,
+        5913.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 140,
+      "source_point": [
+        203.0,
+        1210.0
+      ],
+      "point": [
+        966.7,
+        5733.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 141,
+      "source_point": [
+        331.2,
+        1225.0
+      ],
+      "point": [
+        1577.1,
+        5804.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 142,
+      "source_point": [
+        376.0,
+        1192.5
+      ],
+      "point": [
+        1790.5,
+        5650.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 143,
+      "source_point": [
+        568.8,
+        1129.8
+      ],
+      "point": [
+        2708.6,
+        5353.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 144,
+      "source_point": [
+        658.0,
+        1039.5
+      ],
+      "point": [
+        3133.3,
+        4925.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 145,
+      "source_point": null,
+      "point": null,
+      "status": "unreadable"
+    },
+    {
+      "id": 146,
+      "source_point": null,
+      "point": null,
+      "status": "unreadable"
+    },
+    {
+      "id": 147,
+      "source_point": [
+        259.0,
+        1316.0
+      ],
+      "point": [
+        1233.3,
+        6235.2
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 148,
+      "source_point": [
+        298.0,
+        1261.0
+      ],
+      "point": [
+        1419.0,
+        5974.6
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 149,
+      "source_point": [
+        356.0,
+        1333.8
+      ],
+      "point": [
+        1695.2,
+        6319.5
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 150,
+      "source_point": [
+        612,
+        1108
+      ],
+      "point": [
+        2914.3,
+        5249.7
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 151,
+      "source_point": [
+        741,
+        985
+      ],
+      "point": [
+        3528.6,
+        4666.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 152,
+      "source_point": [
+        840.2,
+        863.8
+      ],
+      "point": [
+        4001.0,
+        4092.7
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 153,
+      "source_point": [
+        404.8,
+        1328.8
+      ],
+      "point": [
+        1927.6,
+        6295.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 154,
+      "source_point": [
+        407.5,
+        1271.5
+      ],
+      "point": [
+        1940.5,
+        6024.3
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 155,
+      "source_point": [
+        493.2,
+        1331.8
+      ],
+      "point": [
+        2348.6,
+        6310.0
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 156,
+      "source_point": [
+        632.2,
+        1248.8
+      ],
+      "point": [
+        3010.5,
+        5916.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 157,
+      "source_point": [
+        688.8,
+        1157.8
+      ],
+      "point": [
+        3280.0,
+        5485.6
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 158,
+      "source_point": [
+        762.0,
+        1103.2
+      ],
+      "point": [
+        3628.6,
+        5226.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 159,
+      "source_point": [
+        804.0,
+        1039.0
+      ],
+      "point": [
+        3828.6,
+        4922.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 160,
+      "source_point": [
+        795,
+        997
+      ],
+      "point": [
+        3785.7,
+        4723.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 161,
+      "source_point": [
+        861.0,
+        971.8
+      ],
+      "point": [
+        4100.0,
+        4604.4
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 162,
+      "source_point": [
+        905.5,
+        918.2
+      ],
+      "point": [
+        4311.9,
+        4350.4
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 163,
+      "source_point": [
+        951.5,
+        885.2
+      ],
+      "point": [
+        4531.0,
+        4194.1
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 164,
+      "source_point": [
+        1028,
+        848
+      ],
+      "point": [
+        4895.2,
+        4017.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 165,
+      "source_point": [
+        707.2,
+        1338.5
+      ],
+      "point": [
+        3367.6,
+        6341.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 166,
+      "source_point": [
+        746.0,
+        1255.0
+      ],
+      "point": [
+        3552.4,
+        5946.2
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 167,
+      "source_point": [
+        846.8,
+        1187.8
+      ],
+      "point": [
+        4032.4,
+        5627.8
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 168,
+      "source_point": [
+        928.0,
+        1088.8
+      ],
+      "point": [
+        4419.0,
+        5158.7
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 169,
+      "source_point": [
+        1008.0,
+        1065.0
+      ],
+      "point": [
+        4800.0,
+        5045.9
+      ],
+      "status": "draft"
+    },
+    {
+      "id": 170,
+      "source_point": [
+        1022.0,
+        993.5
+      ],
+      "point": [
+        4866.7,
+        4707.2
+      ],
+      "status": "draft"
+    }
+  ]
+}
