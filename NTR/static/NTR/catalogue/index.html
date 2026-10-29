@@ -1,0 +1,617 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Napoleon’s Triumph — element catalogue</title><style>body{font:16px system-ui,sans-serif;background:#f5f3ee;color:#242824;margin:0 auto;max-width:1200px;padding:28px}h1{font-size:28px}p{line-height:1.55}nav{display:flex;flex-wrap:wrap;gap:14px;margin:24px 0}section{scroll-margin-top:20px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}article{background:white;border:1px solid #d4d6cd;border-radius:8px;padding:18px;overflow-wrap:anywhere}h3{margin:0 0 6px}figure{height:160px;margin:12px 0;background:#edf1ec;display:flex;align-items:center;justify-content:center}img{width:100%;height:128px;object-fit:contain}small{color:#525a51}code{font-size:12px}details{margin-top:12px}summary{cursor:pointer}.status{color:#704300;font-weight:600}a{color:#245b86}li{margin-bottom:8px}</style><body>
+<h1>Napoleon’s Triumph — map element catalogue</h1>
+<p>Reference catalogue from the board image, with meanings checked against the full annotated rulebook. Each card has a separately extracted image, meaning and reproducible source bounds. 42 entries. <a href="catalogue.json">Download the structured catalogue</a>.</p>
+<p><strong>Scope:</strong> symbol families and representative examples. Every occurrence on the board still needs to be located and associated with its locale/approach. Images retain their original backgrounds. Source crop pages identify artwork; evidence references identify the rules explaining it.</p>
+<p><a href="../map-extraction/index.html">Inspect the first extracted region in the annotation workbench</a></p>
+<nav><a href="#group-0">Approach penalties</a><a href="#group-1">Locale structure</a><a href="#group-2">Special markers</a><a href="#group-3">Roads</a><a href="#group-4">Landscape</a><a href="#group-5">Board furniture</a><a href="#group-7">Unit reference</a></nav>
+<details open><summary>Reading and reconstruction rules</summary><ul><li>Crops preserve original backgrounds; these are reference assets, not transparent sprites.</li><li>Meanings were checked against the full annotated PDF, including its errata. Page references are the printed page numbers (also the 1-based PDF page numbers in this file).</li><li>Objective colours are victory categories (§16, p. 24); every colour in a stacked group counts independently. They do not indicate current ownership.</li><li>Approach marks are sided. Matching unit-type penalties normally apply only when the defense approach is blocked (p. 16); cavalry obstruction checks the defense side (p. 13), while a declared Guard Attack checks obstruction on the attack side (p. 23).</li><li>Capacity is a whole-locale unit limit, not approach width or strength. The road pass-through exception is governed by the erratum on p. 6.</li><li>Setup bar count gives the number of units there during setup (user clarification). Heraldic track artwork has no additional rule identified.</li><li>The numbered reference map on p. 28 supplies locale labels for later tracing. Locale polygons, approach identities, exact narrow/wide classification, road junctions and every symbol occurrence still require map extraction.</li></ul></details>
+<section id="group-0"><h2>Approach penalties</h2><div class="grid">
+<article id="penalty-infantry"><h3>Infantry penalty</h3><small><code>penalty-infantry</code></small><figure><a href="assets/penalty-infantry.png"><img src="assets/penalty-infantry.png" alt="Infantry penalty reference crop"></a></figure><p>If defending pieces block this defense approach and the attack leading units are infantry, subtract one from the initial attack result. The matching penalty is applied once to the total, not once per leading unit. Infantry also has a separate minus-one modifier against a blocked defense approach, independent of these symbols. Ordinary defense from reserve does not trigger the symbol penalty; optional Santon rules are an exception. Artillery-led attacks still apply a matching artillery penalty but do not subtract defense leading-unit strength.</p>
+<p>Preserve which side of the approach contains the symbol; do not interpret it as an extra movement cost.</p>
+<p><strong>Record with each instance:</strong> Approach ID + destination locale ID + position + rotation</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §11 Step 6, p. 16; optional §18, p. 25</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/rules/NT_Annotated_Rules_v1.4.pdf&quot;,
+  &quot;page&quot;: 3,
+  &quot;embedded_image_object&quot;: 35,
+  &quot;embedded_image_size&quot;: [
+    42,
+    145
+  ],
+  &quot;bounds&quot;: [
+    12,
+    0,
+    40,
+    16
+  ],
+  &quot;coordinate_system&quot;: &quot;native embedded-image pixels; top-left origin; [left, top, right, bottom)&quot;
+}</pre></details></article>
+<article id="penalty-cavalry"><h3>Cavalry penalty</h3><small><code>penalty-cavalry</code></small><figure><a href="assets/penalty-cavalry.png"><img src="assets/penalty-cavalry.png" alt="Cavalry penalty reference crop"></a></figure><p>If defending pieces block this defense approach and the attack leading units are cavalry, subtract one from the initial attack result. The matching penalty is applied once to the total, not once per leading unit. Infantry also has a separate minus-one modifier against a blocked defense approach, independent of these symbols. Ordinary defense from reserve does not trigger the symbol penalty; optional Santon rules are an exception. Artillery-led attacks still apply a matching artillery penalty but do not subtract defense leading-unit strength.</p>
+<p>Preserve which side of the approach contains the symbol; do not interpret it as an extra movement cost.</p>
+<p><strong>Record with each instance:</strong> Approach ID + destination locale ID + position + rotation</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §11 Step 6, p. 16; optional §18, p. 25</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/rules/NT_Annotated_Rules_v1.4.pdf&quot;,
+  &quot;page&quot;: 3,
+  &quot;embedded_image_object&quot;: 35,
+  &quot;embedded_image_size&quot;: [
+    42,
+    145
+  ],
+  &quot;bounds&quot;: [
+    12,
+    16,
+    40,
+    33
+  ],
+  &quot;coordinate_system&quot;: &quot;native embedded-image pixels; top-left origin; [left, top, right, bottom)&quot;
+}</pre></details></article>
+<article id="penalty-artillery"><h3>Artillery penalty</h3><small><code>penalty-artillery</code></small><figure><a href="assets/penalty-artillery.png"><img src="assets/penalty-artillery.png" alt="Artillery penalty reference crop"></a></figure><p>If defending pieces block this defense approach and the attack leading units are artillery, subtract one from the initial attack result. The matching penalty is applied once to the total, not once per leading unit. Infantry also has a separate minus-one modifier against a blocked defense approach, independent of these symbols. Ordinary defense from reserve does not trigger the symbol penalty; optional Santon rules are an exception. Artillery-led attacks still apply a matching artillery penalty but do not subtract defense leading-unit strength.</p>
+<p>Preserve which side of the approach contains the symbol; do not interpret it as an extra movement cost.</p>
+<p><strong>Record with each instance:</strong> Approach ID + destination locale ID + position + rotation</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §11 Step 6, p. 16; optional §18, p. 25</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/rules/NT_Annotated_Rules_v1.4.pdf&quot;,
+  &quot;page&quot;: 3,
+  &quot;embedded_image_object&quot;: 35,
+  &quot;embedded_image_size&quot;: [
+    42,
+    145
+  ],
+  &quot;bounds&quot;: [
+    12,
+    33,
+    40,
+    50
+  ],
+  &quot;coordinate_system&quot;: &quot;native embedded-image pixels; top-left origin; [left, top, right, bottom)&quot;
+}</pre></details></article>
+<article id="penalty-obstructed"><h3>Obstructed</h3><small><code>penalty-obstructed</code></small><figure><a href="assets/penalty-obstructed.png"><img src="assets/penalty-obstructed.png" alt="Obstructed reference crop"></a></figure><p>If the defense approach is obstructed, cavalry cannot lead an attack, lead a defense or counter-attack; cavalry may still participate without leading or conduct a feint. Separately, a declared Guard Attack is forbidden if the attacker’s own attack approach is obstructed. These two checks use opposite sides of the shared boundary.</p>
+<p><strong>Record with each instance:</strong> Approach ID + destination locale ID + position + rotation</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §11, p. 13; §15, p. 23; flowchart p. 30</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/rules/NT_Annotated_Rules_v1.4.pdf&quot;,
+  &quot;page&quot;: 3,
+  &quot;embedded_image_object&quot;: 35,
+  &quot;embedded_image_size&quot;: [
+    42,
+    145
+  ],
+  &quot;bounds&quot;: [
+    6,
+    50,
+    40,
+    67
+  ],
+  &quot;coordinate_system&quot;: &quot;native embedded-image pixels; top-left origin; [left, top, right, bottom)&quot;
+}</pre></details></article>
+<article id="penalty-impassable"><h3>Impassable</h3><small><code>penalty-impassable</code></small><figure><a href="assets/penalty-impassable.png"><img src="assets/penalty-impassable.png" alt="Impassable reference crop"></a></figure><p>Pieces may neither cross nor block an impassable approach. Retreats may not cross one either. Preserve every printed occurrence and its side.</p>
+<p><strong>Record with each instance:</strong> Approach ID + destination locale ID + position + rotation</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §10, p. 8; §12, p. 21</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/rules/NT_Annotated_Rules_v1.4.pdf&quot;,
+  &quot;page&quot;: 3,
+  &quot;embedded_image_object&quot;: 35,
+  &quot;embedded_image_size&quot;: [
+    42,
+    145
+  ],
+  &quot;bounds&quot;: [
+    6,
+    67,
+    40,
+    85
+  ],
+  &quot;coordinate_system&quot;: &quot;native embedded-image pixels; top-left origin; [left, top, right, bottom)&quot;
+}</pre></details></article>
+</div></section>
+<section id="group-1"><h2>Locale structure</h2><div class="grid">
+<article id="locale-capacity"><h3>Locale capacity</h3><small><code>locale-capacity</code></small><figure><a href="assets/locale-capacity.png"><img src="assets/locale-capacity.png" alt="Locale capacity reference crop"></a></figure><p>Boxed number: maximum units of a player in the entire locale, excluding commanders; blocks, not strength. No separate approach/reserve capacity. A corps may pass through a locale by road even if the corps exceeds its capacity, provided the locale is not already full and the corps does not end there (erratum). During French setup, a corps may initially be assigned more units than its setup locale can hold only if the subsequent detachments leave capacity limits satisfied. Retreat destinations must obey capacity.</p>
+<p><strong>Record with each instance:</strong> Locale ID + position; preserve printed numeric value</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook pp. 3–6; §8 erratum, p. 6; §12, p. 21</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/rules/NT_Annotated_Rules_v1.4.pdf&quot;,
+  &quot;page&quot;: 3,
+  &quot;embedded_image_object&quot;: 35,
+  &quot;embedded_image_size&quot;: [
+    42,
+    145
+  ],
+  &quot;bounds&quot;: [
+    12,
+    85,
+    40,
+    110
+  ],
+  &quot;coordinate_system&quot;: &quot;native embedded-image pixels; top-left origin; [left, top, right, bottom)&quot;
+}</pre></details></article>
+<article id="hill"><h3>Hill marker and elevation</h3><small><code>hill</code></small><figure><a href="assets/hill.png"><img src="assets/hill.png" alt="Hill marker and elevation reference crop"></a></figure><p>Triangle identifies a hill locale; the numeric elevation is cosmetic. Hill status matters: artillery-led attacks may occur from the same approach in consecutive rounds when the attack locale is a hill and the defense locale is not. Optional Santon rules restrict artillery other than the French fixed battery from leading attacks/defenses there. A fixed battery set up in Santon stays in reserve, may lead across any of its three approaches, and approach penalties apply even against its reserve defense.</p>
+<p>Keep the hill flag separate from the printed elevation value and from background elevation shading.</p>
+<p><strong>Record with each instance:</strong> Locale ID + position; preserve printed numeric value</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook p. 3; §11 Step 5, p. 15; optional §18, p. 25</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/rules/NT_Annotated_Rules_v1.4.pdf&quot;,
+  &quot;page&quot;: 3,
+  &quot;embedded_image_object&quot;: 35,
+  &quot;embedded_image_size&quot;: [
+    42,
+    145
+  ],
+  &quot;bounds&quot;: [
+    0,
+    110,
+    40,
+    145
+  ],
+  &quot;coordinate_system&quot;: &quot;native embedded-image pixels; top-left origin; [left, top, right, bottom)&quot;
+}</pre></details></article>
+<article id="locale-example"><h3>Locale and reserve</h3><small><code>locale-example</code></small><figure><a href="assets/locale-example.png"><img src="assets/locale-example.png" alt="Locale and reserve reference crop"></a></figure><p>Locales are polygons; their sides are approaches and the middle is reserve. Corner contact alone does not create adjacency.</p>
+<p><strong>Record with each instance:</strong> Locale polygon + reserve placement point + ordered approach references</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook pp. 2–4</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/rules/NT_Annotated_Rules_v1.4.pdf&quot;,
+  &quot;page&quot;: 3,
+  &quot;embedded_image_object&quot;: 33,
+  &quot;embedded_image_size&quot;: [
+    224,
+    160
+  ],
+  &quot;bounds&quot;: [
+    0,
+    0,
+    224,
+    160
+  ],
+  &quot;coordinate_system&quot;: &quot;native embedded-image pixels; top-left origin; [left, top, right, bottom)&quot;
+}</pre></details></article>
+<article id="approach"><h3>Approach</h3><small><code>approach</code></small><figure><a href="assets/approach.png"><img src="assets/approach.png" alt="Approach reference crop"></a></figure><p>Broad pale bar on a locale boundary. Narrow = one piece wide; wide = two pieces wide. Width is not locale capacity.</p>
+<p>Narrow / wide; retain length and rotation. This crop illustrates the shape, not a calibrated width class.</p>
+<p><strong>Record with each instance:</strong> Shared geometry + the locales on either side; separate penalties for each destination</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook p. 3</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/rules/NT_Annotated_Rules_v1.4.pdf&quot;,
+  &quot;page&quot;: 3,
+  &quot;embedded_image_object&quot;: 34,
+  &quot;embedded_image_size&quot;: [
+    54,
+    152
+  ],
+  &quot;bounds&quot;: [
+    0,
+    0,
+    54,
+    152
+  ],
+  &quot;coordinate_system&quot;: &quot;native embedded-image pixels; top-left origin; [left, top, right, bottom)&quot;
+}</pre></details></article>
+</div></section>
+<section id="group-2"><h2>Special markers</h2><div class="grid">
+<article id="setup-example"><h3>Setup marker</h3><small><code>setup-example</code></small><figure><a href="assets/setup-example.png"><img src="assets/setup-example.png" alt="Setup marker reference crop"></a></figure><p>Parallel bars mark a setup locale for a named corps commander and its units. The corps starts together in one position, either reserve or one approach. Bar count gives the number of units there during setup (user clarification).</p>
+<p>Bar count gives the number of units there during setup (user clarification). Preserve count, side, commander label and orientation.</p>
+<p><strong>Record with each instance:</strong> Locale ID + position + printed colour/rotation; nearby label kept separately</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook pp. 3, 5; user clarification for bar-count meaning</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/rules/NT_Annotated_Rules_v1.4.pdf&quot;,
+  &quot;page&quot;: 3,
+  &quot;embedded_image_object&quot;: 36,
+  &quot;embedded_image_size&quot;: [
+    38,
+    96
+  ],
+  &quot;bounds&quot;: [
+    0,
+    0,
+    38,
+    34
+  ],
+  &quot;coordinate_system&quot;: &quot;native embedded-image pixels; top-left origin; [left, top, right, bottom)&quot;
+}</pre></details></article>
+<article id="objective-example"><h3>Objective marker</h3><small><code>objective-example</code></small><figure><a href="assets/objective-example.png"><img src="assets/objective-example.png" alt="Objective marker reference crop"></a></figure><p>Star marking an objective locale. Blue, green, red and black form distinct victory categories; a locale can carry several categories. Objective control requires a corps with at least one infantry and/or artillery unit, plus a road path to a friendly main-road reinforcement entry locale; neither that entry nor any locale on the path may be enemy-occupied. Without French reinforcements, Allies win marginally if they control at least one blue objective and the French control no green, red or black objectives; otherwise the French win. With French reinforcements, French win marginally if they control at least one objective of each green, red and black category and the Allies control no blue objectives; otherwise Allies win. Demoralization takes precedence as a decisive victory.</p>
+<p>Preserve every colour in a stacked group; do not collapse it to a single objective flag.</p>
+<p><strong>Record with each instance:</strong> Locale ID + position + printed colour/rotation; nearby label kept separately</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook pp. 3, 24 (§16)</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/rules/NT_Annotated_Rules_v1.4.pdf&quot;,
+  &quot;page&quot;: 3,
+  &quot;embedded_image_object&quot;: 36,
+  &quot;embedded_image_size&quot;: [
+    38,
+    96
+  ],
+  &quot;bounds&quot;: [
+    0,
+    34,
+    38,
+    66
+  ],
+  &quot;coordinate_system&quot;: &quot;native embedded-image pixels; top-left origin; [left, top, right, bottom)&quot;
+}</pre></details></article>
+<article id="entry-example"><h3>Reinforcement entry marker</h3><small><code>entry-example</code></small><figure><a href="assets/entry-example.png"><img src="assets/entry-example.png" alt="Reinforcement entry marker reference crop"></a></figure><p>Reinforcement entry locale marker. Blue indicates French; red indicates Allied. Choose an unoccupied-by-enemy entry locale when bringing pieces on; entry uses road movement and commands. A corps enters together via one entry locale and road. French reinforcements may receive two move commands in their entry turn (the first must use a road); Allied reinforcements do not have this double move. French availability is printed on the Time Track; Allied reinforcements in the 1 December scenario are available from its first round.</p>
+<p><strong>Record with each instance:</strong> Locale ID + side + entry road(s) + position/rotation. Main-road entry status also matters for objective supply paths (§16, p. 24).</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §10, p. 11; §6 annotation, p. 5; board legend</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/rules/NT_Annotated_Rules_v1.4.pdf&quot;,
+  &quot;page&quot;: 3,
+  &quot;embedded_image_object&quot;: 36,
+  &quot;embedded_image_size&quot;: [
+    38,
+    96
+  ],
+  &quot;bounds&quot;: [
+    0,
+    66,
+    38,
+    96
+  ],
+  &quot;coordinate_system&quot;: &quot;native embedded-image pixels; top-left origin; [left, top, right, bottom)&quot;
+}</pre></details></article>
+<article id="setup-french"><h3>French setup bars</h3><small><code>setup-french</code></small><figure><a href="assets/setup-french.png"><img src="assets/setup-french.png" alt="French setup bars reference crop"></a></figure><p>French setup locale marker; sample commander is Bessières. A corps starting on the map must occupy the locale bearing its commander’s name. Its pieces may be in reserve or blocking an approach, but must all share one position. French Bernadotte and Davout start off-map in both scenarios; in the 1 December scenario only two Allied corps start in play.</p>
+<p>Bar count gives the number of units there during setup (user clarification). Preserve count, side, commander label and orientation.</p>
+<p><strong>Record with each instance:</strong> Locale ID + position + rotation + nearby label</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §6, p. 5; p. 3 for symbol identity; user clarification for bar-count meaning</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    1708,
+    1910,
+    1834,
+    1978
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="setup-allied"><h3>Allied setup bars</h3><small><code>setup-allied</code></small><figure><a href="assets/setup-allied.png"><img src="assets/setup-allied.png" alt="Allied setup bars reference crop"></a></figure><p>Allied setup locale marker; sample commander is Langeron. A corps starting on the map must occupy the locale bearing its commander’s name. Its pieces may be in reserve or blocking an approach, but must all share one position. French Bernadotte and Davout start off-map in both scenarios; in the 1 December scenario only two Allied corps start in play.</p>
+<p>Bar count gives the number of units there during setup (user clarification). Preserve count, side, commander label and orientation.</p>
+<p><strong>Record with each instance:</strong> Locale ID + position + rotation + nearby label</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §6, p. 5; p. 3 for symbol identity; user clarification for bar-count meaning</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    2720,
+    4105,
+    2798,
+    4210
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="objective-blue"><h3>Blue objective</h3><small><code>objective-blue</code></small><figure><a href="assets/objective-blue.png"><img src="assets/objective-blue.png" alt="Blue objective reference crop"></a></figure><p>Blue star: one of four objective categories used for marginal victory. Objective control requires a corps with at least one infantry and/or artillery unit, plus a road path to a friendly main-road reinforcement entry locale; neither that entry nor any locale on the path may be enemy-occupied. Without French reinforcements, Allies win marginally if they control at least one blue objective and the French control no green, red or black objectives; otherwise the French win. With French reinforcements, French win marginally if they control at least one objective of each green, red and black category and the Allies control no blue objectives; otherwise Allies win. Demoralization takes precedence as a decisive victory.</p>
+<p>A locale with multiple stars counts for every colour shown (two or three, per erratum). The colours identify objective categories, not ownership.</p>
+<p><strong>Record with each instance:</strong> Locale ID + set of objective colours + separate position for each printed star</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §16, p. 24; board artwork for colour and position</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    1600,
+    1982,
+    1670,
+    2040
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="objective-green"><h3>Green objective</h3><small><code>objective-green</code></small><figure><a href="assets/objective-green.png"><img src="assets/objective-green.png" alt="Green objective reference crop"></a></figure><p>Green star: one of four objective categories used for marginal victory. Objective control requires a corps with at least one infantry and/or artillery unit, plus a road path to a friendly main-road reinforcement entry locale; neither that entry nor any locale on the path may be enemy-occupied. Without French reinforcements, Allies win marginally if they control at least one blue objective and the French control no green, red or black objectives; otherwise the French win. With French reinforcements, French win marginally if they control at least one objective of each green, red and black category and the Allies control no blue objectives; otherwise Allies win. Demoralization takes precedence as a decisive victory.</p>
+<p>A locale with multiple stars counts for every colour shown (two or three, per erratum). The colours identify objective categories, not ownership.</p>
+<p><strong>Record with each instance:</strong> Locale ID + set of objective colours + separate position for each printed star</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §16, p. 24; board artwork for colour and position</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    4767,
+    1745,
+    4807,
+    1785
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="objective-red"><h3>Red objective</h3><small><code>objective-red</code></small><figure><a href="assets/objective-red.png"><img src="assets/objective-red.png" alt="Red objective reference crop"></a></figure><p>Red star: one of four objective categories used for marginal victory. Objective control requires a corps with at least one infantry and/or artillery unit, plus a road path to a friendly main-road reinforcement entry locale; neither that entry nor any locale on the path may be enemy-occupied. Without French reinforcements, Allies win marginally if they control at least one blue objective and the French control no green, red or black objectives; otherwise the French win. With French reinforcements, French win marginally if they control at least one objective of each green, red and black category and the Allies control no blue objectives; otherwise Allies win. Demoralization takes precedence as a decisive victory.</p>
+<p>A locale with multiple stars counts for every colour shown (two or three, per erratum). The colours identify objective categories, not ownership.</p>
+<p><strong>Record with each instance:</strong> Locale ID + set of objective colours + separate position for each printed star</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §16, p. 24; board artwork for colour and position</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    4767,
+    1783,
+    4807,
+    1819
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="objective-dark"><h3>Black objective</h3><small><code>objective-dark</code></small><figure><a href="assets/objective-dark.png"><img src="assets/objective-dark.png" alt="Black objective reference crop"></a></figure><p>Black star: one of four objective categories used for marginal victory. Objective control requires a corps with at least one infantry and/or artillery unit, plus a road path to a friendly main-road reinforcement entry locale; neither that entry nor any locale on the path may be enemy-occupied. Without French reinforcements, Allies win marginally if they control at least one blue objective and the French control no green, red or black objectives; otherwise the French win. With French reinforcements, French win marginally if they control at least one objective of each green, red and black category and the Allies control no blue objectives; otherwise Allies win. Demoralization takes precedence as a decisive victory.</p>
+<p>A locale with multiple stars counts for every colour shown (two or three, per erratum). The colours identify objective categories, not ownership.</p>
+<p><strong>Record with each instance:</strong> Locale ID + set of objective colours + separate position for each printed star</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §16, p. 24; board artwork for colour and position</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    4767,
+    1818,
+    4807,
+    1855
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="entry-french"><h3>French reinforcement entry</h3><small><code>entry-french</code></small><figure><a href="assets/entry-french.png"><img src="assets/entry-french.png" alt="French reinforcement entry reference crop"></a></figure><p>French entry locale marker. Blue indicates French; red indicates Allied. Choose an unoccupied-by-enemy entry locale when bringing pieces on; entry uses road movement and commands. A corps enters together via one entry locale and road. French reinforcements may receive two move commands in their entry turn (the first must use a road); Allied reinforcements do not have this double move. French availability is printed on the Time Track; Allied reinforcements in the 1 December scenario are available from its first round.</p>
+<p><strong>Record with each instance:</strong> Locale ID + side + entry road(s) + position/rotation. Main-road entry status also matters for objective supply paths (§16, p. 24).</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §10, p. 11; §6 annotation, p. 5; board legend</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    913,
+    616,
+    961,
+    659
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="entry-allied"><h3>Allied reinforcement entry</h3><small><code>entry-allied</code></small><figure><a href="assets/entry-allied.png"><img src="assets/entry-allied.png" alt="Allied reinforcement entry reference crop"></a></figure><p>Allied entry locale marker. Blue indicates French; red indicates Allied. Choose an unoccupied-by-enemy entry locale when bringing pieces on; entry uses road movement and commands. A corps enters together via one entry locale and road. French reinforcements may receive two move commands in their entry turn (the first must use a road); Allied reinforcements do not have this double move. French availability is printed on the Time Track; Allied reinforcements in the 1 December scenario are available from its first round.</p>
+<p><strong>Record with each instance:</strong> Locale ID + side + entry road(s) + position/rotation. Main-road entry status also matters for objective supply paths (§16, p. 24).</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §10, p. 11; §6 annotation, p. 5; board legend</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    913,
+    689,
+    961,
+    733
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="position-french"><h3>French position line</h3><small><code>position-french</code></small><figure><a href="assets/position-french.png"><img src="assets/position-french.png" alt="French position line reference crop"></a></figure><p>Blue line keyed as French positions at 7:00 AM; a different mark from the parallel setup bars.</p>
+<details><summary>Evidence and source coordinates</summary><p>Board legend; rulebook p. 4 for roads and cosmetic terrain</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    269,
+    392,
+    336,
+    414
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="position-allied"><h3>Allied position line</h3><small><code>position-allied</code></small><figure><a href="assets/position-allied.png"><img src="assets/position-allied.png" alt="Allied position line reference crop"></a></figure><p>Red line keyed as Allied positions at 7:00 AM.</p>
+<details><summary>Evidence and source coordinates</summary><p>Board legend; rulebook p. 4 for roads and cosmetic terrain</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    769,
+    392,
+    837,
+    414
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+</div></section>
+<section id="group-3"><h2>Roads</h2><div class="grid">
+<article id="road-main"><h3>Main road</h3><small><code>road-main</code></small><figure><a href="assets/road-main.png"><img src="assets/road-main.png" alt="Main road reference crop"></a></figure><p>Main road: red for main roads, brown for local roads. A road move may travel up to three locales using only main roads, or up to two using local roads or a mixture. It must follow connected roads: routes in the same locale can be unconnected. From a starting locale with unconnected roads, a piece may leave by any one of them. Road moves normally start and end in reserve; cavalry may finish blocking an approach crossed by the connected route. Reinforcement entry requires road movement; objective control requires a road path to a friendly main-road entry.</p>
+<p><strong>Record with each instance:</strong> Route geometry + road class + connectivity within locales + crossed approaches; sharing a locale does not imply a junction.</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §10, pp. 9–11; §16, p. 24</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    601,
+    491,
+    693,
+    541
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="road-local"><h3>Local road</h3><small><code>road-local</code></small><figure><a href="assets/road-local.png"><img src="assets/road-local.png" alt="Local road reference crop"></a></figure><p>Local road: red for main roads, brown for local roads. A road move may travel up to three locales using only main roads, or up to two using local roads or a mixture. It must follow connected roads: routes in the same locale can be unconnected. From a starting locale with unconnected roads, a piece may leave by any one of them. Road moves normally start and end in reserve; cavalry may finish blocking an approach crossed by the connected route. Reinforcement entry requires road movement; objective control requires a road path to a friendly main-road entry.</p>
+<p><strong>Record with each instance:</strong> Route geometry + road class + connectivity within locales + crossed approaches; sharing a locale does not imply a junction.</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §10, pp. 9–11; §16, p. 24</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    600,
+    554,
+    694,
+    605
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+</div></section>
+<section id="group-4"><h2>Landscape</h2><div class="grid">
+<article id="village"><h3>Village / town</h3><small><code>village</code></small><figure><a href="assets/village.png"><img src="assets/village.png" alt="Village / town reference crop"></a></figure><p>Gray cluster of buildings. Cosmetic map artwork; gameplay effects are represented by approaches and locale geometry.</p>
+<details><summary>Evidence and source coordinates</summary><p>Board legend; rulebook p. 4 for roads and cosmetic terrain</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    266,
+    478,
+    361,
+    546
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="woods"><h3>Woods</h3><small><code>woods</code></small><figure><a href="assets/woods.png"><img src="assets/woods.png" alt="Woods reference crop"></a></figure><p>Clusters of green trees; cosmetic map artwork.</p>
+<details><summary>Evidence and source coordinates</summary><p>Board legend; rulebook p. 4 for roads and cosmetic terrain</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    249,
+    547,
+    371,
+    618
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="pond"><h3>Frozen pond</h3><small><code>pond</code></small><figure><a href="assets/pond.png"><img src="assets/pond.png" alt="Frozen pond reference crop"></a></figure><p>Pale blue water patch; cosmetic map artwork.</p>
+<details><summary>Evidence and source coordinates</summary><p>Board legend; rulebook p. 4 for roads and cosmetic terrain</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    259,
+    616,
+    364,
+    687
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="marsh"><h3>Marsh</h3><small><code>marsh</code></small><figure><a href="assets/marsh.png"><img src="assets/marsh.png" alt="Marsh reference crop"></a></figure><p>Pale blue reed pattern; cosmetic map artwork.</p>
+<details><summary>Evidence and source coordinates</summary><p>Board legend; rulebook p. 4 for roads and cosmetic terrain</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    257,
+    689,
+    362,
+    769
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="stream"><h3>Stream</h3><small><code>stream</code></small><figure><a href="assets/stream.png"><img src="assets/stream.png" alt="Stream reference crop"></a></figure><p>Thin light blue watercourse; cosmetic map artwork, not an independent movement restriction.</p>
+<details><summary>Evidence and source coordinates</summary><p>Board legend; rulebook p. 4 for roads and cosmetic terrain</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    602,
+    620,
+    687,
+    670
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="river"><h3>River</h3><small><code>river</code></small><figure><a href="assets/river.png"><img src="assets/river.png" alt="River reference crop"></a></figure><p>Thicker blue watercourse; cosmetic map artwork, not an independent movement restriction.</p>
+<details><summary>Evidence and source coordinates</summary><p>Board legend; rulebook p. 4 for roads and cosmetic terrain</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    599,
+    698,
+    689,
+    746
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="elevation"><h3>Elevation palette</h3><small><code>elevation</code></small><figure><a href="assets/elevation.png"><img src="assets/elevation.png" alt="Elevation palette reference crop"></a></figure><p>Ten printed elevation bands, 175–400 metres in steps of 25. Shading is cosmetic.</p>
+<details><summary>Evidence and source coordinates</summary><p>Board legend; rulebook p. 4 for roads and cosmetic terrain</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    118,
+    421,
+    241,
+    782
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+</div></section>
+<section id="group-5"><h2>Board furniture</h2><div class="grid">
+<article id="scale-miles"><h3>Miles scale</h3><small><code>scale-miles</code></small><figure><a href="assets/scale-miles.png"><img src="assets/scale-miles.png" alt="Miles scale reference crop"></a></figure><p>Printed English-mile scale; retain ticks, numbers and label.</p>
+<details><summary>Evidence and source coordinates</summary><p>Board legend; rulebook p. 4 for roads and cosmetic terrain</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    227,
+    790,
+    1270,
+    861
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="scale-kilometres"><h3>Kilometres scale</h3><small><code>scale-kilometres</code></small><figure><a href="assets/scale-kilometres.png"><img src="assets/scale-kilometres.png" alt="Kilometres scale reference crop"></a></figure><p>Printed kilometre scale; retain ticks, numbers and label.</p>
+<details><summary>Evidence and source coordinates</summary><p>Board legend; rulebook p. 4 for roads and cosmetic terrain</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    221,
+    862,
+    1277,
+    928
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="roster-french"><h3>French printed roster</h3><small><code>roster-french</code></small><figure><a href="assets/roster-french.png"><img src="assets/roster-french.png" alt="French printed roster reference crop"></a></figure><p>Blue French Army display. The Army displays inventory the initial pieces face-up before setup. Symbols identify unit type; their repetition gives strength. The number beside a commander’s name gives the minimum initial corps assignment (the circled number in this board artwork); the maximum is eight. French setup follows Allied organization; Bernadotte and Davout each require at least one unit other than two-strength infantry. These displays are setup references, not pieces deployed on the battlefield.</p>
+<p>Commander names and minimum-assignment numbers are semantic data; border colour and heraldic artwork are retained as printed reference graphics.</p>
+<p><strong>Record with each instance:</strong> Board coordinates; text sub-elements need separate extraction later</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook pp. 1–2; §6 steps 5–7, p. 5; board artwork for circled-number typography</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    24,
+    1250,
+    275,
+    3375
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="roster-allied"><h3>Allied printed roster</h3><small><code>roster-allied</code></small><figure><a href="assets/roster-allied.png"><img src="assets/roster-allied.png" alt="Allied printed roster reference crop"></a></figure><p>Red Allied Army display. The Army displays inventory the initial pieces face-up before setup. Symbols identify unit type; their repetition gives strength. The number beside a commander’s name gives the minimum initial corps assignment (the circled number in this board artwork); the maximum is eight. French setup follows Allied organization; Bernadotte and Davout each require at least one unit other than two-strength infantry. These displays are setup references, not pieces deployed on the battlefield.</p>
+<p>Commander names and minimum-assignment numbers are semantic data; border colour and heraldic artwork are retained as printed reference graphics.</p>
+<p><strong>Record with each instance:</strong> Board coordinates; text sub-elements need separate extraction later</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook pp. 1–2; §6 steps 5–7, p. 5; board artwork for circled-number typography</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    4840,
+    1370,
+    5065,
+    3985
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="track-allied-command"><h3>Allied command track</h3><small><code>track-allied-command</code></small><figure><a href="assets/track-allied-command.png"><img src="assets/track-allied-command.png" alt="Allied command track reference crop"></a></figure><p>Allied command usage track. After a player carries out a command, the opponent puts a black marker in the corresponding space. Each commander normally gives one corps command per turn; Allied limits: at most five corps commands and three independent commands per turn. Named spaces track corps commands and Independent spaces track detached-unit commands. French reinforcement commanders can give two commands in their entry turn.</p>
+<p>The PDF provides no additional gameplay meaning for the heraldic illustrations; preserve them as printed artwork.</p>
+<p><strong>Record with each instance:</strong> Board coordinates; text sub-elements need separate extraction later</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §6 step 4, p. 5; §9, pp. 7–8; reinforcement exception, p. 11</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    72,
+    6030,
+    990,
+    6520
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="track-french-command"><h3>French command track</h3><small><code>track-french-command</code></small><figure><a href="assets/track-french-command.png"><img src="assets/track-french-command.png" alt="French command track reference crop"></a></figure><p>French command usage track. After a player carries out a command, the opponent puts a black marker in the corresponding space. Each commander normally gives one corps command per turn; French limits: at most four independent commands per turn; no additional army-wide corps-command limit. Named spaces track corps commands and Independent spaces track detached-unit commands. French reinforcement commanders can give two commands in their entry turn.</p>
+<p>The PDF provides no additional gameplay meaning for the heraldic illustrations; preserve them as printed artwork.</p>
+<p><strong>Record with each instance:</strong> Board coordinates; text sub-elements need separate extraction later</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §6 step 4, p. 5; §9, pp. 7–8; reinforcement exception, p. 11</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    4110,
+    5295,
+    5010,
+    5800
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="track-morale"><h3>Morale track</h3><small><code>track-morale</code></small><figure><a href="assets/track-morale.png"><img src="assets/track-morale.png" alt="Morale track reference crop"></a></figure><p>Blue and red markers track French and Allied morale. The board marks initial levels as French 23 and Allied 27; optional balance rules may reduce initial morale. The losing army in an attack loses morale for its strength losses; retreat losses also reduce morale. The final demoralizing loss cannot come from an artillery-led attack. The first French reinforcement adds four morale. At night, recover half of morale losses, rounded down, to a maximum of four. Elite commitment and failed Guard Attacks have additional penalties. Demoralization ends the game immediately.</p>
+<p><strong>Record with each instance:</strong> Board coordinates; text sub-elements need separate extraction later</p>
+<details><summary>Evidence and source coordinates</summary><p>Board artwork for initial 23/27; rulebook §13–14, p. 22; §15, p. 23; §16–17, pp. 24–25</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    3730,
+    5800,
+    5010,
+    6240
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="track-time"><h3>Time track</h3><small><code>track-time</code></small><figure><a href="assets/track-time.png"><img src="assets/track-time.png" alt="Time track reference crop"></a></figure><p>A black marker shows the current round/hour; each round contains an Allied turn followed by a French turn. The two printed date rows support the 1 December and 2 December scenarios, with a Night round between the dates. Printed French reinforcement labels indicate when those corps become eligible; if that time precedes the chosen scenario, they are eligible from its first round. Entry may be voluntarily delayed. Night prohibits attacks and restores some morale.</p>
+<p><strong>Record with each instance:</strong> Board coordinates; text sub-elements need separate extraction later</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook §6–7, p. 5; reinforcement timing, p. 11; §14, p. 22; board artwork for date/time labels</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    3440,
+    6240,
+    5010,
+    6510
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+<article id="legend"><h3>Board furniture</h3><small><code>legend</code></small><figure><a href="assets/legend.png"><img src="assets/legend.png" alt="Board furniture reference crop"></a></figure><p>Original legend, title, elevation key and scales. Context reference, not a single reusable glyph.</p>
+<p><strong>Record with each instance:</strong> Board coordinates; text sub-elements need separate extraction later</p>
+<details><summary>Evidence and source coordinates</summary><p>Board artwork; p. 2 says play aids are explained in their relevant sections</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/images/map.jpg&quot;,
+  &quot;bounds&quot;: [
+    70,
+    70,
+    1410,
+    975
+  ],
+  &quot;coordinate_system&quot;: &quot;original pixels; top-left origin; [left, top, right, bottom), no rotation&quot;
+}</pre></details></article>
+</div></section>
+
+<section id="group-7"><h2>Unit reference</h2><div class="grid">
+<article id="unit-types"><h3>Unit face symbols</h3><small><code>unit-types</code></small><figure><a href="assets/unit-types.png"><img src="assets/unit-types.png" alt="Unit face symbols reference crop"></a></figure><p>Guard infantry, infantry, cavalry and artillery face symbols. These identify units, not approach penalties despite similar glyphs. Heavy cavalry is three-strength cavalry. Guard infantry exists at strength three; after reduction it is replaced by ordinary infantry and loses Guard capabilities.</p>
+<p><strong>Record with each instance:</strong> Unit type + strength + side; not a map penalty</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook p. 2; §15, p. 23</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/rules/NT_Annotated_Rules_v1.4.pdf&quot;,
+  &quot;page&quot;: 2,
+  &quot;embedded_image_object&quot;: 26,
+  &quot;embedded_image_size&quot;: [
+    126,
+    86
+  ],
+  &quot;bounds&quot;: [
+    0,
+    0,
+    126,
+    86
+  ],
+  &quot;coordinate_system&quot;: &quot;native embedded-image pixels; top-left origin; [left, top, right, bottom)&quot;
+}</pre></details></article>
+<article id="unit-strength"><h3>Repeated symbols / strength</h3><small><code>unit-strength</code></small><figure><a href="assets/unit-strength.png"><img src="assets/unit-strength.png" alt="Repeated symbols / strength reference crop"></a></figure><p>Number of symbols indicates unit strength; samples are three-strength infantry, two-strength cavalry and one-strength artillery.</p>
+<p><strong>Record with each instance:</strong> Unit type + strength + side; not a map penalty</p>
+<details><summary>Evidence and source coordinates</summary><p>Rulebook p. 2</p><pre style="white-space:pre-wrap">{
+  &quot;file&quot;: &quot;NTR/static/NTR/rules/NT_Annotated_Rules_v1.4.pdf&quot;,
+  &quot;page&quot;: 2,
+  &quot;embedded_image_object&quot;: 25,
+  &quot;embedded_image_size&quot;: [
+    155,
+    96
+  ],
+  &quot;bounds&quot;: [
+    0,
+    0,
+    155,
+    96
+  ],
+  &quot;coordinate_system&quot;: &quot;native embedded-image pixels; top-left origin; [left, top, right, bottom)&quot;
+}</pre></details></article>
+</div></section>
+<p>Still to extract: every board occurrence, locale and approach geometry, exact approach width classes and road junctions. Setup bar counts record unit numbers, per user clarification. No gameplay integration is included.</p></body></html>

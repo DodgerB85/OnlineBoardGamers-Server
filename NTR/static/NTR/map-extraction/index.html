@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NTR · Map extraction workbench</title>
+  <link rel="stylesheet" href="viewer.css">
+  <script defer src="region-data.js"></script>
+  <script defer src="board-data.js"></script>
+  <script defer src="viewer.js"></script>
+</head>
+<body>
+  <header>
+    <div><small>NAPOLEON’S TRIUMPH / MAP EXTRACTION</small><h1>Full-board extraction</h1></div>
+    <div class="actions"><a href="../catalogue/index.html">Symbol catalogue</a><button id="export-json">Export JSON</button><button id="export-svg">Export SVG</button><label class="button">Import JSON<input id="import-json" type="file" accept=".json,application/json" hidden></label></div>
+  </header>
+  <main>
+    <aside class="layers">
+      <h2>Explore the board</h2><label for="region">Region</label><select id="region" aria-label="Region"></select><p id="region-description"></p>
+      <div id="counts" class="counts"></div>
+      <p class="notice">Full-board traces are drafts. Unknown approach frontages and unread values stay unassigned. Reserve anchors are added placement aids, not printed artwork.</p>
+      <h2>Visible layers</h2><div id="layers"></div>
+      <div class="actions"><button id="all-layers">All</button><button id="no-layers">None</button></div>
+      <h2>Occurrences</h2><input id="search" type="search" placeholder="Find a symbol or locale" aria-label="Search occurrences"><div id="feature-list"></div>
+    </aside>
+    <section class="workspace" aria-label="Map annotation workspace">
+      <div class="toolbar">
+        <div class="segmented" role="group" aria-label="Display mode"><button data-mode="overlay" aria-pressed="true">Overlay</button><button data-mode="reconstruction" aria-pressed="false">Reconstruction</button><button data-mode="crops" aria-pressed="false">Source crops</button></div>
+        <label>Original <input id="opacity" type="range" min="0" max="100" value="70"><output id="opacity-value">70%</output></label>
+        <button id="fit">Fit region</button><button id="undo">Undo</button>
+      </div>
+      <div class="drawbar"><label>Tool <select id="tool"><option value="select">Select / drag</option><option value="symbol">Place symbol</option><option value="polygon">Draw locale</option><option value="line">Draw line</option></select></label><label>New element <select id="new-type"><option value="capacity">Capacity</option><option value="penalty">Penalty</option><option value="objective">Objective</option><option value="setup">Setup bars</option><option value="hill">Hill</option><option value="reserve">Reserve anchor</option><option value="approach">Approach</option><option value="road">Road</option></select></label><button id="finish">Finish drawing</button><button id="cancel">Cancel drawing</button></div>
+      <div id="canvas"><svg id="map" xmlns="http://www.w3.org/2000/svg" aria-label="Editable map region" tabindex="0"></svg></div>
+      <footer><span id="message" role="status">Drag empty space to pan. Scroll to zoom. Click a feature to inspect it.</span><span id="coordinates"></span></footer>
+      <details class="reference"><summary>Numbered reference map · rulebook page 28</summary><p>Reference only; this image has not been registered as an aligned overlay. The large grey numbers identify locales.</p><a href="reference-numbered.png" target="_blank" rel="noopener"><img src="reference-numbered.png" alt="Rulebook page 28 with numbered locales"></a></details>
+    </section>
+    <aside class="inspector">
+      <h2>Selected occurrence</h2><p id="selection-hint">Choose an occurrence on the map or in the list.</p>
+      <form id="editor" hidden>
+        <code id="feature-id"></code>
+        <label>Name<input id="edit-label" required></label>
+        <label>Review state<select id="edit-status"><option value="reviewed">Reviewed</option><option value="draft">Draft</option></select></label>
+        <label id="approach-width-field" hidden>Approach frontage<select id="edit-width"><option value="">Unreviewed</option><option value="1">1 wide · narrow</option><option value="2">2 wide · wide</option></select></label>
+        <label>Meaning and associations<textarea id="edit-properties" rows="10" spellcheck="false"></textarea></label>
+        <label>Geometry in original pixels<textarea id="edit-geometry" rows="6" spellcheck="false"></textarea></label>
+        <div class="actions"><button type="submit">Apply changes</button><button id="delete" type="button">Delete</button></div>
+        <div id="source-crop"></div>
+      </form>
+      <h2>Save and continue</h2><p id="save-state">Edits save in this browser. Export JSON to keep a file or share changes.</p><button id="restore">Restore supplied region</button>
+      <h2>Coverage</h2><p id="coverage"></p>
+    </aside>
+  </main>
+</body>
+</html>

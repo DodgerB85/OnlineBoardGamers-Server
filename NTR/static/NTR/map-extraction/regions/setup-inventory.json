@@ -1,0 +1,271 @@
+{
+  "version": 1,
+  "id": "ntr-on-map-setup-inventory",
+  "title": "On-map setup unit bars",
+  "description": "Inventory of the colored setup bars and adjacent commander labels printed on the source map. Unit counts equal the number of bars in each group.",
+  "source": {
+    "image": "../../images/map.jpg",
+    "size": [
+      5100,
+      6600
+    ]
+  },
+  "coordinate_semantics": "x and y are the center of the source_bounds rectangle in original image pixels; width and height are the rectangle dimensions.",
+  "groups": [
+    {
+      "id": "setup-bessieres",
+      "x": 1744,
+      "y": 1945,
+      "width": 62,
+      "height": 60,
+      "side": "French",
+      "commander": "Bessières",
+      "unit_count": 4,
+      "source_bounds": [
+        1713,
+        1915,
+        1775,
+        1975
+      ],
+      "status": "reviewed"
+    },
+    {
+      "id": "setup-lannes",
+      "x": 2283,
+      "y": 2067,
+      "width": 62,
+      "height": 62,
+      "side": "French",
+      "commander": "Lannes",
+      "unit_count": 4,
+      "source_bounds": [
+        2252,
+        2036,
+        2314,
+        2098
+      ],
+      "status": "reviewed"
+    },
+    {
+      "id": "setup-murat",
+      "x": 1966.5,
+      "y": 2184,
+      "width": 63,
+      "height": 62,
+      "side": "French",
+      "commander": "Murat",
+      "unit_count": 4,
+      "source_bounds": [
+        1935,
+        2153,
+        1998,
+        2215
+      ],
+      "status": "reviewed"
+    },
+    {
+      "id": "setup-vandamme",
+      "x": 1902.5,
+      "y": 2965,
+      "width": 47,
+      "height": 62,
+      "side": "French",
+      "commander": "Vandamme",
+      "unit_count": 3,
+      "source_bounds": [
+        1879,
+        2934,
+        1926,
+        2996
+      ],
+      "status": "reviewed"
+    },
+    {
+      "id": "setup-st-hilaire",
+      "x": 1864.5,
+      "y": 3852,
+      "width": 47,
+      "height": 62,
+      "side": "French",
+      "commander": "St. Hilaire",
+      "unit_count": 3,
+      "source_bounds": [
+        1841,
+        3821,
+        1888,
+        3883
+      ],
+      "status": "reviewed"
+    },
+    {
+      "id": "setup-legrand",
+      "x": 1469,
+      "y": 5182.5,
+      "width": 46,
+      "height": 61,
+      "side": "French",
+      "commander": "Legrand",
+      "unit_count": 3,
+      "source_bounds": [
+        1446,
+        5152,
+        1492,
+        5213
+      ],
+      "status": "reviewed"
+    },
+    {
+      "id": "setup-bagration",
+      "x": 3826,
+      "y": 1531,
+      "width": 62,
+      "height": 62,
+      "side": "Allied",
+      "commander": "Bagration",
+      "unit_count": 4,
+      "source_bounds": [
+        3795,
+        1500,
+        3857,
+        1562
+      ],
+      "status": "reviewed"
+    },
+    {
+      "id": "setup-constantine",
+      "x": 4378.5,
+      "y": 2287.5,
+      "width": 63,
+      "height": 63,
+      "side": "Allied",
+      "commander": "Constantine",
+      "unit_count": 4,
+      "source_bounds": [
+        4347,
+        2256,
+        4410,
+        2319
+      ],
+      "status": "reviewed"
+    },
+    {
+      "id": "setup-kollowrath",
+      "x": 3926,
+      "y": 3390.5,
+      "width": 46,
+      "height": 61,
+      "side": "Allied",
+      "commander": "Kollowrath",
+      "unit_count": 3,
+      "source_bounds": [
+        3903,
+        3360,
+        3949,
+        3421
+      ],
+      "status": "reviewed"
+    },
+    {
+      "id": "setup-miloradovich",
+      "x": 3584,
+      "y": 3448.5,
+      "width": 46,
+      "height": 61,
+      "side": "Allied",
+      "commander": "Miloradovich",
+      "unit_count": 3,
+      "source_bounds": [
+        3561,
+        3418,
+        3607,
+        3479
+      ],
+      "status": "reviewed"
+    },
+    {
+      "id": "setup-prebyshevsky",
+      "x": 2968.5,
+      "y": 3878.5,
+      "width": 63,
+      "height": 63,
+      "side": "Allied",
+      "commander": "Prebyshevsky",
+      "unit_count": 4,
+      "source_bounds": [
+        2937,
+        3847,
+        3000,
+        3910
+      ],
+      "status": "reviewed"
+    },
+    {
+      "id": "setup-langeron",
+      "x": 2757.5,
+      "y": 4143,
+      "width": 63,
+      "height": 62,
+      "side": "Allied",
+      "commander": "Langeron",
+      "unit_count": 4,
+      "source_bounds": [
+        2726,
+        4112,
+        2789,
+        4174
+      ],
+      "status": "reviewed"
+    },
+    {
+      "id": "setup-liechtenstein",
+      "x": 3051,
+      "y": 4259,
+      "width": 62,
+      "height": 62,
+      "side": "Allied",
+      "commander": "Liechtenstein",
+      "unit_count": 4,
+      "source_bounds": [
+        3020,
+        4228,
+        3082,
+        4290
+      ],
+      "status": "reviewed"
+    },
+    {
+      "id": "setup-dokhturov",
+      "x": 2500,
+      "y": 4624.5,
+      "width": 62,
+      "height": 63,
+      "side": "Allied",
+      "commander": "Dokhturov",
+      "unit_count": 4,
+      "source_bounds": [
+        2469,
+        4593,
+        2531,
+        4656
+      ],
+      "status": "reviewed"
+    },
+    {
+      "id": "setup-kienmayer",
+      "x": 2736.5,
+      "y": 5284.5,
+      "width": 47,
+      "height": 61,
+      "side": "Allied",
+      "commander": "Kienmayer",
+      "unit_count": 3,
+      "source_bounds": [
+        2713,
+        5254,
+        2760,
+        5315
+      ],
+      "status": "reviewed"
+    }
+  ]
+}
