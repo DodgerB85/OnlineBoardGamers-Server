@@ -73,6 +73,9 @@
             <span>{% translate "New Design Active! All feedback being processed. Please let us know what improvements you would like." %}</span>
             <a href="{% url 'feedback' %}" class="button button-sm button-primary" style="margin-left:8px;">{% translate "Feedback" %}</a>
         </div>
+        <div class="news-banner" style="background:#fff3cd;border-color:#ffc107;">
+            <span>{% translate "Scheduled downtime: 10 minutes at 14:00 UTC today for database migration. Please finish your turns before then." %}</span>
+        </div>
         <!-- hidden map editor forms (required by Lobby.js) -->
         {% include 'Lobby/map_editor_forms.html' %}
         <!-- TABS -->
