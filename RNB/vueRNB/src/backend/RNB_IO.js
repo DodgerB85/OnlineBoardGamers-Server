@@ -2207,6 +2207,8 @@ export function loadCurrentMove() {
 		// order (current or pending) — this is what lets them see / continue it when opening
 		// the game, and lets the pre-set flow redo the already-done pre-moves.
 		if (currentMoveData.turn === store.gameflow.turn && currentMoveData.phase === store.gameflow.phase && currentMoveData.username === store.players[personal.pov].name && store.gameflow.turnOrder.includes(personal.pov)) {
+			// A recovery reload can reach here twice; keep the reset snapshot free of the first preview.
+			clearUnfinalizedPreMoveBeforeExport()
 			stack.attemptToLoadWholeCurrentMoveStack(currentMoveData, store.gameflow.phase)
 			if (store.actionStack.length > 0) {
 				store.stackControl.loadedPreMove = true

@@ -41,6 +41,7 @@
  *     node --test tests/ghost-turn.test.js
  */
 import test from "node:test"
+import { readFileSync } from "node:fs"
 import assert from "node:assert/strict"
 import { register } from "node:module"
 
@@ -259,4 +260,74 @@ test("current player's pre-set move is still loaded for confirmation", { skip: s
 	assert.equal(store.history[0][1], 0)
 	assert.equal(store.history[0][3][0], rf.PHASE_MOVEMENT_TO)
 	assert.deepEqual(store.ALL_TRANSPORTERS[0].location, [rf.LOCATION_OOB], "current player's pre-set is performed")
+})
+
+test("game 37137: transaction recovery reload must not persist Dycu's wall early", { skip: skip }, async () => {
+	setActivePinia(createPinia())
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	// Exact penultimate rewind snapshot and pending preset from RNB/RNBbug.txt.
+	const fixture = JSON.parse(readFileSync(new URL("./fixtures/conflict-wall-37137.json", import.meta.url), "utf8"))
+	store.mapData.externalMapData = fixture.startingMap
+	funcs.importRNBmodel(fixture.gameDataB64, false)
+	store.gameflow.turn = 16
+	personal.pov = 0
+	personal.name = "Dycu"
+	personal.soloGame = false
+	personal.trainingGame = false
+	personal.currentMoveData = fixture.preset
+	const edge = () => store.mapData.edgeData.find(edge => edge.edgeID === 71)
+	assert.deepEqual(edge().wall, [1, -1])
+	const preset = personal.currentMoveData
+	const cleanGameData = funcs.exportRNBmodel(false)
+	const cleanHistoryLength = store.history.length
+	// Dycu's tab is still in conflict when a reload observes the saved building
+	// phase with an unfinished transaction (the normal transaction-recovery path).
+	store.gameflow.phase = rf.PHASE_CONFLICT_BUILDING_TURN_ORDER
+	const requests = []
+	const originalFetch = globalThis.fetch
+	globalThis.fetch = async (url, options) => {
+		requests.push({ url, ...JSON.parse(options.body) })
+		if (url === "/RNB/data/1/") {
+			return {
+				ok: true,
+				json: async () => ({
+					gameDataB64: cleanGameData,
+					finishedGame: false,
+					latestUpdate: 1,
+					transactionID: "unfinished-conflict",
+					allStackData: [preset],
+					currentMoveData: preset,
+					allMyMoveData: [preset],
+					secondsToNextKickout: 99999,
+				}),
+			}
+		}
+		return { ok: true, json: async () => ({ latestUpdate: 2, currentMoveData: preset, allMyMoveData: [preset] }) }
+	}
+	try {
+		await IO.reloadGameData()
+		assert.equal(requests.length, 2, "reload performs transaction recovery itself")
+		const recoveryBytes = Uint8Array.from(atob(requests[1].gameDataB64), char => char.charCodeAt(0))
+		assert.equal(
+			JSON.parse(pako.ungzip(recoveryBytes, { to: "string" }))[4].length,
+			cleanHistoryLength,
+			"the recovery save excludes the preview",
+		)
+		assert.deepEqual(edge().wall, [2, 0])
+		await IO.saveAndUpdateNotifictionsAfterStack(false)
+	} finally {
+		globalThis.fetch = originalFetch
+	}
+	assert.equal(requests.length, 3)
+	const bytes = Uint8Array.from(atob(requests[2].gameDataB64), char => char.charCodeAt(0))
+	const savedModel = JSON.parse(pako.ungzip(bytes, { to: "string" }))
+	assert.deepEqual(store.gameflow.turnOrder, [1, 0, 2], "Dycu still has their building turn")
+	assert.equal(savedModel[4].length, cleanHistoryLength, "HTTP save must exclude Dycu's unsubmitted wall history")
+	const cleanBytes = Uint8Array.from(atob(cleanGameData), char => char.charCodeAt(0))
+	const cleanModel = JSON.parse(pako.ungzip(cleanBytes, { to: "string" }))
+	assert.deepEqual(savedModel[3], cleanModel[3], "the saved stones have not been consumed")
+	assert.deepEqual(savedModel[4], cleanModel[4], "the saved history has no unsubmitted wall")
+	assert.deepEqual(edge().wall, [2, 0], "the response still loads the preset for local confirmation")
+	assert.equal(store.stackControl.loadedPreMove, true)
 })
