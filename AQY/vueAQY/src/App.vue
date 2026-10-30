@@ -31,6 +31,7 @@ import * as replay from './js/AQYreplay'
 */
 import * as model from "./js/AQYmodel"
 import * as city from "./js/AQYcity"
+import * as Bot from "./js/AQYbot"
 
 //import hexLib from "./js/hexlib.js"
 import * as rf from "./js/AQYreference"
@@ -203,6 +204,9 @@ async function initGame() {
 					if (currentNames[i] === store.players[j].name) store.gameflow.turnOrder.push(j)
 				}
 			}
+			// A kicked player can be left flagged current in old games, so their bot
+			// seat reaches here; drop bots so an empty turnOrder triggers kickstart below
+			Bot.removeBotPlayers()
 		}
 
 		if (window.initData.spoilerFree) {
