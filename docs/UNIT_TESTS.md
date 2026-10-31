@@ -59,6 +59,10 @@ Run `npm test` from `AQY/vueAQY/`. It uses Node's built-in test runner (no extra
 
 Run `npm test` from `KFW/vueKFW/`. The Vitest suite covers the Farmers expansion: field regions and the union of fields across grass edges (roads block, boat tiles never join another boat tile), placing animals, the purple marker's animal/wheat declaration, breeding (including the mixed-field rule of boat 5a), and spending wheat for a move.
 
+## LBR frontend checks
+
+Run `node --test LBR/vueLBR/src/js/LBRrules.test.js` from the repo root. It covers the rulebook setup, tile scoring, revolts, wars (including support and protected temples), treasure priority, monuments, catastrophes, leader eviction, the three-player attacker order, both game-end conditions, and a seeded random playout that must finish with valid leader bookkeeping.
+
 ## URR frontend checks
 
 Run `node --test URR/vueURR/src/components/CurrencyText.test.js` for accessible SPL icons, keeping amounts with their units, and safe text rendering.

@@ -1,0 +1,9 @@
+# LBR (Land Between Rivers) constants.
+
+PHASE_TURN = 0
+PHASE_GAME_OVER = 1
+
+MAIN_PHASES = [PHASE_TURN]
+
+MIN_PLAYERS = 2
+MAX_PLAYERS = 4

@@ -12,6 +12,7 @@ from django.utils.translation import gettext, gettext_lazy
 import AQY.AQYconstants as rfAQY
 import DDL.DDLconstants as rfDDL
 import FCM.FCMconstants as rfFCM
+import LBR.LBRconstants as rfLBR
 import Lobby.sharedFunctions.constants as rf
 import NTR.NTRconstants as rfNTR
 import RNB.RNBconstants as rfRNB
@@ -47,6 +48,7 @@ SR_GAMES_CODES_AND_NAMES_CHOICES = [
     ("DDL", gettext_lazy("Duck Dealer")),
     ("ROW", gettext_lazy("Ranchers of the Old West")),
     ("NTR", gettext_lazy("Napoleon's Triumph")),
+    ("LBR", gettext_lazy("Land Between Rivers")),
 ]
 
 SR_WEBHOOK_CHOICES = {
@@ -697,6 +699,12 @@ def SR_currentTurnString(gameCode, turn, phase):
 
         return currentTurnString
 
+    elif gameCode == "LBR":
+        currentTurnString = gettext("Turn") + " " + str(turn)
+        if phase == rfLBR.PHASE_GAME_OVER:
+            currentTurnString += " - " + gettext("Game End")
+        return currentTurnString
+
 
 def SR_gamePaceString(gamePace):
     gamePaceString = ""
@@ -1201,6 +1209,18 @@ def SR_getKFWstartingOptionsHTML(startingOptionsArr):
         elif option == rf.SO_EXPERIENCED_GAME:
             startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
 
+    return startingOptionsHTML
+
+
+def SR_getLBRstartingOptionsHTML(startingOptionsArr):
+    if not startingOptionsArr:
+        return ""
+    startingOptionsHTML = ""
+    for option in startingOptionsArr:
+        if option == rf.SO_LEARNING_GAME:
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
+        if option == rf.SO_EXPERIENCED_GAME:
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
     return startingOptionsHTML
 
 

@@ -1,0 +1,164 @@
+:root {
+	--lbr-sand: #d9a066;
+	--lbr-sand-light: #e2a96f;
+	--lbr-ink: #222034;
+	--lbr-water: #3f3f74;
+	--lbr-red: #ac3232;
+	--lbr-blue: #5b6ee1;
+	--lbr-green: #388900;
+	--lbr-black: #242327;
+	--lbr-gold: #fbf236;
+	--lbr-panel: #f4ead6;
+	--lbr-panel-edge: #663931;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	background: #b98151;
+	color: var(--lbr-ink);
+	font-family: "Trebuchet MS", Arial, sans-serif;
+}
+
+#app {
+	min-height: 100vh;
+}
+
+.app-shell {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+.top-bar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 14px;
+	background: linear-gradient(180deg, #343d76 0%, #222034 100%);
+	color: #f4ead6;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+	position: sticky;
+	top: 0;
+	z-index: 20;
+}
+
+.top-bar h1 {
+	font-size: 20px;
+	margin: 0;
+	flex: 1 1 260px;
+}
+
+.top-bar .subtitle {
+	font-size: 13px;
+	opacity: 0.85;
+}
+
+.top-bar button,
+button.action,
+button.ghost {
+	font: inherit;
+	border: 1px solid rgba(0, 0, 0, 0.25);
+	border-radius: 5px;
+	padding: 5px 9px;
+	background: #fbf236;
+	color: #222034;
+	cursor: pointer;
+}
+
+.top-bar button {
+	background: #e2a96f;
+	color: #222034;
+	border-color: #663931;
+}
+
+button.action:disabled,
+.top-bar button:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+button.ghost {
+	background: transparent;
+	color: inherit;
+	border-color: rgba(255, 255, 255, 0.35);
+}
+
+.main {
+	display: flex;
+	gap: 14px;
+	padding: 14px;
+	align-items: flex-start;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+
+.board-wrap {
+	flex: 1 1 720px;
+	min-width: 320px;
+	display: flex;
+	justify-content: center;
+	overflow: auto;
+}
+
+.side-panel {
+	flex: 0 1 340px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.panel {
+	background: var(--lbr-panel);
+	border: 2px solid var(--lbr-panel-edge);
+	border-radius: 8px;
+	padding: 10px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.panel h2 {
+	margin: 0 0 8px;
+	font-size: 16px;
+	border-bottom: 1px solid rgba(102, 57, 49, 0.35);
+	padding-bottom: 4px;
+}
+
+.row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+}
+
+.message {
+	min-height: 1.4em;
+	font-size: 13px;
+}
+
+.message.error {
+	color: #8b1d1d;
+}
+
+.message.ok {
+	color: #275d02;
+}
+
+.hidden {
+	display: none;
+}
+
+.footer {
+	padding: 10px 14px;
+	background: #222034;
+	color: #e2a96f;
+	font-size: 12px;
+	text-align: center;
+}
+
+.footer a {
+	color: #fbf236;
+}

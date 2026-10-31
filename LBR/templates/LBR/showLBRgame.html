@@ -1,0 +1,163 @@
+{% load static %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en-gb' }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="title" content="Online Board Gamers - Land Between Rivers">
+    <meta name="description"
+          content="Play Land Between Rivers online for free with others, or solo!">
+    <meta name="keywords"
+          content="Land Between Rivers,Online,Play,Board,Game,Games,Gamers,Mesopotamia,Tigris,Euphrates">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="200 days">
+    <meta name="author" content="Online Board Gamers">
+    <link rel="icon"
+          type="image/png"
+          href="{% static 'LBR/images/lbr_icon.png' %}" />
+    <title>OBG - {{ gameName }}</title>
+    <style>
+    body {
+      margin: 0px !important;
+      background-color: #d9a066;
+      font-family: Arial, sans-serif;
+      box-sizing: border-box;
+    }
+
+    #loadingText {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 40px;
+      margin-top: 20px;
+      padding: 0 16px;
+      box-sizing: border-box;
+      z-index: 10;
+      color: #222034;
+    }
+
+    #loadingAnimation {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 160px;
+      height: 160px;
+    }
+
+    .temple-silhouette {
+      width: 100%;
+      height: 100%;
+      background-image: url("{% static 'LBR/images/lbr_icon.png' %}");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      image-rendering: pixelated;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+
+    .loading-subtext {
+      position: absolute;
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 16px;
+      color: #663931;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    @media (min-width: 600.001px) {
+      #loadingAnimation { width: 240px; height: 240px; }
+    }
+    </style>
+    <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
+    {% if settingsDEBUG %}
+      <script type="module" src="http://localhost:3069/static/@vite/client"></script>
+      <script type="module" src="http://localhost:3069/static/main.js"></script>
+    {% else %}
+      <link href="{% static 'LBR/LBRvuedist/main.css' %}?" rel="stylesheet" />
+      <script type="module"
+              crossorigin=""
+              src="{% static 'LBR/LBRvuedist/main.js' %}"></script>
+    {% endif %}
+  </head>
+  <body>
+    <noscript>
+      <strong>{% translate "Please enable Javascript to continue." %}</strong>
+    </noscript>
+    <div id="app">
+      <div id="loadingText">{% translate "Land Between Rivers is loading..." %}</div>
+      <div id="loadingAnimation">
+        <div class="temple-silhouette"></div>
+        <div class="loading-subtext">{% translate "Two rivers, one soil." %}</div>
+      </div>
+    </div>
+  <div hidden>{% csrf_token %}</div>
+  </body>
+  <script>
+  var initData = {};
+
+  initData.locale = "{{ LANGUAGE_CODE|default:'en-gb' }}";
+  initData.gameID = {{ gameID }};
+  initData.gameName = "{{ gameName|escapejs }}";
+  initData.gameData = '{{ gameData|escapejs }}';
+  initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
+  initData.myZoomLevel = {{ myZoomLevel }};
+  initData.KickoutFlexiDataArray = {{ KickoutFlexiDataArray|safe }};
+  initData.startingOptions = {{ startingOptions|safe }};
+  initData.playerNames = {{ allPlayerListBySeat | safe }};
+  initData.currentPlayers = {{ currentPlayers | safe }};
+  initData.pov = {{ pov }};
+  initData.turn = {{ turn }};
+  initData.phase = {{ phase }};
+  initData.deleteVotesData = {{ deleteVotesData | safe }};
+  initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
+  initData.finishedGame = {{ finishedGame|yesno:"true,false" }};
+
+  {% if spoilerFree %}
+  initData.spoilerFree = true;
+  initData.replayStep = {{ replayStep }}-1;
+  {% endif %}
+
+  {% if user.is_authenticated %}
+  initData.name = '{{ name|escapejs }}';
+  initData.chatData = "{{ chatData }}";
+  initData.latestUpdate = {{ latestUpdateLiteral }};
+  initData.nextURL = '{{ nextURL|safe }}';
+  {% if chatNotification %}
+  initData.chatNotification = true;
+  {% endif %}
+  {% endif %}
+
+  initData.kickoutVotesData = {{ kickoutVotesData | default:'{}' | safe }};
+  initData.kickoutVoteThreshold = {{ kickoutVoteThreshold | default:'0' }};
+
+  {% if involvedPlayer %}
+  initData.secondsToNextKickout = {{ secondsToNextKickout }};
+  {% if kickoutRequired > 0 and not myMove %}
+  initData.kickoutRequired = {{ kickoutRequired }};
+  {% endif %}
+  initData.notes = '{{ notes|escapejs }}';
+  initData.yourTurnAudioType = {{ yourTurnAudioType }};
+  {% endif %}
+
+  {% if not gameData %}
+  {% if displayNames %}
+  initData.displayNames = JSON.parse('{{ displayNames|escapejs }}');
+  {% endif %}
+  {% endif %}
+  </script>
+</html>
