@@ -8,65 +8,67 @@
   <link rel="icon" type="image/svg+xml" href="{% static 'ECL/images/ecl_icon.svg' %}">
   <link rel="stylesheet" href="/ECL/{{ gameID }}/proxy/static/style.css">
   <style>
-    .obg-bar {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-      padding: .55rem 1rem;
-      background: #0b1020;
-      color: #d7f0ff;
-      border-bottom: 1px solid #25314f;
-      font: 14px/1.4 Arial, sans-serif;
-    }
-    .obg-bar a { color: #9fd6ff; text-decoration: none; }
-    .obg-bar a:hover { text-decoration: underline; }
-    .obg-bar .obg-game { color: #fff; font-weight: 600; }
-    .obg-bar .spacer { flex: 1; }
-    .top-controls > label[for="game"], .top-controls > label[for="seat"],
-    #game, #seat, #new-game, .top-actions label.toggle { display: none; }
+    /* OBG game header, copied from URR's TopMenu.vue; scoped to #top so the table's button styles stay out. */
+    #top { overflow-x: auto; background-color: #333; color: white; padding: 0; width: 100%; height: 60px;
+      position: sticky; top: 0; z-index: 20; display: flex; white-space: nowrap; box-sizing: border-box;
+      font: 14px Arial, sans-serif; }
+    #menu { flex-shrink: 0; color: white; }
+    #menu a { color: white; text-decoration: none; }
+    #menu a:hover, #menu span:hover { color: lightblue; }
+    #top .topMenuItem { display: inline-block; min-width: 62px; width: max-content; box-sizing: border-box; height: 55px;
+      border-radius: 5px; border: 0; background: transparent; color: inherit; font: inherit; padding: 0 8px;
+      vertical-align: top; cursor: pointer; text-align: center; transform: none; }
+    #top .topMenuItem:hover { background: transparent; }
+    #top .topMenuItem:focus-visible { outline: 2px solid lightblue; outline-offset: -2px; }
+    #top .topMenuItem:hover img, #top .topMenuItemSelected {
+      filter: brightness(0) saturate(100%) invert(100%) sepia(17%) saturate(6440%) hue-rotate(174deg) brightness(98%) contrast(102%); }
+    #top .topMenuItem img { width: 38px; height: 38px; }
+    #top .topMenuItem span { font-size: 16px; font-weight: bold; display: block; }
+    .menuDivider { display: inline-block; width: 5px; height: 50px; background-color: darkgray; margin: 0 10px; }
+    #topInfos { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;
+      min-width: fit-content; flex-shrink: 0; margin: 0 auto; gap: 2px; }
+    .gameInfoSpan { white-space: nowrap; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+    #topRight { flex-shrink: 0; display: flex; align-items: center; margin: 0 10px; }
+    #turn-order { height: 24px; }
   </style>
 </head>
 <body>
-  <div class="obg-bar">
-    <a href="{% url 'index' %}"><b>Online Board Gamers</b></a>
-    <span class="obg-game">{{ gameName }}</span>
-    <span class="spacer"></span>
-    <a href="{% url 'indexListType' 'current' %}">{% translate "Lobby" %}</a>
-    {% if tabletalk_url %}<a href="{{ tabletalk_url }}" target="_blank" rel="noopener">{% translate "Discord table talk" %}</a>{% endif %}
-    {% if actions_url %}<a href="{{ actions_url }}" target="_blank" rel="noopener">{% translate "Discord actions" %}</a>{% endif %}
-    <a href="{% url 'ECL:ECLhelp' %}">{% translate "Help" %}</a>
-  </div>
+  <div id="top">
+    <div id="menu">
+      <a href="{% url 'indexListType' 'current' %}">
+        <span class="topMenuItem"><img src="{% static 'ECL/images/icon-house.svg' %}" alt=""><span>{% translate "Home" %}</span></span>
+      </a>
+      {% if tabletalk_url %}<a href="{{ tabletalk_url }}" target="_blank" rel="noopener">
+        <span class="topMenuItem"><img src="{% static 'ECL/images/icon-chat.svg' %}" alt=""><span>{% translate "Table talk" %}</span></span>
+      </a>{% endif %}
+      {% if actions_url %}<a href="{{ actions_url }}" target="_blank" rel="noopener">
+        <span class="topMenuItem"><img src="{% static 'ECL/images/icon-chat.svg' %}" alt=""><span>{% translate "Actions" %}</span></span>
+      </a>{% endif %}
+      <div class="menuDivider"></div>
+      <a href="{% url 'ECL:ECLhelp' %}" target="_blank">
+        <span class="topMenuItem"><img src="{% static 'ECL/images/icon-rulebook.svg' %}" alt=""><span>{% translate "Rules" %}</span></span>
+      </a>
+      <button type="button" id="open-faction" class="topMenuItem"><img src="{% static 'ECL/images/icon-hand-card.svg' %}" alt=""><span>{% translate "Faction" %}</span></button>
+      <button type="button" class="topMenuItem" data-reference="ai"><img src="{% static 'ECL/images/icon-info.svg' %}" alt=""><span>{% translate "AI stats" %}</span></button>
+      <button type="button" class="topMenuItem" data-reference="species"><img src="{% static 'ECL/images/icon-info.svg' %}" alt=""><span>{% translate "Species" %}</span></button>
+      <button type="button" class="topMenuItem" data-reference="parts"><img src="{% static 'ECL/images/icon-info.svg' %}" alt=""><span>{% translate "Parts" %}</span></button>
+      <div class="menuDivider"></div>
+      <button type="button" id="open-history" class="topMenuItem"><img src="{% static 'ECL/images/icon-scroll.svg' %}" alt=""><span>{% translate "History" %}</span></button>
+    </div>
 
-  <header class="topbar">
-    <div class="brand">
-      <span class="mark">E</span>
-      <div><b>ECLIPSE</b><small>galactic table</small></div>
+    <div id="topInfos">
+      <span class="gameInfoSpan">{{ gameName }} | <span id="round" class="badge round">Round ?</span> <span id="turn" class="badge"></span></span>
+      <img id="turn-order" alt="Turn order and passing order" class="hidden">
     </div>
-    <div class="top-controls">
-      <label for="game">Game</label>
-      <select id="game"></select>
-      <button id="new-game" class="ghost hidden">New game</button>
-      <label for="seat">Seat</label>
-      <select id="seat"></select>
-      <span id="round" class="badge round">Round ?</span>
-      <div class="turn-status">
-        <span id="turn" class="badge"></span>
-        <img id="turn-order" alt="Turn order and passing order" class="hidden">
-      </div>
-      <span id="s3-remaining" class="badge s3-count"></span>
+
+    <div id="topRight"><span id="s3-remaining" class="badge s3-count"></span></div>
+
+    <!-- app.js binds these; OBG owns game and seat selection. -->
+    <div hidden>
+      <select id="game"></select><select id="seat"></select>
+      <button id="new-game" class="hidden"></button><input type="checkbox" id="mirror">
     </div>
-    <div class="top-actions">
-      <button id="open-faction" class="ghost">Faction</button>
-      <button id="open-history" class="ghost">History</button>
-      <button class="ghost" data-reference="ai">AI stats</button>
-      <button class="ghost" data-reference="species">Minor species</button>
-      <button class="ghost" data-reference="parts">Parts reference</button>
-      <label class="toggle" title="When off, this game lives only in the browser">
-        <input type="checkbox" id="mirror"> Discord
-      </label>
-    </div>
-  </header>
+  </div>
 
   <main class="table">
     <nav id="battle-index" class="battle-index hidden" aria-label="Combat rooms"></nav>

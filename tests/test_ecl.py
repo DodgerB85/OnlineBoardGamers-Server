@@ -179,6 +179,7 @@ class ECLPageTests(TestCase):
         self.assertEqual(response.status_code, 200)
         body = response.content.decode()
         self.assertIn('window.ECL_BASE = "/ECL/%s/proxy";' % self.game.id, body)
+        self.assertIn("ECL/images/icon-house.svg", body)
         self.assertIn("/ECL/%s/proxy/static/app.js" % self.game.id, body)
         self.assertIn("https://discord/table", body)
 

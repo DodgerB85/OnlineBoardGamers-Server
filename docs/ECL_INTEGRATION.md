@@ -132,3 +132,29 @@ served through the proxy, so the frontend has one source of truth.
 - Push updates. The page polls the bot through the proxy like the standalone
   web UI.
 - A Vue rewrite. The Django template reuses the bot's JS/CSS through the proxy.
+
+## Known issues (review 2026-10-31)
+
+Kickout, reminder and status handling, found in review and not yet fixed:
+
+1. **Game creation fails on MySQL.** `ECL/common.py` sets `kickoutDuration = "100000"`
+   to disable kickouts, but the field is a `PositiveSmallIntegerField` (max 32767).
+   Production MySQL runs `STRICT_TRANS_TABLES`, so the insert errors. Tests use
+   SQLite and miss it. A value like 30000 (300 days) fits.
+2. **Turn state is synced only on page view.** `_sync_status` in `ECL/views.py`
+   updates `is_current`, round and game end only when someone loads the table.
+   Lobby "my turn", "next game" and turn nudges are stale until then.
+3. **`latestUpdate` never moves after start.** Moves happen in the bot, so
+   `Auto24HourTimeoutSummary2.py` (which runs for every game code) emails
+   current ECL players "N days since last move" on days 1-6 after the *start*,
+   regardless of real moves, then never again.
+4. **Streaks never count ECL turns**, for the same reason as 3.
+5. ECL is not in `AutoTurnReminder.py` or `AutoSiteSweeper.py` and kickouts are
+   effectively off. Intended (the bot pings in Discord), but abandoned ECL games
+   stay ACTIVE in OBG forever.
+6. Game end is recorded only on page view and sets only FINISHED and winners.
+   No ratings or stats, which matches "stats live in the bot".
+
+Suggested fix for 2-4: have the bot notify OBG on turn change, or add a small
+cron that pulls each ACTIVE ECL game's view and runs `_sync_status`, which
+should also bump `latestUpdate` when the bot's state changes.
