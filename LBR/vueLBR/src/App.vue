@@ -25,10 +25,10 @@ controller.bootGame();
 let pollTimer = null;
 
 onMounted(() => {
-	IO.checkForLatestData(true).then(() => controller.autoPlayMissing());
+	IO.checkForLatestData(true);
 	pollTimer = setInterval(() => {
 		if (document.hidden) return;
-		IO.checkForLatestData().then(() => controller.autoPlayMissing());
+		IO.checkForLatestData();
 	}, IO.POLL_INTERVAL_MS);
 });
 

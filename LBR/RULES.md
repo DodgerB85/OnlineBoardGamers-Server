@@ -198,3 +198,20 @@ Hands and colour scores are private: opponents' hands are shown as counts and
 their scores as hidden until game end. (The server stores one public blob, as
 the other Vue games do; a player inspecting the network payload can see more
 than the UI shows.)
+
+## AI seats
+
+Any seat can be created as an AI seat (`GamePlayer.is_ai`). A mixed game is a
+normal game: the AI seats take their turns through the same save path as a
+human, and `activeSeat`/`pending.seat` in `gameData` is the AI's `seat_order`.
+
+A seat that is kicked out or resigns is **taken over by the AI in place**: the
+`GamePlayer` keeps its `seat_order` and `player`, the blob is not reset, and the
+former human sees the game as a spectator (`pov = -9`) and can no longer save.
+The player can inspect the AI's subsequent moves in the history like any other
+seat.
+
+The AI never runs in the browser. `LBR/ai_worker.py` asks the external Rust
+service for one action, `LBR/ai/lbr_step.mjs` validates and applies it with
+`LBRrules.js`, and the result is saved through `save_lbr_state`. See
+[`ai/README.md`](ai/README.md) for deployment and the decision limits.

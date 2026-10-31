@@ -220,6 +220,15 @@ if DEBUG:
     COMPRESS_OFFLINE = False
 # END JS Minifier settings
 
+# LBR AI seats. The policy service is the donor Rust engine (see LBR/ai/README.md);
+# node runs LBRrules.js headlessly to validate and apply its decisions.
+LBR_AI_URL = config("LBR_AI_URL", default="http://127.0.0.1:8731/move")
+LBR_AI_TIMEOUT = config("LBR_AI_TIMEOUT", default=30, cast=int)
+LBR_AI_NODE = config("LBR_AI_NODE", default="node")
+LBR_AI_STEP_TIMEOUT = config("LBR_AI_STEP_TIMEOUT", default=30, cast=int)
+LBR_AI_RETRY_SECONDS = config("LBR_AI_RETRY_SECONDS", default=60, cast=int)
+LBR_AI_MAX_ATTEMPTS = config("LBR_AI_MAX_ATTEMPTS", default=5, cast=int)
+
 # ASYNC SETTINGS
 Q_CLUSTER = {
     "name": "obg_cluster",

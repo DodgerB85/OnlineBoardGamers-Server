@@ -45,4 +45,26 @@ function validateOptions(change) {
 
 function selectPlayers() {
 	showSeats()
+	syncAiSeats()
+}
+
+// Per-seat AI toggles: one is shown per seat in use, and a username field is
+// disabled (ignored by the server) when its seat is AI. Practice games are
+// hotseat shadows, so the toggles are switched off there.
+function syncAiSeats() {
+	var maxPlayers = parseInt(document.getElementById("playerNumber").value)
+	var practice = document.getElementById("trainingGame").checked
+	for (var seat = 1; seat <= 4; seat++) {
+		var box = document.getElementById("ai" + seat)
+		var row = document.getElementById("aiSeat" + seat + "Row")
+		if (!box || !row) continue
+		row.style.display = seat <= maxPlayers ? "flex" : "none"
+		box.disabled = practice
+		if (practice) box.checked = false
+		var input = document.getElementById("player" + seat)
+		if (input) {
+			input.disabled = box.checked
+			input.style.opacity = box.checked ? 0.5 : 1
+		}
+	}
 }

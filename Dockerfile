@@ -2,6 +2,8 @@ FROM python:3.13-alpine
 
 RUN apk add --no-cache mariadb-connector-c-dev
 RUN apk add --no-cache --virtual build-deps gcc musl-dev pkgconf mariadb-dev
+# node runs LBRrules.js headlessly for AI seats (see LBR/ai/README.md)
+RUN apk add --no-cache nodejs
 
 RUN apk add --no-cache mysql-client 
 

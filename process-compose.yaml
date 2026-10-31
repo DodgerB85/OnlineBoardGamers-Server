@@ -11,6 +11,21 @@ processes:
     availability:
       restart: on_failure
 
+  # LBR AI seats: external Rust policy service (see LBR/ai/README.md).
+  # Expects the donor repo next to this one; point LBR_AI_URL in .env elsewhere.
+  lbr_ai:
+    command: "cargo run --release -- lbr-serve --host 127.0.0.1 --port 8731 --sims 400 --net runs/best.bin"
+    working_dir: "../tigris/tigris-and-euphrates"
+    availability:
+      restart: on_failure
+    readiness_probe:
+      http_get:
+        host: 127.0.0.1
+        port: 8731
+        path: /health
+      initial_delay_seconds: 2
+      period_seconds: 10
+
   bus:
     command: "npm run dev"
     working_dir: "BUS/vueBUS"

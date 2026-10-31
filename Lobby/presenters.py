@@ -194,7 +194,7 @@ class GamePresenter:
         return self.gameObj.activeVotes.get(rf.KICKOUT_VOTE_TOPIC, {}) or {}
 
     def getKickoutVoteThreshold(self):
-        remaining_players = self.gameObj.players.filter(is_missing=False).count()
+        remaining_players = self.gameObj.players.filter(is_missing=False, is_ai=False).count()
         return (remaining_players + 1) // 2
 
     def castKickoutVote(self, voter_username, target_username):
@@ -231,7 +231,7 @@ class GamePresenter:
         valid_voters = (
             set(
                 self.gameObj.players.exclude(is_missing=True)
-                .filter(player__isnull=False)
+                .filter(player__isnull=False, is_ai=False)
                 .values_list("player__username", flat=True)
             )
             - {target_username}
@@ -286,6 +286,19 @@ class GamePresenter:
             gp.is_current = False
             gp.save()
 
+    def handSeatToAi(self, user):
+        """Make the AI play a seat in place; seat_order and gameData are untouched."""
+        gp = self.gameObj.players.filter(player=user).first()
+        if gp and not gp.is_ai:
+            gp.is_ai = True
+            gp.save(update_fields=["is_ai"])
+
+    def getAiSeatNumbers(self):
+        return [gp.seat_order for gp in self.gameObj.players.order_by("seat_order") if gp.is_ai]
+
+    def getAiPlayerUsernames(self):
+        return set(self.gameObj.players.filter(is_ai=True, player__isnull=False).values_list("player__username", flat=True))
+
     def setServerCurrentPlayerNamesInTurnOrder(self, playersInTurnOrderArray):
         if self.gameObj.maxPlayers == 1:
             solo_gp = self.gameObj.players.first()
@@ -319,7 +332,7 @@ class GamePresenter:
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = current_players_array
         self.gameObj.save()
 
-        game_players = list(self.gameObj.players.exclude(is_kicked=True).select_related("player"))
+        game_players = list(self.gameObj.players.exclude(is_kicked=True, is_ai=False).select_related("player"))
 
         to_update = []
         # if self.gameObj.gameCode == "RNB":
@@ -329,7 +342,7 @@ class GamePresenter:
             self.gameObj.currentPlayersInTurnOrder = json.dumps(current_players_array)
         self.gameObj.save()
 
-        game_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
+        game_players = self.gameObj.players.exclude(is_kicked=True, is_ai=False).select_related("player")
 
         for gp in game_players:
             if gp.player:
@@ -369,7 +382,7 @@ class GamePresenter:
     def checkForHostChange(self, _missingUser):
         """Change host if current host is missing"""
         if _missingUser == self.gameObj.host:
-            possibleHost = self.gameObj.players.exclude(is_kicked=True).filter(is_missing=False).select_related("player").order_by("?").first()
+            possibleHost = self.gameObj.players.exclude(is_kicked=True).filter(is_missing=False, is_ai=False).select_related("player").order_by("?").first()
             if possibleHost and possibleHost.player:
                 self.gameObj.host = possibleHost.player
 
@@ -388,7 +401,7 @@ class GamePresenter:
             return
 
         currentUsername = request.user.username if request and hasattr(request, "user") and request.user else ""
-        self.gameObj.players.filter(player__isnull=False).exclude(player__username=currentUsername).update(is_pending_finish=True)
+        self.gameObj.players.filter(player__isnull=False, is_ai=False).exclude(player__username=currentUsername).update(is_pending_finish=True)
 
     def clearGeneralDataOnGameEndWithoutSave(self):
         self.gameObj.gameStatus = "FINISHED"
@@ -3775,7 +3788,7 @@ class LBRpresenter(GamePresenter):
             playerListToNotify = [
                 gp.player.username
                 for gp in game_players
-                if gp.player and gp.player.username != request.user.username
+                if gp.player and gp.player.username != request.user.username and not gp.is_ai
             ]
             self._sendStartGameNotification(request, playerListToNotify)
 
@@ -3818,7 +3831,7 @@ class LBRpresenter(GamePresenter):
         async_task(
             "Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame",
             "LBR",
-            convertedFinalPositions,
+            [row for row in convertedFinalPositions if row[0] not in self.getAiPlayerUsernames()],
             _gameID,
             self.gameObj.gamePace,
             self.getGameName(),

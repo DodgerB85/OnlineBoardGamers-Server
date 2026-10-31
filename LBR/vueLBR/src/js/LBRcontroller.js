@@ -66,13 +66,12 @@ export function resetSelection() {
 
 function commit(action) {
 	const store = useModelStore();
-	const personal = usePersonalStore();
 	if (!store.game || store.game.gameOver) {
 		store.gameMessages.errorText = ERROR_TEXT.gameOver;
 		return false;
 	}
 	const seat = currentActor(store.game);
-	if (!personal.trainingGame && personal.pov !== seat) {
+	if (!model.isMyAction(seat)) {
 		store.gameMessages.errorText = ERROR_TEXT.notYourTurn;
 		return false;
 	}
@@ -219,7 +218,6 @@ export async function doResign() {
 	try {
 		await IO.resign();
 		await IO.checkForLatestData(true);
-		autoPlayMissing();
 	} catch {
 		store.gameMessages.errorText = "Could not resign.";
 	}
@@ -232,54 +230,5 @@ export async function doRewind() {
 		resetSelection();
 	} catch {
 		store.gameMessages.errorText = "Could not rewind.";
-	}
-}
-
-function nextRealSeat(game, after, missing) {
-	for (let step = 1; step <= game.numSeats; step++) {
-		const seat = (after + step) % game.numSeats;
-		if (!missing.has(model.seatUsername(seat))) return seat;
-	}
-	return -1;
-}
-
-function defaultAction(game) {
-	const pending = game.pending;
-	if (!pending) return { type: "pass" };
-	if (pending.kind === "treasure") return { type: "treasure", keep: pending.keepOptions[0] };
-	if (pending.kind === "warOrder") return { type: "warOrder", colour: game.war.conflicts[0].colour };
-	if (pending.kind === "support" || pending.kind === "warSupport" || pending.kind === "revoltSupport") {
-		return { type: "support", count: 0 };
-	}
-	if (pending.kind === "monument") return { type: "monument", build: null };
-	return { type: "pass" };
-}
-
-// A missing seat cannot act. The next real seat in clockwise order persists
-// forced moves for it (passes, zero support, declining monuments), so the game
-// never stalls on an abandoned player.
-export function autoPlayMissing() {
-	const store = useModelStore();
-	const personal = usePersonalStore();
-	const game = store.game;
-	if (!game || game.gameOver || !store.missingPlayers.length) return;
-	const missing = new Set(store.missingPlayers);
-	const actor = currentActor(game);
-	if (!missing.has(model.seatUsername(actor))) return;
-	const designated = nextRealSeat(game, actor, missing);
-	if (!personal.trainingGame && personal.pov !== designated) return;
-
-	let state = game;
-	let guard = 0;
-	while (!state.gameOver && missing.has(model.seatUsername(currentActor(state))) && guard < 32) {
-		guard += 1;
-		const seat = currentActor(state);
-		const result = applyAction(state, seat, defaultAction(state));
-		if (result.error) break;
-		state = result.state;
-	}
-	if (state !== game) {
-		store.game = state;
-		IO.saveGame();
 	}
 }

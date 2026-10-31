@@ -42,7 +42,7 @@ function handCount(hand) {
 }
 
 function ownsHand(seat) {
-	return personal.trainingGame || personal.pov === seat;
+	return personal.trainingGame || (personal.pov === seat && !model.isAiSeat(seat));
 }
 
 function tileMiniStyle(colour, size = 15) {
@@ -72,8 +72,9 @@ function tileMiniStyle(colour, size = 15) {
 				<div>
 					<div class="name">
 						{{ model.seatName(seat) }}
-						<span v-if="seat === personal.pov" class="you">(you)</span>
+						<span v-if="seat === personal.pov && !model.isAiSeat(seat)" class="you">(you)</span>
 						<span v-if="current(seat)" class="current" title="Making a decision now">●</span>
+						<span v-if="model.isAiSeat(seat)" class="missing">AI</span>
 						<span v-if="model.isMissing(seat)" class="missing">missing</span>
 					</div>
 					<div class="mark">{{ model.markForSeat(seat) }} dynasty</div>

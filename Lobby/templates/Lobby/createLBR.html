@@ -77,6 +77,20 @@
                             <input type="text" id="player4" name="player4" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
                         </div></div>
                     </div>
+                    <div class="form-row" id="aiSeatsRow">
+                        <span class="form-label">{% translate "AI seats" %}</span>
+                        <div class="field">
+                            <div class="check-list">
+                                {% for seat in "1234" %}
+                                <label class="check-label" id="aiSeat{{ seat }}Row">
+                                    <input type="checkbox" id="ai{{ seat }}" name="ai{{ seat }}" value="1" class="myCheckbox" onchange="syncAiSeats()">
+                                    <div>{% blocktranslate with number=forloop.counter %}Player {{ number }} is the Tigris AI{% endblocktranslate %}</div>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="form-help">{% translate "Any seat can be AI. A seat that is kicked out or resigns is taken over by the AI, and its player becomes a spectator." %}</div>
+                    </div>
                 </div>
 
                 {% url "lobbyHelp" as the_url %}

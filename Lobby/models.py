@@ -531,6 +531,9 @@ class GamePlayer(models.Model):
 
     is_missing = models.BooleanField(default=False)
     is_kicked = models.BooleanField(default=False)
+    # Seat is played by the AI worker instead of its player (LBR). The player
+    # keeps the seat for display and history and becomes a spectator.
+    is_ai = models.BooleanField(default=False)
 
     is_current = models.BooleanField(default=False)
     has_chat_notification = models.BooleanField(default=False)

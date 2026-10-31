@@ -59,6 +59,10 @@ def showLBRgame(request, game_id=1, spoilerFree=False, replayStep=1):
     all_players = result["all_players"]
     user_gp = result["user_gp"]
 
+    from LBR.ai_worker import schedule_ai_turn
+
+    schedule_ai_turn(currentGame.id)
+
     returnData = {**result["base_data"]}
     returnData["settingsDEBUG"] = returnData.pop("settingsDebug")
     returnData.update(
@@ -68,6 +72,7 @@ def showLBRgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "pov": -99,
             "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(True, False)),
             "currentPlayers": json.dumps(presenter.getArrayOfIsCurrentPlayers()),
+            "aiSeats": json.dumps(presenter.getAiSeatNumbers()),
         }
     )
 
@@ -123,20 +128,31 @@ def _processLBRturn(request):
     if not can_act_in_game(request.user, currentGame):
         return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
+    if currentGame.players.filter(player=request.user, is_ai=True).exists():
+        return JsonResponse({"error": gettext("This seat is played by the AI")}, status=403)
+
     action = jsonData.get("action")
     if action == "saveGame":
         return performSaveGame(request, currentGame, jsonData, presenter)
     if action == "resign":
+        from LBR.ai_worker import schedule_ai_turn
+
         missingPlayer = User.objects.get(username=request.user.username)
         presenter.addMissingPlayer(missingPlayer)
+        presenter.handSeatToAi(missingPlayer)
         presenter.checkForHostChange(missingPlayer)
+        newVer = (int(currentGame.latestUpdate) % 1000) + 1
+        currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
         currentGame.save()
+        schedule_ai_turn(currentGame.id)
         return JsonResponse({"latestUpdate": currentGame.latestUpdate}, safe=False)
     if action == "kickout":
+        from LBR.ai_worker import schedule_ai_turn
+
         latest_update = str(jsonData.get("latestUpdate", 0))
         participant = currentGame.players.filter(player=request.user, is_missing=False, is_kicked=False).exists()
         target_is_current = currentGame.players.filter(
-            player__username=jsonData["kickedName"], is_current=True, is_missing=False, is_kicked=False
+            player__username=jsonData["kickedName"], is_current=True, is_missing=False, is_kicked=False, is_ai=False
         ).exists()
         if not participant or request.user.username == jsonData["kickedName"]:
             return JsonResponse({"error": gettext("Only another active player can initiate kickout.")}, status=403)
@@ -156,13 +172,13 @@ def _processLBRturn(request):
         missing_player = User.objects.get(username=jsonData["kickedName"])
         presenter.addMissingPlayer(missing_player)
         presenter.addKickedPlayer(missing_player)
+        presenter.handSeatToAi(missing_player)
         presenter.checkForHostChange(missing_player)
 
-        currentGame.rewindData = ""
-        currentGame.rewindTempData = ""
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
         currentGame.save()
+        schedule_ai_turn(currentGame.id)
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
@@ -171,6 +187,7 @@ def _processLBRturn(request):
             },
             safe=False,
         )
+
     if action == "loadRewind":
         return loadRewind(request, currentGame, jsonData, presenter)
     return HttpResponse(status=204)
@@ -191,77 +208,21 @@ def performSaveGame(request, currentGame, jsonData, presenter):
         SN_sendAdminErrorMessage(message)
         return JsonResponse({"syncError": True}, safe=False)
 
-    currentGame.gameData = jsonData["gameData"]
-    currentGame.turn = jsonData["turn"]
-    currentGame.phase = jsonData["phase"]
-
-    check_name = jsonData.get("checkName", request.user.username)
-    currentGame.kickoutFlexiData = SF_updateFlexiTime(
-        currentGame.kickoutFlexiData,
-        db_latest_update,
-        int(time.time()) * 1000,
-        check_name,
-        currentGame.kickoutDuration,
-    )
-
-    oldVer = db_latest_update
-    newVer = (int(db_latest_update) % 1000) + 1
-    currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
-
-    presenter.setCurrentPlayersFromArrInTurnOrder(
-        jsonData.get("nextPlayer", []),
+    save_lbr_state(
+        currentGame,
+        presenter,
+        game_data=jsonData["gameData"],
+        turn=jsonData["turn"],
+        phase=jsonData["phase"],
+        next_player_usernames=jsonData.get("nextPlayer", []),
         acting_username=request.user.username,
-        old_latest_update=oldVer,
+        check_name=jsonData.get("checkName", request.user.username),
+        status=jsonData.get("status"),
+        winner=jsonData.get("winner", []),
+        final_positions=jsonData.get("finalPositions", []),
+        save_rewind=jsonData.get("saveRewind"),
+        request=request,
     )
-
-    # SAVE BEFORE NOTIFICATIONS
-    currentGame.save()
-
-    if jsonData.get("status") == "FINISHED":
-        presenter.endGame(
-            request,
-            jsonData.get("winner", []),
-            jsonData.get("finalPositions", []),
-            jsonData["gameID"],
-        )
-    else:
-        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-        current_players = presenter.getArrayOfIsCurrentPlayers()
-        if current_players and rf.SO_TRAINING_GAME not in loadedStartingOptions:
-            playerListToNotify = [player.strip() for player in current_players]
-            if request.user.username in playerListToNotify:
-                playerListToNotify.remove(request.user.username)
-            if playerListToNotify:
-                presenter.sendYourTurnNotification(
-                    "LBR",
-                    playerListToNotify,
-                    currentGame.id,
-                    presenter.getGameName(),
-                    currentGame,
-                    oldVer,
-                )
-
-    if jsonData.get("saveRewind"):
-        currentRewindData = []
-        if currentGame.rewindData != "":
-            currentRewindData = json.loads(currentGame.rewindData)
-        if currentGame.rewindTempData:
-            if not currentRewindData or (
-                currentRewindData[-1] != currentGame.rewindTempData
-                and jsonData["gameData"] != currentGame.rewindTempData
-            ):
-                currentRewindData.append(json.loads(currentGame.rewindTempData))
-            currentGame.rewindTempData = ""
-        if not currentRewindData:
-            currentRewindData.append([jsonData["gameData"]])
-        elif currentRewindData[-1][0] != jsonData["gameData"]:
-            currentRewindData.append([jsonData["gameData"]])
-            while len(currentRewindData) > 20:
-                currentRewindData.pop(0)
-        currentGame.rewindData = json.dumps(currentRewindData)
-
-    presenter.clearKickoutVotes()
-    currentGame.save()
 
     return JsonResponse(
         {
@@ -270,6 +231,98 @@ def performSaveGame(request, currentGame, jsonData, presenter):
         },
         safe=False,
     )
+
+
+def save_lbr_state(
+    current_game,
+    presenter,
+    *,
+    game_data,
+    turn,
+    phase,
+    next_player_usernames,
+    acting_username,
+    check_name,
+    status,
+    winner,
+    final_positions,
+    save_rewind,
+    request,
+    track_availability=True,
+):
+    """Apply one accepted position through the shared save path.
+
+    Used by the turn view and by the AI worker, so both paths share the
+    latestUpdate bookkeeping, notifications, rewind handling and endGame cleanup.
+    """
+    old_ver = current_game.latestUpdate
+    current_game.gameData = game_data
+    current_game.turn = turn
+    current_game.phase = phase
+    current_game.kickoutFlexiData = SF_updateFlexiTime(
+        current_game.kickoutFlexiData,
+        old_ver,
+        int(time.time()) * 1000,
+        check_name,
+        current_game.kickoutDuration,
+    )
+
+    new_ver = (int(old_ver) % 1000) + 1
+    current_game.latestUpdate = str((int(time.time()) * 1000) + new_ver)
+    current_game.autoMoves = None
+
+    presenter.setCurrentPlayersFromArrInTurnOrder(
+        next_player_usernames,
+        acting_username=acting_username if track_availability else None,
+        old_latest_update=old_ver,
+    )
+
+    # SAVE BEFORE NOTIFICATIONS
+    current_game.save()
+
+    if status == "FINISHED":
+        presenter.endGame(request, winner, final_positions, current_game.id)
+    else:
+        loadedStartingOptions = json.loads(current_game.startingOptions) if current_game.startingOptions else []
+        current_players = presenter.getArrayOfIsCurrentPlayers()
+        if current_players and rf.SO_TRAINING_GAME not in loadedStartingOptions:
+            ai_usernames = presenter.getAiPlayerUsernames()
+            playerListToNotify = [name for name in current_players if name not in ai_usernames and name != acting_username]
+            if playerListToNotify:
+                presenter.sendYourTurnNotification(
+                    "LBR",
+                    playerListToNotify,
+                    current_game.id,
+                    presenter.getGameName(),
+                    current_game,
+                    old_ver,
+                )
+
+    if save_rewind:
+        currentRewindData = []
+        if current_game.rewindData != "":
+            currentRewindData = json.loads(current_game.rewindData)
+        if current_game.rewindTempData:
+            if not currentRewindData or (
+                currentRewindData[-1] != current_game.rewindTempData
+                and game_data != current_game.rewindTempData
+            ):
+                currentRewindData.append(json.loads(current_game.rewindTempData))
+            current_game.rewindTempData = ""
+        if not currentRewindData:
+            currentRewindData.append([game_data])
+        elif currentRewindData[-1][0] != game_data:
+            currentRewindData.append([game_data])
+            while len(currentRewindData) > 20:
+                currentRewindData.pop(0)
+        current_game.rewindData = json.dumps(currentRewindData)
+
+    presenter.clearKickoutVotes()
+    current_game.save()
+
+    from LBR.ai_worker import schedule_ai_turn
+
+    schedule_ai_turn(current_game.id)
 
 
 def loadRewind(request, currentGame, jsonData, presenter):
@@ -305,6 +358,10 @@ def loadRewind(request, currentGame, jsonData, presenter):
     currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
     currentGame.save()
 
+    from LBR.ai_worker import schedule_ai_turn
+
+    schedule_ai_turn(currentGame.id)
+
     return JsonResponse(
         {
             "gameData": loadDataArr[0],
@@ -334,6 +391,9 @@ def LBRdata(request, dataType=1):
     presenter = cast("LBRpresenter", currentGame.presenter())
 
     if dataType == 1:
+        from LBR.ai_worker import schedule_ai_turn
+
+        schedule_ai_turn(currentGame.id)
         if currentGame.gameStatus == "FINISHED":
             user_gp = currentGame.players.filter(player=request.user).first()
             if user_gp and user_gp.is_pending_finish:
@@ -347,6 +407,7 @@ def LBRdata(request, dataType=1):
                 "latestUpdate": currentGame.latestUpdate,
                 "missingPlayers": presenter.getMissingPlayersNamesArray(),
                 "kickoutRequired": presenter.kickoutRequired(),
+                "aiSeats": json.dumps(presenter.getAiSeatNumbers()),
             }
         )
 
@@ -356,10 +417,14 @@ def LBRdata(request, dataType=1):
         return JsonResponse({"chatData": currentGame.chatData})
 
     if dataType == 3:
+        from LBR.ai_worker import schedule_ai_turn
+
+        schedule_ai_turn(currentGame.id)
         kickout_data = {
             "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             "kickoutRequired": presenter.kickoutRequired(),
             "missingPlayers": presenter.getMissingPlayersNamesArray(),
+            "aiSeats": json.dumps(presenter.getAiSeatNumbers()),
         }
         if int(jsonData["latestUpdate"]) == int(currentGame.latestUpdate):
             return JsonResponse({"latest": True, **kickout_data}, safe=False)
@@ -457,4 +522,6 @@ def _castVote(request):
         raise Http404(gettext("Game does not exist")) from None
     if not can_act_in_game(request.user, currentGame):
         return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
+    if currentGame.players.filter(player=request.user, is_ai=True).exists():
+        return JsonResponse({"error": gettext("This seat is played by the AI")}, status=403)
     return shared_cast_vote(request)

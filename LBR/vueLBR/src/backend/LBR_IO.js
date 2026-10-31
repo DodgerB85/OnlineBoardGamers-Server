@@ -113,6 +113,7 @@ export async function loadGame() {
 		store.latestUpdate = data.latestUpdate;
 		store.finishedGame = !!data.finishedGame;
 		if (data.missingPlayers) store.missingPlayers = data.missingPlayers;
+		if (data.aiSeats) store.aiSeats = JSON.parse(data.aiSeats);
 		if (data.kickoutRequired !== undefined) store.kickoutRequired = data.kickoutRequired;
 		if (data.secondsToNextKickout !== undefined) store.secondsToNextKickout = data.secondsToNextKickout;
 		if (data.gameData) store.game = JSON.parse(data.gameData);
@@ -138,6 +139,7 @@ export async function checkForLatestData(force = false) {
 		if (data.secondsToNextKickout !== undefined) store.secondsToNextKickout = data.secondsToNextKickout;
 		if (data.kickoutRequired !== undefined) store.kickoutRequired = data.kickoutRequired;
 		if (data.missingPlayers) store.missingPlayers = data.missingPlayers;
+		if (data.aiSeats) store.aiSeats = JSON.parse(data.aiSeats);
 		if (data.latest) return;
 		store.latestUpdate = data.latestUpdate;
 		store.finishedGame = !!data.finishedGame;

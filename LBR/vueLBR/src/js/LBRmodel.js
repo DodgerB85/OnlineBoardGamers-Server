@@ -4,6 +4,13 @@ import { usePersonalStore } from "../stores/LBRpersonal.js";
 import { createInitialState, currentActor, phaseOf } from "./LBRrules.js";
 import { SEAT_MARKS } from "./LBRreference.js";
 
+const AI_LABELS = {
+	TigrisAI: "Tigris AI",
+	TigrisAI2: "Tigris AI 2",
+	TigrisAI3: "Tigris AI 3",
+	TigrisAI4: "Tigris AI 4",
+};
+
 export function initGame() {
 	const store = useModelStore();
 	const personal = usePersonalStore();
@@ -32,6 +39,7 @@ export function initGame() {
 		store.displayNames[shadowNames[i]] = labels[i];
 	}
 	store.currentPlayers = Array.isArray(data.currentPlayers) ? data.currentPlayers : [];
+	store.aiSeats = Array.isArray(data.aiSeats) ? data.aiSeats : [];
 	store.latestUpdate = data.latestUpdate || 0;
 	store.finishedGame = !!data.finishedGame;
 	store.notes = data.notes || "";
@@ -63,7 +71,14 @@ export function seatName(seat) {
 	const store = useModelStore();
 	const username = store.playerNames[seat];
 	if (!username) return `Seat ${seat + 1}`;
-	return store.displayNames[username] || username;
+	if (isAiSeat(seat) && AI_LABELS[username]) return AI_LABELS[username];
+	const shown = store.displayNames[username] || username;
+	return isAiSeat(seat) ? `${shown} (AI)` : shown;
+}
+
+export function isAiSeat(seat) {
+	const store = useModelStore();
+	return store.aiSeats.includes(seat);
 }
 
 export function seatOfName(name) {
@@ -93,6 +108,7 @@ export function mySeat() {
 
 export function isMissing(seat) {
 	const store = useModelStore();
+	if (isAiSeat(seat)) return false;
 	return store.missingPlayers.includes(seatUsername(seat));
 }
 
@@ -102,12 +118,14 @@ export function isMyTurn() {
 	if (!store.game || store.game.gameOver || store.finishedGame) return false;
 	const actor = currentActor(store.game);
 	if (personal.trainingGame) return true;
+	if (personal.pov < 0 || isAiSeat(personal.pov)) return false;
 	return personal.pov === actor;
 }
 
 export function isMyAction(seat) {
 	const personal = usePersonalStore();
 	if (personal.trainingGame) return true;
+	if (isAiSeat(seat)) return false;
 	return personal.pov === seat;
 }
 
@@ -116,6 +134,7 @@ export function visibleScore(seat) {
 	const store = useModelStore();
 	if (personal.trainingGame) return true;
 	if (store.game && store.game.gameOver) return true;
+	if (isAiSeat(seat)) return false;
 	return personal.pov === seat;
 }
 

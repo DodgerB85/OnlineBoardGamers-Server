@@ -67,7 +67,6 @@ async function confirmKickout() {
 	kickoutConfirm.value = false;
 	try {
 		await IO.kickout(model.actorUsername());
-		controller.autoPlayMissing();
 	} catch (error) {
 		store.gameMessages.errorText = error.message || "Could not start the kickout.";
 	}

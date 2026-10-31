@@ -9,6 +9,7 @@ export const useModelStore = defineStore("model", () => {
 	const displayNames = ref({});
 	const currentPlayers = ref([]);
 	const missingPlayers = ref([]);
+	const aiSeats = ref([]);
 	const latestUpdate = ref(0);
 	const finishedGame = ref(false);
 	const chatData = ref("");
@@ -39,6 +40,7 @@ export const useModelStore = defineStore("model", () => {
 		displayNames,
 		currentPlayers,
 		missingPlayers,
+		aiSeats,
 		latestUpdate,
 		finishedGame,
 		chatData,

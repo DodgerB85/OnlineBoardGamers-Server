@@ -24,6 +24,13 @@ if TYPE_CHECKING:
     from Lobby.presenters import LBRpresenter
 
 
+def get_ai_seat_user(seat):
+    """The User that holds AI seat `seat` (1-based). Never notifies or logs in."""
+    username = rfLBR.AI_USERNAMES[seat - 1]
+    user, _ = User.objects.get_or_create(username=username, defaults={"is_active": False})
+    return user
+
+
 @login_required()
 def create_lbr_game(
     request,
@@ -53,7 +60,7 @@ def create_lbr_game(
     invited_usernames_objs = []
     stats_exclude = False
     player_order_seed = random.randint(1000, 32767)
-    all_players = []
+    all_players = []  # (User, is_ai) in seat order
 
     if is_main_tournament or is_mini_tournament:
         if not tournamentObj or not tournamentGameName:
@@ -66,7 +73,7 @@ def create_lbr_game(
         starting_options = json.loads(tournamentObj.startingOptions) if tournamentObj.startingOptions != "" else []
         game_status = "ACTIVE"
         max_players = len(current_players_usernames) if is_mini_tournament and current_players_usernames else tournamentObj.maxGamePlayers
-        all_players = [User.objects.get(username=username) for username in (current_players_usernames or []) if username]
+        all_players = [(User.objects.get(username=username), False) for username in (current_players_usernames or []) if username]
     else:
         game_description = request.POST["gameDescription"]
         creator = request.user
@@ -80,28 +87,41 @@ def create_lbr_game(
             return HttpResponseRedirect(reverse("createLBRpage"))
 
         is_training_game = "trainingGame" in request.POST
+        # Practice games are hotseat and use the SHADOW seats; per-seat AI is for
+        # normal games, where any seat (including the creator's) can be the AI.
+        ai_seats = set() if is_training_game else {seat for seat in range(1, max_players + 1) if request.POST.get(f"ai{seat}")}
 
         if is_training_game:
             starting_options.append(rf.SO_TRAINING_GAME)
             game_status = "ACTIVE"
             stats_exclude = True
             shadow_users, shadowNameNotes = SF_setupTrainingGameShadows(request, max_players)
-            all_players.append(request.user)
-            all_players.extend(shadow_users)
+            all_players.append((request.user, False))
+            all_players.extend((shadow_user, False) for shadow_user in shadow_users)
         else:
-            usernames = [request.POST.get(f"player{i}", "") for i in range(2, max_players + 1)]
+            usernames = [
+                request.POST.get(f"player{seat}", "")
+                for seat in range(2, max_players + 1)
+                if seat not in ai_seats
+            ]
             invited_usernames_objs = SF_validatePlayers(
                 request,
                 [username for username in usernames if username],
-                max_players,
+                max_players - len(ai_seats),
                 allow_creator=False,
             )
             if invited_usernames_objs is None:
                 return HttpResponseRedirect(reverse("createLBRpage"))
-            all_players.append(request.user)
+            for seat in range(1, max_players + 1):
+                if seat in ai_seats:
+                    all_players.append((get_ai_seat_user(seat), True))
+                elif seat == 1:
+                    all_players.append((request.user, False))
             usernames_to_notify = [user.username for user in invited_usernames_objs]
             if usernames_to_notify:
                 game_status = "WAITING"
+            if len(all_players) == max_players:
+                game_status = "ACTIVE"
 
         if "learningGame" in request.POST:
             starting_options.append(rf.SO_LEARNING_GAME)
@@ -143,15 +163,17 @@ def create_lbr_game(
         for player in invited_usernames_objs:
             new_game.invitedPlayers.add(player)
 
-        for idx, player in enumerate(all_players):
+        for idx, (player, is_ai) in enumerate(all_players):
             GamePlayer.objects.create(
                 game=new_game,
                 player=player,
                 seat_order=idx,
+                is_ai=is_ai,
                 notes=shadowNameNotes if player == request.user else "",
             )
 
-        if is_main_tournament or is_mini_tournament or "trainingGame" in request.POST:
+        starts_now = is_main_tournament or is_mini_tournament or "trainingGame" in request.POST or len(all_players) == max_players
+        if starts_now:
             presenter = cast("LBRpresenter", new_game.presenter())
             presenter.startGame(request)
 
@@ -166,6 +188,11 @@ def create_lbr_game(
             max_players,
             "LBR",
         )
+
+    if starts_now:
+        from LBR.ai_worker import schedule_ai_turn
+
+        schedule_ai_turn(new_game.id)
 
     if "trainingGame" in request.POST:
         messages.success(request, gettext("Your Practice game has started"))

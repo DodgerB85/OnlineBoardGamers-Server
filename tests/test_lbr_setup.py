@@ -259,7 +259,8 @@ class LBRTurnTests(TestCase):
         target_gp = self.game.players.get(player__username=target)
         self.assertTrue(target_gp.is_missing)
         self.assertTrue(target_gp.is_kicked)
-        self.assertEqual(self.game.rewindData, "")
+        self.assertTrue(target_gp.is_ai)
+        self.assertEqual(self.game.rewindData, '[["old"]]')
         self.assertNotEqual(str(self.game.latestUpdate), str(old_latest_update))
         self.assertEqual(response.json()["missingPlayers"], [target])
 
