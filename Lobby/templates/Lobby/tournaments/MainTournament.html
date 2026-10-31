@@ -630,7 +630,7 @@
                             <tr>
                               <td colspan="2">
                                   {% translate "Byes" %}:
-                                {% for player in round.byesNames %}<a href="/profile/{{ player }}">{{ player }}</a>{% endfor %}
+                                {% for player in round.byesNames %}<a href="/profile/{{ player }}">{{ player }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
                               </td>
                             </tr>
                           {% endif %}
