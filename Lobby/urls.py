@@ -104,6 +104,8 @@ urlpatterns = [
     ),
     path("createWEBpage/", views.createWEBpage, name="createWEBpage"),
     path("createWEBpage/<int:gameID>/", views.createWEBpage, name="createWEBpage"),
+    path("createECLpage/", views.createECLpage, name="createECLpage"),
+    path("createECLpage/<int:gameID>/", views.createECLpage, name="createECLpage"),
     path(
         "createWEBminiTournament/",
         views.createWEBminiTournament,

@@ -6,6 +6,8 @@ from django.db import models
 from django.urls import reverse
 from django.utils.html import format_html
 
+from ECL.models import ECLgameLink
+
 from .modelProxies import (
     AQYgame,
     AQYMainTournament,
@@ -17,6 +19,7 @@ from .modelProxies import (
     CNSMainTournament,
     CNSMiniTournament,
     DDLgame,
+    ECLgame,
     FCMgame,
     FCMMainTournament,
     FCMMiniTournament,
@@ -611,6 +614,21 @@ class NTRgameAdmin(GameAdmin):
 
     class Meta:
         app_label = "NTR"
+
+
+@admin.register(ECLgame)
+class ECLgameAdmin(GameAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="ECL")
+
+    class Meta:
+        app_label = "ECL"
+
+
+@admin.register(ECLgameLink)
+class ECLgameLinkAdmin(admin.ModelAdmin):
+    list_display = ("game", "external_game_id", "tabletalk_url", "actions_url")
+    search_fields = ("external_game_id", "game__gameName")
 
 
 ################### END Register game objects to specific app

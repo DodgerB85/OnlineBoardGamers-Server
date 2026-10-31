@@ -11,6 +11,7 @@ from django.utils.translation import gettext, gettext_lazy
 
 import AQY.AQYconstants as rfAQY
 import DDL.DDLconstants as rfDDL
+import ECL.ECLconstants as rfECL
 import FCM.FCMconstants as rfFCM
 import Lobby.sharedFunctions.constants as rf
 import NTR.NTRconstants as rfNTR
@@ -47,6 +48,7 @@ SR_GAMES_CODES_AND_NAMES_CHOICES = [
     ("DDL", gettext_lazy("Duck Dealer")),
     ("ROW", gettext_lazy("Ranchers of the Old West")),
     ("NTR", gettext_lazy("Napoleon's Triumph")),
+    ("ECL", gettext_lazy("Eclipse")),
 ]
 
 SR_WEBHOOK_CHOICES = {
@@ -697,6 +699,9 @@ def SR_currentTurnString(gameCode, turn, phase):
 
         return currentTurnString
 
+    elif gameCode == "ECL":
+        return (gettext("Round") + " " + str(turn)) if turn else gettext("Eclipse")
+
 
 def SR_gamePaceString(gamePace):
     gamePaceString = ""
@@ -1344,4 +1349,26 @@ def SR_getNTRstartingOptionsHTML(startingOptionsArr):
             startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
         if option == rf.SO_EXPERIENCED_GAME:
             startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
+    return startingOptionsHTML
+
+
+def SR_getECLstartingOptionsHTML(startingOptionsArr):
+    if not startingOptionsArr:
+        return ""
+    startingOptionsHTML = ""
+    labels = {
+        rfECL.SO_RIFT_CANNON: gettext("Rift cannons"),
+        rfECL.SO_TURN_ORDER_VARIANT: gettext("Passing order turns"),
+        rfECL.SO_GALACTIC_EVENT_TILES: gettext("Galactic event tiles"),
+        rfECL.SO_HYPERLANES: gettext("Hyperlanes"),
+        rfECL.SO_COMMUNITY_PARTS: gettext("Community parts"),
+        rfECL.SO_COMMUNITY_REP_MOD: gettext("Community reputation"),
+        rfECL.SO_BAN_FACTIONS: gettext("Banned factions"),
+        rfECL.SO_ALLIANCES: gettext("Alliances"),
+        rfECL.SO_COMMUNITY_FACTIONS: gettext("Community factions"),
+    }
+    for option in startingOptionsArr:
+        if option in labels:
+            startingOptionsHTML += (f"<span class='startingOption startingOptionText' title='{labels[option]}'>"
+                                    f"{labels[option]}</span>")
     return startingOptionsHTML

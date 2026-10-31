@@ -1,0 +1,161 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OBG - {{ gameName }}</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'ECL/images/ecl_icon.svg' %}">
+  <link rel="stylesheet" href="/ECL/{{ gameID }}/proxy/static/style.css">
+  <style>
+    .obg-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding: .55rem 1rem;
+      background: #0b1020;
+      color: #d7f0ff;
+      border-bottom: 1px solid #25314f;
+      font: 14px/1.4 Arial, sans-serif;
+    }
+    .obg-bar a { color: #9fd6ff; text-decoration: none; }
+    .obg-bar a:hover { text-decoration: underline; }
+    .obg-bar .obg-game { color: #fff; font-weight: 600; }
+    .obg-bar .spacer { flex: 1; }
+    .top-controls > label[for="game"], .top-controls > label[for="seat"],
+    #game, #seat, #new-game, .top-actions label.toggle { display: none; }
+  </style>
+</head>
+<body>
+  <div class="obg-bar">
+    <a href="{% url 'index' %}"><b>Online Board Gamers</b></a>
+    <span class="obg-game">{{ gameName }}</span>
+    <span class="spacer"></span>
+    <a href="{% url 'indexListType' 'current' %}">{% translate "Lobby" %}</a>
+    {% if tabletalk_url %}<a href="{{ tabletalk_url }}" target="_blank" rel="noopener">{% translate "Discord table talk" %}</a>{% endif %}
+    {% if actions_url %}<a href="{{ actions_url }}" target="_blank" rel="noopener">{% translate "Discord actions" %}</a>{% endif %}
+    <a href="{% url 'ECL:ECLhelp' %}">{% translate "Help" %}</a>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark">E</span>
+      <div><b>ECLIPSE</b><small>galactic table</small></div>
+    </div>
+    <div class="top-controls">
+      <label for="game">Game</label>
+      <select id="game"></select>
+      <button id="new-game" class="ghost hidden">New game</button>
+      <label for="seat">Seat</label>
+      <select id="seat"></select>
+      <span id="round" class="badge round">Round ?</span>
+      <div class="turn-status">
+        <span id="turn" class="badge"></span>
+        <img id="turn-order" alt="Turn order and passing order" class="hidden">
+      </div>
+      <span id="s3-remaining" class="badge s3-count"></span>
+    </div>
+    <div class="top-actions">
+      <button id="open-faction" class="ghost">Faction</button>
+      <button id="open-history" class="ghost">History</button>
+      <button class="ghost" data-reference="ai">AI stats</button>
+      <button class="ghost" data-reference="species">Minor species</button>
+      <button class="ghost" data-reference="parts">Parts reference</button>
+      <label class="toggle" title="When off, this game lives only in the browser">
+        <input type="checkbox" id="mirror"> Discord
+      </label>
+    </div>
+  </header>
+
+  <main class="table">
+    <nav id="battle-index" class="battle-index hidden" aria-label="Combat rooms"></nav>
+    <section class="left">
+      <div class="card board-card">
+        <div class="card-head">
+          <h2>Galaxy</h2>
+          <div class="board-tools">
+            <span id="board-note" class="note"></span>
+            <button id="zoom-out" class="icon" title="Zoom out">−</button>
+            <button id="zoom-in" class="icon" title="Zoom in">+</button>
+            <button id="zoom-fit" class="ghost small">Fit</button>
+          </div>
+        </div>
+        <div id="board-viewport" class="board-viewport">
+          <div id="board-stage" class="board-stage">
+            <img id="board" alt="Galaxy board" draggable="false">
+            <div id="board-overlay" class="board-overlay"></div>
+          </div>
+          <div id="board-empty" class="board-empty hidden">Rendering the galaxy…</div>
+        </div>
+        <div id="board-hint" class="board-hint">Drag to pan · scroll to zoom</div>
+      </div>
+    </section>
+
+    <section class="right">
+      <div id="action-dock" class="action-dock"></div>
+      <section class="card market-card">
+        <button id="market-toggle" class="card-head" aria-expanded="true" aria-controls="market-content" type="button">
+          <h2>Tech market</h2>
+          <span id="market-note" class="note"></span>
+        </button>
+        <div id="market-content" class="market-content"><div class="market-clip"><div id="tech-market" class="tech-market"></div></div></div>
+      </section>
+    </section>
+    <section class="card players-card">
+      <div class="card-head">
+        <div class="players-heading"><h2>Players</h2><button id="toggle-player-boards" class="icon" type="button" title="Collapse all player boards" aria-label="Collapse all player boards">▴</button></div>
+        <span id="players-note" class="note"></span>
+      </div>
+      <div id="players" class="players"></div>
+    </section>
+  </main>
+
+  <dialog id="new-game-dialog" class="sheet">
+    <form id="new-game-form">
+      <div class="sheet-head"><h2>New game · dev sandbox</h2><button type="button" class="icon close" data-close="new-game-dialog">×</button></div>
+      <p>Local player seats. Choose factions in the draft after creating the game.</p>
+      <p><label>Game name <input name="name" required maxlength="100" value="New game"></label></p>
+      <p><label>Players <input name="players" type="number" min="1" max="9" value="2" required></label></p>
+      <p id="new-game-error" role="alert"></p><div class="sheet-foot"><button class="primary" type="submit">Create game</button></div></form></dialog>
+
+  <dialog id="history-dialog" class="sheet">
+    <div class="sheet-head">
+      <div><h2>History</h2><p id="history-note" class="note"></p></div>
+      <div class="history-tools">
+        <select id="history-room" title="Filter history by room"></select>
+        <button class="icon close" data-close="history-dialog">×</button>
+      </div>
+    </div>
+    <div id="history-list" class="history-list"></div>
+    <div class="sheet-foot"><button id="history-more" class="ghost">Load older</button></div>
+  </dialog>
+
+  <dialog id="faction-dialog" class="sheet faction-sheet">
+    <div class="sheet-head">
+      <div><h2 id="faction-title">Faction</h2><p id="faction-sub" class="note"></p></div>
+      <button class="icon close" data-close="faction-dialog">×</button>
+    </div>
+    <div id="faction-body" class="faction-body"></div>
+  </dialog>
+
+  <dialog id="tech-track-dialog" class="sheet tech-track-sheet">
+    <div class="sheet-head"><h2 id="tech-track-title">Choose technology track</h2><button class="icon close" data-close="tech-track-dialog">×</button></div>
+    <div id="tech-track-choices" class="tech-track-choices"></div>
+  </dialog>
+
+  <dialog id="reference-dialog" class="sheet reference-sheet">
+    <div class="sheet-head"><h2 id="reference-title"></h2><button class="icon close" data-close="reference-dialog">×</button></div>
+    <div id="reference-body"></div>
+  </dialog>
+
+  <dialog id="zoom-dialog" class="sheet lightbox">
+    <button class="icon close" data-close="zoom-dialog">×</button>
+    <img id="zoom-image" alt="">
+  </dialog>
+
+  <div id="toast" class="toast"></div>
+  <script>window.ECL_BASE = "/ECL/{{ gameID }}/proxy";</script>
+  <script src="/ECL/{{ gameID }}/proxy/static/app.js"></script>
+</body>
+</html>

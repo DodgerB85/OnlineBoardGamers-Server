@@ -126,6 +126,7 @@ class GamePresenter:
             "DDL": "Ddl",
             "ROW": "Row",
             "BOB": "Bob",
+            "ECL": "Ecl",
         }
         prefix = game_code_map.get(self.gameObj.gameCode, "")
         bot_name = f"{prefix}Bot"
@@ -813,6 +814,48 @@ class WEBpresenter(GamePresenter):
 
             playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
             self._sendStartGameNotification(request, playerListToNotify)
+
+
+class ECLpresenter(GamePresenter):
+    def startGame(self, request):
+        """Create the Discord bot game once every OBG seat has joined."""
+        from ECL.bot import create_remote_game
+        from ECL.models import ECLgameLink
+
+        link = ECLgameLink.objects.filter(game=self.gameObj).first()
+        if link is None:
+            link = ECLgameLink.objects.create(game=self.gameObj)
+        players = list(self.gameObj.players.exclude(is_kicked=True).select_related("player").order_by("seat_order"))
+        player_names = [gp.player.username for gp in players if gp.player]
+        if len(player_names) != self.gameObj.maxPlayers:
+            raise ValueError("Eclipse game is not full")
+
+        if not link.external_game_id:
+            seats = []
+            for gp in players:
+                discord_id = getattr(gp.player.profile, "discord_id", "") if gp.player else ""
+                if not discord_id:
+                    raise ValueError(f"{gp.player.username} has no Discord id")
+                seats.append({"discord_id": str(discord_id), "name": gp.player.username})
+            starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
+            result = create_remote_game(
+                str(self.gameObj.gameName or f"Eclipse {self.gameObj.id}"),
+                seats,
+                self.gameObj.maxPlayers,
+                starting_options,
+            )
+            link.external_game_id = result["id"]
+            link.tabletalk_url = result.get("tabletalk_url", "")
+            link.actions_url = result.get("actions_url", "")
+            link.save()
+
+        self.gameObj.gameStatus = "ACTIVE"
+        self.gameObj.latestUpdate = int(time.time() * 1000)
+        self.gameObj.save()
+
+        notify = [name for name in player_names if name != request.user.username]
+        if notify:
+            self._sendStartGameNotification(request, notify)
 
 
 class AQYpresenter(GamePresenter):

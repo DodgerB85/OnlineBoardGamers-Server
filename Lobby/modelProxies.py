@@ -364,3 +364,12 @@ class NTRgame(Game):
         app_label = "NTR"
         verbose_name = "NTR_Game"
         verbose_name_plural = "NTR_Games"
+
+
+# ECL
+class ECLgame(Game):
+    class Meta(Game.Meta):
+        proxy = True
+        app_label = "ECL"
+        verbose_name = "ECL_Game"
+        verbose_name_plural = "ECL_Games"

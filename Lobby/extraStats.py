@@ -110,6 +110,8 @@ def collect_extra_stats():
         group = groups.get(game.gameCode)
         if group is None:
             continue
+        if game.gameCode == "ECL":
+            continue  # Eclipse history lives in the Discord bot, not OBG.
         if str(rf.SO_TRAINING_GAME) in game.startingOptions.replace(" ", "").strip("[]").split(","):
             continue
         group["finished"] += 1
@@ -139,6 +141,8 @@ def collect_extra_stats():
             logger.warning("Extra stats: cannot read %s game %s: %s", game.gameCode, game.id, error)
     results = []
     for group in groups.values():
+        if group["gameCode"] == "ECL":
+            continue  # Eclipse stats live in the Discord bot.
         samples = group.pop("samples")
         group["cohorts"] = build_stats_cohorts(samples)
         results.append(group)

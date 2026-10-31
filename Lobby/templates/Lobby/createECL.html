@@ -1,0 +1,144 @@
+{% extends "Lobby/layout.html" %}
+{% load static i18n compress %}
+{% block head %}
+{% endblock %}
+{% block body %}
+    {{ request.user.id|json_script:"user_id" }}
+    {{ request.user.username|json_script:"username" }}
+
+    <div class="page">
+        <div class="page-header">
+            <h1 class="page-title">{% translate "Eclipse" %}</h1>
+            <a class="button button-ghost button-sm" href="{% url 'newGamesPage' %}">&#8592; {% translate "New Game" %}</a>
+        </div>
+
+        {% include "Lobby/messages.html" %}
+
+        <div class="card card-soft" style="border-left:3px solid var(--color-accent);margin-bottom:16px">
+            <span style="font-size:14px">
+                {% translate "Eclipse is played on the Discord bot's hosted table. Read the " %}
+                <a href="{% url 'ECL:ECLhelp' %}">{% translate "Help" %}</a>
+                {% translate " first. Every player must link Discord in their profile and be a member of the OBG Discord server." %}
+            </span>
+        </div>
+
+        {% if not discord_linked %}
+        <div class="card card-soft" style="border-left:3px solid var(--color-danger);margin-bottom:16px">
+            <b>{% translate "Your Discord account is not linked." %}</b>
+            {% translate "Link it from your profile before creating an Eclipse game." %}
+            <a href="{% url 'profile' %}">{% translate "Profile" %}</a>
+        </div>
+        {% endif %}
+
+        <form id="gameCreationForm" autocomplete="off" action="{% url 'ECL:createECLgame' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="kickoutDuration" name="kickoutDuration" value="100000">
+            <input type="checkbox" id="trainingGame" hidden>
+
+            <div class="setup-cards-grid">
+                <div class="card">
+                    <div class="card-header"><h2 class="card-title">{% translate "Setup Options" %}</h2></div>
+                    <div class="form-row">
+                        <label class="form-label" for="name">{% translate "Name" %}</label>
+                        <input type="text" name="gameName" id="name" placeholder="{% translate "Game name" %}" maxlength="100">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label" for="description">{% translate "Description" %}</label>
+                        <input type="text" name="gameDescription" id="description" placeholder="{% translate "Optional, eg fast EST time zone" %}" maxlength="100">
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label" for="pace">{% translate "Playing Speed" %}</label>
+                        <select name="pace" id="pace">
+                            <option value="10">{% translate "Live: Play the game in one session" %}</option>
+                            <option value="20">{% translate "Fast: Several moves per day" %}</option>
+                            <option value="30" selected>{% translate "Standard: 1-2+ moves a day" %}</option>
+                            <option value="40">{% translate "Slow: At least one move a day" %}</option>
+                            <option value="50">{% translate "Casual: Just take your time" %}</option>
+                        </select>
+                        <div class="form-help" style="padding-left:0">{% translate "Discord and the hosted table handle turn pacing; this is shown in the lobby." %}</div>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label" for="playerNumber">{% translate "Number of players" %}</label>
+                        <select name="playerNumber" id="playerNumber" onchange="selectPlayers();">
+                            <option value="2" selected="selected">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                        </select>
+                    </div>
+                    {% for seat in "23456789" %}
+                    <div class="form-row" id="selPlayer{{ seat }}">
+                        <label class="form-label" for="player{{ seat }}">{% translate "Player" %} {{ seat }}</label>
+                        <div class="field">
+                            <div class="autocomplete">
+                                <input type="text" id="player{{ seat }}" name="player{{ seat }}" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit">
+                            </div>
+                            {% if seat == "2" %}
+                            <span id="player2help" style="display:block;margin-top:4px;font-size:13px;color:var(--color-muted)">{% translate "Leave blank to invite anybody" %}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h2 class="card-title">{% translate "Eclipse Options" %}</h2></div>
+                    <div class="check-list">
+                        <label class="check-label"><input type="checkbox" class="myCheckbox" name="rift_cannon" value="1" checked><div>{% translate "Rift cannons" %}</div></label>
+                        <label class="check-label"><input type="checkbox" class="myCheckbox" name="turn_order_variant" value="1" checked><div>{% translate "Passing order turns" %}</div></label>
+                        <label class="check-label"><input type="checkbox" class="myCheckbox" name="galactic_event_tiles" value="1"><div>{% translate "Galactic event tiles" %}</div></label>
+                        <label class="check-label"><input type="checkbox" class="myCheckbox" name="hyperlanes" value="1"><div>{% translate "Hyperlanes (4-5 players)" %}</div></label>
+                        <label class="check-label"><input type="checkbox" class="myCheckbox" name="community_parts" value="1"><div>{% translate "Community parts" %}</div></label>
+                        <label class="check-label"><input type="checkbox" class="myCheckbox" name="community_rep_mod" value="1"><div>{% translate "Community reputation" %}</div></label>
+                        <label class="check-label"><input type="checkbox" class="myCheckbox" name="ban_factions" value="1"><div>{% translate "Ban factions" %}</div></label>
+                        <label class="check-label"><input type="checkbox" class="myCheckbox" name="alliances" value="1"><div>{% translate "Alliances (4+ players)" %}</div></label>
+                        <label class="check-label"><input type="checkbox" class="myCheckbox" name="community_factions" value="1"><div>{% translate "Community factions" %}</div></label>
+                        <label class="check-label"><input type="checkbox" class="myCheckbox" name="privateGame" value="1"><div>{% translate "Private Game" %}</div></label>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align:center;margin-top:8px">
+                <input type="submit" class="button button-primary createNewGameButton" value="{% translate "Create Eclipse Game" %}" {% if not discord_linked %}disabled{% endif %}>
+            </div>
+        </form>
+    </div>
+
+    {% block script %}
+        {% compress js %}
+            <script src="{% static 'Lobby/createGamePage.js' %}"></script>
+            <script src="{% static 'Lobby/createECL.js' %}"></script>
+        {% endcompress %}
+        <script>
+    var global = {};
+    global.player2normText = '{% translate "Leave blank to invite anybody" %}';
+    global.player2practiceText = '{% translate "You can change the in-game name of the other players" %}';
+    {% if fillData %}
+    var setupData = {};
+    setupData.gameName = "{{ gameName }}";
+    setupData.gameDescription = "{{ gameDescription }}";
+    setupData.gamePace = {{ gamePace }};
+    setupData.playerNumber = {{ playerNumber }};
+    setupData.playerNames = {{ playerNames | safe }};
+    setupData.startingOptions = {{ startingOptions }};
+    {% endif %}
+    document.addEventListener('DOMContentLoaded', function () {
+        {% if not fillData %}
+        autocomplete(document.getElementById("player2"));
+        autocomplete(document.getElementById("player3"));
+        autocomplete(document.getElementById("player4"));
+        autocomplete(document.getElementById("player5"));
+        autocomplete(document.getElementById("player6"));
+        autocomplete(document.getElementById("player7"));
+        autocomplete(document.getElementById("player8"));
+        autocomplete(document.getElementById("player9"));
+        {% endif %}
+        initGameCreation({% if fillData %}true{% else %}false{% endif %}{% if fillData %}, setupData{% endif %});
+    });
+        </script>
+    {% endblock %}
+{% endblock %}

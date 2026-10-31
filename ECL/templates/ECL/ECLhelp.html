@@ -1,0 +1,44 @@
+{% extends "Lobby/help_shell.html" %}
+{% load static %}
+{% load i18n %}
+{% block page_title %}
+  {% translate "Eclipse Help" %}
+{% endblock page_title %}
+{% block content %}
+  <div class="card section">
+    <h2>{% translate "Overview" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% blocktranslate %}Eclipse is played on a hosted table backed by the Eclipse Discord bot. The lobby
+        here handles accounts, invitations and joining; the game itself, its history and its Discord
+        channels live in the bot. The table page is the same game the Discord channels mirror.{% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h2>{% translate "Discord is required" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% blocktranslate %}Every player must link their Discord account in their profile and be a
+        member of the OBG Discord server before creating or joining an Eclipse game. When the last
+        seat joins, OBG creates the Discord category, role, table-talk channel, actions channel and
+        faction draft. Players can act from the table page or from Discord; both surfaces share the
+        same prompt ids.{% endblocktranslate %}
+      </p>
+      <p>
+        {% translate "Link Discord from your profile page." %}
+      </p>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h2>{% translate "History and results" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% blocktranslate %}The History dialog, combat rooms and final scores come from the bot feed.
+        They are not stored in the OBG database, so OBG statistics pages do not include Eclipse games.{% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+{% endblock %}

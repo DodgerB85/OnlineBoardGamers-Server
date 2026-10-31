@@ -52,10 +52,15 @@ class ForceTrailingSlashMiddleware:
             "/DDL",
             "/ROW",
             "/NTR",
+            "/ECL",
             "/login",
             "/profile",
             "/index",
         )
+
+        # Proxied Eclipse assets and API paths are file-like, never directory-like.
+        if request.path.startswith("/ECL/") and "/proxy/" in request.path:
+            return self.get_response(request)
 
         # Check if the path starts with one of your app prefixes and does NOT end with a slash
         if request.path.startswith(app_prefixes) and not request.path.endswith("/"):

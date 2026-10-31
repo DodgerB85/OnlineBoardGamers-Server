@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img" aria-label="Eclipse">
+  <defs>
+    <radialGradient id="space" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#16224a"/>
+      <stop offset="65%" stop-color="#0b1228"/>
+      <stop offset="100%" stop-color="#04060f"/>
+    </radialGradient>
+    <radialGradient id="star" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#fff2b0"/>
+      <stop offset="45%" stop-color="#ffc247"/>
+      <stop offset="100%" stop-color="#c94b12"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#space)"/>
+  <g fill="#cfe8ff" opacity="0.8">
+    <circle cx="90" cy="120" r="2"/><circle cx="150" cy="80" r="1.4"/><circle cx="520" cy="140" r="2"/>
+    <circle cx="480" cy="60" r="1.2"/><circle cx="70" cy="420" r="1.6"/><circle cx="540" cy="470" r="2"/>
+    <circle cx="360" cy="90" r="1.3"/><circle cx="250" cy="500" r="1.5"/>
+  </g>
+  <ellipse cx="300" cy="330" rx="230" ry="62" fill="none" stroke="#8fd3ff" stroke-width="10" opacity="0.85"/>
+  <circle cx="300" cy="330" r="120" fill="url(#star)"/>
+  <circle cx="300" cy="330" r="150" fill="none" stroke="#ffd98a" stroke-width="4" opacity="0.6"/>
+  <text x="300" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="58" font-weight="bold" fill="#e8f6ff" letter-spacing="9">ECLIPSE</text>
+  <text x="300" y="525" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#9fd6ff" letter-spacing="3">A GALACTIC TABLETOP</text>
+</svg>

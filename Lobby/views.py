@@ -412,6 +412,7 @@ GAME_NAMES_MODELS = {
     "ROW": "ROW",
     "URR": "URR",
     "NTR": "NTR",
+    "ECL": "ECL",
 }
 
 
@@ -2447,6 +2448,36 @@ def createWEBpage(request, gameID=0):
 
 
 @login_required
+def createECLpage(request, gameID=0):
+    if request.method != "POST" and gameID == 0:
+        return render(request, "Lobby/createECL.html", {
+            "discord_linked": bool(request.user.profile.discord_id or ""),
+        })
+    if request.method != "POST" and gameID != 0:
+        try:
+            currentGame = Game.objects.get(id=gameID, gameCode="ECL")
+        except Game.DoesNotExist:
+            raise Http404(gettext("Game does not exist")) from None
+        all_players = currentGame.players.exclude(player=request.user).select_related("player")
+        playerNames = [gp.player.username for gp in all_players if gp.player]
+        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        messages.success(request, gettext("Game creation for rematch"))
+        return render(request, "Lobby/createECL.html", {
+            "fillData": True,
+            "gameName": currentGame.presenter().getGameName(),
+            "gameDescription": currentGame.gameDescription,
+            "gamePace": currentGame.gamePace,
+            "playerNumber": currentGame.maxPlayers,
+            "playerNames": playerNames,
+            "kickoutDuration": currentGame.kickoutDuration,
+            "startingOptions": loadedStartingOptions,
+            "discord_linked": bool(request.user.profile.discord_id or ""),
+        })
+
+    return HttpResponse(status=204)  # No Content
+
+
+@login_required
 def createRNBpage(request, gameID=0):
     experienced = SF_hasRequiredExperience(request, "RNB", Game)
     # Get settings debug flag for RNB map rendering
@@ -3067,6 +3098,8 @@ def playerInfo(request, usernameToProfile):
 
     # Now process each game type with its games
     for game_name in GAME_NAMES_MODELS:
+        if game_name == "ECL":
+            continue  # Eclipse results live in the Discord bot, not the OBG stats tables.
         all_games_for_type = games_by_type.get(game_name, [])
 
         # Model-specific counters for the stats table
@@ -3464,6 +3497,14 @@ def checkJoinGame(request, gameType, gameID):
         messages.error(request, (gettext("The creator has blocked you from joining their games")))
         errorFound = True
 
+    if gameType == "ECL" and not request.user.profile.discord_id:
+        messages.error(request, gettext("Link your Discord account in your profile before joining an Eclipse game."))
+        errorFound = True
+    elif gameType == "ECL" and currentGame.players.exclude(is_kicked=True).filter(
+            player__profile__discord_id=request.user.profile.discord_id).exists():
+        messages.error(request, gettext("That Discord account is already playing this Eclipse game."))
+        errorFound = True
+
     if errorFound and ajaxReturn:
         return JsonResponse(
             {
@@ -3531,6 +3572,8 @@ def checkJoinGame(request, gameType, gameID):
         fairPlayLastYear = 100
 
         for game_name, _game_model in GAME_NAMES_MODELS.items():
+            if game_name == "ECL":
+                continue  # Eclipse results live in the Discord bot.
             finishedGames = Game.objects.filter(
                 Q(gameCode=game_name),
                 Q(gameStatus="FINISHED"),
