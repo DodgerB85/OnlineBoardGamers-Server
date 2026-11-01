@@ -1,9 +1,9 @@
 """AI seats for Land Between Rivers.
 
-The AI service (donor Rust engine) decides; LBRrules.js is run headlessly by
-node to validate and apply the decision; the resulting position is saved through
-the same mutex/latestUpdate path as a human move. Django never interprets the
-rules itself.
+The vendored policy engine (LBR/ai-service) decides; LBRrules.js is run
+headlessly by node to validate and apply the decision; the resulting position is
+saved through the same mutex/latestUpdate path as a human move. Django never
+interprets the rules itself.
 """
 
 import json
@@ -11,6 +11,7 @@ import logging
 import subprocess
 import time
 from datetime import timedelta
+from pathlib import Path
 from types import SimpleNamespace
 
 # A whole AI turn is played inside one task. The cap only keeps a task well under
@@ -28,6 +29,29 @@ from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
 logger = logging.getLogger(__name__)
 
 STEP_SCRIPT = settings.BASE_DIR / "LBR" / "ai" / "lbr_step.mjs"
+
+_policy_disabled_logged = False
+
+
+def policy_paths():
+    """Absolute binary and model paths, always derived from settings (never cwd)."""
+    return Path(settings.LBR_AI_BIN), Path(settings.LBR_AI_MODEL)
+
+
+def policy_available():
+    """Whether a policy decision can be produced at all.
+
+    A missing binary or model disables AI seats instead of claiming a turn the
+    worker could never play, so the seat is never wedged by a broken install.
+    """
+    global _policy_disabled_logged
+    if settings.LBR_AI_URL:
+        return True
+    missing = [str(path) for path in policy_paths() if not path.is_file()]
+    if missing and not _policy_disabled_logged:
+        _policy_disabled_logged = True
+        logger.warning("LBR AI seats are disabled: missing %s", ", ".join(missing))
+    return not missing
 
 
 def actor_seat(state):
@@ -80,7 +104,7 @@ def schedule_ai_turn(game_id):
     """
     from django_q.tasks import async_task
 
-    if not settings.LBR_AI_URL:
+    if not policy_available():
         return False
 
     game = Game.objects.filter(id=game_id, gameCode="LBR").first()
@@ -193,19 +217,55 @@ def play_ai_turn(game_id, expected_latest_update, attempt=0):
 
 
 def request_ai_action(state, seat):
-    if not settings.LBR_AI_URL:
-        raise RuntimeError("LBR_AI_URL is not configured")
-    response = requests.post(
-        settings.LBR_AI_URL,
-        json={"state": state, "seat": seat},
-        timeout=settings.LBR_AI_TIMEOUT,
-    )
-    response.raise_for_status()
-    data = response.json()
-    action = data.get("action")
+    """One policy decision for `seat`, from the local binary or LBR_AI_URL."""
+    request = {"state": state, "seat": seat}
+    if settings.LBR_AI_URL:
+        response = requests.post(settings.LBR_AI_URL, json=request, timeout=settings.LBR_AI_TIMEOUT)
+        response.raise_for_status()
+        data = response.json()
+    else:
+        data = _run_policy(request)
+    action = data.get("action") if isinstance(data, dict) else None
     if not isinstance(action, dict):
-        raise RuntimeError(f"AI service returned no action: {data}")
+        raise RuntimeError(f"AI policy returned no action: {data}")
     return action
+
+
+def _run_policy(request):
+    """One-shot `lbr-move` subprocess: a crash or a hang costs one decision."""
+    binary, model = policy_paths()
+    if not binary.is_file():
+        raise RuntimeError(f"LBR policy binary not found: {binary}")
+    if not model.is_file():
+        raise RuntimeError(f"LBR policy model not found: {model}")
+
+    try:
+        process = subprocess.run(
+            [
+                str(binary),
+                "lbr-move",
+                "--sims",
+                str(settings.LBR_AI_SIMS),
+                "--alpha",
+                str(settings.LBR_AI_ALPHA),
+                "--net",
+                str(model),
+            ],
+            input=json.dumps(request),
+            capture_output=True,
+            text=True,
+            timeout=settings.LBR_AI_TIMEOUT,
+        )
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(f"LBR policy timed out after {settings.LBR_AI_TIMEOUT}s") from None
+    if process.returncode != 0:
+        raise RuntimeError(
+            f"LBR policy failed (exit {process.returncode}): {process.stderr.strip() or process.stdout.strip()}"
+        )
+    try:
+        return json.loads(process.stdout)
+    except ValueError:
+        raise RuntimeError(f"LBR policy returned malformed JSON: {process.stdout.strip()[:500]}") from None
 
 
 def _run_step(payload):

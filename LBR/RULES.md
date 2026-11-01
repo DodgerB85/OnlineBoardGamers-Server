@@ -4,14 +4,15 @@ Implementation of Reiner Knizia's *Tigris & Euphrates* (3–4 players; the donor
 engine also defines a 2-player practice variant). Client owns the rules; the
 server stores the last accepted state.
 
-Sources, both in `/home/mihai/personal/tigris/`:
+Sources:
 
-- `Tigris_&_Euphrates.txt` — condensed rulebook (Eric Postpischil, draft 1.3,
-  2007), incorporates the FAQ. This is the source of truth.
-- `tigris-and-euphrates/src/game.rs` — donor engine; `docs/BUGS.md` records
-  corrections where the donor diverged from the rulebook. Where donor and text
-  disagree, the text/BUGS ruling wins.
-- `tigris-and-euphrates/src/maps.rs` + `game.rs::BOARD` — board layout.
+- Condensed rulebook (Eric Postpischil, draft 1.3, 2007), which incorporates the
+  FAQ. This is the source of truth. It is not vendored in this repository.
+- `LBR/ai-service/src/game.rs` — donor engine, vendored from the Tigris and
+  Euphrates engine; its `docs/BUGS.md` records corrections where the donor
+  diverged from the rulebook. Where donor and text disagree, the text/BUGS
+  ruling wins.
+- `LBR/ai-service/src/maps.rs` + `game.rs::BOARD` — board layout.
 
 ## Components
 

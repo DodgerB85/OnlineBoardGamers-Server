@@ -1,14 +1,16 @@
 import json
 import shutil
 import subprocess
+import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from django.conf import settings
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 
-from LBR.ai_worker import STEP_SCRIPT, play_ai_turn, schedule_ai_turn
+from LBR.ai_worker import STEP_SCRIPT, play_ai_turn, policy_available, request_ai_action, schedule_ai_turn
 from Lobby.models import Game, User
 
 
@@ -364,3 +366,56 @@ class LBRAIWorkerTests(TestCase):
         self.assertFalse(schedule_ai_turn(self.game.id))
         after = len([c for c in self.async_task.call_args_list if c.args[0] == "LBR.ai_worker.play_ai_turn"])
         self.assertEqual(after - before, 1)
+
+
+class LBRAIPolicyTests(SimpleTestCase):
+    """The policy subprocess boundary: missing files, crash, timeout, bad output."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        directory = Path(self.tmp.name)
+        self.binary = directory / "policy"
+        self.model = directory / "model.bin"
+        self.model.write_bytes(b"")
+        self.binary.write_text("#!/bin/sh\nprintf '{\"action\":{\"type\":\"pass\"}}'\n")
+        self.binary.chmod(0o755)
+        self.overrides = {
+            "LBR_AI_URL": "",
+            "LBR_AI_BIN": str(self.binary),
+            "LBR_AI_MODEL": str(self.model),
+            "LBR_AI_TIMEOUT": 5,
+        }
+
+    def test_a_missing_binary_or_model_disables_ai_seats(self):
+        with self.settings(**self.overrides):
+            self.assertTrue(policy_available())
+        self.model.unlink()
+        with self.settings(**self.overrides):
+            self.assertFalse(policy_available())
+        self.binary.unlink()
+        with self.settings(**self.overrides):
+            self.assertFalse(policy_available())
+
+    def test_the_local_binary_answers_the_request(self):
+        with self.settings(**self.overrides):
+            self.assertEqual(request_ai_action({"turnNumber": 1}, 0), {"type": "pass"})
+
+    def test_crash_and_malformed_output_raise(self):
+        self.binary.write_text("#!/bin/sh\necho boom >&2\nexit 3\n")
+        with self.settings(**self.overrides), self.assertRaisesMessage(RuntimeError, "exit 3"):
+            request_ai_action({"turnNumber": 1}, 0)
+
+        self.binary.write_text("#!/bin/sh\nprintf 'not json'\n")
+        with self.settings(**self.overrides), self.assertRaisesMessage(RuntimeError, "malformed JSON"):
+            request_ai_action({"turnNumber": 1}, 0)
+
+        self.binary.write_text("#!/bin/sh\nprintf '{\"turn\": 2}'\n")
+        with self.settings(**self.overrides), self.assertRaisesMessage(RuntimeError, "no action"):
+            request_ai_action({"turnNumber": 1}, 0)
+
+    def test_a_hung_policy_times_out(self):
+        self.binary.write_text("#!/bin/sh\nsleep 5\n")
+        with self.settings(**{**self.overrides, "LBR_AI_TIMEOUT": 1}):
+            with self.assertRaisesMessage(RuntimeError, "timed out"):
+                request_ai_action({"turnNumber": 1}, 0)

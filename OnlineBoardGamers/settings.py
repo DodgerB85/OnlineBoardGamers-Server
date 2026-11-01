@@ -220,9 +220,16 @@ if DEBUG:
     COMPRESS_OFFLINE = False
 # END JS Minifier settings
 
-# LBR AI seats. The policy service is the donor Rust engine (see LBR/ai/README.md);
+# LBR AI seats. The policy engine is vendored in LBR/ai-service (see
+# LBR/ai/README.md) and runs as a one-shot subprocess from the Django-Q worker;
 # node runs LBRrules.js headlessly to validate and apply its decisions.
-LBR_AI_URL = config("LBR_AI_URL", default="http://127.0.0.1:8731/move")
+# LBR_AI_URL optionally replaces the local binary with a remote service that
+# answers {"state", "seat"} with {"action"}.
+LBR_AI_URL = config("LBR_AI_URL", default="")
+LBR_AI_BIN = config("LBR_AI_BIN", default=str(BASE_DIR / "LBR" / "ai-service" / "target" / "release" / "lbr-policy"))
+LBR_AI_MODEL = config("LBR_AI_MODEL", default=str(BASE_DIR / "LBR" / "ai-service" / "models" / "best.bin"))
+LBR_AI_SIMS = config("LBR_AI_SIMS", default=400, cast=int)
+LBR_AI_ALPHA = config("LBR_AI_ALPHA", default=0.7, cast=float)
 LBR_AI_TIMEOUT = config("LBR_AI_TIMEOUT", default=30, cast=int)
 LBR_AI_NODE = config("LBR_AI_NODE", default="node")
 LBR_AI_STEP_TIMEOUT = config("LBR_AI_STEP_TIMEOUT", default=30, cast=int)

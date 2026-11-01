@@ -17,3 +17,4 @@ db.sqlite3
 .pytest_cache
 siteUtils/creds4.txt
 siteUtils/client_secrets.json
+LBR/ai-service/target
