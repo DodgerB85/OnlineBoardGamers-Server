@@ -62,17 +62,13 @@ class LBRAISeatCreationTests(TestCase):
         self.assertEqual(game.gameStatus, "WAITING")
         self.assertEqual(game.maxPlayers, 3)
 
-    def test_any_seat_can_be_ai_including_the_creator(self):
+    def test_seat_one_stays_the_creator_when_ai1_is_posted(self):
         self.client.post(reverse("LBR:createLBRgame"), base_post(playerNumber="2", ai1="1", ai2="1"))
         game = Game.objects.get(gameCode="LBR")
 
+        self.assertFalse(game.players.get(player=self.creator).is_ai)
+        self.assertEqual(game.players.filter(is_ai=True).count(), 1)
         self.assertEqual(game.gameStatus, "ACTIVE")
-        self.assertEqual(game.players.count(), 2)
-        self.assertTrue(all(gp.is_ai for gp in game.players.all()))
-        self.assertEqual(game.invitedPlayers.count(), 0)
-        self.assertTrue(game.players.filter(is_current=True).exists())
-        scheduled = [call.args for call in self.async_task.call_args_list if call.args[0] == "LBR.ai_worker.play_ai_turn"]
-        self.assertIn((game.id, game.latestUpdate), [(args[1], args[2]) for args in scheduled])
 
     def test_ai_seat_is_never_invited(self):
         self.client.post(reverse("LBR:createLBRgame"), base_post(playerNumber="4", ai2="1", player3="invited"))
@@ -300,20 +296,64 @@ class LBRAIWorkerTests(TestCase):
         self.assertNotEqual(self.game.gameData, "")
 
     def test_ai_only_game_deals_its_own_opening_position(self):
-        self.client.post(reverse("LBR:createLBRgame"), base_post(playerNumber="2", ai1="1", ai2="1"))
-        game = Game.objects.filter(gameCode="LBR").latest("id")
-        self.assertEqual(game.gameData, "")
+        # The create form always seats the creator, so an all-AI game can only be
+        # reached by a taken-over seat; the opening is still dealt by the worker.
+        self.game.players.update(is_ai=True)
+        self.game.gameData = ""
+        self.game.save()
 
-        result = play_ai_turn(game.id, game.latestUpdate)
+        with patch("LBR.ai_worker.MAX_AI_DECISIONS_PER_TASK", 1):
+            result = play_ai_turn(self.game.id, self.game.latestUpdate)
 
         self.assertEqual(result, "ok")
-        game.refresh_from_db()
-        state = json.loads(game.gameData)
+        self.game.refresh_from_db()
+        state = json.loads(self.game.gameData)
         self.assertEqual(state["numSeats"], 2)
         self.assertEqual(len(state["tiles"]), 176)
-        self.assertNotEqual(game.latestUpdate, "")
+        self.assertNotEqual(self.game.latestUpdate, "")
         task_calls = [call.args for call in self.async_task.call_args_list if call.args[0] == "LBR.ai_worker.play_ai_turn"]
         self.assertTrue(task_calls)
+
+    def test_ai_plays_its_whole_turn_in_one_task(self):
+        self.set_position(actions_used=1)
+        human_seat = self.game.players.get(player=self.creator).seat_order
+        ai_turn = {"activeSeat": self.ai_gp.seat_order, "pending": None, "gameOver": False}
+        human_turn = {"activeSeat": human_seat, "pending": None, "gameOver": False}
+        applied = [
+            {
+                "stateJson": json.dumps(ai_turn),
+                "turn": 2,
+                "phase": 0,
+                "nextPlayer": [self.ai_gp.player.username],
+                "status": "ACTIVE",
+                "winner": "",
+                "finalPositions": [],
+                "fallback": False,
+            },
+            {
+                "stateJson": json.dumps(human_turn),
+                "turn": 3,
+                "phase": 0,
+                "nextPlayer": [self.creator.username],
+                "status": "ACTIVE",
+                "winner": "",
+                "finalPositions": [],
+                "fallback": False,
+            },
+        ]
+
+        with patch("LBR.ai_worker.request_ai_action", return_value={"type": "pass"}), patch(
+            "LBR.ai_worker._run_step", side_effect=applied
+        ) as run_step:
+            result = play_ai_turn(self.game.id, self.game.latestUpdate)
+
+        self.assertEqual(result, "ok")
+        self.assertEqual(run_step.call_count, 2)
+        self.assertFalse(
+            any(call.args[0] == "LBR.ai_worker.play_ai_turn" for call in self.async_task.call_args_list)
+        )
+        self.game.refresh_from_db()
+        self.assertEqual(json.loads(self.game.gameData)["activeSeat"], human_seat)
 
     def test_schedule_claims_a_turn_only_once(self):
         self.set_position()

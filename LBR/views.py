@@ -249,6 +249,7 @@ def save_lbr_state(
     save_rewind,
     request,
     track_availability=True,
+    schedule_next_ai=True,
 ):
     """Apply one accepted position through the shared save path.
 
@@ -320,9 +321,10 @@ def save_lbr_state(
     presenter.clearKickoutVotes()
     current_game.save()
 
-    from LBR.ai_worker import schedule_ai_turn
+    if schedule_next_ai:
+        from LBR.ai_worker import schedule_ai_turn
 
-    schedule_ai_turn(current_game.id)
+        schedule_ai_turn(current_game.id)
 
 
 def loadRewind(request, currentGame, jsonData, presenter):

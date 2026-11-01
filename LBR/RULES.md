@@ -201,9 +201,10 @@ than the UI shows.)
 
 ## AI seats
 
-Any seat can be created as an AI seat (`GamePlayer.is_ai`). A mixed game is a
-normal game: the AI seats take their turns through the same save path as a
-human, and `activeSeat`/`pending.seat` in `gameData` is the AI's `seat_order`.
+Seats 2 to 4 can be created as AI seats (`GamePlayer.is_ai`); seat 1 is always
+the creator's. A mixed game is a normal game: the AI seats take their turns
+through the same save path as a human, and `activeSeat`/`pending.seat` in
+`gameData` is the AI's `seat_order`.
 
 A seat that is kicked out or resigns is **taken over by the AI in place**: the
 `GamePlayer` keeps its `seat_order` and `player`, the blob is not reset, and the
@@ -212,6 +213,7 @@ The player can inspect the AI's subsequent moves in the history like any other
 seat.
 
 The AI never runs in the browser. `LBR/ai_worker.py` asks the external Rust
-service for one action, `LBR/ai/lbr_step.mjs` validates and applies it with
-`LBRrules.js`, and the result is saved through `save_lbr_state`. See
+service for one action at a time until a human seat must act (so one queued
+task resolves the whole turn), `LBR/ai/lbr_step.mjs` validates and applies each
+action with `LBRrules.js`, and each result is saved through `save_lbr_state`. See
 [`ai/README.md`](ai/README.md) for deployment and the decision limits.

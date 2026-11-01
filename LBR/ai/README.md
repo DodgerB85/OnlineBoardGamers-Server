@@ -16,8 +16,10 @@ Three pieces make it work:
    falls back to a rules-derived default and reports the rejection to the admins.
 3. **`LBR/ai_worker.py`** — a django-q task. It takes the game mutex, re-checks
    `latestUpdate`, saves through `save_lbr_state` (the same path as a human
-   move: notifications, rewind, `endGame` cleanup), then queues the next AI
-   seat. `Game.autoMoves` is used as the one-shot claim marker.
+   move: notifications, rewind, `endGame` cleanup), then plays the next AI
+   decision in the same task until a human seat must act. Only a decision cap
+   queues a fresh task, so an AI turn does not wait on the cluster poll or a
+   browser. `Game.autoMoves` is used as the one-shot claim marker.
 
 ## Running the service
 

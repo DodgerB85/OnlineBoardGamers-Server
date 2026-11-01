@@ -87,9 +87,9 @@ def create_lbr_game(
             return HttpResponseRedirect(reverse("createLBRpage"))
 
         is_training_game = "trainingGame" in request.POST
-        # Practice games are hotseat and use the SHADOW seats; per-seat AI is for
-        # normal games, where any seat (including the creator's) can be the AI.
-        ai_seats = set() if is_training_game else {seat for seat in range(1, max_players + 1) if request.POST.get(f"ai{seat}")}
+        # Practice games are hotseat and use the SHADOW seats. Seat 1 is always the
+        # creator, so only the seats below can be AI.
+        ai_seats = set() if is_training_game else {seat for seat in range(2, max_players + 1) if request.POST.get(f"ai{seat}")}
 
         if is_training_game:
             starting_options.append(rf.SO_TRAINING_GAME)
