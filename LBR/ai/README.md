@@ -107,11 +107,10 @@ assumed.
 `models/best.bin` is the donor checkpoint `runs/best.bin` from commit `f717cb8`
 ("Add retrained checkpoint runs/best.bin (honest search, h2w)"), copied byte for
 byte. It was produced by the donor's own self-play pipeline on that engine; it
-embeds no third-party data or code. `minimax/` is the MIT-licensed
-`minimax-local` crate (its `LICENSE` is vendored). The donor repository itself
-carries **no license file**: the vendored Rust source and the weights are
-therefore redistributed under whatever terms the donor owner grants. Get that in
-writing before publishing this repository publicly.
+embeds no third-party data or code. The donor repository is this project's own
+first-party work, so the vendored Rust source and the weights carry the same
+terms as the rest of OBG. `minimax/` is the only third-party code: the MIT-licensed
+`minimax-local` crate (its `LICENSE` is vendored).
 
 ## Decisions and limits
 
