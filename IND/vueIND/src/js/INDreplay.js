@@ -110,6 +110,8 @@ async function resetDataForReplay() {
 	}
 
 	store.gameflow.currentEra = rf.ERA_A
+	// Phase must be reset too, or step 0 keeps the live game's phase with empty ongoingVars
+	store.gameflow.phase = rf.PHASE_NEW_ERA
 
 	// keep history
 	store.clearVars()

@@ -43,7 +43,7 @@ export function currentPlayerIndex() {
 
 	if (store.gameflow.phase === rf.PHASE_MERGER_BIDDING) {
 		if (store.ongoingVars.bidTurnOrder.length > 0) return store.ongoingVars.bidTurnOrder[0]
-		else alert(`CP() IDX Error - Bidding. S.O.bTO: ${store.ongoingVars.bidTurnOrder}`)
+		else if (!store.topMenuViews.showReplay) alert(`CP() IDX Error - Bidding. S.O.bTO: ${store.ongoingVars.bidTurnOrder}`)
 	}
 
 	if (store.gameflow.turnOrder.length > 0) return store.gameflow.turnOrder[0]
