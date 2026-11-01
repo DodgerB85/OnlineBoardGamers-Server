@@ -20,11 +20,14 @@ export const useModelStore = defineStore("model", () => {
 	const kickoutVotesData = ref({});
 	const kickoutVoteThreshold = ref(0);
 	const chatNotification = ref(false);
-	const gameMessages = reactive({ errorText: "", successText: "" });
+	const gameMessages = reactive({ errorText: "", successText: "", bugErrorText: "" });
 	const viewSettings = reactive({
 		showHistory: false,
 		showChat: false,
 		showNotes: false,
+		showBug: false,
+		showRewindPanel: false,
+		showResignPanel: false,
 		mode: "idle",
 		selectedColour: null,
 		showGameOver: true,

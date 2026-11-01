@@ -103,6 +103,7 @@ export function legalCells() {
 	const seat = currentActor(game);
 	const mode = store.viewSettings.mode;
 	const colour = store.viewSettings.selectedColour;
+	if (mode === "idle") return set;
 	for (let pos = 0; pos < CELLS; pos++) {
 		let err = null;
 		if (mode === "tile" && colour) err = canPlaceTile(game, seat, colour, pos);

@@ -201,7 +201,7 @@ function schoolName(type) {
 					</div>
 				</div>
 			</div>
-			<button class="action ghost-dark" :disabled="!myTurn" @click="decline">Decline monument</button>
+			<button class="action" :disabled="!myTurn" @click="decline">Decline monument</button>
 		</template>
 
 		<!-- Normal turn -->
@@ -221,6 +221,7 @@ function schoolName(type) {
 						:key="colour"
 						class="tile-button"
 						:class="{ chosen: mode === 'tile' && selectedColour === colour }"
+						:aria-pressed="mode === 'tile' && selectedColour === colour"
 						:disabled="hand[colour] <= 0 || store.viewSettings.saving"
 						@click="selectTile(colour)"
 						:title="`${colourName(colour)} tile (${hand[colour]} in hand)`"
@@ -237,6 +238,7 @@ function schoolName(type) {
 						:key="colour"
 						class="leader-button"
 						:class="{ chosen: mode === 'leader' && selectedColour === colour }"
+						:aria-pressed="mode === 'leader' && selectedColour === colour"
 						:disabled="store.viewSettings.saving"
 						@click="selectLeader(colour)"
 						:title="`Move the ${colourName(colour)} leader`"
@@ -246,7 +248,7 @@ function schoolName(type) {
 					</button>
 				</div>
 				<div v-if="leaderOnBoard(selectedColour)" class="row">
-					<button class="action ghost-dark" @click="controller.withdrawLeader(selectedColour)">
+					<button class="action" @click="controller.withdrawLeader(selectedColour)">
 						Withdraw selected leader
 					</button>
 				</div>
@@ -256,12 +258,13 @@ function schoolName(type) {
 					<button
 						class="action"
 						:class="{ chosen: mode === 'catastrophe' }"
+						:aria-pressed="mode === 'catastrophe'"
 						:disabled="actorPlayer.catastrophes <= 0 || store.viewSettings.saving"
 						@click="catastrophe"
 					>
 						Catastrophe ({{ actorPlayer.catastrophes }})
 					</button>
-					<button v-if="mode !== 'idle'" class="action ghost-dark" @click="cancel">Cancel</button>
+					<button v-if="mode !== 'idle'" class="action" @click="cancel">Cancel</button>
 				</div>
 
 				<div class="section-title">Swap tiles</div>
@@ -334,7 +337,7 @@ function schoolName(type) {
 
 .tile-button.chosen,
 .leader-button.chosen {
-	box-shadow: 0 0 0 2px #fbf236, 0 0 6px #fbf236;
+	box-shadow: 0 0 0 2px #177daf;
 }
 
 .tile-button:disabled,
@@ -398,10 +401,5 @@ function schoolName(type) {
 }
 .c-K {
 	color: #242327;
-}
-
-.ghost-dark {
-	background: transparent;
-	border: 1px dashed #663931;
 }
 </style>

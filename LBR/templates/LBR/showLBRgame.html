@@ -24,7 +24,8 @@
     <style>
     body {
       margin: 0px !important;
-      background-color: #d9a066;
+      background-color: #d4eafd;
+      color: #302f27;
       font-family: Arial, sans-serif;
       box-sizing: border-box;
     }
@@ -32,15 +33,15 @@
     #loadingText {
       position: absolute;
       top: 0;
-      left: 0;
-      width: 100%;
-      text-align: center;
+      left: 50%;
+      transform: translateX(-50%);
       font-size: 40px;
       margin-top: 20px;
+      text-align: center;
       padding: 0 16px;
       box-sizing: border-box;
+      white-space: nowrap;
       z-index: 10;
-      color: #222034;
     }
 
     #loadingAnimation {
@@ -68,15 +69,8 @@
       50% { opacity: 1; transform: scale(1.05); }
     }
 
-    .loading-subtext {
-      position: absolute;
-      bottom: -40px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 16px;
-      color: #663931;
-      font-weight: bold;
-      white-space: nowrap;
+    @media (prefers-reduced-motion: reduce) {
+      .temple-silhouette { animation: none; }
     }
 
     @media (min-width: 600.001px) {
@@ -102,7 +96,6 @@
       <div id="loadingText">{% translate "Land Between Rivers is loading..." %}</div>
       <div id="loadingAnimation">
         <div class="temple-silhouette"></div>
-        <div class="loading-subtext">{% translate "Two rivers, one soil." %}</div>
       </div>
     </div>
   <div hidden>{% csrf_token %}</div>

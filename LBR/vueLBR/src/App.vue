@@ -1,7 +1,10 @@
 <script setup>
-import { onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted } from "vue";
 
-import TopBar from "./components/TopBar.vue";
+import TopMenu from "./components/TopMenu.vue";
+import TopMenuViews from "./components/TopMenuViews.vue";
+import KickoutDialog from "./components/KickoutDialog.vue";
+import FooterBar from "./components/FooterBar.vue";
 import BoardArea from "./components/BoardArea.vue";
 import ActionPanel from "./components/ActionPanel.vue";
 import PlayerPanel from "./components/PlayerPanel.vue";
@@ -22,6 +25,8 @@ model.initGame();
 if (store.chatData) store.chatMessages = IO.decompressChat(store.chatData);
 controller.bootGame();
 
+const isSpectator = computed(() => personal.pov < 0);
+
 let pollTimer = null;
 
 onMounted(() => {
@@ -38,46 +43,32 @@ onUnmounted(() => {
 </script>
 
 <template>
-	<div class="app-shell">
-		<TopBar />
-		<div v-if="personal.pov === -9 || personal.pov === -1" class="observer-note">
-			You are watching this game. The board is read-only.
-		</div>
-		<div v-if="store.finishedGame && store.game && !store.game.gameOver" class="observer-note">
-			This game is marked finished on the server.
-		</div>
-		<div class="main">
-			<BoardArea />
-			<div class="side-panel">
-				<ActionPanel />
-				<PlayerPanel />
-			</div>
-			<div v-if="store.viewSettings.showHistory" class="side-panel">
-				<HistoryPanel />
-			</div>
-			<div v-if="store.viewSettings.showChat" class="side-panel">
-				<ChatPanel />
-			</div>
-			<div v-if="store.viewSettings.showNotes && personal.pov >= 0" class="side-panel">
-				<NotesPanel />
-			</div>
-		</div>
-		<div class="footer">
-			<a href="/index/">Online Board Gamers</a> ·
-			<a href="/lobbyHelp">Help</a> ·
-			<a href="/LBR/help/">Land Between Rivers rules</a> ·
-			{{ store.gameName }} #{{ store.gameID }}
+	<TopMenu />
+	<TopMenuViews />
+	<KickoutDialog />
+	<div v-if="isSpectator" class="observer-note">You are watching this game. The board is read-only.</div>
+	<div v-if="store.finishedGame && store.game && !store.game.gameOver" class="observer-note">This game is marked finished on the server.</div>
+	<HistoryPanel v-if="store.viewSettings.showHistory" />
+	<ChatPanel v-if="store.viewSettings.showChat" />
+	<NotesPanel v-if="store.viewSettings.showNotes && personal.pov >= 0" />
+	<div class="main">
+		<BoardArea />
+		<div class="side-panel">
+			<ActionPanel />
+			<PlayerPanel />
 		</div>
 	</div>
+	<FooterBar />
 </template>
 
 <style scoped>
 .observer-note {
-	background: #fbf236;
-	color: #222034;
+	background: #fff9e9;
+	border-bottom: 1px solid #aa9b77;
+	color: #302f27;
 	padding: 5px 14px;
-	font-size: 13px;
-	font-weight: bold;
+	font-size: 16px;
+	text-align: center;
 }
 
 @media (max-width: 900px) {

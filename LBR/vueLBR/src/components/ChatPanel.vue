@@ -1,12 +1,16 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 import { useModelStore } from "../stores/LBRstore.js";
+import { usePersonalStore } from "../stores/LBRpersonal.js";
 import * as IO from "../backend/LBR_IO.js";
 
 const store = useModelStore();
+const personal = usePersonalStore();
 const text = ref("");
 const sending = ref(false);
+
+const canSend = computed(() => personal.pov >= 0 || personal.isAdmin);
 
 onMounted(() => {
 	IO.loadChat().catch(() => {});
@@ -34,69 +38,72 @@ async function send() {
 </script>
 
 <template>
-	<div class="panel chat-panel">
-		<h2>Chat</h2>
-		<ul>
-			<li v-for="(message, index) in store.chatMessages" :key="index">
-				<div class="meta">{{ message[0] }} <span class="time">{{ time(message[1]) }}</span></div>
-				<div class="text">{{ message[2] }}</div>
-			</li>
-		</ul>
-		<p v-if="!store.chatMessages.length" class="empty">No messages yet.</p>
-		<div class="composer">
-			<textarea v-model="text" rows="3" placeholder="Write a message"></textarea>
-			<button class="action" :disabled="sending || !text.trim()" @click="send">Send</button>
+	<div id="wholeChat" role="region" aria-label="Game chat">
+		<div class="chatHeading">
+			<h2>Chat</h2>
+			<button type="button" class="utilityClose" @click="store.viewSettings.showChat = false" aria-label="Close chat">×</button>
+		</div>
+		<div id="chatBox">
+			<p v-if="store.gameMessages.errorText" class="errorText" role="alert">{{ store.gameMessages.errorText }}</p>
+			<template v-if="canSend">
+				<div><textarea rows="6" v-model="text" aria-label="Chat message"></textarea></div>
+				<div><button type="button" class="actionsLineButton" :disabled="sending || !text.trim()" @click="send">{{ sending ? "Sending..." : "Send" }}</button></div>
+			</template>
+			<p v-else class="spectatorNote">Spectators can read the chat but cannot send messages.</p>
+		</div>
+		<div id="messageList">
+			<div class="chatentry" v-for="(message, index) in store.chatMessages" :key="index">
+				<div class="header">
+					<span class="author">{{ message[0] }}</span>
+					<span class="date">{{ time(message[1]) }}</span>
+				</div>
+				<div class="messageBody">{{ message[2] }}</div>
+			</div>
+			<p v-if="!store.chatMessages.length" class="empty">No messages yet.</p>
 		</div>
 	</div>
 </template>
 
 <style scoped>
-.chat-panel {
-	max-height: 70vh;
-	display: flex;
-	flex-direction: column;
+#wholeChat {
+	position: fixed;
+	left: 2px;
+	top: calc(var(--lbr-menu-height, 60px) + 2px);
+	width: 450px;
+	max-width: calc(100vw - 4px);
+	max-height: calc(100vh - var(--lbr-menu-height, 60px) - 4px);
+	box-sizing: border-box;
+	z-index: 9999;
+	border: 2px solid black;
+	background-color: #d4eafd;
+	overflow-y: auto;
+	padding-bottom: 10px;
+	text-align: center;
 }
-
-ul {
-	list-style: none;
-	padding: 0;
-	margin: 0 0 8px;
-	overflow: auto;
-	flex: 1;
-}
-
-li {
-	border-bottom: 1px solid rgba(102, 57, 49, 0.25);
-	padding: 5px 0;
-	font-size: 13px;
-}
-
-.meta {
-	font-weight: bold;
-}
-
-.time {
-	font-weight: normal;
-	opacity: 0.65;
-	margin-left: 5px;
-}
-
-.text {
-	white-space: pre-wrap;
+#chatBox textarea { width: 90%; box-sizing: border-box; }
+.chatHeading { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 12px; background: #d4eafd; border-bottom: 1px solid #adc2d0; }
+.chatHeading h2 { font-size: 20px; }
+.chatHeading button { font-size: 26px; border: 0; background: none; cursor: pointer; padding: 5px; }
+#messageList { padding: 0 6px; }
+.chatentry {
 	overflow-wrap: anywhere;
+	margin: 5px;
+	border: #000 1px solid;
+	text-align: left;
+	padding: 5px;
+	background-color: #d4eafd;
 }
-
-.composer {
-	display: flex;
-	gap: 6px;
+.chatentry .header { margin-bottom: 7px; border-bottom: #000 1px solid; }
+.chatentry .author { font-weight: bold; }
+.chatentry .header .date { font-size: 0.7em; font-style: italic; float: right; }
+.chatentry .messageBody { overflow: auto; white-space: pre-wrap; }
+.spectatorNote, .empty { font-size: 14px; opacity: 0.8; }
+.errorText {
+	width: 100%;
+	font-weight: bolder;
+	text-align: center;
+	background-color: lightgoldenrodyellow;
+	color: darkred;
 }
-
-textarea {
-	flex: 1;
-	font: inherit;
-}
-
-.empty {
-	opacity: 0.7;
-}
+@media (max-width: 1050px) { .chatHeading button { min-width: 44px; min-height: 44px; box-sizing: border-box; } }
 </style>

@@ -215,7 +215,8 @@ function isKeep(pos) {
 }
 
 .cell:focus-visible {
-	outline: 2px solid #fbf236;
+	outline: 3px solid #177daf;
+	outline-offset: -3px;
 }
 
 .tile,

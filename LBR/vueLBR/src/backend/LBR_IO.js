@@ -193,6 +193,23 @@ export async function saveZoom(zoomLevel) {
 	);
 }
 
+export async function submitBug(description) {
+	const store = useModelStore();
+	const data = await postJson(`${API_BASE}bugEntry/`, {
+		gameID: store.gameID,
+		action: "bugentry",
+		description,
+		gameData: JSON.stringify(store.game || {}),
+	});
+	if (data?.bugEntrySuccess) {
+		store.gameMessages.successText = "Bug report sent.";
+		store.viewSettings.showBug = false;
+		return true;
+	}
+	store.gameMessages.bugErrorText = "Could not send the bug report.";
+	return false;
+}
+
 export async function loadRewind() {
 	const store = useModelStore();
 	const data = await postJson(`${API_BASE}processLBRturn/`, {

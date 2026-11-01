@@ -58,7 +58,7 @@ td {
 }
 
 tr.winner {
-	background: #fbf23655;
+	background: #e1edf5;
 	font-weight: bold;
 }
 

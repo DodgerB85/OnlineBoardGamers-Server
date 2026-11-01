@@ -1,6 +1,19 @@
 // Display helpers shared by the LBR components.
 import { COLS, COLOUR_NAMES, LEADER_COL, MONUMENT_TYPES, SEAT_MARKS } from "./LBRreference.js";
 
+export function getImage(image) {
+	if (image === "icon-house") return new URL(`../../../static/LBR/images/icon-house.svg`, import.meta.url).href;
+	if (image === "icon-chat") return new URL(`../../../static/LBR/images/icon-chat.svg`, import.meta.url).href;
+	if (image === "icon-stop") return new URL(`../../../static/LBR/images/icon-stop.svg`, import.meta.url).href;
+	if (image === "icon-nextGame") return new URL(`../../../static/LBR/images/icon-nextGame.svg`, import.meta.url).href;
+	if (image === "icon-rulebook") return new URL(`../../../static/LBR/images/icon-rulebook.svg`, import.meta.url).href;
+	if (image === "icon-notebook") return new URL(`../../../static/LBR/images/icon-notebook.svg`, import.meta.url).href;
+	if (image === "icon-scroll") return new URL(`../../../static/LBR/images/icon-scroll.svg`, import.meta.url).href;
+	if (image === "icon-rewind") return new URL(`../../../static/LBR/images/icon-rewind.svg`, import.meta.url).href;
+	if (image === "resign") return "/static/LBR/images/resign.jpg";
+	return "";
+}
+
 export function cellName(pos) {
 	const row = Math.floor(pos / COLS) + 1;
 	const col = String.fromCharCode(65 + (pos % COLS));

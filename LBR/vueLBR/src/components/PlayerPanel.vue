@@ -132,9 +132,8 @@ function tileMiniStyle(colour, size = 15) {
 }
 
 .seat.active {
-	background: #fbf23655;
-	border-color: #663931;
-	box-shadow: 0 0 6px #fbf236;
+	background: #e1edf5;
+	border-color: #177daf;
 }
 
 .seat-head {
@@ -163,7 +162,7 @@ function tileMiniStyle(colour, size = 15) {
 }
 
 .current {
-	color: #ac3232;
+	color: #177daf;
 	font-size: 16px;
 }
 
