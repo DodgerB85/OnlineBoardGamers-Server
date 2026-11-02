@@ -1,23 +1,48 @@
 <script setup>
-import { computed } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import { useModelStore } from "../stores/LBRstore.js";
 import { usePersonalStore } from "../stores/LBRpersonal.js";
 import * as controller from "../js/LBRcontroller.js";
 import * as model from "../js/LBRmodel.js";
 import { cellName, leaderSpriteIndex, monumentSpriteIndex, tileSpriteIndex, colourName } from "../js/LBRview.js";
-import { CELLS, COLS } from "../js/LBRreference.js";
+import { CELLS, CODE_COLOUR, COLS } from "../js/LBRreference.js";
 
 const store = useModelStore();
 const personal = usePersonalStore();
+const wrap = ref(null);
+const fitPitch = ref(39);
+let observer = null;
 
-const pitch = computed(() => personal.zoom || 39);
+const pitch = computed(() => (personal.zoom > 0 ? personal.zoom : fitPitch.value));
 const scale = computed(() => pitch.value / 13);
 const inner = computed(() => 12 * scale.value);
 const mapW = computed(() => 240 * scale.value);
 const mapH = computed(() => 160 * scale.value);
 const legal = computed(() => controller.legalCells());
 const mapSrc = "/static/LBR/images/map.png";
+
+function measure() {
+	const element = wrap.value;
+	if (!element) return;
+	const width = element.clientWidth - 4;
+	const height = element.clientHeight - 4;
+	if (width <= 0 || height <= 0) return;
+	const next = Math.max(20, Math.min(90, Math.floor(Math.min(width / (240 / 13), height / (160 / 13)))));
+	if (next === fitPitch.value) return;
+	fitPitch.value = next;
+	store.viewSettings.boardFitPitch = next;
+}
+
+onMounted(() => {
+	measure();
+	observer = new ResizeObserver(measure);
+	observer.observe(wrap.value);
+});
+
+onUnmounted(() => {
+	if (observer) observer.disconnect();
+});
 
 const cells = Array.from({ length: CELLS }, (_, i) => i);
 const treasureCells = computed(() => {
@@ -122,7 +147,7 @@ function label(pos) {
 	if (leader) return `${cellName(pos)}, ${colourName(leader.c)} leader of ${model.seatName(leader.s)}`;
 	if (store.game.catastrophes[pos]) return `${cellName(pos)}, catastrophe`;
 	if (tile === 5) return `${cellName(pos)}, monument`;
-	if (tile) return `${cellName(pos)}, ${colourName(tile)} tile${store.game.treasures[pos] ? " with treasure" : ""}`;
+	if (tile) return `${cellName(pos)}, ${colourName(CODE_COLOUR[tile])} tile${store.game.treasures[pos] ? " with treasure" : ""}`;
 	if (store.game.treasures[pos]) return `${cellName(pos)}, treasure`;
 	if (store.game.unification === pos) return `${cellName(pos)}, unification tile`;
 	return `${cellName(pos)}, empty`;
@@ -131,10 +156,15 @@ function label(pos) {
 function isKeep(pos) {
 	return store.game.pending?.kind === "treasure" && store.game.pending.keepOptions.includes(pos);
 }
+
+function isOwnLeader(pos) {
+	const leader = store.game.leaders[pos];
+	return !!leader && leader.s === model.mySeat() && model.isMyTurn() && !store.game.pending;
+}
 </script>
 
 <template>
-	<div class="board-wrap">
+	<div ref="wrap" class="board-wrap">
 		<div
 			v-if="store.game"
 			class="board"
@@ -146,7 +176,7 @@ function isKeep(pos) {
 				v-for="pos in cells"
 				:key="pos"
 				class="cell"
-				:class="{ legal: legal.has(pos), keep: isKeep(pos) }"
+				:class="{ legal: legal.has(pos), keep: isKeep(pos), own: isOwnLeader(pos) }"
 				:style="cellStyle(pos)"
 				:aria-label="label(pos)"
 				:title="label(pos)"
@@ -246,6 +276,10 @@ function isKeep(pos) {
 	border-radius: 50%;
 }
 
+.cell.own .leader {
+	box-shadow: 0 0 0 2px #fbf236, 0 0 7px #fbf236;
+}
+
 .monument {
 	position: absolute;
 	background-repeat: no-repeat;
@@ -269,8 +303,8 @@ function isKeep(pos) {
 .legal-ring {
 	position: absolute;
 	inset: 0;
-	border: 2px solid #fbf236;
-	box-shadow: inset 0 0 6px #fbf236;
+	border: 3px solid #fbf236;
+	box-shadow: inset 0 0 10px #fbf236;
 	border-radius: 3px;
 	pointer-events: none;
 }
@@ -287,5 +321,6 @@ function isKeep(pos) {
 	padding: 40px;
 	font-size: 18px;
 	color: #663931;
+	text-align: center;
 }
 </style>

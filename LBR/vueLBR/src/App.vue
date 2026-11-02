@@ -6,7 +6,7 @@ import TopMenuViews from "./components/TopMenuViews.vue";
 import KickoutDialog from "./components/KickoutDialog.vue";
 import FooterBar from "./components/FooterBar.vue";
 import BoardArea from "./components/BoardArea.vue";
-import ActionPanel from "./components/ActionPanel.vue";
+import ActionBar from "./components/ActionBar.vue";
 import PlayerPanel from "./components/PlayerPanel.vue";
 import HistoryPanel from "./components/HistoryPanel.vue";
 import ChatPanel from "./components/ChatPanel.vue";
@@ -26,8 +26,18 @@ if (store.chatData) store.chatMessages = IO.decompressChat(store.chatData);
 controller.bootGame();
 
 const isSpectator = computed(() => personal.pov < 0);
+const seats = computed(() => Array.from({ length: store.game?.numSeats || 0 }, (_, i) => i));
+const leftSeats = computed(() => seats.value.filter((seat) => seat % 2 === 0));
+const rightSeats = computed(() => seats.value.filter((seat) => seat % 2 === 1));
 
 let pollTimer = null;
+
+function onKeydown(event) {
+	if (event.key !== "Escape") return;
+	const target = event.target;
+	if (target instanceof HTMLElement && target.closest("input, textarea, select, [contenteditable='true']")) return;
+	controller.resetSelection();
+}
 
 onMounted(() => {
 	IO.checkForLatestData(true);
@@ -35,10 +45,12 @@ onMounted(() => {
 		if (document.hidden) return;
 		IO.checkForLatestData();
 	}, IO.POLL_INTERVAL_MS);
+	document.addEventListener("keydown", onKeydown);
 });
 
 onUnmounted(() => {
 	if (pollTimer) clearInterval(pollTimer);
+	document.removeEventListener("keydown", onKeydown);
 });
 </script>
 
@@ -51,12 +63,17 @@ onUnmounted(() => {
 	<HistoryPanel v-if="store.viewSettings.showHistory" />
 	<ChatPanel v-if="store.viewSettings.showChat" />
 	<NotesPanel v-if="store.viewSettings.showNotes && personal.pov >= 0" />
-	<div class="main">
-		<BoardArea />
-		<div class="side-panel">
-			<ActionPanel />
-			<PlayerPanel />
+	<div class="game-area">
+		<aside class="player-rail left">
+			<PlayerPanel :seats="leftSeats" />
+		</aside>
+		<div class="center-column">
+			<ActionBar />
+			<BoardArea />
 		</div>
+		<aside class="player-rail right">
+			<PlayerPanel :seats="rightSeats" />
+		</aside>
 	</div>
 	<FooterBar />
 </template>
@@ -71,12 +88,19 @@ onUnmounted(() => {
 	text-align: center;
 }
 
-@media (max-width: 900px) {
-	.main {
-		padding: 8px;
+@media (max-width: 1100px) {
+	.game-area {
+		flex-wrap: wrap;
 	}
-	.side-panel {
+	.center-column {
+		order: -1;
+		flex-basis: 100%;
+		min-height: 60vh;
+	}
+	.player-rail {
 		flex: 1 1 100%;
+		flex-direction: row;
+		overflow-x: auto;
 	}
 }
 </style>

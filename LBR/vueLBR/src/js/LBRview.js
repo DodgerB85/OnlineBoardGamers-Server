@@ -1,5 +1,5 @@
 // Display helpers shared by the LBR components.
-import { COLS, COLOUR_NAMES, LEADER_COL, MONUMENT_TYPES, SEAT_MARKS } from "./LBRreference.js";
+import { COLOUR_CODE, COLS, COLOUR_NAMES, LEADER_COL, MONUMENT_TYPES, SEAT_MARKS } from "./LBRreference.js";
 
 export function getImage(image) {
 	if (image === "icon-house") return new URL(`../../../static/LBR/images/icon-house.svg`, import.meta.url).href;
@@ -62,6 +62,49 @@ export function handTiles(hand) {
 		for (let i = 0; i < hand[colour]; i++) out.push(colour);
 	}
 	return out;
+}
+
+// A hand tile drawn at any width, keeping the 12:13 sprite proportions.
+export function tileStyle(colour, width = 22) {
+	const index = tileSpriteIndex(COLOUR_CODE[colour], false);
+	const scale = width / 12;
+	return {
+		width: `${width}px`,
+		height: `${Math.round(13 * scale)}px`,
+		backgroundImage: "url(/static/LBR/images/tiles.png)",
+		backgroundSize: `${216 * scale}px ${13 * scale}px`,
+		backgroundPosition: `${-index * width}px 0`,
+	};
+}
+
+export function leaderStyle(seat, colour, size = 24) {
+	const index = leaderSpriteIndex(seat, colour);
+	return {
+		width: `${size}px`,
+		height: `${size}px`,
+		backgroundImage: "url(/static/LBR/images/leaders.png)",
+		backgroundSize: `${4 * size}px ${4 * size}px`,
+		backgroundPosition: `${-(index % 4) * size}px ${-Math.floor(index / 4) * size}px`,
+	};
+}
+
+export function monumentStyle(type, size = 40) {
+	const index = monumentSpriteIndex(type);
+	if (index < 0) return {};
+	return {
+		width: `${size}px`,
+		height: `${size}px`,
+		backgroundImage: "url(/static/LBR/images/monuments.png)",
+		backgroundSize: `${6 * size}px ${size}px`,
+		backgroundPosition: `${-index * size}px 0`,
+	};
+}
+
+// Clicking a colour in swap mode adds one tile, wraps back to zero after the
+// last tile of that colour, and never takes more than six in total.
+export function cycleSwapCount(current, handCount, totalSelected, max = 6) {
+	if (current >= handCount || totalSelected >= max) return 0;
+	return current + 1;
 }
 
 export function historyText(entry, seatNames) {

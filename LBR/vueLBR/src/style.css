@@ -30,29 +30,42 @@ body {
 	min-height: 100vh;
 }
 
-.main {
+.game-area {
 	display: flex;
-	flex: 1 0 auto;
-	gap: 14px;
-	padding: 14px;
-	align-items: flex-start;
+	flex: 1 1 auto;
+	min-height: calc(100vh - var(--lbr-menu-height, 60px));
+	gap: 10px;
+	padding: 10px 12px;
+	align-items: stretch;
 	justify-content: center;
-	flex-wrap: wrap;
+}
+
+.player-rail {
+	flex: 0 0 228px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-height: 0;
+	overflow-y: auto;
+}
+
+.center-column {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
+	min-height: 0;
 }
 
 .board-wrap {
-	flex: 1 1 720px;
-	min-width: 320px;
+	flex: 1 1 auto;
+	min-height: 0;
+	min-width: 0;
 	display: flex;
 	justify-content: center;
+	align-items: center;
 	overflow: auto;
-}
-
-.side-panel {
-	flex: 0 1 340px;
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
 }
 
 .panel {
@@ -113,7 +126,7 @@ body {
 
 /* One appearance for action buttons across panels and previews. The header
    controls and the board hit targets keep their own styles. */
-:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton) {
+:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton) {
 	box-sizing: border-box;
 	min-height: 34px;
 	padding: 5px 8px;
@@ -129,22 +142,22 @@ body {
 	cursor: pointer;
 }
 
-:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):hover:enabled {
+:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):hover:enabled {
 	background: #f1e9d7;
 	border-color: #756440;
 }
 
-:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):focus-visible {
+:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):focus-visible {
 	outline: 2px solid #177daf;
 	outline-offset: 2px;
 }
 
-:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):is([aria-pressed="true"], [aria-current], .current, .selected, .chosen):enabled {
+:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):is([aria-pressed="true"], [aria-current], .current, .selected, .chosen):enabled {
 	background: #e1edf5;
 	border-color: #177daf;
 }
 
-:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):disabled {
+:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):disabled {
 	opacity: 0.45;
 	cursor: default;
 }

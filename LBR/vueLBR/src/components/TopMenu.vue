@@ -68,17 +68,18 @@ function nextGame() {
 	if (window.initData?.nextURL) window.location.href = window.initData.nextURL;
 }
 
+const currentZoom = computed(() => (personal.zoom > 0 ? personal.zoom : store.viewSettings.boardFitPitch || 39));
+
 function zoomBy(delta) {
-	const next = Math.min(65, Math.max(26, personal.zoom + delta));
-	if (next === personal.zoom) return;
+	const next = Math.min(90, Math.max(20, currentZoom.value + delta));
+	if (next === currentZoom.value) return;
 	personal.zoom = next;
 	IO.saveZoom(next).catch(() => {});
 }
 
 function fitMap() {
-	personal.zoom = 39;
-	IO.saveZoom(39).catch(() => {});
-	document.querySelector(".board-wrap")?.scrollIntoView({ block: "start", behavior: "smooth" });
+	personal.zoom = 0;
+	IO.saveZoom(0).catch(() => {});
 }
 
 function kickoutText() {
@@ -166,9 +167,9 @@ const showKickoutTimer = computed(
 				<span v-if="showKickoutTimer" id="kickoutTimerSpan">Next kickout in <span id="kickoutTimerTimer">{{ kickoutText() }}</span></span>
 			</div>
 			<div id="zoomDiv" class="mapZoom">
-				<button type="button" class="zoomButton" @click="zoomBy(-6)" :disabled="personal.zoom <= 26" aria-label="Zoom out">−</button>
-				<button type="button" class="zoomButton" @click="zoomBy(6)" :disabled="personal.zoom >= 65" aria-label="Zoom in">+</button>
-				<button type="button" class="zoomButton" @click="fitMap" title="Reset the board zoom">Fit</button>
+				<button type="button" class="zoomButton" @click="zoomBy(-6)" :disabled="currentZoom <= 20" aria-label="Zoom out">−</button>
+				<button type="button" class="zoomButton" @click="zoomBy(6)" :disabled="currentZoom >= 90" aria-label="Zoom in">+</button>
+				<button type="button" class="zoomButton" @click="fitMap" title="Fit the board to the window">Fit</button>
 			</div>
 		</div>
 	</div>
