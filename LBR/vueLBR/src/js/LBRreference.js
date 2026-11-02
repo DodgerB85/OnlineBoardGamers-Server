@@ -4,6 +4,17 @@ export const ROWS = 11;
 export const COLS = 16;
 export const CELLS = ROWS * COLS;
 
+// Board geometry in map units. The artwork is eight times these.
+export const MAP_W = 240;
+export const MAP_H = 160;
+export const CELL_W = 12;
+export const PITCH = 13;
+export const MAP_LEFT = 17;
+export const MAP_TOP = 8;
+
+// The board draws at most 950px wide, shrinking to fit a narrower page.
+export const BOARD_WIDTH = 950;
+
 // Tile codes stored in state.tiles.
 export const T_EMPTY = 0;
 export const T_RED = 1;

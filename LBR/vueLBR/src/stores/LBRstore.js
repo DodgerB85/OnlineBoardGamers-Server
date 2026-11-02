@@ -32,7 +32,7 @@ export const useModelStore = defineStore("model", () => {
 		selectedColour: null,
 		showGameOver: true,
 		saving: false,
-		boardFitPitch: 39,
+		boardZoom: 1,
 	});
 	const selectedSwap = reactive({ R: 0, B: 0, G: 0, K: 0 });
 

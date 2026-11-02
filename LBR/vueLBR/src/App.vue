@@ -88,7 +88,8 @@ onUnmounted(() => {
 	text-align: center;
 }
 
-@media (max-width: 1100px) {
+/* The rails need 500px beside the 950px board; below that they move under it. */
+@media (max-width: 1450px) {
 	.game-area {
 		flex-wrap: wrap;
 	}

@@ -5,7 +5,6 @@ import { useModelStore } from "../stores/LBRstore.js";
 import { usePersonalStore } from "../stores/LBRpersonal.js";
 import * as model from "../js/LBRmodel.js";
 import * as view from "../js/LBRview.js";
-import * as IO from "../backend/LBR_IO.js";
 
 const store = useModelStore();
 const personal = usePersonalStore();
@@ -68,18 +67,16 @@ function nextGame() {
 	if (window.initData?.nextURL) window.location.href = window.initData.nextURL;
 }
 
-const currentZoom = computed(() => (personal.zoom > 0 ? personal.zoom : store.viewSettings.boardFitPitch || 39));
+const currentZoom = computed(() => store.viewSettings.boardZoom);
 
 function zoomBy(delta) {
-	const next = Math.min(90, Math.max(20, currentZoom.value + delta));
+	const next = Math.round(Math.min(3, Math.max(0.5, currentZoom.value + delta)) * 100) / 100;
 	if (next === currentZoom.value) return;
-	personal.zoom = next;
-	IO.saveZoom(next).catch(() => {});
+	store.viewSettings.boardZoom = next;
 }
 
 function fitMap() {
-	personal.zoom = 0;
-	IO.saveZoom(0).catch(() => {});
+	store.viewSettings.boardZoom = 1;
 }
 
 function kickoutText() {
@@ -167,9 +164,9 @@ const showKickoutTimer = computed(
 				<span v-if="showKickoutTimer" id="kickoutTimerSpan">Next kickout in <span id="kickoutTimerTimer">{{ kickoutText() }}</span></span>
 			</div>
 			<div id="zoomDiv" class="mapZoom">
-				<button type="button" class="zoomButton" @click="zoomBy(-6)" :disabled="currentZoom <= 20" aria-label="Zoom out">−</button>
-				<button type="button" class="zoomButton" @click="zoomBy(6)" :disabled="currentZoom >= 90" aria-label="Zoom in">+</button>
-				<button type="button" class="zoomButton" @click="fitMap" title="Fit the board to the window">Fit</button>
+				<button type="button" class="zoomButton" @click="zoomBy(-0.25)" :disabled="currentZoom <= 0.5" aria-label="Zoom out">−</button>
+				<button type="button" class="zoomButton" @click="zoomBy(0.25)" :disabled="currentZoom >= 3" aria-label="Zoom in">+</button>
+				<button type="button" class="zoomButton" @click="fitMap" title="Reset the board to full size">Fit</button>
 			</div>
 		</div>
 	</div>

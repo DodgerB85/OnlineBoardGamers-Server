@@ -7,7 +7,7 @@ const cover = "/static/LBR/images/lbr_icon.png";
 		<div class="content">
 			<img :src="cover" class="cover" alt="Land Between Rivers" />
 			<p>Land Between Rivers is based on <i>Tigris &amp; Euphrates</i>, designed by Reiner Knizia.</p>
-			<p>Online Board Gamers implementation by Mihai &amp; DodgerB. Board and piece artwork by Online Board Gamers.</p>
+			<p>Online Board Gamers implementation by Mihai &amp; DodgerB. Board and piece artwork by Mihai.</p>
 			<p>Menu icons and tile symbols from <a href="http://game-icons.net" target="_blank" rel="noopener">game-icons.net</a> (Lorc and Delapouite, CC BY 3.0).</p>
 		</div>
 	</div>
@@ -34,7 +34,6 @@ const cover = "/static/LBR/images/lbr_icon.png";
 	float: left;
 	height: 100px;
 	margin-right: 10px;
-	image-rendering: pixelated;
 }
 #footer a {
 	color: #d4eafd;

@@ -19,7 +19,6 @@ export function initGame() {
 	personal.name = data.name || "";
 	personal.pov = typeof data.pov === "number" ? data.pov : -99;
 	personal.gameID = data.gameID || 0;
-	personal.zoom = data.myZoomLevel > 0 ? data.myZoomLevel : 0;
 	personal.gameCreationTimestamp = data.gameCreationTimestamp || 0;
 	personal.chatNotification = !!data.chatNotification;
 	personal.isAdmin = personal.pov === -1;

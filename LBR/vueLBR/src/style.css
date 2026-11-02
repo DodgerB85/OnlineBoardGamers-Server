@@ -33,7 +33,6 @@ body {
 .game-area {
 	display: flex;
 	flex: 1 1 auto;
-	min-height: calc(100vh - var(--lbr-menu-height, 60px));
 	gap: 10px;
 	padding: 10px 12px;
 	align-items: stretch;
@@ -63,8 +62,7 @@ body {
 	min-height: 0;
 	min-width: 0;
 	display: flex;
-	justify-content: center;
-	align-items: center;
+	align-items: flex-start;
 	overflow: auto;
 }
 

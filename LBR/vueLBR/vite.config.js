@@ -9,6 +9,13 @@ export default defineConfig(({ command }) => ({
 		host: "0.0.0.0",
 		port: 3069,
 		open: false,
+		proxy: {
+			// The board images are absolute /static/LBR paths; serve them from Django.
+			"/static/LBR": {
+				target: "http://localhost:8000",
+				changeOrigin: true,
+			},
+		},
 		watch: {
 			usePolling: true,
 			disableGlobbing: false,

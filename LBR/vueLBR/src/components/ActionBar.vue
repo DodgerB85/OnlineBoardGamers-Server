@@ -336,6 +336,9 @@ function cancel() {
 		flex-direction: column;
 		max-height: 45vh;
 	}
+	.action-info {
+		flex: 0 0 auto;
+	}
 	.action-controls {
 		max-width: 100%;
 		justify-content: flex-start;

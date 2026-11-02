@@ -1,144 +1,68 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed } from "vue";
 
 import { useModelStore } from "../stores/LBRstore.js";
-import { usePersonalStore } from "../stores/LBRpersonal.js";
 import * as controller from "../js/LBRcontroller.js";
 import * as model from "../js/LBRmodel.js";
 import { cellName, leaderSpriteIndex, monumentSpriteIndex, tileSpriteIndex, colourName } from "../js/LBRview.js";
-import { CELLS, CODE_COLOUR, COLS } from "../js/LBRreference.js";
+import { BOARD_WIDTH, CELLS, CELL_W, CODE_COLOUR, COLS, MAP_H, MAP_LEFT, MAP_TOP, MAP_W, PITCH } from "../js/LBRreference.js";
 
 const store = useModelStore();
-const personal = usePersonalStore();
-const wrap = ref(null);
-const fitPitch = ref(39);
-let observer = null;
 
-const pitch = computed(() => (personal.zoom > 0 ? personal.zoom : fitPitch.value));
-const scale = computed(() => pitch.value / 13);
-const inner = computed(() => 12 * scale.value);
-const mapW = computed(() => 240 * scale.value);
-const mapH = computed(() => 160 * scale.value);
-const legal = computed(() => controller.legalCells());
+// The board is one SVG in map units, so artwork, pieces and hit targets scale together.
 const mapSrc = "/static/LBR/images/map.jpg";
+const tileSheet = "/static/LBR/images/tiles.png";
+const leaderSheet = "/static/LBR/images/leaders.png";
+const monumentSheet = "/static/LBR/images/monuments.png";
 
-function measure() {
-	const element = wrap.value;
-	if (!element) return;
-	const width = element.clientWidth - 4;
-	const height = element.clientHeight - 4;
-	if (width <= 0 || height <= 0) return;
-	const next = Math.max(20, Math.min(90, Math.floor(Math.min(width / (240 / 13), height / (160 / 13)))));
-	if (next === fitPitch.value) return;
-	fitPitch.value = next;
-	store.viewSettings.boardFitPitch = next;
-}
-
-onMounted(() => {
-	measure();
-	observer = new ResizeObserver(measure);
-	observer.observe(wrap.value);
-});
-
-onUnmounted(() => {
-	if (observer) observer.disconnect();
-});
+// The map keeps its full 950px size on every screen; narrower pages scroll it.
+// Four extra pixels keep the map itself at BOARD_WIDTH: the frame adds 2px a side.
+const boardStyle = computed(() => ({ width: `calc(${BOARD_WIDTH + 4}px * ${store.viewSettings.boardZoom})` }));
 
 const cells = Array.from({ length: CELLS }, (_, i) => i);
+const legal = computed(() => controller.legalCells());
+
+const tilePieces = computed(() => {
+	if (!store.game) return [];
+	const out = [];
+	for (const pos of cells) {
+		const index = tileSpriteIndex(store.game.tiles[pos], !!store.game.treasures[pos]);
+		if (index >= 0) out.push({ key: `t${pos}`, pos, index });
+		if (store.game.catastrophes[pos]) out.push({ key: `c${pos}`, pos, index: 6 });
+	}
+	return out;
+});
+
+const leaderPieces = computed(() => {
+	if (!store.game) return [];
+	const out = [];
+	for (const pos of cells) {
+		const leader = store.game.leaders[pos];
+		if (leader) out.push({ key: `l${pos}`, pos, index: leaderSpriteIndex(leader.s, leader.c), own: isOwnLeader(pos) });
+	}
+	return out;
+});
+
+const monumentPieces = computed(() => {
+	const out = [];
+	for (const monument of store.game?.monuments || []) {
+		const index = monumentSpriteIndex(monument.t);
+		if (index >= 0) out.push({ key: `m${monument.at}`, pos: monument.at, index });
+	}
+	return out;
+});
+
 const treasureCells = computed(() => {
 	if (!store.game) return [];
 	return cells.filter((pos) => store.game.treasures[pos] && store.game.tiles[pos] === 5);
 });
-const unificationCells = computed(() => {
-	if (!store.game || store.game.unification < 0) return [];
-	return [store.game.unification];
-});
 
-function cellLeft(pos) {
-	return (17 + 13 * (pos % COLS)) * scale.value;
+function cellX(pos) {
+	return MAP_LEFT + PITCH * (pos % COLS);
 }
 
-function cellTop(pos) {
-	return (8 + 13 * Math.floor(pos / COLS)) * scale.value;
-}
-
-function cellStyle(pos) {
-	return {
-		left: `${cellLeft(pos)}px`,
-		top: `${cellTop(pos)}px`,
-		width: `${inner.value}px`,
-		height: `${pitch.value}px`,
-	};
-}
-
-function tileStyle(pos) {
-	const tile = store.game.tiles[pos];
-	if (!tile || tile === 5) return null;
-	const index = tileSpriteIndex(tile, !!store.game.treasures[pos]);
-	if (index < 0) return null;
-	return spriteStyle(index, 84 * scale.value, 13 * scale.value, 12 * scale.value);
-}
-
-function catastropheStyle(pos) {
-	if (!store.game.catastrophes[pos]) return null;
-	return spriteStyle(6, 84 * scale.value, 13 * scale.value, 12 * scale.value);
-}
-
-function spriteStyle(index, sheetW, sheetH, stepW) {
-	return {
-		backgroundImage: "url(/static/LBR/images/tiles.png)",
-		backgroundSize: `${sheetW}px ${sheetH}px`,
-		backgroundPosition: `${-index * stepW}px 0`,
-	};
-}
-
-function leaderStyle(pos) {
-	const leader = store.game.leaders[pos];
-	if (!leader) return null;
-	const index = leaderSpriteIndex(leader.s, leader.c);
-	return {
-		width: `${inner.value}px`,
-		height: `${inner.value}px`,
-		backgroundImage: "url(/static/LBR/images/leaders.png)",
-		backgroundSize: `${4 * inner.value}px ${4 * inner.value}px`,
-		backgroundPosition: `${-(index % 4) * inner.value}px ${-Math.floor(index / 4) * inner.value}px`,
-	};
-}
-
-function monumentStyle(m) {
-	const idx = monumentSpriteIndex(m.t);
-	if (idx < 0) return null;
-	const width = 2 * pitch.value;
-	return {
-		left: `${cellLeft(m.at)}px`,
-		top: `${cellTop(m.at)}px`,
-		width: `${width}px`,
-		height: `${width}px`,
-		backgroundImage: "url(/static/LBR/images/monuments.png)",
-		backgroundSize: `${6 * width}px ${width}px`,
-		backgroundPosition: `${-idx * width}px 0`,
-	};
-}
-
-function treasureStyle(pos) {
-	if (!store.game.treasures[pos] || store.game.tiles[pos] !== 5) return null;
-	return {
-		left: `${cellLeft(pos) + inner.value / 2 - inner.value / 4}px`,
-		top: `${cellTop(pos) + inner.value / 2 - inner.value / 4}px`,
-		width: `${inner.value / 2}px`,
-		height: `${inner.value / 2}px`,
-	};
-}
-
-function unificationStyle(pos) {
-	if (store.game.unification !== pos) return null;
-	return {
-		...spriteStyle(0, 84 * scale.value, 13 * scale.value, 12 * scale.value),
-		left: `${cellLeft(pos)}px`,
-		top: `${cellTop(pos)}px`,
-		width: `${inner.value}px`,
-		height: `${pitch.value}px`,
-	};
+function cellY(pos) {
+	return MAP_TOP + PITCH * Math.floor(pos / COLS);
 }
 
 function label(pos) {
@@ -164,52 +88,100 @@ function isOwnLeader(pos) {
 </script>
 
 <template>
-	<div ref="wrap" class="board-wrap">
-		<div
-			v-if="store.game"
-			class="board"
-			:style="{ width: `${mapW}px`, height: `${mapH}px` }"
-		>
-			<img class="map" :src="mapSrc" :width="mapW" :height="mapH" alt="Land Between Rivers board" />
+	<div class="board-wrap">
+		<div v-if="store.game" class="board" :style="boardStyle">
+			<svg class="map" :viewBox="`0 0 ${MAP_W} ${MAP_H}`" role="group" aria-label="Land Between Rivers board">
+				<defs>
+					<radialGradient id="lbr-treasure" cx="30%" cy="30%" r="75%">
+						<stop offset="0" stop-color="#fff6d8" />
+						<stop offset="0.5" stop-color="#fbf236" />
+						<stop offset="1" stop-color="#b98151" />
+					</radialGradient>
+				</defs>
 
-			<button
-				v-for="pos in cells"
-				:key="pos"
-				class="cell"
-				:class="{ legal: legal.has(pos), keep: isKeep(pos), own: isOwnLeader(pos) }"
-				:style="cellStyle(pos)"
-				:aria-label="label(pos)"
-				:title="label(pos)"
-				@click="controller.clickCell(pos)"
-			>
-				<span v-if="tileStyle(pos)" class="tile" :style="tileStyle(pos)"></span>
-				<span v-if="catastropheStyle(pos)" class="tile" :style="catastropheStyle(pos)"></span>
-				<span v-if="store.game.treasures[pos] && store.game.tiles[pos] !== 5 && store.game.tiles[pos] !== 1" class="cube"></span>
-				<span v-if="leaderStyle(pos)" class="leader" :style="leaderStyle(pos)"></span>
-				<span v-if="legal.has(pos)" class="legal-ring"></span>
-				<span v-if="isKeep(pos)" class="keep-ring"></span>
-			</button>
+				<image :href="mapSrc" x="0" y="0" :width="MAP_W" :height="MAP_H" />
 
-			<div
-				v-for="m in store.game.monuments"
-				:key="`m${m.at}`"
-				class="monument"
-				:style="monumentStyle(m)"
-			></div>
+				<!-- Tiles, leaders and monuments, all drawn from their sprite sheets. -->
+				<g class="pieces">
+					<svg
+						v-for="piece in tilePieces"
+						:key="piece.key"
+						:x="cellX(piece.pos)"
+						:y="cellY(piece.pos)"
+						:width="CELL_W"
+						:height="PITCH"
+						:viewBox="`${piece.index * CELL_W} 0 ${CELL_W} ${PITCH}`"
+					>
+						<image :href="tileSheet" :width="7 * CELL_W" :height="PITCH" />
+					</svg>
 
-			<div
-				v-for="pos in treasureCells"
-				:key="`t${pos}`"
-				class="treasure"
-				:style="treasureStyle(pos)"
-			></div>
+					<template v-for="piece in leaderPieces" :key="piece.key">
+						<svg
+							:x="cellX(piece.pos)"
+							:y="cellY(piece.pos)"
+							:width="CELL_W"
+							:height="CELL_W"
+							:viewBox="`${piece.index % 4} ${Math.floor(piece.index / 4)} 1 1`"
+						>
+							<image :href="leaderSheet" width="4" height="4" />
+						</svg>
+						<circle v-if="piece.own" :cx="cellX(piece.pos) + CELL_W / 2" :cy="cellY(piece.pos) + CELL_W / 2" :r="CELL_W / 2" class="own-ring" />
+					</template>
 
-			<div
-				v-for="pos in unificationCells"
-				:key="`u${pos}`"
-				class="unification"
-				:style="unificationStyle(pos)"
-			></div>
+					<svg
+						v-for="piece in monumentPieces"
+						:key="piece.key"
+						:x="cellX(piece.pos)"
+						:y="cellY(piece.pos)"
+						:width="2 * PITCH"
+						:height="2 * PITCH"
+						:viewBox="`${piece.index} 0 1 1`"
+					>
+						<image :href="monumentSheet" width="6" height="1" />
+					</svg>
+
+					<rect
+						v-for="pos in treasureCells"
+						:key="`treasure${pos}`"
+						:x="cellX(pos) + CELL_W / 4"
+						:y="cellY(pos) + CELL_W / 4"
+						:width="CELL_W / 2"
+						:height="CELL_W / 2"
+						class="treasure"
+					/>
+
+					<svg
+						v-if="store.game.unification >= 0"
+						:x="cellX(store.game.unification)"
+						:y="cellY(store.game.unification)"
+						:width="CELL_W"
+						:height="PITCH"
+						:viewBox="`0 0 ${CELL_W} ${PITCH}`"
+					>
+						<image :href="tileSheet" :width="7 * CELL_W" :height="PITCH" />
+					</svg>
+				</g>
+
+				<!-- Hit targets sit on top so a piece never swallows a click. -->
+				<rect
+					v-for="pos in cells"
+					:key="pos"
+					class="cell"
+					:x="cellX(pos)"
+					:y="cellY(pos)"
+					:width="CELL_W"
+					:height="PITCH"
+					:class="{ legal: legal.has(pos), keep: isKeep(pos) }"
+					role="button"
+					tabindex="0"
+					:aria-label="label(pos)"
+					@click="controller.clickCell(pos)"
+					@keydown.enter.prevent="controller.clickCell(pos)"
+					@keydown.space.prevent="controller.clickCell(pos)"
+				>
+					<title>{{ label(pos) }}</title>
+				</rect>
+			</svg>
 		</div>
 		<div v-else class="waiting">
 			Waiting for the opening position.
@@ -219,89 +191,65 @@ function isOwnLeader(pos) {
 
 <style scoped>
 .board {
-	position: relative;
-	background: #c49662;
+	flex: 0 0 auto;
+	margin: 0 auto;
 	border: 2px solid #663931;
 	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+	background: #c49662;
+	line-height: 0;
 }
 
 .map {
-	position: absolute;
-	left: 0;
-	top: 0;
 	display: block;
+	width: 100%;
+	height: auto;
+}
+
+.pieces {
+	pointer-events: none;
 }
 
 .cell {
-	position: absolute;
-	background: transparent;
-	border: 0;
-	padding: 0;
-	margin: 0;
+	fill: transparent;
+	pointer-events: all;
 	cursor: pointer;
 }
 
+.cell:hover {
+	fill: rgba(255, 255, 255, 0.22);
+}
+
 .cell:focus-visible {
-	outline: 3px solid #177daf;
-	outline-offset: -3px;
+	fill: rgba(23, 125, 175, 0.25);
+	stroke: #177daf;
+	stroke-width: 0.75;
 }
 
-.tile {
-	position: absolute;
-	left: 0;
-	top: 0;
-	width: 100%;
-	height: 100%;
-	background-repeat: no-repeat;
+/* Stroke widths are in map units: 0.75 is about 3px on a 950px board. */
+.cell.legal {
+	fill: rgba(251, 242, 54, 0.2);
+	stroke: #fbf236;
+	stroke-width: 0.75;
 }
 
-.leader {
-	position: absolute;
-	left: 0;
-	top: 0;
-	background-repeat: no-repeat;
-	border-radius: 50%;
+.cell.keep {
+	fill: rgba(251, 242, 54, 0.25);
+	stroke: #fff6d8;
+	stroke-width: 0.5;
+	stroke-dasharray: 1.2 0.8;
 }
 
-.cell.own .leader {
-	box-shadow: 0 0 0 2px #fbf236, 0 0 7px #fbf236;
-}
-
-.monument {
-	position: absolute;
-	background-repeat: no-repeat;
-	pointer-events: none;
+.own-ring {
+	fill: none;
+	stroke: #fbf236;
+	stroke-width: 0.6;
+	filter: drop-shadow(0 0 0.6px #fbf236);
 }
 
 .treasure {
-	position: absolute;
-	background: radial-gradient(circle at 30% 30%, #fff6d8, #fbf236 45%, #b98151 100%);
-	border: 1px solid #663931;
-	box-shadow: 0 0 3px #fbf236;
-	pointer-events: none;
-}
-
-.unification {
-	position: absolute;
-	background-repeat: no-repeat;
-	pointer-events: none;
-}
-
-.legal-ring {
-	position: absolute;
-	inset: 0;
-	border: 3px solid #fbf236;
-	box-shadow: inset 0 0 10px #fbf236;
-	border-radius: 3px;
-	pointer-events: none;
-}
-
-.keep-ring {
-	position: absolute;
-	inset: 0;
-	border: 2px dashed #fff6d8;
-	background: rgba(251, 242, 54, 0.25);
-	pointer-events: none;
+	fill: url(#lbr-treasure);
+	stroke: #663931;
+	stroke-width: 0.25;
 }
 
 .waiting {

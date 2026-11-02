@@ -184,15 +184,6 @@ export async function saveNotes(notes) {
 	return postJson(`${API_BASE}saveNotesLBR/`, { gameID: store.gameID, notes });
 }
 
-export async function saveZoom(zoomLevel) {
-	const store = useModelStore();
-	return postJson(
-		`${API_BASE}saveZoomLBR/`,
-		{ action: "zoom", gameID: store.gameID, zoomLevel, allPlayers: true },
-		"PUT",
-	);
-}
-
 export async function submitBug(description) {
 	const store = useModelStore();
 	const data = await postJson(`${API_BASE}bugEntry/`, {

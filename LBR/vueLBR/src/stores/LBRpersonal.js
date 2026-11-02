@@ -8,7 +8,6 @@ export const usePersonalStore = defineStore("personal", () => {
 	const trainingGame = ref(false);
 	const learningGame = ref(false);
 	const experiencedGame = ref(false);
-	const zoom = ref(39);
 	const chatNotification = ref(false);
 	const isAdmin = ref(false);
 	const gameCreationTimestamp = ref(0);
@@ -21,7 +20,6 @@ export const usePersonalStore = defineStore("personal", () => {
 		trainingGame,
 		learningGame,
 		experiencedGame,
-		zoom,
 		chatNotification,
 		isAdmin,
 		gameCreationTimestamp,

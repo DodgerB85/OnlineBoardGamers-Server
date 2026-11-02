@@ -425,4 +425,19 @@ function chooseLeader(colour) {
 	outline: 2px solid #177daf;
 	outline-offset: 1px;
 }
+
+/* The rails sit under the board on narrow screens, so the seat cards share a row. */
+@media (max-width: 1450px) {
+	.player-cards {
+		display: flex;
+		flex: 1;
+		flex-wrap: wrap;
+		gap: 8px;
+		min-width: 0;
+	}
+
+	.seat {
+		flex: 1 1 260px;
+	}
+}
 </style>
