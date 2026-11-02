@@ -4,7 +4,7 @@ import { computed } from "vue";
 import { useModelStore } from "../stores/LBRstore.js";
 import * as controller from "../js/LBRcontroller.js";
 import * as model from "../js/LBRmodel.js";
-import { cellName, colourName, monumentName, monumentStyle, tileStyle } from "../js/LBRview.js";
+import { cellName, colourName, leaderStyle, monumentName, monumentStyle, tileStyle } from "../js/LBRview.js";
 import { conflictStanding } from "../js/LBRrules.js";
 import GameOverPanel from "./GameOverPanel.vue";
 
@@ -82,47 +82,58 @@ function decline() {
 
 			<!-- Choose which conflict to resolve first -->
 			<template v-else-if="pending && pending.kind === 'warOrder'">
-				<span class="decision-text">Choose the first conflict.</span>
-				<button
-					v-for="c in conflicts"
-					:key="c.colour"
-					type="button"
-					class="actionsLineButton"
-					:disabled="!myTurn"
-					@click="order(c.colour)"
-				>
-					{{ colourName(c.colour) }}: {{ model.seatName(c.attacker) }} attacks {{ model.seatName(c.defender) }}
-				</button>
+				<div class="decision-row">
+					<span class="decision-title">Choose the first conflict.</span>
+					<button
+						v-for="c in conflicts"
+						:key="c.colour"
+						type="button"
+						class="conflict-button"
+						:disabled="!myTurn"
+						@click="order(c.colour)"
+					>
+						<span class="leader-badge" :style="leaderStyle(c.attacker, c.colour, 32)" aria-hidden="true"></span>
+						<span class="conflict-names">
+							<b>{{ model.seatName(c.attacker) }}</b>
+							attacks
+							<b>{{ model.seatName(c.defender) }}</b>
+						</span>
+						<span class="leader-badge" :style="leaderStyle(c.defender, c.colour, 32)" aria-hidden="true"></span>
+					</button>
+				</div>
 			</template>
 
 			<!-- Support decision -->
 			<template v-else-if="pending && (pending.kind === 'warSupport' || pending.kind === 'revoltSupport')">
-				<div class="conflict-box">
-					<div>
-						<strong>{{ model.seatName(support.attacker) }}</strong>: {{ support.attackerBase }} + {{ support.attackerSupport }} =
-						<strong>{{ support.attackerTotal }}</strong>
+				<div class="decision-row support-row">
+					<div class="contender">
+						<span class="leader-badge" :style="leaderStyle(support.attacker, support.colour, 36)" aria-hidden="true"></span>
+						<span class="contender-name">{{ model.seatName(support.attacker) }}</span>
+						<span class="computation">{{ support.attackerBase }} + {{ support.attackerSupport }} = <b>{{ support.attackerTotal }}</b></span>
 					</div>
-					<div>
-						<strong>{{ model.seatName(support.defender) }}</strong>: {{ support.defenderBase }} + {{ support.defenderSupport }} =
-						<strong>{{ support.defenderTotal }}</strong>
+					<span class="versus">vs</span>
+					<div class="contender">
+						<span class="leader-badge" :style="leaderStyle(support.defender, support.colour, 36)" aria-hidden="true"></span>
+						<span class="contender-name">{{ model.seatName(support.defender) }}</span>
+						<span class="computation">{{ support.defenderBase }} + {{ support.defenderSupport }} = <b>{{ support.defenderTotal }}</b></span>
 					</div>
-					<div class="hint">A tie goes to the defender.</div>
+					<span class="tie-note">A tie goes to the defender.</span>
+					<div v-if="myTurn" class="send-group">
+						<span class="decision-title">Send how many?</span>
+						<button
+							v-for="count in supportChoices"
+							:key="count"
+							type="button"
+							class="support-button"
+							:disabled="saving"
+							@click="sendSupport(count)"
+						>
+							<span class="mini-tile" :style="tileStyle(support.colour, 22)"></span>
+							{{ count }}
+						</button>
+					</div>
+					<span v-else class="decision-title">Waiting for {{ model.seatName(pending.seat) }} to send support.</span>
 				</div>
-				<span v-if="myTurn" class="decision-text">Send how many?</span>
-				<span v-else class="decision-text">Waiting for {{ model.seatName(pending.seat) }} to send support.</span>
-				<template v-if="myTurn">
-					<button
-						v-for="count in supportChoices"
-						:key="count"
-						type="button"
-						class="actionsLineButton support-button"
-						:disabled="saving"
-						@click="sendSupport(count)"
-					>
-						<span class="mini-tile" :style="tileStyle(support.colour, 16)"></span>
-						{{ count }}
-					</button>
-				</template>
 			</template>
 
 			<!-- Monument decision -->
@@ -151,6 +162,7 @@ function decline() {
 .action-bar {
 	display: flex;
 	flex: 0 0 auto;
+	flex-wrap: wrap;
 	gap: 12px;
 	align-items: flex-start;
 	justify-content: space-between;
@@ -208,24 +220,103 @@ function decline() {
 	margin: 0 4px;
 }
 
-.conflict-box {
-	border: 1px solid rgba(102, 57, 49, 0.4);
-	border-radius: 5px;
-	padding: 5px 7px;
-	font-size: 12px;
-	line-height: 1.35;
+/* Decisions lay out across the whole bar so the bar is not a tall stack. */
+.decision-row {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	flex-wrap: wrap;
+	width: 100%;
+	font-size: 18px;
 }
 
-.conflict-box .hint {
-	font-size: 12px;
-	opacity: 0.78;
+.decision-title {
+	font-weight: bold;
+	font-size: 18px;
+	white-space: nowrap;
+}
+
+.leader-badge {
+	flex: 0 0 auto;
+	background-repeat: no-repeat;
+	border-radius: 50%;
+}
+
+.contender {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.contender-name {
+	font-weight: bold;
+}
+
+.computation {
+	font-size: 20px;
+	font-variant-numeric: tabular-nums;
+}
+
+.versus {
+	font-size: 16px;
+	font-weight: bold;
+	opacity: 0.6;
+}
+
+.tie-note {
+	font-size: 14px;
+	opacity: 0.75;
+	margin-right: auto;
+}
+
+.send-group {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.support-button,
+.conflict-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	border: 1px solid #998a67;
+	border-radius: 5px;
+	background: #fffdf4;
+	color: #302f27;
+	font-family: Arial, sans-serif;
+	cursor: pointer;
 }
 
 .support-button {
-	display: inline-flex;
-	align-items: center;
-	gap: 4px;
-	min-width: 44px;
+	justify-content: center;
+	min-width: 64px;
+	min-height: 46px;
+	padding: 6px 12px;
+	font-size: 20px;
+}
+
+.conflict-button {
+	min-height: 48px;
+	padding: 8px 14px;
+	font-size: 18px;
+}
+
+.support-button:hover:enabled,
+.conflict-button:hover:enabled {
+	background: #f1e9d7;
+	border-color: #756440;
+}
+
+.support-button:disabled,
+.conflict-button:disabled {
+	opacity: 0.45;
+	cursor: default;
+}
+
+.conflict-names {
+	white-space: nowrap;
 }
 
 .mini-tile,

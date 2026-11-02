@@ -134,43 +134,51 @@ export function toggleSwapPick(selected, index, totalSelected, max = 6) {
 	return { ...selected, [key]: true };
 }
 
-export function historyText(entry, seatNames) {
+// History lines are split into text and sprite parts so the panel can draw
+// tile, leader and monument icons inline instead of naming colours.
+export function historyParts(entry, seatNames) {
 	const name = entry.s >= 0 ? seatNames[entry.s] || `Seat ${entry.s + 1}` : "";
+	const tile = (colour) => ({ tile: colour });
+	const leader = (seat, colour) => ({ leader: { seat, colour } });
 	switch (entry.a) {
 		case "start":
-			return `Game started with ${entry.n} players.`;
+			return [{ text: `Game started with ${entry.n} players.` }];
 		case "tile":
-			return `${name} placed a ${colourName(entry.c)} tile at ${cellName(entry.p)}.`;
+			return [{ text: `${name} placed a ` }, tile(entry.c), { text: ` tile at ${cellName(entry.p)}.` }];
 		case "leader":
-			return `${name} moved the ${colourName(entry.c)} leader to ${cellName(entry.p)}.`;
+			return [{ text: `${name} moved the ` }, leader(entry.s, entry.c), { text: ` leader to ${cellName(entry.p)}.` }];
 		case "withdraw":
-			return `${name} withdrew the ${colourName(entry.c)} leader.`;
+			return [{ text: `${name} withdrew the ` }, leader(entry.s, entry.c), { text: ` leader.` }];
 		case "cat":
-			return `${name} played a catastrophe at ${cellName(entry.p)}.`;
+			return [{ text: `${name} played a catastrophe at ${cellName(entry.p)}.` }];
 		case "swap":
-			return `${name} swapped ${entry.n} tiles.`;
+			return [{ text: `${name} swapped ${entry.n} tiles.` }];
 		case "pass":
-			return `${name} passed an action.`;
+			return [{ text: `${name} passed an action.` }];
 		case "end":
-			return `${name} ended their turn.`;
+			return [{ text: `${name} ended their turn.` }];
 		case "support":
-			return `${name} sent ${entry.n} ${colourName(entry.c)} tile(s).`;
+			return [{ text: `${name} sent ${entry.n} ` }, tile(entry.c), { text: ` tile(s).` }];
 		case "war":
-			return `${name} won the ${colourName(entry.c)} war and destroyed ${entry.n} tile(s).`;
+			return [{ text: `${name} won the ` }, tile(entry.c), { text: ` war and destroyed ${entry.n} tile(s).` }];
 		case "revolt":
-			return `${name} won the ${colourName(entry.c)} revolt.`;
+			return [{ text: `${name} won the ` }, tile(entry.c), { text: ` revolt.` }];
 		case "treasure":
-			return `${name} took ${entry.n} treasure(s), keeping the one at ${cellName(entry.keep)}.`;
+			return [{ text: `${name} took ${entry.n} treasure(s), keeping the one at ${cellName(entry.keep)}.` }];
 		case "monument":
-			return `${name} built the ${monumentName(entry.t)} monument.`;
+			return [{ text: `${name} built the ` }, { monument: entry.t }, { text: ` monument.` }];
 		case "declineMonument":
-			return `${name} declined a monument.`;
-		case "evict":
-			return `A leader left the board because it had no adjacent temple.`;
+			return [{ text: `${name} declined a monument.` }];
+		case "evict": {
+			// Older saves did not record whose leader was evicted.
+			if (entry.c == null || entry.o == null) return [{ text: "A leader left the board (no adjacent temple)." }];
+			const owner = entry.o >= 0 ? seatNames[entry.o] || `Seat ${entry.o + 1}` : "An unknown player";
+			return [{ text: `${owner}'s ` }, leader(entry.o, entry.c), { text: ` leader left the board (no adjacent temple).` }];
+		}
 		case "over":
-			return `Game over (${entry.r === "bag" ? "the bag is empty" : "only two treasures remain"}).`;
+			return [{ text: `Game over (${entry.r === "bag" ? "the bag is empty" : "only two treasures remain"}).` }];
 		default:
-			return entry.a;
+			return [{ text: entry.a }];
 	}
 }
 

@@ -875,10 +875,11 @@ function removeLeader(s, pos) {
 }
 
 function evictIfNoTemple(s, pos) {
-	if (s.leaders[pos] === null) return;
+	const leader = s.leaders[pos];
+	if (!leader) return;
 	if (isAdjacentToTemple(s, pos)) return;
 	removeLeader(s, pos);
-	s.history.push({ s: s.activeSeat, a: "evict", p: pos });
+	s.history.push({ s: s.activeSeat, a: "evict", p: pos, o: leader.s, c: leader.c });
 }
 
 export function conflictStanding(state, pending) {

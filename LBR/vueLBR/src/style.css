@@ -124,7 +124,7 @@ body {
 
 /* One appearance for action buttons across panels and previews. The header
    controls and the board hit targets keep their own styles. */
-:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton) {
+:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):not(.support-button):not(.conflict-button) {
 	box-sizing: border-box;
 	min-height: 34px;
 	padding: 5px 8px;
@@ -140,22 +140,22 @@ body {
 	cursor: pointer;
 }
 
-:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):hover:enabled {
+:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):not(.support-button):not(.conflict-button):hover:enabled {
 	background: #f1e9d7;
 	border-color: #756440;
 }
 
-:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):focus-visible {
+:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):not(.support-button):not(.conflict-button):focus-visible {
 	outline: 2px solid #177daf;
 	outline-offset: 2px;
 }
 
-:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):is([aria-pressed="true"], [aria-current], .current, .selected, .chosen):enabled {
+:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):not(.support-button):not(.conflict-button):is([aria-pressed="true"], [aria-current], .current, .selected, .chosen):enabled {
 	background: #e1edf5;
 	border-color: #177daf;
 }
 
-:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):disabled {
+:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):not(.support-button):not(.conflict-button):disabled {
 	opacity: 0.45;
 	cursor: default;
 }

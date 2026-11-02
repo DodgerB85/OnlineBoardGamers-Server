@@ -162,6 +162,15 @@ function isOwnLeader(pos) {
 					>
 						<image :href="tileSheet" :width="7 * CELL_W" :height="PITCH" />
 					</svg>
+
+					<rect
+						v-if="store.viewSettings.historyHover != null"
+						:x="cellX(store.viewSettings.historyHover)"
+						:y="cellY(store.viewSettings.historyHover)"
+						:width="CELL_W"
+						:height="PITCH"
+						class="history-hover"
+					/>
 				</g>
 
 				<!-- Hit targets sit on top so a piece never swallows a click. -->
@@ -245,6 +254,12 @@ function isOwnLeader(pos) {
 	stroke: #fbf236;
 	stroke-width: 0.6;
 	filter: drop-shadow(0 0 0.6px #fbf236);
+}
+
+.history-hover {
+	fill: rgba(251, 242, 54, 0.22);
+	stroke: #fbf236;
+	stroke-width: 0.8;
 }
 
 .treasure {

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { neededColours, toggleSwapPick } from "./LBRview.js";
+import { historyParts, neededColours, toggleSwapPick } from "./LBRview.js";
 
 test("swap tiles are picked one at a time and only the clicked one goes back", () => {
 	assert.deepEqual(toggleSwapPick({}, 1, 0), { 0: true });
@@ -26,4 +26,14 @@ test("needed colours count treasures as wild cubes", () => {
 
 test("needed colours are all four when the scores are level", () => {
 	assert.deepEqual(neededColours({ score: { R: 1, B: 1, G: 1, K: 1 }, treasures: 0 }), ["R", "B", "G", "K"]);
+});
+
+test("history uses tile icons and names the evicted leader's owner", () => {
+	const names = ["Ann", "Bob"];
+	const war = historyParts({ s: 0, a: "war", c: "R", n: 1 }, names);
+	assert.deepEqual(war[1], { tile: "R" });
+	const evict = historyParts({ s: 1, a: "evict", o: 0, c: "K", p: 5 }, names);
+	assert.deepEqual(evict[0], { text: "Ann's " });
+	assert.deepEqual(evict[1], { leader: { seat: 0, colour: "K" } });
+	assert.deepEqual(historyParts({ s: 1, a: "evict", p: 5 }, names), [{ text: "A leader left the board (no adjacent temple)." }]);
 });
