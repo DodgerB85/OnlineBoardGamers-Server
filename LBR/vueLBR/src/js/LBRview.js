@@ -34,13 +34,13 @@ export function monumentName(type) {
 export function tileSpriteIndex(code, hasTreasure) {
 	switch (code) {
 		case 1:
-			return hasTreasure ? 11 : 10;
+			return hasTreasure ? 2 : 1;
 		case 2:
-			return 12;
+			return 3;
 		case 4:
-			return 13;
+			return 4;
 		case 3:
-			return 14;
+			return 5;
 		default:
 			return -1;
 	}
@@ -72,7 +72,7 @@ export function tileStyle(colour, width = 22) {
 		width: `${width}px`,
 		height: `${Math.round(13 * scale)}px`,
 		backgroundImage: "url(/static/LBR/images/tiles.png)",
-		backgroundSize: `${216 * scale}px ${13 * scale}px`,
+		backgroundSize: `${84 * scale}px ${13 * scale}px`,
 		backgroundPosition: `${-index * width}px 0`,
 	};
 }

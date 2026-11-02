@@ -20,7 +20,7 @@ const inner = computed(() => 12 * scale.value);
 const mapW = computed(() => 240 * scale.value);
 const mapH = computed(() => 160 * scale.value);
 const legal = computed(() => controller.legalCells());
-const mapSrc = "/static/LBR/images/map.png";
+const mapSrc = "/static/LBR/images/map.jpg";
 
 function measure() {
 	const element = wrap.value;
@@ -76,12 +76,12 @@ function tileStyle(pos) {
 	if (!tile || tile === 5) return null;
 	const index = tileSpriteIndex(tile, !!store.game.treasures[pos]);
 	if (index < 0) return null;
-	return spriteStyle(index, 216 * scale.value, 13 * scale.value, 12 * scale.value);
+	return spriteStyle(index, 84 * scale.value, 13 * scale.value, 12 * scale.value);
 }
 
 function catastropheStyle(pos) {
 	if (!store.game.catastrophes[pos]) return null;
-	return spriteStyle(17, 216 * scale.value, 13 * scale.value, 12 * scale.value);
+	return spriteStyle(6, 84 * scale.value, 13 * scale.value, 12 * scale.value);
 }
 
 function spriteStyle(index, sheetW, sheetH, stepW) {
@@ -133,7 +133,7 @@ function treasureStyle(pos) {
 function unificationStyle(pos) {
 	if (store.game.unification !== pos) return null;
 	return {
-		...spriteStyle(0, 216 * scale.value, 13 * scale.value, 12 * scale.value),
+		...spriteStyle(0, 84 * scale.value, 13 * scale.value, 12 * scale.value),
 		left: `${cellLeft(pos)}px`,
 		top: `${cellTop(pos)}px`,
 		width: `${inner.value}px`,
@@ -220,8 +220,7 @@ function isOwnLeader(pos) {
 <style scoped>
 .board {
 	position: relative;
-	image-rendering: pixelated;
-	background: #d9a066;
+	background: #c49662;
 	border: 2px solid #663931;
 	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
@@ -231,7 +230,6 @@ function isOwnLeader(pos) {
 	left: 0;
 	top: 0;
 	display: block;
-	image-rendering: pixelated;
 }
 
 .cell {
@@ -241,22 +239,11 @@ function isOwnLeader(pos) {
 	padding: 0;
 	margin: 0;
 	cursor: pointer;
-	image-rendering: pixelated;
 }
 
 .cell:focus-visible {
 	outline: 3px solid #177daf;
 	outline-offset: -3px;
-}
-
-.tile,
-.unification {
-	image-rendering: pixelated;
-}
-
-.leader,
-.monument {
-	image-rendering: auto;
 }
 
 .tile {

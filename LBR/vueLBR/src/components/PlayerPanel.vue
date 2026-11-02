@@ -384,7 +384,6 @@ function chooseLeader(colour) {
 	position: absolute;
 	left: 0;
 	background-repeat: no-repeat;
-	image-rendering: pixelated;
 }
 
 .hand-tile.picked {

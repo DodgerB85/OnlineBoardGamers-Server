@@ -325,10 +325,6 @@ function cancel() {
 	flex: 0 0 auto;
 }
 
-.mini-tile {
-	image-rendering: pixelated;
-}
-
 .monument-button {
 	display: inline-flex;
 	align-items: center;
