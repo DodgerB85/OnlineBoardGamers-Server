@@ -891,8 +891,15 @@ pub struct PriorWeights {
     pub withdraw: f32,              // -5.0
 
     // PlaceCatastrophe
-    pub catastrophe_base: f32,      // 3.0
-    pub catastrophe_monument: f32,  // 4.0 (monument or enemy leader)
+    pub catastrophe_base: f32,           // 3.0
+    pub catastrophe_monument: f32,       // 4.0 (near a monument)
+    /// Breaking the last temple supporting a leader removes that leader.
+    /// Applied positively to an opponent's leader and negatively to our own.
+    pub catastrophe_leader_kill: f32,    // 10.0
+    /// Per opposing kingdom whose frontier this square removes.
+    pub catastrophe_enemy_frontier: f32, // 1.0
+    /// Penalty for wasting a square our own kingdom could still score on.
+    pub catastrophe_own_frontier: f32,   // -0.5
 
     // Treasures & monuments
     pub take_treasure: f32,         // 8.0
@@ -927,6 +934,9 @@ impl Default for PriorWeights {
 
             catastrophe_base: 3.0,
             catastrophe_monument: 4.0,
+            catastrophe_leader_kill: 10.0,
+            catastrophe_enemy_frontier: 1.0,
+            catastrophe_own_frontier: -0.5,
 
             take_treasure: 8.0,
             build_monument: 5.0,
@@ -974,6 +984,9 @@ impl PriorWeights {
 
                 "catastrophe_base" => &mut out.catastrophe_base,
                 "catastrophe_monument" => &mut out.catastrophe_monument,
+                "catastrophe_leader_kill" => &mut out.catastrophe_leader_kill,
+                "catastrophe_enemy_frontier" => &mut out.catastrophe_enemy_frontier,
+                "catastrophe_own_frontier" => &mut out.catastrophe_own_frontier,
 
                 "take_treasure" => &mut out.take_treasure,
                 "build_monument" => &mut out.build_monument,
@@ -991,6 +1004,8 @@ impl PriorWeights {
                          leader_already_placed, leader_weak_color, \
                          leader_red_nearby, leader_kingdom_size, withdraw, \
                          catastrophe_base, catastrophe_monument, \
+                         catastrophe_leader_kill, catastrophe_enemy_frontier, \
+                         catastrophe_own_frontier, \
                          take_treasure, build_monument, decline_monument, \
                          replace_tile, pass, attack_odds"
                     ));
@@ -1029,6 +1044,20 @@ pub fn prior_weights(state: &TnEGame, actions: &[Action], pw: &PriorWeights) -> 
         }
         kingdoms.push((p, ks));
     }
+
+    // One union per player. Frontier denial is measured against each player's
+    // whole territory, matching `expected_final_score`'s capacity model.
+    let kingdom_unions: Vec<(Player, Bitboard)> = kingdoms
+        .iter()
+        .map(|(p, ks)| {
+            let mut union = Bitboard::new();
+            for (_, k) in ks {
+                union |= *k;
+            }
+            (*p, union)
+        })
+        .collect();
+
     let kingdom_of = |p: Player, l: Leader| -> Option<Bitboard> {
         kingdoms
             .iter()
@@ -1109,10 +1138,55 @@ pub fn prior_weights(state: &TnEGame, actions: &[Action], pw: &PriorWeights) -> 
                 Action::WithdrawLeader(_) => w += pw.withdraw,
                 Action::PlaceCatastrophe(pos) => {
                     w += pw.catastrophe_base;
-                    // Disrupting a monument or an enemy leader is valuable.
+                    // Disrupting a monument is valuable.
                     for m in &state.monuments {
                         if m.pos_top_left.manhattan_distance(pos) <= 2 {
                             w += pw.catastrophe_monument;
+                        }
+                    }
+
+                    // A catastrophe on a red tile that is a leader's *only*
+                    // adjacent temple removes that leader (R11.3/L88). Reward
+                    // killing an opponent, penalise killing one of our own.
+                    if state.board.get_tile_type(pos) == TileType::Red {
+                        for i in 0..state.num_players as usize {
+                            let owner = Player::from_index(i);
+                            let owner_state = state.players.get(owner);
+                            for l in [Leader::Red, Leader::Blue, Leader::Green, Leader::Black] {
+                                let Some(leader_pos) = owner_state.get_leader(l) else {
+                                    continue;
+                                };
+                                let adjacent = leader_pos.neighbors().get(pos);
+                                if adjacent
+                                    && (leader_pos.neighbors() & state.board.red_tiles).count_ones() == 1
+                                {
+                                    if owner == actor {
+                                        w -= pw.catastrophe_leader_kill;
+                                    } else {
+                                        w += pw.catastrophe_leader_kill;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // A catastrophe on an empty non-river square next to a
+                    // kingdom permanently removes a space that kingdom could
+                    // have scored on. Denying an opponent is good; wasting our
+                    // own capacity is bad.
+                    if state.board.get_tile_type(pos) == TileType::Empty
+                        && !state.board.river.get(pos)
+                    {
+                        let neighbours = pos.neighbors();
+                        for (owner, kingdom) in &kingdom_unions {
+                            if (neighbours & *kingdom).count_ones() == 0 {
+                                continue;
+                            }
+                            if *owner == actor {
+                                w += pw.catastrophe_own_frontier;
+                            } else {
+                                w += pw.catastrophe_enemy_frontier;
+                            }
                         }
                     }
                 }
@@ -1278,6 +1352,7 @@ impl TileLeader for TileType {
 mod tests {
     use super::*;
     use crate::maps::MapSpec;
+    use crate::pos;
 
     /// Regression (PRD-AI-STRENGTH A/B): the two-player utility must stay a
     /// graded, monotone function of the score margin. The old MAD-normalised
@@ -1310,5 +1385,48 @@ mod tests {
             assert!((u[0] + u[1] - 1.0).abs() < 1e-4, "2p utilities sum to 1");
             prev_gap = gap;
         }
+    }
+
+    /// Catastrophes used to be a flat prior, so every square tied and the
+    /// search only ever saw the first one in row-major order. These two
+    /// positional terms must make an opponent's weak-temple square outrank a
+    /// frontier square, which must in turn outrank an irrelevant one.
+    #[test]
+    fn catastrophe_prior_prefers_leader_kills_and_frontier_denial() {
+        let mut game = MapSpec::default_map().start_game(2, 0);
+        let actor = game.next_player();
+        let enemy = if actor == Player::Player1 {
+            Player::Player2
+        } else {
+            Player::Player1
+        };
+
+        // A red temple at (5,4) is the enemy leader's only adjacent temple.
+        let temple = pos!(5, 4);
+        let leader = pos!(5, 5);
+        game.board.set_tile_type(temple, TileType::Red);
+        game.board.set_leader(leader, Leader::Red);
+        game.board.set_player(leader, enemy);
+        game.players.0[enemy.index().unwrap()].placed_red_leader = Some(leader);
+
+        let pw = PriorWeights::default();
+        let kill = Action::PlaceCatastrophe(temple);
+        let deny = Action::PlaceCatastrophe(pos!(5, 6)); // frontier, not a temple
+        let neutral = Action::PlaceCatastrophe(pos!(0, 0));
+        let w = prior_weights(&game, &[kill, deny, neutral], &pw);
+
+        assert!(
+            w[0] > w[1],
+            "killing the leader must outrank denying one square: {w:?}"
+        );
+        assert!(
+            w[1] > w[2],
+            "denying an enemy frontier square must outrank a neutral square: {w:?}"
+        );
+        // `prior_weights` starts every action at 1.0.
+        let base = 1.0 + pw.catastrophe_base;
+        assert!((w[0] - (base + pw.catastrophe_leader_kill)).abs() < 1e-6);
+        assert!((w[1] - (base + pw.catastrophe_enemy_frontier)).abs() < 1e-6);
+        assert!((w[2] - base).abs() < 1e-6);
     }
 }
