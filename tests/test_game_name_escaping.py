@@ -1,4 +1,6 @@
 import importlib
+import re
+from pathlib import Path
 
 from django.apps import apps
 from django.test import TestCase
@@ -7,7 +9,7 @@ from django.urls import reverse
 from Lobby.models import Game, User
 
 
-class AqyGameNameEscapingTests(TestCase):
+class GameNameEscapingTests(TestCase):
     """The rematch create page copies the old game's text into a JS string:
     without escapejs Django's autoescape was stored verbatim by the next save,
     so the name displayed as "Again&amp;again"."""
@@ -38,13 +40,23 @@ class AqyGameNameEscapingTests(TestCase):
         self.assertIn('setupData.gameDescription = "A \\u0026 B";', body)
         self.assertNotIn('setupData.gameName = "Again&amp;again";', body)
 
-    def test_migration_unescapes_stored_names(self):
-        migration = importlib.import_module("Lobby.migrations.0128_unescape_aqy_game_text")
-        stacked = Game.objects.create(gameCode="AQY", gameStatus="ACTIVE", gameName="Again&amp;amp;again", gameDescription="A &amp; B")
-        clean = Game.objects.create(gameCode="AQY", gameStatus="ACTIVE", gameName="Again&again")
-        other_game = Game.objects.create(gameCode="CNS", gameStatus="ACTIVE", gameName="Again&amp;again")
+    def test_every_create_template_escapes_js_string_prefills(self):
+        # Inside <script> the browser does not decode entities, so a bare
+        # "{{ gameName }}" hands Django's &amp; straight to the form field.
+        unescaped = re.compile(r'=\s*"\{\{\s*game(?:Name|Description)\s*\}\}"')
+        templates = sorted(Path("Lobby/templates/Lobby").glob("create*.html"))
+        self.assertTrue(templates, "create templates not found - run from the repo root")
+        for path in templates:
+            self.assertIsNone(unescaped.search(path.read_text(encoding="utf-8")), path.name)
 
-        migration.unescape_aqy_game_text(apps, None)
+    def test_migration_unescapes_stored_names(self):
+        migration = importlib.import_module("Lobby.migrations.0128_unescape_game_text")
+        creator = self.creator
+        stacked = Game.objects.create(gameCode="AQY", creator=creator, host=creator, gameStatus="ACTIVE", gameName="Again&amp;amp;again", gameDescription="A &amp; B")
+        clean = Game.objects.create(gameCode="AQY", creator=creator, host=creator, gameStatus="ACTIVE", gameName="Again&again")
+        other_game = Game.objects.create(gameCode="CNS", creator=creator, host=creator, gameStatus="ACTIVE", gameName="Again&amp;again")
+
+        migration.unescape_game_text(apps, None)
 
         stacked.refresh_from_db()
         self.assertEqual(stacked.gameName, "Again&again")
@@ -52,4 +64,4 @@ class AqyGameNameEscapingTests(TestCase):
         clean.refresh_from_db()
         self.assertEqual(clean.gameName, "Again&again")
         other_game.refresh_from_db()
-        self.assertEqual(other_game.gameName, "Again&amp;again")
+        self.assertEqual(other_game.gameName, "Again&again")

@@ -20,11 +20,9 @@ def repaired(value):
         value = unescaped
 
 
-def unescape_aqy_game_text(apps, schema_editor):
+def unescape_game_text(apps, schema_editor):
     Game = apps.get_model("Lobby", "Game")
-    games = Game.objects.filter(gameCode="AQY").filter(
-        models.Q(gameName__contains="&") | models.Q(gameDescription__contains="&")
-    )
+    games = Game.objects.filter(models.Q(gameName__contains="&") | models.Q(gameDescription__contains="&"))
 
     to_update = []
     for game in games:
@@ -45,5 +43,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(unescape_aqy_game_text, migrations.RunPython.noop),
+        migrations.RunPython(unescape_game_text, migrations.RunPython.noop),
     ]

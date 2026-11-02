@@ -104,7 +104,7 @@
   ///////////////////////
   initData.locale = "{{ LANGUAGE_CODE|default:'en-gb' }}";
   initData.gameID = {{ gameID }};
-  initData.gameName = "{{ gameName }}";
+  initData.gameName = "{{ gameName|escapejs }}";
   initData.gameData = '{{ gameData|escapejs }}';
   initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
   initData.myZoomLevel = {{ myZoomLevel }};
