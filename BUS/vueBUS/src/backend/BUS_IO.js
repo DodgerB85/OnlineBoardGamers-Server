@@ -454,6 +454,12 @@ export async function saveGameDataAfterKickout() {
 			body: JSON.stringify(postData),
 			headers: { "X-CSRFToken": csrftoken },
 		})
+		if (response.status === 400) {
+			// Server refused: the target is no longer on turn, or the clock was reset
+			// after this dialog opened. Nothing changed, so just drop the dialog.
+			clearLoader()
+			return { kickoutRejected: true }
+		}
 		if (!response.ok) {
 			throw new Error("Network response was not ok")
 		}

@@ -82,7 +82,7 @@ It grants nothing inside a game: no turns, kickouts or rewinds.
 
 Three overlapping powers, each repeated per game in its `views.py`:
 
-1. **Treated as in the game.** `Lobby/gameViewHelpers.build_show_game_data` forces `involvedPlayer = True` for a game admin, so the show page renders for them (as `pov = -1` observer unless they hold a seat) and `myMove` is computed — an admin can be *offered a turn* in a game they do not play. `GamePresenter.isMyMove` also returns `True` for everybody while no player is `is_current`, so idle games look like everyone's move. FCM (`FCM/views.py`) and TGZ re-check the flag after the helper.
+1. **Treated as in the game.** `Lobby/gameViewHelpers.build_show_game_data` forces `involvedPlayer = True` for a game admin, so the show page renders for them (as `pov = -1` observer unless they hold a seat) and `myMove` is computed — an admin can be *offered a turn* in a game they do not play. `GamePresenter.isMyMove` returns `False` for everybody while no player is `is_current`: an empty current list means nobody is on turn, so a game left in that state looks like nobody's move rather than everyone's. FCM (`FCM/views.py`) and TGZ re-check the flag after the helper.
 2. **Passes the write gate.** `can_act_in_game(user, game)` = "game admin **or** a seated player" is the standard check at the top of every `processXXXturn` endpoint.
 3. **Acts as somebody else, and moderates.** Submit a move under another player's name via the `BKSN` field (FCM, AQY, RNB, DDL); host-level rewind controls without being the host; `resetGame`; skipping the `passKickoutFor` route; flexi-time bookkeeping; `replaceExternalTournamentPlayer` (TGZ); starting-option bypasses (KFW).
 

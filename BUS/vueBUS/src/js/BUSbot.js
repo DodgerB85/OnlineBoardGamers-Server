@@ -34,7 +34,7 @@ export async function actionPlayerKickout() {
 		// Ask the server first: 3p+ games need a majority vote to kick,
 		// so this may only record a vote rather than actually kick.
 		const result = await IO.saveGameDataAfterKickout()
-		if (result && result.voteCast) return
+		if (result && (result.voteCast || result.kickoutRejected)) return
 
 		// Action the kick in game
 		store.history.push([rf.HIST_KICKOUT, personal.pov, Math.round(new Date().getTime() / 1000 - personal.gameCreationTimestamp), [store.gameflow.turnOrder[0]]])
