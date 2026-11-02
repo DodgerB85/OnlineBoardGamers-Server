@@ -138,7 +138,7 @@ export function visibleScore(seat) {
 }
 
 export function markForSeat(seat) {
-	return SEAT_MARKS[seat] || "bull";
+	return SEAT_MARKS[seat] || "Eye of Horus";
 }
 
 export function seatColourClass(seat) {

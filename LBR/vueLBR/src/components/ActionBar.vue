@@ -4,7 +4,7 @@ import { computed } from "vue";
 import { useModelStore } from "../stores/LBRstore.js";
 import * as controller from "../js/LBRcontroller.js";
 import * as model from "../js/LBRmodel.js";
-import { cellName, colourName, leaderStyle, monumentName, monumentStyle, tileStyle } from "../js/LBRview.js";
+import { cellName, colourName, dynastyStyle, monumentName, monumentStyle, tileStyle } from "../js/LBRview.js";
 import { conflictStanding, currentActor } from "../js/LBRrules.js";
 import GameOverPanel from "./GameOverPanel.vue";
 
@@ -82,7 +82,7 @@ function cancel() {
 	<div v-else class="action-bar">
 		<div class="action-info">
 			<div class="turn-line">
-				<span class="actor-avatar" :style="leaderStyle(actorSeat, 'R', 24)" aria-hidden="true"></span>
+				<span class="actor-avatar" :style="dynastyStyle(actorSeat, 32)" aria-hidden="true"></span>
 				<b>{{ model.seatName(actorSeat) }}</b>
 				<span class="turn-meta">{{ meta }}</span>
 			</div>
@@ -138,23 +138,23 @@ function cancel() {
 						<strong>{{ model.seatName(support.defender) }}</strong>: {{ support.defenderBase }} + {{ support.defenderSupport }} =
 						<strong>{{ support.defenderTotal }}</strong>
 					</div>
-					<div class="hint">
-						A tie goes to the defender. {{ model.seatName(pending.seat) }} holds {{ supportMax }}
-						{{ colourName(support.colour).toLowerCase() }} tile(s).
-					</div>
+					<div class="hint">A tie goes to the defender.</div>
 				</div>
-				<span class="decision-text">Send how many?</span>
-				<button
-					v-for="count in supportChoices"
-					:key="count"
-					type="button"
-					class="actionsLineButton support-button"
-					:disabled="!myTurn || saving"
-					@click="sendSupport(count)"
-				>
-					<span class="mini-tile" :style="tileStyle(support.colour, 16)"></span>
-					{{ count }}
-				</button>
+				<span v-if="myTurn" class="decision-text">Send how many?</span>
+				<span v-else class="decision-text">Waiting for {{ model.seatName(pending.seat) }} to send support.</span>
+				<template v-if="myTurn">
+					<button
+						v-for="count in supportChoices"
+						:key="count"
+						type="button"
+						class="actionsLineButton support-button"
+						:disabled="saving"
+						@click="sendSupport(count)"
+					>
+						<span class="mini-tile" :style="tileStyle(support.colour, 16)"></span>
+						{{ count }}
+					</button>
+				</template>
 			</template>
 
 			<!-- Monument decision -->

@@ -61,7 +61,7 @@ Run `npm test` from `KFW/vueKFW/`. The Vitest suite covers the Farmers expansion
 
 ## LBR frontend checks
 
-Run `node --test LBR/vueLBR/src/js/LBRrules.test.js LBR/vueLBR/src/js/LBRview.test.js` from the repo root. The rules test covers the rulebook setup, tile scoring, revolts, wars (including support and protected temples), treasure priority, monuments, catastrophes, leader eviction, the three-player attacker order, both game-end conditions, and a seeded random playout that must finish with valid leader bookkeeping. The view test covers hand selection for swapping tiles, including the six-tile limit and wrapping back to zero.
+Run `node --test LBR/vueLBR/src/js/LBRrules.test.js LBR/vueLBR/src/js/LBRview.test.js` from the repo root. The rules test covers the rulebook setup, tile scoring, revolts, wars (including support and protected temples), treasure priority, monuments, catastrophes, leader eviction, the three-player attacker order, both game-end conditions, and a seeded random playout that must finish with valid leader bookkeeping. The view test covers hand selection for swapping tiles, including the six-tile limit and wrapping back to zero, and the "Need" colours (lowest scores after treasure cubes, all four when level).
 
 ## URR frontend checks
 

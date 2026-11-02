@@ -1,5 +1,6 @@
 // Display helpers shared by the LBR components.
-import { COLOUR_CODE, COLS, COLOUR_NAMES, LEADER_COL, MONUMENT_TYPES, SEAT_MARKS } from "./LBRreference.js";
+import { COLOUR_CODE, COLS, COLOUR_NAMES, LEADER_COL, MONUMENT_TYPES, seatMarkRow } from "./LBRreference.js";
+import { scoresAfterTreasures } from "./LBRrules.js";
 
 export function getImage(image) {
 	if (image === "icon-house") return new URL(`../../../static/LBR/images/icon-house.svg`, import.meta.url).href;
@@ -51,7 +52,7 @@ export function monumentSpriteIndex(type) {
 }
 
 export function leaderSpriteIndex(seat, colour) {
-	const row = SEAT_MARKS.indexOf(SEAT_MARKS[seat] || "bull");
+	const row = seatMarkRow(seat);
 	const col = LEADER_COL[colour] || 0;
 	return row * 4 + col;
 }
@@ -65,8 +66,7 @@ export function handTiles(hand) {
 }
 
 // A hand tile drawn at any width, keeping the 12:13 sprite proportions.
-export function tileStyle(colour, width = 22) {
-	const index = tileSpriteIndex(COLOUR_CODE[colour], false);
+function sheetStyle(index, width) {
 	const scale = width / 12;
 	return {
 		width: `${width}px`,
@@ -77,6 +77,15 @@ export function tileStyle(colour, width = 22) {
 	};
 }
 
+export function tileStyle(colour, width = 22) {
+	return sheetStyle(tileSpriteIndex(COLOUR_CODE[colour], false), width);
+}
+
+// The last sprite on the tile sheet is the catastrophe.
+export function catastropheStyle(width = 16) {
+	return sheetStyle(6, width);
+}
+
 export function leaderStyle(seat, colour, size = 24) {
 	const index = leaderSpriteIndex(seat, colour);
 	return {
@@ -85,6 +94,18 @@ export function leaderStyle(seat, colour, size = 24) {
 		backgroundImage: "url(/static/LBR/images/leaders.png)",
 		backgroundSize: `${4 * size}px ${4 * size}px`,
 		backgroundPosition: `${-(index % 4) * size}px ${-Math.floor(index / 4) * size}px`,
+	};
+}
+
+// The dynasty mark sits on a gold field so it never reads as one of the four
+// leader colours.
+export function dynastyStyle(seat, size = 44) {
+	return {
+		width: `${size}px`,
+		height: `${size}px`,
+		backgroundImage: "url(/static/LBR/images/dynasties.png)",
+		backgroundSize: `${size}px ${4 * size}px`,
+		backgroundPosition: `0 ${-seatMarkRow(seat) * size}px`,
 	};
 }
 
@@ -149,4 +170,12 @@ export function historyText(entry, seatNames) {
 
 export function scoreRows(score) {
 	return ["R", "B", "G", "K"].map((colour) => ({ colour, value: score[colour] }));
+}
+
+// The colours holding the player's current score (treasures count as wild), so
+// these are the ones that need raising. All four equal means any will do.
+export function neededColours(player) {
+	const scores = scoresAfterTreasures(player);
+	const lowest = Math.min(scores.R, scores.B, scores.G, scores.K);
+	return ["R", "B", "G", "K"].filter((colour) => scores[colour] === lowest);
 }

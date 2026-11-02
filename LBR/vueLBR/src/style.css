@@ -40,7 +40,7 @@ body {
 }
 
 .player-rail {
-	flex: 0 0 228px;
+	flex: 0 0 250px;
 	display: flex;
 	flex-direction: column;
 	gap: 8px;

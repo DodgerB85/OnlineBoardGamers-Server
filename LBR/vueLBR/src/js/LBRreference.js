@@ -113,8 +113,13 @@ export function boardIndex(row, col) {
 	return idx(row, col);
 }
 
-// Seat marks: row in the leader sheet (bull, urn, lion, bow).
-export const SEAT_MARKS = ["bull", "urn", "lion", "bow"];
+// Seat marks: row in the leader sheet (Eye of Horus, Winged Sun Disc,
+// Corinthian Helmet, Chinese Dragon).
+export const SEAT_MARKS = ["Eye of Horus", "Winged Sun Disc", "Corinthian Helmet", "Chinese Dragon"];
+
+export function seatMarkRow(seat) {
+	return seat >= 0 && seat < SEAT_MARKS.length ? seat : 0;
+}
 
 // Leader sheet columns: blue, green, red, black.
 export const LEADER_COL = { B: 0, G: 1, R: 2, K: 3 };

@@ -27,8 +27,10 @@ controller.bootGame();
 
 const isSpectator = computed(() => personal.pov < 0);
 const seats = computed(() => Array.from({ length: store.game?.numSeats || 0 }, (_, i) => i));
-const leftSeats = computed(() => seats.value.filter((seat) => seat % 2 === 0));
-const rightSeats = computed(() => seats.value.filter((seat) => seat % 2 === 1));
+const mySeat = computed(() => personal.pov);
+// Your own card sits on the right, alone; every other player stacks on the left.
+const rightSeats = computed(() => (seats.value.includes(mySeat.value) ? [mySeat.value] : []));
+const leftSeats = computed(() => seats.value.filter((seat) => seat !== mySeat.value));
 
 let pollTimer = null;
 
@@ -71,7 +73,7 @@ onUnmounted(() => {
 			<ActionBar />
 			<BoardArea />
 		</div>
-		<aside class="player-rail right">
+		<aside v-if="rightSeats.length" class="player-rail right">
 			<PlayerPanel :seats="rightSeats" />
 		</aside>
 	</div>

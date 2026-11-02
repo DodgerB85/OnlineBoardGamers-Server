@@ -5,7 +5,7 @@ import { useModelStore } from "../stores/LBRstore.js";
 import { usePersonalStore } from "../stores/LBRpersonal.js";
 import * as controller from "../js/LBRcontroller.js";
 import * as model from "../js/LBRmodel.js";
-import { cellName, colourName, leaderStyle, scoreRows, tileStyle } from "../js/LBRview.js";
+import { catastropheStyle, colourName, dynastyStyle, leaderStyle, neededColours, scoreRows, tileStyle } from "../js/LBRview.js";
 import { COLOURS } from "../js/LBRreference.js";
 
 const props = defineProps({
@@ -47,12 +47,18 @@ function visible(seat) {
 	return model.visibleScore(seat);
 }
 
-function handCount(hand) {
-	return hand.R + hand.B + hand.G + hand.K;
-}
-
 function leaderPos(seat, colour) {
 	return seatPlayer(seat).leaders[colour];
+}
+
+// Leaders already on the board are drawn there and clicked on the map, so the
+// card only offers the ones waiting to be placed.
+function offBoardLeaders(seat) {
+	return COLOURS.filter((colour) => leaderPos(seat, colour) == null);
+}
+
+function need(seat) {
+	return neededColours(seatPlayer(seat));
 }
 
 function leaderSelected(colour) {
@@ -67,20 +73,14 @@ function swapped(colour) {
 	return mode.value === "swap" ? store.selectedSwap[colour] : 0;
 }
 
-function leaderTitle(seat, colour) {
-	const pos = leaderPos(seat, colour);
-	const where = pos == null ? "off the board" : `at ${cellName(pos)}`;
-	return `${colourName(colour)} leader ${where}`;
+function leaderTitle(colour) {
+	return `${colourName(colour)} leader off the board`;
 }
 
 function handTitle(colour) {
 	return mode.value === "swap"
 		? `Pick ${colourName(colour).toLowerCase()} tiles to exchange`
 		: `Place a ${colourName(colour).toLowerCase()} tile`;
-}
-
-function stackHeight(count) {
-	return count > 0 ? 37 + (count - 1) * 9 : 37;
 }
 
 function clickTile(colour) {
@@ -103,7 +103,7 @@ function chooseLeader(colour) {
 			:class="{ active: current(seat), mine: isMine(seat) }"
 		>
 			<div class="seat-head">
-				<span class="avatar" :style="leaderStyle(seat, 'R', 30)" aria-hidden="true"></span>
+				<span class="avatar" :style="dynastyStyle(seat, 72)" aria-hidden="true"></span>
 				<div class="identity">
 					<div class="name">
 						{{ model.seatName(seat) }}
@@ -118,65 +118,69 @@ function chooseLeader(colour) {
 				</div>
 			</div>
 
-			<div class="leader-row" aria-label="Leaders">
+			<div v-if="offBoardLeaders(seat).length" class="leader-row" aria-label="Leaders off the board">
 				<button
-					v-for="colour in COLOURS"
+					v-for="colour in offBoardLeaders(seat)"
 					:key="colour"
 					type="button"
 					class="leader-slot pieceButton"
-					:class="{ off: leaderPos(seat, colour) == null, selected: leaderSelected(colour) }"
+					:class="{ selected: leaderSelected(colour) }"
 					:disabled="!canPick(seat)"
 					:aria-pressed="leaderSelected(colour)"
-					:title="leaderTitle(seat, colour)"
+					:title="leaderTitle(colour)"
 					@click="chooseLeader(colour)"
 				>
-					<span class="leader-disc" :style="leaderStyle(seat, colour, 28)"></span>
-					<span class="where">{{ leaderPos(seat, colour) == null ? "off" : cellName(leaderPos(seat, colour)) }}</span>
+					<span class="leader-disc" :style="leaderStyle(seat, colour, 44)"></span>
 				</button>
 			</div>
 
 			<div class="stats">
-				<span class="stat" title="Treasures">◆ {{ visible(seat) ? seatPlayer(seat).treasures : "?" }}</span>
-				<span class="stat" title="Catastrophes">▲ {{ seatPlayer(seat).catastrophes }}</span>
-				<span class="stat">Hand {{ handCount(seatPlayer(seat).hand) }}</span>
+				<span v-if="ownsHand(seat)" class="stat" title="Treasures">
+					<span class="nugget" aria-hidden="true"></span>
+					{{ seatPlayer(seat).treasures }}
+				</span>
+				<span class="stat" title="Catastrophes">
+					<span class="catastrophe" :style="catastropheStyle(48)" aria-hidden="true"></span>
+					{{ seatPlayer(seat).catastrophes }}
+				</span>
 			</div>
 
-			<div class="score-row" aria-label="Victory points">
-				<template v-if="visible(seat)">
-					<span v-for="row in scoreRows(seatPlayer(seat).score)" :key="row.colour" class="score-cube" :class="`c-${row.colour}`" :title="colourName(row.colour)">
-						{{ row.value }}
-					</span>
+			<div v-if="visible(seat)" class="score-row" aria-label="Victory points">
+				<span v-for="row in scoreRows(seatPlayer(seat).score)" :key="row.colour" class="score-cube" :class="`c-${row.colour}`" :title="colourName(row.colour)">
+					{{ row.value }}
+				</span>
+			</div>
+
+			<div v-if="visible(seat)" class="need-row" aria-label="Needed colours">
+				<span class="need-label">Need:</span>
+				<span v-if="need(seat).length === 4" class="need-any">any</span>
+				<template v-else>
+					<span
+						v-for="colour in need(seat)"
+						:key="colour"
+						class="score-cube need-cube"
+						:class="`c-${colour}`"
+						:title="colourName(colour)"
+					></span>
 				</template>
-				<span v-else class="hidden-score" title="Scores are hidden behind screens">?</span>
 			</div>
 
 			<div v-if="ownsHand(seat)" class="hand" :class="{ swapping: mode === 'swap' }" aria-label="Hand">
-				<button
-					v-for="colour in COLOURS"
-					:key="colour"
-					type="button"
-					class="hand-stack pieceButton"
-					:class="{ selected: tileSelected(colour) || swapped(colour) > 0 }"
-					:style="{ height: `${stackHeight(seatPlayer(seat).hand[colour])}px` }"
-					:disabled="!canPick(seat)"
-					:aria-pressed="tileSelected(colour) || swapped(colour) > 0"
-					:title="handTitle(colour)"
-					@click="clickTile(colour)"
-				>
-					<template v-if="seatPlayer(seat).hand[colour] > 0">
-						<span
-							v-for="i in seatPlayer(seat).hand[colour]"
-							:key="i"
-							class="hand-tile"
-							:class="{ picked: i <= swapped(colour) }"
-							:style="{ ...tileStyle(colour, 34), top: `${(i - 1) * 9}px` }"
-						></span>
-					</template>
-					<span v-else class="hand-empty"></span>
-					<span class="hand-count">{{ seatPlayer(seat).hand[colour] }}</span>
-				</button>
+				<template v-for="colour in COLOURS" :key="colour">
+					<button
+						v-for="i in seatPlayer(seat).hand[colour]"
+						:key="`${colour}${i}`"
+						type="button"
+						class="hand-tile pieceButton"
+						:class="{ selected: tileSelected(colour), picked: i <= swapped(colour) }"
+						:style="tileStyle(colour, 44)"
+						:disabled="!canPick(seat)"
+						:aria-pressed="tileSelected(colour) || i <= swapped(colour)"
+						:title="handTitle(colour)"
+						@click="clickTile(colour)"
+					></button>
+				</template>
 			</div>
-			<div v-else class="hand-line">Hand: {{ handCount(seatPlayer(seat).hand) }}</div>
 		</div>
 	</div>
 </template>
@@ -185,7 +189,7 @@ function chooseLeader(colour) {
 .seat {
 	border: 1px solid rgba(102, 57, 49, 0.4);
 	border-radius: 8px;
-	padding: 8px;
+	padding: 12px;
 	background: rgba(255, 255, 255, 0.3);
 }
 
@@ -223,7 +227,7 @@ function chooseLeader(colour) {
 
 .name {
 	font-weight: bold;
-	font-size: 15px;
+	font-size: 22px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -232,8 +236,8 @@ function chooseLeader(colour) {
 .tags {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 5px;
-	font-size: 11px;
+	gap: 6px;
+	font-size: 15px;
 	opacity: 0.8;
 }
 
@@ -245,7 +249,7 @@ function chooseLeader(colour) {
 .you,
 .mark,
 .missing {
-	font-size: 11px;
+	font-size: 15px;
 	font-weight: normal;
 }
 
@@ -254,20 +258,17 @@ function chooseLeader(colour) {
 }
 
 .leader-row {
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	gap: 3px;
-	margin: 7px 0;
+	display: flex;
+	gap: 5px;
+	margin: 9px 0;
 }
 
 .leader-slot {
 	display: flex;
-	flex-direction: column;
 	align-items: center;
-	gap: 1px;
 	border: 1px solid transparent;
 	border-radius: 4px;
-	padding: 2px 1px;
+	padding: 2px;
 	background: transparent;
 	font: inherit;
 	cursor: pointer;
@@ -292,35 +293,46 @@ function chooseLeader(colour) {
 	image-rendering: auto;
 }
 
-.leader-slot.off .leader-disc {
-	opacity: 0.22;
-}
-
-.where {
-	font-size: 10px;
-	line-height: 1;
-	opacity: 0.75;
-}
-
 .stats {
 	display: flex;
-	gap: 9px;
-	font-size: 12px;
+	gap: 16px;
+	font-size: 18px;
+	align-items: center;
 	flex-wrap: wrap;
+}
+
+.stat {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.nugget {
+	display: inline-block;
+	width: 36px;
+	height: 36px;
+	border: 1px solid #663931;
+	border-radius: 6px;
+	background: radial-gradient(circle at 30% 30%, #fff6d8, #fbf236 50%, #b98151);
+}
+
+.catastrophe {
+	display: inline-block;
+	background-repeat: no-repeat;
 }
 
 .score-row {
 	display: flex;
-	gap: 4px;
-	margin-top: 5px;
+	gap: 6px;
+	margin-top: 9px;
 }
 
 .score-cube {
 	display: inline-block;
-	width: 24px;
+	width: 36px;
 	text-align: center;
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 17px;
 	border: 1px solid #663931;
 	border-radius: 3px;
 	color: #fff6d8;
@@ -339,20 +351,36 @@ function chooseLeader(colour) {
 	background: #242327;
 }
 
-.hidden-score {
-	font-size: 18px;
+.need-row {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	margin-top: 7px;
+	font-size: 16px;
+}
+
+.need-label {
+	opacity: 0.75;
+}
+
+.need-cube {
+	width: 22px;
+	height: 22px;
+}
+
+.need-any {
 	font-weight: bold;
-	opacity: 0.6;
+	opacity: 0.75;
 }
 
 .hand {
 	display: flex;
-	align-items: flex-end;
-	gap: 7px;
-	margin-top: 6px;
-	padding-top: 3px;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 5px;
+	margin-top: 10px;
+	padding-top: 8px;
 	border-top: 1px solid rgba(102, 57, 49, 0.2);
-	min-height: 43px;
 }
 
 .hand.swapping {
@@ -360,65 +388,25 @@ function chooseLeader(colour) {
 	border-radius: 4px;
 }
 
-.hand-stack {
-	position: relative;
-	flex: 0 0 34px;
-	width: 34px;
-	border: 1px solid transparent;
-	border-radius: 4px;
+.hand-tile {
+	border: 0;
 	padding: 0;
-	background: transparent;
+	background-color: transparent;
+	background-repeat: no-repeat;
+	border-radius: 3px;
 	cursor: pointer;
 }
 
-.hand-stack:disabled {
+.hand-tile:disabled {
 	cursor: default;
 }
 
-.hand-stack.selected {
-	border-color: #177daf;
-	background: rgba(225, 237, 245, 0.7);
-}
-
-.hand-tile {
-	position: absolute;
-	left: 0;
-	background-repeat: no-repeat;
+.hand-tile.selected {
+	box-shadow: 0 0 0 2px #177daf;
 }
 
 .hand-tile.picked {
-	left: 4px;
 	box-shadow: 0 0 0 2px #fbf236;
-	z-index: 2;
-}
-
-.hand-empty {
-	position: absolute;
-	left: 0;
-	top: 0;
-	width: 34px;
-	height: 37px;
-	border: 1px dashed rgba(102, 57, 49, 0.35);
-	border-radius: 3px;
-}
-
-.hand-count {
-	position: absolute;
-	right: -4px;
-	bottom: -5px;
-	z-index: 3;
-	background: #663931;
-	color: #fff6d8;
-	font-size: 11px;
-	line-height: 14px;
-	border-radius: 8px;
-	padding: 0 4px;
-}
-
-.hand-line {
-	margin-top: 5px;
-	font-size: 12px;
-	opacity: 0.75;
 }
 
 .pieceButton:focus-visible {
