@@ -4,42 +4,26 @@ import { computed } from "vue";
 import { useModelStore } from "../stores/LBRstore.js";
 import * as controller from "../js/LBRcontroller.js";
 import * as model from "../js/LBRmodel.js";
-import { cellName, colourName, dynastyStyle, monumentName, monumentStyle, tileStyle } from "../js/LBRview.js";
-import { conflictStanding, currentActor } from "../js/LBRrules.js";
+import { cellName, colourName, monumentName, monumentStyle, tileStyle } from "../js/LBRview.js";
+import { conflictStanding } from "../js/LBRrules.js";
 import GameOverPanel from "./GameOverPanel.vue";
 
 const store = useModelStore();
 
 const game = computed(() => store.game);
 const pending = computed(() => game.value?.pending || null);
-const actorSeat = computed(() => (game.value ? currentActor(game.value) : -1));
-const actorPlayer = computed(() => (game.value ? game.value.players[actorSeat.value] : null));
 const myTurn = computed(() => model.isMyTurn());
-const mode = computed(() => store.viewSettings.mode);
-const selectedColour = computed(() => store.viewSettings.selectedColour);
 const saving = computed(() => store.viewSettings.saving);
 
 const support = computed(() => conflictStanding(game.value, pending.value));
 const supportMax = computed(() => {
-	if (!pending.value || !actorPlayer.value) return 0;
+	if (!pending.value) return 0;
 	const colour = pending.value.kind === "revoltSupport" ? "R" : pending.value.colour;
-	return actorPlayer.value.hand[colour] || 0;
+	return game.value.players[pending.value.seat].hand[colour] || 0;
 });
 const supportChoices = computed(() => Array.from({ length: supportMax.value + 1 }, (_, i) => i));
-const swapCount = computed(() => controller.swapTotal());
 const conflicts = computed(() => game.value?.war?.conflicts || []);
-const selectedLeaderPos = computed(() => {
-	if (mode.value !== "leader" || !selectedColour.value || !actorPlayer.value) return null;
-	return actorPlayer.value.leaders[selectedColour.value];
-});
-const hint = computed(() => controller.actionHint());
 const message = computed(() => store.gameMessages.errorText || store.gameMessages.successText);
-const meta = computed(() => {
-	if (!game.value) return "";
-	if (pending.value) return "making a decision";
-	if (myTurn.value) return `your turn · ${2 - game.value.actionsUsed} action(s) left`;
-	return `waiting for ${model.seatName(actorSeat.value)}`;
-});
 
 function keepTreasure(pos) {
 	controller.keepTreasure(pos);
@@ -60,15 +44,6 @@ function build(at, type) {
 function decline() {
 	controller.declineMonument();
 }
-
-function swapSelected() {
-	controller.swapSelected();
-}
-
-function cancel() {
-	controller.resetSelection();
-	store.gameMessages.successText = "";
-}
 </script>
 
 <template>
@@ -79,21 +54,14 @@ function cancel() {
 
 	<GameOverPanel v-else-if="game.gameOver" />
 
-	<div v-else class="action-bar">
-		<div class="action-info">
-			<div class="turn-line">
-				<span class="actor-avatar" :style="dynastyStyle(actorSeat, 32)" aria-hidden="true"></span>
-				<b>{{ model.seatName(actorSeat) }}</b>
-				<span class="turn-meta">{{ meta }}</span>
-			</div>
-			<div
-				class="message"
-				:class="{ error: store.gameMessages.errorText, ok: !store.gameMessages.errorText && store.gameMessages.successText }"
-				role="status"
-			>
-				{{ message }}
-			</div>
-			<div class="hint">{{ hint }}</div>
+	<div v-else class="action-bar" :class="{ idle: !pending && !message }">
+		<div
+			v-if="message"
+			class="message"
+			:class="{ error: store.gameMessages.errorText, ok: !store.gameMessages.errorText && store.gameMessages.successText }"
+			role="status"
+		>
+			{{ message }}
 		</div>
 
 		<div class="action-controls">
@@ -167,7 +135,6 @@ function cancel() {
 						type="button"
 						class="actionsLineButton monument-button"
 						:disabled="!myTurn"
-						:title="`Build ${monumentName(type)} at ${cellName(offer.at)}`"
 						@click="build(offer.at, type)"
 					>
 						<span class="mini-monument" :style="monumentStyle(type, 24)"></span>
@@ -175,40 +142,6 @@ function cancel() {
 					</button>
 				</template>
 				<button type="button" class="actionsLineButton" :disabled="!myTurn" @click="decline">Decline</button>
-			</template>
-
-			<!-- Normal turn -->
-			<template v-else-if="myTurn">
-				<template v-if="mode === 'swap'">
-					<span class="decision-text">Swap {{ swapCount }} / 6</span>
-					<button type="button" class="actionsLineButton" :disabled="swapCount <= 0 || saving" @click="swapSelected">Confirm swap</button>
-					<button type="button" class="actionsLineButton" @click="cancel">Cancel</button>
-				</template>
-				<template v-else>
-					<button v-if="mode !== 'idle'" type="button" class="actionsLineButton" @click="cancel">Cancel</button>
-					<button
-						v-if="mode === 'leader' && selectedLeaderPos != null"
-						type="button"
-						class="actionsLineButton"
-						:disabled="saving"
-						@click="controller.withdrawLeader(selectedColour)"
-					>
-						Withdraw leader
-					</button>
-					<button
-						type="button"
-						class="actionsLineButton"
-						:class="{ chosen: mode === 'catastrophe' }"
-						:aria-pressed="mode === 'catastrophe'"
-						:disabled="actorPlayer.catastrophes <= 0 || saving"
-						@click="controller.selectCatastrophe"
-					>
-						Catastrophe ({{ actorPlayer.catastrophes }})
-					</button>
-					<button type="button" class="actionsLineButton" :disabled="saving" @click="controller.selectSwapMode">Swap tiles</button>
-					<button type="button" class="actionsLineButton" :disabled="saving" @click="controller.passAction">Pass one action</button>
-					<button type="button" class="actionsLineButton" :disabled="saving" @click="controller.endTurn">End turn</button>
-				</template>
 			</template>
 		</div>
 	</div>
@@ -235,28 +168,10 @@ function cancel() {
 	color: #663931;
 }
 
-.action-info {
-	flex: 1 1 320px;
-	min-width: 0;
-}
-
-.turn-line {
-	display: flex;
-	align-items: center;
-	gap: 7px;
-	font-size: 15px;
-}
-
-.actor-avatar {
-	flex: 0 0 auto;
-	background-repeat: no-repeat;
-	border-radius: 50%;
-	image-rendering: auto;
-}
-
-.turn-meta {
-	font-size: 12px;
-	opacity: 0.75;
+/* Nothing to decide and nothing to say: keep the space, drop the frame. */
+.action-bar.idle {
+	background: transparent;
+	border-color: transparent;
 }
 
 .message {
@@ -273,19 +188,13 @@ function cancel() {
 	color: #275d02;
 }
 
-.hint {
-	font-size: 12px;
-	opacity: 0.78;
-}
-
 .action-controls {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 3px;
 	align-items: center;
 	justify-content: flex-end;
-	flex: 0 1 auto;
-	max-width: 60%;
+	flex: 1 1 auto;
 }
 
 .action-controls :deep(.actionsLineButton),
@@ -308,7 +217,8 @@ function cancel() {
 }
 
 .conflict-box .hint {
-	font-size: 11px;
+	font-size: 12px;
+	opacity: 0.78;
 }
 
 .support-button {
@@ -336,11 +246,7 @@ function cancel() {
 		flex-direction: column;
 		max-height: 45vh;
 	}
-	.action-info {
-		flex: 0 0 auto;
-	}
 	.action-controls {
-		max-width: 100%;
 		justify-content: flex-start;
 	}
 }

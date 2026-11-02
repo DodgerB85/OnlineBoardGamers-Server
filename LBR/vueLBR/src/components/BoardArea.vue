@@ -15,9 +15,11 @@ const tileSheet = "/static/LBR/images/tiles.png";
 const leaderSheet = "/static/LBR/images/leaders.png";
 const monumentSheet = "/static/LBR/images/monuments.png";
 
-// The map keeps its full 950px size on every screen; narrower pages scroll it.
-// Four extra pixels keep the map itself at BOARD_WIDTH: the frame adds 2px a side.
-const boardStyle = computed(() => ({ width: `calc(${BOARD_WIDTH + 4}px * ${store.viewSettings.boardZoom})` }));
+// The map keeps its 950px size when there is room and shrinks to fit a narrow
+// page; zooming in past the fit overflows and scrolls as before.
+const boardStyle = computed(() => ({
+	width: `calc(min(100%, ${BOARD_WIDTH + 4}px) * ${store.viewSettings.boardZoom})`,
+}));
 
 const cells = Array.from({ length: CELLS }, (_, i) => i);
 const legal = computed(() => controller.legalCells());
@@ -179,7 +181,6 @@ function isOwnLeader(pos) {
 					@keydown.enter.prevent="controller.clickCell(pos)"
 					@keydown.space.prevent="controller.clickCell(pos)"
 				>
-					<title>{{ label(pos) }}</title>
 				</rect>
 			</svg>
 		</div>

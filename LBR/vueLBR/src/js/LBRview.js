@@ -121,11 +121,17 @@ export function monumentStyle(type, size = 40) {
 	};
 }
 
-// Clicking a colour in swap mode adds one tile, wraps back to zero after the
-// last tile of that colour, and never takes more than six in total.
-export function cycleSwapCount(current, handCount, totalSelected, max = 6) {
-	if (current >= handCount || totalSelected >= max) return 0;
-	return current + 1;
+// Swapping picks tiles one at a time: clicking a picked tile puts only that
+// tile back, and no more than six may be picked.
+export function toggleSwapPick(selected, index, totalSelected, max = 6) {
+	const key = String(index - 1);
+	if (selected[key]) {
+		const next = { ...selected };
+		delete next[key];
+		return next;
+	}
+	if (totalSelected >= max) return selected;
+	return { ...selected, [key]: true };
 }
 
 export function historyText(entry, seatNames) {

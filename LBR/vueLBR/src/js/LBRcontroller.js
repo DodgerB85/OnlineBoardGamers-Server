@@ -4,7 +4,7 @@ import { usePersonalStore } from "../stores/LBRpersonal.js";
 import * as IO from "../backend/LBR_IO.js";
 import * as model from "./LBRmodel.js";
 import { COLOURS, CELLS, CODE_COLOUR } from "./LBRreference.js";
-import { cellName, colourName, cycleSwapCount } from "./LBRview.js";
+import { cellName, colourName, toggleSwapPick } from "./LBRview.js";
 import {
 	applyAction,
 	canPlaceCatastrophe,
@@ -63,37 +63,7 @@ export function resetSelection() {
 	const store = useModelStore();
 	store.viewSettings.mode = "idle";
 	store.viewSettings.selectedColour = null;
-	for (const colour of COLOURS) store.selectedSwap[colour] = 0;
-}
-
-export function actionHint() {
-	const store = useModelStore();
-	const game = store.game;
-	if (!game) return "";
-	if (game.gameOver) return "The game is over.";
-	if (game.pending) {
-		if (!model.isMyTurn()) return `Waiting for ${model.seatName(game.pending.seat)} to decide.`;
-		if (game.pending.kind === "treasure") return "Choose one of the treasures marked on the board.";
-		if (game.pending.kind === "warOrder") return "Choose which conflict is resolved first.";
-		if (game.pending.kind === "monument") return "Build one of the offered monuments, or decline.";
-		if (game.pending.kind === "warSupport" || game.pending.kind === "revoltSupport") {
-			return "Choose how many tiles to send as support.";
-		}
-		return "Make the highlighted decision.";
-	}
-	if (!model.isMyTurn()) return `Waiting for ${model.seatName(currentActor(game))}.`;
-	const mode = store.viewSettings.mode;
-	const colour = store.viewSettings.selectedColour;
-	if (mode === "swap") return "Click tiles in your hand to pick up to six to exchange, then confirm the swap.";
-	if (mode === "tile" && colour) return `Click a highlighted space for your ${colourName(colour).toLowerCase()} tile.`;
-	if (mode === "leader" && colour) {
-		const onBoard = game.players[model.mySeat()].leaders[colour] !== null;
-		return onBoard
-			? `Click a highlighted space for your ${colourName(colour).toLowerCase()} leader, or withdraw it.`
-			: `Click a highlighted temple space to bring your ${colourName(colour).toLowerCase()} leader onto the board.`;
-	}
-	if (mode === "catastrophe") return "Click a space for your catastrophe.";
-	return "Click a tile in your board to place it, or one of your leaders to move it. Leaders on the map can be clicked too.";
+	for (const colour of COLOURS) store.selectedSwap[colour] = {};
 }
 
 function commit(action) {
@@ -185,9 +155,9 @@ function describeCell(game, pos) {
 	return `${cellName(pos)}: empty space.`;
 }
 
-export function clickHandTile(colour) {
+export function clickHandTile(colour, index) {
 	const store = useModelStore();
-	if (store.viewSettings.mode === "swap") pickSwapTile(colour);
+	if (store.viewSettings.mode === "swap") pickSwapTile(colour, index);
 	else selectTile(colour);
 }
 
@@ -242,27 +212,21 @@ export function selectSwapMode() {
 	store.gameMessages.successText = "";
 }
 
-export function pickSwapTile(colour) {
+export function pickSwapTile(colour, index) {
 	const store = useModelStore();
 	const game = store.game;
 	if (!game || store.viewSettings.mode !== "swap") return;
-	const hand = game.players[model.mySeat()].hand;
-	const total = COLOURS.reduce((sum, c) => sum + store.selectedSwap[c], 0);
-	store.selectedSwap[colour] = cycleSwapCount(store.selectedSwap[colour], hand[colour], total);
+	store.selectedSwap[colour] = toggleSwapPick(store.selectedSwap[colour], index, swapTotal());
 	store.gameMessages.errorText = "";
 }
 
 export function swapTotal() {
 	const store = useModelStore();
-	return COLOURS.reduce((sum, colour) => sum + store.selectedSwap[colour], 0);
+	return COLOURS.reduce((sum, colour) => sum + Object.keys(store.selectedSwap[colour]).length, 0);
 }
 
 export function withdrawLeader(colour) {
 	commit({ type: "withdrawLeader", colour });
-}
-
-export function passAction() {
-	commit({ type: "pass" });
 }
 
 export function endTurn() {
@@ -271,7 +235,9 @@ export function endTurn() {
 
 export function swapSelected() {
 	const store = useModelStore();
-	commit({ type: "swap", tiles: { ...store.selectedSwap } });
+	const tiles = {};
+	for (const colour of COLOURS) tiles[colour] = Object.keys(store.selectedSwap[colour]).length;
+	commit({ type: "swap", tiles });
 }
 
 export function keepTreasure(pos) {

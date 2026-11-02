@@ -1,19 +1,17 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { cycleSwapCount, neededColours } from "./LBRview.js";
+import { neededColours, toggleSwapPick } from "./LBRview.js";
 
-test("swap selection adds one tile and wraps back to zero", () => {
-	assert.equal(cycleSwapCount(0, 3, 0), 1);
-	assert.equal(cycleSwapCount(1, 3, 1), 2);
-	assert.equal(cycleSwapCount(2, 3, 2), 3);
-	assert.equal(cycleSwapCount(3, 3, 3), 0);
+test("swap tiles are picked one at a time and only the clicked one goes back", () => {
+	assert.deepEqual(toggleSwapPick({}, 1, 0), { 0: true });
+	assert.deepEqual(toggleSwapPick({}, 3, 0), { 2: true }, "a later tile picks only itself");
+	assert.deepEqual(toggleSwapPick({ 0: true, 1: true, 2: true }, 2, 3), { 0: true, 2: true }, "the clicked tile alone is put back");
 });
 
 test("swap selection never goes past six tiles in total", () => {
-	assert.equal(cycleSwapCount(0, 3, 6), 0);
-	assert.equal(cycleSwapCount(1, 3, 5), 2);
-	assert.equal(cycleSwapCount(1, 3, 7), 0, "a saved over-limit draft still resets");
+	assert.deepEqual(toggleSwapPick({}, 1, 6), {}, "picking a seventh is refused");
+	assert.deepEqual(toggleSwapPick({ 0: true }, 1, 6), {}, "putting one back is always allowed");
 });
 
 test("needed colours are the ones holding the lowest score", () => {

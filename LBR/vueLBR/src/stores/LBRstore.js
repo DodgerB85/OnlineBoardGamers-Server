@@ -34,7 +34,7 @@ export const useModelStore = defineStore("model", () => {
 		saving: false,
 		boardZoom: 1,
 	});
-	const selectedSwap = reactive({ R: 0, B: 0, G: 0, K: 0 });
+	const selectedSwap = reactive({ R: {}, B: {}, G: {}, K: {} });
 
 	return {
 		game,

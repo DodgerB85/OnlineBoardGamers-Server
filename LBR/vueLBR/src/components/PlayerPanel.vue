@@ -20,6 +20,7 @@ const shownSeats = computed(() => props.seats ?? allSeats.value);
 const mySeat = computed(() => model.mySeat());
 const mode = computed(() => store.viewSettings.mode);
 const selectedColour = computed(() => store.viewSettings.selectedColour);
+const swapCount = computed(() => controller.swapTotal());
 
 function seatPlayer(seat) {
 	return store.game.players[seat];
@@ -65,12 +66,17 @@ function leaderSelected(colour) {
 	return mode.value === "leader" && selectedColour.value === colour;
 }
 
+// A leader picked from the map (the card only shows the ones off the board).
+function leaderOnBoard(seat) {
+	return mode.value === "leader" && leaderPos(seat, selectedColour.value) != null;
+}
+
 function tileSelected(colour) {
 	return mode.value === "tile" && selectedColour.value === colour;
 }
 
-function swapped(colour) {
-	return mode.value === "swap" ? store.selectedSwap[colour] : 0;
+function isPicked(colour, i) {
+	return !!store.selectedSwap[colour][i - 1];
 }
 
 function leaderTitle(colour) {
@@ -83,9 +89,9 @@ function handTitle(colour) {
 		: `Place a ${colourName(colour).toLowerCase()} tile`;
 }
 
-function clickTile(colour) {
+function clickTile(colour, index) {
 	if (!canPick(mySeat.value)) return;
-	controller.clickHandTile(colour);
+	controller.clickHandTile(colour, index);
 }
 
 function chooseLeader(colour) {
@@ -110,10 +116,13 @@ function chooseLeader(colour) {
 						<span v-if="seat === personal.pov && !model.isAiSeat(seat)" class="you">(you)</span>
 					</div>
 					<div class="tags">
-						<span v-if="current(seat)" class="current" title="Making a decision now">● playing</span>
+						<span v-if="current(seat)" class="current">● playing</span>
+						<span v-if="current(seat) && !store.game.pending && !store.game.gameOver" class="actions-left">
+							{{ 2 - store.game.actionsUsed }} action(s) left
+						</span>
 						<span v-if="model.isAiSeat(seat)" class="missing">AI</span>
 						<span v-if="model.isMissing(seat)" class="missing">missing</span>
-						<span class="mark">{{ model.markForSeat(seat) }} dynasty</span>
+						<span class="mark">{{ model.markForSeat(seat) }}</span>
 					</div>
 				</div>
 			</div>
@@ -127,26 +136,55 @@ function chooseLeader(colour) {
 					:class="{ selected: leaderSelected(colour) }"
 					:disabled="!canPick(seat)"
 					:aria-pressed="leaderSelected(colour)"
-					:title="leaderTitle(colour)"
+					:aria-label="leaderTitle(colour)"
 					@click="chooseLeader(colour)"
 				>
 					<span class="leader-disc" :style="leaderStyle(seat, colour, 44)"></span>
 				</button>
 			</div>
 
+			<div class="card-controls" v-if="isMine(seat) && !store.game.gameOver">
+				<template v-if="mode === 'swap'">
+					<button type="button" :disabled="!canPick(seat) || swapCount <= 0" @click="controller.swapSelected">
+						Confirm swap ({{ swapCount }}/6)
+					</button>
+					<button type="button" :disabled="!canPick(seat)" @click="controller.resetSelection">Cancel</button>
+				</template>
+				<template v-else>
+					<button type="button" :disabled="!canPick(seat)" @click="controller.selectSwapMode">Swap tiles</button>
+					<button v-if="leaderOnBoard(seat)" type="button" :disabled="!canPick(seat)" @click="controller.withdrawLeader(selectedColour)">
+						Withdraw leader
+					</button>
+					<button v-if="mode !== 'idle'" type="button" :disabled="!canPick(seat)" @click="controller.resetSelection">Cancel</button>
+					<button type="button" :disabled="!canPick(seat)" @click="controller.endTurn">Pass &amp; End Turn</button>
+				</template>
+			</div>
+
 			<div class="stats">
-				<span v-if="ownsHand(seat)" class="stat" title="Treasures">
+				<span v-if="ownsHand(seat)" class="stat">
 					<span class="nugget" aria-hidden="true"></span>
 					{{ seatPlayer(seat).treasures }}
 				</span>
-				<span class="stat" title="Catastrophes">
+				<button
+					v-if="isMine(seat)"
+					type="button"
+					class="stat catastrophe-button pieceButton"
+					:aria-pressed="mode === 'catastrophe'"
+					:disabled="!canPick(seat) || seatPlayer(seat).catastrophes <= 0"
+					aria-label="Place a catastrophe"
+					@click="controller.selectCatastrophe"
+				>
+					<span class="catastrophe" :style="catastropheStyle(48)" aria-hidden="true"></span>
+					{{ seatPlayer(seat).catastrophes }}
+				</button>
+				<span v-else class="stat">
 					<span class="catastrophe" :style="catastropheStyle(48)" aria-hidden="true"></span>
 					{{ seatPlayer(seat).catastrophes }}
 				</span>
 			</div>
 
 			<div v-if="visible(seat)" class="score-row" aria-label="Victory points">
-				<span v-for="row in scoreRows(seatPlayer(seat).score)" :key="row.colour" class="score-cube" :class="`c-${row.colour}`" :title="colourName(row.colour)">
+				<span v-for="row in scoreRows(seatPlayer(seat).score)" :key="row.colour" class="score-cube" :class="`c-${row.colour}`">
 					{{ row.value }}
 				</span>
 			</div>
@@ -160,7 +198,6 @@ function chooseLeader(colour) {
 						:key="colour"
 						class="score-cube need-cube"
 						:class="`c-${colour}`"
-						:title="colourName(colour)"
 					></span>
 				</template>
 			</div>
@@ -172,12 +209,12 @@ function chooseLeader(colour) {
 						:key="`${colour}${i}`"
 						type="button"
 						class="hand-tile pieceButton"
-						:class="{ selected: tileSelected(colour), picked: i <= swapped(colour) }"
+						:class="{ selected: tileSelected(colour), picked: isPicked(colour, i) }"
 						:style="tileStyle(colour, 44)"
 						:disabled="!canPick(seat)"
-						:aria-pressed="tileSelected(colour) || i <= swapped(colour)"
-						:title="handTitle(colour)"
-						@click="clickTile(colour)"
+						:aria-pressed="tileSelected(colour) || isPicked(colour, i)"
+						:aria-label="handTitle(colour)"
+						@click="clickTile(colour, i)"
 					></button>
 				</template>
 			</div>
@@ -253,6 +290,17 @@ function chooseLeader(colour) {
 	font-weight: normal;
 }
 
+.actions-left {
+	font-weight: bold;
+}
+
+.card-controls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 9px 0;
+}
+
 .missing {
 	color: #8b1d1d;
 }
@@ -319,6 +367,27 @@ function chooseLeader(colour) {
 .catastrophe {
 	display: inline-block;
 	background-repeat: no-repeat;
+	border-radius: 6px;
+}
+
+.catastrophe-button {
+	padding: 0;
+	border: 0;
+	background: transparent;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.catastrophe-button:disabled {
+	cursor: default;
+}
+
+.catastrophe-button:hover:enabled .catastrophe {
+	box-shadow: 0 0 0 2px #fbf236;
+}
+
+.catastrophe-button[aria-pressed="true"] .catastrophe {
+	box-shadow: 0 0 0 2px #177daf;
 }
 
 .score-row {
@@ -415,7 +484,7 @@ function chooseLeader(colour) {
 }
 
 /* The rails sit under the board on narrow screens, so the seat cards share a row. */
-@media (max-width: 1450px) {
+@media (max-width: 1300px) {
 	.player-cards {
 		display: flex;
 		flex: 1;
