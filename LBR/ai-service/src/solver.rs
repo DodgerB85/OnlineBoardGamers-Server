@@ -1,7 +1,7 @@
 use crate::{game::{Action, Bitboard, Leader, Player, PlayerAction, TnEGame, H, W, TileType, Pos}, pos};
 use once_cell::sync::Lazy;
 
-pub struct TigrisAndEuphrates;
+pub struct Lbr;
 
 // Zobrist hash constants for leader positions
 static LEADER_HASHES: Lazy<[[[u64; 4]; W]; H]> = Lazy::new(|| {
@@ -86,7 +86,7 @@ fn compute_zobrist_hash(state: &TnEGame) -> u64 {
         mix_hash(&mut h, ps.num_catastrophes as u64);
     }
 
-    // Turn machinery: T&E has several actions per turn and conflict resolution
+    // Turn machinery: LBR has several actions per turn and conflict resolution
     // sub-states, so two states can share a board yet be at different points in
     // a turn (different legal moves and, with `same_player_continues`, a
     // different value sign). Include it all. Terminal states (empty stack) are
@@ -124,7 +124,7 @@ fn compute_zobrist_hash(state: &TnEGame) -> u64 {
 /// Re-export of the Action type as the move type for external usage
 pub type TnEMove = Action;
 
-impl minimax::Game for TigrisAndEuphrates {
+impl minimax::Game for Lbr {
     type S = TnEGame;
     type M = Action;  // Action is Copy
 
@@ -207,7 +207,7 @@ impl minimax::Game for TigrisAndEuphrates {
     }
 
     fn same_player_continues(state: &Self::S) -> bool {
-        // In T&E, the same player moves again if:
+        // In LBR, the same player moves again if:
         // 1. It's still their turn (2 actions per turn)
         // 2. They have pending conflict resolution
         // We check by comparing last_action_player with the player whose turn it is
@@ -225,7 +225,7 @@ impl minimax::Game for TigrisAndEuphrates {
     }
 
     fn null_move(state: &Self::S) -> Option<Self::M> {
-        // T&E has no null move. `Action::Pass` is a *legal game action* that
+        // LBR has no null move. `Action::Pass` is a *legal game action* that
         // spends one of the active player's two actions for the turn; it does
         // not hand the position to the opponent. Treating it as a null move
         // was doubly wrong:
@@ -240,7 +240,7 @@ impl minimax::Game for TigrisAndEuphrates {
         //  2. Even where legal, it is not a pass of the turn, so the pruning
         //     assumption does not hold.
         //
-        // Returning `None` disables null-move pruning for T&E entirely, which
+        // Returning `None` disables null-move pruning for LBR entirely, which
         // is the correct behaviour.
         let _ = state;
         None
@@ -571,7 +571,7 @@ impl Default for Evaluator {
 }
 
 impl minimax::Evaluator for Evaluator {
-    type G = TigrisAndEuphrates;
+    type G = Lbr;
 
     fn evaluate(&self, state: &<Self::G as minimax::Game>::S) -> minimax::Evaluation {
         let s1 = state.players.get(Player::Player1).get_eval(state);
@@ -610,7 +610,7 @@ impl SimpleEvaluator {
 }
 
 impl minimax::Evaluator for SimpleEvaluator {
-    type G = TigrisAndEuphrates;
+    type G = Lbr;
 
     fn evaluate(&self, state: &<Self::G as minimax::Game>::S) -> minimax::Evaluation {
         let s1 = Self::simple_eval(state.players.get(Player::Player1));
@@ -734,7 +734,7 @@ impl EngineEvaluator {
 }
 
 impl minimax::Evaluator for EngineEvaluator {
-    type G = TigrisAndEuphrates;
+    type G = Lbr;
 
     fn evaluate(&self, state: &<Self::G as minimax::Game>::S) -> minimax::Evaluation {
         let diff = self.features(state, Player::Player1) - self.features(state, Player::Player2);
@@ -753,7 +753,7 @@ mod tests {
     use crate::game::Tiles;
     use minimax::{Negamax, Random, Strategy, Game};
 
-    /// Regression: T&E must report "no null move".
+    /// Regression: LBR must report "no null move".
     ///
     /// `Action::Pass` is not a null move here — it spends one of the active
     /// player's two actions. Returning it from `null_move` made the engine try
@@ -766,8 +766,8 @@ mod tests {
     fn tne_has_no_null_move() {
         let state = TnEGame::new();
         assert!(
-            <TigrisAndEuphrates as minimax::Game>::null_move(&state).is_none(),
-            "T&E has no null move: Pass spends one of the two actions in a turn"
+            <Lbr as minimax::Game>::null_move(&state).is_none(),
+            "LBR has no null move: Pass spends one of the two actions in a turn"
         );
     }
 
@@ -781,7 +781,7 @@ mod tests {
             let mut engine = crate::arena::build_engine(depth, 0, 0xBEEF, EngineWeights::default());
             let mut cur = state.clone();
             let mut plies = 0;
-            while <TigrisAndEuphrates as minimax::Game>::get_winner(&cur).is_none()
+            while <Lbr as minimax::Game>::get_winner(&cur).is_none()
                 && plies < 24
             {
                 let m = match engine.choose_move(&cur) {
@@ -804,7 +804,7 @@ mod tests {
 
     /// Helper function to play a single game between two strategies
     /// Returns the winner (Player1, Player2, or None for draw)
-    fn play_game<S1: Strategy<TigrisAndEuphrates>, S2: Strategy<TigrisAndEuphrates>>(
+    fn play_game<S1: Strategy<Lbr>, S2: Strategy<Lbr>>(
         p1_strategy: &mut S1,
         p2_strategy: &mut S2,
         max_moves: usize,
@@ -812,7 +812,7 @@ mod tests {
         let mut game = TnEGame::new();
         let mut move_count = 0;
 
-        while TigrisAndEuphrates::get_winner(&game).is_none() && move_count < max_moves {
+        while Lbr::get_winner(&game).is_none() && move_count < max_moves {
             let curr_player = game.next_player();
             let m = match curr_player {
                 Player::Player1 => p1_strategy.choose_move(&game),
@@ -824,7 +824,7 @@ mod tests {
                 Some(mv) => {
                     // `apply` clones and returns the successor; the caller MUST
                     // adopt it (see the minimax `Game::apply` contract).
-                    if let Some(next) = TigrisAndEuphrates::apply(&mut game, mv) {
+                    if let Some(next) = Lbr::apply(&mut game, mv) {
                         game = next;
                     }
                     move_count += 1;
@@ -858,7 +858,7 @@ mod tests {
                 let mut simple_ai = Negamax::new(SimpleEvaluator::default(), 1);
 
                 let mut moves = 0;
-                while TigrisAndEuphrates::get_winner(&game).is_none() && moves < 200 {
+                while Lbr::get_winner(&game).is_none() && moves < 200 {
                     let cur = game.next_player();
                     let improved_to_move = (cur == Player::Player1) == improved_is_p1;
                     let m = if improved_to_move {
@@ -866,7 +866,7 @@ mod tests {
                     } else {
                         simple_ai.choose_move(&game)
                     };
-                    match m.and_then(|mv| TigrisAndEuphrates::apply(&mut game, mv)) {
+                    match m.and_then(|mv| Lbr::apply(&mut game, mv)) {
                         Some(next) => {
                             game = next;
                             moves += 1;
@@ -915,7 +915,7 @@ mod tests {
             
             // Use depth 2 for faster tests
             let mut ai_strategy = Negamax::new(Evaluator::default(), 2);
-            let mut random_strategy = Random::<TigrisAndEuphrates>::new();
+            let mut random_strategy = Random::<Lbr>::new();
 
             let winner = if ai_is_p1 {
                 play_game(&mut ai_strategy, &mut random_strategy, 200)
@@ -1470,10 +1470,10 @@ mod tests {
     fn test_elo_tournament() {
         println!("\n");
         println!("╔══════════════════════════════════════════════════════════════╗");
-        println!("║           TIGRIS & EUPHRATES AI ELO TOURNAMENT               ║");
+        println!("║           LAND BETWEEN RIVERS AI ELO TOURNAMENT              ║");
         println!("╠══════════════════════════════════════════════════════════════╣");
         println!("║  Measuring AI strength using the ELO rating system           ║");
-        println!("║  (Same system used on Board Game Arena for T&E rankings)     ║");
+        println!("║  (Same system used on Board Game Arena for LBR rankings)     ║");
         println!("╚══════════════════════════════════════════════════════════════╝");
         println!();
         
@@ -1503,25 +1503,25 @@ mod tests {
                     let winner = match (i, j) {
                         // Random vs others
                         (0, 1) => {
-                            let mut p1 = Random::<TigrisAndEuphrates>::new();
+                            let mut p1 = Random::<Lbr>::new();
                             let mut p2 = Negamax::new(SimpleEvaluator::default(), 1);
                             if i_is_p1 { play_game(&mut p1, &mut p2, 200) }
                             else { play_game(&mut p2, &mut p1, 200) }
                         }
                         (0, 2) => {
-                            let mut p1 = Random::<TigrisAndEuphrates>::new();
+                            let mut p1 = Random::<Lbr>::new();
                             let mut p2 = Negamax::new(SimpleEvaluator::default(), 2);
                             if i_is_p1 { play_game(&mut p1, &mut p2, 200) }
                             else { play_game(&mut p2, &mut p1, 200) }
                         }
                         (0, 3) => {
-                            let mut p1 = Random::<TigrisAndEuphrates>::new();
+                            let mut p1 = Random::<Lbr>::new();
                             let mut p2 = Negamax::new(Evaluator::default(), 1);
                             if i_is_p1 { play_game(&mut p1, &mut p2, 200) }
                             else { play_game(&mut p2, &mut p1, 200) }
                         }
                         (0, 4) => {
-                            let mut p1 = Random::<TigrisAndEuphrates>::new();
+                            let mut p1 = Random::<Lbr>::new();
                             let mut p2 = Negamax::new(Evaluator::default(), 2);
                             if i_is_p1 { play_game(&mut p1, &mut p2, 200) }
                             else { play_game(&mut p2, &mut p1, 200) }
@@ -1639,7 +1639,7 @@ mod tests {
         
         // Context for Board Game Arena
         println!("🌐 Board Game Arena Context:");
-        println!("   • BGA uses ELO for T&E rankings");
+        println!("   • BGA uses ELO for LBR rankings");
         println!("   • Top 3 players have ELO > 300 above average");
         println!("   • Our AI shows {:.0} ELO above random baseline", elo_diff);
         println!();

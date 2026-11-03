@@ -1,4 +1,4 @@
-// LBR (Land Between Rivers / Tigris & Euphrates) constants and board.
+// LBR (Land Between Rivers) constants and board.
 
 export const ROWS = 11;
 export const COLS = 16;

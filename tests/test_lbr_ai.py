@@ -76,7 +76,7 @@ class LBRAISeatCreationTests(TestCase):
     def test_ai_seat_is_never_invited(self):
         self.client.post(reverse("LBR:createLBRgame"), base_post(playerNumber="4", ai2="1", player3="invited"))
         game = Game.objects.get(gameCode="LBR")
-        self.assertFalse(game.invitedPlayers.filter(username__startswith="TigrisAI").exists())
+        self.assertFalse(game.invitedPlayers.filter(username__startswith="LBRAI").exists())
         self.assertEqual(game.invitedPlayers.count(), 1)
 
 

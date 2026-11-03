@@ -140,7 +140,7 @@ terms as the rest of OBG. `minimax/` is the only third-party code: the MIT-licen
 - AI seats are never notified and never kickout targets. A kicked or resigned
   seat is played on by the AI; its `seat_order` and `gameData` are untouched.
 
-## Migrating from the `tigris` checkout
+## Migrating from the old external AI service
 
 1. `cd LBR/ai-service && cargo build --release --locked`, or rebuild the
    production image (its `lbr-ai` stage does it).

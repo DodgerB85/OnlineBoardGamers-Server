@@ -3415,7 +3415,7 @@ impl MonumentType {
     }
 }
 
-/// Tile types in Tigris and Euphrates:
+/// Tile types:
 /// - Red = Temple (Priest leader) - Leaders must be placed adjacent to temples
 /// - Blue = Farm (Farmer leader) - Can only be placed on river spaces
 /// - Green = Market (Trader leader) - For collecting treasures
@@ -3433,7 +3433,7 @@ pub enum TileType {
     Black,
 }
 
-/// Temple is a red tile in Tigris and Euphrates
+/// Temple is a red tile
 /// Leaders must always be adjacent to at least one temple
 pub const TEMPLE: TileType = TileType::Red;
 
@@ -5509,7 +5509,7 @@ mod interactive_input_tests {
     /// Both were previously unreachable from the UI — the monument decision had
     /// no handler at all and tile commitment was an undocumented number key — so
     /// this asserts the engine accepts exactly the range the UI offers, and
-    /// rejects what it must not offer. A war in T&E is decided by tile counts,
+    /// rejects what it must not offer. A war in LBR is decided by tile counts,
     /// so an off-by-one here silently hands games away.
     #[test]
     fn war_and_monument_decisions_accept_what_the_ui_can_send() {

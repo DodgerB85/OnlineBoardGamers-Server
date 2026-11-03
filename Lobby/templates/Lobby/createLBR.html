@@ -84,7 +84,7 @@
                                 {% for seat in "234" %}
                                 <label class="check-label" id="aiSeat{{ seat }}Row">
                                     <input type="checkbox" id="ai{{ seat }}" name="ai{{ seat }}" value="1" class="myCheckbox" onchange="syncAiSeats()">
-                                    <div>{% blocktranslate with number=seat %}Player {{ number }} is the Tigris AI{% endblocktranslate %}</div>
+                                    <div>{% blocktranslate with number=seat %}Player {{ number }} is the LBR AI{% endblocktranslate %}</div>
                                 </label>
                                 {% endfor %}
                             </div>

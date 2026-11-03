@@ -395,7 +395,7 @@ where
                 let mut nulled = AppliedMove::<E::G>::new(s, null_move);
                 // Null-move pruning only makes sense if the "pass" hands the
                 // turn to the opponent. In games where the same player
-                // continues (T&E multi-action turns) it is not a null move.
+                // continues (LBR multi-action turns) it is not a null move.
                 if E::G::same_player_continues(&nulled) {
                     return Some(WORST_EVAL);
                 }
@@ -505,7 +505,7 @@ where
         let mut move_index = 0usize;
         for &m in moves.iter() {
             let mut new = AppliedMove::<E::G>::new(s, m);
-            // When the same player continues (e.g. T&E's multi-action turns),
+            // When the same player continues (e.g. LBR's multi-action turns),
             // do NOT negate: the child value is still from this player's
             // perspective and must be searched with the same (alpha, beta).
             let same = E::G::same_player_continues(&new);

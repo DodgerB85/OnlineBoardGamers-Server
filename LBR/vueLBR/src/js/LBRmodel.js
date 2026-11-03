@@ -5,10 +5,10 @@ import { createInitialState, currentActor, phaseOf } from "./LBRrules.js";
 import { SEAT_MARKS } from "./LBRreference.js";
 
 const AI_LABELS = {
-	TigrisAI: "Tigris AI",
-	TigrisAI2: "Tigris AI 2",
-	TigrisAI3: "Tigris AI 3",
-	TigrisAI4: "Tigris AI 4",
+	LBRAI: "LBR AI",
+	LBRAI2: "LBR AI 2",
+	LBRAI3: "LBR AI 3",
+	LBRAI4: "LBR AI 4",
 };
 
 export function initGame() {

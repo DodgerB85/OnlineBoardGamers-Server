@@ -10,7 +10,7 @@
 
 use crate::eval::{self, DomainEvaluator};
 use crate::game::{Action, Player, PlayerAction, Rng, TnEGame};
-use crate::solver::TigrisAndEuphrates;
+use crate::solver::Lbr;
 use minimax::{Game, Strategy};
 
 /// Extra plies the search may run past a depth cap to finish an in-progress
@@ -23,7 +23,7 @@ const TURN_EXTENSION_SLACK: u32 = 32;
 /// second action, or pending conflict/treasure/monument resolution). Shared
 /// with legacy Negamax so both searches agree on what a turn is.
 fn turn_continues(state: &TnEGame) -> bool {
-    <TigrisAndEuphrates as Game>::same_player_continues(state)
+    <Lbr as Game>::same_player_continues(state)
 }
 
 /// Search configuration.
@@ -167,7 +167,7 @@ impl Node {
 }
 
 fn state_hash(state: &TnEGame) -> u64 {
-    <TigrisAndEuphrates as Game>::zobrist_hash(state)
+    <Lbr as Game>::zobrist_hash(state)
 }
 
 /// PUCT search agent.
@@ -671,11 +671,11 @@ fn ancestor_has_hash(arena: &[Node], node_idx: usize, hash: u64) -> bool {
     false
 }
 
-impl Strategy<TigrisAndEuphrates> for Puct {
+impl Strategy<Lbr> for Puct {
     fn choose_move(
         &mut self,
-        state: &<TigrisAndEuphrates as Game>::S,
-    ) -> Option<<TigrisAndEuphrates as Game>::M> {
+        state: &<Lbr as Game>::S,
+    ) -> Option<<Lbr as Game>::M> {
         if state.state.is_empty() {
             return None;
         }

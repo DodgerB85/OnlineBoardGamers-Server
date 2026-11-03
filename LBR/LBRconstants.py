@@ -10,5 +10,5 @@ MAX_PLAYERS = 4
 
 # One User per possible AI seat. Distinct usernames are required because a
 # GamePlayer row is unique per (game, player). The client renders these seats as
-# "Tigris AI"; the seat itself is identified by GamePlayer.is_ai, never by name.
-AI_USERNAMES = ["TigrisAI", "TigrisAI2", "TigrisAI3", "TigrisAI4"]
+# "LBR AI"; the seat itself is identified by GamePlayer.is_ai, never by name.
+AI_USERNAMES = ["LBRAI", "LBRAI2", "LBRAI3", "LBRAI4"]

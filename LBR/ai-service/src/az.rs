@@ -42,7 +42,7 @@ const REPEAT_VALUE: [f32; 4] = [0.0; 4];
 /// Shared with the legacy searches so both agree on what a turn is.
 #[inline]
 fn turn_continues(state: &TnEGame) -> bool {
-    <crate::solver::TigrisAndEuphrates as minimax::Game>::same_player_continues(state)
+    <crate::solver::Lbr as minimax::Game>::same_player_continues(state)
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -558,7 +558,7 @@ impl AzAgent {
                 let ci = arena.len();
                 arena.push(AzNode::new(st, actor, depth));
                 arena[idx].children[slot] = ci;
-                // A state already on this path is a cycle, not progress. T&E has
+                // A state already on this path is a cycle, not progress. LBR has
                 // real two-cycles (a leader shuttling between two squares) and
                 // without this the tree fills with positions the game never rests
                 // in.
@@ -1010,11 +1010,11 @@ pub fn load_net(path: &str) -> Result<SharedNet, String> {
         .map_err(|e| format!("could not load {path}: {e}"))
 }
 
-impl minimax::Strategy<crate::solver::TigrisAndEuphrates> for AzAgent {
+impl minimax::Strategy<crate::solver::Lbr> for AzAgent {
     fn choose_move(
         &mut self,
-        state: &<crate::solver::TigrisAndEuphrates as minimax::Game>::S,
-    ) -> Option<<crate::solver::TigrisAndEuphrates as minimax::Game>::M> {
+        state: &<crate::solver::Lbr as minimax::Game>::S,
+    ) -> Option<<crate::solver::Lbr as minimax::Game>::M> {
         self.search(state).map(|r| r.action)
     }
 }

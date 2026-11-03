@@ -1,17 +1,16 @@
 # Land Between Rivers (LBR) — rules transcription
 
-Implementation of Reiner Knizia's *Tigris & Euphrates* (3–4 players; the donor
-engine also defines a 2-player practice variant). Client owns the rules; the
-server stores the last accepted state.
+Implementation of Reiner Knizia's river-tile game, published here as *Land
+Between Rivers* (3–4 players; the donor engine also defines a 2-player practice
+variant). Client owns the rules; the server stores the last accepted state.
 
 Sources:
 
 - Condensed rulebook (Eric Postpischil, draft 1.3, 2007), which incorporates the
   FAQ. This is the source of truth. It is not vendored in this repository.
-- `LBR/ai-service/src/game.rs` — donor engine, vendored from the Tigris and
-  Euphrates engine; its `docs/BUGS.md` records corrections where the donor
-  diverged from the rulebook. Where donor and text disagree, the text/BUGS
-  ruling wins.
+- `LBR/ai-service/src/game.rs` — vendored donor engine; its `docs/BUGS.md`
+  records corrections where the donor diverged from the rulebook. Where donor
+  and text disagree, the text/BUGS ruling wins.
 - `LBR/ai-service/src/maps.rs` + `game.rs::BOARD` — board layout.
 
 ## Components

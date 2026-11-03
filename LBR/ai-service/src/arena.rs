@@ -6,7 +6,7 @@ use crate::eval::EvalWeights;
 use crate::game::{Action, Player, Rng, TnEGame};
 use crate::maps::MapSpec;
 use crate::puct::{Puct, PuctConfig};
-use crate::solver::{EngineEvaluator, EngineWeights, Evaluator, TigrisAndEuphrates};
+use crate::solver::{EngineEvaluator, EngineWeights, Evaluator, Lbr};
 use minimax::{Game, IterativeOptions, IterativeSearch, Negamax, Strategy};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
@@ -128,7 +128,7 @@ pub fn play_game(
 
         let had_conflict =
             game.internal_conflict.is_some() || game.external_conflict.is_some();
-        match TigrisAndEuphrates::apply(&mut game, action) {
+        match Lbr::apply(&mut game, action) {
             Some(next) => game = next,
             None => break,
         }
@@ -494,7 +494,7 @@ pub fn random_selfplay(
                 break;
             }
             let a = actions[rng.below(actions.len() as u64) as usize];
-            match TigrisAndEuphrates::apply(&mut game, a) {
+            match Lbr::apply(&mut game, a) {
                 Some(s) => game = s,
                 None => break,
             }
@@ -725,7 +725,7 @@ pub fn eval_fit(
                 }
                 samples += 1.0;
             }
-            match action.and_then(|act| TigrisAndEuphrates::apply(&mut game, act)) {
+            match action.and_then(|act| Lbr::apply(&mut game, act)) {
                 Some(next) => game = next,
                 None => break,
             }
@@ -1005,19 +1005,19 @@ fn play_arena_game(
 ) -> (Vec<u8>, Vec<usize>) {
     let n = agents.len() as u8;
     let mut game = map.start_game(n, seed);
-    let mut seats: Vec<Box<dyn Strategy<TigrisAndEuphrates>>> = agents
+    let mut seats: Vec<Box<dyn Strategy<Lbr>>> = agents
         .iter()
         .enumerate()
         .map(|(i, a)| match a {
             Agent4p::Puct(c) => {
-                Box::new(Puct::new(*c, seed ^ (0xA1 + i as u64 * 0x9E37))) as Box<dyn Strategy<TigrisAndEuphrates>>
+                Box::new(Puct::new(*c, seed ^ (0xA1 + i as u64 * 0x9E37))) as Box<dyn Strategy<Lbr>>
             }
             Agent4p::Az { cfg, net } => Box::new(crate::az::AzAgent::new(
                 *cfg,
                 net.as_ref().map(|n| (**n).clone()),
                 seed ^ (0xC7 + i as u64 * 0x9E37),
-            )) as Box<dyn Strategy<TigrisAndEuphrates>>,
-            Agent4p::Random => Box::new(minimax::Random::<TigrisAndEuphrates>::with_seed(
+            )) as Box<dyn Strategy<Lbr>>,
+            Agent4p::Random => Box::new(minimax::Random::<Lbr>::with_seed(
                 seed ^ (0xB2 + i as u64),
             )),
         })
@@ -1030,7 +1030,7 @@ fn play_arena_game(
             None => break,
         };
         let action = seats[seat].choose_move(&game);
-        match action.and_then(|a| TigrisAndEuphrates::apply(&mut game, a)) {
+        match action.and_then(|a| Lbr::apply(&mut game, a)) {
             Some(next) => game = next,
             None => break,
         }
@@ -1104,11 +1104,11 @@ pub(crate) fn build_engine(depth: u8, time_ms: u64, seed: u64, weights: EngineWe
     let opts = IterativeOptions::new()
         .with_countermoves()
         .with_countermove_history()
-        // Null-move pruning is deliberately NOT enabled: T&E has no null move
+        // Null-move pruning is deliberately NOT enabled: LBR has no null move
         // (`Pass` spends one of the two actions in a turn, it does not hand the
-        // position over). See `TigrisAndEuphrates::null_move`.
+        // position over). See `Lbr::null_move`.
         //
-        // T&E turns are two actions, so leaf evaluations should land on turn
+        // LBR turns are two actions, so leaf evaluations should land on turn
         // boundaries: complete only every second ply so odd (mid-turn) depths
         // never become the returned move.
         .with_double_step_increment();
@@ -1121,7 +1121,7 @@ pub(crate) fn build_engine(depth: u8, time_ms: u64, seed: u64, weights: EngineWe
     s
 }
 
-fn build_opponent(opponent: Opponent, game_seed: u64) -> Box<dyn Strategy<TigrisAndEuphrates>> {
+fn build_opponent(opponent: Opponent, game_seed: u64) -> Box<dyn Strategy<Lbr>> {
     match opponent {
         Opponent::Negamax { depth } => {
             Box::new(Negamax::with_seed(Evaluator::default(), depth, game_seed))
@@ -1132,7 +1132,7 @@ fn build_opponent(opponent: Opponent, game_seed: u64) -> Box<dyn Strategy<Tigris
             game_seed,
             EngineWeights::default(),
         )),
-        Opponent::Random => Box::new(minimax::Random::<TigrisAndEuphrates>::with_seed(game_seed)),
+        Opponent::Random => Box::new(minimax::Random::<Lbr>::with_seed(game_seed)),
     }
 }
 
@@ -1227,7 +1227,7 @@ fn play_head_to_head_game(
     let game_seed = seed.wrapping_mul(0x9E3779B97F4A7C15).wrapping_add(g as u64 + 1);
     let mut game = map.start_game(2, game_seed);
 
-    let mut a: Box<dyn Strategy<TigrisAndEuphrates>> = match a_kind {
+    let mut a: Box<dyn Strategy<Lbr>> = match a_kind {
         AgentA::Puct(cfg) => Box::new(Puct::new(cfg, game_seed ^ 0xA1)),
         AgentA::Engine {
             depth,
@@ -1249,7 +1249,7 @@ fn play_head_to_head_game(
         } else {
             b.choose_move(&game)
         };
-        match action.and_then(|act| TigrisAndEuphrates::apply(&mut game, act)) {
+        match action.and_then(|act| Lbr::apply(&mut game, act)) {
             Some(next) => game = next,
             None => break,
         }
@@ -1322,7 +1322,7 @@ impl MatchResult {
 #[allow(dead_code)]
 fn _assert_game_bound() {
     fn _f<G: Game>() {}
-    _f::<TigrisAndEuphrates>();
+    _f::<Lbr>();
 }
 
 #[cfg(test)]
