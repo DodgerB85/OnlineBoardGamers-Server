@@ -250,11 +250,14 @@ def save_lbr_state(
     request,
     track_availability=True,
     schedule_next_ai=True,
+    keep_ai_claim=False,
 ):
     """Apply one accepted position through the shared save path.
 
     Used by the turn view and by the AI worker, so both paths share the
     latestUpdate bookkeeping, notifications, rewind handling and endGame cleanup.
+    ``keep_ai_claim`` leaves ``autoMoves`` alone: the AI worker holds the turn
+    claim for its whole run, a human save releases it.
     """
     old_ver = current_game.latestUpdate
     current_game.gameData = game_data
@@ -270,7 +273,8 @@ def save_lbr_state(
 
     new_ver = (int(old_ver) % 1000) + 1
     current_game.latestUpdate = str((int(time.time()) * 1000) + new_ver)
-    current_game.autoMoves = None
+    if not keep_ai_claim:
+        current_game.autoMoves = None
 
     presenter.setCurrentPlayersFromArrInTurnOrder(
         next_player_usernames,

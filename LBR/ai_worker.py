@@ -97,10 +97,12 @@ def ai_seat_to_act(game):
 
 
 def schedule_ai_turn(game_id):
-    """Queue one AI decision for the current position, once.
+    """Queue one AI turn for the current position, once.
 
-    ``autoMoves`` is used as the claim marker so polling clients cannot queue a
-    burst of duplicate tasks for the same latestUpdate.
+    ``autoMoves`` holds the claim for the whole AI turn: the worker keeps it
+    while it plays, so polling clients cannot queue duplicate tasks between
+    decisions. A claim older than ``LBR_AI_CLAIM_SECONDS`` is treated as
+    abandoned by a crashed worker and replaced.
     """
     from django_q.tasks import async_task
 
@@ -111,21 +113,20 @@ def schedule_ai_turn(game_id):
     if not game or not ai_seat_to_act(game):
         return False
 
-    marker_latest_update = f"ai:{game.latestUpdate}"
-    marker = f"{marker_latest_update}:{int(time.time())}"
     previous = game.autoMoves or ""
-    if previous.startswith(marker_latest_update):
+    if previous.startswith("ai:"):
         try:
             claimed_seconds_ago = int(time.time()) - int(previous.rsplit(":", 1)[-1])
         except ValueError:
             claimed_seconds_ago = None
-        # A queued task that never ran (worker restart) must not block the seat
-        # forever.
-        if claimed_seconds_ago is not None and claimed_seconds_ago < 300:
+        if claimed_seconds_ago is not None and claimed_seconds_ago < settings.LBR_AI_CLAIM_SECONDS:
             return False
 
+    marker = f"ai:{game.latestUpdate}:{int(time.time())}"
+    # Filtering on the old value makes the claim a compare-and-swap, so two
+    # polls at the same moment cannot both queue a task.
     claimed = (
-        Game.objects.filter(id=game.id, latestUpdate=game.latestUpdate)
+        Game.objects.filter(id=game.id, latestUpdate=game.latestUpdate, autoMoves=game.autoMoves)
         .update(autoMoves=marker)
     )
     if not claimed:
@@ -141,79 +142,98 @@ def play_ai_turn(game_id, expected_latest_update, attempt=0):
     The whole turn (and any following AI seat) is resolved in one task, so the AI
     never waits for a browser poll between decisions. The service call and the
     rules step run outside the game mutex; each result is only saved if the
-    position is still the one it was computed from.
+    position is still the one it was computed from. The claim set by
+    ``schedule_ai_turn`` is held for the whole task and released when it ends,
+    except on a retry, which schedules the next attempt under the same claim.
     """
-    game = Game.objects.filter(id=game_id, gameCode="LBR").select_related("creator").first()
-    if not game or str(game.latestUpdate) != str(expected_latest_update):
-        return "stale"
+    claim_prefix = f"ai:{expected_latest_update}:"
+    keep_claim = False
+    try:
+        game = Game.objects.filter(id=game_id, gameCode="LBR").select_related("creator").first()
+        if not game or str(game.latestUpdate) != str(expected_latest_update):
+            return "stale"
 
-    names = [player.player.username if player.player else "" for player in seat_game_players(game)]
-    decisions = 0
-    while True:
-        gp = ai_seat_to_act(game)
-        if not gp:
-            return "ok" if decisions else "not_ai"
+        names = [player.player.username if player.player else "" for player in seat_game_players(game)]
+        decisions = 0
+        while True:
+            gp = ai_seat_to_act(game)
+            if not gp:
+                return "ok" if decisions else "not_ai"
 
-        try:
-            if game.gameData:
-                state = json.loads(game.gameData)
-                seat = actor_seat(state)
-                action = request_ai_action(state, seat)
-                applied = _run_step({"state": state, "seat": seat, "action": action, "playerNames": names})
-            else:
-                seat = 0
-                applied = _run_step({"mode": "init", "numSeats": len(names), "playerNames": names})
-        except Exception as exc:  # noqa: BLE001 - any failure must not wedge the game
-            logger.exception("LBR AI move failed for game %s", game_id)
-            _retry(game_id, str(game.latestUpdate), attempt, exc)
-            return "error"
+            try:
+                if game.gameData:
+                    state = json.loads(game.gameData)
+                    seat = actor_seat(state)
+                    action = request_ai_action(state, seat)
+                    applied = _run_step({"state": state, "seat": seat, "action": action, "playerNames": names})
+                else:
+                    seat = 0
+                    applied = _run_step({"mode": "init", "numSeats": len(names), "playerNames": names})
+            except Exception as exc:  # noqa: BLE001 - any failure must not wedge the game
+                logger.exception("LBR AI move failed for game %s", game_id)
+                keep_claim = True
+                _retry(game_id, str(game.latestUpdate), attempt, exc)
+                return "error"
 
-        if applied.get("fallback"):
-            SN_sendAdminErrorMessage(
-                f"LBR AI: service action rejected by LBRrules - gameID: {game_id} - seat: {seat} - {applied.get('rejectedAction')}"
-            )
+            if applied.get("fallback"):
+                SN_sendAdminErrorMessage(
+                    f"LBR AI: service action rejected by LBRrules - gameID: {game_id} - seat: {seat} - {applied.get('rejectedAction')}"
+                )
 
-        computed_version = str(game.latestUpdate)
-        with db_mutex(f"processTurn_{game_id}", timeout=10, ttl=180) as acquired:
-            if not acquired:
-                _retry(game_id, computed_version, attempt, RuntimeError("game busy"))
-                return "busy"
+            computed_version = str(game.latestUpdate)
+            with db_mutex(f"processTurn_{game_id}", timeout=10, ttl=180) as acquired:
+                if not acquired:
+                    keep_claim = True
+                    _retry(game_id, computed_version, attempt, RuntimeError("game busy"))
+                    return "busy"
 
-            game = Game.objects.filter(id=game_id, gameCode="LBR").select_related("creator").get()
-            if str(game.latestUpdate) != computed_version:
-                return "stale"
-            gp = game.players.filter(seat_order=seat).select_related("player").first()
-            if not gp or not gp.is_ai:
-                return "not_ai" if decisions == 0 else "ok"
-            if applied.get("stateJson") is None:
-                return "bad_result"
+                game = Game.objects.filter(id=game_id, gameCode="LBR").select_related("creator").get()
+                if str(game.latestUpdate) != computed_version:
+                    return "stale"
+                gp = game.players.filter(seat_order=seat).select_related("player").first()
+                if not gp or not gp.is_ai:
+                    return "not_ai" if decisions == 0 else "ok"
+                if applied.get("stateJson") is None:
+                    return "bad_result"
 
-            from LBR.views import save_lbr_state
+                from LBR.views import save_lbr_state
 
-            save_lbr_state(
-                game,
-                game.presenter(),
-                game_data=applied["stateJson"],
-                turn=applied["turn"],
-                phase=applied["phase"],
-                next_player_usernames=applied["nextPlayer"],
-                acting_username=gp.player.username,
-                check_name=gp.player.username,
-                status=applied["status"],
-                winner=applied["winner"],
-                final_positions=applied["finalPositions"],
-                save_rewind=applied["status"] != "FINISHED",
-                request=SimpleNamespace(user=gp.player),
-                track_availability=False,
-                schedule_next_ai=False,
-            )
-            decisions += 1
+                save_lbr_state(
+                    game,
+                    game.presenter(),
+                    game_data=applied["stateJson"],
+                    turn=applied["turn"],
+                    phase=applied["phase"],
+                    next_player_usernames=applied["nextPlayer"],
+                    acting_username=gp.player.username,
+                    check_name=gp.player.username,
+                    status=applied["status"],
+                    winner=applied["winner"],
+                    final_positions=applied["finalPositions"],
+                    save_rewind=applied["status"] != "FINISHED",
+                    request=SimpleNamespace(user=gp.player),
+                    track_availability=False,
+                    schedule_next_ai=False,
+                    keep_ai_claim=True,
+                )
+                decisions += 1
 
-        if applied["status"] == "FINISHED":
-            return "ok"
-        if decisions >= MAX_AI_DECISIONS_PER_TASK:
-            schedule_ai_turn(game.id)
-            return "ok"
+            if applied["status"] == "FINISHED":
+                return "ok"
+            if decisions >= MAX_AI_DECISIONS_PER_TASK:
+                # Release first so the continuation can claim the new position.
+                _release_claim(game_id, claim_prefix)
+                schedule_ai_turn(game.id)
+                return "ok"
+    finally:
+        if not keep_claim:
+            _release_claim(game_id, claim_prefix)
+
+
+def _release_claim(game_id, claim_prefix):
+    """Drop this task's claim without touching a newer one."""
+    Game.objects.filter(id=game_id, autoMoves__startswith=claim_prefix).update(autoMoves=None)
+
 
 
 def request_ai_action(state, seat):

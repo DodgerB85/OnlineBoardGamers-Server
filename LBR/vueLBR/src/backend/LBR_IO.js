@@ -7,6 +7,14 @@ import { currentActor, phaseOf } from "../js/LBRrules.js";
 
 const API_BASE = "/LBR/";
 export const POLL_INTERVAL_MS = 5000;
+export const AI_POLL_INTERVAL_MS = 1000;
+
+// Watching an AI seat play is the one case worth polling faster: the AI releases
+// one decision every few hundred ms and would otherwise arrive as one jump.
+export function pollIntervalMs(game, aiSeats) {
+	if (!game || game.gameOver) return POLL_INTERVAL_MS;
+	return aiSeats.includes(currentActor(game)) ? AI_POLL_INTERVAL_MS : POLL_INTERVAL_MS;
+}
 
 function getCsrfToken() {
 	const input = document.querySelector('input[name="csrfmiddlewaretoken"]');

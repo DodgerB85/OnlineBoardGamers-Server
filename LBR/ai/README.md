@@ -19,7 +19,8 @@ Three pieces make it work:
    move: notifications, rewind, `endGame` cleanup), then plays the next AI
    decision in the same task until a human seat must act. Only a decision cap
    queues a fresh task, so an AI turn does not wait on the cluster poll or a
-   browser. `Game.autoMoves` is used as the one-shot claim marker.
+   browser. `Game.autoMoves` holds the claim for the whole run and is released
+   when the task ends, so polling clients cannot queue duplicates.
 
 ## Why a subprocess and not a daemon
 
@@ -96,6 +97,7 @@ every returned action with `LBRrules.js`.
 | `LBR_AI_STEP_TIMEOUT` | `30` | Rules-step timeout in seconds. |
 | `LBR_AI_RETRY_SECONDS` | `60` | Delay before retrying a failed AI turn. |
 | `LBR_AI_MAX_ATTEMPTS` | `5` | Retries before the claim marker is released. |
+| `LBR_AI_CLAIM_SECONDS` | `30` | A claim older than this is treated as abandoned by a crashed worker. |
 
 The Django host needs **node** for the rules step and either the policy binary
 plus model or a reachable `LBR_AI_URL`. `node` runs `lbr_step.mjs`, which imports
@@ -130,7 +132,8 @@ terms as the rest of OBG. `minimax/` is the only third-party code: the MIT-licen
 - A crash, a non-zero exit, malformed JSON, a timeout or a reply without
   `action` raises in the task: the admins are notified, the task is retried with
   a delay, and the `autoMoves` claim is released after `LBR_AI_MAX_ATTEMPTS`, so
-  a later poll or save can try again.
+  a later poll or save can try again. A claim left behind by a worker that died
+  is replaced once it is older than `LBR_AI_CLAIM_SECONDS`.
 - An action rejected by `LBRrules.js` is replaced by a legal default and reported
   to the admins. A stale `latestUpdate` is re-checked under the mutex and the
   computed position is discarded.

@@ -2,6 +2,7 @@ import json
 import shutil
 import subprocess
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -318,6 +319,9 @@ class LBRAIWorkerTests(TestCase):
 
     def test_ai_plays_its_whole_turn_in_one_task(self):
         self.set_position(actions_used=1)
+        # startGame shuffles the seats, so an AI seat can start and be queued at
+        # creation; only the calls made by this turn matter here.
+        self.async_task.reset_mock()
         human_seat = self.game.players.get(player=self.creator).seat_order
         ai_turn = {"activeSeat": self.ai_gp.seat_order, "pending": None, "gameOver": False}
         human_turn = {"activeSeat": human_seat, "pending": None, "gameOver": False}
@@ -366,6 +370,70 @@ class LBRAIWorkerTests(TestCase):
         self.assertFalse(schedule_ai_turn(self.game.id))
         after = len([c for c in self.async_task.call_args_list if c.args[0] == "LBR.ai_worker.play_ai_turn"])
         self.assertEqual(after - before, 1)
+
+    def test_polls_cannot_queue_duplicates_while_the_turn_claim_holds(self):
+        self.set_position(actions_used=1)
+        self.assertTrue(schedule_ai_turn(self.game.id))
+        self.game.refresh_from_db()
+        # Every AI decision saves a new position but keeps the claim, so a poll
+        # that sees the new latestUpdate must not queue another task.
+        self.game.latestUpdate = str(int(self.game.latestUpdate) + 1)
+        self.game.save()
+        self.assertFalse(schedule_ai_turn(self.game.id))
+        self.game.refresh_from_db()
+        self.assertTrue(self.game.autoMoves.startswith("ai:"))
+
+    def test_an_abandoned_claim_is_replaced(self):
+        self.set_position(actions_used=1)
+        self.game.autoMoves = f"ai:{self.game.latestUpdate}:{int(time.time()) - settings.LBR_AI_CLAIM_SECONDS - 1}"
+        self.game.save()
+        self.assertTrue(schedule_ai_turn(self.game.id))
+
+    def test_the_claim_survives_the_ai_decisions_and_is_released_at_the_end(self):
+        self.set_position(actions_used=1)
+        self.assertTrue(schedule_ai_turn(self.game.id))
+        self.game.refresh_from_db()
+        claim = self.game.autoMoves
+        human_seat = self.game.players.get(player=self.creator).seat_order
+        applied = [
+            {
+                "stateJson": json.dumps({"activeSeat": self.ai_gp.seat_order, "pending": None, "gameOver": False}),
+                "turn": 2,
+                "phase": 0,
+                "nextPlayer": [self.ai_gp.player.username],
+                "status": "ACTIVE",
+                "winner": "",
+                "finalPositions": [],
+                "fallback": False,
+            },
+            {
+                "stateJson": json.dumps({"activeSeat": human_seat, "pending": None, "gameOver": False}),
+                "turn": 3,
+                "phase": 0,
+                "nextPlayer": [self.creator.username],
+                "status": "ACTIVE",
+                "winner": "",
+                "finalPositions": [],
+                "fallback": False,
+            },
+        ]
+        seen = []
+
+        def step(_payload):
+            self.game.refresh_from_db()
+            seen.append(self.game.autoMoves)
+            return applied[len(seen) - 1]
+
+        with patch("LBR.ai_worker.request_ai_action", return_value={"type": "pass"}), patch(
+            "LBR.ai_worker._run_step", side_effect=step
+        ):
+            result = play_ai_turn(self.game.id, self.game.latestUpdate)
+
+        self.assertEqual(result, "ok")
+        self.assertEqual(seen[0], claim)
+        self.assertEqual(seen[1], claim, "an AI save must not release its own claim")
+        self.game.refresh_from_db()
+        self.assertIsNone(self.game.autoMoves)
 
 
 class LBRAIPolicyTests(SimpleTestCase):

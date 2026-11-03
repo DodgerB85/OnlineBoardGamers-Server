@@ -34,6 +34,13 @@ const leftSeats = computed(() => seats.value.filter((seat) => seat !== mySeat.va
 
 let pollTimer = null;
 
+function schedulePoll() {
+	pollTimer = setTimeout(async () => {
+		if (!document.hidden) await IO.checkForLatestData();
+		schedulePoll();
+	}, IO.pollIntervalMs(store.game, store.aiSeats));
+}
+
 function onKeydown(event) {
 	if (event.key !== "Escape") return;
 	const target = event.target;
@@ -43,15 +50,12 @@ function onKeydown(event) {
 
 onMounted(() => {
 	IO.checkForLatestData(true);
-	pollTimer = setInterval(() => {
-		if (document.hidden) return;
-		IO.checkForLatestData();
-	}, IO.POLL_INTERVAL_MS);
+	schedulePoll();
 	document.addEventListener("keydown", onKeydown);
 });
 
 onUnmounted(() => {
-	if (pollTimer) clearInterval(pollTimer);
+	if (pollTimer) clearTimeout(pollTimer);
 	document.removeEventListener("keydown", onKeydown);
 });
 </script>
