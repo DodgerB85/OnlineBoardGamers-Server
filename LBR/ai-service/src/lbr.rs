@@ -516,6 +516,8 @@ fn choose_with_donor(
         dirichlet_eps: 0.0,
         temperature: 0.0,
         hide_hands: true,
+        // Average four hidden-hand deals; `sims` is split across them.
+        determinizations: 4,
         ..AzConfig::default()
     };
     let mut agent = AzAgent::new(cfg, net.cloned(), seed);

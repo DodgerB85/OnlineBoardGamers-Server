@@ -228,7 +228,7 @@ if DEBUG:
 LBR_AI_URL = config("LBR_AI_URL", default="")
 LBR_AI_BIN = config("LBR_AI_BIN", default=str(BASE_DIR / "LBR" / "ai-service" / "target" / "release" / "lbr-policy"))
 LBR_AI_MODEL = config("LBR_AI_MODEL", default=str(BASE_DIR / "LBR" / "ai-service" / "models" / "best.bin"))
-LBR_AI_SIMS = config("LBR_AI_SIMS", default=400, cast=int)
+LBR_AI_SIMS = config("LBR_AI_SIMS", default=2000, cast=int)
 LBR_AI_ALPHA = config("LBR_AI_ALPHA", default=0.7, cast=float)
 LBR_AI_TIMEOUT = config("LBR_AI_TIMEOUT", default=30, cast=int)
 LBR_AI_NODE = config("LBR_AI_NODE", default="node")

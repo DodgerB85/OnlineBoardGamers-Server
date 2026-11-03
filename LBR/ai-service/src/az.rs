@@ -109,6 +109,11 @@ pub struct AzConfig {
     /// main thread's arena is the one retained for tree reuse across plies;
     /// worker arenas are discarded.
     pub parallel: usize,
+    /// Independent determinizations to average over. `sims` is split evenly
+    /// across them, each starts from a fresh hidden-hand redeal and a fresh
+    /// tree, and the move is chosen by the mean per-deal Q of each root action.
+    /// 1 keeps the old single-deal search.
+    pub determinizations: usize,
     /// Search on a re-dealt copy of the opponents' hands instead of the true
     /// ones, so the agent only uses what a human player could know.
     pub hide_hands: bool,
@@ -135,6 +140,7 @@ impl Default for AzConfig {
             value_gain: 1.0,
             prior_weights: crate::eval::PriorWeights::default(),
             parallel: 1,
+            determinizations: 1,
             hide_hands: true,
         }
     }
@@ -209,6 +215,10 @@ pub struct SearchResult {
     pub action: Action,
     pub root_actions: Vec<Action>,
     pub visits: Vec<u32>,
+    /// Blended prior of every root action (after the child cap).
+    pub root_priors: Vec<f32>,
+    /// Visit-weighted value sums per root action, as backed up by the search.
+    pub root_w: Vec<[f32; 4]>,
     /// Visit fraction per root action, after temperature.
     pub target: Vec<f32>,
     /// The search's own value estimate for every seat: the visit-weighted mean
@@ -218,6 +228,95 @@ pub struct SearchResult {
     pub value: [f32; 4],
     pub sims: u32,
     pub elapsed_ms: u128,
+}
+
+/// Fold several independent single-deal searches into one result.
+///
+/// Each deal contributes its own Q for an action; the actions are ranked by the
+/// mean of those Q values rather than by pooled visits. That is the point of
+/// the ensemble: one unlucky hidden-hand deal cannot keep inflating an action's
+/// visit count and win the vote, and a deal that never explored an action does
+/// not dilute it.
+fn combine_deals(deals: &[SearchResult], actor: usize, per_deal_sims: u32) -> SearchResult {
+    let mut actions: Vec<Action> = Vec::new();
+    for d in deals {
+        for a in &d.root_actions {
+            if !actions.contains(a) {
+                actions.push(*a);
+            }
+        }
+    }
+
+    let n_actions = actions.len();
+    let mut visits = vec![0u32; n_actions];
+    let mut w = vec![[0f32; 4]; n_actions];
+    let mut priors = vec![0f32; n_actions];
+    let mut qs: Vec<Vec<f32>> = vec![Vec::new(); n_actions];
+
+    // A deal must have looked at an action enough for its Q to mean anything.
+    let min_deal_visits = (per_deal_sims / 100).max(1);
+    let min_total_visits = (per_deal_sims / 20).max(4);
+
+    for d in deals {
+        for (i, a) in d.root_actions.iter().enumerate() {
+            let j = actions.iter().position(|x| x == a).unwrap();
+            let n = d.visits[i];
+            visits[j] = visits[j].saturating_add(n);
+            for c in 0..4 {
+                w[j][c] += d.root_w[i][c];
+            }
+            if priors[j] == 0.0 {
+                priors[j] = d.root_priors[i];
+            }
+            if n >= min_deal_visits {
+                qs[j].push(d.root_w[i][actor] / n as f32);
+            }
+        }
+    }
+
+    let min_deals = if deals.len() >= 2 { 2 } else { 1 };
+    let mut best: Option<(usize, f32)> = None;
+    for j in 0..n_actions {
+        if visits[j] < min_total_visits || qs[j].len() < min_deals {
+            continue;
+        }
+        let q = qs[j].iter().sum::<f32>() / qs[j].len() as f32;
+        if best.map(|(_, bq)| q > bq).unwrap_or(true) {
+            best = Some((j, q));
+        }
+    }
+    // Every action was too sparsely visited: fall back to the deal-weighted
+    // visit count so we still return something legal and sensible.
+    let best_j = best
+        .map(|(j, _)| j)
+        .unwrap_or_else(|| (0..n_actions).max_by_key(|&j| visits[j]).unwrap_or(0));
+
+    let total_visits: u32 = visits.iter().sum::<u32>().max(1);
+    let mut target = vec![0f32; n_actions];
+    for j in 0..n_actions {
+        target[j] = visits[j] as f32 / total_visits as f32;
+    }
+    let mut value = [0.5f32; 4];
+    for j in 0..n_actions {
+        for c in 0..4 {
+            value[c] += w[j][c];
+        }
+    }
+    for v in value.iter_mut() {
+        *v /= total_visits as f32;
+    }
+
+    SearchResult {
+        action: actions[best_j],
+        root_actions: actions,
+        visits,
+        root_priors: priors,
+        root_w: w,
+        target,
+        value,
+        sims: deals.iter().map(|d| d.sims).sum(),
+        elapsed_ms: deals.iter().map(|d| d.elapsed_ms).sum(),
+    }
 }
 
 /// Snapshot of the root node that workers clone before doing their own
@@ -704,7 +803,58 @@ impl AzAgent {
     /// `sims / parallel` simulations independently; their root-level visit
     /// counts and value totals are folded into the main arena at the end so the
     /// retained subtree is consistent with the aggregated search.
+    /// Run the search. With `determinizations > 1`, `sims` is split across
+    /// independent hidden-hand redeals and the move is chosen by the mean Q of
+    /// each root action across those deals (see [`combine_deals`]). A retained
+    /// tree is not reused across deals: each deal is a different state.
     pub fn search(&mut self, state: &TnEGame) -> Option<SearchResult> {
+        let k = self
+            .cfg
+            .determinizations
+            .max(1)
+            .min(self.cfg.sims.max(1) as usize);
+        if k == 1 || state.state.is_empty() {
+            return self.search_once(state);
+        }
+        let legal = crate::puct::legal_actions(state);
+        if legal.len() <= 1 {
+            return self.search_once(state);
+        }
+
+        let total = self.cfg.sims;
+        let base = (total / k as u32).max(1);
+        let mut extra = total.saturating_sub(base * k as u32) as usize;
+        let saved_sims = self.cfg.sims;
+        let mut deals = Vec::with_capacity(k);
+        for _ in 0..k {
+            self.reset_tree();
+            self.cfg.sims = base + if extra > 0 {
+                extra -= 1;
+                1
+            } else {
+                0
+            };
+            match self.search_once(state) {
+                Some(r) => deals.push(r),
+                None => {
+                    self.cfg.sims = saved_sims;
+                    self.reset_tree();
+                    return None;
+                }
+            }
+        }
+        self.cfg.sims = saved_sims;
+        // Each deal starts from a fresh tree, so the final retained tree is not
+        // useful for the next ply.
+        self.reset_tree();
+
+        let actor = state.next_player().index().unwrap_or(0);
+        Some(combine_deals(&deals, actor, base))
+    }
+
+    /// Search once with one hidden-hand determinization. `search` wraps this
+    /// with the multi-determinization ensemble.
+    fn search_once(&mut self, state: &TnEGame) -> Option<SearchResult> {
         if state.state.is_empty() {
             return None;
         }
@@ -717,6 +867,8 @@ impl AzAgent {
                 action: legal[0],
                 root_actions: legal,
                 visits: vec![0],
+                root_priors: vec![1.0],
+                root_w: vec![[0.5; 4]],
                 target: vec![1.0],
                 value: self.root_value,
                 sims: 0,
@@ -881,6 +1033,8 @@ impl AzAgent {
 
         let root_actions = arena[0].actions.clone();
         let visits = arena[0].n.clone();
+        let root_priors = arena[0].prior.clone();
+        let root_w = arena[0].w.clone();
         let mut order: Vec<usize> = (0..root_actions.len()).collect();
         order.sort_by(|&a, &b| {
             visits[b].cmp(&visits[a]).then(
@@ -942,6 +1096,8 @@ impl AzAgent {
             action,
             root_actions,
             visits,
+            root_priors,
+            root_w,
             target,
             value,
             sims: done,

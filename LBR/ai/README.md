@@ -90,7 +90,7 @@ every returned action with `LBRrules.js`.
 | `LBR_AI_URL` | empty | Compatibility override: POST `{"state","seat"}` to a remote service. Empty uses the local binary. |
 | `LBR_AI_BIN` | `BASE_DIR/LBR/ai-service/target/release/lbr-policy` | Policy binary. |
 | `LBR_AI_MODEL` | `BASE_DIR/LBR/ai-service/models/best.bin` | Network weights (`--net`). |
-| `LBR_AI_SIMS` | `400` | Search simulations per decision. |
+| `LBR_AI_SIMS` | `2000` | Search simulations per decision, split across 4 hidden-hand determinizations. |
 | `LBR_AI_ALPHA` | `0.7` | Network/heuristic blend used by the shipped checkpoint. |
 | `LBR_AI_TIMEOUT` | `30` | Per-decision timeout in seconds (subprocess or HTTP). |
 | `LBR_AI_NODE` | `node` | Node binary used for the rules step. |
