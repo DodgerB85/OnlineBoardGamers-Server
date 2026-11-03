@@ -507,9 +507,14 @@ def _processBUSturn(request):
 
         # Mirror URR: only the player who is actually on turn may be kicked, and only
         # when the server itself says the timer expired - a kickout dialog left open on
-        # a client outlives the move (or the rewind) that reset the clock.
-        target_is_current = currentGame.players.filter(player__username=jsonData["kickedName"], is_current=True, is_missing=False, is_kicked=False).exists()
-        if not target_is_current or presenter.kickoutRequired() != 2:
+        # a client outlives the move (the rewind) that reset the clock.
+        # Nobody on turn means the game is already stuck, so there is nothing left to
+        # protect: letting the kickout through is what lets the client drop the player
+        # from its turn order and save the game back to a playable state.
+        target_on_turn = not currentPlayersArr or currentGame.players.filter(
+            player__username=jsonData["kickedName"], is_current=True, is_missing=False, is_kicked=False
+        ).exists()
+        if not target_on_turn or presenter.kickoutRequired() != 2:
             return JsonResponse({"error": gettext("This player is not eligible for kickout.")}, status=400)
 
         # Voting layer: 3p+ games need a majority vote to kick, unless the

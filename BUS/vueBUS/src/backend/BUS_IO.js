@@ -475,6 +475,18 @@ export async function saveGameDataAfterKickout() {
 			return data
 		}
 		personal.latestUpdate = data.latestUpdate
+		// Action the kick locally before the follow-up save, the way resign() does:
+		// until the kicked player leaves the turn order, saveGame still names them as
+		// nextPlayer and no player ends up is_current - the lobby's "no current player".
+		store.history.push([rf.HIST_KICKOUT, personal.pov, Math.round(new Date().getTime() / 1000 - personal.gameCreationTimestamp), [store.gameflow.turnOrder[0]]])
+		store.resetVarsOnTurnEnd()
+		store.players[store.gameflow.turnOrder[0]].displayName = rf.BOT_NAME
+		store.players[store.gameflow.turnOrder[0]].score = 0
+		store.players[store.gameflow.turnOrder[0]].remainingActions = 0
+		store.gameflow.turnOrder.shift()
+		// actionAnyBotMooves() returns early in PHASE_ADD_BUS / PHASE_ALTER_TIME,
+		// so an emptied turn order would otherwise reach saveGame unhandled
+		if (store.gameflow.turnOrder.length === 0) controller.endCurrentPhase()
 		// Now set the game to the next state
 		// Count non players and end game if only 1 left
 		var nbNonPlayers = 0

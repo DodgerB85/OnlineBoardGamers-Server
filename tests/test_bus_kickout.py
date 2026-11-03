@@ -62,6 +62,20 @@ class BusKickoutTests(TestCase):
         self.assertFalse(self.game_player(self.players[0]).is_kicked)
         self.assertTrue(self.game_player(self.players[1]).is_current)
 
+    def test_kickout_is_allowed_when_nobody_is_on_turn(self):
+        # A game left stuck by an older client has no is_current player at all, so
+        # there is nobody to protect - the kickout is the only lever a regular
+        # player has to get the game moving again.
+        self.game.players.all().update(is_current=False)
+        self.game.serverCurrentPlayerNamesInTurnOrder = [self.players[1].username]
+        self.game.save()
+
+        self.assertEqual(self.kickout(self.players[1]).status_code, 200)
+
+        self.game.refresh_from_db()
+        self.assertTrue(self.game_player(self.players[1]).is_kicked)
+        self.assertEqual(self.game.serverCurrentPlayerNamesInTurnOrder, [])
+
     def test_successful_kickout_clears_the_turn_order_entry(self):
         self.assertEqual(self.kickout(self.players[1]).status_code, 200)
 
