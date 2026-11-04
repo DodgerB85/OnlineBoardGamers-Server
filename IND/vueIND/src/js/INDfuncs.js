@@ -356,7 +356,7 @@ export function simpleExportWholeINDmodelNoCompression() {
         JSON.parse(JSON.stringify(store.players)),            // 0
         JSON.parse(JSON.stringify(store.cities)),             // 1
         JSON.parse(JSON.stringify(store.gameflow)),           // 2
-        JSON.parse(JSON.stringify(store.history)),            // 3
+        null,                                                 // 3 history is identical in every point, so it is not cloned per point
         JSON.parse(JSON.stringify(store.activeCompanies)),    // 4
         JSON.parse(JSON.stringify(store.availableCompanies)), // 5
         JSON.parse(JSON.stringify(store.ongoingVars)),        // 6
@@ -393,8 +393,8 @@ export async function simpleImportWholeINDmodelNoCompression(inputModel, keepHis
     Object.assign(store.ongoingVars, inOngoing);
     Object.assign(store.context, inContext);
 
-    // Conditional History
-    if (!keepHistory) {
+    // Conditional History (newer snapshots leave it null; older snapshots still carry it)
+    if (!keepHistory && inHistory) {
         store.history.splice(0, store.history.length, ...inHistory);
     }
 

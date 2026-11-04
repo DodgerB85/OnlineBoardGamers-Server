@@ -394,6 +394,10 @@ export default {
 		cancel: "Cancel",
 	},
 	actions: {
+		bgStats: "Post to BG Stats",
+		bgStatsCopy: "Copy link",
+		bgStatsCopied: "Link copied",
+		bgStatsQr: "QR code",
 		firstAkkadiansWarning: "Hiring Akkad’s first crew dissolves First Akkadians, including an automatic hire at the end of the turn.",
 		aria: "Game actions",
 		finalRound: "Final round.",

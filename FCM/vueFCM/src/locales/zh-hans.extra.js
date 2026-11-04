@@ -62,7 +62,11 @@ export default {
 			"19": "沿房屋行进的路线销售咖啡",
 			"20": "里程碑：第一次有其他人卖出你的需求时，永久获得距离 -1",
 			"23": "银行破产时，每位玩家增加 $200。基础价格变为 $5、$10 或 $20 中选择最多的一项"
-		}
+		},
+		"bgStats": "发布到 BG Stats",
+		"bgStatsCopy": "复制链接",
+		"bgStatsCopied": "链接已复制",
+		"bgStatsQr": "二维码"
 	},
 	"FCM_IO": {
 		"olderVersionDetected": "检测到旧版本。请刷新。"

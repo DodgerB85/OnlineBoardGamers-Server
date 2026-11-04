@@ -1,6 +1,6 @@
 <script setup>
 import TurnNudge from "./utils/TurnNudge.vue"
-import { ref, watch, onUnmounted } from "vue"
+import { ref, computed, watch, onUnmounted } from "vue"
 import * as rf from "../js/BUSreference.js"
 import * as IO from "../backend/BUS_IO"
 import * as Bot from "../js/BUSbot"
@@ -10,6 +10,7 @@ import * as view from "../js/BUSview.js"
 import * as controller from "../js/BUScontroller.js"
 import * as model from "../js/BUSmodel.js"
 import * as pitts from "../js/BUSpitts.js"
+import { buildBgStatsUrl } from "../js/BUS_bgStats.js"
 
 import i18n from "../i18n"
 
@@ -17,6 +18,23 @@ import { useModelStore } from "../stores/BUSstore.js"
 const store = useModelStore()
 import { usePersonalStore } from "../stores/BUSpersonal.js"
 const personal = usePersonalStore()
+
+// BG Stats export is opt-in per user (profile.bgStatsEnabled) and only makes
+// sense for someone who actually sat at the table.
+const bgStatsUrl = computed(() =>
+	window.initData.bgStatsEnabled === 1 && personal.pov >= 0 && store.gameflow.gameEnded > 0 ? buildBgStatsUrl() : undefined
+)
+const showBgStatsQr = ref(false)
+const bgStatsCopied = ref(false)
+const bgStatsQrSvg = computed(() => (showBgStatsQr.value ? window.OBGQR.toSvg(bgStatsUrl.value) : ""))
+
+function copyBgStatsLink() {
+	// Clipboard permission can be refused; the QR code below is the fallback.
+	navigator.clipboard.writeText(bgStatsUrl.value).then(() => {
+		bgStatsCopied.value = true
+		setTimeout(() => (bgStatsCopied.value = false), 2000)
+	})
+}
 
 const forwardChars = ["A", "B", "C", "D", "E", "F"]
 const reverseChars = ["F", "E", "D", "C", "B", "A"]
@@ -460,6 +478,17 @@ onUnmounted(() => {
 			{{ $t('actionArea.fancyRematchEnd') }}
 			<br />
 			<br />
+			<div v-if="bgStatsUrl" id="bgStatsDiv">
+				<a :href="bgStatsUrl" target="_blank" rel="noopener">{{ $t('actionArea.bgStats') }}</a>
+				<br />
+				<button type="button" class="actionsLineButton" @click="copyBgStatsLink">
+					{{ bgStatsCopied ? $t('actionArea.bgStatsCopied') : $t('actionArea.bgStatsCopy') }}
+				</button>
+				<button type="button" class="actionsLineButton" @click="showBgStatsQr = !showBgStatsQr">
+					{{ $t('actionArea.bgStatsQr') }}
+				</button>
+				<div v-if="showBgStatsQr" class="bgStatsQr" role="img" :aria-label="$t('actionArea.bgStats')" v-html="bgStatsQrSvg"></div>
+			</div>
 		</div>
 	</template>
 
@@ -583,6 +612,21 @@ onUnmounted(() => {
 
 #gameEndDiv {
 	font-size: 30px;
+}
+
+/* Smaller than the rest of the end panel: the QR has to fit the action area. */
+#bgStatsDiv {
+	font-size: 16px;
+	margin-top: 10px;
+}
+
+:deep(.bgStatsQr svg) {
+	display: block;
+	width: 100%;
+	max-width: 564px;
+	height: auto;
+	margin: 8px auto;
+	border: 1px solid black;
 }
 
 .actionError {

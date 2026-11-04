@@ -401,6 +401,10 @@ export default {
 		cancel: "Cancelar",
 	},
 	actions: {
+		bgStats: "Publicar en BG Stats",
+		bgStatsCopy: "Copiar enlace",
+		bgStatsCopied: "Enlace copiado",
+		bgStatsQr: "Código QR",
 		firstAkkadiansWarning: "Contratar la primera cuadrilla de Akkad disuelve a los Primeros Acadios, incluso si se contrata automáticamente al terminar el turno.",
 		aria: "Acciones de la partida",
 		finalRound: "Ronda final.",

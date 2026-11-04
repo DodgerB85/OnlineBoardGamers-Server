@@ -304,6 +304,10 @@ export default {
 
 		// Game end
 		gameOver: "Partita terminata",
+		bgStats: "Pubblica in BG Stats",
+		bgStatsCopy: "Copia collegamento",
+		bgStatsCopied: "Collegamento copiato",
+		bgStatsQr: "Codice QR",
 		winner: "Vincitore:",
 		winners: "Vincitori:",
 		lastManStanding: "Ultimo rimasto in gioco",

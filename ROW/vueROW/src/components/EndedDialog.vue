@@ -3,13 +3,16 @@
  * End-of-game results: standings, totals, ties and a per-category scoring
  * breakdown (ported from the reference ended-dialog).
  */
-import { computed } from "vue"
+import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useModelStore } from "../stores/ROWstore.js"
+import { usePersonalStore } from "../stores/ROWpersonal.js"
 import { City } from "../js/ROWreference"
+import { buildBgStatsUrl } from "../js/ROW_bgStats"
 
 const { t } = useI18n()
 const store = useModelStore()
+const personal = usePersonalStore()
 
 const nextURL = String(window.initData?.nextURL ?? "")
 
@@ -28,12 +31,28 @@ const winners = computed(() => {
 
 function score(name) {
 	return game.value?.getScore(name) ?? 0
-}
-function details(name) {
+}function details(name) {
 	const d = game.value?.scoreDetails(name) ?? {}
 	return Object.entries(d)
 		.map(([k, v]) => [k, v ?? 0])
 		.filter(([, v]) => v !== 0)
+}
+
+// BG Stats export is opt-in per user (profile.bgStatsEnabled) and only makes
+// sense for someone who actually sat at the table.
+const bgStatsUrl = computed(() =>
+	window.initData.bgStatsEnabled === 1 && personal.pov >= 0 && ended.value ? buildBgStatsUrl() : undefined
+)
+const showBgStatsQr = ref(false)
+const bgStatsCopied = ref(false)
+const bgStatsQrSvg = computed(() => (showBgStatsQr.value ? window.OBGQR.toSvg(bgStatsUrl.value) : ""))
+
+function copyBgStatsLink() {
+	// Clipboard permission can be refused; the QR code below is the fallback.
+	navigator.clipboard.writeText(bgStatsUrl.value).then(() => {
+		bgStatsCopied.value = true
+		setTimeout(() => (bgStatsCopied.value = false), 2000)
+	})
 }
 
 /** Per-player detailed statistics (mirrors the reference stats table). */
@@ -100,6 +119,14 @@ const STAT_ROWS = [
 			<a v-if="nextURL" class="ended-action" :href="nextURL">{{ t('app.nextGame') }}</a>
 			<button class="ended-action" @click="store.viewSettings.showEndedDialog = false">{{ t('panels.close') }}</button>
 		</div>
+		<div v-if="bgStatsUrl" id="bgStatsDiv">
+			<a :href="bgStatsUrl" target="_blank" rel="noopener">{{ t('row.ended.bgStats') }}</a>
+			<button type="button" class="ended-action" @click="copyBgStatsLink">
+				{{ bgStatsCopied ? t('row.ended.bgStatsCopied') : t('row.ended.bgStatsCopy') }}
+			</button>
+			<button type="button" class="ended-action" @click="showBgStatsQr = !showBgStatsQr">{{ t('row.ended.bgStatsQr') }}</button>
+			<div v-if="showBgStatsQr" class="bgStatsQr" role="img" :aria-label="t('row.ended.bgStats')" v-html="bgStatsQrSvg"></div>
+		</div>
 		<table>
 			<thead>
 				<tr><th>#</th><th>{{ t('app.player') }}</th><th>{{ t('row.ended.total') }}</th><th>{{ t('row.ended.breakdown') }}</th></tr>
@@ -161,4 +188,8 @@ td.total { text-align: right; font-weight: bold; }
 .dialog-actions { display: flex; gap: 10px; margin-bottom: 10px; }
 .ended-action { padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer; background: #ffd400; color: #222; text-decoration: none; font-size: 14px; }
 .ended-action:hover { background: #ffe680; }
+#bgStatsDiv { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; max-width: 620px; margin-bottom: 10px; }
+#bgStatsDiv a { color: #ffd400; }
+.bgStatsQr { flex-basis: 100%; }
+:deep(.bgStatsQr svg) { display: block; width: 100%; max-width: 564px; height: auto; margin: 8px auto; border: 1px solid black; }
 </style>

@@ -16,14 +16,34 @@ import * as map from "../js/WEBmap"
 import * as view from "../js/WEBview"
 import * as cb from "../js/WEBcables"
 import * as Bot from "../js/WEBbot"
+import { buildBgStatsUrl } from "../js/WEB_bgStats"
 
-import { ref, watch, onUnmounted } from "vue"
+import { computed, ref, watch, onUnmounted } from "vue"
 
 import { useModelStore } from "../stores/WEBstore.js"
 const store = useModelStore()
 
 import { usePersonalStore } from "../stores/WEBpersonal.js"
 const personal = usePersonalStore()
+
+// BG Stats export is opt-in per user (profile.bgStatsEnabled) and only makes
+// sense for someone who actually sat at the table.
+const bgStatsUrl = computed(() =>
+	window.initData.bgStatsEnabled === 1 && personal.pov >= 0 && store.gameflow.phase === rf.PHASE_GAME_OVER
+		? buildBgStatsUrl()
+		: undefined
+)
+const showBgStatsQr = ref(false)
+const bgStatsCopied = ref(false)
+const bgStatsQrSvg = computed(() => (showBgStatsQr.value ? window.OBGQR.toSvg(bgStatsUrl.value) : ""))
+
+function copyBgStatsLink() {
+	// Clipboard permission can be refused; the QR code below is the fallback.
+	navigator.clipboard.writeText(bgStatsUrl.value).then(() => {
+		bgStatsCopied.value = true
+		setTimeout(() => (bgStatsCopied.value = false), 2000)
+	})
+}
 
 function rotateNewCable() {
 	store.context.selectedCableRotation++
@@ -347,6 +367,17 @@ onUnmounted(() => {
 				</i18n-t>
 				<br />
 				<br />
+				<div v-if="bgStatsUrl" id="bgStatsDiv">
+					<a :href="bgStatsUrl" target="_blank" rel="noopener">{{ $t("action.bgStats") }}</a>
+					<br />
+					<button type="button" class="actionsLineButton" @click="copyBgStatsLink">
+						{{ bgStatsCopied ? $t("action.bgStatsCopied") : $t("action.bgStatsCopy") }}
+					</button>
+					<button type="button" class="actionsLineButton" @click="showBgStatsQr = !showBgStatsQr">
+						{{ $t("action.bgStatsQr") }}
+					</button>
+					<div v-if="showBgStatsQr" class="bgStatsQr" role="img" :aria-label="$t('action.bgStats')" v-html="bgStatsQrSvg"></div>
+				</div>
 			</div>
 		</template>
 
@@ -431,7 +462,7 @@ onUnmounted(() => {
 							}"></div>
 					</div>
 					<div class="cableRotateDiv rightRotatePos">
-						<img @click="rotateNewCable(playerIndex, tileIDarr, 1)" :src="view.getImage('rot_clockwise')" />
+						<img @click="rotateNewCable()" :src="view.getImage('rot_clockwise')" />
 					</div>
 				</div>
 				<button @click="cancelAddingCable" class="actionsLineButton">{{ $t("action.cancel") }}</button>
@@ -592,6 +623,21 @@ onUnmounted(() => {
 	font-size: 30px;
 	font-weight: bold;
 	margin-top: 10px;
+}
+
+/* Smaller than the rest of the end panel: the QR has to fit the action area. */
+#bgStatsDiv {
+	font-size: 16px;
+	margin-top: 10px;
+}
+
+:deep(.bgStatsQr svg) {
+	display: block;
+	width: 100%;
+	max-width: 564px;
+	height: auto;
+	margin: 8px auto;
+	border: 1px solid black;
 }
 
 .playerScoreSummaryDiv {

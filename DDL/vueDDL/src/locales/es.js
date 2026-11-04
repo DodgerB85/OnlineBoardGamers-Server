@@ -105,6 +105,10 @@ export default {
 		permissions: "Permisos concedidos. Iconos del menú de",
 	},
 	action: {
+		bgStats: "Publicar en BG Stats",
+		bgStatsCopy: "Copiar enlace",
+		bgStatsCopied: "Enlace copiado",
+		bgStatsQr: "Código QR",
 		title: "Acción",
 		gameOver: "Fin de partida",
 		winner: "Ganador",

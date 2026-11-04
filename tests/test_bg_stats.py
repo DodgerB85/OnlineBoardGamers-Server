@@ -1,8 +1,30 @@
-"""The opt-in BG Stats preference is saved from the profile form and reaches the TGZ page."""
+"""The opt-in BG Stats preference is saved from the profile form and reaches every game's show page."""
+from pathlib import Path
+
 from django.test import TestCase
 from django.urls import reverse
 
 from Lobby.models import Game, GamePlayer, User
+
+ROOT = Path(__file__).resolve().parent.parent
+
+# Every game that has an end screen must load the shared helper and pass the flag.
+GAME_TEMPLATES = [
+    "FCM/templates/FCM/showFCMgame.html",
+    "HLC/templates/HLC/HLCtemplate.html",
+    "BUS/templates/BUS/showBUSgame.html",
+    "TGZ/templates/TGZ/showTGZgame.html",
+    "CNS/templates/CNS/showCNSgame.html",
+    "AQY/templates/AQY/showAQYgame.html",
+    "IND/templates/IND/showINDgame.html",
+    "KFW/templates/KFW/showKFWgame.html",
+    "WEB/templates/WEB/showWEBgame.html",
+    "RNB/templates/RNB/showRNBgame.html",
+    "NTR/templates/NTR/showNTRgame.html",
+    "URR/templates/URR/showURRgame.html",
+    "ROW/templates/ROW/showROWgame.html",
+    "DDL/templates/DDL/showDDLgame.html",
+]
 
 PROFILE_POST = {
     "action": "updateProfileFavourites",
@@ -52,3 +74,11 @@ class BgStatsPreferenceTest(TestCase):
         response = self.client.get(reverse("TGZ:showTGZgame", args=[self.game.id]))
         self.assertContains(response, "initData.bgStatsEnabled = 1;")
         self.assertContains(response, "Lobby/common/qrcode.js")
+
+    def test_every_game_template_loads_the_helpers_and_passes_the_flag(self):
+        for template in GAME_TEMPLATES:
+            with self.subTest(template=template):
+                source = (ROOT / template).read_text(encoding="utf-8")
+                self.assertIn("Lobby/common/qrcode.js", source)
+                self.assertIn("Lobby/common/bgStats.js", source)
+                self.assertRegex(source, r"bgStatsEnabled = \{\{ bgStatsEnabled\|default:0 \}\};")

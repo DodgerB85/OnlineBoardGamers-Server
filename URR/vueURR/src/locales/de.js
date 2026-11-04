@@ -401,6 +401,10 @@ export default {
 		cancel: "Abbrechen",
 	},
 	actions: {
+		bgStats: "An BG Stats senden",
+		bgStatsCopy: "Link kopieren",
+		bgStatsCopied: "Link kopiert",
+		bgStatsQr: "QR-Code",
 		firstAkkadiansWarning: "Das Anheuern von Akkads erster Mannschaft löst die Ersten Akkadier auf, auch beim automatischen Anheuern am Zugende.",
 		aria: "Spielaktionen",
 		finalRound: "Letzte Runde.",

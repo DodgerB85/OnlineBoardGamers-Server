@@ -1,3 +1,4 @@
+import { createRequire } from "node:module"
 import { beforeEach, describe, expect, it } from "vitest"
 import { createPinia, setActivePinia } from "pinia"
 
@@ -5,6 +6,11 @@ import * as rf from "./TGZreference"
 import { buildBgStatsUrl } from "./TGZ_bgStats"
 import { useModelStore } from "../stores/TGZstore.js"
 import { usePersonalStore } from "../stores/TGZpersonal.js"
+
+// The shared builder ships as a plain script the show templates load; install
+// it here the way a browser would.
+globalThis.window = globalThis
+globalThis.OBGBgStats = createRequire(import.meta.url)("../../../../Lobby/static/Lobby/common/bgStats.js")
 
 function makePlayer(index, overrides = {}) {
 	return {

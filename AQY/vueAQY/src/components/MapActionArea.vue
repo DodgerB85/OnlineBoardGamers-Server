@@ -21,8 +21,9 @@ import * as model from "../js/AQYmodel.js"
 import * as country from "../js/AQYcountry.js"
 import * as IO from "../backend/AQY_IO"
 import * as funcs from "../js/AQYfuncs.js"
+import { buildBgStatsUrl } from "../js/AQY_bgStats.js"
 
-import { ref, watch, onUnmounted } from "vue"
+import { ref, computed, watch, onUnmounted } from "vue"
 import { useI18n } from "vue-i18n"
 
 import { useModelStore } from "../stores/AQYstore.js"
@@ -32,6 +33,23 @@ const personal = usePersonalStore()
 const store = useModelStore()
 
 const { t } = useI18n()
+
+// BG Stats export is opt-in per user (profile.bgStatsEnabled) and only makes
+// sense for someone who actually sat at the table.
+const bgStatsUrl = computed(() =>
+	window.initData.bgStatsEnabled === 1 && personal.pov >= 0 && store.gameflow.phase === rf.PHASE_GAME_OVER ? buildBgStatsUrl() : undefined
+)
+const showBgStatsQr = ref(false)
+const bgStatsCopied = ref(false)
+const bgStatsQrSvg = computed(() => (showBgStatsQr.value ? window.OBGQR.toSvg(bgStatsUrl.value) : ""))
+
+function copyBgStatsLink() {
+	// Clipboard permission can be refused; the QR code below is the fallback.
+	navigator.clipboard.writeText(bgStatsUrl.value).then(() => {
+		bgStatsCopied.value = true
+		setTimeout(() => (bgStatsCopied.value = false), 2000)
+	})
+}
 
 /** Kickout */
 function cancelKickout() {
@@ -1041,6 +1059,17 @@ function flatmapResourceArray(array) {
 			</i18n-t>
 			<br />
 			<br />
+			<div v-if="bgStatsUrl" id="bgStatsDiv">
+				<a :href="bgStatsUrl" target="_blank" rel="noopener">{{ $t("mapActionArea.bgStats") }}</a>
+				<br />
+				<button type="button" class="actionsLineButton" @click="copyBgStatsLink">
+					{{ bgStatsCopied ? $t("mapActionArea.bgStatsCopied") : $t("mapActionArea.bgStatsCopy") }}
+				</button>
+				<button type="button" class="actionsLineButton" @click="showBgStatsQr = !showBgStatsQr">
+					{{ $t("mapActionArea.bgStatsQr") }}
+				</button>
+				<div v-if="showBgStatsQr" class="bgStatsQr" role="img" :aria-label="$t('mapActionArea.bgStats')" v-html="bgStatsQrSvg"></div>
+			</div>
 		</div>
 	</template>
 
@@ -1709,6 +1738,21 @@ function flatmapResourceArray(array) {
 	font-size: 30px;
 	font-weight: bold;
 	margin-top: 10px;
+}
+
+/* Smaller than the rest of the end panel: the QR has to fit the action area. */
+#bgStatsDiv {
+	font-size: 16px;
+	margin-top: 10px;
+}
+
+:deep(.bgStatsQr svg) {
+	display: block;
+	width: 100%;
+	max-width: 564px;
+	height: auto;
+	margin: 8px auto;
+	border: 1px solid black;
 }
 
 .playerScoreSummaryDiv {

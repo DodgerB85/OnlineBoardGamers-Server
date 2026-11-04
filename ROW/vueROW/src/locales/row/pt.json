@@ -626,7 +626,11 @@
       "title": "Fim de jogo",
       "total": "Total",
       "breakdown": "Discriminação",
-      "tie": "Empate entre {players}"
+      "tie": "Empate entre {players}",
+      "bgStats": "Publicar no BG Stats",
+      "bgStatsCopy": "Copiar ligação",
+      "bgStatsCopied": "Ligação copiada",
+      "bgStatsQr": "Código QR"
     },
     "history": {
       "empty": "Ainda sem ações",

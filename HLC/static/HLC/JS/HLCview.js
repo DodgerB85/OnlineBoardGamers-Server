@@ -106,6 +106,7 @@ var View = function (model) {
 				$("#actions").append("<BR/><BR/>Fancy a <a href='/createHLCpage/" + String(global.gameID) + "/'>rematch</a>?")
 			}
 			$("#actions").append("<BR/><BR/><a href='/HLC/HLCgameSummary/" + String(global.gameID) + "/'>Click here to see game summary stats</a>")
+			appendBgStatsActions()
 		}
 		$(".topMenuItem").off().on("click", { view: this }, topMenuItem)
 	}

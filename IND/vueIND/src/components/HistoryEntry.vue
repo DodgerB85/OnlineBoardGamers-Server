@@ -189,6 +189,7 @@ function landOperatingOwnerAlsoHadShips(entry) {
 					</template>
 				</template>
 				<br />
+				<button class="actionsLineButton" @click.stop="store.topMenuViews.showGameSummary = true">{{ $t('actionArea.gameSummaryLink') }}</button>
 			</div>
 		</div>
 	</template>

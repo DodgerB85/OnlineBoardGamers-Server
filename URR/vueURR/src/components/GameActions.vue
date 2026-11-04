@@ -20,6 +20,7 @@ import * as boardRules from "../js/URRmap"
 import * as view from "../js/URRview"
 import * as water from "../js/URRwater"
 import * as assets from "../js/URRassets"
+import { buildBgStatsUrl } from "../js/URR_bgStats"
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
 const props = defineProps({ selectedArea: { type: String, default: null }, path: { type: Array, default: () => [] } })
@@ -28,6 +29,19 @@ const store = useModelStore()
 const personal = usePersonalStore()
 const { t } = useI18n()
 const game = computed(() => actionPanelGame(store))
+// BG Stats export is opt-in per user (profile.bgStatsEnabled) and only makes
+// sense for someone who actually sat at the table.
+const bgStatsUrl = computed(() => window.initData.bgStatsEnabled === 1 && personal.pov >= 0 && game.value.gameflow.phase === rf.PHASE_GAME_OVER ? buildBgStatsUrl() : undefined)
+const showBgStatsQr = ref(false)
+const bgStatsCopied = ref(false)
+const bgStatsQrSvg = computed(() => (showBgStatsQr.value ? window.OBGQR.toSvg(bgStatsUrl.value) : ""))
+function copyBgStatsLink() {
+	// Clipboard permission can be refused; the QR code below is the fallback.
+	navigator.clipboard.writeText(bgStatsUrl.value).then(() => {
+		bgStatsCopied.value = true
+		setTimeout(() => (bgStatsCopied.value = false), 2000)
+	})
+}
 const previewState = computed(() => store.turnDraft.ready ? game.value : model.snapshotState())
 const tradeSteps = ref([])
 const stagedEquipment = computed(() => store.turnDraft.steps.filter((step) => ["requestWaterwork", "exchangeCalah"].includes(step.action?.type)).map((step) => step.action.area))
@@ -486,6 +500,13 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 		<template v-if="game.gameflow.phase === rf.PHASE_GAME_OVER">
 			<b>{{ game.gameflow.endReason === 'revolution' ? $t("actions.gameEndedRevolution") : $t("actions.invasion") }}</b>
 			<ol class="finalStandings"><li v-for="index in game.gameflow.finalPositions" :key="index"><button :aria-pressed="store.viewSettings.inspectedPlayer === index" @click="inspectPlayer(index)"><PlayerMarker :index="index" /><span>{{ game.players[index].displayName }}</span><b>{{ game.players[index].score }} <CurrencyIcon /></b></button></li></ol><p>{{ $t("actions.finalAssets") }}</p>
+			<div v-if="bgStatsUrl" id="bgStatsDiv">
+				<a :href="bgStatsUrl" target="_blank" rel="noopener">{{ $t("actions.bgStats") }}</a>
+				<br />
+				<button type="button" class="actionsLineButton" @click="copyBgStatsLink">{{ bgStatsCopied ? $t("actions.bgStatsCopied") : $t("actions.bgStatsCopy") }}</button>
+				<button type="button" class="actionsLineButton" @click="showBgStatsQr = !showBgStatsQr">{{ $t("actions.bgStatsQr") }}</button>
+				<div v-if="showBgStatsQr" class="bgStatsQr" role="img" :aria-label="$t('actions.bgStats')" v-html="bgStatsQrSvg"></div>
+			</div>
 		</template>
 		<template v-else-if="game.gameflow.pendingOffer">
 			<div class="offerHeading"><img :src="assets.getStateOrderImage(pendingOffer.state)" alt="" /><b v-if="pendingOffer.action.type === 'offerNation'"><CurrencyText :text="$t('actions.offerNation', { state: rf.STATE_NAMES[pendingOffer.state], amount: pendingOffer.action.amount, nation: rf.NATION_NAMES[pendingOffer.action.nation] })" /></b><b v-else>{{ $t("actions.offerWaterwork", { state: rf.STATE_NAMES[pendingOffer.state], kind: pendingOffer.action.kind, area: label(pendingOffer.action.area) }) }}</b></div>
@@ -649,4 +670,6 @@ fieldset.plain { border: 0; padding: 0; }fieldset { border: 1px solid #c4b894; b
 .crewStepper { flex-direction: column; padding: 10px 0; border-block: 1px solid #c4b894; }
 .crewStepper > span:first-child { white-space: pre-line; text-wrap: balance; }
 .draftList li > span { white-space: pre-line; flex: 1; text-align: center; text-wrap: balance; }
+#bgStatsDiv { font-size: 16px; margin-top: 10px; }
+:deep(.bgStatsQr svg) { display: block; width: 100%; max-width: 564px; height: auto; margin: 8px auto; border: 1px solid black; }
 </style>

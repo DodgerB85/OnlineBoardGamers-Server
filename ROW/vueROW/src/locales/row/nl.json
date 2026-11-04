@@ -626,7 +626,11 @@
       "title": "Spel voorbij",
       "total": "Totaal",
       "breakdown": "Verdeling",
-      "tie": "Gelijkspel tussen {players}"
+      "tie": "Gelijkspel tussen {players}",
+      "bgStats": "Naar BG Stats sturen",
+      "bgStatsCopy": "Link kopiëren",
+      "bgStatsCopied": "Link gekopieerd",
+      "bgStatsQr": "QR-code"
     },
     "history": {
       "empty": "Nog geen acties",

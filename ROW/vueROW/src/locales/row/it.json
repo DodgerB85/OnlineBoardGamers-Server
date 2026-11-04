@@ -628,7 +628,11 @@
       "title": "Partita finita",
       "total": "Totale",
       "breakdown": "Dettaglio",
-      "tie": "Parità tra {players}"
+      "tie": "Parità tra {players}",
+      "bgStats": "Pubblica in BG Stats",
+      "bgStatsCopy": "Copia collegamento",
+      "bgStatsCopied": "Collegamento copiato",
+      "bgStatsQr": "Codice QR"
     },
     "history": {
       "empty": "Ancora nessuna azione",

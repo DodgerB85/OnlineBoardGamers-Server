@@ -67,6 +67,10 @@ export default {
 
 		// Game end
 		gameOver: "Game Over",
+		bgStats: "Post to BG Stats",
+		bgStatsCopy: "Copy link",
+		bgStatsCopied: "Link copied",
+		bgStatsQr: "QR code",
 		winner: "Winner:",
 		winners: "Winners:",
 		lastManStanding: "Last Man Standing",

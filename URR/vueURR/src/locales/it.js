@@ -401,6 +401,10 @@ export default {
 		cancel: "Annulla",
 	},
 	actions: {
+		bgStats: "Pubblica in BG Stats",
+		bgStatsCopy: "Copia collegamento",
+		bgStatsCopied: "Collegamento copiato",
+		bgStatsQr: "Codice QR",
 		firstAkkadiansWarning: "Assumere la prima squadra di Akkad dissolve i Primi Accadi, anche con l’assunzione automatica a fine turno.",
 		aria: "Azioni di gioco",
 		finalRound: "Turno finale.",

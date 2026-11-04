@@ -626,7 +626,11 @@
       "title": "Game over",
       "total": "Total",
       "breakdown": "Breakdown",
-      "tie": "Tie between {players}"
+      "tie": "Tie between {players}",
+      "bgStats": "Post to BG Stats",
+      "bgStatsCopy": "Copy link",
+      "bgStatsCopied": "Link copied",
+      "bgStatsQr": "QR code"
     },
     "history": {
       "empty": "No actions yet",

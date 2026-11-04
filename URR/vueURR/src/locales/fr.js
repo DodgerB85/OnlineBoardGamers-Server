@@ -401,6 +401,10 @@ export default {
 		cancel: "Annuler",
 	},
 	actions: {
+		bgStats: "Publier dans BG Stats",
+		bgStatsCopy: "Copier le lien",
+		bgStatsCopied: "Lien copié",
+		bgStatsQr: "Code QR",
 		firstAkkadiansWarning: "Recruter la première équipe d’Akkad dissout les Premiers Akkadiens, même lors d’un recrutement automatique en fin de tour.",
 		aria: "Actions de la partie",
 		finalRound: "Dernier tour.",

@@ -626,7 +626,11 @@
       "title": "Spiel vorbei",
       "total": "Gesamt",
       "breakdown": "Aufschlüsselung",
-      "tie": "Gleichstand zwischen {players}"
+      "tie": "Gleichstand zwischen {players}",
+      "bgStats": "An BG Stats senden",
+      "bgStatsCopy": "Link kopieren",
+      "bgStatsCopied": "Link kopiert",
+      "bgStatsQr": "QR-Code"
     },
     "history": {
       "empty": "Noch keine Aktionen",

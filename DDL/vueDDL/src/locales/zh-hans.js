@@ -105,6 +105,10 @@ export default {
 		permissions: "已获授权。菜单图标来自",
 	},
 	action: {
+		bgStats: "发布到 BG Stats",
+		bgStatsCopy: "复制链接",
+		bgStatsCopied: "链接已复制",
+		bgStatsQr: "二维码",
 		title: "行动",
 		gameOver: "游戏结束",
 		winner: "获胜者",

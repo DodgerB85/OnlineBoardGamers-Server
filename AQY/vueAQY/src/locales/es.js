@@ -296,6 +296,10 @@ export default {
 		none: "Ninguno",
 
 		gameOver: "Fin de la partida",
+		bgStats: "Publicar en BG Stats",
+		bgStatsCopy: "Copiar enlace",
+		bgStatsCopied: "Enlace copiado",
+		bgStatsQr: "Código QR",
 		winner: "Ganador:",
 		winners: "Ganadores:",
 		lastManStanding: "Último en pie",

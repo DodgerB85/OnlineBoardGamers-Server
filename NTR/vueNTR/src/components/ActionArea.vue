@@ -2,9 +2,27 @@
 import { ref, computed } from 'vue'
 import { useModelStore } from '../stores/NTRstore'
 import * as rf from '../js/NTRreference'
+import { buildBgStatsUrl } from '../js/NTR_bgStats'
 import { t } from '../i18n'
 
 const store = useModelStore()
+
+// BG Stats export is opt-in per user (profile.bgStatsEnabled) and only makes
+// sense for someone who actually sat at the table.
+const bgStatsUrl = computed(() =>
+  window.initData.bgStatsEnabled === 1 && store.pov >= 0 && store.isGameOver ? buildBgStatsUrl() : undefined
+)
+const showBgStatsQr = ref(false)
+const bgStatsCopied = ref(false)
+const bgStatsQrSvg = computed(() => (showBgStatsQr.value ? window.OBGQR.toSvg(bgStatsUrl.value) : ''))
+
+function copyBgStatsLink() {
+  // Clipboard permission can be refused; the QR code below is the fallback.
+  navigator.clipboard.writeText(bgStatsUrl.value).then(() => {
+    bgStatsCopied.value = true
+    setTimeout(() => (bgStatsCopied.value = false), 2000)
+  })
+}
 
 const actionPhase = ref('move') // 'move', 'attack', 'reveal'
 const selectedUnits = computed(() => store.selection.units)
@@ -118,6 +136,13 @@ function spendCommandPoint() {
     <div v-if="store.isGameOver" class="gameOver">
       {{ t('action.gameOver') }}
       <div v-if="victoryText" class="victoryText">{{ victoryText }}</div>
+      <div v-if="bgStatsUrl" id="bgStatsDiv">
+        <a :href="bgStatsUrl" target="_blank" rel="noopener">{{ t('action.bgStats') }}</a>
+        <br />
+        <button type="button" class="smallBtn" @click="copyBgStatsLink">{{ bgStatsCopied ? t('action.bgStatsCopied') : t('action.bgStatsCopy') }}</button>
+        <button type="button" class="smallBtn" @click="showBgStatsQr = !showBgStatsQr">{{ t('action.bgStatsQr') }}</button>
+        <div v-if="showBgStatsQr" class="bgStatsQr" role="img" :aria-label="t('action.bgStats')" v-html="bgStatsQrSvg"></div>
+      </div>
     </div>
 
     <div v-else-if="!store.myMove" class="notYourTurn">
@@ -367,4 +392,7 @@ function spendCommandPoint() {
 
 .specialActions h4 { margin: 0 0 8px 0; font-size: 0.85rem; color: #2c3e50; }
 .specialActions .smallBtn { margin-right: 4px; margin-bottom: 4px; }
+
+#bgStatsDiv { font-size: 16px; margin-top: 10px; pointer-events: auto; }
+:deep(.bgStatsQr svg) { display: block; width: 100%; max-width: 564px; height: auto; margin: 8px auto; border: 1px solid black; }
 </style>

@@ -401,6 +401,10 @@ export default {
 		cancel: "取消",
 	},
 	actions: {
+		bgStats: "发布到 BG Stats",
+		bgStatsCopy: "复制链接",
+		bgStatsCopied: "链接已复制",
+		bgStatsQr: "二维码",
 		firstAkkadiansWarning: "阿卡德雇用第一支工队时，第一阿卡德人解散，包括回合结束时的自动雇用。",
 		aria: "游戏行动",
 		finalRound: "最后一轮。",

@@ -486,6 +486,7 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
             "statsExcludedGame": statsExcludedGame,
             "displayNames": displayNames,
             "nextURL": nextURL,
+            "bgStatsEnabled": result["auth_data"].get("bgStatsEnabled", 0),
             "KickoutFlexiDataArray": result["base_data"]["KickoutFlexiDataArray"],
             "USE_NEW_CODE": USE_NEW_CODE,
             "startingOptionsLiteral": currentGame.startingOptions if currentGame.startingOptions else [],

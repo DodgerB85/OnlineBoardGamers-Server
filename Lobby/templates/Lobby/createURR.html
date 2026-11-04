@@ -21,7 +21,7 @@
         <form id="gameCreationForm" autocomplete="off" action="{% url 'URR:createURRgame' %}" method="post">
             {% csrf_token %}
 
-            <div class="setup-cards-grid">
+            <div class="setup-cards-grid setup-cards-grid-two">
                 <div class="card">
                     <div class="card-header"><h2 class="card-title">{% translate "Setup Options" %}</h2></div>
                     <div class="form-row">
@@ -90,13 +90,6 @@
                 {% url "lobbyHelp" as the_url %}
                 {% blocktranslate trimmed asvar practiceHelp %}Play all seats on the same device. See <a href="{{ the_url }}#navGameType" target="_blank">Help</a>{% endblocktranslate %}
                 {% include "Lobby/createCommonOptions.html" with practiceHelp=practiceHelp hideSpeedHelp=True %}
-
-                <div class="card">
-                    <div class="card-header"><h2 class="card-title">{% translate "Game Options" %}</h2></div>
-                    <div class="check-list">
-                        <div class="opt-help">{% translate "Game options will be added here as the game is implemented." %}</div>
-                    </div>
-                </div>
             </div>
 
             <div style="text-align:center;margin-top:8px">

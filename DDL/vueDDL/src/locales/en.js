@@ -108,6 +108,10 @@ export default {
 		permissions: "Permissions provided. Menu icons from",
 	},
 	action: {
+		bgStats: "Post to BG Stats",
+		bgStatsCopy: "Copy link",
+		bgStatsCopied: "Link copied",
+		bgStatsQr: "QR code",
 		title: "Action",
 		gameOver: "Game over",
 		winner: "Winner",

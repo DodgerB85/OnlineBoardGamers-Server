@@ -2382,7 +2382,7 @@ function failedToJustPlaceCraftsmanFlag() {
 	margin-top: 10px;
 }
 
-.bgStatsQr svg {
+:deep(.bgStatsQr svg) {
 	display: block;
 	width: 100%;
 	max-width: 564px;

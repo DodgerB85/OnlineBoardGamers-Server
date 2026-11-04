@@ -87,6 +87,10 @@ export const en = {
   },
 
   action: {
+    bgStats: 'Post to BG Stats',
+    bgStatsCopy: 'Copy link',
+    bgStatsCopied: 'Link copied',
+    bgStatsQr: 'QR code',
     title: 'Actions',
     commandPoints: 'Command Points',
     selectUnits: 'Click units on map to select',
