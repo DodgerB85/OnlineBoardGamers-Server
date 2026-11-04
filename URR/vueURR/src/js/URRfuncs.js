@@ -272,9 +272,9 @@ function decodeStates(states) {
 		id,
 		money: entry[0],
 		king: entry[1] < 0 ? null : entry[1],
-		isActive: !!entry[2],
-		diggers: (entry[3] || []).map(([crewId, era, hasDug]) => ({ id: crewId, era, capacity: rf.ERA_CARD_DATA[era].digger[0], hasDug: !!hasDug })),
-		hasRevolted: !!entry[4],
+		isActive: entry.length > 2 ? !!entry[2] : false,
+		diggers: entry.length > 3 ? (entry[3] || []).map(([crewId, era, hasDug]) => ({ id: crewId, era, capacity: rf.ERA_CARD_DATA[era].digger[0], hasDug: !!hasDug })) : [],
+		hasRevolted: entry.length > 4 ? !!entry[4] : false,
 	}))
 }
 
@@ -375,8 +375,8 @@ export function exportURRmodel(forGameOver = false) {
 		encodeNations(state.nations, forGameOver),
 		historyStorage.compactBoard(state.board, forGameOver),
 		state.landPrices,
-		state.era,
-		encodeCardSupply(state.cardSupply),
+		forGameOver ? [] : state.era,           // era not needed for game over display
+		forGameOver ? [] : encodeCardSupply(state.cardSupply), // cardSupply not needed for game over
 		forGameOver ? [] : encodeRain(state.rain, areaIndex),
 		forGameOver ? -1 : state.nextDiggerId,
 		// Replay slot: only entries that affect game state (actions + kickout + resign).
@@ -407,7 +407,7 @@ export function importURRmodel(input) {
 		nations: decodeNations(data[3]),
 		board: historyStorage.expandBoard(data[4]),
 		landPrices: data[5],
-		era: data[6],
+		era: data[6]?.length ? data[6] : 5,
 		cardSupply: decodeCardSupply(data[7]),
 		rain: decodeRain(data[8], historyStorage.printedAreaIds()),
 		nextDiggerId: data[9] >= 0 ? data[9] : Math.max(-1, ...states.flatMap((entry) => entry.diggers.map((crew) => crew.id))) + 1,
