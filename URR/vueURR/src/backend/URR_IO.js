@@ -70,6 +70,8 @@ export async function saveGame(saveRewind = true) {
 		action: "saveGame",
 		latestUpdate: personal.latestUpdate,
 		gameDataCompressed: funcs.exportURRmodel(store.gameflow.phase === rf.PHASE_GAME_OVER),
+		// Plain JSON sidecar so the server never has to decode the msgpack save.
+		openingMarker: JSON.stringify({ opening: true, players: store.players.map((player) => player.name), replayStart: store.history[0]?.[3] ?? [] }),
 		turn: store.gameflow.turn,
 		phase: store.gameflow.phase,
 		status: "ACTIVE",

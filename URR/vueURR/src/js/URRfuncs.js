@@ -53,9 +53,10 @@ export function sleep(ms) {
 }
 
 export function compressData64(data) {
-	let step1 = JSON.stringify(data)
 	// eslint-disable-next-line no-undef
-	let step2 = pako.gzip(step1)
+	let step1 = msgpack.encode(data)
+	// eslint-disable-next-line no-undef
+	let step2 = pako.gzip(step1, { level: 9 })
 	let binary = ""
 	// Large histories exceed the argument limit of a single spread call.
 	for (let index = 0; index < step2.length; index += 32768) binary += String.fromCharCode(...step2.subarray(index, index + 32768))
@@ -66,8 +67,9 @@ export function decompressData64(input) {
 	if (!input) return null
 	let compressedData = Uint8Array.from(atob(input), (c) => c.charCodeAt(0))
 	// eslint-disable-next-line no-undef
-	let decompressedData = pako.ungzip(compressedData, { to: "string" })
-	return JSON.parse(decompressedData)
+	let decompressedData = pako.ungzip(compressedData)
+	// eslint-disable-next-line no-undef
+	return msgpack.decode(decompressedData)
 }
 
 // Chat is stored server-side as gzip+base64 of [[name, deltaSeconds, message], ...]
@@ -385,8 +387,6 @@ export function exportURRmodel(forGameOver = false) {
 	]
 	entry.push(history[0]?.[3] ?? [])
 
-	console.log(JSON.stringify(entry))
-
 	return compressData64(entry)
 }
 
@@ -407,7 +407,7 @@ export function importURRmodel(input) {
 		nations: decodeNations(data[3]),
 		board: historyStorage.expandBoard(data[4]),
 		landPrices: data[5],
-		era: data[6]?.length ? data[6] : 5,
+		era: typeof data[6] === "number" ? data[6] : 5, // game-over saves omit the era
 		cardSupply: decodeCardSupply(data[7]),
 		rain: decodeRain(data[8], historyStorage.printedAreaIds()),
 		nextDiggerId: data[9] >= 0 ? data[9] : Math.max(-1, ...states.flatMap((entry) => entry.diggers.map((crew) => crew.id))) + 1,
