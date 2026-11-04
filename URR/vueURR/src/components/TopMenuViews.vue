@@ -55,11 +55,11 @@ async function submitBug() {
 
 function getStatsExcludeVotes(returnPlayers = false) {
 	let votes = 0
-	const players = []
+	let players = t("common.none")
 	for (const player in store.statsExcludeVotesData) {
 		if (store.statsExcludeVotesData[player] === true) {
 			votes += 1
-			players.push(player)
+			players = players === t("common.none") ? String(player) : players + ", " + player
 		}
 	}
 	return returnPlayers ? players : votes
@@ -67,11 +67,11 @@ function getStatsExcludeVotes(returnPlayers = false) {
 
 function getDeleteVotes(returnPlayers = false) {
 	let votes = 0
-	const players = []
+	let players = t("common.none")
 	for (const player in store.deleteVotesData) {
 		if (store.deleteVotesData[player] === true) {
 			votes += 1
-			players.push(player)
+			players = players === t("common.none") ? String(player) : players + ", " + player
 		}
 	}
 	return returnPlayers ? players : votes
@@ -79,10 +79,6 @@ function getDeleteVotes(returnPlayers = false) {
 
 function localCastVote(topic) {
 	IO.castVote(topic)
-}
-
-async function confirmResign() {
-	if (await IO.resign()) store.viewSettings.showResignPanel = false
 }
 </script>
 
@@ -124,6 +120,7 @@ async function confirmResign() {
 	</transition>
 
 	<!-- CHAT -->
+	<transition name="fade">
 	<div id="wholeChat" v-if="store.viewSettings.showChat" role="region" :aria-label="$t('chat.aria')">
 		<div class="chatHeading"><h2>{{ $t("chat.title") }}</h2><button @click="store.viewSettings.showChat = false" :aria-label="$t('chat.close')">×</button></div>
 		<div id="chatBox">
@@ -138,11 +135,16 @@ async function confirmResign() {
 			</div>
 		</div>
 	</div>
+	</transition>
 
 	<!-- REWIND PANEL -->
+	<transition name="fade">
 	<div id="rewindPanel" v-if="store.viewSettings.showRewindPanel">
-		<div class="utilityHeading"><b>{{ $t("rewind.title") }}</b><button @click="store.viewSettings.showRewindPanel = false" :aria-label="$t('rewind.close')">×</button></div>
+		<div class="utilityHeading"><b>{{ $t("rewind.title") }}</b></div>
 		<p>{{ $t("rewind.intro") }}</p>
+		<p>{{ $t("rewind.courtesy") }}</p>
+		<p>{{ $t("rewind.misuse") }}</p>
+		<p class="rewindWarning">{{ $t("rewind.warningRemove") }}<br />{{ $t("rewind.warningCourteous") }}</p>
 		<p v-if="store.gameMessages.errorText" class="errorText" role="alert"><CurrencyText :text="store.gameMessages.errorText" /></p>
 		<button class="topMenuItem" :disabled="!!store.turnDraft.start || store.viewSettings.showLoader || store.viewSettings.isSaving || personal.haltPlay || store.viewSettings.showReplay" :title="store.turnDraft.start ? $t('rewind.resetFirst') : $t('rewind.previousTurn')" @click="IO.loadRewind()">
 			<img :src="view.getImage('icon-rewind')" alt="" />
@@ -152,28 +154,19 @@ async function confirmResign() {
 		<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
 			{{ $t("rewind.statsIntro") }}
 			<br />
-			{{ $t("rewind.votesPlayers", { votes: getStatsExcludeVotes(false), players: "" }) }}<PlayerMarker v-for="name in getStatsExcludeVotes(true)" :key="name" :index="view.playerIndexByName(store, name)" /><template v-if="!getStatsExcludeVotes(false)">{{ $t("common.none") }}</template>
+			{{ $t("rewind.votesPlayers", { votes: getStatsExcludeVotes(false), players: getStatsExcludeVotes(true) }) }}
 			<br />
 			<button v-if="!personal.votedToExclude" class="actionsLineButton" @click="localCastVote(rf.STATS_EXCLUDE_VOTE_TOPIC)">{{ $t("rewind.voteExclude") }}</button>
 		</div>
 		<div v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER && !personal.trainingGame && personal.pov >= 0">
 			{{ $t("rewind.deleteIntro") }}
 			<br />
-			{{ $t("rewind.votesPlayers", { votes: getDeleteVotes(false), players: "" }) }}<PlayerMarker v-for="name in getDeleteVotes(true)" :key="name" :index="view.playerIndexByName(store, name)" /><template v-if="!getDeleteVotes(false)">{{ $t("common.none") }}</template>
+			{{ $t("rewind.votesPlayers", { votes: getDeleteVotes(false), players: getDeleteVotes(true) }) }}
 			<br />
 			<button v-if="!personal.votedToDelete" class="actionsLineButton" @click="localCastVote(rf.DELETE_VOTE_TOPIC)">{{ $t("rewind.voteDelete") }}</button>
 		</div>
 	</div>
-
-	<!-- RESIGN PANEL -->
-	<div id="resignPanel" v-if="store.viewSettings.showResignPanel && personal.canResign()">
-		<div class="utilityHeading"><b>{{ $t("resign.title") }}</b><button @click="store.viewSettings.showResignPanel = false" :aria-label="$t('resign.close')">×</button></div>
-		<p>{{ $t("resign.question") }}</p>
-		<p>{{ $t("resign.consequences") }} <b>{{ $t("resign.cannotBeUndone") }}</b></p>
-		<p v-if="store.gameMessages.errorText" class="errorText" role="alert"><CurrencyText :text="store.gameMessages.errorText" /></p>
-		<button class="actionsLineButton" :disabled="!!store.turnDraft.start || store.viewSettings.showLoader || store.viewSettings.isSaving" :title="store.turnDraft.start ? $t('resign.resetFirst') : $t('resign.resignGame')" @click="confirmResign">{{ $t("resign.confirm") }}</button>
-		<button class="actionsLineButton" @click="store.viewSettings.showResignPanel = false">{{ $t("common.cancel") }}</button>
-	</div>
+	</transition>
 
 </template>
 
@@ -244,18 +237,22 @@ async function confirmResign() {
 .chatentry .header .date { font-size: 0.7em; font-style: italic; float: right; }
 .chatentry .header .bold { font-weight: bold; }
 .chatentry .messageBody { overflow: auto; white-space: pre-wrap; }
-#rewindPanel, #resignPanel {
+#rewindPanel {
 	position: absolute;
 	background-color: black;
 	border: 1px solid white;
 	padding: 5px;
 	width: 400px;
 	top: var(--urr-menu-height, 60px);
-	left: 440px;
+	left: 50%;
+	transform: translateX(-50%);
 	font-size: 18px;
 	z-index: 10000;
 	color: white;
 }
+.rewindWarning { background-color: lightgoldenrodyellow; color: darkred; font-weight: bold; text-align: center; }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.5s ease-in-out; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 .topMenuItem { display: inline-block; width: 62px; height: 55px; cursor: pointer; text-align: center; }
 .topMenuItem img { width: 38px; height: 38px; }
 .topMenuItem span { font-size: 16px; font-weight: bold; display: block; }

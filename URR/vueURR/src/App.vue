@@ -117,8 +117,13 @@ const waitingForTurn = computed(() => {
 	const acting = view.displayedTurnOrder(store)[0]
 	return acting !== undefined && !personal.trainingGame && personal.pov >= 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER && personal.pov !== acting
 })
-const showWaitingPanel = computed(() => waitingForTurn.value && !personal.canPlay() && !store.turnDraft.ready && !rules.canExchangeBarahshum(store, personal.pov))
 const actingPlayer = computed(() => store.turnDraft.ready ? store.turnDraft.player : view.displayedTurnOrder(store)[0])
+// Spectators and waiting players see the status, but only the acting player gets the controls.
+const controlsForViewer = computed(() => {
+	if (store.viewSettings.showReplay || store.gameflow.phase === rf.PHASE_GAME_OVER) return false
+	if (personal.pov < 0 || store.players[personal.pov]?.isMissing) return false
+	return personal.trainingGame || personal.pov === actingPlayer.value
+})
 const actingState = computed(() => {
 	const game = actionPanelGame(store)
 	return game.gameflow.phase === rf.PHASE_DEVELOPMENT ? view.currentStateId(game) : null
@@ -243,9 +248,10 @@ function showDebug() {
 			</div>
 			<aside v-if="!store.viewSettings.showReplay" class="actionSidebar">
 				<div v-if="!isNationDivision" class="actionPanelHeading"><small class="actingLabel"><template v-if="actingLabel">{{ actingLabel }}</template><PlayerMarker v-if="actingPlayer !== undefined" :index="actingPlayer" /><span v-if="actingPlayer !== undefined">{{ store.players[actingPlayer].displayName }}</span></small><small v-if="actingState !== null" class="actingLabel actingState"><img :src="assets.getStateOrderImage(actingState)" alt="" />{{ $t("common.state") }}: {{ rf.STATE_NAMES[actingState] }}</small>{{ actionPanelTitle }}</div>
-				<div v-if="!showWaitingPanel || isNationDivision" class="actionPanelBody"><NationMarket v-if="isNationDivision" :is-board-layout="isNationDivision" />
+				<div v-if="isNationDivision || controlsForViewer" class="actionPanelBody"><NationMarket v-if="isNationDivision" :is-board-layout="isNationDivision" />
 				<GameActions v-else ref="gameActions" @inspect="revealStatus" :key="store.turnDraft.revision" @select-area="selectedArea = $event" @change-map-action="mapAction = $event" @change-action-targets="actionTargets = $event" :selected-area="selectedArea" :path="canalPath" @clear-path="map.finishDig()" @change-removal="removalArea = $event" @change-land-draft="landDraft = $event" @change-turn-action="turnAction = $event" @change-dig-capacity="digCapacity = $event" /></div>
-				<TurnControls v-if="!showWaitingPanel || isNationDivision" :is-nation-division="isNationDivision" :turn-action="turnAction" :land-draft="landDraft" @end-turn="finishTurn" />
+				<TurnControls v-if="controlsForViewer" :is-nation-division="isNationDivision" :turn-action="turnAction" :land-draft="landDraft" @end-turn="finishTurn" />
+				<button v-if="personal.canResign()" class="resignButton" @click="store.viewSettings.showResignPanel = !store.viewSettings.showResignPanel">{{ $t("resign.title") }}</button>
 			</aside>
 		</div>
 		<DevelopmentProgress v-if="!isNationDivision && !store.viewSettings.showReplay" :is-digging="!!gameActions?.showDigging" />
@@ -318,6 +324,7 @@ body {
 .stateSidebar { flex: 0 0 260px; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
 .stateSidebar .holdingsPanel { width: 100%; }
 .actionSidebar { flex: 0 0 310px; padding: 12px; box-sizing: border-box; background: #fff9e9; border: 1px solid #aa9b77; border-radius: 5px; }
+.actionSidebar .resignButton { margin-top: 8px; }
 .actionSidebar .gameActions { margin: 0; padding: 0; border: 0; background: transparent; }
 .actionSidebar .equipmentCard { float: none; display: block; max-width: 100%; width: 100%; margin: 0 0 8px; }
 .actionPanelHeading { white-space: pre-line; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #c4b894; font-size: 17px; font-weight: bold; }

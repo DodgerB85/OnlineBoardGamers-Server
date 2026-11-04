@@ -91,10 +91,6 @@ function nextGame() {
 	window.location.href = window.initData.nextURL
 }
 
-function resignGame() {
-	store.viewSettings.showResignPanel = !store.viewSettings.showResignPanel
-}
-
 function getKickoutTimerText() {
 	if (personal.secondsToNextKickout < 0) personal.secondsToNextKickout = 0
 	let minsToGo = String(Math.floor(personal.secondsToNextKickout / 60))
@@ -174,11 +170,6 @@ function getKickoutTimerText() {
 			<button type="button" v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showRewindPanel }]" :aria-expanded="store.viewSettings.showRewindPanel" @click="loadRewind()">
 				<img :src="view.getImage('icon-rewind')" alt="" />
 				<span>{{ $t("topMenu.rewind") }}</span>
-			</button>
-
-			<button type="button" v-if="personal.canResign()" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showResignPanel }]" :aria-expanded="store.viewSettings.showResignPanel" @click="resignGame">
-				<img :src="view.getImage('resign')" alt="" />
-				<span>{{ $t("topMenu.resign") }}</span>
 			</button>
 		</div>
 
