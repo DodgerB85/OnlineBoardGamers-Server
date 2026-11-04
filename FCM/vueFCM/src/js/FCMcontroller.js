@@ -153,7 +153,9 @@ export function endWorkingDaySubphase() {
 		if (store.context.justHired.length >= 3) {
 			plyr.awardMilestone(playerIndex, rf.FIRST_HIRE_3)
 		}
-		model.addHistory(rf.HIST_HIRE, [...store.context.justHired], playerIndex, 0)
+		// A hire already wrote this entry; only turns with no hires still need it.
+		if (hireEntryThisTurn(playerIndex)) syncHireEntry(playerIndex)
+		else model.addHistory(rf.HIST_HIRE, [...store.context.justHired], playerIndex, 0)
 
 		store.gameflow.subphase = rf.SUBPHASE_TRAINING
 		store.context.justTrained.length = 0
@@ -2606,6 +2608,49 @@ export function resetSubphase() {
 	startPlayerTurn(true)
 }
 
+// justHired is client-only, so a save taken mid-turn followed by a reload
+// loses it while the beach keeps the hired cards. The current turn's hire
+// history entry is written on the first hire, so it can rebuild the ledger.
+function hireEntryThisTurn(playerIndex) {
+	const store = useModelStore()
+	let turnStart = -1
+	for (let i = store.history.length - 1; i >= 0; i--) {
+		if (store.history[i][0] === rf.HIST_NEW_TURN) {
+			turnStart = i
+			break
+		}
+	}
+	for (let i = store.history.length - 1; i > turnStart; i--) {
+		const entry = store.history[i]
+		if (entry[0] === rf.HIST_HIRE && entry[1] === playerIndex) return entry
+	}
+	return null
+}
+
+// Write the current hiring ledger into history as soon as it changes, so a
+// mid-turn save carries it. One entry per hiring phase, as before.
+function syncHireEntry(playerIndex) {
+	const store = useModelStore()
+	let entry = hireEntryThisTurn(playerIndex)
+	if (!entry) {
+		entry = [rf.HIST_HIRE, playerIndex, Math.round(new Date().getTime() / 1000), []]
+		store.history.push(entry)
+	}
+	entry[3] = store.context.justHired.filter((emp) => emp !== -1)
+	return entry
+}
+
+function recordedHiresThisTurn(playerIndex) {
+	const entry = hireEntryThisTurn(playerIndex)
+	if (!entry) return []
+	return [
+		...entry[3].filter((emp) => emp !== -1),
+		// Each train-from-hire used an extra recruiting point; history stores
+		// that count separately from the hired card list.
+		...Array(entry[4] || 0).fill(-1),
+	]
+}
+
 function setupHiringSubphase() {
 	const store = useModelStore()
 	const playerIndex = currentPlayerIndex()
@@ -2614,6 +2659,11 @@ function setupHiringSubphase() {
 	store.context.justHired.length = 0
 	summary.hire.total = rules.getRemainingRecruitingPoints(playerIndex)
 	summary.hire.hired.length = 0
+	const recordedHires = recordedHiresThisTurn(playerIndex)
+	if (recordedHires.length > 0) {
+		store.context.justHired.push(...recordedHires)
+		summary.hire.hired.push(...recordedHires)
+	}
 	summary.hire.salaryReductions = playerObj.employees.reduce((total, emp) => {
 		if (emp === rf.RECRUITING_MANAGER) return total + 2
 		if (emp === rf.HR_DIRECTOR) return total + 4
@@ -2766,6 +2816,14 @@ export function chooseTurnOrderPosition(idx) {
 // Hire
 export function hireEmployee(emp) {
 	const store = useModelStore()
+	// The template hides these options, but a stale click or a reloaded model
+	// must not spend a recruiting point the ledger has already used.
+	if (store.gameflow.phase !== rf.PHASE_WORKING_DAY || store.gameflow.subphase !== rf.SUBPHASE_HIRING) return false
+	const playerIndex = currentPlayerIndex()
+	if (rules.getRemainingRecruitingPoints(playerIndex) <= 0) return false
+	if (!rf.HIREABLE_EMPLOYEES.includes(emp) || store.availableEmployees[emp] <= 0) return false
+	if (rules.forbiddenEmployeesDuringHire(playerIndex, store.context.justHired).includes(emp)) return false
+
 	let playerObj = currentPlayerObj()
 	playerObj.beach.push(emp)
 
@@ -2777,10 +2835,30 @@ export function hireEmployee(emp) {
 	}
 
 	store.context.justHired.push(emp)
+	syncHireEntry(playerIndex)
 
 	if (playerObj.employees.indexOf(rf.RECRUITING_GIRL) > -1 || rules.temporaryWorkerRoleCount(currentPlayerIndex(), rf.RECRUITING_GIRL) > 0) {
 		plyr.awardMilestone(currentPlayerIndex(), rf.FIRST_RECRUITING_GIRL_USED)
 	}
+	return true
+}
+
+// Undo a hire while still in the hiring subphase. A stale click must not
+// splice(-1) (the previous UI implementation) and remove an unrelated card.
+export function undoHireEmployee(emp) {
+	const store = useModelStore()
+	if (store.gameflow.phase !== rf.PHASE_WORKING_DAY || store.gameflow.subphase !== rf.SUBPHASE_HIRING) return false
+	const playerObj = currentPlayerObj()
+	const hiredIndex = store.context.justHired.lastIndexOf(emp)
+	const beachIndex = playerObj.beach.lastIndexOf(emp)
+	if (hiredIndex === -1 || beachIndex === -1) return false
+	store.context.justHired.splice(hiredIndex, 1)
+	playerObj.beach.splice(beachIndex, 1)
+	store.availableEmployees[emp]++
+	const summaryIndex = store.context.endOfDaySummaryData.hire.hired.lastIndexOf(emp)
+	if (summaryIndex > -1) store.context.endOfDaySummaryData.hire.hired.splice(summaryIndex, 1)
+	syncHireEntry(currentPlayerIndex())
+	return true
 }
 
 // TRAIN

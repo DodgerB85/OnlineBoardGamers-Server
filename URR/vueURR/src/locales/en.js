@@ -814,6 +814,7 @@ export default {
 		pump: "{amount} water travels from {from} to {state} pump at {to}.",
 		irrigate: "{state} uses 1 water to irrigate {area}.",
 		return: "{amount} unused water returns from {from} to {to}.",
+		release: "{amount} unused water returns to the river at {area}.",
 		outflow: "{amount} water leaves the board.",
 		completeOne: "Water routing complete: {count} hex irrigated, {outflow} water left the board.",
 		completeMany: "Water routing complete: {count} hexes irrigated, {outflow} water left the board.",

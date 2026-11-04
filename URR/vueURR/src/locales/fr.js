@@ -821,6 +821,7 @@ export default {
 		pump: "{amount} eau voyage de {from} à la pompe de {state} à {to}.",
 		irrigate: "{state} utilise 1 eau pour irriguer {area}.",
 		return: "{amount} eau inutilisée revient de {from} à {to}.",
+		release: "{amount} eau inutilisée retourne à la rivière en {area}.",
 		outflow: "{amount} eau quitte le plateau.",
 		completeOne: "Acheminement de l'eau terminé : {count} hexagone irrigué, {outflow} eau a quitté le plateau.",
 		completeMany: "Acheminement de l'eau terminé : {count} hexagones irrigués, {outflow} eau a quitté le plateau.",
