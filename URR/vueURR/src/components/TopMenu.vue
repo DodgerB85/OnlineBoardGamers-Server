@@ -196,7 +196,7 @@ function getKickoutTimerText() {
 
 		<div id="topRight">
 			<div id="loggedInDiv" v-if="personal.name">
-				<PlayerMarker v-if="personal.pov >= 0" :index="personal.pov" /><span v-else :title="personal.name">{{ $t("topMenu.spectator") }}</span>
+				<span v-if="personal.pov >= 0">{{ personal.name }}</span><span v-else :title="personal.name">{{ $t("topMenu.spectator") }}</span>
 				<div id="WSstatus" v-if="personal.pov >= 0" :class="personal.WSstatus"></div>
 				<br alt="" />
 				<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
@@ -204,9 +204,9 @@ function getKickoutTimerText() {
 				</template>
 			</div>
 			<div id="zoomDiv" class="mapZoom">
+				<button @click="fitMap" :title="$t('topMenu.fitMapTitle')">{{ $t("topMenu.fitMap") }}</button>
 				<button @click="store.viewSettings.boardZoom = Math.min(3, store.viewSettings.boardZoom + .25)" :disabled="store.viewSettings.boardZoom >= 3" :aria-label="$t('topMenu.zoomIn')">🔍+</button>
 				<button @click="store.viewSettings.boardZoom = Math.max(.5, store.viewSettings.boardZoom - .25)" :disabled="store.viewSettings.boardZoom <= .5" :aria-label="$t('topMenu.zoomOut')">🔍−</button>
-				<button @click="fitMap" :title="$t('topMenu.fitMapTitle')">{{ $t("topMenu.fitMap") }}</button>
 			</div>
 		</div>
 	</div>
@@ -226,12 +226,10 @@ function getKickoutTimerText() {
 .WSdisconnected { background-color: darkred; }
 
 #top {
-	overflow-x: auto;
 	background-color: #333;
 	color: white;
 	padding: 0px;
 	width: 100%;
-	min-width: 1380px;
 	height: 60px;
 	top: 0px;
 	z-index: 2;
@@ -277,9 +275,9 @@ function getKickoutTimerText() {
 
 #topRight { flex-shrink: 0; height: 100%; font-size: 16px; font-weight: 400; text-align: center; margin-right: 5px; }
 #zoomDiv { display: flex; justify-content: flex-end; gap: 4px; margin-top: 3px; }#zoomDiv button { min-height: 25px; font: inherit; font-size: 16px; font-weight: 400; cursor: pointer; }#zoomDiv button:disabled { opacity: .4; cursor: default; }
-#topInfos { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; min-width: fit-content; flex-shrink: 0; margin: 0 auto; }
+#topInfos { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; min-width: 0; flex: 1 1 auto; overflow: hidden; }
 .menuDivider { display: inline-block; width: 5px; height: 50px; background-color: darkgray; margin: 0px 10px 0px 10px; }
 .turnOrderSpan { display: inline-block; padding: 5px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
-.gameInfoSpan { white-space: nowrap; }
-.playerLineDiv { white-space: nowrap; }
+.gameInfoSpan { white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.playerLineDiv { white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 </style>

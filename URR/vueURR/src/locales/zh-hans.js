@@ -237,7 +237,7 @@ export default {
 		allEras: "时代卡",
 	},
 	market: {
-		landPrices: "土地价格",
+		landPrices: "价格",
 		aria: "土地市场",
 		pricesAria: "当前土地售价",
 		priceTitle: "{land}：{price} SPL",

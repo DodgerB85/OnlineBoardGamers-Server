@@ -237,7 +237,7 @@ export default {
 		allEras: "Era cards",
 	},
 	market: {
-		landPrices: "Land prices",
+		landPrices: "Prices",
 		aria: "Land market",
 		pricesAria: "Current land sale prices",
 		priceTitle: "{land}: {price} SPL",

@@ -237,7 +237,7 @@ export default {
 		allEras: "Ära-Karten",
 	},
 	market: {
-		landPrices: "Landpreise",
+		landPrices: "Preise",
 		aria: "Landmarkt",
 		pricesAria: "Aktuelle Landverkaufspreise",
 		priceTitle: "{land}: {price} SPL",
