@@ -80,6 +80,35 @@ class LBRCreationTests(TestCase):
         self.assertIn(rf.SO_TRAINING_GAME, json.loads(created.startingOptions))
         self.assertTrue(created.players.filter(is_current=True).exists())
 
+    def test_board_and_finish_round_are_stored_as_starting_options(self):
+        response = self.client.post(
+            reverse("LBR:createLBRgame"),
+            base_post(
+                playerNumber="3",
+                trainingGame="1",
+                player2="One",
+                player3="Two",
+                mapName="the-fork",
+                finishRound="1",
+            ),
+        )
+
+        self.assertEqual(response.status_code, 302)
+        options = json.loads(Game.objects.get(gameCode="LBR").startingOptions)
+        self.assertIn("map:the-fork", options)
+        self.assertIn("finishRound", options)
+
+    def test_unknown_board_falls_back_to_the_rulebook(self):
+        response = self.client.post(
+            reverse("LBR:createLBRgame"),
+            base_post(playerNumber="3", trainingGame="1", player2="One", player3="Two", mapName="bogus"),
+        )
+
+        self.assertEqual(response.status_code, 302)
+        options = json.loads(Game.objects.get(gameCode="LBR").startingOptions)
+        self.assertIn("map:default", options)
+        self.assertNotIn("finishRound", options)
+
     def test_player_count_outside_two_to_four_is_rejected(self):
         for count in ["1", "5"]:
             with self.subTest(count=count):
@@ -102,6 +131,8 @@ class LBRCreationTests(TestCase):
         response = self.client.get(reverse("createLBRpage"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Land Between Rivers")
+        self.assertContains(response, 'name="mapName"')
+        self.assertContains(response, 'name="finishRound"')
 
         response = self.client.get(reverse("LBR:LBRhelp"))
         self.assertEqual(response.status_code, 200)

@@ -52,7 +52,10 @@ export function bootGame() {
 	const personal = usePersonalStore();
 	if (store.game || personal.pov < 0) return;
 	if (!store.playerNames.length) return;
-	const game = model.newGameState(store.playerNames.length, Math.random);
+	const game = model.newGameState(store.playerNames.length, Math.random, {
+		map: store.mapName,
+		finishRound: store.finishRound,
+	});
 	game.displayNames = { ...store.displayNames };
 	store.game = game;
 	store.gameMessages.successText = "The game has started.";

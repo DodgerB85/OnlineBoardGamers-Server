@@ -46,7 +46,10 @@ try {
 
 	// AI-only games have no client to deal the opening position.
 	if (request.mode === "init") {
-		const initial = createInitialState(request.numSeats);
+		const initial = createInitialState(request.numSeats, Math.random, {
+			map: request.map,
+			finishRound: request.finishRound,
+		});
 		process.stdout.write(JSON.stringify(saveFields(initial, playerNames, false, null)));
 	} else {
 		const { state, seat } = request;

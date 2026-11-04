@@ -132,6 +132,15 @@ def create_lbr_game(
         if "privateGame" in request.POST:
             game_status = "PRIVATE"
 
+        # Per-game setup choices ride in startingOptions, the existing carrier
+        # that already reaches both the client and the AI worker.
+        map_name = request.POST.get("mapName", "default")
+        if map_name not in rfLBR.MAP_NAMES:
+            map_name = "default"
+        starting_options.append(f"map:{map_name}")
+        if "finishRound" in request.POST:
+            starting_options.append("finishRound")
+
     with transaction.atomic():
         new_game = Game(
             gameCode="LBR",

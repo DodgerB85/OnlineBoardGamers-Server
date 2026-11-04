@@ -47,10 +47,11 @@ export const MONUMENT_COLOURS = {
 };
 
 export const START_TILES = { R: 57, B: 36, G: 30, K: 30 };
-export const START_TEMPLES = 10;
 
-// Board layout from the donor engine (`BOARD` in game.rs). Row 0 is the top.
-// x = river, t = starting temple + treasure.
+// Board layouts from the donor engine. Row 0 is the top; x = river, t =
+// starting temple + treasure. Every board keeps the 16-column storage stride;
+// width/height are the playable corner of it. Keys are stored in the game state,
+// so they must match the Rust policy's registry in LBR/ai-service/src/lbr.rs.
 export const BOARD_ROWS = [
 	"....xxxxx.t.x...",
 	".t..x.......x..t",
@@ -65,15 +66,79 @@ export const BOARD_ROWS = [
 	"..........t.....",
 ];
 
-export const RIVER = new Uint8Array(CELLS);
-export const START_TEMPLE = new Uint8Array(CELLS);
-for (let row = 0; row < ROWS; row++) {
-	for (let col = 0; col < COLS; col++) {
-		const ch = BOARD_ROWS[row][col];
-		const i = row * COLS + col;
-		RIVER[i] = ch === "x" ? 1 : 0;
-		START_TEMPLE[i] = ch === "t" ? 1 : 0;
+export const MAP_DEFS = {
+	default: { width: 16, height: 11, rows: BOARD_ROWS },
+	"twin-bends": {
+		width: 14,
+		height: 11,
+		rows: [
+			"..t..x.xx..t....",
+			".....xx.x.......",
+			"......xxx.......",
+			"....txx......t..",
+			".....xx.........",
+			".t.....t........",
+			"..........xxxx..",
+			"..........x.....",
+			"..........x..t..",
+			"....t.....x.....",
+			"........t.x.....",
+		],
+	},
+	"long-bend": {
+		width: 15,
+		height: 8,
+		rows: [
+			"....xt..........",
+			".t..x......t....",
+			"....xx..........",
+			".....xx.......t.",
+			"......xx........",
+			".......x..t.....",
+			"t......xxxxxx...",
+			"....t..xx...xt..",
+		],
+	},
+	"the-fork": {
+		width: 13,
+		height: 10,
+		rows: [
+			"..t.x..xxx......",
+			"....xx...x..t...",
+			".....x...x......",
+			"t....x...x......",
+			".....x.t.x......",
+			".....x.xxx......",
+			"....txxxx...t...",
+			".....x.x........",
+			"t....x.x........",
+			".....x.xx.t.....",
+		],
+	},
+};
+
+const MAP_NAMES = Object.keys(MAP_DEFS);
+
+function buildMap(name, def) {
+	const river = new Uint8Array(CELLS);
+	const temples = new Uint8Array(CELLS);
+	let templeCount = 0;
+	for (let row = 0; row < def.height; row++) {
+		for (let col = 0; col < def.width; col++) {
+			const ch = def.rows[row][col];
+			const i = row * COLS + col;
+			river[i] = ch === "x" ? 1 : 0;
+			temples[i] = ch === "t" ? 1 : 0;
+			if (ch === "t") templeCount += 1;
+		}
 	}
+	return { ...def, name, river, temples, templeCount };
+}
+
+export const MAPS = Object.fromEntries(MAP_NAMES.map((name) => [name, buildMap(name, MAP_DEFS[name])]));
+
+export function getMap(name) {
+	return MAPS[name] || MAPS.default;
 }
 
 export function idx(row, col) {
@@ -103,10 +168,10 @@ export function neighbours(i) {
 	return out;
 }
 
-export function edgeDistance(i) {
+export function edgeDistance(i, map) {
 	const row = rowOf(i);
 	const col = colOf(i);
-	return Math.min(row, ROWS - 1 - row, col, COLS - 1 - col);
+	return Math.min(row, map.height - 1 - row, col, map.width - 1 - col);
 }
 
 export function boardIndex(row, col) {

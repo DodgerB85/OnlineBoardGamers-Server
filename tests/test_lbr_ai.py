@@ -317,6 +317,22 @@ class LBRAIWorkerTests(TestCase):
         task_calls = [call.args for call in self.async_task.call_args_list if call.args[0] == "LBR.ai_worker.play_ai_turn"]
         self.assertTrue(task_calls)
 
+    def test_ai_only_game_deals_the_chosen_board(self):
+        self.game.players.update(is_ai=True)
+        self.game.gameData = ""
+        self.game.startingOptions = json.dumps(["map:the-fork", "finishRound"])
+        self.game.save()
+
+        with patch("LBR.ai_worker.MAX_AI_DECISIONS_PER_TASK", 1):
+            result = play_ai_turn(self.game.id, self.game.latestUpdate)
+
+        self.assertEqual(result, "ok")
+        self.game.refresh_from_db()
+        state = json.loads(self.game.gameData)
+        self.assertEqual(state["map"], "the-fork")
+        self.assertTrue(state["finishRound"])
+        self.assertEqual(sum(state["treasures"]), 8)
+
     def test_ai_plays_its_whole_turn_in_one_task(self):
         self.set_position(actions_used=1)
         # startGame shuffles the seats, so an AI seat can start and be queued at

@@ -5,6 +5,10 @@ export const useModelStore = defineStore("model", () => {
 	const game = ref(null);
 	const gameID = ref(0);
 	const gameName = ref("");
+	// Chosen on the create page and carried in startingOptions; the first client
+	// deals the opening position on this board.
+	const mapName = ref("default");
+	const finishRound = ref(false);
 	const playerNames = ref([]);
 	const displayNames = ref({});
 	const currentPlayers = ref([]);
@@ -41,6 +45,8 @@ export const useModelStore = defineStore("model", () => {
 		game,
 		gameID,
 		gameName,
+		mapName,
+		finishRound,
 		playerNames,
 		displayNames,
 		currentPlayers,

@@ -57,6 +57,16 @@
                         <div class="form-help">{% translate "Land Between Rivers is best with 3 or 4 players" %}</div>
                     </div>
                     <div class="form-row">
+                        <label class="form-label" for="mapName">{% translate "Board" %}</label>
+                        <select name="mapName" id="mapName">
+                            <option value="default" selected="selected">{% translate "Rulebook board" %}</option>
+                            <option value="twin-bends">{% translate "Twin Bends" %}</option>
+                            <option value="long-bend">{% translate "Long Bend" %}</option>
+                            <option value="the-fork">{% translate "The Fork" %}</option>
+                        </select>
+                        <div class="form-help">{% translate "All boards use the same rules. The generated ones passed the balance tests." %}</div>
+                    </div>
+                    <div class="form-row">
                         <label class="form-label" for="player2">{% translate "Player 2" %}</label>
                         <div class="field">
                             <div class="autocomplete">
@@ -90,6 +100,15 @@
                             </div>
                         </div>
                         <div class="form-help">{% translate "Player 1 is always you. A seat that is kicked out or resigns is taken over by the AI, and its player becomes a spectator." %}</div>
+                    </div>
+                    <div class="check-list">
+                        <label class="check-label">
+                            <input type="checkbox" class="myCheckbox" id="finishRound" name="finishRound" value="1">
+                            <div>
+                                <div>{% translate "Finish the round when the bag runs out" %}</div>
+                                <div class="opt-help">{% translate "Every seat gets the same number of turns. Encouraged on Twin Bends and Long Bend." %}</div>
+                            </div>
+                        </label>
                     </div>
                 </div>
 

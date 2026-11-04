@@ -144,6 +144,14 @@ pub struct TnEGame {
     /// Deterministic: `(map, num_players, seed)` reproduces a game exactly.
     #[serde(default)]
     pub rng: Rng,
+
+    /// Optional rule: when the bag cannot refill every hand, finish the current
+    /// round instead of ending the game mid-round. Hands are refilled as far as
+    /// the bag allows and play continues until the starter is next.
+    ///
+    /// Default `false` preserves the historical engine behaviour.
+    #[serde(default)]
+    pub finish_round: bool,
 }
 
 pub fn default_num_players() -> u8 {
@@ -366,6 +374,7 @@ impl TnEGame {
             num_players,
             start_player,
             rng,
+            finish_round: false,
         };
 
         // initial draw for players, each player draws 6 tiles
@@ -1575,13 +1584,30 @@ impl TnEGame {
             self.player_turn = next_player;
 
             // Refresh every active player's hand to 6 from the bag.
-            // If the bag runs dry, the game ends (R13.1).
-            for i in 0..self.num_players as usize {
-                let mut p = self.players.0[i];
-                if self.bag.draw_to_6(&mut p, &mut self.rng).is_none() {
+            //
+            // Historical rule (R13.1): if the bag cannot fill every hand, the
+            // game ends at this turn boundary.
+            //
+            // `finish_round`: refill as far as the bag allows (hands may shrink
+            // below six) and keep playing until the starter is next, so every
+            // seat gets the same number of turns.
+            if self.finish_round {
+                for i in 0..self.num_players as usize {
+                    let mut p = self.players.0[i];
+                    self.bag.draw_up_to_6(&mut p, &mut self.rng);
+                    self.players.0[i] = p;
+                }
+                if self.bag.sum() == 0 && self.player_turn == self.start_player {
                     self.state.clear();
                 }
-                self.players.0[i] = p;
+            } else {
+                for i in 0..self.num_players as usize {
+                    let mut p = self.players.0[i];
+                    if self.bag.draw_to_6(&mut p, &mut self.rng).is_none() {
+                        self.state.clear();
+                    }
+                    self.players.0[i] = p;
+                }
             }
 
             // Rulebook L93-94: the game also ends at the end of a turn when one
@@ -1591,7 +1617,14 @@ impl TnEGame {
             // once the action stack empties, it also denied them their monument
             // points. Cleared the same way as the empty bag, so the action
             // stack still holds a next player and `next()` stays safe.
-            if self.board.available_treasures_count() <= 2 {
+            //
+            // `finish_round` applies to this end condition too: when the last
+            // treasures are claimed mid-round, the round is played out so every
+            // seat gets the same number of turns.
+            let round_over = self.player_turn == self.start_player;
+            if self.board.available_treasures_count() <= 2
+                && (!self.finish_round || round_over)
+            {
                 self.state.clear();
             }
         }
@@ -2089,6 +2122,17 @@ pub struct Tiles {
 impl Tiles {
     pub fn sum(&self) -> u8 {
         self.black + self.blue + self.green + self.red
+    }
+
+    fn draw_up_to_6(&mut self, player: &mut PlayerState, rng: &mut Rng) {
+        let hand_sum = player.hand_sum();
+        if hand_sum >= 6 {
+            return;
+        }
+        let n = (6 - hand_sum).min(self.sum());
+        if n > 0 {
+            self.player_draw(player, n, rng);
+        }
     }
 
     #[must_use]

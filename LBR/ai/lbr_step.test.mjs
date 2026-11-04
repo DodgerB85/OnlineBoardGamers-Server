@@ -14,8 +14,13 @@ function run(payload) {
 	return { status: result.status, out: JSON.parse(result.stdout || "{}"), err: result.stderr };
 }
 
-function initialState(numSeats = 4) {
-	const { status, out } = run({ mode: "init", numSeats, playerNames: ["a", "b", "c", "d"].slice(0, numSeats) });
+function initialState(numSeats = 4, options = {}) {
+	const { status, out } = run({
+		mode: "init",
+		numSeats,
+		playerNames: ["a", "b", "c", "d"].slice(0, numSeats),
+		...options,
+	});
 	assert.equal(status, 0);
 	assert.equal(out.status, "ACTIVE");
 	return { state: JSON.parse(out.stateJson), out };
@@ -28,6 +33,14 @@ test("init deals a complete opening position", () => {
 	assert.equal(state.activeSeat, 0);
 	assert.deepEqual(out.nextPlayer, ["a"]);
 	assert.equal(state.players[0].hand.R + state.players[0].hand.B + state.players[0].hand.G + state.players[0].hand.K, 6);
+});
+
+test("init deals the chosen board and round rule", () => {
+	const { state } = initialState(4, { map: "the-fork", finishRound: true });
+	assert.equal(state.map, "the-fork");
+	assert.equal(state.finishRound, true);
+	assert.equal(state.treasures.filter(Boolean).length, 8);
+	assert.equal(state.tiles.filter((code) => code === 1).length, 8);
 });
 
 test("a legal action is applied by LBRrules", () => {

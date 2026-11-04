@@ -14,7 +14,7 @@ use serde_json::{json, Value};
 use crate::az::{self, AzAgent, AzConfig, SharedNet};
 use crate::game::{
     Bitboard, Board, Conflict, ExternalConflict, GameState, Leader, Monument, MonumentType, MoveHistory,
-    Player, PlayerAction, PlayerState, Players, Pos, Rng, TileType, Tiles, TnEGame, RIVER, W,
+    Player, PlayerAction, PlayerState, Players, Pos, Rng, TileType, Tiles, TnEGame, H, RIVER, W,
 };
 use crate::nn::Net;
 
@@ -132,6 +132,12 @@ struct LbrPending {
 struct LbrState {
     #[serde(rename = "numSeats")]
     num_seats: usize,
+    /// Board key from LBRreference.js. Absent in the rulebook-only era.
+    #[serde(default)]
+    map: Option<String>,
+    /// Play the round out when the bag runs dry, matching LBRrules.js.
+    #[serde(rename = "finishRound", default)]
+    finish_round: bool,
     tiles: Vec<u8>,
     leaders: Vec<Option<LbrLeaderCell>>,
     treasures: Vec<bool>,
@@ -304,8 +310,48 @@ fn revolt_conflict(r: &LbrRevolt, board: &Board) -> Result<Conflict, String> {
     })
 }
 
+/// Board layouts shared with `LBRreference.js`; the keys must match.
+fn lbr_map(name: &str) -> Result<(Bitboard, u8, u8), String> {
+    let (bits, width, height) = match name {
+        "default" => return Ok((*RIVER, W as u8, H as u8)),
+        "twin-bends" => (
+            [
+                0x0060_01c0_0160_01a0,
+                0x0400_3c00_0000_0060,
+                0x0000_0400_0400_0400,
+                0x0000_0000_0000_0000,
+            ],
+            14,
+            11,
+        ),
+        "long-bend" => (
+            [
+                0x0060_0030_0010_0010,
+                0x1180_1f80_0080_00c0,
+                0x0000_0000_0000_0000,
+                0x0000_0000_0000_0000,
+            ],
+            15,
+            8,
+        ),
+        "the-fork" => (
+            [
+                0x0220_0220_0230_0390,
+                0x00a0_01e0_03a0_0220,
+                0x0000_0000_01a0_00a0,
+                0x0000_0000_0000_0000,
+            ],
+            13,
+            10,
+        ),
+        other => return Err(format!("unknown LBR map '{other}'")),
+    };
+    Ok((Bitboard::from_binary(bits), width, height))
+}
+
 fn lbr_board(state: &LbrState) -> Result<Board, String> {
-    let mut board = Board::from_bits(RIVER.clone(), Bitboard::new());
+    let (river, width, height) = lbr_map(state.map.as_deref().unwrap_or("default"))?;
+    let mut board = Board::from_layout(river, Bitboard::new(), width, height);
 
     for index in 0..CELLS {
         let pos = pos_of(index)?;
@@ -415,6 +461,7 @@ fn lbr_to_donor(state: &LbrState, seed: u64) -> Result<TnEGame, String> {
         num_players: state.num_seats as u8,
         start_player: Player::Player1,
         rng: Rng::new(seed),
+        finish_round: state.finish_round,
     };
 
     match &state.pending {
@@ -696,6 +743,21 @@ mod tests {
         assert_eq!(game.player_turn, Player::Player1);
         assert_eq!(game.play_action_stack.len(), 2);
         assert!(game.play_action_stack.iter().all(|(p, a)| *p == Player::Player1 && *a == PlayerAction::Normal));
+    }
+
+    #[test]
+    fn maps_a_generated_board_onto_the_donor() {
+        let mut state = opening_state();
+        state["map"] = json!("the-fork");
+        state["finishRound"] = json!(true);
+        let parsed: LbrState = serde_json::from_value(state).unwrap();
+        let game = lbr_to_donor(&parsed, 5).unwrap();
+
+        assert_eq!(game.board.width, 13);
+        assert_eq!(game.board.height, 10);
+        assert!(game.finish_round);
+        assert!(game.board.river.get(Pos { x: 0, y: 4 }));
+        assert!(!game.board.in_bounds(Pos { x: 10, y: 0 }));
     }
 
     #[test]

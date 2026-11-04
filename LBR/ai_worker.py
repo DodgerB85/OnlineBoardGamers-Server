@@ -59,6 +59,19 @@ def actor_seat(state):
     return pending.get("seat") if pending else state.get("activeSeat")
 
 
+def setup_options(game):
+    """The board and finish-round choices carried in startingOptions."""
+    try:
+        options = json.loads(game.startingOptions) if game.startingOptions else []
+    except ValueError:
+        options = []
+    map_name = next(
+        (option[4:] for option in options if isinstance(option, str) and option.startswith("map:")),
+        "default",
+    )
+    return map_name, "finishRound" in options
+
+
 def seat_game_players(game):
     return list(game.players.select_related("player").order_by("seat_order"))
 
@@ -168,7 +181,16 @@ def play_ai_turn(game_id, expected_latest_update, attempt=0):
                     applied = _run_step({"state": state, "seat": seat, "action": action, "playerNames": names})
                 else:
                     seat = 0
-                    applied = _run_step({"mode": "init", "numSeats": len(names), "playerNames": names})
+                    map_name, finish_round = setup_options(game)
+                    applied = _run_step(
+                        {
+                            "mode": "init",
+                            "numSeats": len(names),
+                            "playerNames": names,
+                            "map": map_name,
+                            "finishRound": finish_round,
+                        }
+                    )
             except Exception as exc:  # noqa: BLE001 - any failure must not wedge the game
                 logger.exception("LBR AI move failed for game %s", game_id)
                 keep_claim = True

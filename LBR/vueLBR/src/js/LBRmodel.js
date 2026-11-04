@@ -27,6 +27,9 @@ export function initGame() {
 	personal.trainingGame = options.includes(102);
 	personal.learningGame = options.includes(110);
 	personal.experiencedGame = options.includes(120);
+	const mapOption = options.find((option) => typeof option === "string" && option.startsWith("map:"));
+	store.mapName = mapOption ? mapOption.slice(4) : "default";
+	store.finishRound = options.includes("finishRound");
 
 	store.gameID = data.gameID || 0;
 	store.gameName = data.gameName || "";
@@ -166,6 +169,6 @@ export function phaseForSave() {
 	return store.game ? phaseOf(store.game) : 0;
 }
 
-export function newGameState(numSeats, rng = Math.random) {
-	return createInitialState(numSeats, rng);
+export function newGameState(numSeats, rng = Math.random, options = {}) {
+	return createInitialState(numSeats, rng, options);
 }

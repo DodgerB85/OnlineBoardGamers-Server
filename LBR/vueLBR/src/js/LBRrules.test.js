@@ -72,6 +72,36 @@ test("initial state follows the rulebook setup", () => {
 	for (const p of s.players) assert.equal(p.hand.R + p.hand.B + p.hand.G + p.hand.K, 6);
 });
 
+test("a generated map sets its own temples and river", () => {
+	const s = createInitialState(4, () => 0.5, { map: "the-fork", finishRound: true });
+	assert.equal(s.map, "the-fork");
+	assert.equal(s.finishRound, true);
+	assert.equal(boardTreasureCount(s), 8);
+	// 57 red tiles, 8 of them on the board as temples.
+	assert.equal(s.bag.R + s.bag.B + s.bag.G + s.bag.K, 153 - 8 - 24);
+	s.players[0].hand = { R: 6, B: 6, G: 6, K: 6 };
+	assert.equal(canPlaceTile(s, 0, "B", idx(0, 4)), null);
+	assert.equal(canPlaceTile(s, 0, "G", idx(0, 4)), "landOnRiver");
+	assert.equal(canPlaceTile(s, 0, "G", idx(0, 0)), null);
+	// A cell past the 13x10 board is not a legal square.
+	assert.equal(canPlaceTile(s, 0, "G", idx(10, 0)), "badCell");
+});
+
+test("finishRound plays the round out when the bag empties", () => {
+	const make = (activeSeat) => {
+		const s = blank(2);
+		s.finishRound = true;
+		s.bag = { R: 0, B: 0, G: 0, K: 0 };
+		s.players[0].hand = { R: 0, B: 0, G: 0, K: 0 };
+		s.activeSeat = activeSeat;
+		return s;
+	};
+	// The starter just moved: the rest of the round still has to be played.
+	assert.equal(act(make(0), 0, { type: "endTurn" }).gameOver, false);
+	// The last seat just moved: the round is over, so the game ends.
+	assert.equal(act(make(1), 1, { type: "endTurn" }).gameOver, true);
+});
+
 test("a tile scores its colour to the matching leader", () => {
 	let s = blank();
 	put(s, 0, 10, 1); // temple

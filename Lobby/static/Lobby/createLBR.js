@@ -28,6 +28,9 @@ function initGameCreation(fillData, setupData = {}) {
 		}
 		if (startingOptions.includes(110)) document.getElementById("learningGame").checked = true
 		if (startingOptions.includes(120)) document.getElementById("experiencedGame").checked = true
+		const mapOption = startingOptions.find((option) => typeof option === "string" && option.startsWith("map:"))
+		if (mapOption) document.getElementById("mapName").value = mapOption.slice(4)
+		document.getElementById("finishRound").checked = startingOptions.includes("finishRound")
 	}
 }
 

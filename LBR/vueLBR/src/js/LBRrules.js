@@ -6,20 +6,17 @@
 import {
 	CELLS,
 	COLS,
-	ROWS,
 	COLOURS,
 	COLOUR_CODE,
 	CODE_COLOUR,
 	MONUMENT_COLOURS,
 	MONUMENT_TYPES,
-	RIVER,
-	START_TEMPLE,
-	START_TEMPLES,
 	START_TILES,
 	neighbours,
 	edgeDistance,
 	rowOf,
 	colOf,
+	getMap,
 } from "./LBRreference.js";
 
 export const VERSION = 1;
@@ -80,11 +77,14 @@ function giveTiles(player, tiles) {
 	for (const c of COLOURS) player.hand[c] += tiles[c];
 }
 
-export function createInitialState(numSeats, rng = Math.random) {
+export function createInitialState(numSeats, rng = Math.random, options = {}) {
 	if (numSeats < 2 || numSeats > 4) throw new Error("numSeats must be 2..4");
+	const map = getMap(options.map);
 	const state = {
 		v: VERSION,
 		numSeats,
+		map: map.name,
+		finishRound: !!options.finishRound,
 		tiles: new Array(CELLS).fill(0),
 		leaders: new Array(CELLS).fill(null),
 		treasures: new Array(CELLS).fill(false),
@@ -94,7 +94,7 @@ export function createInitialState(numSeats, rng = Math.random) {
 		availableMonuments: ALL_MONUMENTS.slice(),
 		players: Array.from({ length: numSeats }, newPlayer),
 		bag: {
-			R: START_TILES.R - START_TEMPLES,
+			R: START_TILES.R - map.templeCount,
 			B: START_TILES.B,
 			G: START_TILES.G,
 			K: START_TILES.K,
@@ -112,7 +112,7 @@ export function createInitialState(numSeats, rng = Math.random) {
 	};
 
 	for (let i = 0; i < CELLS; i++) {
-		if (START_TEMPLE[i]) {
+		if (map.temples[i]) {
 			state.tiles[i] = COLOUR_CODE.R;
 			state.treasures[i] = true;
 		}
@@ -243,11 +243,13 @@ export function canPlaceTile(state, seat, colour, pos) {
 	if (!isMyAction(state, seat)) return "notYourTurn";
 	if (!COLOURS.includes(colour)) return "badColour";
 	if (pos < 0 || pos >= CELLS) return "badCell";
+	const map = getMap(state.map);
+	if (rowOf(pos) >= map.height || colOf(pos) >= map.width) return "badCell";
 	if (state.players[seat].hand[colour] <= 0) return "noTile";
 	if (state.tiles[pos] !== 0 || state.leaders[pos] !== null) return "occupied";
 	if (state.catastrophes[pos] || state.monuments.some((m) => coversCell(m, pos))) return "occupied";
-	if (colour === "B" && !RIVER[pos]) return "blueOnLand";
-	if (colour !== "B" && RIVER[pos]) return "landOnRiver";
+	if (colour === "B" && !map.river[pos]) return "blueOnLand";
+	if (colour !== "B" && map.river[pos]) return "landOnRiver";
 	if (kingdomCountAt(state, pos) > 2) return "threeKingdoms";
 	return null;
 }
@@ -264,10 +266,12 @@ export function canPlaceLeader(state, seat, colour, pos) {
 	if (!isMyAction(state, seat)) return "notYourTurn";
 	if (!COLOURS.includes(colour)) return "badColour";
 	if (pos < 0 || pos >= CELLS) return "badCell";
+	const map = getMap(state.map);
+	if (rowOf(pos) >= map.height || colOf(pos) >= map.width) return "badCell";
 	if (state.tiles[pos] !== 0 || state.leaders[pos] !== null) return "occupied";
 	if (state.catastrophes[pos]) return "catastrophe";
 	if (state.monuments.some((m) => coversCell(m, pos))) return "monument";
-	if (RIVER[pos]) return "river";
+	if (map.river[pos]) return "river";
 	if (!isAdjacentToTemple(state, pos)) return "notAdjacentTemple";
 	if (kingdomCountAt(state, pos) > 1) return "joinTwoKingdoms";
 	const from = state.players[seat].leaders[colour];
@@ -552,9 +556,9 @@ function treasureTargets(s) {
 	return out;
 }
 
-function keepChoices(treasures) {
-	const maxDistance = Math.max(...treasures.map(edgeDistance));
-	return treasures.filter((p) => edgeDistance(p) === maxDistance);
+function keepChoices(treasures, map) {
+	const maxDistance = Math.max(...treasures.map((p) => edgeDistance(p, map)));
+	return treasures.filter((p) => edgeDistance(p, map) === maxDistance);
 }
 
 function processFollowUp(s, follow) {
@@ -566,7 +570,7 @@ function processFollowUp(s, follow) {
 			kind: "treasure",
 			seat: t.seat,
 			at: t.at,
-			keepOptions: keepChoices(t.treasures),
+			keepOptions: keepChoices(t.treasures, getMap(s.map)),
 			takeCount: t.treasures.length - 1,
 		};
 		return;
@@ -619,9 +623,10 @@ function monumentOffers(s, pos, colour) {
 		[row, col - 1],
 		[row - 1, col - 1],
 	];
+	const map = getMap(s.map);
 	const offers = [];
 	for (const [r, c] of topLefts) {
-		if (r < 0 || c < 0 || r >= ROWS - 1 || c >= COLS - 1) continue;
+		if (r < 0 || c < 0 || r >= map.height - 1 || c >= map.width - 1) continue;
 		const at = r * COLS + c;
 		const cells = [at, at + 1, at + COLS, at + COLS + 1];
 		if (cells.every((i) => s.tiles[i] === code)) offers.push({ at, types: types.slice() });
@@ -818,12 +823,20 @@ function finishAction(s) {
 
 function endTurn(s) {
 	scoreMonuments(s);
-	const empty = refreshHands(s);
-	if (empty) {
+	const short = refreshHands(s);
+	const roundOver = (s.activeSeat + 1) % s.numSeats === 0;
+	if (s.finishRound) {
+		// Refill as far as the bag allows and play the round out, so every seat
+		// gets the same number of turns. Seat 0 is the starter.
+		if (handTotal(s.bag) === 0 && roundOver) {
+			finishGame(s, "bag");
+			return;
+		}
+	} else if (short) {
 		finishGame(s, "bag");
 		return;
 	}
-	if (boardTreasureCount(s) <= 2) {
+	if (boardTreasureCount(s) <= 2 && (!s.finishRound || roundOver)) {
 		finishGame(s, "treasures");
 		return;
 	}
@@ -845,15 +858,16 @@ function scoreMonuments(s) {
 }
 
 function refreshHands(s) {
+	let short = false;
 	for (let seat = 0; seat < s.numSeats; seat++) {
 		const p = s.players[seat];
 		const need = 6 - handTotal(p.hand);
 		if (need <= 0) continue;
 		const drawn = drawTiles(s.bag, need, Math.random);
 		giveTiles(p, drawn.tiles);
-		if (drawn.short) return true;
+		if (drawn.short) short = true;
 	}
-	return false;
+	return short;
 }
 
 function finishGame(s, reason) {

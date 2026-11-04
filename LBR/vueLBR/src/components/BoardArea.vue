@@ -5,12 +5,15 @@ import { useModelStore } from "../stores/LBRstore.js";
 import * as controller from "../js/LBRcontroller.js";
 import * as model from "../js/LBRmodel.js";
 import { cellName, leaderSpriteIndex, monumentSpriteIndex, tileSpriteIndex, colourName } from "../js/LBRview.js";
-import { BOARD_WIDTH, CELLS, CELL_W, CODE_COLOUR, COLS, MAP_H, MAP_LEFT, MAP_TOP, MAP_W, PITCH } from "../js/LBRreference.js";
+import { BOARD_WIDTH, CELLS, CELL_W, CODE_COLOUR, COLS, MAP_H, MAP_LEFT, MAP_TOP, MAP_W, PITCH, colOf, getMap, rowOf } from "../js/LBRreference.js";
 
 const store = useModelStore();
 
 // The board is one SVG in map units, so artwork, pieces and hit targets scale together.
-const mapSrc = "/static/LBR/images/map.jpg";
+const mapSrc = computed(() => {
+	const name = store.game?.map || "default";
+	return name === "default" ? "/static/LBR/images/map.jpg" : `/static/LBR/images/map-${name}.jpg`;
+});
 const tileSheet = "/static/LBR/images/tiles.png";
 const leaderSheet = "/static/LBR/images/leaders.png";
 const monumentSheet = "/static/LBR/images/monuments.png";
@@ -21,13 +24,23 @@ const boardStyle = computed(() => ({
 	width: `calc(min(100%, ${BOARD_WIDTH + 4}px) * ${store.viewSettings.boardZoom})`,
 }));
 
-const cells = Array.from({ length: CELLS }, (_, i) => i);
+const allCells = Array.from({ length: CELLS }, (_, i) => i);
+const cells = computed(() => {
+	const map = getMap(store.game?.map);
+	return allCells.filter((pos) => rowOf(pos) < map.height && colOf(pos) < map.width);
+});
+// A smaller board is cropped to its own grid so it fills the same width.
+const viewBox = computed(() => {
+	const map = getMap(store.game?.map);
+	if (map.name === "default") return `0 0 ${MAP_W} ${MAP_H}`;
+	return `0 0 ${MAP_LEFT + PITCH * map.width + 12} ${MAP_TOP + PITCH * map.height + 9}`;
+});
 const legal = computed(() => controller.legalCells());
 
 const tilePieces = computed(() => {
 	if (!store.game) return [];
 	const out = [];
-	for (const pos of cells) {
+	for (const pos of cells.value) {
 		const index = tileSpriteIndex(store.game.tiles[pos], !!store.game.treasures[pos]);
 		if (index >= 0) out.push({ key: `t${pos}`, pos, index });
 		if (store.game.catastrophes[pos]) out.push({ key: `c${pos}`, pos, index: 6 });
@@ -38,7 +51,7 @@ const tilePieces = computed(() => {
 const leaderPieces = computed(() => {
 	if (!store.game) return [];
 	const out = [];
-	for (const pos of cells) {
+	for (const pos of cells.value) {
 		const leader = store.game.leaders[pos];
 		if (leader) out.push({ key: `l${pos}`, pos, index: leaderSpriteIndex(leader.s, leader.c), own: isOwnLeader(pos) });
 	}
@@ -56,7 +69,7 @@ const monumentPieces = computed(() => {
 
 const treasureCells = computed(() => {
 	if (!store.game) return [];
-	return cells.filter((pos) => store.game.treasures[pos] && store.game.tiles[pos] === 5);
+	return cells.value.filter((pos) => store.game.treasures[pos] && store.game.tiles[pos] === 5);
 });
 
 function cellX(pos) {
@@ -92,7 +105,7 @@ function isOwnLeader(pos) {
 <template>
 	<div class="board-wrap">
 		<div v-if="store.game" class="board" :style="boardStyle">
-			<svg class="map" :viewBox="`0 0 ${MAP_W} ${MAP_H}`" role="group" aria-label="Land Between Rivers board">
+			<svg class="map" :viewBox="viewBox" role="group" aria-label="Land Between Rivers board">
 				<defs>
 					<radialGradient id="lbr-treasure" cx="30%" cy="30%" r="75%">
 						<stop offset="0" stop-color="#fff6d8" />
