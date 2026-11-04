@@ -76,6 +76,9 @@
     }
     </style>
     <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
+    {% if bgStatsEnabled %}
+    <script src="{% static 'Lobby/common/qrcode.js' %}"></script>
+    {% endif %}
     {% if settingsDEBUG %}
       <script type="module" src="http://localhost:3006/static/@vite/client"></script>
       <script type="module" src="http://localhost:3006/static/main.js"></script>
@@ -124,6 +127,7 @@
   initData.chatData = "{{ chatData }}";
 
   initData.nextURL = '{{ nextURL|safe }}';
+  initData.bgStatsEnabled = {{ bgStatsEnabled|default:0 }};
   {% endif %}
 
   initData.kickoutVotesData = {{ kickoutVotesData | default:'{}' | safe }};

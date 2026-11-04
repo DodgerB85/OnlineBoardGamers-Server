@@ -136,6 +136,8 @@ class Profile(models.Model):
     is_site_admin = models.BooleanField(default=False)
     is_game_admin = models.BooleanField(default=False)
     showAssistance = models.BooleanField(default=True)
+    # Opt-in "Post to BG Stats" button on the game end screen.
+    bgStatsEnabled = models.BooleanField(default=False)
 
     profileLanguage = models.CharField(max_length=10, choices=settings.LANGUAGES, default=settings.LANGUAGE_CODE)
 

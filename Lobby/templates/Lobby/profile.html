@@ -599,6 +599,17 @@
                     </div>
                 </div>
 
+                <div class="form-row">
+                    <label class="form-label">{% translate "BG Stats" %}</label>
+                    <div class="field">
+                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="checkbox" class="myCheckbox" id="bgStatsEnabled" name="bgStatsEnabled"
+                                   value="bgStatsEnabled" {% if bgStatsEnabled %}checked{% endif %} />
+                            {% translate "Show a button on the game end screen that posts the play to the BG Stats app" %}
+                        </label>
+                    </div>
+                </div>
+
                 <div style="margin-top: 16px; margin-bottom: 16px; text-align: center;">
                     <button type="submit" class="button button-primary">{% translate "Save Game Preferences" %}</button>
                 </div>
