@@ -111,13 +111,19 @@ const waitingPlayerIndex = computed(() => {
 	if (personal.haltPlay || personal.canPlay() || store.gameflow.phase === rf.PHASE_GAME_OVER) return null
 	return view.displayedTurnOrder(store)[0] ?? null
 })
-// vueWEB's page colours: light blue normally, grey while a normal game waits for another player's move.
+// vueWEB's page colours: light blue normally, grey while watching a replay or waiting for another player's move.
 const waitingForTurn = computed(() => {
+	if (store.viewSettings.showReplay) return true
 	const acting = view.displayedTurnOrder(store)[0]
 	return acting !== undefined && !personal.trainingGame && personal.pov >= 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER && personal.pov !== acting
 })
-const showWaitingPanel = computed(() => waitingForTurn.value && !personal.canPlay() && !store.turnDraft.ready && !rules.canExchangeBarahshum(store, personal.pov))
 const actingPlayer = computed(() => store.turnDraft.ready ? store.turnDraft.player : view.displayedTurnOrder(store)[0])
+// Spectators and waiting players see the status, but only the acting player gets the controls.
+const controlsForViewer = computed(() => {
+	if (store.viewSettings.showReplay || store.gameflow.phase === rf.PHASE_GAME_OVER) return false
+	if (personal.pov < 0 || store.players[personal.pov]?.isMissing) return false
+	return personal.trainingGame || personal.pov === actingPlayer.value
+})
 const actingState = computed(() => {
 	const game = actionPanelGame(store)
 	return game.gameflow.phase === rf.PHASE_DEVELOPMENT ? view.currentStateId(game) : null
@@ -125,9 +131,10 @@ const actingState = computed(() => {
 const actingLabel = computed(() => {
 	if (store.turnDraft.ready) return t("app.reviewing")
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return ""
-	const player = store.players[store.gameflow.turnOrder[0]]
-	const context = store.gameflow.pendingOffer ? t("app.responding") : store.gameflow.developmentStep === "betweenStates" ? t("app.nextStep") : t("app.acting")
-	return `${context}: ${player ? '' : t("app.automaticResolution")}`
+	if (store.gameflow.pendingOffer) return t("app.responding")
+	if (store.gameflow.developmentStep === "betweenStates") return t("app.nextStep")
+	if (store.gameflow.turnOrder[0] === undefined) return t("app.automaticResolution")
+	return ""
 })
 const actionPanelTitle = computed(() => {
 	const game = actionPanelGame(store)
@@ -207,6 +214,17 @@ function showDebug() {
 		<div class="mapPreviewViewport" tabindex="0" :aria-label="$t('app.enlargedMap')"><div id="nationMapPreviewBody"></div></div>
 	</dialog></Teleport>
 	<TopMenu />
+	<div id="turnStatus" :class="{ myTurn: personal.canPlay() && !store.viewSettings.showReplay, gameOver: store.gameflow.phase === rf.PHASE_GAME_OVER }">
+		<template v-if="store.viewSettings.showReplay">{{ $t("status.replay") }}</template>
+		<template v-else-if="store.gameflow.phase === rf.PHASE_GAME_OVER">{{ $t("status.gameOver") }}</template>
+		<template v-else-if="personal.canPlay()">
+			<span class="yourTurnBadge">{{ $t("status.yourTurnBadge") }}</span> {{ actionPanelTitle }}
+		</template>
+		<template v-else-if="actingPlayer !== undefined">
+			<span class="turnPlayerChip" :style="{ backgroundColor: personal.getCorrectedColourHex(store.players[actingPlayer].colour) }">{{ store.players[actingPlayer].displayName }}</span> {{ $t("status.acting", { action: actionPanelTitle }) }}
+		</template>
+		<template v-else>{{ $t("status.waitingNoPlayer", { action: actionPanelTitle }) }}</template>
+	</div>
 	<div id="wholeMiddleArea" :class="{ historyOpen: store.viewSettings.showHistory, nationDivision: isNationDivision, greyBackground: waitingForTurn, normalBackground: !waitingForTurn }">
 		<TopMenuViews />
 		<HistoryTab />
@@ -229,10 +247,11 @@ function showDebug() {
 				</Teleport>
 			</div>
 			<aside v-if="!store.viewSettings.showReplay" class="actionSidebar">
-				<div v-if="!isNationDivision" class="actionPanelHeading"><small class="actingLabel">{{ actingLabel }} <PlayerMarker v-if="actingPlayer !== undefined" :index="actingPlayer" /></small><small v-if="actingState !== null" class="actingLabel actingState"><img :src="assets.getStateOrderImage(actingState)" alt="" />{{ $t("common.state") }}: {{ rf.STATE_NAMES[actingState] }}</small>{{ actionPanelTitle }}</div>
-				<div v-if="!showWaitingPanel || isNationDivision" class="actionPanelBody"><NationMarket v-if="isNationDivision" :is-board-layout="isNationDivision" />
+				<div v-if="!isNationDivision" class="actionPanelHeading"><small class="actingLabel"><template v-if="actingLabel">{{ actingLabel }}</template><PlayerMarker v-if="actingPlayer !== undefined" :index="actingPlayer" /><span v-if="actingPlayer !== undefined">{{ store.players[actingPlayer].displayName }}</span></small><small v-if="actingState !== null" class="actingLabel actingState"><img :src="assets.getStateOrderImage(actingState)" alt="" />{{ $t("common.state") }}: {{ rf.STATE_NAMES[actingState] }}</small>{{ actionPanelTitle }}</div>
+				<div v-if="isNationDivision || controlsForViewer" class="actionPanelBody"><NationMarket v-if="isNationDivision" :is-board-layout="isNationDivision" />
 				<GameActions v-else ref="gameActions" @inspect="revealStatus" :key="store.turnDraft.revision" @select-area="selectedArea = $event" @change-map-action="mapAction = $event" @change-action-targets="actionTargets = $event" :selected-area="selectedArea" :path="canalPath" @clear-path="map.finishDig()" @change-removal="removalArea = $event" @change-land-draft="landDraft = $event" @change-turn-action="turnAction = $event" @change-dig-capacity="digCapacity = $event" /></div>
-				<TurnControls v-if="!showWaitingPanel || isNationDivision" :is-nation-division="isNationDivision" :turn-action="turnAction" :land-draft="landDraft" @end-turn="finishTurn" />
+				<TurnControls v-if="controlsForViewer" :is-nation-division="isNationDivision" :turn-action="turnAction" :land-draft="landDraft" @end-turn="finishTurn" />
+				<button v-if="personal.canResign()" class="resignButton" @click="store.viewSettings.showResignPanel = !store.viewSettings.showResignPanel">{{ $t("resign.title") }}</button>
 			</aside>
 		</div>
 		<DevelopmentProgress v-if="!isNationDivision && !store.viewSettings.showReplay" :is-digging="!!gameActions?.showDigging" />
@@ -260,6 +279,32 @@ body {
 #app { display: flex; flex-direction: column; min-width: 1380px; min-height: 100vh; }
 #app > #footer { flex-shrink: 0; }
 
+#turnStatus {
+	text-align: center;
+	font-weight: bolder;
+	padding: 4px 8px;
+	background-color: #c4dff7;
+	border-bottom: 1px solid #8bb8d8;
+}
+#turnStatus.myTurn { background-color: lightgreen; }
+#turnStatus.gameOver { background-color: lightgoldenrodyellow; }
+.yourTurnBadge {
+	display: inline-block;
+	background-color: darkgreen;
+	color: white;
+	border-radius: 10px;
+	padding: 1px 8px;
+	margin-right: 6px;
+	font-size: 0.9em;
+}
+.turnPlayerChip {
+	display: inline-block;
+	color: white;
+	border: 1px solid black;
+	padding: 1px 6px;
+	margin-right: 6px;
+}
+
 #wholeMiddleArea {
 	flex: 1 0 auto;
 	width: 100%;
@@ -279,6 +324,7 @@ body {
 .stateSidebar { flex: 0 0 260px; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
 .stateSidebar .holdingsPanel { width: 100%; }
 .actionSidebar { flex: 0 0 310px; padding: 12px; box-sizing: border-box; background: #fff9e9; border: 1px solid #aa9b77; border-radius: 5px; }
+.actionSidebar .resignButton { margin-top: 8px; }
 .actionSidebar .gameActions { margin: 0; padding: 0; border: 0; background: transparent; }
 .actionSidebar .equipmentCard { float: none; display: block; max-width: 100%; width: 100%; margin: 0 0 8px; }
 .actionPanelHeading { white-space: pre-line; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #c4b894; font-size: 17px; font-weight: bold; }

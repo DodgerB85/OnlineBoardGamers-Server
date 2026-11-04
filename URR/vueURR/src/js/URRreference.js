@@ -9,7 +9,7 @@ import i18n from "../i18n.js"
 
 const t = i18n.global.t
 
-export const SUPER_USERS = ["BotKickStarter", "admin"]
+export const SUPER_USERS = ["BotKickStarter"]
 export const DEBUG_USERS = []
 export const BOT_NAME = "UrrBot"
 export const KICKOUT_SOLO_DELAY_MS = 2 * 24 * 60 * 60 * 1000

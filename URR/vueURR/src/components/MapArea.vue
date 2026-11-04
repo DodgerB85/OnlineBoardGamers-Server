@@ -1,6 +1,7 @@
 <script setup>
 import PlayerMarker from "./PlayerMarker.vue"
 import WaterPlayback from "./WaterPlayback.vue"
+import ResignPanel from "./ResignPanel.vue"
 import { useWaterPlaybackStore } from "../stores/URRwaterPlayback.js"
 import { computed, nextTick, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
@@ -23,6 +24,7 @@ const displayedBoard = computed(() => playback.state.visible ? playback.state.bo
 const reservoirCapacities = Object.values(rf.ERA_CARD_DATA).map((card) => card.reservoir[0])
 const pumpCapacities = Object.values(rf.ERA_CARD_DATA).map((card) => card.pump[0])
 const personal = usePersonalStore()
+const resignOpen = computed(() => store.viewSettings.showResignPanel && personal.canResign())
 const selectedHexId = ref(null)
 watch(() => props.selectedHex, (id) => { selectedHexId.value = id })
 const focusedHex = ref(null)
@@ -253,7 +255,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 <template>
 	<div id="mapArea" ref="boardElement">
 		<div v-if="previewError" class="previewError" role="alert"><CurrencyText :text="previewError" /></div>
-		<div class="mapSurface">
+		<div class="mapSurface" :class="{ flipped: resignOpen }">
 			<svg :viewBox="`0 0 ${boardDisplay.MAP_WIDTH} ${boardDisplay.MAP_HEIGHT}`" :aria-label="$t('map.aria')"><title>{{ $t("map.keyboardHint") }}</title>
 				<defs>
 					<clipPath v-for="entry in actualAreas" :id="`hex-clip-${entry.area.id}`" :key="entry.area.id" clipPathUnits="userSpaceOnUse"><polygon :points="areaClips[entry.area.id]" /></clipPath>
@@ -307,6 +309,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 				<b><CurrencyText :text="mapAction.label" /></b><small><CurrencyText :text="mapAction.detail" /></small>
 				<div><button :disabled="!mapAction.canConfirm" @click="emit('confirmAction')">{{ $t("map.confirm") }}</button><button @click="emit('cancelAction')">{{ $t("map.cancel") }}</button></div>
 			</div>
+			<div class="mapBack"><transition name="resignFade"><ResignPanel v-if="resignOpen" /></transition></div>
 		</div>
 		<div v-if="waterReport" class="riverStatus" role="status"><span><b>{{ waterReport.kind === 'riverComplete' && store.gameflow.phase !== rf.PHASE_RAINY_SEASON ? $t("map.lastRainySeason") : $t("map.riverFlow", { turn: waterReport.turn }) }}</b> · {{ $t("map.water", { amount: waterReport.waterTotal }) }}<template v-if="waterReport.kind === 'riverComplete'"> · {{ $t("map.wetHexes", { count: waterReport.irrigatedCount }) }} · {{ $t("map.waterLost", { amount: waterReport.outflow }) }}<template v-if="!waterReport.irrigatedCount"> · {{ $t("map.noIrrigation") }}</template></template><template v-else> · {{ $t("map.routingInProgress") }}</template></span></div>
 		<div class="mapFooter" v-if="previewOpen">
@@ -337,7 +340,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 
 .legendRow { display: contents; }.legendToken { justify-self: end; }.legendExamples { display: inline-flex; gap: 4px; }.legendToken, .legendExamples img { width: 24px; height: 24px; flex-shrink: 0; }
 .boardLegend { display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: center; gap: 4px 8px; font-size: 16px; font-weight: 400; line-height: 1.4; padding: 6px 8px; text-align: left; }
-#mapArea { width: 100%; display: flex; flex-direction: column; align-items: center; min-width: 0; }.mapFooter { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 0; }.legendFooter { display: flex; align-items: flex-start; gap: 8px; width: 100%; padding-top: 6px; }.legendFooter .boardLegend { flex: 1; min-width: 0; }.legendFooter .mapZoom { flex-shrink: 0; }.mapFooter .controls { width: auto; padding: 0; }.mapSurface { position: relative; width: 100%; line-height: 0; box-shadow: 0 2px 5px #6b614a; }.mapSurface svg { width: 100%; height: auto; display: block; }
+#mapArea { width: 100%; display: flex; flex-direction: column; align-items: center; min-width: 0; perspective: 1600px; }.mapFooter { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 0; }.legendFooter { display: flex; align-items: flex-start; gap: 8px; width: 100%; padding-top: 6px; }.legendFooter .boardLegend { flex: 1; min-width: 0; }.legendFooter .mapZoom { flex-shrink: 0; }.mapFooter .controls { width: auto; padding: 0; }.mapSurface { position: relative; width: 100%; line-height: 0; box-shadow: 0 2px 5px #6b614a; transform-style: preserve-3d; transition: transform .6s ease; }.mapSurface.flipped { transform: rotateY(180deg); }.mapSurface > * { backface-visibility: hidden; }.mapBack { position: absolute; inset: 0; transform: rotateY(180deg); backface-visibility: hidden; line-height: 1.4; }.resignFade-enter-active { transition: opacity .4s ease-in-out .25s; }.resignFade-leave-active { transition: opacity .2s ease-in-out; }.resignFade-enter-from, .resignFade-leave-to { opacity: 0; }.mapSurface svg { width: 100%; height: auto; display: block; }
 .printedHexes polygon, .areaHit { fill: #fff; fill-opacity: .001; stroke: transparent; stroke-width: 5; cursor: pointer; }.areaHit.maintenanceSale { fill: #ffd894; fill-opacity: .2; stroke: #b76400; }.areaHit.harvestRemovalSite { fill: #ffd894; fill-opacity: .22; stroke: #b76400; }.areaHit.barahshumSite, .areaHit.calahSite { fill: #d9b7ed; fill-opacity: .28; stroke: #8758a8; }.areaHit.reachable { fill: #bf9dff; fill-opacity: .24; }.areaHit.waterDestination { fill: #74e9ff; fill-opacity: .3; stroke: #008cb3; }.areaHit.routing { stroke: #006dca; stroke-width: 8; }.areaHit:hover, .areaHit:focus, .areaHit.selected { fill: #fff57a; fill-opacity: .32; stroke: #7e6400; }.areaHit.drafting { stroke: #1165bb; fill-opacity: .17; }
 .savedCanal { fill: none; stroke: #2269ad; stroke-width: 10; stroke-linecap: round; pointer-events: none; }.draftCanal { fill: none; stroke: #1f75ce; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; opacity: .82; pointer-events: none; }.irrigationMarker { fill: #35d6ff; stroke: #fff; stroke-width: 3; pointer-events: none; }.ownerMarker, .waterworkMarker, .areaLabel { pointer-events: none; }.areaLabel { opacity: 0; text-anchor: middle; fill: #333; font-weight: bold; font-size: 16px; font-weight: 400; paint-order: stroke; stroke: #fff; stroke-width: 3; }
 .tokenFrame { fill: none; stroke: #000; stroke-width: 2; pointer-events: none; }.saleMarkerFrame { fill: #fff; }.irrigationMarker { stroke: #000; stroke-width: 2; }
