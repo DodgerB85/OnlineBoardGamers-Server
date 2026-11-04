@@ -105,7 +105,19 @@ The foundation report records a real browser save failing with `RequestDataTooBi
 
 `1747d544` replaced whole-history reactive recomputation with incremental rows and a separate river-report subscription for the map. `e0fa8e4e` cached area descriptions by their actual inputs, including locale, and cleared development-only vue-i18n performance entries. Its comments attribute the slowdown to Firefox formatter/timeline behavior; that diagnosis was not independently profiled here.
 
-**Keep:** keep derived snapshots out of deep reactive persisted state, constrain subscriptions and invalidate caches on every relevant state/locale change. Profile the affected browser and build mode. Do not paste these caches or instrumentation cleanup into another game pre-emptively. Full decoded-state logging was removed in `e0fa8e4e` but exists again in current `exportURRmodel`; current source is not proof that logging is free or desirable.
+**Keep:** keep derived snapshots out of deep reactive persisted state, constrain subscriptions and invalidate caches on every relevant state/locale change. Profile the affected browser and build mode. Do not paste these caches or instrumentation cleanup into another game pre-emptively. Full decoded-state logging was removed in `e0fa8e4e`, returned during the compact-save work, and was removed again in `5a0e54a9`; logging decoded saves is still not free or desirable.
+
+## After the review baseline
+
+The review above ends at 2026-10-27. Later changes supersede a few of its statements; keep the sections above as the record of that review.
+
+- `6dbb5461` (10-28) clarified the digging-selection controls.
+- `d8430c49` (10-29) compacted the game-over save: play-only state (card supply, rain, next digger id, sold land/emerging-state lists) is dropped while the final scores, board, prices and replay are kept.
+- `42ef9d21` (11-04) was the final functional touch-up: controls, artwork, and additional game-rule tests.
+- `fdc3399f` and `5a0e54a9` (11-04) replaced the save transfer codec: `exportURRmodel` now writes MessagePack through gzip level 9 and base64 (the RNB recipe), and pre-change gzip+JSON saves no longer load. `5a0e54a9` also removed the server-side save decode: the client sends a plain-JSON `openingMarker` sidecar for the first rewind point, so `openingPosition` and `decodeGameData` no longer exist in `URR/views.py`.
+- `68c949e9` (11-04) corrected the shell: the top bar no longer scrolls (the centre flexes and ellipsizes), it shows the viewer's name beside the connection dot, orders zoom as map/+/−, and shows each turn-order player's marker with their name. Bid, buy and pass controls are hidden for viewers who cannot act instead of rendered disabled.
+- `29ee5cec` (11-04) removed `admin` from `SUPER_USERS`; only `BotKickStarter` remains, so a human administrator no longer acts for the current seat out of turn.
+- Working tree at the time of writing (11-04): the BUS-style turn status bar below the header, blue/grey page background rules including replay, the acting-panel name beside its marker, and the settlement "Pass & End Turn & Phase" label. Treat these as part of the shell contract above once committed.
 
 ## Taste observed through revisions
 

@@ -43,6 +43,7 @@ Create `XYZ/common.py` with `create_xyz_game(request, tournamentObj=None, ...)` 
 Then add the create page:
 
 - `Lobby/templates/Lobby/createXYZ.html` (copy `createWEB.html`). It comes with the shared create-page pieces already wired in: `Lobby/createGamePage.js` (autocomplete, `getCookie`, `removeOption`/`addOption`, `setKickoutOptions`, `showSeats`/`clearSeatNames`, `validateGameType`), `Lobby/createCommonOptions.html` (the Common Options card, parameterised by the practice-game sentence) and `Lobby/kickoutOptions.html` (translated kickout labels). Keep only the per-game `validateOptions` / `selectPlayers` / `initGameCreation` in `Lobby/createXYZ.js` - do not copy the shared helpers into it.
+- Only render a Game Options card when the game actually has options. Do not ship a placeholder "options will be added here" card. If the page ends up with two cards, add `setup-cards-grid-two` to the grid so a wide screen does not leave an empty third column.
 - `createXYZpage` view in `Lobby/views.py` (copy `createWEBpage`; it also implements the rematch/`gameID` prefill),
 - routes in `Lobby/urls.py`: `createXYZpage/` and `createXYZpage/<int:gameID>/`, plus `createXYZminiTournament/` and its view/reverse entries if mini tournaments are wanted.
 
@@ -73,6 +74,15 @@ Mirroring `WEB/RNB`:
 
 The [show-page shell contract](add-new-game/SKILL.md#reuse-the-show-page-shell) is required: adapt URR’s `TopMenu.vue` structure and SVG icons, and WEB’s `.actionsLineButton` styles (or the documented URR panel variant). Preserve the site header, utility panels, typography, background and footer. A custom themed top bar or hand-rolled button palette is not an equivalent substitute. Compare the result against the named donor in a browser.
 
+Shell corrections already made in the donors, required for a new game:
+
+- The top bar must never show a scrollbar. No `overflow-x` and no fixed `min-width` on `#top`; the centred `#topInfos` takes the remaining width (`flex: 1 1 auto; min-width: 0`) and ellipsizes long game/player text so menu items, viewer name and zoom controls stay visible at 1366–1400px.
+- Show the viewer's name as text beside the connection dot (`#WSstatus`); spectators show "Spectator". Do not replace the name with only a player marker.
+- Zoom controls run whole-map/fit, zoom in, zoom out, left to right. Keep menu labels short enough to fit (e.g. "Prices", not "Land prices"). The turn-order line shows each player's marker followed by the display name.
+- Place a turn status bar directly below the header (copy `BUS/vueBUS/src/App.vue` `#turnStatus`): a "YOUR TURN" badge plus the current action on your turn, otherwise the acting player's colour chip, name and action; use it for "Game over" and "Replay" too. Drive the action text from the same helper as the action panel so both agree.
+- Page background (`#wholeMiddleArea`): light blue (`#d4eafd`) on your turn and for spectators, grey while a seated player waits for another player's turn and while replaying, with the 1s fade. Practice games stay blue.
+- Hide action controls the viewer cannot use; do not render them disabled. Disabled buy/bid/pass buttons on another player's turn confuse spectators. Leave read-only information (prices, bids, ownership) visible.
+- `SUPER_USERS` is for automated accounts only (`BotKickStarter`). Never add a human or administrator username: that bypasses the turn check and submits actions for whichever seat is active. Administrators without a seat observe with `pov = -1`.
 - For a Vue client create `XYZ/vueXYZ/` (Vite + Pinia; copy the structure of `CNS/vueCNS` or `RNB/vueRNB`: `model/`, `controller/`, `js/`, `stores/`, `IO/`). The build outputs to `XYZ/static/XYZ/XYZvuedist` (or similar) which Django serves — **never edit the dist**; add a `XYZ.bat` build/dev script like `FCM/vueFCM/FCM.bat`.
 - The client implements all rules: it computes moves locally, polls the data endpoint, and submits via `processXYZturn` with `latestUpdate`. Refer to the client conventions in [ARCHITECTURE.md](ARCHITECTURE.md).
 

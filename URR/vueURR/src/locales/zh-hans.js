@@ -128,6 +128,13 @@ export default {
 		beforeStateDevelopment: "{state} 发展之前",
 		statePhase: "{state}\n{phase}",
 	},
+	status: {
+		yourTurnBadge: "轮到你了",
+		acting: "正在行动：{action}",
+		waitingNoPlayer: "等待下一位玩家：{action}",
+		gameOver: "游戏结束",
+		replay: "回放",
+	},
 	footer: {
 		credit: "UR: 1830 BC 是 Jeroen Doumen 和 Joris Wiersinga 设计的桌游，由",
 		implementation: "Online Board Gamers 实现，作者 Mihai & DodgerB。已获授权。",
@@ -576,6 +583,7 @@ export default {
 		reviewedEndTurn: "结束回合（{cost} SPL）",
 		endTurnNet: "结束回合（{net} SPL）",
 		passEndTurn: "跳过并结束回合",
+		passEndTurnAndPhase: "跳过并结束回合和阶段",
 		resetTurn: "重置回合",
 		addOrClearCanal: "在完成发展前添加或清除运河草稿。",
 		selectTwoAreas: "请选择至少两个区域作为运河路径。",

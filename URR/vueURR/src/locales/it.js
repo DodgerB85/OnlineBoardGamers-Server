@@ -128,6 +128,13 @@ export default {
 		beforeStateDevelopment: "Prima dello sviluppo di {state}",
 		statePhase: "{state}\n{phase}",
 	},
+	status: {
+		yourTurnBadge: "TOCCA A TE",
+		acting: "sta giocando: {action}",
+		waitingNoPlayer: "In attesa del prossimo giocatore: {action}",
+		gameOver: "Partita terminata",
+		replay: "Replay",
+	},
 	footer: {
 		credit: "UR: 1830 BC è un gioco da tavolo di Jeroen Doumen e Joris Wiersinga, pubblicato da",
 		implementation: "Implementazione Online Board Gamers di Mihai & DodgerB. Con autorizzazione.",
@@ -576,6 +583,7 @@ export default {
 		reviewedEndTurn: "Termina turno ({cost} SPL)",
 		endTurnNet: "Termina turno ({net} SPL)",
 		passEndTurn: "Passa e termina turno",
+		passEndTurnAndPhase: "Passa e termina turno e fase",
 		resetTurn: "Reimposta turno",
 		addOrClearCanal: "Aggiungi o pulisci la bozza canale prima di terminare lo sviluppo.",
 		selectTwoAreas: "Seleziona almeno due aree per un percorso di canale.",

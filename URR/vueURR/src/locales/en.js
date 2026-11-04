@@ -128,6 +128,13 @@ export default {
 		beforeStateDevelopment: "Before {state} development",
 		statePhase: "{state}\n{phase}",
 	},
+	status: {
+		yourTurnBadge: "YOUR TURN",
+		acting: "is acting: {action}",
+		waitingNoPlayer: "Waiting for the next player: {action}",
+		gameOver: "Game over",
+		replay: "Replay",
+	},
 	footer: {
 		credit: "UR: 1830 BC is a board game by Jeroen Doumen and Joris Wiersinga, published by",
 		implementation: "Online Board Gamers implementation by Mihai & DodgerB. Permissions Provided.",
@@ -569,6 +576,7 @@ export default {
 		reviewedEndTurn: "End Turn ({cost} SPL)",
 		endTurnNet: "End Turn ({net} SPL)",
 		passEndTurn: "Pass & End Turn",
+		passEndTurnAndPhase: "Pass & End Turn & Phase",
 		resetTurn: "Reset Turn",
 		addOrClearCanal: "Add or clear the canal draft before finishing development.",
 		selectTwoAreas: "Select at least two areas for a canal path.",

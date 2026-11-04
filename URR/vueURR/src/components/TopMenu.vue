@@ -189,7 +189,7 @@ function getKickoutTimerText() {
 			</span>
 			<div class="playerLineDiv">
 				<template v-for="(playerIndex, idx) in view.displayedTurnOrder(store)" :key="idx">
-					<span v-if="playerIndex !== -1" class="mainEntryPlayer turnOrderSpan" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)"><PlayerMarker :index="playerIndex" /></span>
+					<span v-if="playerIndex !== -1" class="mainEntryPlayer turnOrderSpan" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)"><PlayerMarker :index="playerIndex" /><span class="turnOrderName">{{ store.players[playerIndex].displayName }}</span></span>
 				</template>
 			</div>
 		</div>
@@ -278,6 +278,7 @@ function getKickoutTimerText() {
 #topInfos { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; min-width: 0; flex: 1 1 auto; overflow: hidden; }
 .menuDivider { display: inline-block; width: 5px; height: 50px; background-color: darkgray; margin: 0px 10px 0px 10px; }
 .turnOrderSpan { display: inline-block; padding: 5px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+.turnOrderName { margin-left: 4px; vertical-align: middle; }
 .gameInfoSpan { white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .playerLineDiv { white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 </style>
