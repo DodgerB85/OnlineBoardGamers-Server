@@ -25,7 +25,7 @@ const personal = usePersonalStore()
 // BG Stats export is opt-in per user (profile.bgStatsEnabled) and only makes
 // sense for someone who actually sat at the table.
 const bgStatsUrl = computed(() =>
-	window.initData.bgStatsEnabled === 1 && personal.pov >= 0 && store.gameflow.phase === rf.PHASE_GAME_OVER
+	window.initData.bgStatsEnabled === 1 && store.gameflow.phase === rf.PHASE_GAME_OVER
 		? buildBgStatsUrl()
 		: undefined
 )

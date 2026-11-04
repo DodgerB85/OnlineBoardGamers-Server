@@ -10,7 +10,7 @@ const store = useModelStore()
 // BG Stats export is opt-in per user (profile.bgStatsEnabled) and only makes
 // sense for someone who actually sat at the table.
 const bgStatsUrl = computed(() =>
-  window.initData.bgStatsEnabled === 1 && store.pov >= 0 && store.isGameOver ? buildBgStatsUrl() : undefined
+  window.initData.bgStatsEnabled === 1 && store.isGameOver ? buildBgStatsUrl() : undefined
 )
 const showBgStatsQr = ref(false)
 const bgStatsCopied = ref(false)

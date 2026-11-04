@@ -140,11 +140,9 @@ function localCastVote(topic) {
 	<!-- REWIND PANEL -->
 	<transition name="fade">
 	<div id="rewindPanel" v-if="store.viewSettings.showRewindPanel">
-		<div class="utilityHeading"><b>{{ $t("rewind.title") }}</b></div>
 		<p>{{ $t("rewind.intro") }}</p>
 		<p>{{ $t("rewind.courtesy") }}</p>
 		<p>{{ $t("rewind.misuse") }}</p>
-		<p class="rewindWarning">{{ $t("rewind.warningRemove") }}<br />{{ $t("rewind.warningCourteous") }}</p>
 		<p v-if="store.gameMessages.errorText" class="errorText" role="alert"><CurrencyText :text="store.gameMessages.errorText" /></p>
 		<button class="topMenuItem" :disabled="!!store.turnDraft.start || store.viewSettings.showLoader || store.viewSettings.isSaving || personal.haltPlay || store.viewSettings.showReplay" :title="store.turnDraft.start ? $t('rewind.resetFirst') : $t('rewind.previousTurn')" @click="IO.loadRewind()">
 			<img :src="view.getImage('icon-rewind')" alt="" />
@@ -244,18 +242,16 @@ function localCastVote(topic) {
 	padding: 5px;
 	width: 400px;
 	top: var(--urr-menu-height, 60px);
-	left: 50%;
-	transform: translateX(-50%);
+	left: 650px;
 	font-size: 18px;
 	z-index: 10000;
 	color: white;
 }
-.rewindWarning { background-color: lightgoldenrodyellow; color: darkred; font-weight: bold; text-align: center; }
 .fade-enter-active, .fade-leave-active { transition: opacity 0.5s ease-in-out; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 .topMenuItem { display: inline-block; width: 62px; height: 55px; cursor: pointer; text-align: center; }
 .topMenuItem img { width: 38px; height: 38px; }
 .topMenuItem span { font-size: 16px; font-weight: bold; display: block; }
-.utilityHeading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }.utilityHeading button { border: 0; background: none; color: inherit; font-size: 26px; cursor: pointer; }.topMenuItem { border: 0; background: #303030; color: white; border-radius: 3px; }.topMenuItem:disabled { opacity: .5; cursor: default; }
-@media (max-width: 1050px) { .chatHeading button, .utilityHeading button { min-width: 44px; min-height: 44px; box-sizing: border-box; } }
+.topMenuItem { border: 0; background: #303030; color: white; border-radius: 3px; }.topMenuItem:disabled { opacity: .5; cursor: default; }
+@media (max-width: 1050px) { .chatHeading button { min-width: 44px; min-height: 44px; box-sizing: border-box; } }
 </style>

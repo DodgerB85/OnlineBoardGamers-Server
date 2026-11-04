@@ -6,6 +6,7 @@ import { useWaterPlaybackStore } from "../stores/URRwaterPlayback.js"
 const playback = useWaterPlaybackStore()
 const { t } = useI18n()
 const svg = ref(null)
+const motion = ref(null)
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
 const step = computed(() => playback.current)
 const position = (id) => boardDisplay.getAreaPosition(playback.state.board.areas.find((area) => area.id === id))
@@ -53,15 +54,37 @@ function schedule() {
 	// leaves no frozen frame between hexes.
 	if (playback.state.advancing) timer = setTimeout(() => playback.next(), Math.max(50, duration.value * 1000 - 30))
 }
+// The step's SVG is rebuilt by :key, and a newly inserted animateMotion does not
+// start on its own. Begin it before paint so the blob starts at the path start,
+// then restart it on the next frame once the new SVG's clock is running. Manual
+// Next/Previous steps play once at a quicker pace instead of jumping to the point.
+function animateStep() {
+	const element = motion.value
+	if (!element) return
+	element.setAttribute("dur", `${playback.state.advancing ? duration.value : Math.min(duration.value, 0.45)}s`)
+	element.beginElement()
+}
+async function beginStep() {
+	const index = playback.state.index
+	await nextTick()
+	if (playback.state.index !== index) return
+	animateStep()
+	requestAnimationFrame(() => {
+		if (playback.state.index !== index) return
+		svg.value?.unpauseAnimations()
+		animateStep()
+	})
+}
 function outsideInteract(event) {
 	if (!event.target.closest(".waterPlayback")) playback.stop()
 }
+watch(() => playback.state.index, beginStep)
 watch(() => [playback.state.index, playback.state.advancing], schedule)
 watch(() => playback.state.advancing, (advancing) => nextTick(() => {
 	if (advancing) svg.value?.unpauseAnimations()
 	else svg.value?.pauseAnimations()
 }))
-onMounted(() => { schedule(); document.addEventListener("click", outsideInteract, true) })
+onMounted(() => { beginStep(); schedule(); document.addEventListener("click", outsideInteract, true) })
 onBeforeUnmount(() => { clearTimeout(timer); document.removeEventListener("click", outsideInteract, true) })
 </script>
 
@@ -78,7 +101,7 @@ onBeforeUnmount(() => { clearTimeout(timer); document.removeEventListener("click
 				<text y="7">{{ water.amount }}</text>
 			</g>
 			<g v-if="points.length && !(step.type === 'confluence' && step.waiting)" :transform="blobPosition" class="waterTransit">
-				<animateMotion v-if="path && !reducedMotion" :path="path" :dur="`${duration}s`" calcMode="paced" fill="freeze" />
+				<animateMotion ref="motion" v-if="path && !reducedMotion" begin="indefinite" :path="path" calcMode="paced" fill="freeze" />
 				<g class="waterBlob" :class="{ paused: !playback.state.advancing }" :style="{ animationDelay: bobDelay() }">
 					<path d="M -25 1 C -27 -15 -13 -25 2 -24 C 18 -25 29 -12 27 3 C 27 20 11 26 -4 24 C -20 25 -28 15 -25 1 Z" />
 					<ellipse cx="-9" cy="-13" rx="8" ry="4" class="blobHighlight" />

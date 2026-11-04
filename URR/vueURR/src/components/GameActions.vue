@@ -31,7 +31,7 @@ const { t } = useI18n()
 const game = computed(() => actionPanelGame(store))
 // BG Stats export is opt-in per user (profile.bgStatsEnabled) and only makes
 // sense for someone who actually sat at the table.
-const bgStatsUrl = computed(() => window.initData.bgStatsEnabled === 1 && personal.pov >= 0 && game.value.gameflow.phase === rf.PHASE_GAME_OVER ? buildBgStatsUrl() : undefined)
+const bgStatsUrl = computed(() => window.initData.bgStatsEnabled === 1 && game.value.gameflow.phase === rf.PHASE_GAME_OVER ? buildBgStatsUrl() : undefined)
 const showBgStatsQr = ref(false)
 const bgStatsCopied = ref(false)
 const bgStatsQrSvg = computed(() => (showBgStatsQr.value ? window.OBGQR.toSvg(bgStatsUrl.value) : ""))
@@ -587,7 +587,7 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 						<div class="equipLegend"><span class="swatch pump"></span><div><span class="shopItemLine"><CurrencyText :text="$t('actions.pump', { price: siteCost.pump[1] })" /> · {{ $t("actions.reach", { reach: siteCost.pump[0] }) }}</span><small>{{ $t("actions.tokensLeft", { tokens: rules.remainingWaterworkTokens(game, state.id, siteCost.pump[0]) }) }}</small></div></div>
 						<div class="equipLegend"><span class="swatch reservoir"></span><div><span class="shopItemLine"><CurrencyText :text="$t('actions.reservoir', { price: siteCost.reservoir[1] })" /> · {{ $t("actions.holds", { capacity: siteCost.reservoir[0] }) }}</span><small>{{ $t("actions.tokensLeft", { tokens: rules.remainingWaterworkTokens(game, state.id, siteCost.reservoir[0]) }) }}</small></div></div>
 						<label v-if="ownedCalah"><input type="checkbox" v-model="useCalah" /> <CurrencyText :text="$t('actions.useCalah', { income: rf.NATION_INCOMES[rf.NATION_CALAH] })" /></label>
-						<p v-if="!store.turnDraft.ready && !equipSites.length" class="hint"><CurrencyText :text="noSiteReason" /></p>
+						<p v-if="!store.turnDraft.ready && !equipSites.length" class="error"><CurrencyText :text="noSiteReason" /></p>
 						<div class="crewStepper"><span>{{ $t("actions.crewStepper", { era: cardEra === 5 ? 'M' : cardEra, capacity: cardData.digger[0] }) }}<br>{{ cardData.digger[1] }} <CurrencyIcon /></span><span class="stepper"><button :disabled="!canRemoveCrew" :aria-label="$t('actions.removeCrew')" @click="removeCrew()">−</button><b>{{ crewCount }}</b><button :disabled="!!crewError" :aria-label="$t('actions.addCrew')" @click="addCrew">+</button></span></div>
 						<p v-if="crewError" class="hint"><CurrencyText :text="crewError" /></p>
 						<button v-if="game.gameflow.developmentStep === 'digging' && unusedCrews.length" @click="diggingDone = false">{{ $t("actions.backToDigging") }}</button>

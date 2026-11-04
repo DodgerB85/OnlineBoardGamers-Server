@@ -7,7 +7,7 @@
  */
 
 function buildHLCBgStatsUrl() {
-	if (!global.bgStatsEnabled || global.pov < 0) return undefined
+	if (!global.bgStatsEnabled) return undefined
 
 	// turnOrder is money-sorted when the game ends, so this is the final standings
 	var turnOrder = M.gameFlow.turnOrder
