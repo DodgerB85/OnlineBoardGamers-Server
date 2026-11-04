@@ -6,11 +6,31 @@ import * as controller from "../js/DDLcontroller.js"
 import * as IO from "../backend/DDL_IO.js"
 import * as funcs from "../js/DDLfuncs.js"
 import * as view from "../js/DDLview.js"
+import { buildBgStatsUrl } from "../js/DDL_bgStats.js"
 import { useModelStore } from "../stores/DDLstore.js"
 import { usePersonalStore } from "../stores/DDLpersonal.js"
 
 const store = useModelStore()
 const personal = usePersonalStore()
+
+// BG Stats export is opt-in per user (profile.bgStatsEnabled) and only makes
+// sense for someone who actually sat at the table.
+const bgStatsUrl = computed(() =>
+	window.initData.bgStatsEnabled === 1 && personal.pov >= 0 && store.gameflow.phase === rf.PHASE_GAME_OVER
+		? buildBgStatsUrl()
+		: undefined
+)
+const showBgStatsQr = ref(false)
+const bgStatsCopied = ref(false)
+const bgStatsQrSvg = computed(() => (showBgStatsQr.value ? window.OBGQR.toSvg(bgStatsUrl.value) : ""))
+
+function copyBgStatsLink() {
+	// Clipboard permission can be refused; the QR code below is the fallback.
+	navigator.clipboard.writeText(bgStatsUrl.value).then(() => {
+		bgStatsCopied.value = true
+		setTimeout(() => (bgStatsCopied.value = false), 2000)
+	})
+}
 
 const randomGood = ref(-1)
 const siteGearSlot = ref(-1)
@@ -205,6 +225,13 @@ function openTradeModal() {
 			<div v-for="(group, i) in store.gameflow.finalPositions" :key="i" class="finalGroup">
 				<b>{{ i === 0 ? $t("action.winner") : view.placeLabel(i + 1) }}:</b>
 				<span v-for="idx in group" :key="idx" class="finalPlayer">{{ store.players[idx].displayName }} ({{ rules.finalScore(store.players[idx]) }})</span>
+			</div>
+			<div v-if="bgStatsUrl" id="bgStatsDiv">
+				<a :href="bgStatsUrl" target="_blank" rel="noopener">{{ $t("action.bgStats") }}</a>
+				<br />
+				<button type="button" class="actionsLineButton" @click="copyBgStatsLink">{{ bgStatsCopied ? $t("action.bgStatsCopied") : $t("action.bgStatsCopy") }}</button>
+				<button type="button" class="actionsLineButton" @click="showBgStatsQr = !showBgStatsQr">{{ $t("action.bgStatsQr") }}</button>
+				<div v-if="showBgStatsQr" class="bgStatsQr" role="img" :aria-label="$t('action.bgStats')" v-html="bgStatsQrSvg"></div>
 			</div>
 		</div>
 
@@ -454,4 +481,6 @@ select { max-width: 100%; font-size: 11px; margin: 2px; }
 .gameOverBox { text-align: left; }
 .finalGroup { margin: 4px 0; }
 .finalPlayer { margin-left: 6px; }
+#bgStatsDiv { font-size: 16px; margin-top: 10px; }
+:deep(.bgStatsQr svg) { display: block; width: 100%; max-width: 564px; height: auto; margin: 8px auto; border: 1px solid black; }
 </style>

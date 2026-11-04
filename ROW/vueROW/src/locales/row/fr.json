@@ -626,7 +626,11 @@
       "title": "Fin de partie",
       "total": "Total",
       "breakdown": "Détail",
-      "tie": "Égalité entre {players}"
+      "tie": "Égalité entre {players}",
+      "bgStats": "Publier dans BG Stats",
+      "bgStatsCopy": "Copier le lien",
+      "bgStatsCopied": "Lien copié",
+      "bgStatsQr": "Code QR"
     },
     "history": {
       "empty": "Aucune action pour l'instant",

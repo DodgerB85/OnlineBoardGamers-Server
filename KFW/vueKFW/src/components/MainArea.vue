@@ -3,6 +3,8 @@ import * as IO from "../backend/KFW_IO"
 import * as rf from "../js/KFWreference"
 import * as controller from "../js/KFWcontroller"
 import i18n from "../i18n"
+import { buildBgStatsUrl } from "../js/KFW_bgStats"
+import { computed, ref } from "vue"
 
 import SupplyArea from "./SupplyArea.vue"
 import PlayerItems from "./PlayerItems.vue"
@@ -19,6 +21,25 @@ const store = useModelStore()
 
 import { usePersonalStore } from "../stores/KFWpersonal.js"
 const personal = usePersonalStore()
+
+// BG Stats export is opt-in per user (profile.bgStatsEnabled) and only makes
+// sense for someone who actually sat at the table.
+const bgStatsUrl = computed(() =>
+	window.initData.bgStatsEnabled === 1 && personal.pov >= 0 && store.gameflow.phase === rf.PHASE_GAME_OVER
+		? buildBgStatsUrl()
+		: undefined
+)
+const showBgStatsQr = ref(false)
+const bgStatsCopied = ref(false)
+const bgStatsQrSvg = computed(() => (showBgStatsQr.value ? window.OBGQR.toSvg(bgStatsUrl.value) : ""))
+
+function copyBgStatsLink() {
+	// Clipboard permission can be refused; the QR code below is the fallback.
+	navigator.clipboard.writeText(bgStatsUrl.value).then(() => {
+		bgStatsCopied.value = true
+		setTimeout(() => (bgStatsCopied.value = false), 2000)
+	})
+}
 
 function getTrgGamePlayerItemsOrder() {
 	let res = [...store.gameflow.fullTurnOrder]
@@ -205,6 +226,17 @@ function getOrdinalForIdx1(idx1) {
 							<FinalScoreTable :playerIndexProp="playerIndex" />
 							<PlayerVillage :playerIndexProp="playerIndex" />
 						</template>
+						<div v-if="bgStatsUrl" id="bgStatsDiv">
+							<a :href="bgStatsUrl" target="_blank" rel="noopener">{{ $t("mainArea.bgStats") }}</a>
+							<br />
+							<button type="button" class="actionsLineButton" @click="copyBgStatsLink">
+								{{ bgStatsCopied ? $t("mainArea.bgStatsCopied") : $t("mainArea.bgStatsCopy") }}
+							</button>
+							<button type="button" class="actionsLineButton" @click="showBgStatsQr = !showBgStatsQr">
+								{{ $t("mainArea.bgStatsQr") }}
+							</button>
+							<div v-if="showBgStatsQr" class="bgStatsQr" role="img" :aria-label="$t('mainArea.bgStats')" v-html="bgStatsQrSvg"></div>
+						</div>
 					</div>
 				</template>
 				<template v-else>
@@ -292,6 +324,21 @@ function getOrdinalForIdx1(idx1) {
 #gameEndDiv {
 	font-weight: bolder;
 	font-size: 30px;
+}
+
+/* Smaller than the rest of the end panel: the QR has to fit the action area. */
+#bgStatsDiv {
+	font-size: 16px;
+	margin-top: 10px;
+}
+
+.bgStatsQr svg {
+	display: block;
+	width: 100%;
+	max-width: 564px;
+	height: auto;
+	margin: 8px auto;
+	border: 1px solid black;
 }
 
 #finalScoreDiv {

@@ -437,9 +437,6 @@ function requestConsent(game, state, action) {
 		boardRules.requireRule(action.kind === "pump" || action.kind === "reservoir", "Only waterworks need landowner consent")
 		owner = boardRules.getArea(game, action.area).owner
 		boardRules.requireRule(!game.gameflow.declinedWaterworks?.includes(action.area), "The landowner declined construction at this site for this development turn")
-		const preview = JSON.parse(JSON.stringify(game))
-		if (action.type === "exchangeCalah") exchangeCalah(preview, preview.states[state.id], action, owner)
-		else buyCard(preview, preview.states[state.id], action, owner)
 	}
 	const hasAgreement = action.type !== "offerNation" && game.gameflow.waterworkAgreements?.some((agreement) => agreement.state === state.id && agreement.owner === owner && agreement.action.area === action.area && agreement.action.kind === action.kind)
 	if (owner === null || owner === state.king || hasAgreement) {
@@ -448,6 +445,9 @@ function requestConsent(game, state, action) {
 		else if (action.type === "exchangeCalah") exchangeCalah(game, state, action, owner)
 		else buyCard(game, state, action, owner)
 	} else if (action.type !== "offerNation") {
+		const preview = JSON.parse(JSON.stringify(game))
+		if (action.type === "exchangeCalah") exchangeCalah(preview, preview.states[state.id], action, owner)
+		else buyCard(preview, preview.states[state.id], action, owner)
 		game.gameflow.waterworkRequests ??= []
 		game.gameflow.waterworkRequests.push({ state: state.id, action, returnPlayer: state.king })
 	} else {

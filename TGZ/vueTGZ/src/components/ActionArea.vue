@@ -10,6 +10,7 @@ import * as funcs from "../js/TGZfuncs"
 import * as controller from "../js/TGZcontroller"
 import * as Bot from "../js/TGZbot"
 import * as IO from "../js/TGZ_IO"
+import { buildBgStatsUrl } from "../js/TGZ_bgStats"
 
 import { ref, computed, watch, onUnmounted } from "vue"
 
@@ -23,6 +24,25 @@ const t = i18n.global.t
 
 const autoPass = ref(window.initData.autoPass || false)
 const confirmTournamentReplacement = ref(false)
+
+// BG Stats export is opt-in per user (profile.bgStatsEnabled) and only makes
+// sense for someone who actually sat at the table.
+const bgStatsUrl = computed(() =>
+	window.initData.bgStatsEnabled === 1 && personal.pov >= 0 && store.gameflow.phase === rf.PHASE_GAME_OVER
+		? buildBgStatsUrl()
+		: undefined
+)
+const showBgStatsQr = ref(false)
+const bgStatsCopied = ref(false)
+const bgStatsQrSvg = computed(() => (showBgStatsQr.value ? window.OBGQR.toSvg(bgStatsUrl.value) : ""))
+
+function copyBgStatsLink() {
+	// Clipboard permission can be refused; the QR code below is the fallback.
+	navigator.clipboard.writeText(bgStatsUrl.value).then(() => {
+		bgStatsCopied.value = true
+		setTimeout(() => (bgStatsCopied.value = false), 2000)
+	})
+}
 
 // --- Smooth Rotation ---
 const currentDegrees = ref(store.context.itemBeingAddedRotation * 90)
@@ -1017,6 +1037,23 @@ function failedToJustPlaceCraftsmanFlag() {
 				<span v-else>{{ $t("actionArea.normal") }}</span>
 				{{ $t("actionArea.view") }}
 			</button>
+			<div v-if="bgStatsUrl" id="bgStatsDiv">
+				<a :href="bgStatsUrl" target="_blank" rel="noopener">{{ $t("actionArea.bgStats") }}</a>
+				<br />
+				<button type="button" class="actionsLineButton" @click="copyBgStatsLink">
+					{{ bgStatsCopied ? $t("actionArea.bgStatsCopied") : $t("actionArea.bgStatsCopy") }}
+				</button>
+				<button type="button" class="actionsLineButton" @click="showBgStatsQr = !showBgStatsQr">
+					{{ $t("actionArea.bgStatsQr") }}
+				</button>
+				<div
+					v-if="showBgStatsQr"
+					class="bgStatsQr"
+					role="img"
+					:aria-label="$t('actionArea.bgStats')"
+					v-html="bgStatsQrSvg"
+				></div>
+			</div>
 		</div>
 	</template>
 
@@ -2337,6 +2374,21 @@ function failedToJustPlaceCraftsmanFlag() {
 
 #gameEndDiv {
 	font-size: 30px;
+}
+
+/* Smaller than the rest of the end panel: the QR has to fit the action area. */
+#bgStatsDiv {
+	font-size: 16px;
+	margin-top: 10px;
+}
+
+:deep(.bgStatsQr svg) {
+	display: block;
+	width: 100%;
+	max-width: 564px;
+	height: auto;
+	margin: 8px auto;
+	border: 1px solid black;
 }
 
 .winningTribeImg {

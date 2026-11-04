@@ -903,6 +903,7 @@ def showHLCgame(request, game_id):
             "statsExcludedGame": statsExcludedGame,
             "displayNames": displayNames,
             "nextURL": nextURL,
+            "bgStatsEnabled": result["auth_data"].get("bgStatsEnabled", 0),
             "KickoutFlexiDataArray": result["base_data"]["KickoutFlexiDataArray"],
             "settingsDebug": result["base_data"]["settingsDebug"],
             "statsExcludeVotesData": result["base_data"]["statsExcludeVotesData"],

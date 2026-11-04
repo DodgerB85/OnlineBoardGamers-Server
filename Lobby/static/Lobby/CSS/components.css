@@ -2129,6 +2129,10 @@ a.create-tile {
     .setup-cards-grid {
         grid-template-columns: repeat(3, 1fr);
     }
+    /* Games with no game options have only two cards. */
+    .setup-cards-grid.setup-cards-grid-two {
+        grid-template-columns: repeat(2, 1fr);
+    }
     .setup-cards-grid .card:nth-last-child(1):nth-child(odd) {
         grid-column: auto;
         justify-self: auto;

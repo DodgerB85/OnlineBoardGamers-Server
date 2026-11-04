@@ -105,6 +105,10 @@ export default {
 		permissions: "Mit freundlicher Genehmigung. Menüsymbole von",
 	},
 	action: {
+		bgStats: "An BG Stats senden",
+		bgStatsCopy: "Link kopieren",
+		bgStatsCopied: "Link kopiert",
+		bgStatsQr: "QR-Code",
 		title: "Aktion",
 		gameOver: "Spielende",
 		winner: "Sieger",

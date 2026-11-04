@@ -12,6 +12,7 @@ import * as funcs from "../js/CNSfuncs"
 import * as model from "../js/CNSmodel"
 import * as map from "../js/CNSmap"
 import * as Bot from "../js/CNSbot"
+import { buildBgStatsUrl } from "../js/CNS_bgStats"
 import i18n from "../i18n"
 
 import { ref, computed, watch, onUnmounted } from "vue"
@@ -21,6 +22,23 @@ const store = useModelStore()
 
 import { usePersonalStore } from "../stores/CNSpersonal.js"
 const personal = usePersonalStore()
+
+// BG Stats export is opt-in per user (profile.bgStatsEnabled) and only makes
+// sense for someone who actually sat at the table.
+const bgStatsUrl = computed(() =>
+	window.initData.bgStatsEnabled === 1 && personal.pov >= 0 && store.gameflow.phase === rf.PHASE_GAME_OVER ? buildBgStatsUrl() : undefined
+)
+const showBgStatsQr = ref(false)
+const bgStatsCopied = ref(false)
+const bgStatsQrSvg = computed(() => (showBgStatsQr.value ? window.OBGQR.toSvg(bgStatsUrl.value) : ""))
+
+function copyBgStatsLink() {
+	// Clipboard permission can be refused; the QR code below is the fallback.
+	navigator.clipboard.writeText(bgStatsUrl.value).then(() => {
+		bgStatsCopied.value = true
+		setTimeout(() => (bgStatsCopied.value = false), 2000)
+	})
+}
 
 function canMoveToNetworkPhase(hexActionsUsed, agents) {
 	if (agents === 0 && hexActionsUsed === 1) return true
@@ -360,6 +378,17 @@ function cancelSales() {
 					</template>
 					<br />
 				</template>
+				<div v-if="bgStatsUrl" id="bgStatsDiv">
+					<a :href="bgStatsUrl" target="_blank" rel="noopener">{{ $t("action.bgStats") }}</a>
+					<br />
+					<button type="button" class="actionsLineButton" @click="copyBgStatsLink">
+						{{ bgStatsCopied ? $t("action.bgStatsCopied") : $t("action.bgStatsCopy") }}
+					</button>
+					<button type="button" class="actionsLineButton" @click="showBgStatsQr = !showBgStatsQr">
+						{{ $t("action.bgStatsQr") }}
+					</button>
+					<div v-if="showBgStatsQr" class="bgStatsQr" role="img" :aria-label="$t('action.bgStats')" v-html="bgStatsQrSvg"></div>
+				</div>
 			</div>
 		</template>
 
@@ -576,6 +605,21 @@ function cancelSales() {
 #gameEndDiv {
 	font-size: 30px;
 	font-weight: bold;
+}
+
+/* Smaller than the rest of the end panel: the QR has to fit the action area. */
+#bgStatsDiv {
+	font-size: 16px;
+	margin-top: 10px;
+}
+
+:deep(.bgStatsQr svg) {
+	display: block;
+	width: 100%;
+	max-width: 564px;
+	height: auto;
+	margin: 8px auto;
+	border: 1px solid black;
 }
 
 #rewindErrorText,

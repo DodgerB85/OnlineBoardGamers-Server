@@ -38,7 +38,7 @@ class GamePresenter:
         current_players = self.gameObj.players.filter(is_current=True).select_related("player")
 
         if not current_players.exists():
-            return True
+            return False
 
         current_usernames = [gp.player.username for gp in current_players if gp.player]
 
@@ -54,7 +54,7 @@ class GamePresenter:
 
         if not current_players.exists():
             SN_sendAdminErrorMessage(f"* * * * * * * * quickIsMyMove: no current players - gameCode: {self.gameObj.gameCode} - GameID: {self.gameObj.id} - loggedInPlayerUsername: {loggedInPlayerUsername}")
-            return True
+            return False
 
         current_usernames = [gp.player.username for gp in current_players if gp.player]
 
@@ -277,6 +277,7 @@ class GamePresenter:
             gp.is_missing = True
             gp.is_current = False
             gp.save()
+        self._dropFromServerCurrentPlayers(user.username)
 
     def addKickedPlayer(self, user):
         """Mark a player as kicked"""
@@ -285,6 +286,16 @@ class GamePresenter:
             gp.is_kicked = True
             gp.is_current = False
             gp.save()
+        self._dropFromServerCurrentPlayers(user.username)
+
+    def _dropFromServerCurrentPlayers(self, username):
+        # is_current is cleared above, so the turn-order copy must lose this name too;
+        # otherwise the lobby lights up everyone's move and kickout charges flexi time
+        # to a player nobody can name.
+        current = self.gameObj.serverCurrentPlayerNamesInTurnOrder or []
+        if username in current:
+            self.gameObj.serverCurrentPlayerNamesInTurnOrder = [name for name in current if name != username]
+            self.gameObj.save()
 
     def handSeatToAi(self, user):
         """Make the AI play a seat in place; seat_order and gameData are untouched."""
@@ -329,10 +340,12 @@ class GamePresenter:
             self.gameObj.save()
             return
 
-        self.gameObj.serverCurrentPlayerNamesInTurnOrder = current_players_array
+        # The client saves before it drops a just-kicked player from its own turn order,
+        # so a kicked name can arrive here - keeping it would leave serverCurrentPlayerNamesInTurnOrder
+        # claiming a turn that no is_current flag backs.
+        kicked_usernames = set(self.gameObj.players.filter(is_kicked=True).values_list("player__username", flat=True))
+        self.gameObj.serverCurrentPlayerNamesInTurnOrder = [name for name in current_players_array if name not in kicked_usernames]
         self.gameObj.save()
-
-        game_players = list(self.gameObj.players.exclude(is_kicked=True, is_ai=False).select_related("player"))
 
         to_update = []
         # if self.gameObj.gameCode == "RNB":

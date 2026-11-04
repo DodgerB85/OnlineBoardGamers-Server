@@ -1230,7 +1230,7 @@
             //alert("Filling Data")
             var setupData = {};
             setupData.gameName = "{{ gameName|escapejs }}";
-            setupData.gameDescription = "{{ gameDescription }}";
+            setupData.gameDescription = "{{ gameDescription|escapejs }}";
             setupData.gamePace = {{ gamePace }};
             setupData.kickoutDuration = "{{ kickoutDuration }}";
             setupData.playerNumber = {{ playerNumber }};

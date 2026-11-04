@@ -626,7 +626,11 @@
       "title": "Fin de la partida",
       "total": "Total",
       "breakdown": "Desglose",
-      "tie": "Empate entre {players}"
+      "tie": "Empate entre {players}",
+      "bgStats": "Publicar en BG Stats",
+      "bgStatsCopy": "Copiar enlace",
+      "bgStatsCopied": "Enlace copiado",
+      "bgStatsQr": "Código QR"
     },
     "history": {
       "empty": "Aún no hay acciones",

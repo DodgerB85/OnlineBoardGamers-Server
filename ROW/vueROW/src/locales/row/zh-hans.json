@@ -626,7 +626,11 @@
       "title": "游戏结束",
       "total": "总计",
       "breakdown": "明细",
-      "tie": "{players} 并列"
+      "tie": "{players} 并列",
+      "bgStats": "发布到 BG Stats",
+      "bgStatsCopy": "复制链接",
+      "bgStatsCopied": "链接已复制",
+      "bgStatsQr": "二维码"
     },
     "history": {
       "empty": "还没有行动",

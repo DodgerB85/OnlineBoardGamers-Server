@@ -268,8 +268,8 @@
 
     {% if fillData %}
     var setupData = {};
-    setupData.gameName = "{{ gameName }}";
-    setupData.gameDescription = "{{ gameDescription }}";
+    setupData.gameName = "{{ gameName|escapejs }}";
+    setupData.gameDescription = "{{ gameDescription|escapejs }}";
     setupData.gamePace = {{ gamePace }};
     setupData.kickoutDuration = "{{ kickoutDuration }}";
     setupData.playerNumber = {{ playerNumber }};

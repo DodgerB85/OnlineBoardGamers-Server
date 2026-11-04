@@ -53,9 +53,10 @@ export function sleep(ms) {
 }
 
 export function compressData64(data) {
-	let step1 = JSON.stringify(data)
 	// eslint-disable-next-line no-undef
-	let step2 = pako.gzip(step1)
+	let step1 = msgpack.encode(data)
+	// eslint-disable-next-line no-undef
+	let step2 = pako.gzip(step1, { level: 9 })
 	let binary = ""
 	// Large histories exceed the argument limit of a single spread call.
 	for (let index = 0; index < step2.length; index += 32768) binary += String.fromCharCode(...step2.subarray(index, index + 32768))
@@ -66,8 +67,9 @@ export function decompressData64(input) {
 	if (!input) return null
 	let compressedData = Uint8Array.from(atob(input), (c) => c.charCodeAt(0))
 	// eslint-disable-next-line no-undef
-	let decompressedData = pako.ungzip(compressedData, { to: "string" })
-	return JSON.parse(decompressedData)
+	let decompressedData = pako.ungzip(compressedData)
+	// eslint-disable-next-line no-undef
+	return msgpack.decode(decompressedData)
 }
 
 // Chat is stored server-side as gzip+base64 of [[name, deltaSeconds, message], ...]
@@ -272,9 +274,9 @@ function decodeStates(states) {
 		id,
 		money: entry[0],
 		king: entry[1] < 0 ? null : entry[1],
-		isActive: !!entry[2],
-		diggers: (entry[3] || []).map(([crewId, era, hasDug]) => ({ id: crewId, era, capacity: rf.ERA_CARD_DATA[era].digger[0], hasDug: !!hasDug })),
-		hasRevolted: !!entry[4],
+		isActive: entry.length > 2 ? !!entry[2] : false,
+		diggers: entry.length > 3 ? (entry[3] || []).map(([crewId, era, hasDug]) => ({ id: crewId, era, capacity: rf.ERA_CARD_DATA[era].digger[0], hasDug: !!hasDug })) : [],
+		hasRevolted: entry.length > 4 ? !!entry[4] : false,
 	}))
 }
 
@@ -375,8 +377,8 @@ export function exportURRmodel(forGameOver = false) {
 		encodeNations(state.nations, forGameOver),
 		historyStorage.compactBoard(state.board, forGameOver),
 		state.landPrices,
-		state.era,
-		encodeCardSupply(state.cardSupply),
+		forGameOver ? [] : state.era,           // era not needed for game over display
+		forGameOver ? [] : encodeCardSupply(state.cardSupply), // cardSupply not needed for game over
 		forGameOver ? [] : encodeRain(state.rain, areaIndex),
 		forGameOver ? -1 : state.nextDiggerId,
 		// Replay slot: only entries that affect game state (actions + kickout + resign).
@@ -384,8 +386,6 @@ export function exportURRmodel(forGameOver = false) {
 		history.slice(1).filter(isReplayEntry).map(normalizeEntry),
 	]
 	entry.push(history[0]?.[3] ?? [])
-
-	console.log(JSON.stringify(entry))
 
 	return compressData64(entry)
 }
@@ -407,7 +407,7 @@ export function importURRmodel(input) {
 		nations: decodeNations(data[3]),
 		board: historyStorage.expandBoard(data[4]),
 		landPrices: data[5],
-		era: data[6],
+		era: typeof data[6] === "number" ? data[6] : 5, // game-over saves omit the era
 		cardSupply: decodeCardSupply(data[7]),
 		rain: decodeRain(data[8], historyStorage.printedAreaIds()),
 		nextDiggerId: data[9] >= 0 ? data[9] : Math.max(-1, ...states.flatMap((entry) => entry.diggers.map((crew) => crew.id))) + 1,

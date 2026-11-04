@@ -16,7 +16,11 @@ export default {
 		"bailoutTitle": "La ville renfloue la banque !",
 		"bailoutBody": "Choisissez un employé marketing de niveau 2 gratuit (premier arrivé, premier servi). Le cadeau ne compte pas comme une embauche – l'employé rejoint votre plage et est payé comme tout autre employé.",
 		"bailoutNothingLeft": "Plus rien à réclamer.",
-		"bailoutDecline": "Refuser le cadeau"
+		"bailoutDecline": "Refuser le cadeau",
+		"bgStats": "Publier dans BG Stats",
+		"bgStatsCopy": "Copier le lien",
+		"bgStatsCopied": "Lien copié",
+		"bgStatsQr": "Code QR"
 	},
 	"milestones": {
 		"firstStadiumSold": "Premier fournisseur du stade",

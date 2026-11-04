@@ -152,6 +152,8 @@ def build_show_game_data(
         "latestUpdateLiteral": latestUpdate,
         "nextURL": nextURL,
         "chatNotification": chatNotification,
+        # 1/0 rather than a bool: the templates drop this straight into JS.
+        "bgStatsEnabled": 1 if user_profile.bgStatsEnabled else 0,
     }
 
     if not involvedPlayer:

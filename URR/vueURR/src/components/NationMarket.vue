@@ -76,9 +76,9 @@ watch([() => auction.value?.nation, () => auction.value?.amount, () => actor.val
 					</form>
 					<p v-if="!auction && treaty?.id !== nation.id && amountError(nation)" class="amountError" role="status"><CurrencyText :text="amountError(nation)" /></p>
 				</template>
-				<div v-if="nation.ownerType === null && !auction && treaty?.id === nation.id" class="marketControls treatyControls">
-					<button class="primaryAction" :disabled="!personal.canPlay() || available < price(nation)" @click="endTurnWith({ type: 'buyNation', nation: nation.id })"><CurrencyText :text="$t('nationMarket.buyFor', { price: price(nation) })" /></button>
-					<button class="passButton" :disabled="!personal.canPlay()" @click="endTurnWith({ type: 'pass' })">{{ $t("nationMarket.pass") }}</button>
+				<div v-if="nation.ownerType === null && !auction && treaty?.id === nation.id && personal.canPlay()" class="marketControls treatyControls">
+					<button class="primaryAction" :disabled="available < price(nation)" @click="endTurnWith({ type: 'buyNation', nation: nation.id })"><CurrencyText :text="$t('nationMarket.buyFor', { price: price(nation) })" /></button>
+					<button class="passButton" @click="endTurnWith({ type: 'pass' })">{{ $t("nationMarket.pass") }}</button>
 				</div>
 				<div v-if="nation.ownerType === null && isAuction(nation)" class="marketControls auctionControls">
 					<form @submit.prevent="bid(nation)">

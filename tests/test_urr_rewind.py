@@ -7,11 +7,11 @@ from unittest.mock import Mock, patch
 
 from django.test import RequestFactory, SimpleTestCase
 
-from URR.views import _processURRturn, decompressRewindPoint, doSaveRewind, openingPosition
+from URR.views import _processURRturn, decompressRewindPoint, doSaveRewind
 
 
-def encode_model(players, replay_start=None):
-    data = [[[name, 0] for name in players], [], [], [], [], [], 1, [], [], 0, [], replay_start or []]
+def encode_model(players):
+    data = [[[name, 0] for name in players], [], [], [], [], [], 1, [], [], 0, [], []]
     return base64.b64encode(gzip.compress(json.dumps(data).encode("utf-8"), mtime=0)).decode("ascii")
 
 
@@ -32,14 +32,15 @@ class UrrRewindTests(SimpleTestCase):
         doSaveRewind(game, {}, "22")
         self.assertEqual(json.loads(game.rewindData), [str(index) for index in range(3, 23)])
 
-    def test_opening_position_returns_a_client_rebuild_marker(self):
-        replay_start = [[["players", "0", "displayName"], "Ann"]]
-        saved = encode_model(["A", "B"], replay_start)
-        self.assertEqual(json.loads(openingPosition(saved)), {"opening": True, "players": ["A", "B"], "replayStart": replay_start})
+    def test_opening_marker_becomes_the_first_rewind_point(self):
+        marker = json.dumps({"opening": True, "players": ["A", "B"], "replayStart": [[["players", "0", "displayName"], "Ann"]]})
+        game = SimpleNamespace(rewindData="", rewindTempData="")
+        doSaveRewind(game, {"openingMarker": marker}, "")
+        self.assertEqual(json.loads(game.rewindData), [marker])
 
-    def test_opening_position_rejects_non_model_data(self):
-        self.assertEqual(openingPosition("{}"), "")
-        self.assertEqual(openingPosition("not a model"), "")
+        # The same marker must not be appended twice.
+        doSaveRewind(game, {"openingMarker": marker}, "")
+        self.assertEqual(json.loads(game.rewindData), [marker])
 
     def test_loaded_position_keeps_redo_anchor_in_client_representation(self):
         presenter = Mock()
@@ -68,12 +69,6 @@ class UrrRewindTests(SimpleTestCase):
         game = SimpleNamespace(rewindData=json.dumps([compressed]), rewindTempData=position)
         doSaveRewind(game, {}, position)
         self.assertEqual(json.loads(game.rewindData), [compressed])
-
-    def test_previous_object_save_keeps_its_opening_changes(self):
-        changes = [[["players", "0", "displayName"], "Ann"]]
-        saved = json.dumps({"version": 2, "players": [{"name": "A"}], "replay": [], "replayStart": changes})
-        self.assertEqual(json.loads(openingPosition(saved)), {"opening": True, "players": ["A"], "replayStart": changes})
-
 
     def test_load_rewind_accepts_a_previous_gzip_point(self):
         position = json.dumps({"version": 2, "players": [{"name": "A"}]})

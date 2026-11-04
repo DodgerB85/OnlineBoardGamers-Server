@@ -225,6 +225,7 @@ export const useModelStore = defineStore("store", () => {
 		showStatsExcludeDropdown: false,
 		showWholeTable: false,
 		showIntroInfo: true,
+		showGameSummary: false,
 		selectingBoard: false,
 		performingMapChange: false,
 		minimalPlayerTable: false,

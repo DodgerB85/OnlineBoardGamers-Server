@@ -304,6 +304,10 @@ export default {
 
 		// Game end
 		gameOver: "游戏结束",
+		bgStats: "发布到 BG Stats",
+		bgStatsCopy: "复制链接",
+		bgStatsCopied: "链接已复制",
+		bgStatsQr: "二维码",
 		winner: "获胜者：",
 		winners: "获胜者：",
 		lastManStanding: "最后幸存者",

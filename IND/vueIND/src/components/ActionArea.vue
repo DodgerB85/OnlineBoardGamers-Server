@@ -7,6 +7,7 @@ import * as controller from "../js/INDcontroller"
 import * as Bot from "../js/INDbot"
 import * as IO from "../backend/IND_IO"
 import * as map from "../js/INDmap"
+import { buildBgStatsUrl } from "../js/IND_bgStats"
 
 import i18n from "../i18n"
 
@@ -26,6 +27,23 @@ const personal = usePersonalStore()
 
 const turnbidAmount = ref(0)
 const isValidBid = ref(true)
+
+// BG Stats export is opt-in per user (profile.bgStatsEnabled) and only makes
+// sense for someone who actually sat at the table.
+const bgStatsUrl = computed(() =>
+	window.initData.bgStatsEnabled === 1 && personal.pov >= 0 && store.gameflow.phase === rf.PHASE_GAME_OVER ? buildBgStatsUrl() : undefined
+)
+const showBgStatsQr = ref(false)
+const bgStatsCopied = ref(false)
+const bgStatsQrSvg = computed(() => (showBgStatsQr.value ? window.OBGQR.toSvg(bgStatsUrl.value) : ""))
+
+function copyBgStatsLink() {
+	// Clipboard permission can be refused; the QR code below is the fallback.
+	navigator.clipboard.writeText(bgStatsUrl.value).then(() => {
+		bgStatsCopied.value = true
+		setTimeout(() => (bgStatsCopied.value = false), 2000)
+	})
+}
 
 const RND_KEYS = ["rnd.bidMultiplier", "rnd.slots", "rnd.mergers", "rnd.expansion", "rnd.hullCapacity", "rnd.mergerSubsidy", "rnd.shippingSubsidy"]
 function rndString(idx) {
@@ -828,6 +846,20 @@ function selectC0() {
 				{{ $t('actionArea.fancyRematchEnd') }}
 				<br />
 				<br />
+				<button class="actionsLineButton" @click="store.topMenuViews.showGameSummary = true">{{ $t('actionArea.gameSummaryLink') }}</button>
+				<br />
+				<br />
+				<div v-if="bgStatsUrl" id="bgStatsDiv">
+					<a :href="bgStatsUrl" target="_blank" rel="noopener">{{ $t('actionArea.bgStats') }}</a>
+					<br />
+					<button type="button" class="actionsLineButton" @click="copyBgStatsLink">
+						{{ bgStatsCopied ? $t('actionArea.bgStatsCopied') : $t('actionArea.bgStatsCopy') }}
+					</button>
+					<button type="button" class="actionsLineButton" @click="showBgStatsQr = !showBgStatsQr">
+						{{ $t('actionArea.bgStatsQr') }}
+					</button>
+					<div v-if="showBgStatsQr" class="bgStatsQr" role="img" :aria-label="$t('actionArea.bgStats')" v-html="bgStatsQrSvg"></div>
+				</div>
 			</div>
 		</template>
 
@@ -1505,6 +1537,21 @@ function selectC0() {
 
 #gameEndDiv {
 	font-size: 30px;
+}
+
+/* Smaller than the rest of the end panel: the QR has to fit the action area. */
+#bgStatsDiv {
+	font-size: 16px;
+	margin-top: 10px;
+}
+
+:deep(.bgStatsQr svg) {
+	display: block;
+	width: 100%;
+	max-width: 564px;
+	height: auto;
+	margin: 8px auto;
+	border: 1px solid black;
 }
 
 .linkOther {

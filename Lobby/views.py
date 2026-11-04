@@ -1832,6 +1832,8 @@ def profile(request):
                 separators=(",", ":"),
             )
 
+            profile.bgStatsEnabled = "bgStatsEnabled" in request.POST
+
             preferredCNScolour = request.POST["cnsColour"] if request.POST["cnsColour"] != "-1" else None
             profile.preferredCNScolour = preferredCNScolour
 
@@ -2010,6 +2012,7 @@ def profile(request):
                 "favWEBcolour": favWEBcolour,
                 "TGZminimalText": TGZminimalText,
                 "TGZprefersReducedMotion": TGZprefersReducedMotion,
+                "bgStatsEnabled": profile.bgStatsEnabled,
                 "webhooks": webhooks,
                 "yourTurnEmail": yourTurnEmail,
                 "gameInviteEmail": gameInviteEmail,

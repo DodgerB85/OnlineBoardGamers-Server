@@ -78,6 +78,10 @@
     }
     </style>
     <script src="{% static 'Lobby/common/pakoLib.js' %}"></script>
+    {% if bgStatsEnabled %}
+    <script src="{% static 'Lobby/common/qrcode.js' %}"></script>
+    <script src="{% static 'Lobby/common/bgStats.js' %}"></script>
+    {% endif %}
     {% if settingsDebug %}
       <script type="module" src="http://localhost:3048/static/@vite/client"></script>
       <script type="module" src="http://localhost:3048/static/main.js"></script>
@@ -156,6 +160,7 @@
   initData.chatData = "{{ chatData }}";
   initData.latestUpdate = {{ latestUpdateLiteral }};
   initData.nextURL = '{{ nextURL|safe }}';
+  initData.bgStatsEnabled = {{ bgStatsEnabled|default:0 }};
   {% if chatNotification %}
   initData.chatNotification = true;
   {% endif %}

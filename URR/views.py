@@ -350,44 +350,6 @@ def decompressRewindPoint(point):
     return point
 
 
-def decodeGameData(gameData):
-    if not gameData:
-        return None
-    try:
-        return json.loads(gameData)
-    except (json.JSONDecodeError, TypeError):
-        return json.loads(safe_gzip_decompress(base64.b64decode(gameData)).decode("utf-8"))
-
-
-def openingPosition(gameData):
-    """Return the client's opening marker for the first rewind point.
-
-    The client rebuilds the opening from its own createGame + replayStart, so
-    the server only has to hand back the names and opening changes.
-    """
-    try:
-        data = decodeGameData(gameData)
-        if isinstance(data, dict) and data.get("players"):
-            if "replay" in data:
-                return json.dumps({"opening": True, "players": [player["name"] for player in data["players"]], "replayStart": data.get("replayStart", [])})
-            history = data.get("history") or []
-            if not history:
-                return ""
-            opening = json.loads(history[0][2])
-            opening["history"] = [history[0]]
-            return json.dumps(opening)
-        if not isinstance(data, list) or not data:
-            return ""
-        players = data[0] or []
-        names = [entry[0] for entry in players]
-        if not names or any(name is None for name in names):
-            return ""
-        replay_start = data[11] if len(data) > 11 else []
-        return json.dumps({"opening": True, "players": names, "replayStart": replay_start})
-    except (json.JSONDecodeError, IndexError, KeyError, TypeError, ValueError, OSError):
-        return ""
-
-
 def doSaveRewind(currentGame, jsonData, previousGameData):
     # Points are the positions from *before* each move: the position after the
     # latest move is already currentGame.gameData.
@@ -406,7 +368,9 @@ def doSaveRewind(currentGame, jsonData, previousGameData):
         currentGame.rewindTempData = ""
 
     if not previousGameData:
-        previousGameData = openingPosition(jsonData["gameData"])
+        # The client sends the opening marker as plain JSON beside its msgpack
+        # save, so the server never decodes the save itself.
+        previousGameData = jsonData.get("openingMarker", "")
     if previousGameData and (not currentRewindData or decompressRewindPoint(currentRewindData[-1]) != decompressRewindPoint(previousGameData)):
         currentRewindData.append(previousGameData)
 

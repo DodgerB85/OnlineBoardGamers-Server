@@ -109,7 +109,10 @@ async function resetDataForReplay() {
 		}
 	}
 
+	// Turn and phase must be reset too, or step 0 keeps the live game's values with empty ongoingVars
+	store.gameflow.turn = 1
 	store.gameflow.currentEra = rf.ERA_A
+	store.gameflow.phase = rf.PHASE_NEW_ERA
 
 	// keep history
 	store.clearVars()
@@ -135,6 +138,8 @@ export async function generateReplayData(spoilerFree = false) {
 
 	for (let i = 0; i < store.computedHistory.length; i++) {
 		if (i !== 0) checkAndPerformTurnEnd(i)
+		// Live phases change inside endPlayerTurn, which never runs here, so each step derives its phase from its history entry
+		store.gameflow.phase = phaseForHistoryEntry(i)
 
 		store.spinoffReplayData.push(funcs.simpleExportWholeINDmodelNoCompression())
 
@@ -192,6 +197,8 @@ export async function generateReplayData(spoilerFree = false) {
 /*** REPLAY FUNCTIONS HERE */
 function replayNewTurn(historyIndex, playerIndex, entry3) {
 	const store = useModelStore()
+	// entry3[0] is the new turn number (older histories may lack it)
+	if (typeof entry3[0] === "number") store.gameflow.turn = entry3[0]
 	model.resetLandCompanies()
 	model.resetShippingCompanies(true)
 	for (let i = 0; i < store.players.length; i++) store.players[i].moneyRoundIncome = 0
@@ -432,7 +439,6 @@ function replaySkipOperateShipping(historyIndex, playerIndex, entry3) {
 
 function replayOperateShipping(historyIndex, playerIndex, entry3) {
 	const store = useModelStore()
-	store.gameflow.phase = rf.PHASE_OPERATIONS
 	let companyID = entry3[0][0]
 	let slotIdx = model.getSlotIDXfromCompanyID(companyID)
 	// Mark companies as operated
@@ -455,7 +461,6 @@ function replayOperateShipping(historyIndex, playerIndex, entry3) {
 
 function replayRND(historyIndex, playerIndex, entry3) {
 	const store = useModelStore()
-	store.gameflow.phase = rf.PHASE_R_AND_D
 	let shippingPlayerIndex = -1
 	if (entry3.length === 2) {
 		store.players[playerIndex].RnD[entry3[0]]++
@@ -485,7 +490,6 @@ function replayRND(historyIndex, playerIndex, entry3) {
 
 function replayAddCity(historyIndex, playerIndex, entry3) {
 	const store = useModelStore()
-	store.gameflow.phase = rf.PHASE_NEW_ERA
 	let eraCard
 	if (rf.ORIGINAL_MAPS.includes(store.mapData.selectedMap)) {
 		eraCard = rf.ALL_ERA_CARDS.find((card) => card.id === entry3[1])
@@ -533,7 +537,6 @@ function replayNewTurnOrder(historyIndex, playerIndex, entry3) {
 
 function replayAcquireCompany(historyIndex, playerIndex, entry3) {
 	const store = useModelStore()
-	store.gameflow.phase = rf.PHASE_ACQUISITIONS
 	let companyID = entry3[0]
 	let slotIdx = model.acquireCompany_core(playerIndex, companyID)
 	model.expandCompany_core(playerIndex, slotIdx, entry3[1], true)
@@ -649,6 +652,52 @@ export const HIST_SKIP_ACQUISITOIN_NO_COMPANIES = 47
 	//return NOTHING
 }
 
+/** Live phases change inside endPlayerTurn, so a replay step must derive its phase from its own history entry */
+export function phaseForHistoryEntry(historyIndex) {
+	const store = useModelStore()
+	const action = store.computedHistory[historyIndex][0]
+	const entry3 = store.computedHistory[historyIndex][3]
+
+	// After the new turn order is set, turn 1 goes straight to acquisitions; later turns start with mergers
+	if (action === rf.HIST_SET_NEW_TURN_ORDER) return store.gameflow.turn === 1 ? rf.PHASE_ACQUISITIONS : rf.PHASE_MERGERS
+	// An era change follows the new turn entry in the same live action, so that step shares the NEW_ERA phase
+	if (action === rf.HIST_NEW_TURN) return store.computedHistory[historyIndex + 1]?.[0] === rf.HIST_NEW_ERA ? rf.PHASE_NEW_ERA : rf.PHASE_BID_TURN_ORDER
+	if (rf.HIST_OPERATIONS_ENTRIES.includes(action)) return rf.PHASE_OPERATIONS
+	if (rf.HIST_CITY_GROWTH_ENTRIES.includes(action)) return rf.PHASE_CITY_GROWTH
+
+	switch (action) {
+		case rf.HIST_TURN_ORDER_BID:
+			return rf.PHASE_BID_TURN_ORDER
+		case rf.HIST_ADD_CITY:
+		case rf.HIST_REMOVE_ERA_CARD:
+		case rf.HIST_NEW_ERA:
+			return rf.PHASE_NEW_ERA
+		// Bidding stays grouped under mergers: mid-merger steps have no live bidTurnOrder to show
+		case rf.HIST_PASS_MERGER:
+		case rf.HIST_MERGER_WITHOUT_BIDDING:
+		case rf.HIST_MERGER_BIDDING:
+		case rf.HIST_AUTO_SKIP_MERGERS:
+			return rf.PHASE_MERGERS
+		case rf.HIST_MERGER_REMOVE_SIAP_FAJI_TERRS:
+			return rf.PHASE_MERGER_REMOVE_SIAP_FAJI_TERRS
+		case rf.HIST_MERGER_SHIP_REDEPLOYMENT:
+			return rf.PHASE_MERGER_SHIP_REDEPLOYMENT
+		case rf.HIST_ACQUIRE_COMPANY:
+		case rf.HIST_PLAYER_SKIP_ACQUISITOIN_PHASE:
+		case rf.HIST_AUTO_SKIP_SINGLE_ACQUISITOIN:
+		case rf.HIST_SKIP_ACQUISITOIN_PHASE:
+		case rf.HIST_SKIP_ACQUISITOIN_NO_COMPANIES:
+			return rf.PHASE_ACQUISITIONS
+		case rf.HIST_RND:
+			return rf.PHASE_R_AND_D
+		case rf.HIST_GAME_END:
+			return rf.PHASE_GAME_OVER
+		default:
+			// Rewinds, resignations, income summaries etc. happen inside an unchanged phase
+			return store.gameflow.phase
+	}
+}
+
 function replayRemoveCompanyNoTerrs(historyIndex, playerIndex, entry3) {
 	const store = useModelStore()
 	let companyId = entry3[0]
@@ -670,7 +719,6 @@ function replayFinalIncome(historyIndex, playerIndex, entry3) {
 
 function replayGameEnd(historyIndex, playerIndex, entry3) {
 	const store = useModelStore()
-	store.gameflow.phase = rf.PHASE_GAME_OVER
 	const finalRes = entry3
 	if (finalRes && finalRes.length > 0) {
 		store.gameflow.fullTurnOrder.splice(0)

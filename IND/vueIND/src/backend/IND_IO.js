@@ -716,68 +716,6 @@ export async function checkForLatestData() {
 	}
 }
 
-export async function submitStatsToBGS() {
-	// Get current UTC date and time
-	const now = new Date()
-	const utcDate = new Date(now.getTime()) // + now.getTimezoneOffset() * 60000) // Convert to UTC
-
-	// Format the UTC date and time as "YYYY-MM-DD HH:mm:ss"
-	const year = utcDate.getUTCFullYear()
-	const month = (utcDate.getUTCMonth() + 1).toString().padStart(2, "0") // Month is 0-indexed
-	const day = utcDate.getUTCDate().toString().padStart(2, "0")
-	const hours = utcDate.getUTCHours().toString().padStart(2, "0")
-	const minutes = utcDate.getUTCMinutes().toString().padStart(2, "0")
-	const seconds = utcDate.getUTCSeconds().toString().padStart(2, "0")
-
-	const playDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
-
-	const store = useModelStore()
-	const personal = usePersonalStore()
-	let data = {
-		sourceName: "OnlineBoardGamers.com",
-		location: "OnlineBoardGamers.com",
-		sourcePlayId: personal.gameID,
-		playDate: playDate,
-		//"board": "",
-		//"comments": "",
-		game: {
-			name: "Indonesia",
-			sourceGameId: "IND",
-			bggId: 19777,
-			highestWins: true,
-			noPoints: false,
-		},
-
-		players: [],
-	}
-	// Add the players
-	for (let i = 0; i < store.players.length; i++) {
-		data.players.push({
-			name: store.players[i].name,
-			sourcePlayerId: store.players[i].name,
-			startPlayer: i === 0 ? true : false,
-			rank: 1,
-			//role: "",
-			score: store.players[i].moneyCash + store.players[i].moneyBank,
-			winner: false,
-		})
-	}
-	// Set the result
-	let resArray = store.history[store.history.length - 1][3]
-	for (let i = 0; i < resArray.length; i++) {
-		data.players[resArray[i][0]].rank = i + 1
-		if (i == 0) data.players[resArray[i][0]].winner = true
-	}
-
-	// Create the URL
-	let urlData = encodeURIComponent(JSON.stringify(data))
-	let url = `https://app.bgstatsapp.com/createPlay.html?data=${urlData}`
-
-	// Open the URL in a new window
-	window.open(url, "_blank")
-	console.log(JSON.stringify(data, null, 4))
-}
-
 export async function submitStatsExcludeConsent() {
 	//const store = useModelStore()
 	//const personal = usePersonalStore()
@@ -1006,6 +944,9 @@ export async function copyGameToNewPracticeGame(_replayStep) {
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
+		// Snapshots no longer carry history, so restore the truncated history explicitly
+		store.history.splice(0)
+		store.history = [...histotyCopy]
 		replay.performStep(0)
 		store.topMenuViews.showLoader = false
 		// Replace original names

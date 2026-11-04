@@ -172,7 +172,8 @@ def SF_serializeGame(game, user, player_context):
     is_my_move = False
     if user and game.gameStatus == "ACTIVE":
         current_usernames = {u.strip() for u in current_players_str.split(",") if u.strip()} if current_players_str else set()
-        is_my_move = not current_players_str or user.username in current_usernames or any(s in current_usernames for s in rf.SHADOW_USERNAMES)
+        # An empty current list means nobody is on turn, not that it is everyone's move
+        is_my_move = bool(current_players_str) and (user.username in current_usernames or any(s in current_usernames for s in rf.SHADOW_USERNAMES))
 
         # For HLC Build Factory, submitted players are not "my move", and they
         # see only their own name dropped - everyone else stays current so no

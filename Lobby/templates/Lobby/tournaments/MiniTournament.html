@@ -275,7 +275,7 @@
                         <td colspan="2" style="color: var(--color-muted);">
                           {% translate "Byes" %}:
                           {% for player in round.byesNames %}
-                            <a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>
+                            <a href="{% url 'playerInfo' usernameToProfile=player %}">{{ player }}</a>{% if not forloop.last %}, {% endif %}
                           {% endfor %}
                         </td>
                       </tr>

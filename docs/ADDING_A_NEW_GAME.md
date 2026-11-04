@@ -71,12 +71,15 @@ Mirroring `WEB/RNB`:
 
 ## 6. Client
 
+The [show-page shell contract](add-new-game/SKILL.md#reuse-the-show-page-shell) is required: adapt URR’s `TopMenu.vue` structure and SVG icons, and WEB’s `.actionsLineButton` styles (or the documented URR panel variant). Preserve the site header, utility panels, typography, background and footer. A custom themed top bar or hand-rolled button palette is not an equivalent substitute. Compare the result against the named donor in a browser.
+
 - For a Vue client create `XYZ/vueXYZ/` (Vite + Pinia; copy the structure of `CNS/vueCNS` or `RNB/vueRNB`: `model/`, `controller/`, `js/`, `stores/`, `IO/`). The build outputs to `XYZ/static/XYZ/XYZvuedist` (or similar) which Django serves — **never edit the dist**; add a `XYZ.bat` build/dev script like `FCM/vueFCM/FCM.bat`.
 - The client implements all rules: it computes moves locally, polls the data endpoint, and submits via `processXYZturn` with `latestUpdate`. Refer to the client conventions in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## 7. Config and finishing touches
 
 - Player profile preferences (colour/board) if wanted → new fields on `Profile` (`Lobby/models.py`) + migration.
+- BG Stats export: if the game has an end screen, wire the shared opt-in export. In `showXYZgame.html` load `Lobby/common/qrcode.js` and `Lobby/common/bgStats.js` inside `{% if bgStatsEnabled %}` and set `initData.bgStatsEnabled = {{ bgStatsEnabled|default:0 }}` in the authenticated block; then add a `XYZ_bgStats.js` builder that calls `window.OBGBgStats.buildUrl({ title, bggId, sourceGameId, sourcePlayId, playDate, noPoints, groups })` with the final standings (best group first, bots excluded) and render the link/QR block on the game-over screen (copy `TGZ/vueTGZ/src/components/ActionArea.vue`). The flag, the profile toggle and the migration already exist; only the per-game wiring is new.
 - Experience gate: `SF_getRequiredExp` in `Lobby/sharedFunctions/sharedFunctions.py` — add your code if it should require N completed games before creating/joining.
 - Practice/shadow conventions: reuse `SHADOW`-family accounts via `SF_setupTrainingGameShadows`; add your code to `should_auto_start_game` semantics in the auto-tournament helpers if applicable.
 - i18n (optional): `XYZ/locale/` and message ids; site already wires `statici18n`.

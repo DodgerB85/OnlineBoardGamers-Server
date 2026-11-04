@@ -19,6 +19,7 @@ import ActionArea from "./components/ActionArea.vue"
 import CompanysTable from "./components/CompanysTable.vue"
 import PlayerTable from "./components/PlayerTable.vue"
 import ReplayArea from "./components/ReplayArea.vue"
+import GameSummary from "./components/GameSummary.vue"
 
 import DebugArea from "./components/DebugArea.vue"
 import FooterBar from "./components/FooterBar.vue"
@@ -496,6 +497,7 @@ function getWholeMiddleAreaClass() {
 		</defs>
 	</svg>
 	<TopMenu v-if="!store.historyOnly" />
+	<GameSummary />
 	<div
 		id="wholeMiddleArea"
 		:class="getWholeMiddleAreaClass()"

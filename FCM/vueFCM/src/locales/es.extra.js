@@ -16,7 +16,11 @@ export default {
 		"bailoutTitle": "¡La ciudad rescata al banco!",
 		"bailoutBody": "Elige un empleado de marketing de nivel 2 gratis (por orden de llegada). El regalo no cuenta como contratación: el empleado se une a tu playa y cobra como cualquier otro empleado.",
 		"bailoutNothingLeft": "No queda nada que reclamar.",
-		"bailoutDecline": "Rechazar el regalo"
+		"bailoutDecline": "Rechazar el regalo",
+		"bgStats": "Publicar en BG Stats",
+		"bgStatsCopy": "Copiar enlace",
+		"bgStatsCopied": "Enlace copiado",
+		"bgStatsQr": "Código QR"
 	},
 	"milestones": {
 		"firstStadiumSold": "Primer proveedor del estadio",

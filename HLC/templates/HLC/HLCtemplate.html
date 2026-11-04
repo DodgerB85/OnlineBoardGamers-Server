@@ -307,6 +307,7 @@
     global.liveWS = true;
     global.name = '{{ name }}';
     global.nextURL = '{{ nextURL|safe }}';
+    global.bgStatsEnabled = {{ bgStatsEnabled|default:0 }};
     global.startingOptions = {{ startingOptionsLiteral }};
 
 
@@ -396,6 +397,11 @@
                     <script src="{% url 'javascript-catalog' %}"></script>
                     <script src="{% static 'HLC/HLCdist/lib/jquery-2.1.4.min.js' %}"></script>
                     <script src="{% static 'HLC/HLCdist/lib/lodash.min.js' %}"></script>
+                    {% if bgStatsEnabled %}
+                      <script src="{% static 'Lobby/common/qrcode.js' %}"></script>
+                      <script src="{% static 'Lobby/common/bgStats.js' %}"></script>
+                      <script src="{% static 'HLC/JS/HLCbgStats.js' %}"></script>
+                    {% endif %}
                     {% if settingsDebug %}
                       <script src="/static/HLC/JS/Roger.js"></script>
                       <script src="/static/HLC/JS/HLCutils.js"></script>

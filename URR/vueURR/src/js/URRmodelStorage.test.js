@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import test from "node:test"
 import { createPinia, setActivePinia } from "pinia"
 import "../pakoLib.js"
+import "../msgpackLib.js"
 import { createGame } from "./URRgame.js"
 import * as historyStorage from "./URRhistoryStorage.js"
 import { encodeAction, historyAction } from "./URRhistoryActions.js"
@@ -82,7 +83,8 @@ test("game-over saves drop transient state but keep the final result", () => {
 	assert.equal(imported.gameflow.phase, rf.PHASE_GAME_OVER)
 	assert.equal(imported.gameflow.endReason, "invasion")
 	assert.deepEqual(imported.gameflow.finalPositions, [0, 1, 2])
-	assert.equal(imported.cardSupply[1], 4)
+	assert.deepEqual(saved[7], [], "play-only card supply is not stored")
+	assert.equal(imported.cardSupply[1], rf.ERA_CARD_COUNTS[1])
 	assert.equal(imported.rain.step, null)
 	assert.deepEqual(imported.players[0].soldLandTypes, [])
 })

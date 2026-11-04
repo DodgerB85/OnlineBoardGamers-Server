@@ -66,6 +66,10 @@
     fancyA: "Fancy a",
     rematch: "rematch",
     rematchSuffix: "?",
+    bgStats: "Post to BG Stats",
+    bgStatsCopy: "Copy link",
+    bgStatsCopied: "Link copied",
+    bgStatsQr: "QR code",
 
     // Second Bailout mod
     bailoutTitle: "The city bails the bank out!",
