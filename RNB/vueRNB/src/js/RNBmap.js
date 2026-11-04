@@ -276,7 +276,8 @@ export function updateHexInternalRoads(hexId, nodeIds) {
 
 	for (const nodeId of nodeIds) {
 		if (nodeId < 0) continue // Skip invalid nodeIds (e.g. -1 from polder cornerNodeIds)
-		updateHexInternalRoadsViaNode(hexId, hexGraph, isEntryPoint, nodeId, "edgeHasRoad")
+		// CITY: a moat bridge only carries road once a road reaches it from outside
+		updateHexInternalRoadsViaNode(hexId, hexGraph, isEntryPoint, nodeId, "edgeHasRoad", hex.hexTerrainID !== rf.CITY)
 	}
 }
 
