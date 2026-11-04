@@ -1,3 +1,7 @@
+<script>
+let equipmentSiteCache = { key: "", sites: [] }
+</script>
+
 <script setup>
 import PlayerMarker from "./PlayerMarker.vue"
 import KickoutDialog from "./KickoutDialog.vue"
@@ -19,7 +23,7 @@ import * as assets from "../js/URRassets"
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
 const props = defineProps({ selectedArea: { type: String, default: null }, path: { type: Array, default: () => [] } })
-const emit = defineEmits(["clearPath", "changeRemoval", "changeLandDraft", "changeDigCapacity", "selectArea", "changeMapAction", "changeActionTargets", "changeTurnAction"])
+const emit = defineEmits(["clearPath", "changeRemoval", "changeLandDraft", "changeDigCapacity", "selectArea", "changeMapAction", "changeActionTargets", "changeTurnAction", "inspect"])
 const store = useModelStore()
 const personal = usePersonalStore()
 const { t } = useI18n()
@@ -48,6 +52,10 @@ function setIntent(intent) {
 	store.viewSettings.actionIntent = intent
 	store.viewSettings.inspectedState = null
 	store.viewSettings.showOwnedLand = false
+}
+function inspectPlayer(index) {
+	store.viewSettings.inspectedPlayer = index
+	emit("inspect", "player")
 }
 const canalSummaries = computed(() => store.turnDraft.steps.filter((step) => ["dig", "digEridu", "exchangeBarahshum"].includes(step.action?.type)).map((step) => {
 	const path = step.action.path || [step.action.from, step.action.to]
@@ -172,7 +180,10 @@ function buyLand(id) {
 }
 // Clicking land on the map edits the plan directly: your land toggles a sale, other land becomes the (single) purchase.
 function planClick(id) {
-	if (game.value.gameflow.phase === rf.PHASE_DEVELOPMENT) return equipClick(id)
+	if (game.value.gameflow.phase === rf.PHASE_DEVELOPMENT) {
+		if (store.viewSettings.actionIntent === "sell" && personal.canPlay() && !store.turnDraft.ready) return toggleMaintenanceLand(id)
+		return equipClick(id)
+	}
 	if (game.value.gameflow.phase !== rf.PHASE_SETTLEMENT || !personal.canPlay() || actor.value === undefined || store.turnDraft.ready) return
 	const land = game.value.board.areas.find((entry) => entry.id === id)
 	store.gameMessages.actionError = ""
@@ -221,7 +232,6 @@ const maintenanceError = computed(() => {
 	return error
 })
 const maintenanceChoices = computed(() => !state.value || maintenanceGap.value === 0 || maintenanceSalePreview.value.error ? [] : maintenanceFundingGame.value.board.areas.filter((land) => !rules.getMaintenanceSaleError(maintenanceFundingGame.value, state.value.king, land, state.value.id)))
-const maintenanceGroups = computed(() => rf.ALL_LAND_TYPES.map((type) => ({ type, lands: maintenanceChoices.value.filter((land) => land.landType === type) })).filter((group) => group.lands.length))
 const maintenanceSelectionValue = computed(() => maintenanceSelection.value.reduce((total, id) => total + rules.landPrice(maintenanceFundingGame.value, maintenanceFundingGame.value.board.areas.find((land) => land.id === id)), 0))
 function toggleMaintenanceLand(id) {
 	const land = maintenanceChoices.value.find((entry) => entry.id === id)
@@ -267,10 +277,19 @@ const siteAction = (land) => ({ type: useCalah.value ? "exchangeCalah" : "reques
 const equipSites = computed(() => {
 	if (store.viewSettings.actionIntent !== "equip" || !personal.canPlay() || !showEquipment.value || store.turnDraft.ready) return []
 	const snapshot = previewState.value
-	return game.value.board.areas.filter((land) => {
-		if (land.waterwork) return false
+	const flow = snapshot.gameflow
+	const currentState = snapshot.states[state.value.id]
+	const era = rules.nextCardEra(snapshot)
+	const prices = rf.ERA_CARD_DATA[era]
+	const money = flow.waterworkRequests?.length ? currentState.money : [currentState.money >= prices.pump[1], currentState.money >= prices.reservoir[1]]
+	const key = JSON.stringify([snapshot.board, snapshot.nations, Object.values(snapshot.cardSupply).map((count) => count > 0), snapshot.era, era, actor.value, currentState.id, currentState.king, money, useCalah.value, flow.phase, flow.developmentStep, flow.pendingOffer, flow.waterworkRequests, flow.waterworkAgreements, flow.declinedWaterworks])
+	if (equipmentSiteCache.key === key) return equipmentSiteCache.sites
+	const sites = snapshot.board.areas.filter((land) => {
+		if (land.waterwork || boardRules.isNationLandClosed(snapshot, land) || flow.declinedWaterworks?.includes(land.id)) return false
 		try { applyAction(snapshot, actor.value, siteAction(land)); return true } catch { return false }
 	}).map((land) => land.id)
+	equipmentSiteCache = { key, sites }
+	return sites
 })
 watch(equipSites, (sites) => emit("changeActionTargets", sites), { immediate: true })
 const crewError = computed(() => {
@@ -373,14 +392,15 @@ async function confirmAgreement(accept) {
 }
 async function submit(action) {
 	if (await controller.submitAction(action)) {
-		// Dig and equipment stay on the map between purchases; the remounted panel re-selects them.
-		if (!["dig", "equip"].includes(store.viewSettings.actionIntent)) store.viewSettings.actionIntent = ""
+		// Keep the development mode, including forced land sales after a purchase.
+		if (!["dig", "equip", "sell"].includes(store.viewSettings.actionIntent)) store.viewSettings.actionIntent = ""
 		if (action.type !== "exchangeBarahshum") {
 			resetTrade()
 			maintenanceSales.value = []
 			maintenanceSelection.value = []
 		}
 		if (["dig", "digEridu"].includes(action.type)) emit("clearPath")
+		if (action.type === "offerNation" && store.gameflow.pendingOffer) await controller.endPlayerTurn()
 	}
 }
 const mapConfirmation = computed(() => {
@@ -429,7 +449,6 @@ watch([() => game.value.gameflow.phase, () => actor.value, () => game.value.game
 }, { immediate: true })
 watch(() => game.value.gameflow.primogenitureBid?.amount, (amount) => { if (primogenitureAmount.value <= (amount || 0)) primogenitureAmount.value = (amount || 0) + 1 })
 watch(() => props.selectedArea, (id) => {
-	if (id && game.value.gameflow.phase === rf.PHASE_DEVELOPMENT && store.viewSettings.actionIntent === "sell") toggleMaintenanceLand(id)
 	if (game.value.gameflow.phase === rf.PHASE_RAINY_SEASON && game.value.rain.step === "routing") waterTarget.value = waterOptions.value.some((choice) => choice.area === id) ? id : null
 	if (game.value.gameflow.phase === rf.PHASE_RAINY_SEASON && game.value.rain.step === "harvest" && removable.value.includes(id)) removeWaterwork.value = id
 })
@@ -466,7 +485,7 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 		<div v-if="game.gameflow.endReason && game.gameflow.phase !== rf.PHASE_GAME_OVER" class="endNotice" role="status"><b>{{ $t("actions.finalRound") }}</b> {{ game.gameflow.endReason === 'invasion' ? $t("actions.invasionEnd") : $t("actions.revolutionEnd") }}</div>
 		<template v-if="game.gameflow.phase === rf.PHASE_GAME_OVER">
 			<b>{{ game.gameflow.endReason === 'revolution' ? $t("actions.gameEndedRevolution") : $t("actions.invasion") }}</b>
-			<ol class="finalStandings"><li v-for="index in game.gameflow.finalPositions" :key="index"><PlayerMarker :index="index" /><b>{{ game.players[index].score }} <CurrencyIcon /></b></li></ol><p>{{ $t("actions.finalAssets") }}</p>
+			<ol class="finalStandings"><li v-for="index in game.gameflow.finalPositions" :key="index"><button :aria-pressed="store.viewSettings.inspectedPlayer === index" @click="inspectPlayer(index)"><PlayerMarker :index="index" /><span>{{ game.players[index].displayName }}</span><b>{{ game.players[index].score }} <CurrencyIcon /></b></button></li></ol><p>{{ $t("actions.finalAssets") }}</p>
 		</template>
 		<template v-else-if="game.gameflow.pendingOffer">
 			<div class="offerHeading"><img :src="assets.getStateOrderImage(pendingOffer.state)" alt="" /><b v-if="pendingOffer.action.type === 'offerNation'"><CurrencyText :text="$t('actions.offerNation', { state: rf.STATE_NAMES[pendingOffer.state], amount: pendingOffer.action.amount, nation: rf.NATION_NAMES[pendingOffer.action.nation] })" /></b><b v-else>{{ $t("actions.offerWaterwork", { state: rf.STATE_NAMES[pendingOffer.state], kind: pendingOffer.action.kind, area: label(pendingOffer.action.area) }) }}</b></div>
@@ -510,17 +529,16 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 					<button v-else :disabled="!!path.length" @click="finishDigging">{{ $t("actions.doneDigging") }}</button>
 				</div>
 				<template v-if="game.gameflow.developmentStep !== 'eridu'">
-					<p v-if="state.id === rf.STATE_AKKAD && !game.nations[rf.NATION_FIRST_AKKADIANS].isRemoved" class="eraChange" role="status">{{ $t("actions.firstAkkadiansWarning") }}</p>
+					<p v-if="state.id === rf.STATE_AKKAD && (!game.nations[rf.NATION_FIRST_AKKADIANS].isRemoved || (store.turnDraft.start && !store.turnDraft.start.state.nations[rf.NATION_FIRST_AKKADIANS].isRemoved))" class="eraChange" role="status">{{ $t("actions.firstAkkadiansWarning") }}</p>
 					<div v-if="!rules.hasMaintenanceCrew(game, state.id) && (!canFinishDevelopment || maintenanceSales.length || maintenanceSelection.length)" class="actionGroup crewFunding" :aria-label="$t('actions.requiredCrewFunding')">
-						<b>{{ $t("actions.requiredCrew", { capacity: cardData.digger[0] }) }}<br>{{ cardData.digger[1] }} <CurrencyIcon /></b>
-						<p><CurrencyText :text="$t('actions.statePays', { amount: Math.min(state.money, cardData.digger[1]), private: maintenanceContribution })" /></p>
-						<p v-if="maintenanceSales.length"><CurrencyText :text="$t('actions.privateAfterSales', { amount: maintenanceFundingGame.players[state.king].money })" /></p>
+						<div class="fundingRow fundingTotal"><b>{{ $t("actions.requiredCrew", { capacity: cardData.digger[0] }) }}</b><b>{{ cardData.digger[1] }} <CurrencyIcon /></b></div>
+						<div class="fundingRow"><span>{{ $t("actions.stateTreasury", { state: rf.STATE_NAMES[state.id] }) }}</span><span>{{ Math.min(state.money, cardData.digger[1]) }} <CurrencyIcon /></span></div>
+						<div class="fundingRow"><span>{{ $t("actions.personalContribution") }}</span><span>{{ maintenanceContribution }} <CurrencyIcon /></span></div>
+						<div class="fundingRow"><span>{{ $t("actions.privateCash") }}</span><span>{{ maintenanceFundingGame.players[state.king].money }} <CurrencyIcon /></span></div>
 						<p role="status" class="fundingGap"><CurrencyText :text="willRevolt ? $t('actions.crewCannotCover') : maintenanceGap ? $t('actions.needMore', { amount: maintenanceGap }) : maintenanceError ? $t('actions.reviewSales') : $t('actions.crewCovered')" /></p>
 						<template v-if="!canFinishDevelopment">
-							<button v-if="store.viewSettings.actionIntent !== 'sell' && maintenanceGap" @click="setIntent('sell')">{{ $t("actions.selectFundingLand") }}</button>
-							<div v-for="group in maintenanceGroups" :key="group.type" class="fundingTerrain"><b>{{ rf.LAND_NAMES[group.type] }}</b><div class="buttonRow"><button v-for="land in group.lands" :key="land.id" :aria-pressed="maintenanceSelection.includes(land.id)" @click="toggleMaintenanceLand(land.id)">{{ label(land.id) }}<br>+{{ rules.landPrice(maintenanceFundingGame, land) }} <CurrencyIcon /></button></div></div>
-							<button v-if="maintenanceSelection.length" class="primaryAction" @click="addMaintenanceBatch"><CurrencyText :text="$t('actions.addSale', { count: maintenanceSelection.length, amount: maintenanceSelectionValue })" /></button>
-							<p v-if="maintenanceChoices.length" class="hint">{{ $t("actions.saleHint") }}</p>
+							<p v-if="maintenanceChoices.length" class="hint" :title="$t('actions.saleHint')">{{ $t("actions.selectFundingLand") }}</p>
+							<div v-if="maintenanceSelection.length" class="fundingSelection"><span>{{ maintenanceSelection.map(label).join(", ") }}</span><button class="primaryAction" @click="addMaintenanceBatch"><CurrencyText :text="$t('actions.addSale', { count: maintenanceSelection.length, amount: maintenanceSelectionValue })" /></button></div>
 							<ol v-if="maintenanceSales.length" :aria-label="$t('actions.crewFundingSalesAria')"><li v-for="(batch, index) in maintenanceSales" :key="index">{{ $t("actions.saleNumber", { number: index + 1 }) }}<button v-for="id in batch" :key="id" :aria-label="$t('actions.removeFromSale', { land: label(id) })" @click="removeSale(maintenanceSales, index, id)">{{ label(id) }} ×</button></li></ol>
 							<button v-if="maintenanceSales.length" @click="maintenanceSales = []; maintenanceSelection = []">{{ $t("actions.clearFundingSales") }}</button>
 						</template>
@@ -537,7 +555,7 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 					<p v-if="game.gameflow.offerDeclined && state" role="status">{{ $t("actions.agreementDeclined", { area: label(game.gameflow.offerDeclined) }) }}</p>
 					<div v-if="showEquipment" class="actionGroup equipmentShop">
 						<b>{{ $t("actions.buyEquipment") }}</b>
-						<p class="hint">{{ $t("actions.eraSupply", { era: cardEra === 5 ? 'M' : cardEra }) }} - {{ cardEra === 5 ? $t("actions.unlimitedSupply") : $t("actions.cardsLeft", { count: game.cardSupply[cardEra] }) }}</p>
+						<p class="hint">{{ $t("actions.eraSupply", { era: cardEra === 5 ? 'M' : cardEra }) }} - {{ cardEra === 5 ? $t("actions.unlimitedSupply") : $t("actions.cardsLeft", { count: (maintenancePreview?.game || game).cardSupply[cardEra] }) }}</p>
 						<div class="equipLegend"><span class="swatch pump"></span><div><span class="shopItemLine"><CurrencyText :text="$t('actions.pump', { price: siteCost.pump[1] })" /> · {{ $t("actions.reach", { reach: siteCost.pump[0] }) }}</span><small>{{ $t("actions.tokensLeft", { tokens: rules.remainingWaterworkTokens(game, state.id, siteCost.pump[0]) }) }}</small></div></div>
 						<div class="equipLegend"><span class="swatch reservoir"></span><div><span class="shopItemLine"><CurrencyText :text="$t('actions.reservoir', { price: siteCost.reservoir[1] })" /> · {{ $t("actions.holds", { capacity: siteCost.reservoir[0] }) }}</span><small>{{ $t("actions.tokensLeft", { tokens: rules.remainingWaterworkTokens(game, state.id, siteCost.reservoir[0]) }) }}</small></div></div>
 						<label v-if="ownedCalah"><input type="checkbox" v-model="useCalah" /> <CurrencyText :text="$t('actions.useCalah', { income: rf.NATION_INCOMES[rf.NATION_CALAH] })" /></label>
@@ -589,7 +607,7 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 </template>
 
 <style scoped>
-.equipLegend { display: flex; align-items: center; gap: 8px; margin: 4px 0; }.swatch { width: 18px; height: 18px; border-radius: 3px; border: 3px solid #007cac; box-sizing: border-box; flex-shrink: 0; }.swatch.reservoir { border-color: #a34720; }.draftList { list-style: none; margin: 6px 0; padding: 0; }.draftList li { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0; }.draftList button { min-height: 28px; padding: 0 9px; margin: 0; flex-shrink: 0; }.crewStepper { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 8px 0; }.stepper { display: flex; align-items: center; gap: 10px; }.stepper button { min-width: 36px; margin: 0; }.equipmentChoices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }.equipmentChoices button { text-align: left; min-height: 65px; margin: 0; padding: 8px; }.equipmentChoices small { display: block; margin-top: 5px; }.equipmentChoices [aria-pressed=true], .fundingTerrain [aria-pressed=true] { background: #e3eddb; border: 2px solid #547751; }.equipmentPreview { padding: 8px; margin-top: 8px; border: 1px solid #c4b894; border-radius: 4px; }.equipmentReference { margin-top: 8px; }.equipmentReference :deep(img) { max-width: 100%; }.fundingGap { font-weight: bold; }.fundingTerrain { margin: 8px 0; }.crewFunding ol { padding-left: 20px; }
+.equipLegend { display: flex; align-items: center; gap: 8px; margin: 4px 0; }.swatch { width: 18px; height: 18px; border-radius: 3px; border: 3px solid #007cac; box-sizing: border-box; flex-shrink: 0; }.swatch.reservoir { border-color: #a34720; }.draftList { list-style: none; margin: 6px 0; padding: 0; }.draftList li { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0; }.draftList button { min-height: 28px; padding: 0 9px; margin: 0; flex-shrink: 0; }.crewStepper { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 8px 0; }.stepper { display: flex; align-items: center; gap: 10px; }.stepper button { min-width: 36px; margin: 0; }.equipmentChoices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }.equipmentChoices button { text-align: left; min-height: 65px; margin: 0; padding: 8px; }.equipmentChoices small { display: block; margin-top: 5px; }.equipmentChoices [aria-pressed=true] { background: #e3eddb; border: 2px solid #547751; }.equipmentPreview { padding: 8px; margin-top: 8px; border: 1px solid #c4b894; border-radius: 4px; }.equipmentReference { margin-top: 8px; }.equipmentReference :deep(img) { max-width: 100%; }.fundingGap { font-weight: bold; }.crewFunding ol { padding-left: 20px; }
 
 .gameActions { width: 100%; box-sizing: border-box; background: #fff9df; border: 2px solid #8e805e; border-radius: 7px; padding: 8px; margin: 8px 0; text-align: left; font-size: 16px; font-weight: 400; }
 fieldset.plain { border: 0; padding: 0; }fieldset { border: 1px solid #c4b894; border-radius: 4px; padding: 8px; margin: 0; min-width: 0; }legend { max-width: 100%; overflow-wrap: anywhere; box-sizing: border-box; font-weight: bold; font-size: 15px; }p { margin: 6px 0; }.buttonRow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 6px 0; }button, input, select { font: inherit; }button { cursor: pointer; margin: 2px; padding: 4px 7px; }button:disabled { cursor: default; }input[type=number] { width: 70px; }label { margin: 3px; }summary { cursor: pointer; font-weight: bold; padding: 5px 0; }
@@ -617,13 +635,13 @@ fieldset.plain { border: 0; padding: 0; }fieldset { border: 1px solid #c4b894; b
 .irrigationPreview small, .workMeasure { display: block; margin-top: 3px; font-size: 16px; font-weight: 400; color: #655a42; }
 .consentIncome b, .crewContribution b { flex-shrink: 0; white-space: nowrap; }.crewContribution small { display: block; margin-top: 3px; font-size: 16px; font-weight: 400; }
 .endNotice { margin-bottom: 8px; padding: 7px 8px; background: #f6e3cf; border-left: 3px solid #a75a24; color: #663716; font-size: 16px; font-weight: 400; }
-.finalStandings { padding-left: 24px; }.finalStandings li { overflow-wrap: anywhere; padding: 7px 0; }.finalStandings img { width: 28px; height: 28px; vertical-align: middle; margin-right: 6px; }.finalStandings b { float: right; margin: 6px 0 0 5px; }
+.finalStandings { padding-left: 24px; }.finalStandings li { padding: 4px 0; }.finalStandings button { display: flex; align-items: center; gap: 6px; width: 100%; margin: 0; text-align: left; }.finalStandings button > span { min-width: 0; overflow-wrap: anywhere; }.finalStandings img { width: 28px; height: 28px; }.finalStandings b { margin-left: auto; white-space: nowrap; }.finalStandings [aria-pressed=true] { background: #e3eddb; border-color: #547751; }
 .offerHeading, .offeredWork { display: flex; align-items: center; gap: 8px; margin: 8px 0; }.offerHeading img, .offeredWork img { width: 38px; height: 38px; }.offerHeading { padding-bottom: 8px; border-bottom: 1px solid #c4b894; font-size: 15px; }
 .nationOfferPreview { display: grid; grid-template-columns: minmax(0, 42%) minmax(0, 1fr); align-items: start; gap: 10px; margin-top: 8px; }.nationOfferPreview > :first-child { width: 100%; }.nationPurchaseRecipient, .nationPurchaseButton { grid-column: 1 / -1; }.nationPurchaseRecipient { margin: 0; }.nationOfferPreview > div { min-width: 0; overflow-wrap: anywhere; }.nationOffer select { max-width: 100%; }
 .turnPlan { margin: 4px 0 8px; padding-left: 22px; }.turnPlan li { margin: 5px 0; }.turnPlan li .planButtons { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }.turnPlan li button { min-height: 30px; padding: 0 9px; }
 .developmentActions > .actionGroup:first-child { border-top: 0; margin-top: 0; padding-top: 0; }
 .crewFunding, .equipmentShop { text-align: center; }
-.crewFunding > b { display: block; text-wrap: balance; }
+.fundingRow { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 6px 0; text-align: left; }.fundingRow > :last-child { flex-shrink: 0; white-space: nowrap; }.fundingTotal { padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid #c4b894; }.fundingGap { padding: 8px; background: #f6e3cf; border-radius: 4px; }.fundingSelection { padding: 8px; border: 1px solid #c4b894; border-radius: 4px; }.fundingSelection > span { display: block; }
 .queuedCrew { margin: 0; color: #24532c; }
 .equipLegend { justify-content: center; }
 .shopItemLine { white-space: nowrap; }

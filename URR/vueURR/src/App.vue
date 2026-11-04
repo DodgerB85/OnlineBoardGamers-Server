@@ -116,7 +116,12 @@ const waitingForTurn = computed(() => {
 	const acting = view.displayedTurnOrder(store)[0]
 	return acting !== undefined && !personal.trainingGame && personal.pov >= 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER && personal.pov !== acting
 })
+const showWaitingPanel = computed(() => waitingForTurn.value && !personal.canPlay() && !store.turnDraft.ready && !rules.canExchangeBarahshum(store, personal.pov))
 const actingPlayer = computed(() => store.turnDraft.ready ? store.turnDraft.player : view.displayedTurnOrder(store)[0])
+const actingState = computed(() => {
+	const game = actionPanelGame(store)
+	return game.gameflow.phase === rf.PHASE_DEVELOPMENT ? view.currentStateId(game) : null
+})
 const actingLabel = computed(() => {
 	if (store.turnDraft.ready) return t("app.reviewing")
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return ""
@@ -224,10 +229,10 @@ function showDebug() {
 				</Teleport>
 			</div>
 			<aside v-if="!store.viewSettings.showReplay" class="actionSidebar">
-				<div v-if="!isNationDivision" class="actionPanelHeading"><small class="actingLabel">{{ actingLabel }} <PlayerMarker v-if="actingPlayer !== undefined" :index="actingPlayer" /></small>{{ actionPanelTitle }}</div>
-				<div class="actionPanelBody"><NationMarket v-if="isNationDivision" :is-board-layout="isNationDivision" />
-				<GameActions v-else ref="gameActions" :key="store.turnDraft.revision" @select-area="selectedArea = $event" @change-map-action="mapAction = $event" @change-action-targets="actionTargets = $event" :selected-area="selectedArea" :path="canalPath" @clear-path="map.finishDig()" @change-removal="removalArea = $event" @change-land-draft="landDraft = $event" @change-turn-action="turnAction = $event" @change-dig-capacity="digCapacity = $event" /></div>
-				<TurnControls :is-nation-division="isNationDivision" :turn-action="turnAction" :land-draft="landDraft" @end-turn="finishTurn" />
+				<div v-if="!isNationDivision" class="actionPanelHeading"><small class="actingLabel">{{ actingLabel }} <PlayerMarker v-if="actingPlayer !== undefined" :index="actingPlayer" /></small><small v-if="actingState !== null" class="actingLabel actingState"><img :src="assets.getStateOrderImage(actingState)" alt="" />{{ $t("common.state") }}: {{ rf.STATE_NAMES[actingState] }}</small>{{ actionPanelTitle }}</div>
+				<div v-if="!showWaitingPanel || isNationDivision" class="actionPanelBody"><NationMarket v-if="isNationDivision" :is-board-layout="isNationDivision" />
+				<GameActions v-else ref="gameActions" @inspect="revealStatus" :key="store.turnDraft.revision" @select-area="selectedArea = $event" @change-map-action="mapAction = $event" @change-action-targets="actionTargets = $event" :selected-area="selectedArea" :path="canalPath" @clear-path="map.finishDig()" @change-removal="removalArea = $event" @change-land-draft="landDraft = $event" @change-turn-action="turnAction = $event" @change-dig-capacity="digCapacity = $event" /></div>
+				<TurnControls v-if="!showWaitingPanel || isNationDivision" :is-nation-division="isNationDivision" :turn-action="turnAction" :land-draft="landDraft" @end-turn="finishTurn" />
 			</aside>
 		</div>
 		<DevelopmentProgress v-if="!isNationDivision && !store.viewSettings.showReplay" :is-digging="!!gameActions?.showDigging" />
@@ -303,6 +308,7 @@ body {
 	font-size: 36px;
 }
 .actingLabel { display: flex; justify-content: center; align-items: center; gap: 6px; white-space: pre-line; font-size: 16px; font-weight: 400; color: #655a42; margin-bottom: 5px; }
+.actingState img { width: 24px; height: 24px; }
 .welcomeHelper { margin-bottom: 10px; padding: 8px; background: #edf5e4; border: 1px solid #c1cdb1; border-radius: 4px; }
 .welcomeHelper > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .welcomeHelper button { flex-shrink: 0; min-width: 40px; min-height: 40px; font: inherit; font-size: 20px; }

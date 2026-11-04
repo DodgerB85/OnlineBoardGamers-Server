@@ -1,6 +1,6 @@
 ---
 name: add-new-game
-description: Add a board game to OnlineBoardGamers, from rule and component transcription through client gameplay, Django integration, saves, replay and playable UI. Use for a new game implementation or its implementation plan; ordinary fixes to an existing game do not require this whole workflow.
+description: Add a board game to OnlineBoardGamers, from rule and component transcription through client gameplay, Django integration, saves, replay and playable UI. Use for a new game implementation or its implementation plan; also use for aligning an existing game's show-page shell with site conventions. Ordinary rules fixes do not require this whole workflow.
 ---
 
 # Add a game to OnlineBoardGamers
@@ -72,6 +72,33 @@ Keep decoders for published saves unless a reset/migration is explicitly part of
 
 For display performance, derive history rows and reconstructed positions outside persisted state. Append incrementally and invalidate on undo/import/replacement. Subscribe the map only to the history data it uses. Profile long sessions in the affected browser and distinguish development instrumentation from production cost before adding caches.
 
+## Reuse the show-page shell
+
+The game page must look and behave like the site's established game pages. Game-specific artwork and interactions do not authorize a new theme for navigation, buttons or page chrome. Apply this section to shell corrections too, without rewriting rules or persistence.
+
+There is no shared game-shell component or stylesheet to import. Copy and adapt the donor components and local styles below, changing game identifiers, translations and bindings. Name the donor in the implementation plan. The newest game is not automatically a style reference; a bespoke `TopBar` with similar labels does not satisfy this requirement.
+
+| Element | Required pattern and source |
+| --- | --- |
+| Header structure | Copy [URR TopMenu.vue](../../URR/vueURR/src/components/TopMenu.vue): `#top` contains `#menu`, `#topInfos` and `#topRight`. Keep the approximately 60px dark `#333` header, icon-and-label navigation, centered game/phase/player information, and viewer/connection/zoom area. Assess width against the board instead of blindly copying URR's minimum width. |
+| Menu controls | Use `.topMenuItem`, `.topMenuItemSelected`, `.menuDivider` and `.hasNotes`. Items have transparent backgrounds, roughly 38px icons and labels underneath; selected/hover states use the donor's light-blue treatment. Use real buttons for toggles, links for navigation, translated labels, `aria-expanded` for panels, visible keyboard focus and appropriate disabled states. Do not copy older clickable-span semantics. |
+| Utilities and panels | Preserve Home, Chat, Bug report, Next game, Rules/help, Notes, History, Replay, Rewind and Resign where supported and eligible. Follow participant/spectator and game-state visibility rules. Wire actual handlers and [TopMenuViews.vue](../../URR/vueURR/src/components/TopMenuViews.vue) panel behavior. Dummy controls or omitting site utilities for a first version are incomplete integration. Trace actual routes and init data, including `nextURL`; do not guess creation URLs. |
+| Action buttons | Default to `.actionsLineButton` from [WEB App.vue](../../WEB/vueWEB/src/App.vue): `margin: 10px`, `width: fit-content`, `border: 2px solid green`, `border-radius: 5px`, `font-weight: bolder`, `padding: 5px`, light-grey hover and dark-grey active backgrounds. Preserve native focus/disabled behavior or the donor's explicit states. No yellow/ghost buttons or invented palette. |
+| Existing panel variant | If adopting URR's coordinated panel UI, copy the button base and state rules from [URR App.vue](../../URR/vueURR/src/App.vue), including `button:not(.topMenuItem)`, selected, hover, focus-visible and disabled states. This is an existing alternative to WEB's buttons, not permission to invent a hybrid. Scope styles to exclude header controls and board hit targets. Dialogs and previews use the same chosen system. |
+| Page and footer | Copy zero body margin, Arial/sans-serif typography and light-blue `#d4eafd` page background. Keep artwork within the game area; do not theme the shell with gradients, gold controls, new fonts or decorative shadows. Copy [FooterBar.vue](../../WEB/vueWEB/src/components/FooterBar.vue), its `#footer` styles and the normal loading shell. Retain implementation, artwork/permission and icon credits as applicable. |
+
+### Icons and SVG
+
+- Reuse the menu SVGs from [WEB's images](../../WEB/static/WEB/images): `icon-house.svg`, `icon-chat.svg`, `icon-stop.svg` (bug report), `icon-nextGame.svg`, `icon-rulebook.svg`, `icon-notebook.svg`, `icon-scroll.svg` (history), `icon-replay.svg` and `icon-rewind.svg`. Copy needed assets into the new game's static images directory and adapt [URRview.js](../../URR/vueURR/src/js/URRview.js)'s build-resolved image lookup. Do not introduce a new icon pack, hand-draw substitutes, or replace navigation with emoji or text-only buttons. Resign and game-specific icons may use donor raster assets.
+- Decorative icons beside visible labels use `alt=""`; icon-only controls need an accessible name. Preserve selected/hover icon treatment and icon credits. Verify asset loading in the production bundle as well as development.
+- For a scalable fixed-map board, inspect [URR MapArea.vue](../../URR/vueURR/src/components/MapArea.vue) and [WEB MapArea.vue](../../WEB/vueWEB/src/components/MapArea.vue): an SVG `viewBox` places artwork, targets and markers in one coordinate system. Reuse supplied board artwork through an image layer; do not redraw the printed board as invented SVG art. Keep geometry separate from rules and saved state, with keyboard-accessible targets. A different renderer needs a game-specific reason; it does not justify different site chrome. A shell correction need not replace a working board renderer.
+
+### Verify visual consistency
+
+Compare donor and new page in a browser at the same desktop viewport. Check header structure, icon sizes/labels, font, background, button states, panels, footer, zoom and long content. Include participant and spectator views, keyboard focus and an open utility panel. Similar component names or a History button do not establish visual consistency. Record the donor and comparison evidence; if browser comparison cannot run, report the shell as unverified.
+
+LBR's initial implementation illustrates the gap this contract closes: a custom gradient `TopBar.vue`, Trebuchet typography, yellow/ghost buttons and text-only navigation passed the old vague instruction to match the site. Those choices must not become a donor for future shells. Game-specific board artwork is a separate concern.
+
 ## Build an interface around the decision
 
 Observed URR taste, to adapt to the new game's needs:
@@ -85,7 +112,7 @@ Observed URR taste, to adapt to the new game's needs:
 - Prefer local confirmation/cancel controls to browser alerts. Preserve ordinary keyboard operation, labels, safe text rendering and reduced motion. Currency images still need accessible units. Keep user-facing text translated; do not store translated display prose as game state.
 - Explain automatic sequences through recorded history/playback where helpful. Animation presents recorded outcomes, never drives game rules or saves. Manual stepping must show the same state, including waiting/returned resources.
 
-Match the site's menu, notes, chat, history, help, footer credits and loading shell. Verify the Django template and Vite config use the same dev port, entry URL and static paths. URR required both a port correction and a Django-image proxy after the initial implementation. Use existing permissioned artwork where available, prefer JPG when suitable, and keep temporary extraction sheets out of the deliverable.
+Follow the show-page shell contract above. Verify the Django template and Vite config use the same dev port, entry URL and static paths. URR required both a port correction and a Django-image proxy after the initial implementation. Use existing permissioned artwork where available, prefer JPG when suitable, and keep temporary extraction sheets out of the deliverable.
 
 ## Verify observable outcomes
 
@@ -99,6 +126,7 @@ Before calling the game playable, collect evidence for the requested modes:
 | Site lifecycle | Create, invite/join, start, current-player handoff, missing-player handling and finish work through real endpoints; stored state, flags and results agree |
 | Authorization and concurrency | Spectator/forged actor rejected; stale submission rejected without mutation; two independent accounts/tabs converge; equal WS messages do not echo |
 | Persistence | Reload during a meaningful intermediate phase; current and old fixtures load; late-game size/time measured; rewind and replay retain the expected states |
+| Shell | Named donor compared in-browser; header, SVG icons, buttons, utility panels and footer follow the contract above |
 | UI | Normal controls can reach the tested rules; Undo/Reset, selection, review, save failure and every replay exit behave correctly; intended viewports/locales checked |
 | Build | Production frontend build passes, Django shell loads the bundle and images; no generated output enters the change |
 

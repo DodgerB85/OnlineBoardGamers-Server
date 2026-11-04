@@ -197,6 +197,31 @@ test("assimilated Barahshum can only be exchanged during its owning state's turn
 	assert.equal(canExchangeBarahshum(game, 0), false)
 })
 
+test("Nation purchase agreements pause development until the seller responds", () => {
+	const game = betweenStatesGame()
+	game.era = 3
+	game.gameflow.developmentStep = "purchasing"
+	game.states[0].money = 500
+	const nation = game.nations[rf.NATION_BARAHSHUM]
+	const action = { type: "offerNation", nation: nation.id, amount: rf.NATION_PRICES[nation.id] }
+	const requested = applyAction(game, 0, action)
+	assert.equal(endsDecision(game, requested, action), true)
+	assert.deepEqual(requested.gameflow.turnOrder, [2])
+	assert.deepEqual(requested.gameflow.pendingOffer.action, action)
+	assert.equal(requested.nations[nation.id].ownerType, "player")
+	assert.equal(requested.states[0].money, 500)
+	assert.throws(() => applyAction(requested, 0, { type: "endDevelopment" }), /not this player's turn/)
+	assert.throws(() => applyAction(requested, 2, { type: "endDevelopment" }), /Accept or decline/)
+	for (const accept of [true, false]) {
+		const answered = applyAction(requested, 2, { type: "respondOffer", accept })
+		assert.equal(answered.gameflow.pendingOffer, null)
+		assert.deepEqual(answered.gameflow.turnOrder, [0])
+		assert.equal(answered.gameflow.stateIndex, 0)
+		assert.equal(answered.nations[nation.id].ownerType, accept ? "state" : "player")
+		assert.equal(answered.states[0].money, accept ? 500 - action.amount : 500)
+	}
+})
+
 test("Waterwork agreements wait for End Turn and allow other purchases", () => {
 	const game = betweenStatesGame()
 	game.gameflow.developmentStep = "purchasing"

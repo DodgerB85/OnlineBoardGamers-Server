@@ -71,6 +71,8 @@ Mirroring `WEB/RNB`:
 
 ## 6. Client
 
+The [show-page shell contract](add-new-game/SKILL.md#reuse-the-show-page-shell) is required: adapt URR’s `TopMenu.vue` structure and SVG icons, and WEB’s `.actionsLineButton` styles (or the documented URR panel variant). Preserve the site header, utility panels, typography, background and footer. A custom themed top bar or hand-rolled button palette is not an equivalent substitute. Compare the result against the named donor in a browser.
+
 - For a Vue client create `XYZ/vueXYZ/` (Vite + Pinia; copy the structure of `CNS/vueCNS` or `RNB/vueRNB`: `model/`, `controller/`, `js/`, `stores/`, `IO/`). The build outputs to `XYZ/static/XYZ/XYZvuedist` (or similar) which Django serves — **never edit the dist**; add a `XYZ.bat` build/dev script like `FCM/vueFCM/FCM.bat`.
 - The client implements all rules: it computes moves locally, polls the data endpoint, and submits via `processXYZturn` with `latestUpdate`. Refer to the client conventions in [ARCHITECTURE.md](ARCHITECTURE.md).
 
