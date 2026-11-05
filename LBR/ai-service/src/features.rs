@@ -46,7 +46,7 @@ pub const MAG_OFF: usize = KINDCOL_OFF + POLICY_KINDCOL;
 
 /// Number of scalar features. Fixed; asserted by a unit test so a silent change
 /// cannot desynchronise a trained checkpoint.
-pub const NFEAT: usize = 193;
+pub const NFEAT: usize = 243;
 
 /// Saturating scale: `x` divided by `scale`, clipped to `[-1, 1]`.
 #[inline]
@@ -57,7 +57,8 @@ fn sc(x: f32, scale: f32) -> f32 {
 #[inline]
 fn pos_idx(p: Option<Pos>) -> usize {
     match p {
-        Some(p) if (p.x as usize) < W && (p.y as usize) < H => p.x as usize * W + p.y as usize,
+        // `x` is the row (< H), `y` the column (< W).
+        Some(p) if (p.x as usize) < H && (p.y as usize) < W => p.x as usize * W + p.y as usize,
         // Out-of-board or absent: the dedicated "no position" slot.
         _ => W * H,
     }
@@ -362,7 +363,14 @@ pub fn extract(state: &TnEGame, out: &mut [f32; NFEAT]) {
         push(sc(c as f32, 6.0), out, &mut k);
     }
     push(sc(my.hand_sum() as f32, 24.0), out, &mut k);
-    push((state.state.len() as f32 / 200.0).clamp(0.0, 1.0), out, &mut k);
+    // Normal actions I still have this turn (2 at turn start, 1 after the
+    // first). Queued on the action stack, under any pending sub-decision.
+    let actions_left = state
+        .play_action_stack
+        .iter()
+        .filter(|(p, a)| *p == me && *a == PlayerAction::Normal)
+        .count();
+    push(sc(actions_left as f32, 2.0), out, &mut k);
 
     // --- block 2: my score ------------------------------------------------
     let my_scores = [my.score_red, my.score_blue, my.score_green, my.score_black];
@@ -455,6 +463,9 @@ pub fn extract(state: &TnEGame, out: &mut [f32; NFEAT]) {
             for _ in 0..4 {
                 push(0.0, out, &mut k);
             }
+            for _ in 0..12 {
+                push(0.0, out, &mut k);
+            }
             continue;
         }
         let ps = &state.players.0[opp];
@@ -483,6 +494,13 @@ pub fn extract(state: &TnEGame, out: &mut [f32; NFEAT]) {
         }
         for i in 0..4 {
             push(sc(infos[i].own_tiles, 15.0), out, &mut k);
+        }
+        // Revolt defence, and catastrophe exposure (1 temple = one catastrophe
+        // kills it); then where they will score and what they could take.
+        for i in 0..4 {
+            push(sc(infos[i].adj_temples, 4.0), out, &mut k);
+            push(sc(infos[i].kingdom_size, 15.0), out, &mut k);
+            push(sc(infos[i].treasures, 5.0), out, &mut k);
         }
     }
 
@@ -520,27 +538,36 @@ pub fn extract(state: &TnEGame, out: &mut [f32; NFEAT]) {
         push(if i == phase { 1.0 } else { 0.0 }, out, &mut k);
     }
 
-    // Pending revolt: is the decision mine, and who is stronger.
-    if let Some(c) = state.internal_conflict {
+    // The conflict being decided right now: a revolt, or the war colour whose
+    // support is being added. Strength = base (temples / kingdom tiles) +
+    // committed support, which is exactly what the rules compare.
+    let active = state.internal_conflict.or_else(|| match (&state.external_conflict, pa) {
+        (Some(ec), PlayerAction::AddSupport(t)) => {
+            ec.conflicts.iter().find(|c| c.conflict_leader.as_tile_type() == t).copied()
+        }
+        _ => None,
+    });
+    if let Some(c) = active {
         let i_am_attacker = c.attacker == me;
+        let (my_base, my_sup, their_base, their_sup) = if i_am_attacker {
+            (c.attacker_base_strength, c.attacker_support, c.defender_base_strength, c.defender_support)
+        } else {
+            (c.defender_base_strength, c.defender_support, c.attacker_base_strength, c.attacker_support)
+        };
+        let mine = (my_base + my_sup) as f32;
+        let theirs = (their_base + their_sup) as f32;
+        // Ties go to the defender.
+        let ahead = if i_am_attacker { mine > theirs } else { mine >= theirs };
         push(if i_am_attacker { 1.0 } else { -1.0 }, out, &mut k);
-        let mine = if i_am_attacker {
-            c.attacker_support
-        } else {
-            c.defender_support
-        };
-        let theirs = if i_am_attacker {
-            c.defender_support
-        } else {
-            c.attacker_support
-        };
-        push(sc(mine as f32, 10.0), out, &mut k);
-        push(sc(theirs as f32, 10.0), out, &mut k);
-        push(sc(mine as f32 - theirs as f32, 6.0), out, &mut k);
-        push(if mine > theirs { 1.0 } else { -1.0 }, out, &mut k);
+        push(sc(my_base as f32, 10.0), out, &mut k);
+        push(sc(their_base as f32, 10.0), out, &mut k);
+        push(sc(my_sup as f32, 10.0), out, &mut k);
+        push(sc(their_sup as f32, 10.0), out, &mut k);
+        push(sc(mine - theirs, 6.0), out, &mut k);
+        push(if ahead { 1.0 } else { -1.0 }, out, &mut k);
         push(colour_idx(Some(c.conflict_leader.as_tile_type())) as f32 / 4.0 - 0.5, out, &mut k);
     } else {
-        for _ in 0..6 {
+        for _ in 0..8 {
             push(0.0, out, &mut k);
         }
     }
@@ -624,6 +651,67 @@ mod tests {
         let mut f = [0f32; NFEAT];
         extract(&g, &mut f);
         assert!(f.iter().all(|v| v.is_finite()));
+    }
+
+    #[test]
+    fn actions_left_counts_down() {
+        use crate::game::Action;
+        let mut g = MapSpec::default_map().start_game(4, 11);
+        let mut f = [0f32; NFEAT];
+        extract(&g, &mut f);
+        assert_eq!(f[5], 1.0, "two actions at turn start");
+        let a = g
+            .next_action()
+            .generate_moves(&g)
+            .into_iter()
+            .find(|a| matches!(a, Action::PlaceTile { .. }))
+            .unwrap();
+        g.process(a).unwrap();
+        extract(&g, &mut f);
+        assert_eq!(f[5], 0.5, "one action left after the first tile");
+    }
+
+    #[test]
+    fn revolt_strength_is_visible() {
+        use crate::game::{Conflict, Player};
+        let mut g = MapSpec::default_map().start_game(2, 11);
+        let me = g.next_player();
+        let other = if me == Player::Player1 { Player::Player2 } else { Player::Player1 };
+        let revolt = |att_base, def_base, def_sup| Conflict {
+            is_internal: true,
+            conflict_leader: Leader::Red,
+            attacker: me,
+            attacker_pos: Pos { x: 0, y: 0 },
+            attacker_support: 1,
+            attacker_sent_support: true,
+            attacker_base_strength: att_base,
+            defender: other,
+            defender_pos: Pos { x: 0, y: 2 },
+            defender_support: def_sup,
+            defender_sent_support: false,
+            defender_base_strength: def_base,
+        };
+        let feats = |g: &TnEGame| {
+            let mut f = [0f32; NFEAT];
+            extract(g, &mut f);
+            f
+        };
+        g.internal_conflict = Some(revolt(3, 0, 0));
+        let ahead = feats(&g);
+        g.internal_conflict = Some(revolt(0, 3, 0));
+        let behind = feats(&g);
+        g.internal_conflict = Some(revolt(0, 3, 2));
+        let more_support = feats(&g);
+        assert_ne!(ahead, behind, "base strength must reach the net");
+        assert_ne!(behind, more_support, "support must reach the net");
+    }
+
+    #[test]
+    fn every_board_cell_has_its_own_slot() {
+        assert_eq!(pos_idx(Some(Pos { x: 0, y: 15 })), 15);
+        assert_eq!(pos_idx(Some(Pos { x: 10, y: 15 })), W * H - 1);
+        assert_eq!(pos_idx(Some(Pos { x: 11, y: 0 })), W * H);
+        assert_eq!(pos_idx(None), W * H);
     }
 
     #[test]

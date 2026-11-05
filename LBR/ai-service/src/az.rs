@@ -396,7 +396,8 @@ impl AzAgent {
     }
 
     /// Priors for one node's legal moves, before the child cap is applied.
-    fn blend_priors(cfg: &AzConfig, state: &TnEGame, actions: &[Action], net: Option<&NetOut>) -> Vec<f32> {
+    /// Returns `(blended, heuristic)`.
+    fn blend_priors(cfg: &AzConfig, state: &TnEGame, actions: &[Action], net: Option<&NetOut>) -> (Vec<f32>, Vec<f32>) {
         let n = actions.len();
         let heuristic = {
             let w = eval::prior_weights(state, actions, &cfg.prior_weights);
@@ -440,7 +441,7 @@ impl AzAgent {
                 *v /= s;
             }
         }
-        out
+        (out, heuristic)
     }
 
     /// Leaf value: network and hand-written evaluator, blended.
@@ -517,29 +518,35 @@ impl AzAgent {
             let v = Self::blend_value(&cfg, &self.evaluator, &arena[idx].state, o.as_ref());
             arena[idx].leaf_value = Some(v);
         }
-        let priors = Self::blend_priors(&cfg, &arena[idx].state, &actions, o.as_ref());
+        let (priors, heuristic) = Self::blend_priors(&cfg, &arena[idx].state, &actions, o.as_ref());
         let slots: Vec<ActionSlot> = actions.iter().map(features::slot_of).collect();
 
         // Cap the branching factor, but force the best move of every action kind
         // through: with ~700 candidate placements, a pure top-K drops every
-        // leader, treasure and monument decision.
+        // leader, treasure and monument decision. The heuristic's best per kind
+        // goes through too, so a board-blind net prior cannot outvote e.g. a
+        // leader-killing catastrophe and keep it out of the tree (and so out of
+        // the visit counts the net trains on).
         let k = self.cfg.max_children.max(1).min(actions.len());
         let keep: Vec<usize> = if k >= actions.len() {
             (0..actions.len()).collect()
         } else {
-            let mut best_by_kind = [usize::MAX; features::NKIND];
-            for i in 0..actions.len() {
-                let kind = slots[i].kind;
-                let cur = best_by_kind[kind];
-                if cur == usize::MAX || priors[i] > priors[cur] {
-                    best_by_kind[kind] = i;
+            let mut chosen: Vec<usize> = Vec::new();
+            for p in [&priors, &heuristic] {
+                let mut best_by_kind = [usize::MAX; features::NKIND];
+                for i in 0..actions.len() {
+                    let kind = slots[i].kind;
+                    let cur = best_by_kind[kind];
+                    if cur == usize::MAX || p[i] > p[cur] {
+                        best_by_kind[kind] = i;
+                    }
+                }
+                for &v in best_by_kind.iter() {
+                    if v != usize::MAX && !chosen.contains(&v) {
+                        chosen.push(v);
+                    }
                 }
             }
-            let mut chosen: Vec<usize> = best_by_kind
-                .iter()
-                .filter(|&&v| v != usize::MAX)
-                .copied()
-                .collect();
             let mut order: Vec<usize> = (0..actions.len()).collect();
             order.sort_by(|&x, &y| {
                 priors[y]

@@ -540,11 +540,11 @@ impl PlayerAction {
                 // generator emit moves that `validate_action` rejects.
                 let nearest = ts
                     .iter()
-                    .map(|t| crate::game::edge_distance(*t))
+                    .map(|t| state.board.edge_distance(*t))
                     .min()
                     .unwrap_or(u8::MAX);
                 for t in ts.iter() {
-                    if crate::game::edge_distance(*t) == nearest {
+                    if state.board.edge_distance(*t) == nearest {
                         moves.push(Action::TakeTreasure(*t));
                     }
                 }

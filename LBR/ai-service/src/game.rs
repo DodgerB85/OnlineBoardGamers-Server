@@ -762,10 +762,10 @@ impl TnEGame {
                 };
                 let nearest = available
                     .iter()
-                    .map(|t| edge_distance(*t))
+                    .map(|t| self.board.edge_distance(*t))
                     .min()
                     .unwrap_or(u8::MAX);
-                if edge_distance(pos) > nearest {
+                if self.board.edge_distance(pos) > nearest {
                     return Err(Error::MustTakeBorderTreasureFirst);
                 }
             }
@@ -2762,16 +2762,6 @@ pub static RIVER: Lazy<Bitboard> = Lazy::new(|| {
     ret
 });
 
-/// Distance from `pos` to the nearest edge of the board.
-///
-/// Rulebook L40 requires the treasures "on the corner temples" to be taken
-/// first. Ruled 2026-10-10 to mean: nearer an edge wins, ties are free. So
-/// priority is simply this distance, and no list of special squares is needed.
-pub fn edge_distance(pos: Pos) -> u8 {
-    pos.x.min(H as u8 - 1 - pos.x)
-        .min(pos.y.min(W as u8 - 1 - pos.y))
-}
-
 /// Default starting board layout: `x` river, `t` winged-beast temple+treasure.
 const BOARD: [&str; 11] = [
     "....xxxxx.t.x...",
@@ -2841,6 +2831,16 @@ impl Board {
         }
 
         ret
+    }
+
+    /// Distance from `pos` to the nearest edge of the playable area.
+    ///
+    /// Rulebook L40 requires the treasures "on the corner temples" to be taken
+    /// first. Ruled 2026-10-10 to mean: nearer an edge wins, ties are free. So
+    /// priority is simply this distance, and no list of special squares is needed.
+    pub fn edge_distance(&self, pos: Pos) -> u8 {
+        pos.x.min(self.height - 1 - pos.x)
+            .min(pos.y.min(self.width - 1 - pos.y))
     }
 
     /// True if `pos` is inside the playable area.
@@ -2950,7 +2950,7 @@ impl Board {
             for y in 0..self.width {
                 if self.get_tile_type(pos!(x as u8, y as u8)) == TileType::Red {
                     for pos in pos!(x as u8, y as u8).neighbors().iter() {
-                        if count[pos.x as usize][pos.y as usize] > 1 {
+                        if !self.in_bounds(pos) || count[pos.x as usize][pos.y as usize] > 1 {
                             continue;
                         }
 
@@ -5288,8 +5288,8 @@ mod tests {
         game.state.push(GameState::TakeTreasure);
         game.play_action_stack.clear();
         // Both (1,15) and (0,10) are on a board edge: edge distance 0.
-        assert_eq!(edge_distance(pos!(1, 15)), 0);
-        assert_eq!(edge_distance(pos!(0, 10)), 0);
+        assert_eq!(game.board.edge_distance(pos!(1, 15)), 0);
+        assert_eq!(game.board.edge_distance(pos!(0, 10)), 0);
         game.play_action_stack.push((
             Player::Player1,
             PlayerAction::TakeTreasure(vec![pos!(1, 15), pos!(0, 10)]),
@@ -5311,8 +5311,8 @@ mod tests {
         game.play_action_stack.clear();
         let near = pos!(1, 15); // right edge, distance 0
         let far = pos!(5, 5); // interior, distance 5
-        assert_eq!(edge_distance(near), 0);
-        assert!(edge_distance(far) > edge_distance(near));
+        assert_eq!(game.board.edge_distance(near), 0);
+        assert!(game.board.edge_distance(far) > game.board.edge_distance(near));
         game.board.set_treasure(near, true);
         game.board.set_treasure(far, true);
         game.play_action_stack.push((
@@ -5499,8 +5499,8 @@ mod tests {
             let PlayerAction::TakeTreasure(avail) = game.next_action() else {
                 break;
             };
-            let nearest = avail.iter().map(|t| edge_distance(*t)).min().unwrap();
-            let pick = *avail.iter().find(|t| edge_distance(**t) == nearest).unwrap();
+            let nearest = avail.iter().map(|t| game.board.edge_distance(*t)).min().unwrap();
+            let pick = *avail.iter().find(|t| game.board.edge_distance(**t) == nearest).unwrap();
             game.process(Action::TakeTreasure(pick)).unwrap();
             takes += 1;
             if takes > 8 {
@@ -5532,13 +5532,22 @@ mod tests {
     /// emits moves the rules reject.
     #[test]
     fn test_edge_distance_is_min_distance_to_any_edge() {
-        assert_eq!(edge_distance(pos!(0, 0)), 0);
-        assert_eq!(edge_distance(pos!(10, 15)), 0);
-        assert_eq!(edge_distance(pos!(5, 0)), 0);
-        assert_eq!(edge_distance(pos!(0, 7)), 0);
-        assert_eq!(edge_distance(pos!(5, 5)), 5);
+        let b = Board::new();
+        assert_eq!(b.edge_distance(pos!(0, 0)), 0);
+        assert_eq!(b.edge_distance(pos!(10, 15)), 0);
+        assert_eq!(b.edge_distance(pos!(5, 0)), 0);
+        assert_eq!(b.edge_distance(pos!(0, 7)), 0);
+        assert_eq!(b.edge_distance(pos!(5, 5)), 5);
         // Ties are common and must compare equal.
-        assert_eq!(edge_distance(pos!(0, 10)), edge_distance(pos!(1, 15)));
+        assert_eq!(b.edge_distance(pos!(0, 10)), b.edge_distance(pos!(1, 15)));
+        // A smaller map's right and bottom edges are its own, not the 16x11 ones.
+        let small = Board::from_layout(Bitboard::new(), Bitboard::new(), 13, 10);
+        assert_eq!(small.edge_distance(pos!(4, 12)), 0);
+        assert_eq!(small.edge_distance(pos!(9, 5)), 0);
+        // Off-board neighbours of a temple on the last column are not leader squares.
+        let mut small = small;
+        small.set_tile_type(pos!(4, 12), TileType::Red);
+        assert!(!small.find_empty_leader_space_next_to_red().get(pos!(4, 13)));
     }
 }
 #[cfg(test)]

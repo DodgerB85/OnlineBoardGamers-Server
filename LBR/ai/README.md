@@ -51,7 +51,8 @@ LBR/ai-service/
   src/lbr.rs                 LBR <-> donor mapping; proposes one action
   src/main.rs                `lbr-move` (stdin JSON -> stdout JSON)
   minimax/                   MIT-licensed generic search crate (path dependency)
-  models/best.bin            777 945-byte trained network
+  models/best.bin            default-board net (803 545 bytes, 243 inputs)
+  models/<map>.bin           one net per generated board (twin-bends, long-bend, the-fork)
 ```
 
 Excluded from the donor repository: the desktop/macroquad game, the Python
@@ -65,7 +66,7 @@ passed by Django (`settings.BASE_DIR` or `LBR_AI_MODEL`).
 ```sh
 cd LBR/ai-service
 cargo build --release --locked     # target/release/lbr-policy
-cargo test --release               # 119 donor tests
+cargo test --release               # 125 donor tests
 ```
 
 The production image builds the same crate in a `rust:1-alpine` stage and copies
@@ -89,7 +90,7 @@ every returned action with `LBRrules.js`.
 |---|---|---|
 | `LBR_AI_URL` | empty | Compatibility override: POST `{"state","seat"}` to a remote service. Empty uses the local binary. |
 | `LBR_AI_BIN` | `BASE_DIR/LBR/ai-service/target/release/lbr-policy` | Policy binary. |
-| `LBR_AI_MODEL` | `BASE_DIR/LBR/ai-service/models/best.bin` | Network weights (`--net`). |
+| `LBR_AI_MODEL` | `BASE_DIR/LBR/ai-service/models/best.bin` | Default-board weights (`--net`). A board with its own `<map>.bin` beside it uses that instead. |
 | `LBR_AI_SIMS` | `2000` | Search simulations per decision, split across 4 hidden-hand determinizations. |
 | `LBR_AI_ALPHA` | `0.7` | Network/heuristic blend used by the shipped checkpoint. |
 | `LBR_AI_TIMEOUT` | `30` | Per-decision timeout in seconds (subprocess or HTTP). |
@@ -106,10 +107,12 @@ assumed.
 
 ## Model provenance and licensing
 
-`models/best.bin` is the donor checkpoint `runs/best.bin` from commit `f717cb8`
-("Add retrained checkpoint runs/best.bin (honest search, h2w)"), copied byte for
-byte. It was produced by the donor's own self-play pipeline on that engine; it
-embeds no third-party data or code. The donor repository is this project's own
+Each net is the donor's `runs/<map>/best.bin`, trained by its per-map chain
+(`train/all_maps.sh`, donor commit `cf81336`) and copied byte for byte; each
+beats the donor heuristic on its own board in a 150-setup paired gate. A net
+only fits the engine's 243-input features: replace the source and the weights
+together. They were produced by the donor's own self-play pipeline on that engine and
+embed no third-party data or code. The donor repository is this project's own
 first-party work, so the vendored Rust source and the weights carry the same
 terms as the rest of OBG. `minimax/` is the only third-party code: the MIT-licensed
 `minimax-local` crate (its `LICENSE` is vendored).

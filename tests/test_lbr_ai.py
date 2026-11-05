@@ -485,6 +485,19 @@ class LBRAIPolicyTests(SimpleTestCase):
         with self.settings(**self.overrides):
             self.assertEqual(request_ai_action({"turnNumber": 1}, 0), {"type": "pass"})
 
+    def test_each_board_uses_its_own_net_when_installed(self):
+        # $7 is the --net argument: lbr-move --sims N --alpha A --net PATH
+        self.binary.write_text("#!/bin/sh\nprintf '{\"action\":{\"type\":\"pass\",\"net\":\"%s\"}}' \"$7\"\n")
+        (self.model.parent / "the-fork.bin").write_bytes(b"")
+        with self.settings(**self.overrides):
+            def net(state):
+                return Path(request_ai_action(state, 0)["net"]).name
+
+            self.assertEqual(net({"map": "the-fork"}), "the-fork.bin")
+            self.assertEqual(net({"map": "long-bend"}), "model.bin", "no net installed: fall back")
+            self.assertEqual(net({"map": "../model"}), "model.bin")
+            self.assertEqual(net({}), "model.bin")
+
     def test_crash_and_malformed_output_raise(self):
         self.binary.write_text("#!/bin/sh\necho boom >&2\nexit 3\n")
         with self.settings(**self.overrides), self.assertRaisesMessage(RuntimeError, "exit 3"):

@@ -273,9 +273,23 @@ def request_ai_action(state, seat):
     return action
 
 
+def model_for_map(model, map_name):
+    """The board's own net, `<map>.bin` beside LBR_AI_MODEL, if one is installed.
+
+    Each board has its own trained net; a board without one falls back to
+    LBR_AI_MODEL (the default board's net), which still plays legally.
+    """
+    if isinstance(map_name, str) and map_name.replace("-", "").isalnum():
+        candidate = model.with_name(f"{map_name}.bin")
+        if candidate.is_file():
+            return candidate
+    return model
+
+
 def _run_policy(request):
     """One-shot `lbr-move` subprocess: a crash or a hang costs one decision."""
     binary, model = policy_paths()
+    model = model_for_map(model, (request.get("state") or {}).get("map"))
     if not binary.is_file():
         raise RuntimeError(f"LBR policy binary not found: {binary}")
     if not model.is_file():

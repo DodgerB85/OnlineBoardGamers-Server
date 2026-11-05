@@ -6,12 +6,15 @@
 // engine agree on the action vocabulary.
 //
 // Usage: node LBR/ai/smoke.mjs [moves]
+//   LBR_MAP picks the board (and its net, `models/<map>.bin`).
 //   LBR_AI_BIN / LBR_AI_MODEL override the default paths in LBR/ai-service.
 import { spawnSync } from "node:child_process";
 import { applyAction, createInitialState, currentActor } from "../vueLBR/src/js/LBRrules.js";
 
 const bin = process.env.LBR_AI_BIN || new URL("../ai-service/target/release/lbr-policy", import.meta.url).pathname;
-const model = process.env.LBR_AI_MODEL || new URL("../ai-service/models/best.bin", import.meta.url).pathname;
+const map = process.env.LBR_MAP || "default";
+const net = map === "default" ? "best.bin" : `${map}.bin`;
+const model = process.env.LBR_AI_MODEL || new URL(`../ai-service/models/${net}`, import.meta.url).pathname;
 const limit = Number(process.argv[2] || 40);
 
 let seed = 20261031;
@@ -32,7 +35,7 @@ function decide(state, seat) {
 	return JSON.parse(child.stdout).action;
 }
 
-let state = createInitialState(4, rng);
+let state = createInitialState(4, rng, { map });
 for (let decision = 0; decision < limit; decision++) {
 	const seat = currentActor(state);
 	const action = decide(state, seat);

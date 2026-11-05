@@ -25,7 +25,8 @@ fn colour_index(l: Leader) -> usize {
 fn frontier_spaces(state: &TnEGame, mine: Bitboard) -> u32 {
     let mut n = 0;
     for p in mine.dilate().iter() {
-        if state.board.get_tile_type(p) == TileType::Empty
+        if state.board.in_bounds(p)
+            && state.board.get_tile_type(p) == TileType::Empty
             && !state.board.river.get(p)
             && !state.board.get_catastrophe(p)
         {
@@ -891,8 +892,8 @@ pub struct PriorWeights {
     pub withdraw: f32,              // -5.0
 
     // PlaceCatastrophe
-    pub catastrophe_base: f32,           // 3.0
-    pub catastrophe_monument: f32,       // 4.0 (near a monument)
+    pub catastrophe_base: f32,           // 0.0: a catastrophe earns prior only through its effect
+    pub catastrophe_split: f32,          // 1.0 per tile cut off from a leader
     /// Breaking the last temple supporting a leader removes that leader.
     /// Applied positively to an opponent's leader and negatively to our own.
     pub catastrophe_leader_kill: f32,    // 10.0
@@ -932,8 +933,8 @@ impl Default for PriorWeights {
 
             withdraw: -5.0,
 
-            catastrophe_base: 3.0,
-            catastrophe_monument: 4.0,
+            catastrophe_base: 0.0,
+            catastrophe_split: 1.0,
             catastrophe_leader_kill: 10.0,
             catastrophe_enemy_frontier: 1.0,
             catastrophe_own_frontier: -0.5,
@@ -983,7 +984,7 @@ impl PriorWeights {
                 "withdraw" => &mut out.withdraw,
 
                 "catastrophe_base" => &mut out.catastrophe_base,
-                "catastrophe_monument" => &mut out.catastrophe_monument,
+                "catastrophe_split" => &mut out.catastrophe_split,
                 "catastrophe_leader_kill" => &mut out.catastrophe_leader_kill,
                 "catastrophe_enemy_frontier" => &mut out.catastrophe_enemy_frontier,
                 "catastrophe_own_frontier" => &mut out.catastrophe_own_frontier,
@@ -1003,7 +1004,7 @@ impl PriorWeights {
                          tile_opp_denial, tile_red_bonus, leader_base, \
                          leader_already_placed, leader_weak_color, \
                          leader_red_nearby, leader_kingdom_size, withdraw, \
-                         catastrophe_base, catastrophe_monument, \
+                         catastrophe_base, catastrophe_split, \
                          catastrophe_leader_kill, catastrophe_enemy_frontier, \
                          catastrophe_own_frontier, \
                          take_treasure, build_monument, decline_monument, \
@@ -1138,10 +1139,31 @@ pub fn prior_weights(state: &TnEGame, actions: &[Action], pw: &PriorWeights) -> 
                 Action::WithdrawLeader(_) => w += pw.withdraw,
                 Action::PlaceCatastrophe(pos) => {
                     w += pw.catastrophe_base;
-                    // Disrupting a monument is valuable.
-                    for m in &state.monuments {
-                        if m.pos_top_left.manhattan_distance(pos) <= 2 {
-                            w += pw.catastrophe_monument;
+                    // Removing a tile can split a kingdom: every tile (or
+                    // monument) cut off from a leader's kingdom is scoring room
+                    // and war strength that leader loses. Leaders this kills
+                    // are left to the leader-kill term below.
+                    if state.board.get_tile_type(pos) != TileType::Empty {
+                        let mut after = connectable;
+                        after.reset(pos);
+                        for (owner, ks) in &kingdoms {
+                            let sign = if *owner == actor { -1.0 } else { 1.0 };
+                            for (l, before) in ks {
+                                if !before.get(pos) {
+                                    continue;
+                                }
+                                let Some(lp) = state.players.get(*owner).get_leader(*l) else {
+                                    continue;
+                                };
+                                let temples = lp.neighbors() & state.board.red_tiles;
+                                if temples.get(pos) && temples.count_ones() == 1 {
+                                    continue;
+                                }
+                                let now = state.board.find_kingdom_map_fast(lp, after);
+                                // -1: the catastrophe square itself is not a cut.
+                                let cut = before.count_ones() as f32 - now.count_ones() as f32 - 1.0;
+                                w += sign * cut * pw.catastrophe_split;
+                            }
                         }
                     }
 
@@ -1428,5 +1450,30 @@ mod tests {
         assert!((w[0] - (base + pw.catastrophe_leader_kill)).abs() < 1e-6);
         assert!((w[1] - (base + pw.catastrophe_enemy_frontier)).abs() < 1e-6);
         assert!((w[2] - base).abs() < 1e-6);
+    }
+
+    /// A catastrophe on the only tile linking an enemy leader to the rest of
+    /// its kingdom outranks one on a tile that cuts nothing.
+    #[test]
+    fn catastrophe_prior_rewards_splitting_a_kingdom() {
+        let mut game = MapSpec::default_map().start_game(2, 0);
+        let actor = game.next_player();
+        let enemy = if actor == Player::Player1 { Player::Player2 } else { Player::Player1 };
+        // Row 7: L T B B B B, with a second temple under the leader so the
+        // catastrophe cannot kill it. Cutting at (7,3) strands (7,4..6).
+        let leader = pos!(7, 1);
+        game.board.set_leader(leader, Leader::Blue);
+        game.board.set_player(leader, enemy);
+        game.players.0[enemy.index().unwrap()].placed_blue_leader = Some(leader);
+        game.board.set_tile_type(pos!(7, 2), TileType::Red);
+        game.board.set_tile_type(pos!(8, 1), TileType::Red);
+        for y in 3..=6 {
+            game.board.set_tile_type(pos!(7, y), TileType::Blue);
+        }
+        let pw = PriorWeights::default();
+        let split = Action::PlaceCatastrophe(pos!(7, 3));
+        let tail = Action::PlaceCatastrophe(pos!(7, 6));
+        let w = prior_weights(&game, &[split, tail], &pw);
+        assert!((w[0] - w[1] - 3.0 * pw.catastrophe_split).abs() < 1e-6, "{w:?}");
     }
 }
