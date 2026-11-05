@@ -130,6 +130,74 @@ class FcmEmployeeLossGuardTest(TestCase):
         self.assertNotIn("syncError", body, body)
 
 
+class FcmOobPreferenceTest(TestCase):
+    """Choosing auto-early/late is not a restructuring move."""
+
+    def setUp(self):
+        self.alice = User.objects.create_user("alice", "a@example.com", "pw")
+        self.bob = User.objects.create_user("bob", "b@example.com", "pw")
+        self.game = Game.objects.create(
+            gameCode="FCM",
+            creator=self.alice,
+            host=self.alice,
+            gameStatus="ACTIVE",
+            gameData=game_data([
+                player("alice", [1], [2], [14, 9]),
+                player("bob", [4], [3], [7, 1]),
+            ]),
+            startingMap="",
+            startingOptions="[]",
+            turn=7,
+            phase=PHASE_RESTRUCTURING,
+            maxPlayers=2,
+        )
+        GamePlayer.objects.create(game=self.game, player=self.alice, seat_order=0, is_current=True)
+        GamePlayer.objects.create(game=self.game, player=self.bob, seat_order=1, is_current=True)
+        self.url = reverse("FCM:processTurn")
+
+    def test_preference_does_not_complete_restructuring(self):
+        self.client.force_login(self.alice)
+        response = self.client.post(
+            self.url,
+            data=json.dumps({
+                "action": "saveOOBpreference",
+                "gameID": self.game.id,
+                "latestUpdate": self.game.latestUpdate,
+                "OOBpreference": 2,
+            }),
+            content_type="application/json",
+        )
+        body = json.loads(response.content)
+        self.assertTrue(body["OOBsaved"], body)
+
+        self.game.refresh_from_db()
+        row = next(row for row in json.loads(self.game.FCMplayersMoveData) if row[0] == "alice")
+        self.assertEqual(row[1], [-1], "the preference must not turn the scaffold into a move")
+        self.assertEqual(row[3][2], 2)
+        self.assertFalse(self.game.presenter().hasValidActualMoveData("alice"))
+
+        # Bob has moved, but Alice still owes a structure.
+        self.client.force_login(self.bob)
+        response = self.client.post(
+            self.url,
+            data=json.dumps({
+                "action": "saveSimulMove",
+                "gameID": self.game.id,
+                "latestUpdate": self.game.latestUpdate,
+                "turn": 7,
+                "phase": PHASE_RESTRUCTURING,
+                "moveData": compress([[], [4], 0]),
+                "notRequiedPlayerNames": [],
+                "continueFromStalledGame": False,
+                "BKSN": "bob",
+            }),
+            content_type="application/json",
+        )
+        body = json.loads(response.content)
+        self.assertFalse(body["allPlayersMoved"], body)
+        self.assertIn("alice", body["playersToMove"], body)
+
+
 class FcmRestructureSkipTest(TestCase):
     """A stale client cannot mark another player with cards as "no move needed"."""
 
