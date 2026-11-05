@@ -246,7 +246,7 @@ Q_CLUSTER = {
     "timeout": 90,  # Process timeout - max time on task MUST BE LESS THAN RETRY VALUE
     "retry": 180,  # Must be bigger than time to complete longest task
     "orm": "default",  # Or your database alias
-    "poll": 10,  # Seconds the ORM broker sleeps before checking for new tasks again
+    "poll": 1,  # Seconds the ORM broker sleeps before checking for new tasks again
     "guard_cycle": 60,  # Max allowed value
     "cpu_affinity": 1,  # Forces the worker to stay on one core (Saves credits)
     "bulking": 10,  # Process up to 10 tasks in one go to minimize overhead
