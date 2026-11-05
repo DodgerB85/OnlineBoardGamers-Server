@@ -72,6 +72,7 @@ class FcmEmployeeLossGuardTest(TestCase):
             "checksum": False,
             "BKSN": "alice",
             "nextPlayer": ["alice", "bob"],
+            "sideData": "",
         }
         response = self.client.post(self.url, data=json.dumps(payload), content_type="application/json")
         self.assertEqual(response.status_code, 200, response.content)
@@ -103,9 +104,63 @@ class FcmEmployeeLossGuardTest(TestCase):
 
         self.assertNotIn("syncError", body, body)
 
+    def test_in_progress_map_save_cannot_drop_employees(self):
+        old_data = self.game.gameData
+        self.client.force_login(self.alice)
+        payload = {
+            "action": "saveInProgressMap",
+            "gameID": self.game.id,
+            "latestUpdate": self.game.latestUpdate,
+            "data": game_data([
+                player("alice", [], []),
+                player("bob", [4], [], [7, 1]),
+            ]),
+            "nextPlayer": ["alice", "bob"],
+            "tiles": [],
+        }
+        response = self.client.post(self.url, data=json.dumps(payload), content_type="application/json")
+        body = json.loads(response.content)
+
+        self.assertTrue(body.get("employeeLoss"), body)
+        self.game.refresh_from_db()
+        self.assertEqual(self.game.gameData, old_data)
+
+    def test_rewind_must_match_the_snapshot_roster(self):
+        old_data = self.game.gameData
+        self.client.force_login(self.alice)
+        payload = {
+            "action": "updateDataFromLoadRewind",
+            "gameID": self.game.id,
+            "turn": 7,
+            "phase": PHASE_RESTRUCTURING,
+            "nextPlayer": ["alice", "bob"],
+            "data": game_data([
+                player("alice", [], []),
+                player("bob", [4], [], [7, 1]),
+            ]),
+        }
+        response = self.client.post(self.url, data=json.dumps(payload), content_type="application/json")
+        body = json.loads(response.content)
+
+        self.assertTrue(body.get("employeeLoss"), body)
+        self.game.refresh_from_db()
+        self.assertEqual(self.game.gameData, old_data)
+
     def test_headhunt_transfer_is_allowed(self):
-        # A Headhunter moves a card from one player to another; the overall
-        # roster is unchanged, so this must not look like a loss.
+        # A Headhunter moves a card from one player to another; with the Labor
+        # Market module on, that is not a loss.
+        body = self._save(
+            [
+                player("alice", [], [3], [14, 9]),
+                player("bob", [4, 1, 2], [], [7, 1]),
+            ],
+            PHASE_TURN_ORDER,
+            starting_options="[48]",
+        )
+
+        self.assertNotIn("syncError", body, body)
+
+    def test_cards_cannot_move_to_another_player_without_labor_market(self):
         body = self._save(
             [
                 player("alice", [], [3], [14, 9]),
@@ -114,7 +169,41 @@ class FcmEmployeeLossGuardTest(TestCase):
             PHASE_TURN_ORDER,
         )
 
+        self.assertTrue(body.get("employeeLoss"), body)
+
+    def test_cfo_fired_at_100_dollars_is_allowed(self):
+        self.game.gameData = game_data([
+            player("alice", [4, 1], [3], [14, 9]),
+            player("bob", [2], [], [7, 1]),
+        ])
+        self.game.phase = 5  # working day -> dinner/pizza transition
+        self.game.save(update_fields=["gameData", "phase"])
+        body = self._save(
+            [
+                player("alice", [1], [3], [14, 9]),
+                player("bob", [2], [], [7, 1]),
+            ],
+            11,
+        )
+
         self.assertNotIn("syncError", body, body)
+
+    def test_dinner_cannot_drop_more_than_the_cfo(self):
+        self.game.gameData = game_data([
+            player("alice", [4, 1], [3], [14, 9]),
+            player("bob", [2], [], [7, 1]),
+        ])
+        self.game.phase = 5
+        self.game.save(update_fields=["gameData", "phase"])
+        body = self._save(
+            [
+                player("alice", [], [3], [14, 9]),
+                player("bob", [2], [], [7, 1]),
+            ],
+            11,
+        )
+
+        self.assertTrue(body.get("employeeLoss"), body)
 
     def test_payday_firing_is_allowed(self):
         self.game.phase = PHASE_PAYDAY
