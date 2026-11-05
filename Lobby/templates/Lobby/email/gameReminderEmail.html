@@ -25,8 +25,14 @@
 {% blocktranslate %}
 Hi {{ playerName }},<br/>
 <br/>
-Reminder: You have less than 2 hours to make a move in: {{ box_name }}<br/>
+Reminder: You have less than 2 hours of standard move time left in: {{ box_name }}<br/>
 <br/>
+{% endblocktranslate %}
+{% if flexiTimeString %}
+{% translate "Flexi-Time remaining" %}: {{ flexiTimeString }}<br/>
+<br/>
+{% endif %}
+{% blocktranslate %}
 Game: {{ gameName }}<br/>
 <br/>
 https://{{ domain }}{{ the_url }}<br/>

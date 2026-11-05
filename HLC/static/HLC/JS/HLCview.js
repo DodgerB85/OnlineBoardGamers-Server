@@ -109,6 +109,7 @@ var View = function (model) {
 			appendBgStatsActions()
 		}
 		$(".topMenuItem").off().on("click", { view: this }, topMenuItem)
+		this.renderKickoutCountdown()
 	}
 
 	this.renderPlayerLineDiv = function (item) {
@@ -3934,39 +3935,73 @@ var View = function (model) {
 	/************************************************************************************************************************************************** */
 	/************************************************************************************************************************************************** */
 
-	this.renderKickoutCountdown = function () {
-		//if (replay.showingReplay || global.secondsToNextKickout > 1200 || global.secondsToNextKickout == undefined || M.workflow.phase == END_GAME || M.trainingGame) {
-		if (global.secondsToNextKickout > 1200 || global.secondsToNextKickout == undefined || M.workflow?.phase == PHASE_GAME_END_CHECK || M.trainingGame) {
-			$("#kickoutTimerSpan").hide()
-			clearInterval(global.kickoutCountdownIntervalTimer)
-		} else {
-			if ($("#kickoutTimerTimer").css("color") != "rgb(238, 238, 238)") $("#kickoutTimerTimer").css("color", "rgb(238, 238, 238)")
-			$("#kickoutTimerSpan").show()
-			let localSecondsToNextKickout = global.secondsToNextKickout
-			if (localSecondsToNextKickout < 0) localSecondsToNextKickout = 0
-			var minsToGo = String(Math.floor(localSecondsToNextKickout / 60))
-			var secsToGo = "0" + String(Math.floor(localSecondsToNextKickout % 60))
-			$("#kickoutTimerTimer").html(" " + minsToGo + " : " + secsToGo.slice(-2) + "")
+	function getHeaderCurrentPlayer() {
+		if (!global.currentPlayers || global.currentPlayers.length === 0) return null
+		var playerName = global.currentPlayers[0]
+		if (playerName === "HcBot" || playerName === "HlcBot") return null
+		return playerName
+	}
 
-			if (global.kickoutCountdownIntervalTimer != undefined) clearInterval(global.kickoutCountdownIntervalTimer)
-			global.kickoutCountdownIntervalTimer = setInterval(this.kickoutTimeFunction, 1000)
+	function getFlexiBankSeconds(playerName) {
+		var secondsIn24Hours = 24 * 60 * 60
+		var flexiData = global.KickoutFlexiDataArray || []
+		for (var i = 0; i < flexiData.length; i++) {
+			var entry = flexiData[i]
+			if (Array.isArray(entry) && entry.length === 2 && entry[0] === playerName) {
+				return Math.max(0, secondsIn24Hours - entry[1])
+			}
 		}
+		return secondsIn24Hours
+	}
+
+	function formatHHMM(totalSeconds) {
+		totalSeconds = Math.max(0, Math.floor(totalSeconds))
+		var hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0")
+		var mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0")
+		return hours + ":" + mins
+	}
+
+	function updateHeaderTimers() {
+		var currentPlayer = getHeaderCurrentPlayer()
+		if (currentPlayer === null || global.secondsToNextKickout == undefined) {
+			$("#kickoutTimerTimer").html("00:00")
+			$("#flexiTimerTimer").html("00:00")
+			return
+		}
+		var standardSeconds = Math.max(0, global.secondsToNextKickout)
+		var flexiSeconds = getFlexiBankSeconds(currentPlayer) + Math.min(0, global.secondsToNextKickout)
+		if (flexiSeconds < 0) flexiSeconds = 0
+		$("#kickoutTimerTimer").html(formatHHMM(standardSeconds))
+		$("#flexiTimerTimer").html(formatHHMM(flexiSeconds))
+		if (standardSeconds < 2 * 60 * 60) $("#kickoutTimerTimer").addClass("redText")
+		else $("#kickoutTimerTimer").removeClass("redText")
+	}
+
+	this.renderKickoutCountdown = function () {
+		var currentPlayer = getHeaderCurrentPlayer()
+		if (global.secondsToNextKickout == undefined || currentPlayer === null || M.workflow?.phase == PHASE_GAME_END_CHECK || M.trainingGame) {
+			$("#kickoutTimerSpan").hide()
+			$("#flexiTimerSpan").hide()
+			if (global.kickoutCountdownIntervalTimer != undefined) clearInterval(global.kickoutCountdownIntervalTimer)
+			return
+		}
+		$("#kickoutTimerSpan").show()
+		if (global.kickoutDuration >= 50) $("#flexiTimerSpan").show()
+		else $("#flexiTimerSpan").hide()
+		updateHeaderTimers()
+		if (global.kickoutCountdownIntervalTimer != undefined) clearInterval(global.kickoutCountdownIntervalTimer)
+		global.kickoutCountdownIntervalTimer = setInterval(this.kickoutTimeFunction, 1000)
 	}
 	this.kickoutTimeFunction = function () {
-		global.secondsToNextKickout--
-		if (global.secondsToNextKickout > 1200 || global.secondsToNextKickout == undefined) {
+		if (global.secondsToNextKickout != undefined) global.secondsToNextKickout--
+		var currentPlayer = getHeaderCurrentPlayer()
+		if (currentPlayer === null || M.workflow?.phase == PHASE_GAME_END_CHECK || M.trainingGame) {
 			$("#kickoutTimerSpan").hide()
-			clearInterval(global.kickoutCountdownIntervalTimer)
-		} else {
-			if (global.secondsToNextKickout < 60) {
-				if ($("#kickoutTimerTimer").css("color") == "rgb(238, 238, 238)") $("#kickoutTimerTimer").css("color", "rgb(255, 6, 0)")
-				else $("#kickoutTimerTimer").css("color", "rgb(238, 238, 238)")
-			}
-			if (global.secondsToNextKickout < 0) global.secondsToNextKickout = 0
-			var minsToGo = String(Math.floor(global.secondsToNextKickout / 60))
-			var secsToGo = "0" + String(Math.floor(global.secondsToNextKickout % 60))
-			$("#kickoutTimerTimer").html(" " + minsToGo + " : " + secsToGo.slice(-2) + "")
+			$("#flexiTimerSpan").hide()
+			if (global.kickoutCountdownIntervalTimer != undefined) clearInterval(global.kickoutCountdownIntervalTimer)
+			return
 		}
+		updateHeaderTimers()
 	}
 
 	this.kickoutFlexiTimeFunction = function () {

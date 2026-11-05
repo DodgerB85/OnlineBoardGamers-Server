@@ -450,7 +450,7 @@ def SN_M_sendEndGameNotificationAnyGame(gameCode, finalPositions, gameID, curren
     # activate(originalLang)
 
 # This is async schedule
-def SN_sendNextTurnNotificationWithValidation(gameCode, playerList, gameID, gameName, expected_latestUpdate, expected_turn, expected_phase, expected_players, oldLatestUpdate):
+def SN_sendNextTurnNotificationWithValidation(gameCode, playerList, gameID, gameName, expected_latestUpdate, expected_turn, expected_phase, expected_players, oldLatestUpdate, notification_kind=None):
     try:
         from Lobby.models import Game
 
@@ -476,14 +476,14 @@ def SN_sendNextTurnNotificationWithValidation(gameCode, playerList, gameID, game
         # 5. Final Notification
         if newPlayerList:
             turn_string = current_game.presenter().currentTurnString()
-            SN_sendNextTurnNotification(gameCode, newPlayerList, gameID, gameName, turn_string, current_game.gamePace, oldLatestUpdate)
+            SN_sendNextTurnNotification(gameCode, newPlayerList, gameID, gameName, turn_string, current_game.gamePace, oldLatestUpdate, notification_kind)
 
     except Exception as e:
         print(f"Error in SN_sendNextTurnNotificationWithValidation: {e}")
 
 
 # This is used by the function above to ACTUALY send the notification
-def SN_sendNextTurnNotification(gameCode, playerList, gameID, gameName, currentGameTurnString, currentGamePace, oldLatestUpdate=0):
+def SN_sendNextTurnNotification(gameCode, playerList, gameID, gameName, currentGameTurnString, currentGamePace, oldLatestUpdate=0, notification_kind=None):
     # Pre-fetch users and profiles to avoid N+1 queries
     valid_players = [player for player in playerList if player not in USERNAMES_NOT_TO_NOTIFY]
     users = User.objects.filter(username__in=valid_players).select_related('profile')
@@ -500,19 +500,23 @@ def SN_sendNextTurnNotification(gameCode, playerList, gameID, gameName, currentG
             # Set up language vars
 
             gameStrings = getGameStrings(gameCode)
-            subject = gameStrings["yourTurnSubject"]
             boxName = gameStrings["boxName"]
             urlText = gameStrings["clickHereToPlayText"]
 
-            # messageText = user.username + ": " + gettext("Your turn at OnlineBoardGamers!\n%(gameName)s - %(currentTurnString)s.") % {"gameName": gameName, "currentTurnString": currentTurnString}
-
-            messageText = user.username + ": " + gettext("Your turn at OnlineBoardGamers") + " - " + boxName + "\n" + gameName + " - " + currentGameTurnString
+            if notification_kind == "factory_phase":
+                subject = gettext("Horseless Carriage - Build Factory is in progress")
+                messageText = user.username + ": " + gettext("Build Factory is in progress at OnlineBoardGamers - Horseless Carriage\n%(gameName)s - %(currentTurnString)s\nYou can submit your factory now, even if you are not first in Engineering Order. If your factory becomes the one blocking the queue, you will be alerted when your move time starts.") % {"gameName": gameName, "currentTurnString": currentGameTurnString}
+                emailTemplate = "HLC/yourTurnEmailFactoryStart.html"
+            else:
+                subject = gameStrings["yourTurnSubject"]
+                messageText = user.username + ": " + gettext("Your turn at OnlineBoardGamers") + " - " + boxName + "\n" + gameName + " - " + currentGameTurnString
+                emailTemplate = "Lobby/gameEmails/yourTurnEmail.html"
 
             # SEND EMAIL
             if shouldSendEmail("yourTurn", player, profile, currentGamePace):
                 try:
                     message = render_to_string(
-                        "Lobby/gameEmails/yourTurnEmail.html",
+                        emailTemplate,
                         {
                             "game": gameCode,
                             "user": user.username,
@@ -851,7 +855,7 @@ def SN_sendFactoryAlertNotification(request, player, gameID, currentGame):
         messageText = (
             user.username
             + ": "
-            + gettext("Your turn at OnlineBoardGamers - Horseless Carriage\nYour factory needs building\n%(gameName)s - %(currentTurnString)s.")
+            + gettext("Your factory is now blocking the queue at OnlineBoardGamers - Horseless Carriage\nYour move time has started\n%(gameName)s - %(currentTurnString)s.")
             % {
                 "gameName": presenter.getGameName(),
                 "currentTurnString": presenter.currentTurnString(),
@@ -1350,7 +1354,7 @@ def SN_sendBugReportEmail(reporterUsername, reporterEmail, gameCode, gameID, gam
         SN_sendAdminErrorMessage(error_message)
 
 # This is not async, but is only run from a script
-def SN_sendReminderEmail(playerName, gameCode, gameID, gameName):
+def SN_sendReminderEmail(playerName, gameCode, gameID, gameName, flexiTimeString=None):
     originalLang = get_language()
     if playerName not in USERNAMES_NOT_TO_NOTIFY:
         try:
@@ -1382,11 +1386,15 @@ def SN_sendReminderEmail(playerName, gameCode, gameID, gameName):
                         "gameName": gameName,
                         "box_name": box_name,
                         "gameID": gameID,
+                        "flexiTimeString": flexiTimeString,
                     },
                 )
                 SN_sendEmail("2hourReminder", subject, message, user.email)
 
-            messageText = playerName + ": " + gettext("Less than 2 hours to move at OnlineBoardGamers!\n%(boxName)s: %(gameName)s") % {"boxName": box_name, "gameName": gameName}
+            flexiLine = ""
+            if flexiTimeString:
+                flexiLine = "\n" + gettext("Flexi-Time remaining: %(flexiTime)s") % {"flexiTime": flexiTimeString}
+            messageText = playerName + ": " + gettext("Less than 2 hours of standard move time at OnlineBoardGamers!\n%(boxName)s: %(gameName)s") % {"boxName": box_name, "gameName": gameName} + flexiLine
 
             # SEND WEBHOOKS
             urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"
@@ -1404,7 +1412,7 @@ def SN_sendReminderEmail(playerName, gameCode, gameID, gameName):
     activate(originalLang)
 
 # This is not async, but is only run from a script
-def SN_sendReminderExpiredEmail(playerName, gameCode, gameID, gameName):
+def SN_sendReminderExpiredEmail(playerName, gameCode, gameID, gameName, flexiTimeString=None, flexiRemainingSeconds=None):
     originalLang = get_language()
     if playerName not in USERNAMES_NOT_TO_NOTIFY:
         try:
@@ -1436,11 +1444,19 @@ def SN_sendReminderExpiredEmail(playerName, gameCode, gameID, gameName):
                         "gameName": gameName,
                         "box_name": box_name,
                         "gameID": gameID,
+                        "flexiTimeString": flexiTimeString,
+                        "flexiRemainingSeconds": flexiRemainingSeconds,
                     },
                 )
                 SN_sendEmail("turnExpired", subject, message, user.email)
 
-            messageText = playerName + ": " + gettext("Your time limit has expired at OnlineBoardGamers!\n%(boxName)s: %(gameName)s\nYou could be kicked out at any time. Please move ASAP") % {"boxName": box_name, "gameName": gameName}
+            if flexiRemainingSeconds is None:
+                expiredText = gettext("You could be kicked out at any time. Please move ASAP")
+            elif flexiRemainingSeconds > 0:
+                expiredText = gettext("You are now using Flexi-Time. Remaining: %(flexiTime)s. Once that runs out, other players can kick you. Please move ASAP") % {"flexiTime": flexiTimeString}
+            else:
+                expiredText = gettext("Your move time and Flexi-Time are used up. Other players can now kick you. Please move ASAP")
+            messageText = playerName + ": " + gettext("Your standard move time has expired at OnlineBoardGamers!\n%(boxName)s: %(gameName)s") % {"boxName": box_name, "gameName": gameName} + "\n" + expiredText
 
             # SEND WEBHOOKS
             urlRaw = f"https://www.OnlineBoardGamers.com/{gameCode}/{str(gameID)}/show/"

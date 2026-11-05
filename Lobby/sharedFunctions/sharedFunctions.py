@@ -288,7 +288,7 @@ def SF_serializeGame(game, user, player_context):
         "experiencedGame": isExperiencedGame,
         "maxPlayers": game.maxPlayers,
         "startingOptionsHTML": startingOptionsHTML,
-        "pace": SR_gamePaceString(game.gamePace),
+        "pace": SR_gamePaceString(game.gamePace, game.kickoutDuration),
         "startingMap": game.startingMap if hasattr(game, "startingMap") else "",
         "latestUpdate": game.latestUpdate,
         "currentPlayers": current_players_str,
@@ -349,6 +349,25 @@ def SF_updateFlexiTime(kickoutFlexiData, latestUpdate, now, currentUsername, kic
     updatedKickoutFlexiData = json.dumps(KickoutFlexiDataArray)
     # ("Data Upated")
     return updatedKickoutFlexiData
+
+
+def SF_getRemainingFlexiSeconds(kickoutFlexiData, username):
+    """Remaining Flexi-Time bank for one player in this game."""
+    usedSeconds = 0
+    if kickoutFlexiData:
+        try:
+            for entry in json.loads(kickoutFlexiData):
+                if isinstance(entry, list) and len(entry) == 2 and entry[0] == username:
+                    usedSeconds = int(entry[1])
+                    break
+        except (TypeError, ValueError):
+            pass
+    return max(0, (24 * 60 * 60) - usedSeconds)
+
+
+def SF_formatSecondsHHMM(seconds):
+    seconds = max(0, int(seconds))
+    return f"{seconds // 3600:02d}:{(seconds % 3600) // 60:02d}"
 
 
 def SF_kickoutRequired(

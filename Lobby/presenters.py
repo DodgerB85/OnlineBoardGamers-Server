@@ -434,7 +434,7 @@ class GamePresenter:
 
         async_task("Lobby.sharedFunctions.sharedNotifications.SN_sendInviteNotifications", playerNames, _gameName, _maxPlayers, _gameCode)
 
-    def sendYourTurnNotification(self, gameCode, playerListToNotify, gameID, gameName, gameObj, oldVer):
+    def sendYourTurnNotification(self, gameCode, playerListToNotify, gameID, gameName, gameObj, oldVer, notification_kind=None):
         # from django_q.tasks import async_task
         from datetime import timedelta
 
@@ -462,6 +462,7 @@ class GamePresenter:
             current_phase,
             current_players,
             oldVer,
+            notification_kind,
             next_run=start_time,
             repeats=-1,  # Neg repeats for delete
             schedule_type="O",

@@ -26,6 +26,14 @@ body {
 	display: none;
 }
 
+#flexiTimerSpan {
+	display: none;
+}
+
+.redText {
+	color: rgb(255, 6, 0);
+}
+
 .topMenuItem {
 	display: inline-block;
 	width: 62px;

@@ -1,0 +1,21 @@
+{% load i18n %}
+{% autoescape off %}
+{% url "HLC:showHLCgame" gameID as the_url %}
+{% comment %}Translators: This is an email{% endcomment %}
+{% blocktranslate %}
+Hi {{ user }},
+
+Build Factory is in progress at Online Board Gamers - Horseless Carriage.
+
+You can submit your factory now, even if you are not first in Engineering Order.
+If your factory becomes the one blocking the queue, you will be alerted when your move time starts.
+
+Game: {{ gameName }}
+Turn/Phase: {{ currentTurnString }}
+
+https://{{ domain }}{{ the_url }}
+
+Notification preferences can be changed in your Profile
+
+{% endblocktranslate %}
+{% endautoescape %}

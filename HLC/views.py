@@ -482,6 +482,7 @@ def _processHLCturn(request):
                         presenter.getGameName(),
                         currentGame,
                         oldVer,
+                        notification_kind="factory_phase" if jsonData["phase"] == 3 else None,
                     )
 
         ################ REWIND EVERY SAVE #######################
@@ -659,6 +660,7 @@ def _processHLCturn(request):
                     presenter.getGameName(),
                     currentGame,
                     currentGame.latestUpdate,
+                    notification_kind="factory_phase" if jsonData["phase"] == 3 else None,
                 )
 
         return JsonResponse(
@@ -743,6 +745,7 @@ def _processHLCturn(request):
                         presenter.getGameName(),
                         currentGame,
                         currentGame.latestUpdate,
+                        notification_kind="factory_phase" if jsonData["phase"] == 3 else None,
                     )
 
         return JsonResponse(
@@ -900,6 +903,7 @@ def showHLCgame(request, game_id):
             "rewindHostPossible": rewindHostPossible,
             "currentRewindConsent": int(currentRewindConsent),
             "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+            "kickoutDuration": currentGame.kickoutDuration,
             "statsExcludedGame": statsExcludedGame,
             "displayNames": displayNames,
             "nextURL": nextURL,

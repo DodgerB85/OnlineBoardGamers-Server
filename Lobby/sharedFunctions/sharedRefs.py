@@ -698,7 +698,18 @@ def SR_currentTurnString(gameCode, turn, phase):
         return currentTurnString
 
 
-def SR_gamePaceString(gamePace):
+def SR_timeControlString(kickoutDuration):
+    if kickoutDuration == 50:
+        return gettext("12h kickout + 24h Flexi-Time")
+    if kickoutDuration >= 100:
+        days = int(kickoutDuration / 100)
+        if days == 1:
+            return gettext("1 day kickout + 24h Flexi-Time")
+        return gettext("%(days)s days kickout + 24h Flexi-Time") % {"days": days}
+    return ""
+
+
+def SR_gamePaceString(gamePace, kickoutDuration=None):
     gamePaceString = ""
     if gamePace == rf.PACE_LIVE:
         gamePaceString = gettext("Live")
@@ -710,6 +721,10 @@ def SR_gamePaceString(gamePace):
         gamePaceString = gettext("Slow<br/>(1 move/day)")
     if gamePace == rf.PACE_CASUAL:
         gamePaceString = gettext("Casual")
+    if gamePaceString and gamePace != rf.PACE_LIVE and kickoutDuration is not None:
+        timeControlString = SR_timeControlString(int(kickoutDuration))
+        if timeControlString:
+            gamePaceString += " · " + timeControlString
     return gamePaceString
 
 

@@ -44,6 +44,10 @@ django.setup()
 from Lobby.models import Game
 
 # from Lobby.sharedFunctions.sharedFunctions import *
+from Lobby.sharedFunctions.sharedFunctions import (
+    SF_formatSecondsHHMM,
+    SF_getRemainingFlexiSeconds,
+)
 from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendReminderEmail,
     SN_sendReminderExpiredEmail,
@@ -61,6 +65,13 @@ remaining_start_time_expired = 60 * -61  # * 69120000  # -1hr
 remaining_finish_time_expired = 0  # Now
 
 
+def get_flexi_info(game, playerName):
+    if game.kickoutDuration < 50:
+        return None, None
+    flexiRemainingSeconds = SF_getRemainingFlexiSeconds(game.kickoutFlexiData, playerName)
+    return flexiRemainingSeconds, SF_formatSecondsHHMM(flexiRemainingSeconds)
+
+
 for gameCode in GAME_CODES:
     game_start_calc_time = time.perf_counter()
 
@@ -71,16 +82,19 @@ for gameCode in GAME_CODES:
     allGames = Game.objects.filter(query).all()
     for singleGame in allGames:
         timeRemaining = singleGame.presenter().getSecondsToNextKickout()
+
         if timeRemaining >= remaining_start_time and timeRemaining <= remaining_finish_time:
             print(f"{gameCode}: 2hr: {singleGame.id}")
             playersToNotify = singleGame.presenter().getArrayOfIsCurrentPlayers()
             for playerName in playersToNotify:
                 print(f"2hr Email: {playerName}")
+                flexiRemainingSeconds, flexiTimeString = get_flexi_info(singleGame, playerName)
                 SN_sendReminderEmail(
                     playerName,
                     gameCode,
                     singleGame.id,
                     singleGame.presenter().getGameName(),
+                    flexiTimeString=flexiTimeString,
                 )
 
         if timeRemaining >= remaining_start_time_expired and timeRemaining <= remaining_finish_time_expired:
@@ -89,11 +103,14 @@ for gameCode in GAME_CODES:
             playersToNotify = singleGame.presenter().getArrayOfIsCurrentPlayers()
             for playerName in playersToNotify:
                 print(f"Expired Email: {playerName}")
+                flexiRemainingSeconds, flexiTimeString = get_flexi_info(singleGame, playerName)
                 SN_sendReminderExpiredEmail(
                     playerName,
                     gameCode,
                     singleGame.id,
                     singleGame.presenter().getGameName(),
+                    flexiTimeString=flexiTimeString,
+                    flexiRemainingSeconds=flexiRemainingSeconds,
                 )
 
             if gameCode == "FCM" and singleGame.relatedMainTournament:

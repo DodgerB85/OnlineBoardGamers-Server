@@ -303,6 +303,7 @@ function init() {
 
 	// Rules checked in C.startActions. Also if can't play display info in C.startActions
 	C.startActions()
+	V.renderKickoutCountdown()
 
 	if (global.pov != undefined && global.pov >= 0) {
 		global.votedToExclude = global.statsExcludeVotesData[global.name]

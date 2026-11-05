@@ -25,9 +25,17 @@
 {% blocktranslate %}
 Hi {{ playerName }},<br/>
 <br/>
-Your time limit has expired! Please make a move in: {{ box_name }}<br/>
+Your standard move time has expired for: {{ box_name }}<br/>
 <br/>
-Note: You could be kicked at any time. Please move as soon as possible. <br/>
+{% endblocktranslate %}
+{% if flexiRemainingSeconds %}
+{% blocktranslate %}Flexi-Time remaining: {{ flexiTimeString }}. You are now using Flexi-Time; once that runs out, other players can kick you. Please move as soon as possible.{% endblocktranslate %}<br/>
+{% elif flexiRemainingSeconds == 0 %}
+{% blocktranslate %}Your move time and Flexi-Time are used up. Other players can now kick you. Please move as soon as possible.{% endblocktranslate %}<br/>
+{% else %}
+{% blocktranslate %}You could be kicked at any time. Please move as soon as possible.{% endblocktranslate %}<br/>
+{% endif %}
+{% blocktranslate %}
 <br/>
 Game: {{ gameName }}<br/>
 <br/>
