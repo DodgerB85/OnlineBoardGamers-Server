@@ -3,7 +3,7 @@
  * IE multi-build bldgs, player res, player bldgs
  */
 
-//import * as view from "../js/AQYview.js"
+import * as view from "../js/AQYview.js"
 import * as rf from "../js/AQYreference.js"
 import * as city from "../js/AQYcity.js"
 
@@ -24,6 +24,47 @@ const props = defineProps({
 		prop: "playerIndexProp", // Specify the name of the prop in the parent component
 	},
 })
+
+// [bldgNum, centerX, centerY] cost icon centres in SVG squares, placed on the solid part of each shape
+const costOverlayGroups = {
+	uni: [
+		[rf.BLDG_THEOLOGY, 1.5, 1.5],
+		[rf.BLDG_BIOLOGY, 4.5, 1.5],
+		[rf.BLDG_ALCHEMY, 1.5, 4.5],
+		[rf.BLDG_PHILOSOPHY, 4.5, 4.5],
+		[rf.BLDG_UNIVERSITY, 3, 3],
+	],
+	second: [
+		[rf.BLDG_BREWERY, 2, 0.5],
+		[rf.BLDG_FORCED_LABOUR, 2, 2.5],
+		[rf.BLDG_STABLE, 2, 4],
+		[rf.BLDG_HARBOUR, 2, 5.5],
+	],
+	third: [
+		[rf.BLDG_EXPLORER, 1.5, 0.5],
+		[rf.BLDG_GRANARY, 1.5, 2],
+		[rf.BLDG_DUMP, 1.5, 4.5],
+		[rf.BLDG_CATHEDRAL, 3.5, 2],
+		[rf.BLDG_HOSPITAL, 4.5, 5],
+		[rf.BLDG_MARKET, 5, 3],
+	],
+}
+
+function getCostIcons(bldgNum) {
+	const cost = rf.BLDG_DATA[rf.BLDG_ARRAY[bldgNum]].cost
+	let ret = []
+	if (cost[0] > 0) ret.push([rf.RES_WOOD, cost[0]])
+	if (cost[1] > 0) ret.push([rf.RES_STONE, cost[1]])
+	if (cost[2] > 0) ret.push([rf.RES_GOLD, cost[2]])
+	return ret
+}
+
+function getCostOverlayStyle(entry) {
+	return {
+		left: entry[1] * rf.SMALL_SQ + "px",
+		top: entry[2] * rf.SMALL_SQ + "px",
+	}
+}
 
 function getBldgPath(bldg_str, offsetX, offsetY) {
 	let path = [...rf.BLDG_DATA[bldg_str].path]
@@ -319,6 +360,14 @@ function getStokeClass(bldgNum) {
 						:d="getBldgPath('BLDG_UNIVERSITY', 2, 2)"
 						:class="{ 'buildingSVGpathHighlightOn': store.topMenuViews.buildingSVGpathHighlightNum === rf.BLDG_UNIVERSITY}" />
 				</svg>
+				<template v-for="entry in costOverlayGroups.uni" :key="entry[0]">
+					<span v-if="store.players[playerIndexProp].availableBuildings.includes(entry[0])" class="costOverlay" :style="getCostOverlayStyle(entry)">
+						<span v-for="(icon, idx) in getCostIcons(entry[0])" :key="idx" class="costIconWrap">
+							<img class="costIcon" :src="view.getImage('res_' + String(icon[0]))" />
+							<span v-if="icon[1] > 1" class="costIconCount">{{ icon[1] }}</span>
+						</span>
+					</span>
+				</template>
 			</div>
 
 			<div
@@ -415,6 +464,14 @@ function getStokeClass(bldgNum) {
 						:d="getBldgPath('BLDG_HARBOUR', 0, 4)"
 						:class="{ 'buildingSVGpathHighlightOn': store.topMenuViews.buildingSVGpathHighlightNum === rf.BLDG_HARBOUR}" />
 				</svg>
+				<template v-for="entry in costOverlayGroups.second" :key="entry[0]">
+					<span v-if="store.players[playerIndexProp].availableBuildings.includes(entry[0])" class="costOverlay" :style="getCostOverlayStyle(entry)">
+						<span v-for="(icon, idx) in getCostIcons(entry[0])" :key="idx" class="costIconWrap">
+							<img class="costIcon" :src="view.getImage('res_' + String(icon[0]))" />
+							<span v-if="icon[1] > 1" class="costIconCount">{{ icon[1] }}</span>
+						</span>
+					</span>
+				</template>
 			</div>
 
 			<div
@@ -551,6 +608,14 @@ function getStokeClass(bldgNum) {
 						:d="getBldgPath('BLDG_MARKET', 4, 2)"
 						:class="{ 'buildingSVGpathHighlightOn': store.topMenuViews.buildingSVGpathHighlightNum === rf.BLDG_MARKET}" />
 				</svg>
+				<template v-for="entry in costOverlayGroups.third" :key="entry[0]">
+					<span v-if="store.players[playerIndexProp].availableBuildings.includes(entry[0])" class="costOverlay" :style="getCostOverlayStyle(entry)">
+						<span v-for="(icon, idx) in getCostIcons(entry[0])" :key="idx" class="costIconWrap">
+							<img class="costIcon" :src="view.getImage('res_' + String(icon[0]))" />
+							<span v-if="icon[1] > 1" class="costIconCount">{{ icon[1] }}</span>
+						</span>
+					</span>
+				</template>
 			</div>
 		</div>
 		<!--ENd personal buildings-->
@@ -717,6 +782,41 @@ function getStokeClass(bldgNum) {
 		1px -1px 0 white,
 		-1px 1px 0 white,
 		1px 1px 0 white;
+}
+
+.costOverlay {
+	position: absolute;
+	z-index: 1;
+	transform: translate(-50%, -50%);
+	display: flex;
+	gap: 3px;
+	pointer-events: none;
+}
+
+.costIconWrap {
+	position: relative;
+}
+
+.costIcon {
+	display: block;
+	width: 30px;
+	height: 30px;
+	border: 1px solid black;
+	background-color: rgba(255, 255, 255, 0.8);
+}
+
+.costIconCount {
+	position: absolute;
+	right: -6px;
+	bottom: -8px;
+	font-size: 18px;
+	line-height: 18px;
+	color: white;
+	text-shadow:
+		-1px -1px 0 #000,
+		1px -1px 0 #000,
+		-1px 1px 0 #000,
+		1px 1px 0 #000;
 }
 
 .greyscale {
