@@ -5,7 +5,7 @@ from django.urls import reverse
 import Lobby.sharedFunctions.constants as rf
 from Lobby.models import Game, User
 
-# The 10 games shown on the "Start a new game" page (Lobby/newGames.html).
+# The games shown on the "Start a new game" page (Lobby/newGames.html).
 # ``extra`` holds POST fields that game's create function indexes directly.
 GAMES = [
     {"code": "FCM", "url": "FCM:createFCMgame", "page": "createFCMpage", "extra": {"mapData": ""}},
@@ -18,6 +18,7 @@ GAMES = [
     {"code": "CNS", "url": "CNS:createCNSgame", "page": "createCNSpage", "extra": {}},
     {"code": "WEB", "url": "WEB:createWEBgame", "page": "createWEBpage", "extra": {}},
     {"code": "KFW", "url": "KFW:createKFWgame", "page": "createKFWpage", "extra": {"hiddenInfoLevel": "1"}},
+    {"code": "LBR", "url": "LBR:createLBRgame", "page": "createLBRpage", "extra": {}},
 ]
 
 
@@ -56,11 +57,12 @@ CREATE_PAGE_FIELDS = {
     "createKFWpage": {"seats": [2, 3, 4, 5, 6], "seat_rows": [3, 4, 5, 6], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"]},
     "createURRpage": {"seats": [2, 3, 4, 5, 6], "seat_rows": [2, 3, 4, 5, 6], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"]},
     "createNTRpage": {"seats": [2, 3, 4, 5, 6, 7, 8], "seat_rows": [3, 4, 5, 6, 7, 8], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"], "extras": ['id="scenario1"', 'id="scenario2"', 'id="teamPlay"']},
+    "createLBRpage": {"seats": [2, 3, 4], "seat_rows": [3, 4], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"]},
 }
 
 
 class AllGamesCreationTests(TestCase):
-    """Cross-game smoke tests for the 10 games on the create-new-game page.
+    """Cross-game smoke tests for the games on the create-new-game page.
 
     Each game has its own create function (and some validate invites inline
     while others use SF_validatePlayers), so these assert the behaviours that

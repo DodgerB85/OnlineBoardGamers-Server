@@ -89,6 +89,7 @@ urlpatterns = [
     path("PPF/", include("PPF.urls")),
     path("WEB/", include("WEB.urls")),
     path("RNB/", include("RNB.urls")),
+    path("LBR/", include("LBR.urls")),
     path("NTR/", include("NTR.urls")),
     path("URR/", include("URR.urls")),
     path("DDL/", include("DDL.urls")),
