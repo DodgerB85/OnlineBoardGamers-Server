@@ -1,15 +1,15 @@
 {% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
-{% static 'TGZ/The_Great_Zimbabwe_rules.pdf' as rules_pdf %}
-{% static 'TGZ/TGZ_Schism_Rules.pdf' as schism_pdf %}
-{% static 'TGZ/images/noIvory.jpg' as no_ivory %}
-{% static 'TGZ/images/noCows.jpg' as no_cows %}
-{% static 'TGZ/images/noCmen.jpg' as no_cmen %}
 {% block page_title %}
   {% translate "The Great Zimbabwe Help" %}
 {% endblock page_title %}
 {% block content %}
+  {% static 'TGZ/The_Great_Zimbabwe_rules.pdf' as rules_pdf %}
+  {% static 'TGZ/TGZ_Schism_Rules.pdf' as schism_pdf %}
+  {% static 'TGZ/images/noIvory.jpg' as no_ivory %}
+  {% static 'TGZ/images/noCows.jpg' as no_cows %}
+  {% static 'TGZ/images/noCmen.jpg' as no_cmen %}
   <div class="card section">
     <h2>{% translate "Rules" %}</h2>
     <div class="help-qa">
