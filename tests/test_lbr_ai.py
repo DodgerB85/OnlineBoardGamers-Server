@@ -283,6 +283,85 @@ class LBRAIWorkerTests(TestCase):
         self.game.refresh_from_db()
         self.assertEqual(self.game.gameData, data_before)
 
+    def test_a_failed_attempt_schedules_one_retry_under_the_same_claim(self):
+        self.set_position(actions_used=1)
+        self.assertTrue(schedule_ai_turn(self.game.id))
+        self.game.refresh_from_db()
+        claim_version = self.game.latestUpdate
+        original_claim = self.game.autoMoves
+        original_ts = int(original_claim.rsplit(":", 1)[-1])
+
+        with patch("LBR.ai_worker.request_ai_action", side_effect=RuntimeError("boom")), patch(
+            "LBR.ai_worker.time.time", return_value=original_ts + 5
+        ):
+            result = play_ai_turn(self.game.id, claim_version)
+
+        self.assertEqual(result, "error")
+        self.admin_error.assert_called_once()
+        self.game.refresh_from_db()
+        self.assertEqual(self.game.autoMoves, f"ai:{claim_version}:{original_ts + 5}")
+        retries = [
+            call.args
+            for call in self.schedule.call_args_list
+            if call.args and call.args[0] == "LBR.ai_worker.play_ai_turn"
+        ]
+        self.assertEqual(len(retries), 1)
+        self.assertEqual(retries[0][2], claim_version, "the retry must expect the failed position")
+        self.assertEqual(retries[0][3], 1)
+        self.assertEqual(retries[0][4], claim_version, "the retry must keep its original claim")
+
+    def test_the_last_attempt_marks_the_position_failed_until_it_changes(self):
+        self.set_position(actions_used=1)
+        self.assertTrue(schedule_ai_turn(self.game.id))
+        self.game.refresh_from_db()
+
+        with patch("LBR.ai_worker.request_ai_action", side_effect=RuntimeError("boom")):
+            result = play_ai_turn(
+                self.game.id, self.game.latestUpdate, attempt=settings.LBR_AI_MAX_ATTEMPTS - 1
+            )
+
+        self.assertEqual(result, "error")
+        self.admin_error.assert_called_once()
+        self.game.refresh_from_db()
+        self.assertEqual(self.game.autoMoves, f"ai-failed:{self.game.latestUpdate}")
+        self.assertFalse(
+            any(
+                call.args and call.args[0] == "LBR.ai_worker.play_ai_turn"
+                for call in self.schedule.call_args_list
+            )
+        )
+        self.assertFalse(schedule_ai_turn(self.game.id), "a failed position must not be re-queued")
+
+        # A save, rewind or replay moves latestUpdate on, so the AI may try again.
+        self.game.latestUpdate = str(int(self.game.latestUpdate) + 1)
+        self.game.save()
+        self.assertTrue(schedule_ai_turn(self.game.id))
+
+    def test_a_failure_after_the_position_moved_on_is_dropped(self):
+        self.set_position(actions_used=1)
+        self.assertTrue(schedule_ai_turn(self.game.id))
+        self.game.refresh_from_db()
+        expected = self.game.latestUpdate
+
+        def move_on_then_fail(_state, _seat):
+            # What a rewind or replay save does: new version, claim cleared.
+            Game.objects.filter(id=self.game.id).update(
+                latestUpdate=str(int(expected) + 1), autoMoves=None
+            )
+            raise RuntimeError("boom")
+
+        with patch("LBR.ai_worker.request_ai_action", side_effect=move_on_then_fail):
+            result = play_ai_turn(self.game.id, expected)
+
+        self.assertEqual(result, "error")
+        self.admin_error.assert_not_called()
+        self.assertFalse(
+            any(
+                call.args and call.args[0] == "LBR.ai_worker.play_ai_turn"
+                for call in self.schedule.call_args_list
+            )
+        )
+
     def test_service_action_rejected_by_rules_falls_back_to_a_legal_move(self):
         self.set_position()
         # Cell 0 already holds a starting temple, so this placement is illegal.

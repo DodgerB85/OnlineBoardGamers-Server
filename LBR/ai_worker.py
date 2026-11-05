@@ -127,6 +127,9 @@ def schedule_ai_turn(game_id):
         return False
 
     previous = game.autoMoves or ""
+    if previous == f"ai-failed:{game.latestUpdate}":
+        # This position already used its attempts; wait for a new save.
+        return False
     if previous.startswith("ai:"):
         try:
             claimed_seconds_ago = int(time.time()) - int(previous.rsplit(":", 1)[-1])
@@ -149,8 +152,14 @@ def schedule_ai_turn(game_id):
     return True
 
 
-def play_ai_turn(game_id, expected_latest_update, attempt=0):
+def play_ai_turn(game_id, expected_latest_update, attempt=0, claim_latest_update=None):
     """Play AI decisions until a human seat has to act.
+
+    ``expected_latest_update`` is the position this attempt must still be on; a
+    rewind or replay makes a pending retry return "stale". ``claim_latest_update``
+    is the version whose ``autoMoves`` claim the task holds. It stays fixed across
+    retries, so the claim is still released after the AI saved earlier decisions
+    in the same turn.
 
     The whole turn (and any following AI seat) is resolved in one task, so the AI
     never waits for a browser poll between decisions. The service call and the
@@ -159,7 +168,9 @@ def play_ai_turn(game_id, expected_latest_update, attempt=0):
     ``schedule_ai_turn`` is held for the whole task and released when it ends,
     except on a retry, which schedules the next attempt under the same claim.
     """
-    claim_prefix = f"ai:{expected_latest_update}:"
+    if claim_latest_update is None:
+        claim_latest_update = expected_latest_update
+    claim_prefix = f"ai:{claim_latest_update}:"
     keep_claim = False
     try:
         game = Game.objects.filter(id=game_id, gameCode="LBR").select_related("creator").first()
@@ -194,7 +205,7 @@ def play_ai_turn(game_id, expected_latest_update, attempt=0):
             except Exception as exc:  # noqa: BLE001 - any failure must not wedge the game
                 logger.exception("LBR AI move failed for game %s", game_id)
                 keep_claim = True
-                _retry(game_id, str(game.latestUpdate), attempt, exc)
+                _retry(game_id, claim_latest_update, str(game.latestUpdate), attempt, exc)
                 return "error"
 
             if applied.get("fallback"):
@@ -206,7 +217,7 @@ def play_ai_turn(game_id, expected_latest_update, attempt=0):
             with db_mutex(f"processTurn_{game_id}", timeout=10, ttl=180) as acquired:
                 if not acquired:
                     keep_claim = True
-                    _retry(game_id, computed_version, attempt, RuntimeError("game busy"))
+                    _retry(game_id, claim_latest_update, computed_version, attempt, RuntimeError("game busy"))
                     return "busy"
 
                 game = Game.objects.filter(id=game_id, gameCode="LBR").select_related("creator").get()
@@ -338,13 +349,33 @@ def _run_step(payload):
     return json.loads(process.stdout)
 
 
-def _retry(game_id, expected_latest_update, attempt, exc):
+def _retry(game_id, claim_latest_update, expected_latest_update, attempt, exc):
+    """Notify and schedule the next attempt, unless this task no longer owns the position.
+
+    ``claim_latest_update`` is the version whose claim the task holds and stays
+    fixed across retries. ``expected_latest_update`` is the position the failed
+    attempt was computed for, so a rewind or replay makes this retry stale.
+    """
+    claim_prefix = f"ai:{claim_latest_update}:"
+    owns = Game.objects.filter(
+        id=game_id, latestUpdate=expected_latest_update, autoMoves__startswith=claim_prefix
+    )
+    if attempt + 1 >= settings.LBR_AI_MAX_ATTEMPTS:
+        # Remember the failed position so polls stop re-queueing it. A save or
+        # rewind changes latestUpdate, which allows the AI to try again.
+        if owns.update(autoMoves=f"ai-failed:{expected_latest_update}"):
+            SN_sendAdminErrorMessage(
+                f"LBR AI move failed - gameID: {game_id} - attempt {attempt + 1}/{settings.LBR_AI_MAX_ATTEMPTS} - {exc}"
+            )
+        return
+
+    # Restart the claim clock so a poll cannot take over while the retry waits.
+    if not owns.update(autoMoves=f"{claim_prefix}{int(time.time())}"):
+        return
+
     SN_sendAdminErrorMessage(
         f"LBR AI move failed - gameID: {game_id} - attempt {attempt + 1}/{settings.LBR_AI_MAX_ATTEMPTS} - {exc}"
     )
-    if attempt + 1 >= settings.LBR_AI_MAX_ATTEMPTS:
-        Game.objects.filter(id=game_id, latestUpdate=expected_latest_update).update(autoMoves=None)
-        return
 
     from django_q.tasks import schedule
 
@@ -353,6 +384,7 @@ def _retry(game_id, expected_latest_update, attempt, exc):
         game_id,
         expected_latest_update,
         attempt + 1,
+        claim_latest_update,
         next_run=timezone.now() + timedelta(seconds=settings.LBR_AI_RETRY_SECONDS),
         schedule_type="O",
     )

@@ -234,9 +234,10 @@ LBR_AI_TIMEOUT = config("LBR_AI_TIMEOUT", default=30, cast=int)
 LBR_AI_NODE = config("LBR_AI_NODE", default="node")
 LBR_AI_STEP_TIMEOUT = config("LBR_AI_STEP_TIMEOUT", default=30, cast=int)
 LBR_AI_RETRY_SECONDS = config("LBR_AI_RETRY_SECONDS", default=60, cast=int)
-LBR_AI_MAX_ATTEMPTS = config("LBR_AI_MAX_ATTEMPTS", default=5, cast=int)
+LBR_AI_MAX_ATTEMPTS = config("LBR_AI_MAX_ATTEMPTS", default=2, cast=int)
 # A crashed worker must not wedge a seat: a claim older than this is abandoned.
-LBR_AI_CLAIM_SECONDS = config("LBR_AI_CLAIM_SECONDS", default=30, cast=int)
+# It must outlast a pending retry, or a poll starts a second retry chain.
+LBR_AI_CLAIM_SECONDS = config("LBR_AI_CLAIM_SECONDS", default=LBR_AI_RETRY_SECONDS + 30, cast=int)
 
 # ASYNC SETTINGS
 Q_CLUSTER = {

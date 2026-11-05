@@ -97,8 +97,8 @@ every returned action with `LBRrules.js`.
 | `LBR_AI_NODE` | `node` | Node binary used for the rules step. |
 | `LBR_AI_STEP_TIMEOUT` | `30` | Rules-step timeout in seconds. |
 | `LBR_AI_RETRY_SECONDS` | `60` | Delay before retrying a failed AI turn. |
-| `LBR_AI_MAX_ATTEMPTS` | `5` | Retries before the claim marker is released. |
-| `LBR_AI_CLAIM_SECONDS` | `30` | A claim older than this is treated as abandoned by a crashed worker. |
+| `LBR_AI_MAX_ATTEMPTS` | `2` | Attempts per position before the AI gives up until the next save. |
+| `LBR_AI_CLAIM_SECONDS` | `LBR_AI_RETRY_SECONDS + 30` | A claim older than this is treated as abandoned by a crashed worker. |
 
 The Django host needs **node** for the rules step and either the policy binary
 plus model or a reachable `LBR_AI_URL`. `node` runs `lbr_step.mjs`, which imports
@@ -138,10 +138,13 @@ of OBG. The binary statically links the MIT-licensed `minimax-local` crate.
   returning `False` without claiming the turn, so polling clients cannot queue
   tasks that can never run.
 - A crash, a non-zero exit, malformed JSON, a timeout or a reply without
-  `action` raises in the task: the admins are notified, the task is retried with
-  a delay, and the `autoMoves` claim is released after `LBR_AI_MAX_ATTEMPTS`, so
-  a later poll or save can try again. A claim left behind by a worker that died
-  is replaced once it is older than `LBR_AI_CLAIM_SECONDS`.
+  `action` raises in the task: the admins are notified and the task is retried
+  with a delay, during which the existing `autoMoves` claim is kept. After
+  `LBR_AI_MAX_ATTEMPTS` the position is marked `ai-failed:<latestUpdate>` and the
+  AI stops trying it until a save, rewind or replay changes `latestUpdate`. A
+  retry whose position moved on, or whose claim was replaced, is dropped
+  silently. A claim left behind by a worker that died is replaced once it is
+  older than `LBR_AI_CLAIM_SECONDS`.
 - An action rejected by `LBRrules.js` is replaced by a legal default and reported
   to the admins. A stale `latestUpdate` is re-checked under the mutex and the
   computed position is discarded.
