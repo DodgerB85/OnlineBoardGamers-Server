@@ -105,6 +105,12 @@ plus model or a reachable `LBR_AI_URL`. `node` runs `lbr_step.mjs`, which import
 `LBR/vueLBR/src/js/LBRrules.js` relative to itself, so no working directory is
 assumed.
 
+The committed binary is a Linux ELF, so on Windows set `LBR_AI_BIN` to
+`LBR/ai-service/bin/lbr-policy.cmd`: it runs the same binary in the default WSL
+distribution and translates the Windows `--net` path. Install a distro first
+(`wsl --install -d Ubuntu`, or import any small rootfs); the binary is static
+musl, so any distro works.
+
 ## Model provenance and licensing
 
 Each net is the donor's `runs/<map>/best.bin`, trained by its per-map chain
