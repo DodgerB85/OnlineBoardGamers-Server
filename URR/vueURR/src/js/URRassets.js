@@ -15,9 +15,9 @@ export function getStateOrderImage(state) { return getAsset(`state-order-${STATE
 export function getNationCardImage(nation) { return getAsset(NATION_FILES[nation]) }
 export function getWaterworkImage(state, capacity) { return getAsset(`waterwork-${STATE_FILES[state]}-${capacity === "M" ? "unlimited" : capacity}.png`) }
 export function getPlayerMarkerImage(player) { return getAsset(`ownership-marker-${PLAYER_FILES[player]}.png`) }
-export const mapImage = getAsset("ur-map.png")
+export const mapImage = getAsset("ur-map.jpg")
 export const landPriceTrackImage = getAsset("land-price-track.png")
 
 // Rendered at 300 dpi from tempAssets/BGG/ur1830bc_redesign/cards_version1.pdf.
-export function getEquipmentCardImage(era) { return getAsset(`equipment-era-${era}.png`) }
-export const primogenitureImage = getAsset("primogeniture.png")
+export function getEquipmentCardImage(era) { return getAsset(`equipment-era-${era}.jpg`) }
+export const primogenitureImage = getAsset("primogeniture.jpg")
