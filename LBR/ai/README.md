@@ -52,7 +52,7 @@ LBR/ai-service/
 ```
 
 The engine source lives in [MihaiAnca13/tigris](https://github.com/MihaiAnca13/tigris)
-(`tigris-and-euphrates/`); the committed binary is built from commit `cf81336`.
+(`tigris-and-euphrates/`); the committed binary is built from commit `7912e96`.
 The binary never reads the current directory: the model path is always passed by
 Django (`settings.BASE_DIR` or `LBR_AI_MODEL`).
 
