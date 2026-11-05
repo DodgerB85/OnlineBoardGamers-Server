@@ -6,7 +6,8 @@ The human behind a taken-over seat becomes a spectator.
 
 Three pieces make it work:
 
-1. **Policy engine** (`LBR/ai-service`, Rust) — maps the LBR blob onto the donor
+1. **Policy engine** (`LBR/ai-service/bin/lbr-policy`, a static Rust binary
+   built from [MihaiAnca13/tigris](https://github.com/MihaiAnca13/tigris)) — maps the LBR blob onto the donor
    `TnEGame`, runs the `az` agent with `models/best.bin` (alpha 0.7,
    `hide_hands = true`) and prints one action in LBR's own vocabulary. It only
    *proposes*; it knows no LBR rules and does not touch the database.
@@ -45,48 +46,38 @@ path releases the seat.
 
 ```
 LBR/ai-service/
-  Cargo.toml, Cargo.lock     pinned dependency set
-  src/game.rs eval.rs features.rs nn.rs az.rs puct.rs solver.rs
-  src/maps.rs arena.rs       board layout and the donor search harness
-  src/lbr.rs                 LBR <-> donor mapping; proposes one action
-  src/main.rs                `lbr-move` (stdin JSON -> stdout JSON)
-  minimax/                   MIT-licensed generic search crate (path dependency)
+  bin/lbr-policy             static (musl) build of the engine, the LBR_AI_BIN default
   models/best.bin            default-board net (803 545 bytes, 243 inputs)
   models/<map>.bin           one net per generated board (twin-bends, long-bend, the-fork)
 ```
 
-Excluded from the donor repository: the desktop/macroquad game, the Python
-(`pyo3`/`numpy`) bindings, the self-play/training pipeline (`gen`, `replay`,
-`history`), training checkpoints, `target/` and the rulebook transcription. No
-`LBR/ai-service` source reads the current directory: the model path is always
-passed by Django (`settings.BASE_DIR` or `LBR_AI_MODEL`).
+The engine source lives in [MihaiAnca13/tigris](https://github.com/MihaiAnca13/tigris)
+(`tigris-and-euphrates/`); the committed binary is built from commit `cf81336`.
+The binary never reads the current directory: the model path is always passed by
+Django (`settings.BASE_DIR` or `LBR_AI_MODEL`).
 
-## Build
+## Rebuilding the binary
 
-```sh
-cd LBR/ai-service
-cargo build --release --locked     # target/release/lbr-policy
-cargo test --release               # 125 donor tests
-```
-
-A static build is committed at `bin/lbr-policy` (the `LBR_AI_BIN` default), so a
-plain git pull deploy (PythonAnywhere) needs no Rust toolchain. After changing
-the engine, rebuild and commit it:
+The binary is committed so a deploy needs no Rust toolchain. After changing the
+engine, rebuild it in the tigris checkout and commit it here, with the commit
+hash above:
 
 ```sh
+cd tigris-and-euphrates
 rustup target add x86_64-unknown-linux-musl
-cargo build --release --locked --target x86_64-unknown-linux-musl
-cp target/x86_64-unknown-linux-musl/release/lbr-policy bin/ && strip bin/lbr-policy
+cargo build --release --locked --target x86_64-unknown-linux-musl --bin tigris-and-euphrates
+cp target/x86_64-unknown-linux-musl/release/tigris-and-euphrates \
+  <OBG>/LBR/ai-service/bin/lbr-policy && strip <OBG>/LBR/ai-service/bin/lbr-policy
 ```
 
-The Docker image builds the crate in a `rust:1-alpine` stage and overwrites
-`/app/LBR/ai-service/bin/lbr-policy` with it.
+Then run `node LBR/ai/smoke.mjs` (and `LBR_MAP=<map> node LBR/ai/smoke.mjs 400`
+for each board) to check that every action it returns is legal.
 
 Manual call:
 
 ```sh
 echo '{"state": <gameData>, "seat": 0}' |
-  ./target/release/lbr-policy lbr-move --sims 400 --alpha 0.7 --net models/best.bin
+  LBR/ai-service/bin/lbr-policy lbr-move --sims 400 --alpha 0.7 --net LBR/ai-service/models/best.bin
 # {"action":{"type":"placeTile","colour":"K","pos":134}}
 ```
 
@@ -122,9 +113,8 @@ beats the donor heuristic on its own board in a 150-setup paired gate. A net
 only fits the engine's 243-input features: replace the source and the weights
 together. They were produced by the donor's own self-play pipeline on that engine and
 embed no third-party data or code. The donor repository is this project's own
-first-party work, so the vendored Rust source and the weights carry the same
-terms as the rest of OBG. `minimax/` is the only third-party code: the MIT-licensed
-`minimax-local` crate (its `LICENSE` is vendored).
+first-party work, so the binary and the weights carry the same terms as the rest
+of OBG. The binary statically links the MIT-licensed `minimax-local` crate.
 
 ## Decisions and limits
 
@@ -154,8 +144,7 @@ terms as the rest of OBG. `minimax/` is the only third-party code: the MIT-licen
 
 ## Migrating from the old external AI service
 
-1. `cd LBR/ai-service && cargo build --release --locked`, or rebuild the
-   production image (its `lbr-ai` stage does it).
+1. Make sure `LBR/ai-service/bin/lbr-policy` is deployed and executable.
 2. Remove `LBR_AI_URL` from `.env` (or leave it empty) so the local binary is
    used. Any old `http://127.0.0.1:8731/move` value would still be honoured as
    the remote-service override.

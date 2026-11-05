@@ -1,6 +1,6 @@
 """AI seats for Land Between Rivers.
 
-The vendored policy engine (LBR/ai-service) decides; LBRrules.js is run
+The prebuilt policy engine (LBR/ai-service/bin/lbr-policy) decides; LBRrules.js is run
 headlessly by node to validate and apply the decision; the resulting position is
 saved through the same mutex/latestUpdate path as a human move. Django never
 interprets the rules itself.

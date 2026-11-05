@@ -8,10 +8,10 @@ Sources:
 
 - Condensed rulebook (Eric Postpischil, draft 1.3, 2007), which incorporates the
   FAQ. This is the source of truth. It is not vendored in this repository.
-- `LBR/ai-service/src/game.rs` — vendored donor engine; its `docs/BUGS.md`
+- `src/game.rs` in MihaiAnca13/tigris — the donor engine; its `docs/BUGS.md`
   records corrections where the donor diverged from the rulebook. Where donor
   and text disagree, the text/BUGS ruling wins.
-- `LBR/ai-service/src/maps.rs` + `game.rs::BOARD` — board layout.
+- `src/maps.rs` + `game.rs::BOARD` in MihaiAnca13/tigris — board layout.
 
 ## Components
 

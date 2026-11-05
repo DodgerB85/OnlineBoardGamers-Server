@@ -51,7 +51,7 @@ export const START_TILES = { R: 57, B: 36, G: 30, K: 30 };
 // Board layouts from the donor engine. Row 0 is the top; x = river, t =
 // starting temple + treasure. Every board keeps the 16-column storage stride;
 // width/height are the playable corner of it. Keys are stored in the game state,
-// so they must match the Rust policy's registry in LBR/ai-service/src/lbr.rs.
+// so they must match the Rust policy registry in src/maps.rs of MihaiAnca13/tigris.
 export const BOARD_ROWS = [
 	"....xxxxx.t.x...",
 	".t..x.......x..t",

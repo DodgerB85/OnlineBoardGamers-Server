@@ -11,7 +11,7 @@ MAX_PLAYERS = 4
 # Board keys shared by the create page, the client rules and the AI policy.
 # "default" is the rulebook board; the rest are the generated boards that passed
 # the donor's balance tests. The client registry is LBR/vueLBR/src/js/LBRreference.js
-# and the policy registry is LBR/ai-service/src/lbr.rs.
+# and the policy registry is src/maps.rs in MihaiAnca13/tigris.
 MAP_NAMES = ["default", "twin-bends", "long-bend", "the-fork"]
 
 # One User per possible AI seat. Distinct usernames are required because a
