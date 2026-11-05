@@ -2,8 +2,8 @@
  * BG Stats export for the Horseless Carriage game end screen.
  *
  * Loaded as its own script by HLCtemplate.html (next to qrcode.js and bgStats.js)
- * only when the viewer opted in on their profile, so HLCview.js checks the
- * function exists before calling it.
+ * only when the viewer opted in on their profile. HLCview.js calls it on every
+ * game end, so a failure here must never break the game end screen.
  */
 
 function buildHLCBgStatsUrl() {
@@ -14,7 +14,8 @@ function buildHLCBgStatsUrl() {
 	var groups = []
 	for (var i = 0; i < turnOrder.length; i++) {
 		var player = M.players[turnOrder[i]]
-		if (player.name === BOT_NAME || player.autoplay === true) continue
+		// autoplay marks a bot seat, including a player who was kicked out
+		if (player.autoplay === true || player.name === "HcBot") continue
 		var score = player.money
 		var last = groups.length > 0 ? groups[groups.length - 1] : null
 		if (last != null && last[0].score === score) last.push({ name: player.name, score: score })
@@ -22,10 +23,11 @@ function buildHLCBgStatsUrl() {
 	}
 
 	// The end-of-game log entry carries the real finish time; fall back to now
+	var logs = M.logs || []
 	var playDate = Date.now()
-	for (var j = M.logs.length - 1; j >= 0; j--) {
-		if (M.logs[j].action === Log.GAME_END) {
-			playDate = M.logs[j].timestamp * 1000
+	for (var j = logs.length - 1; j >= 0; j--) {
+		if (logs[j].action === Log.GAME_END) {
+			playDate = logs[j].timestamp * 1000
 			break
 		}
 	}
@@ -41,7 +43,14 @@ function buildHLCBgStatsUrl() {
 }
 
 function appendBgStatsActions() {
-	var url = buildHLCBgStatsUrl()
+	var url
+	try {
+		url = buildHLCBgStatsUrl()
+	} catch (err) {
+		// A nicety must never stop the game end screen from rendering
+		console.warn("BG Stats export unavailable:", err)
+		return
+	}
 	if (url == undefined) return
 
 	var div = $("<div id='bgStatsDiv'></div>")
