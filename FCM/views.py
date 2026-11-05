@@ -3,6 +3,7 @@ import gzip
 import json
 import logging
 import time
+import zlib
 from typing import TYPE_CHECKING, cast
 from urllib.parse import urlparse
 
@@ -26,6 +27,7 @@ from Lobby.gameViewHelpers import (
 )
 from Lobby.models import Game, GamePlayer, Profile, User
 from Lobby.sharedFunctions.permissions import is_game_admin, is_site_admin
+from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_updateFlexiTime,
@@ -37,7 +39,6 @@ from Lobby.sharedFunctions.sharedRefs import SR_getFCMstartingOptionsHTML
 
 from . import FCMconstants as rfFCM
 from .common import create_fcm_game
-from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
 if TYPE_CHECKING:
     from Lobby.presenters import FCMpresenter
@@ -89,6 +90,64 @@ def _resolvePassKickoutTarget(request, currentGame, presenter, jsonData):
     if not is_participant or not current_players or target != current_players[0] or presenter.kickoutRequired() != 2:
         return "", True
     return target, False
+
+
+# Permanent roster cards lost by accident. Temporary workers and the union
+# organiser are deliberately excluded: they move on by rule during the round.
+FCM_EPHEMERAL_EMPLOYEES = {56, 58}  # TEMPORARY_WORKER, UNION_ORGANIZER
+
+
+def _fcm_roster_totals(game_data, starting_options):
+    """Name -> employee cards owned (structure + beach + marketers), or None."""
+    try:
+        data = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(game_data))).decode("utf-8"))
+    except (ValueError, TypeError, zlib.error):
+        return None
+    if not isinstance(data, list):
+        return None
+
+    # The lobbyists module adds its map tiles at slot 0; players follow it.
+    players = data[1] if rfFCM.SO_LOBBYISTS in starting_options else data[0]
+    if not (isinstance(players, list) and players and isinstance(players[0], list) and players[0] and isinstance(players[0][0], list)):
+        players = data[0]
+    if not isinstance(players, list):
+        return None
+
+    night_shift = rfFCM.SO_NIGHT_SHIFT in starting_options
+    totals = {}
+    for row in players:
+        if not isinstance(row, list) or not row or not isinstance(row[0], list):
+            return None
+        name = row[0][0]
+        employees = row[4] if len(row) > 4 else []
+        beach = row[5] if len(row) > 5 else []
+        marketers = row[7] if len(row) > 7 else []
+        if not (isinstance(employees, list) and isinstance(beach, list) and isinstance(marketers, list)):
+            return None
+        cards = employees + beach
+        total = sum(1 for employee in cards if employee != -1 and employee not in FCM_EPHEMERAL_EMPLOYEES)
+        # Marketers are exported flat as [card, campaign] pairs, with an extra
+        # night-shift flag after a Marketing Trainee.
+        i = 0
+        while i < len(marketers):
+            if marketers[i] not in FCM_EPHEMERAL_EMPLOYEES:
+                total += 1
+            i += 3 if night_shift and marketers[i] == 13 else 2
+        totals[name] = total
+    return totals
+
+
+def _fcm_employee_losses(currentGame, new_game_data, starting_options):
+    old_totals = _fcm_roster_totals(currentGame.gameData, starting_options)
+    new_totals = _fcm_roster_totals(new_game_data, starting_options)
+    if old_totals is None or new_totals is None:
+        return []
+    losses = [(name, old_totals[name], new_totals[name]) for name in old_totals if name in new_totals and new_totals[name] < old_totals[name]]
+    # A Headhunter moves a card between players; only a fall in the overall
+    # roster is a loss.
+    if sum(new_totals.values()) >= sum(old_totals.values()):
+        return []
+    return losses
 
 
 def index(request):
@@ -826,6 +885,42 @@ def _processTurn(request):
         if "mapTiles" in jsonData and jsonData["mapTiles"] and (currentGame.startingMap == "" or isGameReset):
             currentGame.startingMap = json.dumps(jsonData["mapTiles"], separators=(",", ":"))
 
+        # A full-game save trusts the client. Refuse one that silently drops a
+        # player's permanent staff (game 37571 lost a whole structure this way:
+        # an empty restructuring move was accepted, then saved as the new state).
+        starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        payday = rfFCM.PHASE_PAYDAY
+        firing_allowed = (
+            isGameReset
+            or jsonData.get("status") == "FINISHED"
+            or currentGame.phase == payday
+            or jsonData.get("phase") == payday
+            or rfFCM.SO_SANDBOX_MODE in starting_options
+            or rf.SO_TRAINING_GAME in starting_options
+        )
+        if not firing_allowed and currentGame.gameData and jsonData.get("gameData"):
+            losses = _fcm_employee_losses(currentGame, jsonData["gameData"], starting_options)
+            if losses:
+                loss_text = ", ".join(f"{name}: {old}->{new}" for name, old, new in losses)
+                SN_sendAdminErrorMessage(
+                    f"BLOCKED SAVE - EMPLOYEE LOSS - gameID: {currentGame.id} - User: {request.user.username} "
+                    f"- turn: {jsonData.get('turn', 'N/A')} - phase: {jsonData.get('phase', 'N/A')} "
+                    f"- DB phase: {currentGame.phase} - losses: {loss_text}"
+                )
+                if currentGame.phase == rfFCM.PHASE_RESTRUCTURING:
+                    # Let everyone redo the structure rather than leave the game
+                    # stuck on a move we just refused.
+                    presenter.clearAllMoveDataV2()
+                    missing_players = set(currentGame.players.filter(is_missing=True).values_list("player__username", flat=True))
+                    current_players = [
+                        gp.player.username
+                        for gp in currentGame.players.all().select_related("player")
+                        if gp.player and gp.player.username not in missing_players
+                    ]
+                    presenter.setCurrentPlayersFromArrInTurnOrder(current_players)
+                    currentGame.save()
+                return JsonResponse({"syncError": True, "employeeLoss": True}, safe=False)
+
         nameToUse = request.user.username
         if is_game_admin(request.user):
             nameToUse = jsonData["BKSN"]
@@ -1168,6 +1263,18 @@ def _processTurn(request):
                     passKickoutTarget if passKickoutTarget else request.user.username,
                     currentGame.kickoutDuration,
                 )
+
+        # The skip list is built from the submitting client's board. A stale
+        # client must not be able to say another player has no employees: in
+        # restructuring, a player with real cards always has to submit a move.
+        if currentGame.phase == rfFCM.PHASE_RESTRUCTURING and currentGame.gameData:
+            starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+            totals = _fcm_roster_totals(currentGame.gameData, starting_options)
+            if totals:
+                missing_players = set(presenter.getMissingPlayersNamesArray())
+                notRequiedPlayerNames = [
+                    name for name in notRequiedPlayerNames if name in missing_players or totals.get(name, 0) == 0
+                ]
 
         response = presenter.getJsonMoveResponseV2(notRequiedPlayerNames)
 
