@@ -357,6 +357,15 @@ class ROWgame(Game):
         verbose_name_plural = "ROW_Games"
 
 
+# LBR
+class LBRgame(Game):
+    class Meta(Game.Meta):
+        proxy = True
+        app_label = "LBR"
+        verbose_name = "LBR_Game"
+        verbose_name_plural = "LBR_Games"
+
+
 # NTR
 class NTRgame(Game):
     class Meta(Game.Meta):

@@ -11,6 +11,9 @@ processes:
     availability:
       restart: on_failure
 
+  # LBR AI seats need no separate process: the worker runs the vendored
+  # LBR/ai-service binary per decision (see LBR/ai/README.md).
+
   bus:
     command: "npm run dev"
     working_dir: "BUS/vueBUS"
@@ -58,3 +61,7 @@ processes:
   row:
     command: "npm run dev"
     working_dir: "ROW/vueROW"
+
+  lbr:
+    command: "npm run dev"
+    working_dir: "LBR/vueLBR"

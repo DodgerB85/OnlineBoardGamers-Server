@@ -124,6 +124,7 @@ INSTALLED_APPS = [
     "django_q",
     "FCM",
     "Lobby",
+    "LBR",
     "NTR",
     "user_visit",
     "BUS",
@@ -219,6 +220,24 @@ if DEBUG:
     COMPRESS_OFFLINE = False
 # END JS Minifier settings
 
+# LBR AI seats. The policy engine is vendored in LBR/ai-service (see
+# LBR/ai/README.md) and runs as a one-shot subprocess from the Django-Q worker;
+# node runs LBRrules.js headlessly to validate and apply its decisions.
+# LBR_AI_URL optionally replaces the local binary with a remote service that
+# answers {"state", "seat"} with {"action"}.
+LBR_AI_URL = config("LBR_AI_URL", default="")
+LBR_AI_BIN = config("LBR_AI_BIN", default=str(BASE_DIR / "LBR" / "ai-service" / "bin" / "lbr-policy"))
+LBR_AI_MODEL = config("LBR_AI_MODEL", default=str(BASE_DIR / "LBR" / "ai-service" / "models" / "best.bin"))
+LBR_AI_SIMS = config("LBR_AI_SIMS", default=2000, cast=int)
+LBR_AI_ALPHA = config("LBR_AI_ALPHA", default=0.7, cast=float)
+LBR_AI_TIMEOUT = config("LBR_AI_TIMEOUT", default=30, cast=int)
+LBR_AI_NODE = config("LBR_AI_NODE", default="node")
+LBR_AI_STEP_TIMEOUT = config("LBR_AI_STEP_TIMEOUT", default=30, cast=int)
+LBR_AI_RETRY_SECONDS = config("LBR_AI_RETRY_SECONDS", default=60, cast=int)
+LBR_AI_MAX_ATTEMPTS = config("LBR_AI_MAX_ATTEMPTS", default=5, cast=int)
+# A crashed worker must not wedge a seat: a claim older than this is abandoned.
+LBR_AI_CLAIM_SECONDS = config("LBR_AI_CLAIM_SECONDS", default=30, cast=int)
+
 # ASYNC SETTINGS
 Q_CLUSTER = {
     "name": "obg_cluster",
@@ -227,7 +246,7 @@ Q_CLUSTER = {
     "timeout": 90,  # Process timeout - max time on task MUST BE LESS THAN RETRY VALUE
     "retry": 180,  # Must be bigger than time to complete longest task
     "orm": "default",  # Or your database alias
-    "poll": 10,  # Check DB every 60 seconds (replaces your 'sleeptime' idea)
+    "poll": 1,  # Seconds the ORM broker sleeps before checking for new tasks again
     "guard_cycle": 60,  # Max allowed value
     "cpu_affinity": 1,  # Forces the worker to stay on one core (Saves credits)
     "bulking": 10,  # Process up to 10 tasks in one go to minimize overhead

@@ -125,6 +125,7 @@ class GamePresenter:
             "URR": "Urr",
             "DDL": "Ddl",
             "ROW": "Row",
+            "LBR": "Lbr",
             "BOB": "Bob",
         }
         prefix = game_code_map.get(self.gameObj.gameCode, "")
@@ -193,7 +194,7 @@ class GamePresenter:
         return self.gameObj.activeVotes.get(rf.KICKOUT_VOTE_TOPIC, {}) or {}
 
     def getKickoutVoteThreshold(self):
-        remaining_players = self.gameObj.players.filter(is_missing=False).count()
+        remaining_players = self.gameObj.players.filter(is_missing=False, is_ai=False).count()
         return (remaining_players + 1) // 2
 
     def castKickoutVote(self, voter_username, target_username):
@@ -230,7 +231,7 @@ class GamePresenter:
         valid_voters = (
             set(
                 self.gameObj.players.exclude(is_missing=True)
-                .filter(player__isnull=False)
+                .filter(player__isnull=False, is_ai=False)
                 .values_list("player__username", flat=True)
             )
             - {target_username}
@@ -296,6 +297,19 @@ class GamePresenter:
             self.gameObj.serverCurrentPlayerNamesInTurnOrder = [name for name in current if name != username]
             self.gameObj.save()
 
+    def handSeatToAi(self, user):
+        """Make the AI play a seat in place; seat_order and gameData are untouched."""
+        gp = self.gameObj.players.filter(player=user).first()
+        if gp and not gp.is_ai:
+            gp.is_ai = True
+            gp.save(update_fields=["is_ai"])
+
+    def getAiSeatNumbers(self):
+        return [gp.seat_order for gp in self.gameObj.players.order_by("seat_order") if gp.is_ai]
+
+    def getAiPlayerUsernames(self):
+        return set(self.gameObj.players.filter(is_ai=True, player__isnull=False).values_list("player__username", flat=True))
+
     def setServerCurrentPlayerNamesInTurnOrder(self, playersInTurnOrderArray):
         if self.gameObj.maxPlayers == 1:
             solo_gp = self.gameObj.players.first()
@@ -341,7 +355,7 @@ class GamePresenter:
             self.gameObj.currentPlayersInTurnOrder = json.dumps(current_players_array)
         self.gameObj.save()
 
-        game_players = self.gameObj.players.exclude(is_kicked=True).select_related("player")
+        game_players = self.gameObj.players.exclude(is_kicked=True, is_ai=False).select_related("player")
 
         for gp in game_players:
             if gp.player:
@@ -381,7 +395,7 @@ class GamePresenter:
     def checkForHostChange(self, _missingUser):
         """Change host if current host is missing"""
         if _missingUser == self.gameObj.host:
-            possibleHost = self.gameObj.players.exclude(is_kicked=True).filter(is_missing=False).select_related("player").order_by("?").first()
+            possibleHost = self.gameObj.players.exclude(is_kicked=True).filter(is_missing=False, is_ai=False).select_related("player").order_by("?").first()
             if possibleHost and possibleHost.player:
                 self.gameObj.host = possibleHost.player
 
@@ -400,7 +414,7 @@ class GamePresenter:
             return
 
         currentUsername = request.user.username if request and hasattr(request, "user") and request.user else ""
-        self.gameObj.players.filter(player__isnull=False).exclude(player__username=currentUsername).update(is_pending_finish=True)
+        self.gameObj.players.filter(player__isnull=False, is_ai=False).exclude(player__username=currentUsername).update(is_pending_finish=True)
 
     def clearGeneralDataOnGameEndWithoutSave(self):
         self.gameObj.gameStatus = "FINISHED"
@@ -3774,3 +3788,100 @@ class NTRpresenter(GamePresenter):
 
     def getAllMyMoveDataForPlayer(self, name):
         return []
+
+
+class LBRpresenter(GamePresenter):
+    def startGame(self, request):
+        from Lobby.models import GamePlayer
+
+        self.gameObj.gameStatus = "ACTIVE"
+        self.gameObj.playerOrderSeed = random.randint(1000, 32767)
+
+        game_players = list(self.gameObj.players.exclude(is_kicked=True))
+
+        random.Random(self.gameObj.playerOrderSeed).shuffle(game_players)
+
+        for idx, gp in enumerate(game_players):
+            gp.seat_order = idx
+            gp.is_current = idx == 0
+
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+
+        self.gameObj.save()
+
+        if not self.gameObj.players.filter(player__username="SHADOW").exists():
+            playerListToNotify = [
+                gp.player.username
+                for gp in game_players
+                if gp.player and gp.player.username != request.user.username and not gp.is_ai
+            ]
+            self._sendStartGameNotification(request, playerListToNotify)
+
+    def endGame(self, request, _winnerUsernames, _finalPositions, _gameID):
+        from django_q.tasks import async_task
+
+        from Lobby.models import User
+        from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
+
+        self.clearGeneralDataOnGameEndWithoutSave()
+
+        for username in _winnerUsernames:
+            winner_user = User.objects.get(username=username)
+            winner_gp = self.gameObj.players.filter(player=winner_user).first()
+            if winner_gp:
+                winner_gp.winner = True
+                winner_gp.save()
+
+        self.gameObj.save()
+        self.markPlayersPendingFinish(request)
+
+        seatNames = self.getAllPlayersOrderedySeatInArray(True)
+        convertedFinalPositions = []
+        for pos, seatPos in enumerate(_finalPositions):
+            username = seatNames[seatPos]
+            if not _winnerUsernames:
+                posText = "Draw"
+            elif username in _winnerUsernames:
+                posText = "Joint 1st - Congratulations!" if len(_winnerUsernames) > 1 else "1st - Congratulations!"
+            elif pos == 1:
+                posText = "2nd"
+            elif pos == 2:
+                posText = "3rd"
+            elif pos == 3:
+                posText = "4th"
+            else:
+                posText = "Last"
+            convertedFinalPositions.append([username, posText, pos])
+
+        async_task(
+            "Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame",
+            "LBR",
+            [row for row in convertedFinalPositions if row[0] not in self.getAiPlayerUsernames()],
+            _gameID,
+            self.gameObj.gamePace,
+            self.getGameName(),
+            request.user.username,
+        )
+
+        finalPositionRows = [list(_winnerUsernames)] if _winnerUsernames else [seatNames]
+        for seatPos in _finalPositions:
+            username = seatNames[seatPos]
+            if username not in _winnerUsernames:
+                finalPositionRows.append([username, 0])
+
+        if self.gameObj.relatedMainTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                self.gameObj.relatedMainTournament,
+                self.gameObj,
+                _winnerUsernames,
+                finalPositionRows,
+            )
+        if self.gameObj.relatedMiniTournament:
+            SF_M_ProcessAnyTournamentEndGame(
+                request,
+                self.gameObj.relatedMiniTournament,
+                self.gameObj,
+                _winnerUsernames,
+                finalPositionRows,
+            )

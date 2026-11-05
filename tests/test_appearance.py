@@ -51,7 +51,7 @@ class AppearanceTests(TestCase):
 
     def test_game_view_templates_do_not_load_lobby_theme(self):
         self.user.profile.darkMode = True
-        for game in ("FCM", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB", "URR", "DDL", "ROW"):
+        for game in ("FCM", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB", "URR", "DDL", "ROW", "LBR"):
             with self.subTest(game=game):
                 html = render_to_string(f"{game}/show{game}game.html", {"user": self.user})
                 self.assertNotIn('data-theme="dark"', html)

@@ -1,0 +1,161 @@
+:root {
+	--lbr-sand: #d9a066;
+	--lbr-sand-light: #e2a96f;
+	--lbr-ink: #222034;
+	--lbr-water: #3f3f74;
+	--lbr-red: #ac3232;
+	--lbr-blue: #5b6ee1;
+	--lbr-green: #388900;
+	--lbr-black: #242327;
+	--lbr-gold: #fbf236;
+	--lbr-panel: #f4ead6;
+	--lbr-panel-edge: #663931;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	background: #d4eafd;
+	color: #302f27;
+	font-family: Arial, sans-serif;
+	font-size: 16px;
+}
+
+#app {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+.game-area {
+	display: flex;
+	flex: 1 1 auto;
+	gap: 10px;
+	padding: 10px 12px;
+	align-items: stretch;
+	justify-content: center;
+}
+
+.player-rail {
+	flex: 0 0 250px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-height: 0;
+	overflow-y: auto;
+}
+
+.center-column {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
+	min-height: 0;
+}
+
+.board-wrap {
+	flex: 1 1 auto;
+	min-height: 0;
+	min-width: 0;
+	display: flex;
+	align-items: flex-start;
+	overflow: auto;
+}
+
+.panel {
+	background: var(--lbr-panel);
+	border: 2px solid var(--lbr-panel-edge);
+	border-radius: 8px;
+	padding: 10px;
+}
+
+.panel h2 {
+	margin: 0 0 8px;
+	font-size: 16px;
+	border-bottom: 1px solid rgba(102, 57, 49, 0.35);
+	padding-bottom: 4px;
+}
+
+.row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+}
+
+.message {
+	min-height: 1.4em;
+	font-size: 13px;
+}
+
+.message.error {
+	color: #8b1d1d;
+}
+
+.message.ok {
+	color: #275d02;
+}
+
+.hidden {
+	display: none;
+}
+
+.actionsLineButton {
+	margin: 10px;
+	width: fit-content;
+	border: 2px solid green;
+	border-radius: 5px;
+	font-weight: bolder;
+	padding: 5px;
+	cursor: pointer;
+}
+
+.actionsLineButton:hover {
+	background-color: lightgrey;
+}
+
+.actionsLineButton:active {
+	background-color: darkgrey;
+}
+
+/* One appearance for action buttons across panels and previews. The header
+   controls and the board hit targets keep their own styles. */
+:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):not(.support-button):not(.conflict-button) {
+	box-sizing: border-box;
+	min-height: 34px;
+	padding: 5px 8px;
+	border: 1px solid #998a67;
+	border-radius: 3px;
+	background: #fffdf4;
+	color: #302f27;
+	font-family: Arial, sans-serif;
+	font-size: 16px;
+	font-weight: 400;
+	line-height: 1.2;
+	opacity: 1;
+	cursor: pointer;
+}
+
+:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):not(.support-button):not(.conflict-button):hover:enabled {
+	background: #f1e9d7;
+	border-color: #756440;
+}
+
+:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):not(.support-button):not(.conflict-button):focus-visible {
+	outline: 2px solid #177daf;
+	outline-offset: 2px;
+}
+
+:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):not(.support-button):not(.conflict-button):is([aria-pressed="true"], [aria-current], .current, .selected, .chosen):enabled {
+	background: #e1edf5;
+	border-color: #177daf;
+}
+
+:is(#app) button:not(.topMenuItem):not(.cell):not(.utilityClose):not(.zoomButton):not(.pieceButton):not(.support-button):not(.conflict-button):disabled {
+	opacity: 0.45;
+	cursor: default;
+}

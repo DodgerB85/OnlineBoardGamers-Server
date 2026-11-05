@@ -1,0 +1,22 @@
+{% extends "Lobby/help_shell.html" %}
+{% load i18n %}
+{% block page_title %}{% translate "Land Between Rivers Help" %}{% endblock %}
+{% block content %}
+<h2>{% translate "Goal" %}</h2>
+<p>{% translate "Your score is the number of victory points in the colour you have the fewest of. Treasures are wild and fill your lowest colour." %}</p>
+
+<h2>{% translate "A turn" %}</h2>
+<p>{% translate "Take up to two actions: move a leader, place a civilisation tile, place a catastrophe tile, or swap up to six tiles. After each action the treasure rule applies, and at the end of the turn the active player scores monuments and everybody refreshes to six tiles." %}</p>
+
+<h2>{% translate "Kingdoms and leaders" %}</h2>
+<p>{% translate "A kingdom is a connected group of tiles containing at least one leader. Leaders are placed on empty land next to a red temple. Moving a leader into a kingdom that already holds another player's leader of the same colour starts a revolt, fought with red temples from your hand." %}</p>
+
+<h2>{% translate "Placing tiles" %}</h2>
+<p>{% translate "Farms (blue) go on river spaces; temples (red), markets (green) and settlements (black) go on land. A tile may not join three kingdoms. If it joins two kingdoms, resolve conflicts between leaders of the same colour: the attacker sends tiles of that colour first, then the defender. The winner scores that colour and destroys the loser's same-colour tiles." %}</p>
+
+<h2>{% translate "Treasures and monuments" %}</h2>
+<p>{% translate "If a kingdom holds more than one treasure and a green trader, that trader's owner takes all but one, starting with treasures nearest the board edge. Four like-coloured tiles in a square may be turned into a monument, which scores its two colours at the end of a turn when the matching leaders are in its kingdom." %}</p>
+
+<h2>{% translate "Game end" %}</h2>
+<p>{% translate "The game ends at the end of a turn when only one or two treasures remain on the board, or when a player would draw a tile but the bag is empty. Highest lowest-colour score wins." %}</p>
+{% endblock %}
