@@ -68,12 +68,9 @@
                         <!--<span class="topMenuItem" data-type="9" id="assistanceMenuButton"><img id="assistIcon" src="{% static 'FCM/images/assistance.svg' %}"><span>AID</span></span>-->
                       </div>
                         <div id="topRight">
-                          <span class="live"></span>
-                          <div id="liveDiv">{% translate "Connecting to server" %}.....</div>
                           <div id="loggedInDiv">
-                            {% if user.is_authenticated %}
-                              {% translate "Logged in as" %}: {{ user.username }}
-                            {% endif %}
+                            {% if user.is_authenticated %}{{ user.username }}{% endif %}
+                            <div id="WSstatus" class="WSconnecting" title="{% translate 'Connecting to server' %}" aria-label="{% translate 'Connecting to server' %}" role="status"></div>
                             <br />
                             <span id="kickoutTimerSpan">{% translate "Turn time left" %}: <span id="kickoutTimerTimer"></span></span>
                             <br />

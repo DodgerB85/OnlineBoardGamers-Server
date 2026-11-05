@@ -250,7 +250,6 @@ function init() {
 	if (global.load != undefined && !global.HLCgameSummary) Log.refreshHistory(M)
 
 	if (global.liveWS) {
-		$(".live").show()
 		IO.init(C)
 		StartWebSocket().catch(() => {
 			console.log("WebSocket background task initialized.")

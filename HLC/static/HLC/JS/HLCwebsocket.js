@@ -4,13 +4,21 @@ let retryCount = 0
 const MAX_RETRIES = 13 // Uses 3 tries per attempt
 const BASE_RETRY_DELAY = 2000
 
+function setWSstatus(statusClass, statusText) {
+	var statusElement = document.getElementById("WSstatus")
+	if (!statusElement) return
+	statusElement.className = statusClass
+	statusElement.title = statusText
+	statusElement.setAttribute("aria-label", statusText)
+}
+
 async function StartWebSocket() {
 	if (HLCwebSocket && HLCwebSocket.readyState === 1) return HLCwebSocket
 	if (HLCconnectionPromise) return HLCconnectionPromise
 
 	if (retryCount >= MAX_RETRIES) {
 		console.error("Max WebSocket retries reached.")
-		document.getElementById("liveDiv").innerHTML = gettext("Disconnected")
+		setWSstatus("WSdisconnected", gettext("Disconnected"))
 		return null
 	}
 
@@ -33,11 +41,11 @@ async function StartWebSocket() {
 			global.liveWS = false
 
 			if (retryCount < MAX_RETRIES) {
-				document.getElementById("liveDiv").innerHTML = gettext("Connecting...")
+				setWSstatus("WSconnecting", gettext("Connecting..."))
 				const delay = BASE_RETRY_DELAY * Math.pow(2, retryCount - 1)
 				setTimeout(StartWebSocket, delay)
 			} else {
-				document.getElementById("liveDiv").innerHTML = gettext("Disconnected")
+				setWSstatus("WSdisconnected", gettext("Disconnected"))
 			}
 		}
 
@@ -82,24 +90,24 @@ async function StartWebSocket() {
 }
 
 function HLCwebSocketOnOpen(evt) {
-	document.getElementById("liveDiv").innerHTML = gettext("Connected")
+	setWSstatus("WSconnected", gettext("Connected"))
 	IO.checkForLatestData()
 }
 
 function HLCwebSocketOnClose(evt) {
-	document.getElementById("liveDiv").innerHTML = gettext("Disconnected")
+	setWSstatus("WSdisconnected", gettext("Disconnected"))
 	setTimeout(StartWebSocket, 2000)
 }
 
 function HLCwebSocketOnError(evt) {
-	document.getElementById("liveDiv").innerHTML = gettext("Error")
+	setWSstatus("WSdisconnected", gettext("Error"))
 	setTimeout(StartWebSocket, 2000)
 }
 
 function HLCwebSocketClose(evt) {
 	HLCwebSocket.close()
 	// MAYBE DELETE THIS?
-	document.getElementById("liveDiv").innerHTML = gettext("Disconnected")
+	setWSstatus("WSdisconnected", gettext("Disconnected"))
 }
 
 async function HLCwebSocketOnInfo(IncomingInfo) {

@@ -34,6 +34,27 @@ body {
 	color: rgb(255, 6, 0);
 }
 
+#WSstatus {
+	border: 2px solid white;
+	border-radius: 100%;
+	width: 15px;
+	height: 15px;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.WSconnecting {
+	background-color: #ff9900;
+}
+
+.WSconnected {
+	background-color: green;
+}
+
+.WSdisconnected {
+	background-color: darkred;
+}
+
 .topMenuItem {
 	display: inline-block;
 	width: 62px;
@@ -65,12 +86,6 @@ body {
 
 .topMenuItem.highlighted {
 	color: #ff9900;
-}
-
-span.live {
-	float: right;
-	height: 100%;
-	display: none;
 }
 
 #topRight {
