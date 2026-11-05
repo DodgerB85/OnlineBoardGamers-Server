@@ -774,3 +774,17 @@ msgstr "<b>权限丢失。请重新加载页面并再次检查</b>"
 #~ "%(gameName)s - %(currentTurnString)s.\n"
 #~ "[点击这里进行游戏Horseless Carriage](https://www.OnlineBoardGamers.com/HC/"
 #~ "%(gameOD)s/)"
+
+msgid "Turn time left"
+msgstr "剩余行动时间"
+
+msgid "Flexi-Time left"
+msgstr "剩余弹性时间"
+
+#, python-format
+msgid "\nHi %(user)s,\n\nYour factory is now blocking the queue at Online Board Gamers - Horseless Carriage.\n\nYour move time has started.\n\nGame: %(gameName)s\nTurn/Phase: %(currentTurnString)s\n\nhttps://%(domain)s%(the_url)s\n\nNotification preferences can be changed in your Profile\n\n"
+msgstr "\n%(user)s，你好：\n\n你的工厂现在阻塞了 Online Board Gamers - Horseless Carriage 的队列。\n\n你的行动时间已开始。\n\n游戏：%(gameName)s\n回合/阶段：%(currentTurnString)s\n\nhttps://%(domain)s%(the_url)s\n\n通知偏好可在你的个人资料中更改\n\n"
+
+#, python-format
+msgid "\nHi %(user)s,\n\nBuild Factory is in progress at Online Board Gamers - Horseless Carriage.\n\nYou can submit your factory now, even if you are not first in Engineering Order.\nIf your factory becomes the one blocking the queue, you will be alerted when your move time starts.\n\nGame: %(gameName)s\nTurn/Phase: %(currentTurnString)s\n\nhttps://%(domain)s%(the_url)s\n\nNotification preferences can be changed in your Profile\n\n"
+msgstr "\n%(user)s，你好：\n\nOnline Board Gamers - Horseless Carriage 的建造工厂阶段正在进行。\n\n你现在可以提交工厂，即使你不是工程顺序中的第一位。\n如果你的工厂开始阻塞队列，系统会在你的行动时间开始时通知你。\n\n游戏：%(gameName)s\n回合/阶段：%(currentTurnString)s\n\nhttps://%(domain)s%(the_url)s\n\n通知偏好可在你的个人资料中更改\n\n"
