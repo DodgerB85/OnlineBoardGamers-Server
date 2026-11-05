@@ -35,6 +35,6 @@ RUN pip install -r requirements-dev.txt
 # Copy the project code into the container
 COPY . /app/
 # LBR_AI_BIN defaults to this path in settings.py.
-COPY --from=lbr-ai /build/target/release/lbr-policy /app/LBR/ai-service/target/release/lbr-policy
+COPY --from=lbr-ai /build/target/release/lbr-policy /app/LBR/ai-service/bin/lbr-policy
 
 CMD ./start.sh

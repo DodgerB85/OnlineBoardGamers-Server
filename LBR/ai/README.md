@@ -69,9 +69,18 @@ cargo build --release --locked     # target/release/lbr-policy
 cargo test --release               # 125 donor tests
 ```
 
-The production image builds the same crate in a `rust:1-alpine` stage and copies
-the static binary to
-`/app/LBR/ai-service/target/release/lbr-policy` (the `LBR_AI_BIN` default).
+A static build is committed at `bin/lbr-policy` (the `LBR_AI_BIN` default), so a
+plain git pull deploy (PythonAnywhere) needs no Rust toolchain. After changing
+the engine, rebuild and commit it:
+
+```sh
+rustup target add x86_64-unknown-linux-musl
+cargo build --release --locked --target x86_64-unknown-linux-musl
+cp target/x86_64-unknown-linux-musl/release/lbr-policy bin/ && strip bin/lbr-policy
+```
+
+The Docker image builds the crate in a `rust:1-alpine` stage and overwrites
+`/app/LBR/ai-service/bin/lbr-policy` with it.
 
 Manual call:
 
@@ -89,7 +98,7 @@ every returned action with `LBRrules.js`.
 | Setting | Default | Meaning |
 |---|---|---|
 | `LBR_AI_URL` | empty | Compatibility override: POST `{"state","seat"}` to a remote service. Empty uses the local binary. |
-| `LBR_AI_BIN` | `BASE_DIR/LBR/ai-service/target/release/lbr-policy` | Policy binary. |
+| `LBR_AI_BIN` | `BASE_DIR/LBR/ai-service/bin/lbr-policy` | Policy binary. |
 | `LBR_AI_MODEL` | `BASE_DIR/LBR/ai-service/models/best.bin` | Default-board weights (`--net`). A board with its own `<map>.bin` beside it uses that instead. |
 | `LBR_AI_SIMS` | `2000` | Search simulations per decision, split across 4 hidden-hand determinizations. |
 | `LBR_AI_ALPHA` | `0.7` | Network/heuristic blend used by the shipped checkpoint. |

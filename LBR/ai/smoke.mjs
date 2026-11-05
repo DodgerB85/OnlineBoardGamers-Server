@@ -11,7 +11,7 @@
 import { spawnSync } from "node:child_process";
 import { applyAction, createInitialState, currentActor } from "../vueLBR/src/js/LBRrules.js";
 
-const bin = process.env.LBR_AI_BIN || new URL("../ai-service/target/release/lbr-policy", import.meta.url).pathname;
+const bin = process.env.LBR_AI_BIN || new URL("../ai-service/bin/lbr-policy", import.meta.url).pathname;
 const map = process.env.LBR_MAP || "default";
 const net = map === "default" ? "best.bin" : `${map}.bin`;
 const model = process.env.LBR_AI_MODEL || new URL(`../ai-service/models/${net}`, import.meta.url).pathname;
