@@ -16,7 +16,7 @@ function entry(player, action) {
 	return [code, player, 1, ...params]
 }
 
-function routingHistory(hasPump = true, hasLand = false) {
+function routingHistory(hasPump = true, hasLand = false, capacity = 2, hasEmptyReservoir = false) {
 	const opening = createGame(["A", "B", "C"])
 	let game = JSON.parse(JSON.stringify(opening))
 	Object.assign(game.gameflow, { phase: rf.PHASE_DEVELOPMENT, stateOrder: [0], stateIndex: 0, developmentStep: "purchasing", turnOrder: [0] })
@@ -25,17 +25,18 @@ function routingHistory(hasPump = true, hasLand = false) {
 	const river = game.board.areas.find((area) => area.id === "printed-4-2")
 	const pump = game.board.areas.find((area) => area.id === "printed-4-3")
 	const land = game.board.areas.find((area) => area.id === "printed-4-3")
-	if (hasPump || hasLand) {
-		river.waterwork = { state: 0, kind: "reservoir", capacity: 2 }
+	if (hasPump || hasLand || hasEmptyReservoir) {
+		river.waterwork = { state: 0, kind: "reservoir", capacity }
 		if (hasPump) {
 			pump.waterwork = { state: 0, kind: "pump", capacity: 1 }
 			pump.owner = 0
 			game.board.canals.push([river.id, pump.id])
-		} else {
+		} else if (hasLand) {
 			land.owner = 0
 			game.board.canals.push([river.id, land.id])
 		}
 	}
+	if (hasEmptyReservoir) game.board.areas.find((area) => area.label === "E7").waterwork = { state: 0, kind: "reservoir", capacity: 8 }
 	const openingChanges = changesBetween(opening, game)
 	const history = [[rf.HIST_NEW_GAME, -1, null, openingChanges]]
 	function act(action) {
@@ -96,7 +97,7 @@ test("Reservoir water left after irrigation returns to the river before it flows
 	assert.equal(released.amount, 1)
 	assert.equal(released.from, reservoir.to)
 	assert.deepEqual(released.path, [reservoir.to])
-	assert.equal(script.steps.indexOf(released), script.steps.indexOf(irrigation) + 1)
+	assert.equal(script.steps.indexOf(released), script.steps.indexOf(irrigation) + 2)
 	const riverIndex = script.steps.findIndex((step, index) => index > script.steps.indexOf(released) && step.type === "river" && step.from === reservoir.to)
 	assert.equal(script.steps[riverIndex].amount, 5)
 })
@@ -147,4 +148,46 @@ test("Junction water stays visible until the next river merges with it", () => {
 	assert.equal(script.steps[mergeIndex].amount, arrival.amount + incoming.amount)
 	assert.ok(!script.steps[mergeIndex].waitingWater.some((water) => water.area === arrival.to))
 	assert.deepEqual(script.steps.at(-1).waitingWater, [])
+})
+
+
+test("The full reservoir share travels to land before one water irrigates and the rest returns", () => {
+	const { history, snapshots } = routingHistory(false, true, 4)
+	const script = buildWaterPlayback(history, snapshots, 2)
+	const index = script.steps.findIndex((step) => step.type === "canal")
+	const [canal, irrigation, returned, release, river] = script.steps.slice(index, index + 5)
+	assert.equal(canal.amount, 4)
+	assert.deepEqual(canal.path, ["printed-4-2", "printed-4-3"])
+	assert.ok(!canal.wet.includes(canal.to))
+	assert.equal(irrigation.type, "irrigate")
+	assert.equal(irrigation.amount, 1)
+	assert.deepEqual(irrigation.path, [canal.to])
+	assert.ok(irrigation.wet.includes(canal.to))
+	assert.deepEqual(irrigation.waitingWater.find((water) => water.area === canal.to), { area: canal.to, amount: 3 })
+	assert.deepEqual(irrigation.waitingWater.find((water) => water.area === canal.from), { area: canal.from, amount: 2 })
+	assert.equal(returned.type, "return")
+	assert.equal(returned.amount, 3)
+	assert.deepEqual(returned.path, [...canal.path].reverse())
+	assert.ok(!returned.waitingWater.some((water) => water.area === canal.to))
+	assert.equal(release.amount, 3)
+	assert.equal(river.type, "river")
+	assert.equal(river.amount, 5)
+	assert.equal(script.steps.at(-1).text, "Water routing complete: 1 hex irrigated, 17 water left the board.")
+})
+
+test("A reservoir without irrigation passes water on without a split and recombination", () => {
+	const { history, snapshots } = routingHistory(false, false, 2, true)
+	const script = buildWaterPlayback(history, snapshots, 1)
+	assert.ok(!script.steps.some((step) => ["reservoir", "release"].includes(step.type)))
+	const river = script.steps.find((step) => step.type === "river" && step.from === "printed-4-2")
+	assert.equal(river.amount, 6)
+	assert.deepEqual(river.waitingWater, [])
+	const junction = script.board.areas.find((area) => area.label === "E7")
+	const mergeIndex = script.steps.findIndex((step) => step.type === "confluence" && step.to === junction.id && !step.waiting)
+	assert.ok(mergeIndex >= 0)
+	const downstream = script.steps[mergeIndex + 1]
+	assert.equal(downstream.type, "river")
+	assert.equal(downstream.from, junction.id)
+	assert.equal(downstream.amount, script.steps[mergeIndex].amount)
+	assert.equal(script.steps.filter((step) => step.type === "outflow").reduce((sum, step) => sum + step.amount, 0), 18)
 })

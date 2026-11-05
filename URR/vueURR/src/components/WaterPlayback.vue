@@ -48,7 +48,10 @@ const duration = computed(() => {
 	}
 	return Math.min(1.8, Math.max(0.3, length / SPEED))
 })
-const waitingText = (id) => (playback.state.board.areas.find((area) => area.id === id)?.waterwork ? t("waterPlayback.toContinue") : t("waterPlayback.atJunction"))
+const waitingText = (id) => {
+	const area = playback.state.board.areas.find((area) => area.id === id)
+	return t(!area.isRiver ? "waterPlayback.toReturn" : area.waterwork ? "waterPlayback.toContinue" : "waterPlayback.atJunction")
+}
 // The blob's idle wobble is one continuous animation: hand it the phase the
 // clock is at, so a re-rendered step does not restart it with a visible pulse.
 const BOB_SECONDS = 2.8
