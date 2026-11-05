@@ -4,10 +4,18 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 
 import Lobby.sharedFunctions.constants as rf
-
+from Lobby.sharedFunctions.availabilityMatchmaking import expected_exchange_hours
 
 AVAILABILITY_BUCKET_COUNT = 24
 MAX_TRACKED_TURN_HOURS = 14 * 24
+
+# Join warning: compare the creator's play-time habits with the joiner's.
+# Typical player pairs exchange a turn in about 2 hours (95th percentile ~6.5),
+# so above 8 hours each turn takes most of a day. A player needs this many
+# tracked moves first: fewer hours of history say more about the smoothing
+# prior than about the player.
+JOIN_WARNING_MIN_MOVES = 20
+JOIN_WARNING_EXCHANGE_HOURS = 8.0
 
 
 def get_availability_hour(moment=None):
@@ -128,6 +136,33 @@ def should_skip_availability_tracking(game):
 
 def should_skip_availability_username(username):
     return username in rf.SHADOW_USERNAMES or username == "BotKickStarter" or username == "RowAI" or username.endswith("Bot")
+
+
+def availability_join_warning_hours(joiner, creator):
+    """Hours per exchange when the creator's play times clash with the joiner's, else None.
+
+    Only a warning: the join still goes through once the player confirms it.
+    """
+    for player in (joiner, creator):
+        if not player or should_skip_availability_username(player.username):
+            return None
+
+    joiner_profile = joiner.profile
+    creator_profile = creator.profile
+    joiner_move_counts = joiner_profile.availabilityMoveCounts
+    creator_move_counts = creator_profile.availabilityMoveCounts
+    joiner_samples = sum(normalize_availability_counts(joiner_move_counts))
+    creator_samples = sum(normalize_availability_counts(creator_move_counts))
+    if min(joiner_samples, creator_samples) < JOIN_WARNING_MIN_MOVES:
+        return None
+
+    exchange_hours = expected_exchange_hours(
+        joiner_move_counts,
+        joiner_profile.availabilityTurnCounts,
+        creator_move_counts,
+        creator_profile.availabilityTurnCounts,
+    )
+    return exchange_hours if exchange_hours >= JOIN_WARNING_EXCHANGE_HOURS else None
 
 
 def get_starting_options(starting_options):

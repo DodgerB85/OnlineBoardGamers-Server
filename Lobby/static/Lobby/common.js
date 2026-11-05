@@ -64,3 +64,23 @@ function addGameRowDividers() {
 }
 
 document.addEventListener("DOMContentLoaded", addGameRowDividers)
+
+// Join-time availability warning. Shared by the lobby and schism join flows;
+// pages without the dialog markup in joinWarningDiv.html fall back to a native confirm.
+function showJoinWarning(message, onJoin) {
+	const dialog = document.getElementById("joinWarningDiv")
+	if (!dialog) {
+		if (window.confirm("⚠️ " + message)) onJoin()
+		return
+	}
+
+	document.getElementById("joinWarningText").textContent = message
+	document.getElementById("joinWarningJoin").onclick = function () {
+		dialog.style.display = "none"
+		onJoin()
+	}
+	document.getElementById("joinWarningCancel").onclick = function () {
+		dialog.style.display = "none"
+	}
+	dialog.style.display = "block"
+}

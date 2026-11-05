@@ -169,7 +169,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 }) // END INIT LOBBY
 
-function joinGame(gameName, _gameID) {
+function joinGame(gameName, _gameID, confirmed) {
 	let csrftoken = getCookie("csrftoken")
 	fetch("/joinGame/" + gameName + "/", {
 		method: "POST",
@@ -177,12 +177,17 @@ function joinGame(gameName, _gameID) {
 			gameID: _gameID,
 			action: "join",
 			source: "ajax",
+			confirmed: confirmed === true,
 		}),
 		headers: { "X-CSRFToken": csrftoken },
 	})
 		.then((response) => response.json())
 		.then((result) => {
 			//alert(JSON.stringify(result))
+			if (result.confirm_join) {
+				showJoinWarning(result.confirm_join, () => joinGame(gameName, _gameID, true))
+				return
+			}
 			if (result.show_div) {
 				window.open("/index/available", "_self")
 			} else {

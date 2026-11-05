@@ -1,0 +1,7 @@
+{% load i18n %}
+<!-- Play-time warning shown by showJoinWarning in common.js before joining. -->
+<div id="joinWarningDiv" role="dialog" aria-modal="true" aria-live="polite">
+    <p><span aria-hidden="true">⚠️</span> <span id="joinWarningText"></span></p>
+    <div id="joinWarningJoin" class="buttonDiv Join learningGameConfirmButtons">{% translate "Join anyway" %}</div>
+    <div id="joinWarningCancel" class="buttonDiv Leave learningGameConfirmButtons">{% translate "Cancel" %}</div>
+</div>
