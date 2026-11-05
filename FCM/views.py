@@ -143,13 +143,16 @@ def _fcm_employee_losses(currentGame, new_game_data, starting_options):
     new_rosters = _fcm_roster_cards(new_game_data, starting_options)
     if old_rosters is None or new_rosters is None:
         return []
+    # Count, not card identity: training replaces one card with another, which
+    # is a legitimate working-day change even though the old card disappears.
     losses = []
     for name in old_rosters:
         if name not in new_rosters:
             continue
-        missing = Counter(old_rosters[name]) - Counter(new_rosters[name])
-        if missing:
-            losses.append((name, len(old_rosters[name]), len(new_rosters[name]), missing))
+        old_total = len(old_rosters[name])
+        new_total = len(new_rosters[name])
+        if new_total < old_total:
+            losses.append((name, old_total, new_total))
     # Only the Labor Market Headhunter may move a card between players. Outside
     # that module any per-player fall is a loss, even if someone else gained.
     if losses and rfFCM.SO_LABOR_MARKET in starting_options and sum(len(cards) for cards in new_rosters.values()) >= sum(len(cards) for cards in old_rosters.values()):
@@ -157,9 +160,19 @@ def _fcm_employee_losses(currentGame, new_game_data, starting_options):
     return losses
 
 
-def _fcm_only_cfo_fired(losses, new_phase):
+def _fcm_only_cfo_fired(losses, currentGame, new_game_data, starting_options, new_phase):
     """The $100 milestone fires the CFO at the end of the working day."""
-    return new_phase == rfFCM.PHASE_PIZZA_BOMB and all(set(missing) == {FCM_CFO} for _name, _old, _new, missing in losses)
+    if new_phase != rfFCM.PHASE_PIZZA_BOMB or not losses:
+        return False
+    old_rosters = _fcm_roster_cards(currentGame.gameData, starting_options)
+    new_rosters = _fcm_roster_cards(new_game_data, starting_options)
+    if old_rosters is None or new_rosters is None:
+        return False
+    for name, old_total, new_total in losses:
+        missing = Counter(old_rosters[name]) - Counter(new_rosters[name])
+        if set(missing) != {FCM_CFO} or missing[FCM_CFO] != old_total - new_total:
+            return False
+    return True
 
 
 def _fcm_block_employee_loss(request, currentGame, presenter, new_game_data, new_phase=None, status=None, allow_loss=False):
@@ -171,16 +184,20 @@ def _fcm_block_employee_loss(request, currentGame, presenter, new_game_data, new
         status == "FINISHED"
         or currentGame.phase == rfFCM.PHASE_PAYDAY
         or new_phase == rfFCM.PHASE_PAYDAY
+        # Mid-working-day saves include normal training/hiring edits. The
+        # dangerous transition INTO the working day (turn order -> 5) stays
+        # guarded; only 5 -> 5 is exempt.
+        or (currentGame.phase == rfFCM.PHASE_WORKING_DAY and new_phase == rfFCM.PHASE_WORKING_DAY)
         or rfFCM.SO_SANDBOX_MODE in starting_options
         or rf.SO_TRAINING_GAME in starting_options
     ):
         return None
 
     losses = _fcm_employee_losses(currentGame, new_game_data, starting_options)
-    if not losses or _fcm_only_cfo_fired(losses, new_phase):
+    if not losses or _fcm_only_cfo_fired(losses, currentGame, new_game_data, starting_options, new_phase):
         return None
 
-    loss_text = ", ".join(f"{name}: {old}->{new}" for name, old, new, _missing in losses)
+    loss_text = ", ".join(f"{name}: {old}->{new}" for name, old, new in losses)
     SN_sendAdminErrorMessage(
         f"BLOCKED SAVE - EMPLOYEE LOSS - gameID: {currentGame.id} - User: {request.user.username} "
         f"- phase: {new_phase} - DB phase: {currentGame.phase} - losses: {loss_text}"

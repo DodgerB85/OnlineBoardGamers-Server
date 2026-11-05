@@ -160,6 +160,44 @@ class FcmEmployeeLossGuardTest(TestCase):
 
         self.assertNotIn("syncError", body, body)
 
+    def test_mid_working_day_save_is_exempt(self):
+        self.game.phase = 5
+        self.game.save(update_fields=["phase"])
+        body = self._save(
+            [
+                player("alice", [], []),
+                player("bob", [4], [], [7, 1]),
+            ],
+            5,
+        )
+
+        self.assertNotIn("syncError", body, body)
+
+    def test_transition_into_working_day_is_still_guarded(self):
+        self.game.phase = 4  # turn order -> working day
+        self.game.save(update_fields=["phase"])
+        body = self._save(
+            [
+                player("alice", [], []),
+                player("bob", [4], [], [7, 1]),
+            ],
+            5,
+        )
+
+        self.assertTrue(body.get("employeeLoss"), body)
+
+    def test_training_replacement_is_not_a_loss(self):
+        # Training removes one card and adds another: same count, different card.
+        body = self._save(
+            [
+                player("alice", [5, 6], [3], [14, 9]),
+                player("bob", [4], [], [7, 1]),
+            ],
+            PHASE_TURN_ORDER,
+        )
+
+        self.assertNotIn("syncError", body, body)
+
     def test_cards_cannot_move_to_another_player_without_labor_market(self):
         body = self._save(
             [
