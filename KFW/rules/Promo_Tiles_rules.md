@@ -69,7 +69,7 @@ The two sides are alternative boats; use the side chosen for the game.
 
 ### The Glade in Winter
 
-- At game end, score 3 VP for each adjacent Winter tile.
+- At game end, score 3 VP for each adjacent tile with a winter icon.
 
 ### Keyside
 

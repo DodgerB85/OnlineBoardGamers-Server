@@ -3263,9 +3263,9 @@ export function scoreAutoProcessingTilesAndMoveResources(playerIndex) {
 			// get neighbours - a full array of tiles data
 			let neighbours = map.getNeighbours(playerIndex, tile.coord)
 
-			// Score adjacent WINTER tiles
+			// Score adjacent tiles with a winter icon: boats and turn order tiles in a village always show their winter side
 			if (tile.tileID[0] === rf.TILE_WINTER_THE_GLADE_IN_WINTER_A) {
-				let winterNeighbours = neighbours.filter((tile) => tile.season === rf.WINTER).length
+				let winterNeighbours = neighbours.filter((tile) => tile.season === rf.WINTER || tile.season === rf.SEASON_BOAT_TILE || tile.season === rf.SEASON_TURN_ORDER_TILE).length
 				tile.victoryPoints[0] = winterNeighbours * 3
 			}
 			// Score adjacent SUMMER tiles
