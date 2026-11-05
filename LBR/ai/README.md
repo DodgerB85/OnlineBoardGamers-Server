@@ -65,10 +65,16 @@ hash above:
 ```sh
 cd tigris-and-euphrates
 rustup target add x86_64-unknown-linux-musl
-cargo build --release --locked --target x86_64-unknown-linux-musl --bin tigris-and-euphrates
+RUSTFLAGS="-C target-cpu=x86-64" cargo build --release --locked \
+  --target x86_64-unknown-linux-musl --bin tigris-and-euphrates
 cp target/x86_64-unknown-linux-musl/release/tigris-and-euphrates \
   <OBG>/LBR/ai-service/bin/lbr-policy && strip <OBG>/LBR/ai-service/bin/lbr-policy
 ```
+
+Build with `target-cpu=x86-64`: a `native` build emits GFNI/AVX-512
+instructions and dies with SIGILL on deploy hosts that lack them
+(PythonAnywhere's CPU has AVX2 but not GFNI). Check the result with
+`objdump -d .../lbr-policy | grep -c gf2p8affineqb`; it must print 0.
 
 Then run `node LBR/ai/smoke.mjs` (and `LBR_MAP=<map> node LBR/ai/smoke.mjs 400`
 for each board) to check that every action it returns is legal.
