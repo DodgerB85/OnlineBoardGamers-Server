@@ -10,7 +10,13 @@ const motion = ref(null)
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
 const step = computed(() => playback.current)
 const position = (id) => boardDisplay.getAreaPosition(playback.state.board.areas.find((area) => area.id === id))
-const points = computed(() => step.value.path.map(position).filter(Boolean))
+const points = computed(() => {
+	const positions = step.value.path.map(position).filter(Boolean)
+	// The unused reservoir share leaves the reservoir marker and rejoins the river
+	// at the hex centre.
+	if (step.value.type === "release" && positions.length === 1) return [{ x: positions[0].x + 26, y: positions[0].y - 24 }, positions[0]]
+	return positions
+})
 const path = computed(() => {
 	const positions = [...points.value]
 	if (step.value.type === "source" && positions.length) positions.unshift({ x: positions[0].x, y: 0 })
