@@ -181,6 +181,14 @@ export function syncHistoryReplay(cache, history, playerNames, creationTimestamp
 	return cache
 }
 
+// Replay jumps need the previous entry made by this player, skipping the opening.
+export function previousOwnStep(history, playerIndex, beforeStep) {
+	for (let index = beforeStep - 1; index > 0; index--) {
+		if (history[index]?.[1] === playerIndex) return index
+	}
+	return null
+}
+
 export function expandHistory(data, newGameEvent) {
 	if (!Array.isArray(data.replay)) throw new Error("Unsupported URR replay format")
 	if (!data.replay.every((entry) => Array.isArray(entry) && typeof entry[0] === "number" && typeof entry[1] === "number" && typeof entry[2] === "number")) throw new Error("Unsupported URR replay format")

@@ -796,6 +796,7 @@ export default {
 	replay: {
 		aria: "Contrôles de relecture",
 		title: "Relecture",
+		backToMyLastMove: "Revenir à mon dernier coup",
 		prev: "Précédent",
 		next: "Suivant",
 		step: "Étape {step} / {total}",

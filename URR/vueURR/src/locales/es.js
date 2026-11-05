@@ -796,6 +796,7 @@ export default {
 	replay: {
 		aria: "Controles de repetición",
 		title: "Repetición",
+		backToMyLastMove: "Volver a mi último movimiento",
 		prev: "Anterior",
 		next: "Siguiente",
 		step: "Paso {step} / {total}",

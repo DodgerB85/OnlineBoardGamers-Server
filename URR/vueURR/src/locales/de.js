@@ -796,6 +796,7 @@ export default {
 	replay: {
 		aria: "Wiedergabesteuerung",
 		title: "Wiedergabe",
+		backToMyLastMove: "Zurück zu meinem letzten Zug",
 		prev: "Zurück",
 		next: "Weiter",
 		step: "Schritt {step} / {total}",

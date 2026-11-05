@@ -796,6 +796,7 @@ export default {
 	replay: {
 		aria: "回放控制",
 		title: "回放",
+		backToMyLastMove: "返回我的上一步",
 		prev: "上一步",
 		next: "下一步",
 		step: "第 {step} / {total} 步",

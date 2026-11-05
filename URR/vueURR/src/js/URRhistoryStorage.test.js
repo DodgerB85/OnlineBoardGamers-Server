@@ -4,7 +4,7 @@ import { applyAction, createGame, getBotAction } from "./URRgame.js"
 import * as rf from "./URRreference.js"
 import { computeHistory } from "./URRhistory.js"
 import { encodeAction, historyAction, normalizeEntry } from "./URRhistoryActions.js"
-import { changesBetween, compactBoard, expandBoard, expandHistory, openingState, syncHistoryReplay } from "./URRhistoryStorage.js"
+import { changesBetween, compactBoard, expandBoard, expandHistory, openingState, previousOwnStep, syncHistoryReplay } from "./URRhistoryStorage.js"
 
 function replay(history, names, creationTimestamp = 1000) {
 	const cache = { entries: [], snapshots: [], times: [] }
@@ -150,4 +150,12 @@ test("board entries omit trailing defaults and preserve every runtime field", ()
 		if (change.owner === 0) assert.equal(compact[0][0].length, 2)
 		assert.deepEqual(expandBoard(compact), board)
 	}
+})
+
+test("replay finds the previous own move and skips the opening", () => {
+	const history = [[rf.HIST_NEW_GAME, -1, null], [10, 0, 1], [10, 1, 1], [10, 0, 1], [10, 2, 1]]
+	assert.equal(previousOwnStep(history, 0, 4), 3)
+	assert.equal(previousOwnStep(history, 0, 3), 1)
+	assert.equal(previousOwnStep(history, 2, 4), null)
+	assert.equal(previousOwnStep(history, 1, 0), null)
 })

@@ -789,6 +789,7 @@ export default {
 	replay: {
 		aria: "Replay controls",
 		title: "Replay",
+		backToMyLastMove: "Back to my last move",
 		prev: "Prev",
 		next: "Next",
 		step: "Step {step} / {total}",
