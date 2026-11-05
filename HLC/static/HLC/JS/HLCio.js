@@ -189,6 +189,7 @@ var IO = {
 					return
 				}
 				global.latestUpdate = String(result.latestUpdate)
+				if (result.secondsToNextKickout != undefined) global.secondsToNextKickout = result.secondsToNextKickout
 				global.saveRewind = true
 
 				hideLoader()

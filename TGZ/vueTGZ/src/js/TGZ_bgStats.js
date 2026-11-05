@@ -1,5 +1,4 @@
 import * as rf from "./TGZreference"
-import * as model from "./TGZmodel"
 import { useModelStore } from "../stores/TGZstore.js"
 import { usePersonalStore } from "../stores/TGZpersonal.js"
 
@@ -12,14 +11,16 @@ export function buildBgStatsUrl() {
 	const personal = usePersonalStore()
 
 	const gameEnd = store.history[store.history.length - 1]
-	// Overshoot then tie-break leaves the field fully ordered: one group each.
+	// Entries are [overshoot, playerIndex, tieBreakCode], best first. Overshoot
+	// is VP minus VR - the +4 / -11 a TGZ player would write down - and it is
+	// what the ranking is built from, so score and rank can never disagree.
 	const groups = []
 	for (const entry of gameEnd[3]) {
 		const playerIndex = entry[1]
 		const player = store.players[playerIndex]
 		// A bot is not a player: solo games export as a one-player play.
 		if (player.displayName === rf.BOT_NAME) continue
-		groups.push([{ name: player.name, score: model.getScore(playerIndex) }])
+		groups.push([{ name: player.name, score: entry[0] }])
 	}
 
 	return window.OBGBgStats.buildUrl({

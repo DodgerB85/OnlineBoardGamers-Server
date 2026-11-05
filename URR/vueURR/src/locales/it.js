@@ -796,6 +796,7 @@ export default {
 	replay: {
 		aria: "Controlli replay",
 		title: "Replay",
+		backToMyLastMove: "Torna alla mia ultima mossa",
 		prev: "Prec.",
 		next: "Succ.",
 		step: "Passo {step} / {total}",
@@ -821,6 +822,7 @@ export default {
 		pump: "{amount} acqua viaggia da {from} alla pompa di {state} a {to}.",
 		irrigate: "{state} usa 1 acqua per irrigare {area}.",
 		return: "{amount} acqua inutilizzata torna da {from} a {to}.",
+		release: "{amount} acqua inutilizzata ritorna al fiume a {area}.",
 		outflow: "{amount} acqua lascia il tabellone.",
 		completeOne: "Instradamento acqua completato: {count} esagono irrigato, {outflow} acqua ha lasciato il tabellone.",
 		completeMany: "Instradamento acqua completato: {count} esagoni irrigati, {outflow} acqua ha lasciato il tabellone.",

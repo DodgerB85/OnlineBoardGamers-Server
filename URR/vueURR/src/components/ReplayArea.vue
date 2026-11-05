@@ -3,8 +3,11 @@ import { onMounted, onBeforeUnmount, computed, watch } from "vue"
 import * as model from "../js/URRmodel.js"
 import * as funcs from "../js/URRfuncs.js"
 import * as IO from "../backend/URR_IO.js"
+import { previousOwnStep } from "../js/URRhistoryStorage.js"
 import { useModelStore } from "../stores/URRstore.js"
+import { usePersonalStore } from "../stores/URRpersonal.js"
 const store = useModelStore()
+const personal = usePersonalStore()
 
 store.replayStep.index = 0
 const step = computed({ get: () => store.replayStep.index, set: (index) => { store.replayStep.index = index } })
@@ -39,6 +42,11 @@ function prev() {
 	}
 }
 
+function backToMyLastMove() {
+	const index = previousOwnStep(store.history, personal.pov, step.value)
+	if (index !== null) step.value = index
+}
+
 function next() {
 	if (step.value < maxStep()) {
 		step.value++
@@ -53,6 +61,7 @@ function exitReplay() {
 <template>
 	<div id="replayArea" :aria-label="$t('replay.aria')">
 		<b>{{ $t("replay.title") }}</b>
+		<button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="step === 0" @click="backToMyLastMove">{{ $t("replay.backToMyLastMove") }}</button>
 		<button class="actionsLineButton" :disabled="step === 0" @click="prev">&lt; {{ $t("replay.prev") }}</button>
 		<input :aria-label="$t('replay.stepAria')" type="range" min="0" :max="Math.max(0, maxStep())" v-model.number="step" />
 		<span>{{ $t("replay.step", { step, total: maxStep() }) }}</span>

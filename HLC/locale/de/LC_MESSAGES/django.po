@@ -516,3 +516,17 @@ msgid "<b>Permissions missing. Please reload the page and check again</b>"
 msgstr ""
 "<b>Berechtigungen fehlen. Bitte laden Sie die Seite neu und prüfen Sie "
 "erneut</b>"
+
+msgid "Turn time left"
+msgstr "Verbleibende Zugzeit"
+
+msgid "Flexi-Time left"
+msgstr "Verbleibende Flexi-Time"
+
+#, python-format
+msgid "\nHi %(user)s,\n\nYour factory is now blocking the queue at Online Board Gamers - Horseless Carriage.\n\nYour move time has started.\n\nGame: %(gameName)s\nTurn/Phase: %(currentTurnString)s\n\nhttps://%(domain)s%(the_url)s\n\nNotification preferences can be changed in your Profile\n\n"
+msgstr "\nHallo %(user)s,\n\nDeine Fabrik blockiert jetzt die Warteschlange bei Online Board Gamers – Horseless Carriage.\n\nDeine Zugzeit hat begonnen.\n\nSpiel: %(gameName)s\nRunde/Phase: %(currentTurnString)s\n\nhttps://%(domain)s%(the_url)s\n\nBenachrichtigungseinstellungen können in deinem Profil geändert werden\n\n"
+
+#, python-format
+msgid "\nHi %(user)s,\n\nBuild Factory is in progress at Online Board Gamers - Horseless Carriage.\n\nYou can submit your factory now, even if you are not first in Engineering Order.\nIf your factory becomes the one blocking the queue, you will be alerted when your move time starts.\n\nGame: %(gameName)s\nTurn/Phase: %(currentTurnString)s\n\nhttps://%(domain)s%(the_url)s\n\nNotification preferences can be changed in your Profile\n\n"
+msgstr "\nHallo %(user)s,\n\nBuild Factory läuft bei Online Board Gamers – Horseless Carriage.\n\nDu kannst deine Fabrik jetzt einreichen, auch wenn du nicht als Erster in der Engineering-Reihenfolge dran bist.\nWenn deine Fabrik die Warteschlange blockiert, wirst du benachrichtigt, sobald deine Zugzeit beginnt.\n\nSpiel: %(gameName)s\nRunde/Phase: %(currentTurnString)s\n\nhttps://%(domain)s%(the_url)s\n\nBenachrichtigungseinstellungen können in deinem Profil geändert werden\n\n"

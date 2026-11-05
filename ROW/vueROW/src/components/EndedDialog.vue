@@ -6,13 +6,11 @@
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useModelStore } from "../stores/ROWstore.js"
-import { usePersonalStore } from "../stores/ROWpersonal.js"
 import { City } from "../js/ROWreference"
 import { buildBgStatsUrl } from "../js/ROW_bgStats"
 
 const { t } = useI18n()
 const store = useModelStore()
-const personal = usePersonalStore()
 
 const nextURL = String(window.initData?.nextURL ?? "")
 
@@ -41,7 +39,7 @@ function score(name) {
 // BG Stats export is opt-in per user (profile.bgStatsEnabled) and only makes
 // sense for someone who actually sat at the table.
 const bgStatsUrl = computed(() =>
-	window.initData.bgStatsEnabled === 1 && personal.pov >= 0 && ended.value ? buildBgStatsUrl() : undefined
+	window.initData.bgStatsEnabled === 1 && ended.value ? buildBgStatsUrl() : undefined
 )
 const showBgStatsQr = ref(false)
 const bgStatsCopied = ref(false)

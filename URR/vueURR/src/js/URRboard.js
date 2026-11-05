@@ -1,4 +1,4 @@
-/** Transcription of static/URR/images/ur-map.png, with neutral river areas.
+/** Transcription of static/URR/images/ur-map.jpg, with neutral river areas.
  * Rows run north to south; columns run west to east. Regions cross state borders.
  */
 import * as rf from "./URRreference.js"

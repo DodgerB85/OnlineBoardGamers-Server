@@ -7,7 +7,6 @@
  */
 import * as rf from "../js/FCMreference"
 import * as controller from "../js/FCMcontroller"
-import * as funcs from "../js/FCMfuncs"
 import * as view from "../js/FCMview"
 import * as rules from "../js/FCMrules"
 import * as plyr from "../js/FCMplayer"
@@ -40,14 +39,6 @@ function removeTemporaryWorkerRole(index) {
 function confirmTemporaryWorkerSelection() {
 	controller.chooseTemporaryWorkerRoles([...temporarySelectedRoles.value])
 	resetTemporaryWorkerSelection()
-}
-
-function undoHireEmployee(employee) {
-	const idx = store.context.justHired.indexOf(employee)
-	store.availableEmployees[employee]++
-	store.context.justHired.splice(idx, 1)
-	store.context.endOfDaySummaryData.hire.hired.splice(store.context.endOfDaySummaryData.hire.hired.indexOf(employee), 1)
-	controller.currentPlayerObj().beach.splice(controller.currentPlayerObj().beach.lastIndexOf(employee), 1)
 }
 
 function selectEmployeeToTrain(employee, origin = 0) {
@@ -324,7 +315,7 @@ const computedProducers = computed(() => {
 
 			<!-- Display just hired employees -->
 			<div v-if="store.context.justHired.length > 0" class="reminder hiredLine">
-				<div v-for="employee in store.context.justHired" :key="employee" class="cardSummaryDiv selectable" :title="$t('actionArea.clickToUndoHire')" @click="undoHireEmployee(employee)">
+				<div v-for="employee in store.context.justHired" :key="employee" class="cardSummaryDiv selectable" :title="$t('actionArea.clickToUndoHire')" @click="controller.undoHireEmployee(employee)">
 					<img :src="view.getImage(`emp_${employee}`)" class="cardImg" :alt="rf.employeeName(employee)" />
 				</div>
 			</div>

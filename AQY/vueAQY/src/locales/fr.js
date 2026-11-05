@@ -545,6 +545,7 @@ export default {
 		cautionUnresolvedTradesNoPeriod: "Attention : vous avez des échanges non résolus. Ils seront annulés",
 		cautionUnresolvedTrades: "Attention : vous avez des échanges non résolus. Ils seront annulés",
 		cautionHospitalUnused: "Attention : vous avez affecté un hôpital mais ne l'avez pas utilisé. Cliquez sur l'hôpital puis sur le bouton au centre",
+		infoCanBuildHouse: "Info : vous pouvez encore construire une maison",
 	},
 
 	cityNewBuildingArea: {

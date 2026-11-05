@@ -75,7 +75,9 @@
                               {% translate "Logged in as" %}: {{ user.username }}
                             {% endif %}
                             <br />
-                            <span id="kickoutTimerSpan">{% translate "Time to next kickout" %}: <span id="kickoutTimerTimer"></span></span>
+                            <span id="kickoutTimerSpan">{% translate "Turn time left" %}: <span id="kickoutTimerTimer"></span></span>
+                            <br />
+                            <span id="flexiTimerSpan">{% translate "Flexi-Time left" %}: <span id="flexiTimerTimer"></span></span>
                           </div>
                           <div id="testDiv"></div>
                           <div id="zoomDiv">
@@ -354,7 +356,8 @@
     global.latestUpdate = {{ latestUpdateLiteral }};
 
     // no
-    {% if secondsToNextKickout %}global.secondsToNextKickout = {{ secondsToNextKickout }};{% endif %}
+    global.secondsToNextKickout = {{ secondsToNextKickout|default:0 }};
+    global.kickoutDuration = {{ kickoutDuration|default:0 }};
 
 
     
@@ -402,26 +405,21 @@
                       <script src="{% static 'Lobby/common/bgStats.js' %}"></script>
                       <script src="{% static 'HLC/JS/HLCbgStats.js' %}"></script>
                     {% endif %}
-                    {% if settingsDebug %}
-                      <script src="/static/HLC/JS/Roger.js"></script>
-                      <script src="/static/HLC/JS/HLCutils.js"></script>
-                      <script src="/static/HLC/JS/HLCreference.js"></script>
-                      <script src="/static/HLC/JS/HLCplayer.js"></script>
-                      <script src="/static/HLC/JS/HLCrules.js"></script>
-                      <script src="/static/HLC/JS/HLCfactory.js"></script>
-                      <script src="/static/HLC/JS/HLCmodel.js"></script>
-                      <script src="/static/HLC/JS/HLCview.js"></script>
-                      <script src="/static/HLC/JS/HLCcontroller.js"></script>
-                      <script src="/static/HLC/JS/HLChistory.js"></script>
-                      <script src="/static/HLC/JS/HLCio.js"></script>
-                      <script src="/static/HLC/JS/HLCbot.js"></script>
-                      <script src="/static/HLC/JS/HLCwebsocket.js"></script>
-                      <script src="/static/HLC/JS/HLCreplay.js"></script>
-                      <script src="/static/HLC/JS/HLCmain.js"></script>
-                      <script src="/static/HLC/JS/HLCtest.js"></script>
-                    {% else %}
-                      <script src="{% static 'HLC/HLCdist/HLCmain.js' %}"></script>
-                    {% endif %}
+                    <script src="{% static 'HLC/JS/Roger.js' %}"></script>
+                    <script src="{% static 'HLC/JS/HLCutils.js' %}"></script>
+                    <script src="{% static 'HLC/JS/HLCreference.js' %}"></script>
+                    <script src="{% static 'HLC/JS/HLCplayer.js' %}"></script>
+                    <script src="{% static 'HLC/JS/HLCrules.js' %}"></script>
+                    <script src="{% static 'HLC/JS/HLCfactory.js' %}"></script>
+                    <script src="{% static 'HLC/JS/HLCmodel.js' %}"></script>
+                    <script src="{% static 'HLC/JS/HLCview.js' %}"></script>
+                    <script src="{% static 'HLC/JS/HLCcontroller.js' %}"></script>
+                    <script src="{% static 'HLC/JS/HLChistory.js' %}"></script>
+                    <script src="{% static 'HLC/JS/HLCio.js' %}"></script>
+                    <script src="{% static 'HLC/JS/HLCbot.js' %}"></script>
+                    <script src="{% static 'HLC/JS/HLCwebsocket.js' %}"></script>
+                    <script src="{% static 'HLC/JS/HLCreplay.js' %}"></script>
+                    <script src="{% static 'HLC/JS/HLCmain.js' %}"></script>
                   {% include "Lobby/gameMomentum.html" %}
                   </body>
                 </html>

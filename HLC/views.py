@@ -6,7 +6,6 @@ import time
 from typing import TYPE_CHECKING, cast
 
 import lzstring
-from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
@@ -50,7 +49,6 @@ def HLCgameSummary(request, game_id):
         "HLC/HLCgameSummary.html",
         {
             # "now": now,
-            "settingsDEBUG": config("HLC_USE_SOURCE_CODE", default=False, cast=bool),
             "gameData": currentGame.gameData,
             "gameID": currentGame.id,
         },
@@ -482,6 +480,7 @@ def _processHLCturn(request):
                         presenter.getGameName(),
                         currentGame,
                         oldVer,
+                        notification_kind="factory_phase" if jsonData["phase"] == 3 else None,
                     )
 
         ################ REWIND EVERY SAVE #######################
@@ -659,6 +658,7 @@ def _processHLCturn(request):
                     presenter.getGameName(),
                     currentGame,
                     currentGame.latestUpdate,
+                    notification_kind="factory_phase" if jsonData["phase"] == 3 else None,
                 )
 
         return JsonResponse(
@@ -743,6 +743,7 @@ def _processHLCturn(request):
                         presenter.getGameName(),
                         currentGame,
                         currentGame.latestUpdate,
+                        notification_kind="factory_phase" if jsonData["phase"] == 3 else None,
                     )
 
         return JsonResponse(
@@ -764,7 +765,6 @@ def showHLCgame(request, game_id):
         game_id,
         "HLC",
         default_zoom=200,
-        settings_debug_key="HLC_USE_SOURCE_CODE",
         clear_chat_notification=False,
     )
     if isinstance(result, HttpResponseRedirect):
@@ -900,12 +900,12 @@ def showHLCgame(request, game_id):
             "rewindHostPossible": rewindHostPossible,
             "currentRewindConsent": int(currentRewindConsent),
             "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+            "kickoutDuration": currentGame.kickoutDuration,
             "statsExcludedGame": statsExcludedGame,
             "displayNames": displayNames,
             "nextURL": nextURL,
             "bgStatsEnabled": result["auth_data"].get("bgStatsEnabled", 0),
             "KickoutFlexiDataArray": result["base_data"]["KickoutFlexiDataArray"],
-            "settingsDebug": result["base_data"]["settingsDebug"],
             "statsExcludeVotesData": result["base_data"]["statsExcludeVotesData"],
             "deleteVotesData": result["base_data"]["deleteVotesData"],
         },

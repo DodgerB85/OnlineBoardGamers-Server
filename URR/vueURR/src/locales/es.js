@@ -796,6 +796,7 @@ export default {
 	replay: {
 		aria: "Controles de repetición",
 		title: "Repetición",
+		backToMyLastMove: "Volver a mi último movimiento",
 		prev: "Anterior",
 		next: "Siguiente",
 		step: "Paso {step} / {total}",
@@ -821,6 +822,7 @@ export default {
 		pump: "{amount} agua viaja de {from} a la bomba de {state} en {to}.",
 		irrigate: "{state} usa 1 agua para regar {area}.",
 		return: "{amount} agua sin usar vuelve de {from} a {to}.",
+		release: "{amount} agua sin usar vuelve al río en {area}.",
 		outflow: "{amount} agua sale del tablero.",
 		completeOne: "Enrutado de agua completo: {count} casilla regada, {outflow} agua salió del tablero.",
 		completeMany: "Enrutado de agua completo: {count} casillas regadas, {outflow} agua salió del tablero.",

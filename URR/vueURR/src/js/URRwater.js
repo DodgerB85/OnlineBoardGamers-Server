@@ -60,7 +60,10 @@ function finishFrame(game, record) {
 			parent.returnedWater.push(...unused)
 		}
 	} else {
-		const amount = frame.downstreamWater + unused.reduce((sum, batch) => sum + batch.water, 0)
+		const unusedAmount = unused.reduce((sum, batch) => sum + batch.water, 0)
+		// Water left in the reservoir rejoins the river before it flows on.
+		if (unusedAmount > 0) record?.({ type: "release", from: frame.area, amount: unusedAmount })
+		const amount = frame.downstreamWater + unusedAmount
 		record?.({ type: "river", from: frame.area, to: game.board.riverDownstream[frame.area], amount })
 		routing.river = { area: game.board.riverDownstream[frame.area], water: amount }
 	}

@@ -796,6 +796,7 @@ export default {
 	replay: {
 		aria: "回放控制",
 		title: "回放",
+		backToMyLastMove: "返回我的上一步",
 		prev: "上一步",
 		next: "下一步",
 		step: "第 {step} / {total} 步",
@@ -821,6 +822,7 @@ export default {
 		pump: "{amount} 份水从 {from} 流到 {state} 在 {to} 的水泵。",
 		irrigate: "{state} 用 1 份水灌溉 {area}。",
 		return: "{amount} 份未使用的水从 {from} 返回 {to}。",
+		release: "{amount} 份未使用的水返回到 {area} 的河流。",
 		outflow: "{amount} 份水流出棋盘。",
 		completeOne: "水流引导完成：灌溉了 {count} 个六角格，{outflow} 份水流出棋盘。",
 		completeMany: "水流引导完成：灌溉了 {count} 个六角格，{outflow} 份水流出棋盘。",

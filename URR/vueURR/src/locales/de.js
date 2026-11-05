@@ -796,6 +796,7 @@ export default {
 	replay: {
 		aria: "Wiedergabesteuerung",
 		title: "Wiedergabe",
+		backToMyLastMove: "Zurück zu meinem letzten Zug",
 		prev: "Zurück",
 		next: "Weiter",
 		step: "Schritt {step} / {total}",
@@ -821,6 +822,7 @@ export default {
 		pump: "{amount} Wasser fließt von {from} zur Pumpe von {state} bei {to}.",
 		irrigate: "{state} nutzt 1 Wasser, um {area} zu bewässern.",
 		return: "{amount} ungenutztes Wasser fließt von {from} nach {to} zurück.",
+		release: "{amount} ungenutztes Wasser fließt bei {area} in den Fluss zurück.",
 		outflow: "{amount} Wasser verlässt das Brett.",
 		completeOne: "Wasserleitung abgeschlossen: {count} Feld bewässert, {outflow} Wasser verließ das Brett.",
 		completeMany: "Wasserleitung abgeschlossen: {count} Felder bewässert, {outflow} Wasser verließ das Brett.",

@@ -2,12 +2,12 @@
  * BG Stats export for the Horseless Carriage game end screen.
  *
  * Loaded as its own script by HLCtemplate.html (next to qrcode.js and bgStats.js)
- * only when the viewer opted in on their profile, so it is deliberately NOT part
- * of the concatenated HLCdist/HLCmain.js bundle - same as HLCtest.js.
+ * only when the viewer opted in on their profile, so HLCview.js checks the
+ * function exists before calling it.
  */
 
 function buildHLCBgStatsUrl() {
-	if (!global.bgStatsEnabled || global.pov < 0) return undefined
+	if (!global.bgStatsEnabled) return undefined
 
 	// turnOrder is money-sorted when the game ends, so this is the final standings
 	var turnOrder = M.gameFlow.turnOrder

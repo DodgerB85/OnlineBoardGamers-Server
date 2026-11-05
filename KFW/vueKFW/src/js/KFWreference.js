@@ -3800,7 +3800,7 @@ export const ALL_TILES = [
 		sides: [GRASS, GRASS, ROAD, GRASS, GRASS, GRASS],
 		coord: [-1, -1, -1],
 		extension: EXTENSION_NONE,
-		winterText: "Score <3VP> for each adjacent Winter tile",
+		winterText: "Score <3VP> for each adjacent tile with a winter icon",
 		taltonScore: [0, 0],
 		tileItemType: TILE_ITEM_TYPE_NONE,
 		autoSelect: false,

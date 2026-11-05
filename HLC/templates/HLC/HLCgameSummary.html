@@ -48,23 +48,19 @@
     {% compress js %}
         <script src="{% static 'HLC/HLCgameSummary.js' %}"></script>
     {% endcompress %}
-    {% if settingsDEBUG %}
-        <script src="/static/HLC/JS/Roger.js"></script>
-        <script src="/static/HLC/JS/HLCutils.js"></script>
-        <script src="/static/HLC/JS/HLCreference.js"></script>
-        <script src="/static/HLC/JS/HLCplayer.js"></script>
-        <script src="/static/HLC/JS/HLCrules.js"></script>
-        <script src="/static/HLC/JS/HLCfactory.js"></script>
-        <script src="/static/HLC/JS/HLCmodel.js"></script>
-        <script src="/static/HLC/JS/HLCview.js"></script>
-        <script src="/static/HLC/JS/HLCcontroller.js"></script>
-        <script src="/static/HLC/JS/HLChistory.js"></script>
-        <script src="/static/HLC/JS/HLCio.js"></script>
-        <script src="/static/HLC/JS/HLCbot.js"></script>
-<script src="/static/HLC/JS/HLCwebsocket.js"></script>
-    <script src="/static/HLC/JS/HLCreplay.js"></script>
-    <script src="/static/HLC/JS/HLCmain.js"></script>
-    {% else %}
-        <script src="{% static 'HLC/HLCdist/HLCmain.js' %}"></script>
-    {% endif %}
+    <script src="{% static 'HLC/JS/Roger.js' %}"></script>
+    <script src="{% static 'HLC/JS/HLCutils.js' %}"></script>
+    <script src="{% static 'HLC/JS/HLCreference.js' %}"></script>
+    <script src="{% static 'HLC/JS/HLCplayer.js' %}"></script>
+    <script src="{% static 'HLC/JS/HLCrules.js' %}"></script>
+    <script src="{% static 'HLC/JS/HLCfactory.js' %}"></script>
+    <script src="{% static 'HLC/JS/HLCmodel.js' %}"></script>
+    <script src="{% static 'HLC/JS/HLCview.js' %}"></script>
+    <script src="{% static 'HLC/JS/HLCcontroller.js' %}"></script>
+    <script src="{% static 'HLC/JS/HLChistory.js' %}"></script>
+    <script src="{% static 'HLC/JS/HLCio.js' %}"></script>
+    <script src="{% static 'HLC/JS/HLCbot.js' %}"></script>
+    <script src="{% static 'HLC/JS/HLCwebsocket.js' %}"></script>
+    <script src="{% static 'HLC/JS/HLCreplay.js' %}"></script>
+    <script src="{% static 'HLC/JS/HLCmain.js' %}"></script>
 {% endblock body %}

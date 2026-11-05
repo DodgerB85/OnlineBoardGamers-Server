@@ -61,6 +61,7 @@ export function buildWaterPlayback(history, snapshots, completionIndex) {
 			pump: t("waterPlayback.pump", { amount: event.amount, from: label(event.from), state: rf.STATE_NAMES[event.state], to: label(event.to) }),
 			irrigate: t("waterPlayback.irrigate", { state: rf.STATE_NAMES[event.state], area: label(event.to) }),
 			return: t("waterPlayback.return", { amount: event.amount, from: label(event.from), to: label(event.to) }),
+			release: t("waterPlayback.release", { amount: event.amount, area: label(event.from) }),
 			outflow: t("waterPlayback.outflow", { amount: event.amount }),
 		}
 		const path = event.from && event.to && ["pump", "irrigate", "return"].includes(event.type) ? canalPath(board, event.from, event.to) : [event.from, event.to].filter(Boolean)

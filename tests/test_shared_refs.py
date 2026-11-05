@@ -218,6 +218,19 @@ class TestSRgamePaceString(TestCase):
         result = SR_gamePaceString(30)
         self.assertIn("Standard", result)
 
+    def test_standard_shows_time_control(self):
+        result = SR_gamePaceString(30, 50)
+        self.assertIn("12h kickout", result)
+        self.assertIn("24h Flexi-Time", result)
+
+    def test_day_kickout_shows_time_control(self):
+        result = SR_gamePaceString(30, 200)
+        self.assertIn("2 days kickout", result)
+        self.assertIn("24h Flexi-Time", result)
+
+    def test_live_never_shows_time_control(self):
+        self.assertEqual(SR_gamePaceString(10, 50), "Live")
+
     def test_slow(self):
         result = SR_gamePaceString(40)
         self.assertIn("Slow", result)

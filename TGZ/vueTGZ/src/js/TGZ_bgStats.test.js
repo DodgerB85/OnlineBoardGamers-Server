@@ -91,20 +91,21 @@ describe("buildBgStatsUrl", () => {
 		}
 	})
 
-	it("records final scores, finishing order and a single winner", () => {
+	it("records the VP overshoot, finishing order and a single winner", () => {
 		finish(
 			[
-				[10, 0, 1],
-				[5, 1, 1],
+				[4, 0, 1],
+				[-11, 1, 1],
 			],
 			[makePlayer(0, { monuments: [[0, 5]] }), makePlayer(1, { monuments: [[0, 2]] })]
 		)
 
 		const play = decode(buildBgStatsUrl())
 
+		// +4 / -11 is VP minus VR, not the raw 21 / 3 the monuments alone score.
 		expect(play.players).toEqual([
-			{ name: "user0", sourcePlayerId: "user0", score: 21, rank: 1, winner: true, startPlayer: false },
-			{ name: "user1", sourcePlayerId: "user1", score: 3, rank: 2, winner: false, startPlayer: false },
+			{ name: "user0", sourcePlayerId: "user0", score: 4, rank: 1, winner: true, startPlayer: false },
+			{ name: "user1", sourcePlayerId: "user1", score: -11, rank: 2, winner: false, startPlayer: false },
 		])
 	})
 

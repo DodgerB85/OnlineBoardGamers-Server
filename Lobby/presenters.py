@@ -448,7 +448,7 @@ class GamePresenter:
 
         async_task("Lobby.sharedFunctions.sharedNotifications.SN_sendInviteNotifications", playerNames, _gameName, _maxPlayers, _gameCode)
 
-    def sendYourTurnNotification(self, gameCode, playerListToNotify, gameID, gameName, gameObj, oldVer):
+    def sendYourTurnNotification(self, gameCode, playerListToNotify, gameID, gameName, gameObj, oldVer, notification_kind=None):
         # from django_q.tasks import async_task
         from datetime import timedelta
 
@@ -476,6 +476,7 @@ class GamePresenter:
             current_phase,
             current_players,
             oldVer,
+            notification_kind,
             next_run=start_time,
             repeats=-1,  # Neg repeats for delete
             schedule_type="O",
@@ -2653,9 +2654,10 @@ class FCMpresenter(GamePresenter):
 
         playerMoveArr = playersMoveDataArr[arrIdx]
 
-        # If no phase is set, then there's no move Data
+        # An OOB preference can be stored before the structure move: keep it
+        # readable without pretending the row is a completed restructuring.
         if playerMoveArr[1] == [-1]:
-            return 0
+            return playerMoveArr[3][2] if len(playerMoveArr[3]) >= 3 and isinstance(playerMoveArr[3][2], int) else 0
 
         # Finally, check it is valid
         if self.gameObj.phase in (rfFCM.PHASE_TURN_ORDER, rfFCM.PHASE_RESTRUCTURING) and self.isThisValidActualMoveArrForPhase(self.gameObj.phase, playerMoveArr):
@@ -2679,8 +2681,18 @@ class FCMpresenter(GamePresenter):
 
         playerMoveArr = playersMoveDataArr[arrIdx]
 
-        # If no phase is set, then there's no move Data
+        # During restructuring the preference is not a structure move. Store it
+        # in the scaffold content but leave the row as a non-move, otherwise
+        # selecting auto-early/auto-late by itself completes restructuring with
+        # an empty beach and empty structure (which then wiped the roster).
         if playerMoveArr[1] == [-1]:
+            if self.gameObj.phase == rfFCM.PHASE_RESTRUCTURING:
+                while len(playerMoveArr[3]) < 3:
+                    playerMoveArr[3].append([] if len(playerMoveArr[3]) < 2 else 0)
+                playerMoveArr[3][2] = OOBpreference
+                self.gameObj.FCMplayersMoveData = json.dumps(playersMoveDataArr)
+                self.gameObj.save()
+                return True
             playerMoveArr[1] = [3, 4]
 
         # Finally, check it is valid

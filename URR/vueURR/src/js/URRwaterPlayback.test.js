@@ -16,7 +16,7 @@ function entry(player, action) {
 	return [code, player, 1, ...params]
 }
 
-function routingHistory(hasPump = true) {
+function routingHistory(hasPump = true, hasLand = false) {
 	const opening = createGame(["A", "B", "C"])
 	let game = JSON.parse(JSON.stringify(opening))
 	Object.assign(game.gameflow, { phase: rf.PHASE_DEVELOPMENT, stateOrder: [0], stateIndex: 0, developmentStep: "purchasing", turnOrder: [0] })
@@ -24,11 +24,17 @@ function routingHistory(hasPump = true) {
 	for (const nation of game.nations) nation.isRemoved = true
 	const river = game.board.areas.find((area) => area.id === "printed-4-2")
 	const pump = game.board.areas.find((area) => area.id === "printed-4-3")
-	if (hasPump) {
+	const land = game.board.areas.find((area) => area.id === "printed-4-3")
+	if (hasPump || hasLand) {
 		river.waterwork = { state: 0, kind: "reservoir", capacity: 2 }
-		pump.waterwork = { state: 0, kind: "pump", capacity: 1 }
-		pump.owner = 0
-		game.board.canals.push([river.id, pump.id])
+		if (hasPump) {
+			pump.waterwork = { state: 0, kind: "pump", capacity: 1 }
+			pump.owner = 0
+			game.board.canals.push([river.id, pump.id])
+		} else {
+			land.owner = 0
+			game.board.canals.push([river.id, land.id])
+		}
 	}
 	const openingChanges = changesBetween(opening, game)
 	const history = [[rf.HIST_NEW_GAME, -1, null, openingChanges]]
@@ -39,6 +45,7 @@ function routingHistory(hasPump = true) {
 	}
 	act({ type: "endDevelopment" })
 	if (hasPump) act({ type: "allocateWater", area: pump.id, amount: 2 })
+	else if (hasLand) act({ type: "allocateWater", area: land.id, amount: 1 })
 	const cache = replay(history)
 	return { history, snapshots: cache.snapshots }
 }
@@ -56,6 +63,13 @@ test("Completed water playback follows recorded decisions, irrigation and return
 	const returned = script.steps.find((step) => step.type === "return")
 	assert.equal(returned.amount, 1)
 	assert.deepEqual(returned.path, ["printed-4-3", "printed-4-2"])
+	const reservoir = script.steps.find((step) => step.type === "reservoir")
+	const released = script.steps.find((step) => step.type === "release")
+	assert.equal(released.amount, 1)
+	assert.equal(released.from, reservoir.to)
+	assert.deepEqual(released.path, [reservoir.to])
+	const releasedRiverIndex = script.steps.findIndex((step, index) => index > script.steps.indexOf(released) && step.type === "river" && step.from === reservoir.to)
+	assert.equal(script.steps[releasedRiverIndex].amount, 5)
 	assert.deepEqual(script.steps.at(-1).wet, ["printed-4-3"])
 	assert.equal(script.board.areas.find((area) => area.id === "printed-4-3").irrigatedBy, null)
 	assert.equal(script.steps.at(-1).text, "Water routing complete: 1 hex irrigated, 17 water left the board.")
@@ -66,7 +80,25 @@ test("Fully automatic rainy seasons can replay all three rivers after harvest ha
 	const script = buildWaterPlayback(history, snapshots, 1)
 	assert.equal(script.steps.filter((step) => step.type === "source").length, 3)
 	assert.equal(script.steps.filter((step) => step.type === "outflow").reduce((sum, step) => sum + step.amount, 0), 18)
+	assert.equal(script.steps.filter((step) => step.type === "release").length, 0)
 	assert.deepEqual(script.steps.at(-1).wet, [])
+})
+
+test("Reservoir water left after irrigation returns to the river before it flows on", () => {
+	const { history, snapshots } = routingHistory(false, true)
+	const script = buildWaterPlayback(history, snapshots, 2)
+	const reservoir = script.steps.find((step) => step.type === "reservoir")
+	const irrigation = script.steps.find((step) => step.type === "irrigate")
+	const released = script.steps.find((step) => step.type === "release")
+	assert.equal(reservoir.amount, 2)
+	assert.equal(reservoir.downstream, 4)
+	assert.equal(irrigation.amount, 1)
+	assert.equal(released.amount, 1)
+	assert.equal(released.from, reservoir.to)
+	assert.deepEqual(released.path, [reservoir.to])
+	assert.equal(script.steps.indexOf(released), script.steps.indexOf(irrigation) + 1)
+	const riverIndex = script.steps.findIndex((step, index) => index > script.steps.indexOf(released) && step.type === "river" && step.from === reservoir.to)
+	assert.equal(script.steps[riverIndex].amount, 5)
 })
 
 test("Rainy-season completion replays the same water flow after harvesting", () => {

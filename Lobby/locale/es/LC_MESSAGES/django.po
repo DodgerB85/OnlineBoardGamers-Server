@@ -14738,3 +14738,73 @@ msgstr "Administrador del sitio Django"
 
 #~ msgid "Final Round"
 #~ msgstr "Ronda final"
+
+msgid "12h kickout + 24h Flexi-Time"
+msgstr "Expulsión tras 12 h + 24 h de Flexi-Time"
+
+msgid "1 day kickout + 24h Flexi-Time"
+msgstr "Expulsión tras 1 día + 24 h de Flexi-Time"
+
+#, python-format
+msgid "%(days)s days kickout + 24h Flexi-Time"
+msgstr "Expulsión tras %(days)s días + 24 h de Flexi-Time"
+
+msgid "Horseless Carriage - Build Factory is in progress"
+msgstr "Horseless Carriage: la fase Build Factory está en curso"
+
+#, python-format
+msgid "Build Factory is in progress at OnlineBoardGamers - Horseless Carriage\n%(gameName)s - %(currentTurnString)s\nYou can submit your factory now, even if you are not first in Engineering Order. If your factory becomes the one blocking the queue, you will be alerted when your move time starts."
+msgstr "La fase Build Factory está en curso en OnlineBoardGamers: Horseless Carriage\n%(gameName)s: %(currentTurnString)s\nPuedes enviar tu fábrica ahora, aunque no seas el primero en el orden de ingeniería. Si tu fábrica bloquea la cola, se te avisará cuando empiece tu tiempo de movimiento."
+
+#, python-format
+msgid "Your factory is now blocking the queue at OnlineBoardGamers - Horseless Carriage\nYour move time has started\n%(gameName)s - %(currentTurnString)s."
+msgstr "Tu fábrica ahora bloquea la cola en OnlineBoardGamers: Horseless Carriage\nTu tiempo de movimiento ha empezado\n%(gameName)s: %(currentTurnString)s."
+
+#, python-format
+msgid "Flexi-Time remaining: %(flexiTime)s"
+msgstr "Flexi-Time restante: %(flexiTime)s"
+
+#, python-format
+msgid "Less than 2 hours of standard move time at OnlineBoardGamers!\n%(boxName)s: %(gameName)s"
+msgstr "¡Menos de 2 horas de tiempo de movimiento estándar en OnlineBoardGamers!\n%(boxName)s: %(gameName)s"
+
+msgid "You could be kicked out at any time. Please move ASAP"
+msgstr "Podrían expulsarte en cualquier momento. Muévete lo antes posible."
+
+#, python-format
+msgid "You are now using Flexi-Time. Remaining: %(flexiTime)s. Once that runs out, other players can kick you. Please move ASAP"
+msgstr "Ahora estás usando Flexi-Time. Restante: %(flexiTime)s. Cuando se agote, otros jugadores podrán expulsarte. Muévete lo antes posible."
+
+msgid "Your move time and Flexi-Time are used up. Other players can now kick you. Please move ASAP"
+msgstr "Tu tiempo de movimiento y tu Flexi-Time se han agotado. Otros jugadores ya pueden expulsarte. Muévete lo antes posible."
+
+#, python-format
+msgid "Your standard move time has expired at OnlineBoardGamers!\n%(boxName)s: %(gameName)s"
+msgstr "¡Tu tiempo de movimiento estándar ha expirado en OnlineBoardGamers!\n%(boxName)s: %(gameName)s"
+
+#, python-format
+msgid "\nHi %(playerName)s,<br/>\n<br/>\nReminder: You have less than 2 hours of standard move time left in: %(box_name)s<br/>\n<br/>\n"
+msgstr "\nHola %(playerName)s,<br/>\n<br/>\nRecordatorio: te quedan menos de 2 horas de tiempo de movimiento estándar en: %(box_name)s<br/>\n<br/>\n"
+
+msgid "Flexi-Time remaining"
+msgstr "Flexi-Time restante"
+
+#, python-format
+msgid "\nHi %(playerName)s,<br/>\n<br/>\nYour standard move time has expired for: %(box_name)s<br/>\n<br/>\n"
+msgstr "\nHola %(playerName)s,<br/>\n<br/>\nTu tiempo de movimiento estándar ha expirado para: %(box_name)s<br/>\n<br/>\n"
+
+#, python-format
+msgid "Flexi-Time remaining: %(flexiTimeString)s. You are now using Flexi-Time; once that runs out, other players can kick you. Please move as soon as possible."
+msgstr "Flexi-Time restante: %(flexiTimeString)s. Ahora estás usando Flexi-Time; cuando se agote, otros jugadores podrán expulsarte. Muévete lo antes posible."
+
+msgid "Your move time and Flexi-Time are used up. Other players can now kick you. Please move as soon as possible."
+msgstr "Tu tiempo de movimiento y tu Flexi-Time se han agotado. Otros jugadores ya pueden expulsarte. Muévete lo antes posible."
+
+msgid "You could be kicked at any time. Please move as soon as possible."
+msgstr "Podrían expulsarte en cualquier momento. Muévete lo antes posible."
+
+msgid "HLC always shows the current player's standard move time and remaining Flexi-Time as two separate timers."
+msgstr "HLC siempre muestra el tiempo de movimiento estándar del jugador actual y el Flexi-Time restante como dos temporizadores separados."
+
+msgid "In HLC, remaining Flexi-Time is also shown under the turn timer."
+msgstr "En HLC, el Flexi-Time restante también se muestra debajo del temporizador de movimiento."

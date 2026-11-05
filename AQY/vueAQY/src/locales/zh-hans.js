@@ -545,6 +545,7 @@ export default {
 		cautionUnresolvedTradesNoPeriod: "注意：你有未完成的交易，这些交易将被取消",
 		cautionUnresolvedTrades: "注意：你有未完成的交易。这些交易将被取消",
 		cautionHospitalUnused: "注意：你已派驻医院但未使用。点击医院，再点击中央的按钮",
+		infoCanBuildHouse: "提示：你还可以建造一座房屋",
 	},
 
 	cityNewBuildingArea: {

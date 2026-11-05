@@ -11,6 +11,8 @@ from Lobby.models import Game, GamePlayer, Tournament, User
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_M_ProcessAnyTournamentEndGame,
     SF_createNextRoundGamesSetup,
+    SF_formatSecondsHHMM,
+    SF_getRemainingFlexiSeconds,
     SF_getRequiredExp,
     SF_getSecondsToNextKickout,
     SF_getTimeNow,
@@ -117,6 +119,27 @@ class TestSFupdateFlexiTime(PrintSuccessTestCase):
         result_data = json.loads(result)
         self.assertEqual(result_data[0][0], "player1")
         self.assertEqual(result_data[0][1], 300)
+
+
+class TestSFRemainingFlexiTime(PrintSuccessTestCase):
+    def test_no_used_flexi_returns_full_bank(self):
+        self.assertEqual(SF_getRemainingFlexiSeconds(None, "player1"), 24 * 60 * 60)
+
+    def test_existing_entry_is_subtracted(self):
+        flexi_data = json.dumps([["player1", 3600]])
+        self.assertEqual(SF_getRemainingFlexiSeconds(flexi_data, "player1"), 23 * 60 * 60)
+
+    def test_other_players_entry_is_ignored(self):
+        flexi_data = json.dumps([["player2", 3600]])
+        self.assertEqual(SF_getRemainingFlexiSeconds(flexi_data, "player1"), 24 * 60 * 60)
+
+    def test_malformed_flexi_data_returns_full_bank(self):
+        self.assertEqual(SF_getRemainingFlexiSeconds("not json", "player1"), 24 * 60 * 60)
+
+    def test_format_seconds_as_hhmm(self):
+        self.assertEqual(SF_formatSecondsHHMM(24 * 60 * 60), "24:00")
+        self.assertEqual(SF_formatSecondsHHMM(3661), "01:01")
+        self.assertEqual(SF_formatSecondsHHMM(-5), "00:00")
 
 
 class TestSFkickoutRequired(PrintSuccessTestCase):
