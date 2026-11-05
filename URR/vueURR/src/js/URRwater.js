@@ -142,9 +142,11 @@ export function allocateWater(game, action, record = null) {
 	const area = boardRules.getArea(game, choice.area)
 	if (choice.kind === "irrigate") {
 		boardRules.requireRule(amount === 1, "Each area uses exactly one water")
+		record?.({ type: "canal", from: frame.area, to: area.id, amount: frame.water })
 		area.irrigatedBy = boardRules.getArea(game, frame.area).waterwork.state
 		frame.water--
-		record?.({ type: "irrigate", from: frame.area, to: area.id, amount: 1, state: area.irrigatedBy })
+		record?.({ type: "irrigate", from: area.id, to: area.id, amount: 1, remaining: frame.water, state: area.irrigatedBy })
+		if (frame.water > 0) record?.({ type: "return", from: area.id, to: frame.area, amount: frame.water })
 	} else {
 		frame.water -= amount
 		record?.({ type: "pump", from: frame.area, to: area.id, amount, state: area.waterwork.state })

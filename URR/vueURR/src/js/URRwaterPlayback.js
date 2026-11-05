@@ -51,6 +51,8 @@ export function buildWaterPlayback(history, snapshots, completionIndex) {
 		// The reservoir's undiverted share stays on the river, and stays visible
 		// there, until its canal play is done and the water is released.
 		if (event.type === "reservoir" && event.downstream > 0) waitingWater.set(event.to, event.downstream)
+		if (event.type === "irrigate" && event.remaining > 0) waitingWater.set(event.to, event.remaining)
+		if (event.type === "return") waitingWater.delete(event.from)
 		if (event.type === "river" && waitingWater.has(event.from)) waitingWater.delete(event.from)
 		if (event.amount === 0) return
 		const descriptions = {
@@ -59,12 +61,13 @@ export function buildWaterPlayback(history, snapshots, completionIndex) {
 			confluence: event.waiting ? t("waterPlayback.confluenceWait", { amount: event.amount, area: label(event.to) }) : t("waterPlayback.confluenceMerge", { amount: event.amount, area: label(event.to) }),
 			reservoir: t("waterPlayback.reservoir", { state: rf.STATE_NAMES[event.state], area: label(event.to), amount: event.amount, downstream: event.downstream }),
 			pump: t("waterPlayback.pump", { amount: event.amount, from: label(event.from), state: rf.STATE_NAMES[event.state], to: label(event.to) }),
+			canal: t("waterPlayback.canal", { amount: event.amount, from: label(event.from), to: label(event.to) }),
 			irrigate: t("waterPlayback.irrigate", { state: rf.STATE_NAMES[event.state], area: label(event.to) }),
 			return: t("waterPlayback.return", { amount: event.amount, from: label(event.from), to: label(event.to) }),
 			release: t("waterPlayback.release", { amount: event.amount, area: label(event.from) }),
 			outflow: t("waterPlayback.outflow", { amount: event.amount }),
 		}
-		const path = event.from && event.to && ["pump", "irrigate", "return"].includes(event.type) ? canalPath(board, event.from, event.to) : [event.from, event.to].filter(Boolean)
+		const path = event.from && event.to && ["pump", "canal", "irrigate", "return"].includes(event.type) ? canalPath(board, event.from, event.to) : [event.from, event.to].filter(Boolean)
 		steps.push({ ...event, path, waitingWater: [...waitingWater].map(([area, amount]) => ({ area, amount })), text: descriptions[event.type], wet: game.board.areas.filter((area) => area.irrigatedBy !== null).map((area) => area.id) })
 	}
 	let finished = water.startWaterRouting(game, record)
@@ -74,6 +77,10 @@ export function buildWaterPlayback(history, snapshots, completionIndex) {
 		else if (action?.type === "advanceWater") finished = water.advanceWaterRouting(game, record)
 	}
 	if (!finished || game.rain.routing.outflow !== completed.rain.outflow) throw new Error(t("waterPlayback.noAllDecisions"))
+	// A reservoir with no canal play passes all its water straight downstream.
+	for (let index = steps.length - 2; index >= 0; index--) {
+		if (steps[index].type === "reservoir" && steps[index + 1].type === "release" && steps[index].to === steps[index + 1].from) steps.splice(index, 2)
+	}
 	const wet = game.board.areas.filter((area) => area.irrigatedBy !== null).map((area) => area.id)
 	steps.push({ type: "complete", path: [], wet, waitingWater: [], text: wet.length === 1 ? t("waterPlayback.completeOne", { count: wet.length, outflow: game.rain.routing.outflow }) : t("waterPlayback.completeMany", { count: wet.length, outflow: game.rain.routing.outflow }) })
 	return { board, steps }
