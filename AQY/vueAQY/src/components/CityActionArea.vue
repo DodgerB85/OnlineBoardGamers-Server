@@ -156,7 +156,11 @@ then I only need to be sure that I have no more than 5 of Gold, Stone, Dye, Pear
 	
 	// Manned and unused hospital
 	if (player.cities.some(city => city.buildings.some(building => building.bldgNum === rf.BLDG_HOSPITAL && building.manned && !building.usedThisTurn))) ret.push(["red", t("cityActionArea.cautionHospitalUnused")])
-	
+
+	// Info: an affordable house is still available and there is space to build it
+	let hasFreeCitySquare = player.cities.some((cityObj) => cityObj.coords.includes(rf.BLDG_NONE_SQ))
+	if (hasFreeCitySquare && player.availableHouses.some((houseNum) => !city.buildingNotAddedAndCannotAfford(playerIndex, houseNum))) ret.push(["green", t("cityActionArea.infoCanBuildHouse")])
+
 	return ret
 }
 

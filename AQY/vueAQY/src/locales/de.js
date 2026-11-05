@@ -545,6 +545,7 @@ export default {
 		cautionUnresolvedTradesNoPeriod: "Achtung: Sie haben ungeklärte Handelsangebote Diese werden storniert",
 		cautionUnresolvedTrades: "Achtung: Sie haben ungeklärte Handelsangebote. Diese werden storniert",
 		cautionHospitalUnused: "Achtung: Sie haben ein Krankenhaus besetzt, aber nicht genutzt. Klicken Sie auf das Krankenhaus und dann auf die Schaltfläche in der Mitte",
+		infoCanBuildHouse: "Info: Sie können noch ein Haus bauen",
 	},
 
 	cityNewBuildingArea: {

@@ -112,6 +112,7 @@ export default {
 		cautionUnresolvedTradesNoPeriod: "Caution: You have unresolved trades These will be cancelled",
 		cautionUnresolvedTrades: "Caution: You have unresolved trades. These will be cancelled",
 		cautionHospitalUnused: "Caution: You have manned a Hospital but not used it. Click the Hospital then the button in the centre",
+		infoCanBuildHouse: "Info: You can still build a House",
 	},
 
 	cityNewBuildingArea: {
