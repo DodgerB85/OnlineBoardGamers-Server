@@ -127,7 +127,9 @@ const inspectionTargets = computed(() => new Set(store.board.areas.filter((area)
 ).map((area) => area.id)))
 const confirmationPosition = computed(() => {
 	const position = actualAreas.value.find((entry) => entry.area.id === props.mapAction?.area)?.position
-	return position ? { left: `clamp(0px, ${position.x / boardDisplay.MAP_WIDTH * 100}%, calc(100% - 220px))`, top: `min(${(position.y + 45) / boardDisplay.MAP_HEIGHT * 100}%, calc(100% - 100px))` } : null
+	// 57 is the printed pointy-top hex centre-to-tip. The popup bottom sits above
+	// the tip, then a quarter hex higher, clear of the hex's upper neighbours.
+	return position ? { left: `clamp(110px, ${position.x / boardDisplay.MAP_WIDTH * 100}%, calc(100% - 110px))`, top: `${(position.y - 89) / boardDisplay.MAP_HEIGHT * 100}%` } : null
 })
 function inspectArea(id) {
 	if (playback.state.visible) return
@@ -332,7 +334,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 <style scoped>
 .areaHit:focus { outline: none; }
 .areaHit.purchaseLocked { fill: #444; fill-opacity: .35; }
-.mapSurface { position: relative; }.mapConfirmation { position: absolute; width: 220px; max-width: 100%; box-sizing: border-box; padding: 8px; background: #fff9e9; border: 2px solid #177daf; border-radius: 5px; box-shadow: 0 2px 8px #0005; text-align: left; font-size: 16px; font-weight: 400; line-height: 1.4; z-index: 2; }.mapConfirmation b { display: block; }.mapConfirmation small { display: block; margin: 4px 0; }.mapConfirmation button { min-height: 36px; margin-right: 5px; font: inherit; }.mapConfirmation button:first-child { background: #d9ead1; }.areaHit.actionSite { fill: #7bdca3; fill-opacity: .35; stroke: #176a3b; stroke-width: 6; }.actionShade { fill: #fff9e9; fill-opacity: .55; pointer-events: none; }
+.mapSurface { position: relative; }.mapConfirmation { position: absolute; width: 220px; max-width: 100%; box-sizing: border-box; transform: translate(-50%, -100%); padding: 8px; background: #fff9e9; border: 2px solid #177daf; border-radius: 5px; box-shadow: 0 2px 8px #0005; text-align: left; font-size: 16px; font-weight: 400; line-height: 1.4; z-index: 2; }.mapConfirmation b { display: block; }.mapConfirmation small { display: block; margin: 4px 0; }.mapConfirmation button { min-height: 36px; margin-right: 5px; font: inherit; }.mapConfirmation button:first-child { background: #d9ead1; }.areaHit.actionSite { fill: #7bdca3; fill-opacity: .35; stroke: #176a3b; stroke-width: 6; }.actionShade { fill: #fff9e9; fill-opacity: .55; pointer-events: none; }
 
 .areaHit.digComplete { fill: #7bdca3; fill-opacity: .3; stroke: #176a3b; }
 .areaHit.digContinue { fill: #c1e8ed; fill-opacity: .25; stroke: #257b89; stroke-dasharray: 10 6; }

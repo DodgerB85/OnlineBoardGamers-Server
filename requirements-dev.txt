@@ -5,8 +5,9 @@ pyinstrument
 pip-audit
 
 # Used to regenerate the rulebook markdown in */rules/
-pymupdf==2.0
-pymupdf4llm==2.0
+pymupdf==2.1
+pymupdf4llm==2.1
 markdownify==1.2.3
+# Newer releases require Python <3.13 (deployment uses 3.13)
 rapidocr-onnxruntime==1.2.3
 pdfplumber

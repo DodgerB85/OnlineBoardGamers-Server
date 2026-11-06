@@ -2,15 +2,16 @@ asgiref==3.13.0
 certifi==2026.10.23
 charset-normalizer==3.5.2
 config==0.5.1
-Django==5.2.18
+# Django 6.1+ requires MySQL 8.4; PythonAnywhere accounts may still be on MySQL 8.0
+Django==6.0.10
 django-user-visit==2.3
 idna==3.20
 mysqlclient==2.3.0
 python-decouple==3.8
 requests==2.34.2
 six==1.17.0
-sqlparse==0.6.0
-tzdata==2026.5
+sqlparse==0.6.1
+tzdata==2026.6
 ua-parser==1.0.2
 ua-parser-builtins==202610
 urllib3==2.8.0

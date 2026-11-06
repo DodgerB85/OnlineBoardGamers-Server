@@ -4158,7 +4158,7 @@ var View = function (model) {
 
 				if (message != undefined && message.length > 0 && global.name != undefined) {
 					$("#chatMessage").val("")
-					addMessageToDisplay.call(this, { timestamp: new Date().getTime(), message: htmlEscape(message), name: global.name }, true)
+					addMessageToDisplay.call(this, { timestamp: new Date().getTime(), message: message, name: global.name }, true)
 					IO.postMessage(message, global.name)
 				}
 			})
@@ -4247,7 +4247,10 @@ var View = function (model) {
 		$("#messageList").empty()
 		var messages = []
 		if (global.chat != undefined) {
-			messages = global.chat.chat
+			// Chat is stored HTML-escaped; live messages are unescaped on arrival, page-load ones are not
+			messages = global.chat.chat.map(function (message) {
+				return Object.assign({}, message, { message: htmlUnescape(message.message) })
+			})
 		}
 
 		messages.push({ name: "WelcomeBot", timestamp: global.gameCreationTimestamp, message: gettext("Welcome to Horseless Carriage Online!=-NEWLINE-==-NEWLINE-=If you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!") })
