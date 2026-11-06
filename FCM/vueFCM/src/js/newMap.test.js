@@ -140,6 +140,18 @@ describe("New Map mod — tile pool & map generation", () => {
 		for (let t = 29; t <= 43; t++) expect(seen.has(t)).toBe(false)
 	})
 
+	it("keeps new tiles out of normal games with New Districts and Lobbyists", () => {
+		const store = useModelStore()
+		store.startingOptions.newDistricts = true
+		store.startingOptions.lobbyists = true
+
+		expect(rules.availableLobbyistTiles().filter((t) => t >= 29 && t <= 43)).toHaveLength(0)
+		expect(rules.availableUrbanPlanningTiles().filter((t) => t >= 29 && t <= 43)).toHaveLength(0)
+		for (let i = 0; i < 30; i++) {
+			expect(drawnTiles(4).filter((t) => t >= 29 && t <= 43)).toHaveLength(0)
+		}
+	})
+
 	it("puts all 15 new tiles into the random pool when the mod is on", () => {
 		const store = useModelStore()
 		store.startingOptions.newMap = true

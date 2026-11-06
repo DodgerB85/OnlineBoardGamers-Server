@@ -2,8 +2,50 @@ var availableTiles;
 var boardTiles;
 var playerCount = 2;
 
+// Tiles 0-19 are the base game, 20-25 the New Districts / Lobbyists set.
+// 29-43 are the optional fan-made New Map tiles.
+var BASE_MAP_TILES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
+var NEW_MAP_TILES = [29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43];
+
+function availableTilePool() {
+    var tiles = BASE_MAP_TILES.slice();
+    var toggle = document.getElementById("showNewMapTiles");
+    if (toggle && toggle.checked) tiles = tiles.concat(NEW_MAP_TILES);
+    return tiles;
+}
+
+function boardHasNewMapTiles() {
+    if (boardTiles == undefined) return false;
+    for (var i = 0; i < boardTiles.length; i += 2) {
+        if (boardTiles[i] >= 29 && boardTiles[i] <= 43) return true;
+    }
+    return false;
+}
+
+function toggleNewMapTiles() {
+    var toggle = document.getElementById("showNewMapTiles");
+    if (toggle.checked) {
+        var used = {};
+        for (var i = 0; i < boardTiles.length; i += 2) used[boardTiles[i]] = true;
+        for (var j = 0; j < NEW_MAP_TILES.length; j++) {
+            var tile = NEW_MAP_TILES[j];
+            if (!used[tile] && !availableTiles.includes(tile)) availableTiles.push(tile);
+        }
+    } else {
+        availableTiles = availableTiles.filter(function (tile) {
+            return tile < 29 || tile > 43;
+        });
+    }
+    availableTiles.sort(function (a, b) {
+        return a - b;
+    });
+    renderAvailableTiles();
+}
+
 function init() {
-    availableTiles = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
+    // A saved New Map custom map needs its fan tiles available on load.
+    if (boardHasNewMapTiles()) document.getElementById("showNewMapTiles").checked = true;
+    availableTiles = availableTilePool();
 
     //if (boardTiles.length == 0) {
     if (boardTiles == undefined) {
@@ -18,7 +60,7 @@ function init() {
 
         for (var i = 0; i < boardTiles.length; i += 2) {
             var index = availableTiles.indexOf(boardTiles[i]);
-            availableTiles.splice(index, 1);
+            if (index > -1) availableTiles.splice(index, 1);
         }
     }
     renderAvailableTiles();
@@ -598,7 +640,7 @@ function changePlayerNumberGraphics(playerNumber) {
 
 function changePlayerNumber() {
     playerCount = parseInt(this.id.slice(0, 1));
-    availableTiles = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
+    availableTiles = availableTilePool();
     switch (playerCount) {
         case 2:
             document.querySelectorAll(".playerCount").forEach((element) => element.src = "/static/Lobby/images/playerOutline.svg");
@@ -655,6 +697,15 @@ function changePlayerNumber() {
 }
 
 function fillMap(useAllTiles) {
+    // "Base-game tiles" must not use the expansion or New Map tiles, even when
+    // they are currently visible in the available pool.
+    var reservedTiles = [];
+    if (!useAllTiles) {
+        for (var r = availableTiles.length - 1; r >= 0; r--) {
+            if (availableTiles[r] >= 20) reservedTiles.push(availableTiles.splice(r, 1)[0]);
+        }
+    }
+
     availableTiles = shuffle(availableTiles);
     var i = 0;
     for (i = 0; i < boardTiles.length; i += 2) {
@@ -663,29 +714,18 @@ function fillMap(useAllTiles) {
                 boardTiles[i] = availableTiles.pop();
                 boardTiles[i + 1] = Math.floor(Math.random() * 4);
             }
-            else {
-                //while (counter < boardTiles.length && i < availableTiles.length) {
-                //while (availableTiles[0] >= 20) {
-                //   availableTiles = shuffle(availableTiles);
-                //}
-                //boardTiles[i] = availableTiles.shift();
-                //boardTiles[i + 1] = Math.floor(Math.random() * 4);
-                while (availableTiles.length > 0 && availableTiles[0] >= 20) {
-                    availableTiles.shift();
-                }
-                if (availableTiles.length > 0) {
-                    boardTiles[i] = availableTiles.shift();
-                    boardTiles[i + 1] = Math.floor(Math.random() * 4);
-                }
+            else if (availableTiles.length > 0) {
+                boardTiles[i] = availableTiles.shift();
+                boardTiles[i + 1] = Math.floor(Math.random() * 4);
             }
         }
     }
 
     if (!useAllTiles) {
-        // recover available tiles
-        for (i = 20; i <= 25; i++) if (!availableTiles.includes(i)) availableTiles.push(i);
+        reservedTiles.forEach(function (tile) {
+            if (!availableTiles.includes(tile)) availableTiles.push(tile);
+        });
     }
-
 
     availableTiles.sort(function (a, b) {
         return a - b;
@@ -713,7 +753,7 @@ function clearMap() {
         boardTiles[i] = -1;
         boardTiles[i + 1] = 0;
     }
-    availableTiles = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
+    availableTiles = availableTilePool();
     renderAvailableTiles();
     renderBoard(playerCount);
 }
@@ -852,10 +892,10 @@ async function generateBGHmap() {
             boardTiles = boardTiles.concat(translateTiles(data["map_tiles"][i].tile_letter, data["map_tiles"][i].tile_rotations))
         }
 
-        availableTiles = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
+        availableTiles = availableTilePool();
         for (var i = 0; i < boardTiles.length; i += 2) {
             var index = availableTiles.indexOf(boardTiles[i]);
-            availableTiles.splice(index, 1);
+            if (index > -1) availableTiles.splice(index, 1);
         }
 
         renderAvailableTiles();

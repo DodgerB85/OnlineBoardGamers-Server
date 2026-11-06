@@ -92,6 +92,10 @@
       <main class="map-editor-main">
         <section class="card">
           <h2 class="map-editor-section-title">{% translate "Available tiles" %}</h2>
+          <label class="map-editor-note">
+            <input type="checkbox" id="showNewMapTiles" onchange="toggleNewMapTiles()" />
+            {% translate "Show new fan-made tiles" %}
+          </label>
           <div id="availableMapTiles"></div>
         </section>
         <section class="card">

@@ -100,7 +100,8 @@ function initGameCreation(fillData, setupData = {}) {
 			if (startingOptions.includes("181")) document.getElementById("newDistrictsApp").checked = true
 			if (startingOptions.includes("183")) document.getElementById("newDistrictsPark").checked = true
 			if (startingOptions.includes("182")) document.getElementById("newDistrictsAll").checked = true
-			if (startingOptions.includes("51")) document.getElementById("newMap").checked = true
+			// 52 is a sub-option of 51; older/crafted setups may only have 52.
+			if (startingOptions.includes("51") || startingOptions.includes("52")) document.getElementById("newMap").checked = true
 			validateOptions("newMap")
 			if (startingOptions.includes("52")) document.getElementById("newMapAll").checked = true
 			if (startingOptions.includes("22")) document.getElementById("lobbyists").checked = true

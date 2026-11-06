@@ -127,6 +127,9 @@ def buildFCMstartingOptions(post_data):
         "allowRewind",
     ]
     optionsArr.extend(int(post_data[opt]) for opt in option_names if opt in post_data)
+    # New Map priority mode is a sub-option: always store the base flag too.
+    if rfFCM.SO_NEW_MAP_ALL in optionsArr and rfFCM.SO_NEW_MAP not in optionsArr:
+        optionsArr.append(rfFCM.SO_NEW_MAP)
     return optionsArr
 
 
