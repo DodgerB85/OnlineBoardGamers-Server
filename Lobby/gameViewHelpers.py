@@ -346,6 +346,17 @@ def shared_cast_vote(request):
     try:
         currentGame = Game.objects.get(id=jsonData["gameID"])
     except Game.DoesNotExist:
+        # The final delete vote removes the game, so a vote still in flight from
+        # another player's open page must land back in the lobby, not a 404.
+        if jsonData.get("topic") == rf.DELETE_VOTE_TOPIC:
+            return JsonResponse(
+                {
+                    "voteChanged": True,
+                    "votesData": "{}",
+                    "message": gettext("Game successfully deleted"),
+                    "redirect_url": reverse("index"),
+                }
+            )
         raise Http404(gettext("Game does not exist")) from None
 
     result = currentGame.presenter().processVoteLogic(

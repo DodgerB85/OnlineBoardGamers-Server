@@ -280,3 +280,35 @@ class VotesClearedOnGameEndTests(TestCase):
             f"FCM rewrote vote data onto a finished game: {game.activeVotes}",
         )
         self.assertEqual(game.rewindData, "")
+
+
+class VoteAfterGameDeletedTests(TestCase):
+    """
+    The vote that completes a game deletion removes the Game row. A delete vote
+    still in flight from another player's open page used to 404 and get logged
+    as an error; it should land back in the lobby instead.
+    """
+
+    def setUp(self):
+        import Lobby.sharedFunctions.constants as rf
+
+        self.rf = rf
+        self.user = User.objects.create_user(username="lateVoter", password="pw")
+        self.client.force_login(self.user)
+
+    def _cast_vote(self, topic, game_id=999999):
+        payload = {"action": "castVote", "topic": topic, "gameID": game_id, "choice": True}
+        return self.client.post(reverse("HLC:castVoteCNS"), data=json.dumps(payload), content_type="application/json")
+
+    def test_delete_vote_on_deleted_game_redirects_to_lobby(self):
+        response = self._cast_vote(self.rf.DELETE_VOTE_TOPIC)
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["voteChanged"])
+        self.assertEqual(data["redirect_url"], reverse("index"))
+
+    def test_other_votes_on_deleted_game_still_404(self):
+        response = self._cast_vote(self.rf.REWIND_CONSENT_VOTE_TOPIC)
+
+        self.assertEqual(response.status_code, 404)
