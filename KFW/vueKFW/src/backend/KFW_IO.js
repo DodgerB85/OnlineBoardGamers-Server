@@ -991,13 +991,15 @@ export async function kickout() {
 			return
 		}
 		if (data.voteCast) {
-			store.kickoutVotesData = data.votesData
+			store.kickoutVotesData = data.votesData ? JSON.parse(data.votesData) : {}
+			if (data.threshold != null) store.kickoutVoteThreshold = data.threshold
 			store.viewSettings.showLoader = false
 			store.gameMessages.successText = i18n.global.t("io.kickoutVoteRecorded")
 			return data
 		}
 
 		// Apply kickout result to local state so subsequent saves don't revert it
+		store.kickoutVotesData = {}
 		personal.latestUpdate = data.latestUpdate
 		window.initData.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout

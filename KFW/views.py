@@ -684,10 +684,20 @@ def _processKFWturn(request):
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": "12345"}, safe=False)
 
+        # Only the player who is actually on turn can be kicked, and only once
+        # the server says the flexi time is used up. A kickout panel left open
+        # on a client outlives the move that reset the clock.
+        kicked_name = jsonData["kickedName"]
+        target_on_turn = currentGame.players.filter(
+            player__username=kicked_name, is_current=True, is_missing=False, is_kicked=False
+        ).exists()
+        if kicked_name == request.user.username or not target_on_turn or presenter.kickoutRequired() != 2:
+            return JsonResponse({"error": gettext("This player is not eligible for kickout.")}, status=400)
+
         # Voting layer: 3p+ games need a majority vote to kick, unless the
         # requester's own vote for this target is more than 2 days old.
         # If the vote is only recorded, return straight away without kicking.
-        kickout_vote_result = presenter.processKickoutVote(request.user.username, jsonData["kickedName"])
+        kickout_vote_result = presenter.processKickoutVote(request.user.username, kicked_name)
         if kickout_vote_result["voteCast"]:
             currentGame.save()
             return JsonResponse(kickout_vote_result, safe=False)

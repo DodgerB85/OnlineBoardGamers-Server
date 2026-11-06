@@ -31,7 +31,6 @@
  */
 export const BOT_NAME = "KfwBot"
 
-export const KICKOUT_VOTE_TOPIC = "kickout_player_votes"
 export const KICKOUT_SOLO_DELAY_MS = 2 * 24 * 60 * 60 * 1000
 
 // Player colours - 2 sets of totally different from meeples, and more usual but similar to meeple colours

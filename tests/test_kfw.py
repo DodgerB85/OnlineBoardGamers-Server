@@ -140,3 +140,59 @@ class KFWFinalScoringTests(TestCase):
         self.assertFalse(response[-1]["allReady"])
         moves = json.loads(self.game.KFWplayersMoveData)
         self.assertEqual([move[2] for move in moves], ["final-a", ""])
+
+
+class KFWKickoutVoteTests(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.players = [user_model.objects.create_user(username=f"kfw-kickout-{index}", password="pw") for index in range(3)]
+        self.game = Game.objects.create(
+            gameCode="KFW",
+            creator=self.players[0],
+            host=self.players[0],
+            gameStatus="ACTIVE",
+            maxPlayers=3,
+            startingOptions="[]",
+        )
+        for index, player in enumerate(self.players):
+            GamePlayer.objects.create(game=self.game, player=player, seat_order=index, is_current=index == 2)
+        self.client.force_login(self.players[0])
+
+    def kickout(self, target=None, latest_update=None):
+        return self.client.post(
+            reverse("KFW:processKFWturn"),
+            data=json.dumps(
+                {
+                    "action": "kickout",
+                    "gameID": self.game.id,
+                    "kickedName": (target or self.players[2]).username,
+                    "latestUpdate": latest_update or self.game.latestUpdate,
+                }
+            ),
+            content_type="application/json",
+        )
+
+    @patch("Lobby.presenters.GamePresenter.kickoutRequired", return_value=2)
+    def test_vote_is_recorded_then_majority_kicks(self, _kickout_required):
+        response = self.kickout()
+        self.assertTrue(response.json()["voteCast"])
+        votes = json.loads(response.json()["votesData"])
+        self.assertEqual(votes[self.players[0].username][0], self.players[2].username)
+
+        self.client.force_login(self.players[1])
+        self.kickout()  # second vote reaches the majority and performs the kickout
+
+        seat = self.game.players.get(player=self.players[2])
+        self.assertTrue(seat.is_missing)
+        self.assertTrue(seat.is_kicked)
+
+    @patch("Lobby.presenters.GamePresenter.kickoutRequired", return_value=1)
+    def test_cannot_kick_during_flex_time(self, _kickout_required):
+        self.assertEqual(self.kickout().status_code, 400)
+        self.game.refresh_from_db()
+        self.assertFalse(self.game.players.get(player=self.players[2]).is_kicked)
+
+    @patch("Lobby.presenters.GamePresenter.kickoutRequired", return_value=2)
+    def test_only_the_current_other_player_can_be_kicked(self, _kickout_required):
+        self.assertEqual(self.kickout(self.players[0]).status_code, 400)  # self
+        self.assertEqual(self.kickout(self.players[1]).status_code, 400)  # not on turn
