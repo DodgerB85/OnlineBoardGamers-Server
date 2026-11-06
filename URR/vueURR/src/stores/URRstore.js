@@ -34,9 +34,9 @@ export const useModelStore = defineStore("store", () => {
 	})
 
 	// Draft checkpoints are local and never exported to the server.
-	const turnDraft = reactive({ start: null, steps: [], player: null, ready: false, message: "", revision: 0, pauseAutomatic: false })
+	const turnDraft = reactive({ start: null, steps: [], waterPlan: [], player: null, ready: false, message: "", revision: 0, pauseAutomatic: false })
 	function clearTurnDraft() {
-		Object.assign(turnDraft, { start: null, steps: [], player: null, ready: false, message: "", pauseAutomatic: false })
+		Object.assign(turnDraft, { start: null, steps: [], waterPlan: [], player: null, ready: false, message: "", pauseAutomatic: false })
 		viewSettings.actionIntent = ""
 		turnDraft.revision++
 	}

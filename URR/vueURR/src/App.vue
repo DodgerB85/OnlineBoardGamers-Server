@@ -166,7 +166,7 @@ function revealStatus(type) {
 watch(() => store.viewSettings.historyArea, (id) => { if (id) map.value.locateArea(id) })
 const automaticAction = computed(() => {
 	if (store.viewSettings.showLoader || store.viewSettings.isSaving || store.viewSettings.performingRewind) return null
-	if (store.turnDraft.pauseAutomatic || store.turnDraft.ready) return null
+	if (store.turnDraft.pauseAutomatic || store.turnDraft.ready || store.turnDraft.waterPlan.length) return null
 	return personal.canPlay() ? rules.getAutomaticAction(store) : controller.getAutomaticBotAction()
 })
 // A turn made only of forced moves (nothing to decide) saves itself instead of waiting for End Turn.
@@ -243,7 +243,7 @@ function showDebug() {
 			<div class="mapContainer" :title="isNationDivision ? $t('app.clickMapEnlarge') : undefined" @keydown.enter="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()" @keydown.space="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()" @click="isNationDivision && $event.target.closest('.mapSurface') && openMapPreview()">
 				<TerrainMarket v-if="store.viewSettings.showLandPrices" />
 				<Teleport to="#nationMapPreviewBody" :disabled="!isMapPreviewOpen">
-				<MapArea ref="map" :selected-hex="selectedArea" :map-action="mapAction" :action-targets="actionTargets" @confirm-action="gameActions?.confirmMapAction()" @cancel-action="gameActions?.cancelMapAction()" :highlighted-player="store.viewSettings.showOwnedLand ? holdings?.activePlayer ?? null : null" :removal-area="removalArea" :land-draft="landDraft" :waiting-player-index="waitingPlayerIndex" :dig-capacity="digCapacity" @select-area="selectArea" @click-area="gameActions?.planClick($event)" @change-path="canalPath = $event" />
+				<MapArea ref="map" :selected-hex="selectedArea" :map-action="mapAction" :action-targets="actionTargets" @change-water-amount="gameActions?.changeWaterAmount($event)" @confirm-action="gameActions?.confirmMapAction()" @cancel-action="gameActions?.cancelMapAction()" :highlighted-player="store.viewSettings.showOwnedLand ? holdings?.activePlayer ?? null : null" :removal-area="removalArea" :land-draft="landDraft" :waiting-player-index="waitingPlayerIndex" :dig-capacity="digCapacity" @select-area="selectArea" @click-area="gameActions?.planClick($event)" @change-path="canalPath = $event" />
 				</Teleport>
 			</div>
 			<aside v-if="!store.viewSettings.showReplay" class="actionSidebar">

@@ -15,7 +15,7 @@ import * as rf from "../js/URRreference"
 import * as debug from "../js/URRdebug"
 import { usePersonalStore } from "../stores/URRpersonal.js"
 import { useModelStore } from "../stores/URRstore.js"
-const emit = defineEmits(["selectArea", "clickArea", "changePath", "confirmAction", "cancelAction"])
+const emit = defineEmits(["selectArea", "clickArea", "changePath", "confirmAction", "cancelAction", "changeWaterAmount"])
 const props = defineProps({ selectedHex: { type: String, default: null }, mapAction: { type: Object, default: null }, actionTargets: { type: Array, default: () => [] }, highlightedPlayer: { type: Number, default: null }, removalArea: { type: String, default: null }, landDraft: { type: Object, default: null }, waitingPlayerIndex: { type: Number, default: null }, digCapacity: { type: [Number, String, Array], default: null } })
 const store = useModelStore()
 const { t, locale } = useI18n()
@@ -70,6 +70,7 @@ const waterReport = computed(() => {
 })
 const selectedArea = computed(() => store.board.areas.find((area) => area.id === selectedHexId.value))
 const reachable = computed(() => !previewOpen.value && !store.viewSettings.actionIntent && selectedArea.value?.waterwork ? boardRules.getWaterworkReach(store, selectedArea.value.id) : [])
+const irrigationDraft = computed(() => store.viewSettings.showReplay ? [] : store.turnDraft.waterPlan.map((selection) => selection.area))
 const waterDestinations = computed(() => water.waterChoices(store).map((choice) => choice.area))
 const routingArea = computed(() => water.currentWaterFrame(store)?.area)
 const chosenRemoval = computed(() => !store.viewSettings.showReplay && store.gameflow.phase === rf.PHASE_RAINY_SEASON && store.rain.step === "harvest" ? props.removalArea : null)
@@ -281,6 +282,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 					<image v-if="entry.area.waterwork" :href="assets.getWaterworkImage(entry.area.waterwork.state, entry.area.waterwork.capacity)" :x="entry.position.x + 10" :y="entry.position.y - 40" width="32" height="32" class="waterworkMarker"><title>{{ rf.STATE_NAMES[entry.area.waterwork.state] }} {{ view.kindName(entry.area.waterwork.kind) }} · {{ view.waterworkMeasure(entry.area.waterwork) }}</title></image>
 					<rect v-if="entry.area.waterwork" :x="entry.position.x + 10" :y="entry.position.y - 40" width="32" height="32" class="tokenFrame" />
 					<circle v-if="entry.area.irrigatedBy !== null" :cx="entry.position.x + 24" :cy="entry.position.y + 20" r="10" class="irrigationMarker"><title>{{ $t("map.irrigatedBy", { state: rf.STATE_NAMES[entry.area.irrigatedBy] }) }}</title></circle>
+					<text v-if="irrigationDraft.includes(entry.area.id)" :x="entry.position.x" :y="entry.position.y + 12" class="irrigationTick" aria-hidden="true">✓</text>
 					<g v-if="mapDecisions[entry.area.id]" class="mapDecisionHighlight" :class="mapDecisions[entry.area.id].kind">
 						<template v-if="mapDecisions[entry.area.id].number"><circle :cx="entry.position.x - 28" :cy="entry.position.y - 27" r="16" class="decisionBadge" /><text :x="entry.position.x - 28" :y="entry.position.y - 27" class="destinationNumber">{{ mapDecisions[entry.area.id].label }}</text></template>
 						<template v-else-if="mapDecisions[entry.area.id].label"><rect :x="entry.position.x - 36" :y="entry.position.y + 23" width="72" height="23" rx="4" class="decisionBadge" /><text :x="entry.position.x" :y="entry.position.y + 35" class="decisionLabel">{{ mapDecisions[entry.area.id].label }}</text></template>
@@ -307,9 +309,10 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 				<polygon v-if="selectedHexId && !mapDecisions[selectedHexId] && !hasMapInspection && !store.turnDraft.ready && !store.viewSettings.showReplay" :points="areaClips[selectedHexId]" class="areaHit selected selectionOutline" />
 			</svg>
 			<WaterPlayback v-if="playback.state.visible" />
-			<div v-if="!playback.state.visible && mapAction && confirmationPosition && !store.turnDraft.ready" class="mapConfirmation" :style="confirmationPosition">
+			<div v-if="!playback.state.visible && mapAction && confirmationPosition && (!store.turnDraft.ready || mapAction.endTurn)" class="mapConfirmation" :style="confirmationPosition">
 				<b><CurrencyText :text="mapAction.label" /></b><small><CurrencyText :text="mapAction.detail" /></small>
-				<div><button :disabled="!mapAction.canConfirm" @click="emit('confirmAction')">{{ $t("map.confirm") }}</button><button @click="emit('cancelAction')">{{ $t("map.cancel") }}</button></div>
+				<label v-if="mapAction.pumpAmount !== null && mapAction.pumpAmount !== undefined">{{ $t("actions.water") }} <input type="number" inputmode="numeric" :value="mapAction.pumpAmount" min="1" :max="mapAction.maxWater" step="1" @input="emit('changeWaterAmount', $event.target.value)" /></label>
+				<div><button :disabled="!mapAction.canConfirm" @click="emit('confirmAction')">{{ $t(mapAction.endTurn ? "actions.endTurn" : "map.confirm") }}</button><button @click="emit('cancelAction')">{{ $t(mapAction.endTurn ? "common.close" : "map.cancel") }}</button></div>
 			</div>
 			<div class="mapBack"><transition name="resignFade"><ResignPanel v-if="resignOpen" /></transition></div>
 		</div>
@@ -344,6 +347,8 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 .boardLegend { display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: center; gap: 4px 8px; font-size: 16px; font-weight: 400; line-height: 1.4; padding: 6px 8px; text-align: left; }
 #mapArea { width: 100%; display: flex; flex-direction: column; align-items: center; min-width: 0; perspective: 1600px; }.mapFooter { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 0; }.legendFooter { display: flex; align-items: flex-start; gap: 8px; width: 100%; padding-top: 6px; }.legendFooter .boardLegend { flex: 1; min-width: 0; }.legendFooter .mapZoom { flex-shrink: 0; }.mapFooter .controls { width: auto; padding: 0; }.mapSurface { position: relative; width: 100%; line-height: 0; box-shadow: 0 2px 5px #6b614a; transform-style: preserve-3d; transition: transform .6s ease; }.mapSurface.flipped { transform: rotateY(180deg); }.mapSurface > * { backface-visibility: hidden; }.mapBack { position: absolute; inset: 0; transform: rotateY(180deg); backface-visibility: hidden; line-height: 1.4; }.resignFade-enter-active { transition: opacity .4s ease-in-out .25s; }.resignFade-leave-active { transition: opacity .2s ease-in-out; }.resignFade-enter-from, .resignFade-leave-to { opacity: 0; }.mapSurface svg { width: 100%; height: auto; display: block; }
 .printedHexes polygon, .areaHit { fill: #fff; fill-opacity: .001; stroke: transparent; stroke-width: 5; cursor: pointer; }.areaHit.maintenanceSale { fill: #ffd894; fill-opacity: .2; stroke: #b76400; }.areaHit.harvestRemovalSite { fill: #ffd894; fill-opacity: .22; stroke: #b76400; }.areaHit.barahshumSite, .areaHit.calahSite { fill: #d9b7ed; fill-opacity: .28; stroke: #8758a8; }.areaHit.reachable { fill: #bf9dff; fill-opacity: .24; }.areaHit.waterDestination { fill: #74e9ff; fill-opacity: .3; stroke: #008cb3; }.areaHit.routing { stroke: #006dca; stroke-width: 8; }.areaHit:hover, .areaHit:focus, .areaHit.selected { fill: #fff57a; fill-opacity: .32; stroke: #7e6400; }.areaHit.drafting { stroke: #1165bb; fill-opacity: .17; }
+.mapConfirmation input { width: 65px; font: inherit; }
+.irrigationTick { fill: #fff; stroke: #176c32; stroke-width: 5; paint-order: stroke; font-size: 48px; font-weight: bold; text-anchor: middle; pointer-events: none; }
 .savedCanal { fill: none; stroke: #2269ad; stroke-width: 10; stroke-linecap: round; pointer-events: none; }.draftCanal { fill: none; stroke: #1f75ce; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; opacity: .82; pointer-events: none; }.irrigationMarker { fill: #35d6ff; stroke: #fff; stroke-width: 3; pointer-events: none; }.ownerMarker, .waterworkMarker, .areaLabel { pointer-events: none; }.areaLabel { opacity: 0; text-anchor: middle; fill: #333; font-weight: bold; font-size: 16px; font-weight: 400; paint-order: stroke; stroke: #fff; stroke-width: 3; }
 .tokenFrame { fill: none; stroke: #000; stroke-width: 2; pointer-events: none; }.saleMarkerFrame { fill: #fff; }.irrigationMarker { stroke: #000; stroke-width: 2; }
 .riverStatus { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 8px; box-sizing: border-box; background: #def5ff; font-size: 16px; font-weight: 400; line-height: 1.4; }.riverStatus button { flex-shrink: 0; padding: 6px; font: inherit; border: 1px solid #177daf; border-radius: 3px; background: #fffdf4; cursor: pointer; }.wetHex { fill: #35d6ff; fill-opacity: .22; stroke: #008cb3; stroke-width: 3; pointer-events: none; }.historyOutline { fill: none; stroke: #177daf; stroke-width: 8; pointer-events: none; }
