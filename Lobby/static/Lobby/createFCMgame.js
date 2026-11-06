@@ -100,6 +100,9 @@ function initGameCreation(fillData, setupData = {}) {
 			if (startingOptions.includes("181")) document.getElementById("newDistrictsApp").checked = true
 			if (startingOptions.includes("183")) document.getElementById("newDistrictsPark").checked = true
 			if (startingOptions.includes("182")) document.getElementById("newDistrictsAll").checked = true
+			if (startingOptions.includes("51")) document.getElementById("newMap").checked = true
+			validateOptions("newMap")
+			if (startingOptions.includes("52")) document.getElementById("newMapAll").checked = true
 			if (startingOptions.includes("22")) document.getElementById("lobbyists").checked = true
 			if (startingOptions.includes("19")) document.getElementById("coffee").checked = true
 
@@ -147,6 +150,7 @@ function show_Options(listType) {
 		document.getElementById("newDistrictsApp").disabled = true
 		document.getElementById("newDistrictsAll").disabled = true
 		document.getElementById("newDistrictsPark").disabled = true
+		document.getElementById("newMapAll").disabled = true
 		document.getElementById("individualOptionsView").style.display = "inline-block"
 	}
 	if (listType == "scenariosTab") document.getElementById("scenarioOptionsView").style.display = "inline-block"
@@ -316,7 +320,13 @@ function validateOptions(change) {
 			removeOption("newDistrictsAll")
 			removeOption("newDistrictsPark")
 		}
-	} 
+	} else if (change === "newMap") {
+		if (document.getElementById(change).checked == true) {
+			addOption("newMapAll")
+		} else {
+			removeOption("newMapAll")
+		}
+	}
 	else if (change === "urbanPlanning") {
 		document.getElementById("urbanPlanningPlus").checked = false
 	}

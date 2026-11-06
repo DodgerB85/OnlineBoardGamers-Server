@@ -495,7 +495,7 @@ const computedEntry3 = computed(() => {
 					kind: "sale",
 					buildingNumber: buildingNumber,
 					isApartment: rf.APARTMENTS.includes(buildingNumber),
-					isRural: buildingNumber == rf.RURAL_MARKETING_AREA,
+					isRural: buildingNumber == rf.ruralAreaNum(store.startingOptions),
 					goods: house[1],
 					// No-sale: no providers list follows the goods (length-2 entries)
 					noSale: !Array.isArray(house[2]),
@@ -569,7 +569,7 @@ const computedEntry3 = computed(() => {
 					kind: "coffee",
 					buildingNumber: coffeeBuilding,
 					isApartment: rf.APARTMENTS.includes(coffeeBuilding),
-					isRural: coffeeBuilding == rf.RURAL_MARKETING_AREA,
+					isRural: coffeeBuilding == rf.ruralAreaNum(store.startingOptions),
 					gardenParkStatus: currentGardenParkStatus,
 					highlightSqs: house[1],
 					rows: [],
@@ -620,7 +620,7 @@ const computedEntry3 = computed(() => {
 				campaign[1].forEach((number) => {
 					if (rf.ALL_HOUSES.includes(number)) houses.push(number)
 					if (rf.APARTMENTS.includes(number)) apartments.push(number === 3.2 ? 3.14 : number)
-					if (number == rf.RURAL_MARKETING_AREA) affectsRMA = true
+					if (number == rf.ruralAreaNum(store.startingOptions)) affectsRMA = true
 				})
 			}
 			return { num: campaign[0], good: campaign[2], houses: houses, apartments: apartments, rma: affectsRMA }
@@ -633,11 +633,11 @@ const computedEntry3 = computed(() => {
 			pEarnings[0].forEach((bldg) => {
 				if (bldg === 3.2) numItems++
 				if (bldg === 9.7) numItems++
-				if (bldg === rf.RURAL_MARKETING_AREA) numItems++
+				if (bldg === rf.ruralAreaNum(store.startingOptions)) numItems++
 			})
 			const uniqBuildings = [...new Set(pEarnings[0])]
 			let buildingsStr
-			if (uniqBuildings.includes(rf.RURAL_MARKETING_AREA)) buildingsStr = uniqBuildings.map((b) => (b === rf.RURAL_MARKETING_AREA ? " [" + i18n.global.t("history.ruralArea") + "]" : " " + b)).toString()
+			if (uniqBuildings.includes(rf.ruralAreaNum(store.startingOptions))) buildingsStr = uniqBuildings.map((b) => (b === rf.ruralAreaNum(store.startingOptions) ? " [" + i18n.global.t("history.ruralArea") + "]" : " " + b)).toString()
 			else buildingsStr = uniqBuildings.toString()
 			ret.earningRows.push({
 				colour: store.players[p]?.colour,

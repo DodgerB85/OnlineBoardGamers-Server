@@ -614,7 +614,7 @@ const needDisplays = computed(() => {
 	const sqSize = store.refSize / 5
 
 	for (const need of store.needs) {
-		if (need.number === rf.RURAL_MARKETING_AREA) continue
+		if (need.number === rf.ruralAreaNum(store.startingOptions)) continue
 		if (need.movedOut) {
 			// Fried chicken mod: house has moved out — show SOLD sign on house/apartment
 			const houseObj = model.findHouse(need.number)

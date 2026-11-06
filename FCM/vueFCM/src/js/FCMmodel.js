@@ -413,6 +413,12 @@ export function setInternalStartingOptions(startingOptionsArray) {
 		if (opts[i] === rf.SO_SECOND_BAILOUT) store.startingOptions.secondBailout = true
 		// Media Line mod
 		if (opts[i] === rf.SO_MEDIA_LINE) store.startingOptions.mediaLine = true
+		// New Map mod
+		if (opts[i] === rf.SO_NEW_MAP) store.startingOptions.newMap = true
+		if (opts[i] === rf.SO_NEW_MAP_ALL) {
+			store.startingOptions.newMap = true
+			store.startingOptions.newMapAll = true
+		}
 
 		if (opts[i] === rf.SO_STRICT_PAYDAY_FRIDGE) store.startingOptions.strictPaydayFridge = true
 		if (opts[i] === rf.SO_TRAINING_GAME) store.startingOptions.trainingGame = true
@@ -708,7 +714,7 @@ export function giveHousesInWaveRange(playerIndex, tileRange = 2) {
 	const houses = new Set()
 	for (let i = 0; i < store.mapData.coords.length; i++) {
 		const v = store.mapData.coords[i]
-		if (v > rf.HOUSE && v < rf.HOUSE + 29) {
+		if (v > rf.HOUSE && v < rf.HOUSE_ENC_MAX) {
 			const house = houseNumberAt(v)
 			if (house === rf.STADIUM) continue
 			if (region.has(i)) houses.add(house)
@@ -724,7 +730,7 @@ export function giveSpacesOfHouses(houses) {
 	const spaces = []
 	for (let i = 0; i < store.mapData.coords.length; i++) {
 		const v = store.mapData.coords[i]
-		if (v > rf.HOUSE && v < rf.HOUSE + 29) {
+		if (v > rf.HOUSE && v < rf.HOUSE_ENC_MAX) {
 			const house = houseNumberAt(v)
 			if (wanted.has(house)) spaces.push(i)
 		}
@@ -818,7 +824,7 @@ export function findHouse(number) {
 	if (res) return res
 
 	// 3. Fallback: Search board houses if not found in current houses
-	if (rf.BOARD_HOUSES.includes(number)) {
+	if (rf.isBoardHouse(number, store.startingOptions)) {
 		const t = map.findIndexForHouse(number)
 
 		if (t > -1) {
@@ -1040,12 +1046,12 @@ export function getAvailableCoffee(returnArray) {
 function zoneSquaresForHouse(number, index) {
 	const store = useModelStore()
 	let zone = []
-	if (number !== rf.RURAL_MARKETING_AREA) {
+	if (number !== rf.ruralAreaNum(store.startingOptions)) {
 		zone = [index + 1, index + rf.ssW, index + rf.ssW + 1]
 	}
 
 	if (hasGarden(number)) {
-		if (!rf.BOARD_HOUSES.includes(number)) {
+		if (!rf.isBoardHouse(number, store.startingOptions)) {
 			const house = store.houses.find((h) => h.number === number)
 			if (house && (house.rotated === 1 || house.rotated === 3)) {
 				zone.push(index + 2, index + rf.ssW + 2)
@@ -1068,7 +1074,7 @@ function zoneSquaresForHouse(number, index) {
 		zone.push(index + 2, index + rf.ssW + 2, index + 2 * rf.ssW, index + 2 * rf.ssW + 1, index + 2 * rf.ssW + 2)
 	}
 
-	if (number === rf.RURAL_MARKETING_AREA && store.freeways.length > 0) {
+	if (number === rf.ruralAreaNum(store.startingOptions) && store.freeways.length > 0) {
 		zone = map.getRuralMarketingZone()
 	}
 	return zone
@@ -1318,7 +1324,7 @@ export function giveRestaurantRangesForHouse(number) {
 	}
 
 	// 6. Rural Penalty
-	if (number === rf.RURAL_MARKETING_AREA) {
+	if (number === rf.ruralAreaNum(store.startingOptions)) {
 		for (let k = 0; k < res.length; k++) {
 			if (res[k] !== -99) res[k]++
 		}
@@ -1369,11 +1375,11 @@ export function getHousesAffectedByHawkerTruck(campaignNumber) {
 		const spaceContent = store.mapData.coords[neighborIdx]
 
 		// Check if the space contains a house
-		if (spaceContent > rf.HOUSE && spaceContent < rf.HOUSE + 29) {
+		if (spaceContent > rf.HOUSE && spaceContent < rf.HOUSE_ENC_MAX) {
 			const houseNum = houseNumberAt(spaceContent)
 
 			// Handle Board Houses and Apartments (Simple check)
-			if (rf.BOARD_HOUSES.includes(houseNum) || rf.APARTMENTS.includes(houseNum)) {
+			if (rf.isBoardHouse(houseNum, store.startingOptions) || rf.APARTMENTS.includes(houseNum)) {
 				housesFound.add(houseNum)
 			} else {
 				// Handle player-built houses (filtering out garden tiles)
@@ -1410,7 +1416,7 @@ export function hasGarden(house) {
 	// 1. Check if the house is a standard player-built house.
 	// If it's not a Board House, not an Apartment, not Rural Marketing, and not the
 	// Stadium pseudo-house, it has a garden by default.
-	if (!rf.BOARD_HOUSES.includes(house) && !rf.APARTMENTS.includes(house) && house !== rf.RURAL_MARKETING_AREA && house !== rf.STADIUM) {
+	if (!rf.isBoardHouse(house, store.startingOptions) && !rf.APARTMENTS.includes(house) && house !== rf.ruralAreaNum(store.startingOptions) && house !== rf.STADIUM) {
 		return true
 	}
 
@@ -1421,7 +1427,7 @@ export function hasGarden(house) {
 export function adjacentToPark(building) {
 	const store = useModelStore()
 	// building is the number of the bldg, eg 3.2, 9.7, 22
-	if (building == rf.RURAL_MARKETING_AREA) return false
+	if (building == rf.ruralAreaNum(store.startingOptions)) return false
 	const zone = building === 3.2 || building === 9.7 ? map.giveAllSpaceForAToken(map.findIndexForApartment(building), 3, 3) : map.getZoneOfHouse(building)
 	return map.neighbours(zone).some((i) => store.mapData.coords[i] === rf.PARK)
 }
@@ -1442,7 +1448,7 @@ export function getHouseOffset(house) {
 	const store = useModelStore()
 
 	// 1. Only Board Houses have external garden offsets to calculate
-	if (rf.BOARD_HOUSES.includes(house)) {
+	if (rf.isBoardHouse(house, store.startingOptions)) {
 		const garden = store.gardens.find((g) => g.house === house)
 
 		if (garden) {

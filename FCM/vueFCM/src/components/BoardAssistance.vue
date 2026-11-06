@@ -433,7 +433,7 @@ const RMA_DEMAND_COORDS = [
 ]
 
 const rmaDemands = computed(() => {
-	const rmaNeed = store.needs.find((n) => n.number === rf.RURAL_MARKETING_AREA)
+	const rmaNeed = store.needs.find((n) => n.number === rf.ruralAreaNum(store.startingOptions))
 	if (!rmaNeed) return []
 
 	const combined = [0, 0, 0, 0, 0, 0]

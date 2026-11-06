@@ -1,0 +1,40 @@
+<svg style="height: 128px; width: 128px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect x="0" y="0" width="512" height="512" fill="#87c2c8" fill-opacity="1"/>
+  <!-- Roads: horizontal + vertical band (Tile 29 compact cross) -->
+  <rect x="0" y="216" width="512" height="80" fill="#ffffff" fill-opacity="0.85"/>
+  <rect x="216" y="0" width="80" height="512" fill="#ffffff" fill-opacity="0.85"/>
+  <!-- Road center dashes -->
+  <g fill="#87c2c8" fill-opacity="0.9">
+    <rect x="24" y="252" width="28" height="8"/>
+    <rect x="76" y="252" width="28" height="8"/>
+    <rect x="128" y="252" width="28" height="8"/>
+    <rect x="356" y="252" width="28" height="8"/>
+    <rect x="408" y="252" width="28" height="8"/>
+    <rect x="460" y="252" width="28" height="8"/>
+    <rect x="252" y="24" width="8" height="28"/>
+    <rect x="252" y="76" width="8" height="28"/>
+    <rect x="252" y="128" width="8" height="28"/>
+    <rect x="252" y="356" width="8" height="28"/>
+    <rect x="252" y="408" width="8" height="28"/>
+    <rect x="252" y="460" width="8" height="28"/>
+  </g>
+  <!-- 4 corner houses (Tile 29 layout) -->
+  <g fill="#ffffff">
+    <!-- Top-left -->
+    <path d="M 50 95 L 105 50 L 160 95 Z"/>
+    <rect x="58" y="95" width="94" height="100"/>
+    <rect x="93" y="135" width="24" height="60" fill="#87c2c8"/>
+    <!-- Top-right -->
+    <path d="M 352 95 L 407 50 L 462 95 Z"/>
+    <rect x="360" y="95" width="94" height="100"/>
+    <rect x="395" y="135" width="24" height="60" fill="#87c2c8"/>
+    <!-- Bottom-left -->
+    <path d="M 50 361 L 105 316 L 160 361 Z"/>
+    <rect x="58" y="361" width="94" height="100"/>
+    <rect x="93" y="401" width="24" height="60" fill="#87c2c8"/>
+    <!-- Bottom-right -->
+    <path d="M 352 361 L 407 316 L 462 361 Z"/>
+    <rect x="360" y="361" width="94" height="100"/>
+    <rect x="395" y="401" width="24" height="60" fill="#87c2c8"/>
+  </g>
+</svg>

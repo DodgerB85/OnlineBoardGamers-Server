@@ -67,6 +67,10 @@ export const SO_LABOR_MARKET = 48
 export const SO_SECOND_BAILOUT = 49
 // Media Line mod
 export const SO_MEDIA_LINE = 50
+// New Map mod (15 custom tiles + 15 board houses + garden cap 15)
+export const SO_NEW_MAP = 51
+// New Map sub-option: draw the map from the 15 new tiles first
+export const SO_NEW_MAP_ALL = 52
 // Other options
 export const SO_STRICT_PAYDAY_FRIDGE = 101
 export const SO_TRAINING_GAME = 102
@@ -725,6 +729,8 @@ export const ROAD_UC = 6
 export const PARK = 7
 export const FREEWAY = 8
 export const HOUSE = 10 // + house number IE 11-29,31,32,35
+// Highest encoded house value on the board (New Map mod house 37 + HOUSE)
+export const HOUSE_ENC_MAX = HOUSE + 38
 export const MARKETING = 130 // + campaign number // NB THIS IS BAD. MARKETING SHOULD HAVE ~30 numbers reserved for it.
 export const RESTAURANT_OPEN = 140 // + colour // THIS CAN CLASH WITTH MARKETING CAMPAIGNS
 export const RESTAURANT_COMING_SOON = 150 // + colour // SAME HERE. I don't think it matters as coords are only really chacked for roads/space
@@ -785,12 +791,52 @@ export const TILES = [
 	// Stadium mod - 2 complementary half-tiles forming one arena: 27 = left/top half, 28 = right/bottom half
 	[1, 1, 1, 1, 1, 1, 10.1, 10.1, 10.1, 10.1, 1, 10.1, 10.1, 10.1, 10.1, 1, 10.1, 10.1, 10.1, 10.1, 1, 1, 1, 1, 1], //27
 	[1, 1, 1, 1, 1, 10.1, 10.1, 10.1, 10.1, 1, 10.1, 10.1, 10.1, 10.1, 1, 10.1, 10.1, 10.1, 10.1, 1, 1, 1, 1, 1, 1], //28
+	// New Map mod - 15 custom tiles (indices 29-43), enabled by SO_NEW_MAP.
+	// Houses encoded as house number + HOUSE (10); parks = 7; drinks = 2 (beer) / 3 (coke) / 4 (lemonade).
+	// 29: compact cross (TBLR) + 4 corner houses 28/29/30/31
+	[38, 38, 1, 39, 39, 38, 38, 1, 39, 39, 1, 1, 1, 1, 1, 40, 40, 1, 41, 41, 40, 40, 1, 41, 41],
+	// 30: L-turn (L+B) + diagonal houses 26 (top) / 27 (right)
+	[0, 36, 36, 0, 0, 0, 36, 36, 0, 0, 1, 1, 1, 37, 37, 0, 0, 1, 37, 37, 0, 0, 1, 0, 0],
+	// 31: L-turn (T+R) + two 2x2 parks
+	[0, 0, 1, 0, 0, 7, 7, 1, 0, 0, 7, 7, 1, 1, 1, 0, 0, 7, 7, 0, 0, 0, 7, 7, 0],
+	// 32: L-turn (L+B) + 3 houses 32 (top-left) / 34 (right) / 33 (bottom-left)
+	[42, 42, 0, 0, 0, 42, 42, 0, 0, 0, 1, 1, 1, 44, 44, 43, 43, 1, 44, 44, 43, 43, 1, 0, 0],
+	// 33: straight T+B, single column
+	[0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+	// 34: T-junction (T+R+B) + right houses 23 / 24
+	[0, 0, 1, 33, 33, 0, 0, 1, 33, 33, 0, 0, 1, 1, 1, 0, 0, 1, 34, 34, 0, 0, 1, 34, 34],
+	// 35: L-turn (L+B) + single house 20
+	[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 30, 30, 0, 0, 1, 30, 30, 0, 0, 1, 1, 1, 1, 1],
+	// 36: T+R with vertical arm + one 2x2 park
+	[1, 1, 1, 1, 1, 0, 0, 7, 7, 1, 0, 0, 7, 7, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+	// 37: windmill cross (TBLR) + diagonal houses 35 / 36
+	[1, 1, 1, 45, 45, 1, 0, 0, 45, 45, 1, 0, 0, 0, 1, 46, 46, 0, 0, 1, 46, 46, 1, 1, 1],
+	// 38: outer ring (TBLR) + empty center 3x3
+	[1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+	// 39: irregular cross (TBLR) + 3 drink pickups: beer (2,3), lemonade (3,3), coke (4,3)
+	[0, 0, 1, 1, 0, 0, 0, 2, 1, 0, 1, 1, 4, 1, 1, 0, 1, 3, 0, 0, 0, 1, 1, 0, 0],
+	// 40: T-junction (L+R+B) + beer pickup at (2,1)
+	[0, 1, 0, 0, 0, 2, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+	// 41: T-junction (L+R+B) + coke pickup at (2,5)
+	[0, 0, 0, 1, 0, 0, 0, 0, 1, 3, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+	// 42: outer ring (TBLR) + house 37 top-right
+	[1, 1, 1, 47, 47, 1, 0, 0, 47, 47, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+	// 43: 4 corner isolated road blocks, no exits
+	[1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1],
 ]
 
-export const HOUSE_SQS = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 35]
+export const HOUSE_SQS = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47]
 
 // QWERT
 export const BOARD_HOUSES = [2, 4, 5, 7, 8, 10, 12, 13, 15, 16, 18, 21, 22] // NB 25 isn't considered a "board" house because it comes with a garden built in
+// New Map mod - board houses printed on tiles 29-43; encoded on board as NEW_MAP_HOUSES[n] + HOUSE
+export const NEW_MAP_HOUSES = [20, 23, 24, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+// True when `number` is a house pre-printed on a board tile. The New Map mod adds
+// NEW_MAP_HOUSES to the board-house set when enabled.
+export function isBoardHouse(number, startingOptions) {
+	if (BOARD_HOUSES.includes(number)) return true
+	return !!(startingOptions && startingOptions.newMap && NEW_MAP_HOUSES.includes(number))
+}
 export const APARTMENT_3 = 3.2
 export const APARTMENT_9 = 9.7
 export const APARTMENTS = [APARTMENT_3, APARTMENT_9]
@@ -798,6 +844,15 @@ export const APARTMENTS = [APARTMENT_3, APARTMENT_9]
 export const STADIUM = 0.1
 export const AVAILABLE_HOUSES = [1, 3, 6, 9, 11, 14, 17, 19]
 export const RURAL_MARKETING_AREA = 26
+// The RMA is a virtual house number that settles LAST at dinnertime: in the base
+// game 26 > every real house number (max 25). The New Map mod prints real board
+// houses numbered up to 37, including a real 26 that would collide with the RMA
+// in every needs[]-by-number lookup. With the mod on the RMA moves to 99 so it
+// still settles last and never collides. Old saves (no New Map) keep 26.
+export const RURAL_MARKETING_AREA_NEW_MAP = 99
+export function ruralAreaNum(startingOptions) {
+	return startingOptions && startingOptions.newMap ? RURAL_MARKETING_AREA_NEW_MAP : RURAL_MARKETING_AREA
+}
 // No 20,23,24
 export const ALL_HOUSES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 25]
 

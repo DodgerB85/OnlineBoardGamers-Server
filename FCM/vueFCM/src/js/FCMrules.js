@@ -958,7 +958,7 @@ export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, 
 			// A phone token must touch at least one house/apartment building.
 			const touchesBuilding = map.neighbours(cells).some((c) => {
 				const v = store.mapData.coords[c]
-				return v > rf.HOUSE && v < rf.HOUSE + 29
+				return v > rf.HOUSE && v < rf.HOUSE_ENC_MAX
 			})
 			if (fits && touchesBuilding) possibilities.push(anchor)
 		}
@@ -1071,7 +1071,7 @@ export function givePossibleHousesForGarden() {
 	const allBoardHouses = map.findAllHouses() // Assuming this returns an array of house numbers
 
 	const possibilities = allBoardHouses.filter((houseNum) => {
-		const isBoardHouse = rf.BOARD_HOUSES.includes(houseNum)
+		const isBoardHouse = rf.isBoardHouse(houseNum, store.startingOptions)
 		const hasNoGarden = !existingGardenHouses.has(houseNum)
 		return isBoardHouse && hasNoGarden
 	})
@@ -1215,12 +1215,12 @@ export function giveHousesAlongHawkerPath(path) {
 		for (const neighborIdx of map.neighbours(step)) {
 			const spaceContent = coords[neighborIdx]
 
-			if (spaceContent > rf.HOUSE && spaceContent < rf.HOUSE + 29) {
+			if (spaceContent > rf.HOUSE && spaceContent < rf.HOUSE_ENC_MAX) {
 				const rawHouseNum = spaceContent - rf.HOUSE
 				const houseNum = Number.isInteger(spaceContent) ? rawHouseNum : Math.round((rawHouseNum + Number.EPSILON) * 100) / 100
 
 				// Board Houses and Apartments: directly add the neighbour index
-				if (rf.BOARD_HOUSES.includes(houseNum) || rf.APARTMENTS.includes(houseNum)) {
+				if (rf.isBoardHouse(houseNum, store.startingOptions) || rf.APARTMENTS.includes(houseNum)) {
 					houseIndexes.add(neighborIdx)
 				} else {
 					// Player-built houses: check rotation to exclude garden tiles
@@ -1624,6 +1624,9 @@ function districtTiles() {
 		allTiles.push(24)
 		if (store.startingOptions.lobbyists) allTiles.push(25)
 	}
+	if (store.startingOptions.newMap) {
+		for (let t = 29; t <= 43; t++) allTiles.push(t)
+	}
 	return allTiles
 }
 
@@ -1683,8 +1686,9 @@ export function availableHouses() {
 export function availableGardens() {
 	const store = useModelStore()
 
-	// Simple subtraction from total stock (8)
-	return 8 - store.gardens.length
+	// New Map mod raises the garden stock from 8 to 15
+	const stock = store.startingOptions.newMap ? 15 : 8
+	return stock - store.gardens.length
 }
 
 export function availableParks() {
@@ -1875,7 +1879,7 @@ export function doDinnerTime(replayOnly) {
 
 	for (const need of sortedNeeds) {
 		// Fried Chicken mod: condemned (pendingMoveOut) houses move out before any matching
-		if (fcMod && need.pendingMoveOut && need.number !== rf.RURAL_MARKETING_AREA) {
+		if (fcMod && need.pendingMoveOut && need.number !== rf.ruralAreaNum(store.startingOptions)) {
 			need.movedOut = true
 			need.pendingMoveOut = false
 			need.needs = []
@@ -1953,13 +1957,13 @@ export function doDinnerTime(replayOnly) {
 
 			// Pizza Bomb tracking
 			if (possiblePizzaBomb && firstPizzas.length < 9 && finalGoods.includes(rf.PIZZA)) {
-				if (need.number !== rf.RURAL_MARKETING_AREA) firstPizzas.push(1, need.number, winner.playerIndex)
+				if (need.number !== rf.ruralAreaNum(store.startingOptions)) firstPizzas.push(1, need.number, winner.playerIndex)
 			}
 		} else {
 			histoH.splice(2) // No one sold
 
 			// Fried Chicken mod: unserved demand flips / condemns the house
-			if (fcMod && need.number !== rf.RURAL_MARKETING_AREA && need.number !== rf.STADIUM && need.needs.length > 0) {
+			if (fcMod && need.number !== rf.ruralAreaNum(store.startingOptions) && need.number !== rf.STADIUM && need.needs.length > 0) {
 				let flippedCount = 0
 				let hasFlippedChicken = false
 				let hasMarketedChicken = false
@@ -2195,7 +2199,7 @@ export function processCoffee(houseNum, winner, usedFryChefs, coffeeEarnings, hi
 	const store = useModelStore()
 	const winnerIdx = winner.playerIndex
 	let coffeeDist = winner.distance
-	if (houseNum === rf.RURAL_MARKETING_AREA) coffeeDist--
+	if (houseNum === rf.ruralAreaNum(store.startingOptions)) coffeeDist--
 
 	if (plyr.hasMilestone(winnerIdx, rf.FIRST_MARKETEER_USED)) coffeeDist += 2
 	if (plyr.hasMilestone(winnerIdx, rf.SOMEONE_SELLS_YOUR_DEMAND)) coffeeDist++
@@ -2820,7 +2824,7 @@ export function housesAffectedByMarketingCampaign(campaign) {
 		const tileValue = store.mapData.coords[space]
 
 		// Standard House Check (House IDs are usually base + offset)
-		if (tileValue > rf.HOUSE && tileValue < rf.HOUSE + 29) {
+		if (tileValue > rf.HOUSE && tileValue < rf.HOUSE_ENC_MAX) {
 			let houseId
 			if (Number.isInteger(tileValue)) {
 				houseId = tileValue - rf.HOUSE
@@ -2960,7 +2964,7 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 
 			// Rural Marketing Logic (Campaigns 21-24)
 			if (campaign.number >= 21 && campaign.number <= 24) {
-				const houseId = rf.RURAL_MARKETING_AREA
+				const houseId = rf.ruralAreaNum(store.startingOptions)
 				model.addNeedToHouse(good1, houseId, playerIndex)
 				model.addNeedToHouse(good1, houseId, playerIndex)
 				const reward = rewardMarketingOnHouse(playerIndex, houseId)
@@ -3251,12 +3255,13 @@ export function giveSalesMilestones(playerIndex, needs) {
 
 function rewardMarketingOnHouse(playerIndex, house) {
 	if (playerIndex === -1) return 0
+	const store = useModelStore()
 	let total = 0
 	if (plyr.hasMilestone(playerIndex, rf.FIRST_MARKETEER_USED)) {
 		total = 5
 	}
 	if (rf.APARTMENTS.includes(house)) total *= 2
-	if (house === rf.RURAL_MARKETING_AREA) total *= 2
+	if (house === rf.ruralAreaNum(store.startingOptions)) total *= 2
 	return total
 }
 
