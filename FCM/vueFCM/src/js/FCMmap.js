@@ -86,6 +86,24 @@ export function generateRandomMap(maxPlayers) {
 		}
 	}
 
+	// 3.5 New Map mod
+	if (options.newMap) {
+		if (options.newMapAll) {
+			// Priority mode: fill from the 15 new tiles first, the pool below
+			// only backfills whatever is still missing
+			const newMapTiles = []
+			for (let t = 29; t <= 43; t++) newMapTiles.push(t)
+			funcs.shuffle(newMapTiles)
+			const wanted = totalTilesNeeded - chosenTiles.length
+			for (let i = 0; i < wanted && newMapTiles.length > 0; i++) {
+				chosenTiles.push(newMapTiles.pop())
+			}
+		} else {
+			// Mix mode: add the 15 new tiles to the random pool
+			for (let t = 29; t <= 43; t++) allTiles.push(t)
+		}
+	}
+
 	// 4. Shuffle and fill (Replaces _.shuffle)
 	funcs.shuffle(allTiles)
 	funcs.shuffle(chosenTiles)
@@ -1684,13 +1702,13 @@ export function getZoneOfHouse(houseNumber) {
 
 	// 1. Initialize the base 2x2 house zone
 	let zone = []
-	if (houseNumber !== rf.RURAL_MARKETING_AREA) {
+	if (houseNumber !== rf.ruralAreaNum(store.startingOptions)) {
 		zone = [index, index + 1, index + mapWidth, index + mapWidth + 1]
 	}
 
 	// 2. Add garden tiles if applicable
 	if (model.hasGarden(houseNumber)) {
-		const isOnBoardHouse = rf.BOARD_HOUSES.includes(houseNumber)
+		const isOnBoardHouse = rf.isBoardHouse(houseNumber, store.startingOptions)
 
 		if (!isOnBoardHouse) {
 			// Logic for houses with "built-in" gardens
@@ -1732,7 +1750,7 @@ export function findAllHouses() {
 	for (let i = 0; i < store.mapData.coords.length; i++) {
 		let c = store.mapData.coords[i]
 		// QWERT
-		if (c < rf.HOUSE + 29 && c > rf.HOUSE) {
+		if (c < rf.HOUSE_ENC_MAX && c > rf.HOUSE) {
 			let m = c - rf.HOUSE
 
 			// Needed to fix 3.2 becoming 3.1999999

@@ -45,6 +45,10 @@ export const useModelStore = defineStore("store", () => {
 		newDistrictsAll: false,
 		newDistrictsApp: false,
 
+		// New Map mod
+		newMap: false,
+		newMapAll: false,
+
 		coffee: false,
 		ketchupMilestone: false,
 		newMilestones: false,

@@ -408,6 +408,7 @@ export function getImage(image) {
 	else if (image === "so_skip") return new URL(`../../../static/FCM/images/so_skip.jpg`, import.meta.url).href
 	// MEDIA LINE (B line) - antenna channel tokens & headline icons
 	else if (image === "so_mediaLine") return new URL(`../../../static/FCM/images/so_mediaLine.svg`, import.meta.url).href
+	else if (image === "so_newMap") return new URL(`../../../static/FCM/images/so_newMap.svg`, import.meta.url).href
 	else if (image === "campaign_28") return new URL(`../../../static/FCM/images/antenna35.png`, import.meta.url).href
 	else if (image === "campaign_29") return new URL(`../../../static/FCM/images/antenna45.png`, import.meta.url).href
 	else if (image === "antenna35") return new URL(`../../../static/FCM/images/antenna35.png`, import.meta.url).href

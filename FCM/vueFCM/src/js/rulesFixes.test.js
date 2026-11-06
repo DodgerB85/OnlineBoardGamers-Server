@@ -272,7 +272,7 @@ describe("Dumplings on the Rural Marketing Area", () => {
 
 		rules.doMarketingCampaigns(false)
 
-		const rural = store.needs.find((n) => n.number === rf.RURAL_MARKETING_AREA)
+		const rural = store.needs.find((n) => n.number === rf.ruralAreaNum(store.startingOptions))
 		expect(rural.needs.filter((sub) => sub[0] === rf.BURGER)).toHaveLength(2)
 		expect(rural.needs.filter((sub) => sub[0] === rf.DUMPLING)).toHaveLength(2)
 	})

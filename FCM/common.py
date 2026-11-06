@@ -34,6 +34,8 @@ STATS_EXCLUDED_OPTIONS = [
     rfFCM.SO_LABOR_MARKET,
     rfFCM.SO_SECOND_BAILOUT,
     rfFCM.SO_MEDIA_LINE,
+    rfFCM.SO_NEW_MAP,
+    rfFCM.SO_NEW_MAP_ALL,
 ]
 
 
@@ -120,6 +122,8 @@ def buildFCMstartingOptions(post_data):
         "laborMarket",
         "secondBailout",
         "mediaLine",
+        "newMap",
+        "newMapAll",
         "allowRewind",
     ]
     optionsArr.extend(int(post_data[opt]) for opt in option_names if opt in post_data)

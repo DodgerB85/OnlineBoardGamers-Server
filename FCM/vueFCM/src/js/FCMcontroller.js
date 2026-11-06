@@ -1523,7 +1523,7 @@ export function placeMarketingCampaign(index) {
 export function toggleTVHouseSelection(index) {
 	const store = useModelStore()
 	const v = store.mapData.coords[index]
-	if (!(v > rf.HOUSE && v < rf.HOUSE + 29)) return
+	if (!(v > rf.HOUSE && v < rf.HOUSE_ENC_MAX)) return
 	const house = model.houseNumberAt(v)
 	if (!model.giveHousesInWaveRange(currentPlayerIndex(), 2).includes(house)) return
 
