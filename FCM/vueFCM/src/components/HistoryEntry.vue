@@ -618,7 +618,7 @@ const computedEntry3 = computed(() => {
 			let affectsRMA = false
 			if (campaign.length > 1 && campaign[1].length > 0) {
 				campaign[1].forEach((number) => {
-					if (rf.ALL_HOUSES.includes(number)) houses.push(number)
+					if (rf.ALL_HOUSES.includes(number) || (store.startingOptions.newMap && rf.NEW_MAP_HOUSES.includes(number))) houses.push(number)
 					if (rf.APARTMENTS.includes(number)) apartments.push(number === 3.2 ? 3.14 : number)
 					if (number == rf.ruralAreaNum(store.startingOptions)) affectsRMA = true
 				})
