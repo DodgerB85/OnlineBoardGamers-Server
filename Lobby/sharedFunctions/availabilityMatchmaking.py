@@ -55,6 +55,40 @@ def expected_response_wait(profile):
     return sum(waits) / 24
 
 
+def expected_exchange_hours(move_counts_a, turn_counts_a, move_counts_b, turn_counts_b):
+    """Hours for one A->B->A exchange: each reply waits from the hour the other moved.
+
+    Unlike expected_response_wait (averaged over the day for the tournament
+    objective), a reply can land in the hour it was asked for, and the move-hour
+    counts weight the wait instead of a flat average over the day.
+    """
+    waits_a = _hourly_wait_after_move(availability_profile(move_counts_a, turn_counts_a))
+    waits_b = _hourly_wait_after_move(availability_profile(move_counts_b, turn_counts_b))
+    return _move_hour_weighted_wait(move_counts_b, waits_a) + _move_hour_weighted_wait(move_counts_a, waits_b)
+
+
+def _hourly_wait_after_move(profile):
+    waits = []
+    for hour in range(24):
+        expected_wait = 0.0
+        probability_of_waiting = 1.0
+        for offset in range(24):
+            move_probability = profile[(hour + offset) % 24]
+            expected_wait += move_probability * offset * probability_of_waiting
+            probability_of_waiting *= 1 - move_probability
+        # A whole missed day restarts the same day-long wait.
+        waits.append((expected_wait + probability_of_waiting * 24) / (1 - probability_of_waiting))
+    return waits
+
+
+def _move_hour_weighted_wait(move_counts, waits):
+    counts = _normalize_counts(move_counts)
+    total = sum(counts)
+    if not total:
+        return sum(waits) / 24
+    return sum(count * wait for count, wait in zip(counts, waits)) / total
+
+
 def expected_game_duration(profiles):
     """Score sequential and simultaneous response waits with weights (1, 21)."""
     if not profiles:

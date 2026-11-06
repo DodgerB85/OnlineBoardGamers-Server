@@ -66,6 +66,7 @@ from user_visit.models import UserVisit
 import Lobby.sharedFunctions.constants as rf
 import NTR.NTRconstants as rfNTR
 from FCM.common import buildFCMstartingOptions
+from Lobby.sharedFunctions.availability import availability_join_warning_hours
 from Lobby.sharedFunctions.db_mutex import db_mutex
 from Lobby.sharedFunctions.loginThrottle import (
     LOGIN_FAILURE_KEY,
@@ -3511,6 +3512,20 @@ def checkJoinGame(request, gameType, gameID):
         )
     if errorFound:
         return
+
+    # Warn once (never block) when the creator's play-time habits clash with the joiner's.
+    # The lobby popup re-sends the join with "confirmed": true.
+    if ajaxReturn and not jsonData.get("confirmed"):
+        warning_hours = availability_join_warning_hours(request.user, currentGame.creator)
+        if warning_hours is not None:
+            return JsonResponse(
+                {
+                    "confirm_join": gettext(
+                        "You and the host usually play at different times: a typical back-and-forth "
+                        "would take about {hours} hours. Join anyway?"
+                    ).format(hours=round(warning_hours))
+                }
+            )
 
     # SO NOW IT IS NOT ACTIVE OR FINISHED, AND IF IT IS "WAITING", YOU ARE AN INVITEE, PLUS YOU ARE NOT ALREADY IN THE GAME
     _latestUpdate = int(time.time()) * 1000

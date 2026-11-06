@@ -1,7 +1,7 @@
 {% extends "Lobby/layout.html" %}
 {% load static i18n compress %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/lobby_new.css' %}?v=17" rel="stylesheet" />
+    <link href="{% static 'Lobby/CSS/lobby_new.css' %}?v=20" rel="stylesheet" />
     <style>
         /* UR: 1830 BC release teaser - remove after launch */
         .new-game-teaser { text-align: center; margin-bottom: 14px; }
@@ -162,6 +162,7 @@
             <div id="learningCancel"
                  class="buttonDiv Leave learningGameConfirmButtons">{% translate "Cancel" %}</div>
         </div>
+        {% include "Lobby/joinWarningDiv.html" %}
         <!-- PANELS -->
         <div class="panels">
             <!-- Available (square view — kept for Lobby.js; hidden via CSS) -->

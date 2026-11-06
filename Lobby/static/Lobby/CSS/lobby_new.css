@@ -638,7 +638,8 @@
 }
 
 /* ---- Learning game confirm dialog ---- */
-#learningGameConfirmDiv {
+#learningGameConfirmDiv,
+#joinWarningDiv {
     display: none;
     position: fixed;
     top: 50%;
@@ -654,6 +655,30 @@
     text-align: center;
     font-size: 14px;
     color: var(--color-ink);
+}
+
+/* The play-time warning text is longer than the learning-game note, and its
+   frame takes the primary button's resting colour, a little thicker. */
+#joinWarningDiv {
+    max-width: 420px;
+    border: 2px solid var(--color-accent);
+}
+
+/* "Join anyway" sits next to Cancel looking the same at rest; hovering brings
+   in the profile page's primary "Save preferences" colours. */
+#joinWarningJoin {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: inherit;
+}
+
+@media (hover: hover) {
+    #joinWarningJoin:hover,
+    #joinWarningCancel:hover {
+        background: var(--color-accent-strong);
+        border-color: rgba(0, 0, 0, 0.15);
+        color: #fff;
+    }
 }
 
 .learningGameConfirmButtons {
@@ -722,7 +747,8 @@
     .open-all-btn { font-size: 16px; }
     .colour-guide { font-size: 15px; }
     .colour-guide-title { font-size: 13px; }
-    #learningGameConfirmDiv { font-size: 16px; }
+    #learningGameConfirmDiv,
+    #joinWarningDiv { font-size: 16px; }
     .learningGameConfirmButtons { font-size: 16px; }
 
     /* Desktop current-games column widths */

@@ -14,6 +14,7 @@ from Lobby.sharedFunctions.availabilityMatchmaking import (
     _anneal,
     availability_profile,
     build_matchup_counts,
+    expected_exchange_hours,
     expected_game_duration,
     multigame_round_one_indices,
     multigame_round_two_indices,
@@ -250,6 +251,21 @@ class TestAvailabilityMatchmaking(PrintSuccessTestCase):
             expected_game_duration([even_hour_player, odd_hour_player]),
             single_wait_sum + 21 * group_wait,
         )
+
+    def test_exchange_hours_follow_play_hour_overlap(self):
+        def daily_window(start_hour):
+            # Three hours a day, always answering in the same hour.
+            move_counts = [0] * 24
+            turn_counts = [0] * 24
+            for hour in range(start_hour, start_hour + 3):
+                move_counts[hour] = 30
+                turn_counts[hour] = 30
+            return move_counts, turn_counts
+
+        # Same window: replies land in the hour they were asked for.
+        self.assertLess(expected_exchange_hours(*daily_window(0), *daily_window(0)), 1)
+        # Opposite windows: each reply waits about half a day.
+        self.assertGreater(expected_exchange_hours(*daily_window(0), *daily_window(12)), 8)
 
     def test_six_player_group_wait_includes_responses_after_one_day(self):
         hourly_probabilities = (0.01, 0.02, 0.03, 0.04, 0.05, 0.06)

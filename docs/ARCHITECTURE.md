@@ -151,7 +151,7 @@ RNB adds one more layer: during multi-step "stack" moves the game holds a `trans
 - **Creation**: `Lobby/views.py::createXXXpage` renders `Lobby/templates/Lobby/createXXX.html`; its form POSTs to the game app's `common.py::create_<code>_game`, which validates invites via `SF_validatePlayers` (no self-invites, no unknown users), creates `Game` + `GamePlayer` rows, and either:
   - starts immediately (solo / practice "trainingGame" / tournaments → `presenter.startGame`), or
   - waits (`WAITING` for invites, `AVAILABLE`/`PRIVATE` open games) in the lobby lists.
-- **Joining**: `joinGame` / `checkJoinGame` in `Lobby/views.py` handle join/leave/decline/kick actions from the lobby lists; joining a `WAITING` game that reaches `maxPlayers` starts it.
+- **Joining**: `joinGame` / `checkJoinGame` in `Lobby/views.py` handle join/leave/decline/kick actions from the lobby lists; joining a `WAITING` game that reaches `maxPlayers` starts it. Before joining, a popup warns once (and can be confirmed away) when the creator's tracked play hours clash with the joiner's.
 - **Playing**: see above. Kickout logic (`SF_kickoutRequired`, pace strings in `sharedRefs`) flags idle players; pace is a constant (`Lobby/sharedFunctions/constants.py`, e.g. `KICKOUT_1_DAY`).
 - **Finishing**: the client submits final positions; the presenter records winners, stats and the end-game notification. Rematch prefills the create page via `createXXXpage/<gameID>/`.
 
@@ -185,7 +185,7 @@ Timing uses wall time between the first and last history timestamps. Entries exa
 - `Lobby/sharedFunctions/constants.py` — shared starting-option ids, kickout/pace constants.
 - `Lobby/sharedFunctions/sharedFunctions.py` — kickouts, flexi-time, game serialisation for lists, next-round setup.
 - `Lobby/gameViewHelpers.py` — show-page/notes/votes/zoom/bug helpers and the mutex wrapper.
-- `Lobby/sharedFunctions/availability.py` — per-player play-time tracking (hourly buckets on `Profile`).
+- `Lobby/sharedFunctions/availability.py` — per-player play-time tracking (hourly buckets on `Profile`) and the join-time play-time warning that compares a joiner with the game creator. `availabilityMatchmaking.py` holds the profile maths shared with tournament scheduling.
 
 Anything a new game needs already lives here — games should call these, not fork them.
 

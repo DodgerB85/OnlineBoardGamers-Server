@@ -6,6 +6,9 @@ from django.utils import timezone
 
 from Lobby.models import Game, GamePlayer, User
 from Lobby.sharedFunctions.availability import (
+    JOIN_WARNING_EXCHANGE_HOURS,
+    JOIN_WARNING_MIN_MOVES,
+    availability_join_warning_hours,
     get_availability_hour,
     get_availability_hours_between,
     normalize_availability_counts,
@@ -157,3 +160,47 @@ class AvailabilityTrackingTests(TestCase):
 
         actor_gp.refresh_from_db()
         self.assertEqual(actor_gp.availabilityAnchor, int(now.timestamp() * 1000))
+
+
+class AvailabilityJoinWarningTests(TestCase):
+    """Joining warns when the creator's play hours and the joiner's do not line up."""
+
+    def setUp(self):
+        self.creator = User.objects.create_user(username="host", password="pw")
+        self.joiner = User.objects.create_user(username="guest", password="pw")
+
+    def _set_play_hours(self, user, start_hour, moves_per_hour=JOIN_WARNING_MIN_MOVES):
+        # Three hours a day, always answering in the same hour.
+        profile = user.profile
+        profile.availabilityMoveCounts = [0] * 24
+        profile.availabilityTurnCounts = [0] * 24
+        for offset in range(3):
+            hour = (start_hour + offset) % 24
+            profile.availabilityMoveCounts[hour] = moves_per_hour
+            profile.availabilityTurnCounts[hour] = moves_per_hour
+        profile.save()
+
+    def test_opposite_play_hours_warn(self):
+        self._set_play_hours(self.creator, 0)
+        self._set_play_hours(self.joiner, 12)
+
+        hours = availability_join_warning_hours(self.joiner, self.creator)
+
+        self.assertGreaterEqual(hours, JOIN_WARNING_EXCHANGE_HOURS)
+
+    def test_matching_play_hours_do_not_warn(self):
+        self._set_play_hours(self.creator, 10)
+        self._set_play_hours(self.joiner, 10)
+
+        self.assertIsNone(availability_join_warning_hours(self.joiner, self.creator))
+
+    def test_account_with_too_few_moves_does_not_warn(self):
+        self._set_play_hours(self.creator, 0, moves_per_hour=2)
+        self._set_play_hours(self.joiner, 12)
+
+        self.assertIsNone(availability_join_warning_hours(self.joiner, self.creator))
+
+    def test_account_without_tracked_moves_does_not_warn(self):
+        self._set_play_hours(self.creator, 0)
+
+        self.assertIsNone(availability_join_warning_hours(self.joiner, self.creator))
