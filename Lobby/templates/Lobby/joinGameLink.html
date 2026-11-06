@@ -17,7 +17,7 @@
           content="{{ availableGamesList.0.gameName }} - {{ availableGamesList.0.gameDescription }}" />
 {% endblock canonical %}
 {% block head %}
-    <link href="{% static 'Lobby/CSS/lobby_new.css' %}?v=10" rel="stylesheet" />
+    <link href="{% static 'Lobby/CSS/lobby_new.css' %}?v=13" rel="stylesheet" />
 {% endblock head %}
 {% block body %}
     {% compress js %}
@@ -41,6 +41,7 @@
             <div id="learningCancel"
                  class="buttonDiv Leave learningGameConfirmButtons">{% translate "Cancel" %}</div>
         </div>
+        {% include "Lobby/joinWarningDiv.html" %}
         <div class="page-header">
             <h1 class="page-title">{% translate "The link allows you to join the following game:" %}</h1>
         </div>

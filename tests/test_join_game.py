@@ -7,6 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from Lobby.models import Game, GamePlayer, User
+from Lobby.sharedFunctions.availability import JOIN_WARNING_MIN_MOVES
 from Lobby.sharedFunctions.sharedFunctions import SF_kickoutRequired
 
 
@@ -104,6 +105,49 @@ class JoinGameTests(TestCase):
         game.refresh_from_db()
         self.assertEqual(game.gameStatus, "ACTIVE")
         self.assertEqual(set(game.players.values_list("player__username", flat=True)), {"creator", "joiner"})
+
+    def _set_play_hours(self, user, start_hour):
+        # Three hours a day, always answering in the same hour.
+        profile = user.profile
+        profile.availabilityMoveCounts = [0] * 24
+        profile.availabilityTurnCounts = [0] * 24
+        for offset in range(3):
+            hour = (start_hour + offset) % 24
+            profile.availabilityMoveCounts[hour] = JOIN_WARNING_MIN_MOVES
+            profile.availabilityTurnCounts[hour] = JOIN_WARNING_MIN_MOVES
+        profile.save()
+
+    def test_clashing_play_hours_ask_for_confirmation_before_joining(self):
+        game = self._game()
+        playing(game, self.creator)
+        self._set_play_hours(self.creator, 0)
+        self._set_play_hours(self.joiner, 12)
+
+        response = self._post({"gameID": game.id, "source": "ajax", "action": ""})
+
+        self.assertIn("different times", response.json()["confirm_join"])
+        self.assertEqual(game.players.count(), 1)
+
+    def test_confirmed_join_with_clashing_play_hours_goes_through(self):
+        game = self._game()
+        playing(game, self.creator)
+        self._set_play_hours(self.creator, 0)
+        self._set_play_hours(self.joiner, 12)
+
+        response = self._post({"gameID": game.id, "source": "ajax", "action": "", "confirmed": True})
+
+        self.assertEqual(response.json()["listToShow"], "ACTIVE")
+        self.assertEqual(game.players.count(), 2)
+
+    def test_join_without_enough_play_history_does_not_ask(self):
+        game = self._game()
+        playing(game, self.creator)
+        self._set_play_hours(self.creator, 0)
+
+        response = self._post({"gameID": game.id, "source": "ajax", "action": ""})
+
+        self.assertEqual(response.json()["listToShow"], "ACTIVE")
+        self.assertEqual(game.players.count(), 2)
 
     def test_vacate_last_player_deletes_game(self):
         game = self._game()
