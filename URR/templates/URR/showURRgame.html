@@ -141,6 +141,7 @@
     initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
     initData.myZoomLevel = {{ myZoomLevel }};
     initData.startingOptions = {{ startingOptions|safe }};
+    initData.preferredURRoptions = {{ preferredURRoptions|default:"[-1]"|safe }};
     initData.KickoutFlexiDataArray = {{ KickoutFlexiDataArray|safe }};
     initData.playerNames = {{ allPlayerListBySeat|safe }};
     initData.missingPlayers = {{ missingPlayers|safe }};

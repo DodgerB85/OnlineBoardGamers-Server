@@ -28,6 +28,7 @@ export const usePersonalStore = defineStore("personal", () => {
 	var kickoutTimerUpdatedAt = 0
 	var notes = ""
 	var yourTurnAudioType = 0
+	var preferredColour = -1
 	var chatNotification = false
 	var gameDataB64 = ""
 	var votedToExclude = false
@@ -55,15 +56,20 @@ export const usePersonalStore = defineStore("personal", () => {
 	}
 
 	function getCorrectedColour(colour) {
+		if (this.preferredColour > -1 && this.pov > -1) {
+			const myColour = store.players[this.pov]?.colour
+			if (myColour === colour) return this.preferredColour
+			if (this.preferredColour === colour) return myColour
+		}
 		return colour
 	}
 
 	function getCorrectedColourHex(colour) {
-		return rf.PLAYER_COLOUR_HEXES[colour] || "none"
+		return rf.PLAYER_COLOUR_HEXES[this.getCorrectedColour(colour)] || "none"
 	}
 
 	function getCorrectedTextColourHex(colour) {
-		return rf.PLAYER_COLOUR_TEXT_HEXES[colour] || "#ffffff"
+		return rf.PLAYER_COLOUR_TEXT_HEXES[this.getCorrectedColour(colour)] || "#ffffff"
 	}
 
 	/** Returns the name to show in history: uses player.name if displayName is BOT_NAME (kicked out), else displayName */
@@ -93,6 +99,7 @@ export const usePersonalStore = defineStore("personal", () => {
 		kickoutTimerUpdatedAt,
 		notes,
 		yourTurnAudioType,
+		preferredColour,
 		chatNotification,
 		gameDataB64,
 		votedToExclude,

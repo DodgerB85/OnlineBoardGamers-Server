@@ -205,8 +205,14 @@
 
 .favCNSchoice,
 .favKFWchoice,
-.favWEBchoice {
+.favWEBchoice,
+.favURRchoice {
 	width: 100px;
+}
+
+.favURRchoice img {
+	width: 100px;
+	height: 100px;
 }
 
 .cnsPrefSVG,

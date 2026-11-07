@@ -106,15 +106,28 @@ const eventText = computed(() => {
 	}
 	return labels[move.type] || move.type
 })
-const eventLandIcons = computed(() => {
+const eventInlineIcons = computed(() => {
 	const move = action.value
-	if (move?.type !== "tradeLand") return {}
 	const icons = {}
-	for (const id of [move.buy, ...(move.sellBefore || []).flat(), ...(move.sellAfter || []).flat()].filter((id) => id !== undefined)) {
-		const area = before.value?.board.areas.find((entry) => entry.id === id)
-		if (!area || area.isRiver) continue
-		const label = area.label || area.id
-		icons[label] = { src: assets.getTerrainImage(area.landType, area.isCity), alt: area.isCity ? t("history.altTerrainCity", { land: rf.LAND_NAMES[area.landType] }) : rf.LAND_NAMES[area.landType] }
+	if (move?.type === "tradeLand") {
+		for (const id of [move.buy, ...(move.sellBefore || []).flat(), ...(move.sellAfter || []).flat()].filter((id) => id !== undefined)) {
+			const area = before.value?.board.areas.find((entry) => entry.id === id)
+			if (!area || area.isRiver) continue
+			const label = area.label || area.id
+			icons[label] = { src: assets.getTerrainImage(area.landType, area.isCity), alt: area.isCity ? t("history.altTerrainCity", { land: rf.LAND_NAMES[area.landType] }) : rf.LAND_NAMES[area.landType] }
+		}
+	}
+	if (move?.type === "requestWaterwork" && stateId.value !== null) {
+		const era = [1, 2, 3, 4].find((era) => before.value?.cardSupply[era] > 0) || 5
+		const capacity = rf.ERA_CARD_DATA[era][move.kind][0]
+		icons[landLabel(move.area)] = { src: assets.getWaterworkImage(stateId.value, capacity), alt: t("history.altWaterwork", { kind: view.kindName(move.kind), measure: view.waterworkMeasure({ kind: move.kind, capacity }) }) }
+	}
+	if (move?.type === "respondOffer") {
+		const offer = before.value?.gameflow.pendingOffer
+		if (offer && offer.action.type !== "offerNation" && move.accept) {
+			const capacity = after.value?.board.areas.find((area) => area.id === offer.action.area)?.waterwork?.capacity
+			if (capacity !== undefined) icons[landLabel(offer.action.area)] = { src: assets.getWaterworkImage(offer.state, capacity), alt: t("history.altAcceptedWork", { kind: view.kindName(offer.action.kind), measure: view.waterworkMeasure({ kind: offer.action.kind, capacity }) }) }
+		}
 	}
 	return icons
 })
@@ -145,20 +158,18 @@ const actionImages = computed(() => {
 	if (move.type === "respondOffer") {
 		const offer = before.value?.gameflow.pendingOffer
 		if (offer?.action.type === "offerNation") return [{ src: assets.getNationCardImage(offer.action.nation), alt: rf.NATION_NAMES[offer.action.nation], card: true }]
-		if (offer) {
-			const capacity = after.value?.board.areas.find((area) => area.id === offer.action.area)?.waterwork?.capacity
-			if (capacity !== undefined && move.accept) return [{ src: assets.getWaterworkImage(offer.state, capacity), alt: t("history.altAcceptedWork", { kind: view.kindName(offer.action.kind), measure: view.waterworkMeasure({ kind: offer.action.kind, capacity }) }) }]
-		}
 	}
 	if (["buyNation", "bidNation", "offerNation"].includes(move.type)) return [...new Set([move.nation, ...nationAwards.value.map((award) => award.id)])].map((id) => ({ src: assets.getNationCardImage(id), alt: rf.NATION_NAMES[id], card: true }))
 	if (move.type === "pass" && nationAwards.value.length) return nationAwards.value.map((award) => ({ src: assets.getNationCardImage(award.id), alt: rf.NATION_NAMES[award.id], card: true }))
-	if (["buyCard", "requestWaterwork"].includes(move.type) && stateId.value !== null) {
+	if (move.type === "buyCard" && stateId.value !== null) {
 		const era = [1, 2, 3, 4].find((era) => before.value?.cardSupply[era] > 0) || 5
 		const capacity = rf.ERA_CARD_DATA[era][move.kind][0]
 		return String(capacity).split("+").map((capacity) => ({ src: assets.getWaterworkImage(stateId.value, capacity), alt: move.kind === "digger" ? t("history.altCrew", { points: capacity }) : t("history.altWaterwork", { kind: view.kindName(move.kind), measure: view.waterworkMeasure({ kind: move.kind, capacity }) }) }))
 	}
 	return []
 })
+const actionInlineImages = computed(() => actionImages.value.filter((asset) => !asset.card))
+const actionCards = computed(() => actionImages.value.filter((asset) => asset.card))
 const playback = useWaterPlaybackStore()
 const playbackError = ref("")
 const canReplayWater = computed(() => ["riverComplete", "rainEnd"].includes(props.entry.administration?.kind) && (!store.turnDraft.start || props.entry.historyIndex < store.turnDraft.start.historyLength))
@@ -210,11 +221,11 @@ function jumpToEntry() {
 			</template>
 			<div v-else-if="entry[0] === rf.HIST_NEW_GAME" class="new_turn"><CurrencyText :text="eventText" /></div>
 			<template v-else>
-				<div class="container"><span class="header" v-if="player"><PlayerMarker :index="entry[1]" :name="personal.getHistoryName(entry[1])" /><span class="historyPlayerName" :style="{ backgroundColor: playerColour(entry[1]), color: playerTextColour(entry[1]) }">{{ personal.getHistoryName(entry[1]) }}</span></span><img v-if="eventArtwork" :src="eventArtwork.src" :alt="eventArtwork.alt" :title="eventArtwork.alt" /><span><CurrencyText :text="eventText" :land-icons="eventLandIcons" /></span></div>
+				<div class="container"><span class="header" v-if="player"><PlayerMarker :index="entry[1]" :name="personal.getHistoryName(entry[1])" /><span class="historyPlayerName" :style="{ backgroundColor: playerColour(entry[1]), color: playerTextColour(entry[1]) }">{{ personal.getHistoryName(entry[1]) }}</span></span><img v-if="eventArtwork" :src="eventArtwork.src" :alt="eventArtwork.alt" :title="eventArtwork.alt" /><span><CurrencyText :text="eventText" :inline-icons="eventInlineIcons" /><img v-for="(asset, idx) in actionInlineImages" :key="idx" class="inlineActionImage" :src="asset.src" :alt="asset.alt" :title="asset.alt" /></span></div>
 				<div v-for="award in nationAwards" :key="award.id" class="nationAwardNotice"><PlayerMarker :index="award.owner" :name="personal.getHistoryName(award.owner)" /><span class="historyPlayerName" :style="{ backgroundColor: playerColour(award.owner), color: playerTextColour(award.owner) }">{{ personal.getHistoryName(award.owner) }}</span><span><CurrencyText :text="$t('history.acquiredNation', { nation: rf.NATION_NAMES[award.id], amount: award.price })" /></span></div>
 				<StateLeadership v-for="change in leadershipChanges" :key="change.id" :change="change" />
 				<details class="balanceDetails" v-if="balanceChanges.length" @click.stop @keydown.enter.stop @keydown.space.stop><summary class="balanceChanges" :aria-label="$t('history.showBalances')"><span v-for="change in balanceChanges" :key="change.label" :title="change.title || change.label"><img :src="change.src" :alt="change.label" /><span v-if="change.player !== undefined" class="historyPlayerName" :style="{ backgroundColor: playerColour(change.player), color: playerTextColour(change.player) }">{{ personal.getHistoryName(change.player) }}</span><b>{{ change.amount > 0 ? '+' : '' }}{{ change.amount }} <CurrencyIcon /></b></span></summary><div class="balanceBreakdown"><div v-for="change in balanceChanges" :key="change.label"><img :src="change.src" :alt="change.title || change.label" :title="change.title || change.label" /><span v-if="change.player !== undefined" class="historyPlayerName" :style="{ backgroundColor: playerColour(change.player), color: playerTextColour(change.player) }">{{ personal.getHistoryName(change.player) }}</span><span><CurrencyText :text="change.label" /></span></div></div></details>
-				<div class="actionImages" :class="{ multipleCards: actionImages.filter((asset) => asset.card).length > 1 }" v-if="actionImages.length"><template v-for="(asset, idx) in actionImages" :key="idx"><div v-if="asset.card" class="historyCard"><ArtworkCard :src="asset.src" :alt="asset.alt" /></div><img v-else :src="asset.src" :alt="asset.alt" :title="asset.alt" /></template></div>
+				<div class="actionImages" :class="{ multipleCards: actionCards.length > 1 }" v-if="actionCards.length"><div v-for="(asset, idx) in actionCards" :key="idx" class="historyCard"><ArtworkCard :src="asset.src" :alt="asset.alt" /></div></div>
 				<div v-if="isGameEnd" class="new_turn">{{ after?.gameflow.endReason === 'invasion' ? $t("history.gameEndedInvasion") : after?.gameflow.endReason === 'revolution' ? $t("history.gameEndedRevolution") : $t("history.gameEnded") }}</div>
 			</template>
 		</div>
@@ -232,10 +243,11 @@ function jumpToEntry() {
 .new_turn { background: black; color: white; text-align: center; font-weight: bold; font-size: 1.2em; padding: 8px; }.phaseHeading { background: black; color: white; text-align: center; font-weight: bold; font-size: 1.2em; padding: 8px; margin: 5px; }
 .selectableHistory { cursor: pointer; }.selectableHistory:hover { border: 1px solid yellow; }.selectableHistory:focus-visible { outline: 2px solid yellow; outline-offset: -2px; }
 .log.currentReplay { box-shadow: inset 3px 0 #177daf; background: #e5f3ff; }.replayPosition { display: block; color: #12628c; font-size: 16px; font-weight: bold; }
-.actionImages { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }.actionImages img { width: 30px; height: 30px; object-fit: contain; }.historyCard { width: 185px; max-width: 100%; }
+.actionImages { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }.historyCard { width: 185px; max-width: 100%; }
 .actionImages.multipleCards .historyCard { width: calc((100% - 4px) / 2); max-width: 185px; }
 .nationAwardNotice { display: flex; align-items: center; gap: 5px; margin-top: 4px; padding: 3px 6px; background: #edf6fd; border-left: 3px solid #177daf; font-size: 16px; font-weight: 400; }.nationAwardNotice img { width: 23px; height: 23px; flex-shrink: 0; }.nationAwardNotice span { min-width: 0; overflow-wrap: anywhere; }
 .container > img { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; margin-right: 6px; }.container > span:last-child { min-width: 0; overflow-wrap: anywhere; }
+.inlineActionImage { width: 26px; height: 26px; object-fit: contain; vertical-align: middle; margin-left: 4px; }
 .balanceChanges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }.balanceChanges > span { display: inline-flex; align-items: center; gap: 4px; padding: 2px 5px; background: #edf6fd; border: 1px solid #adc2d0; font-size: 16px; font-weight: 400; }.balanceChanges img { width: 22px; height: 22px; }
 .balanceChanges { cursor: pointer; align-items: center; list-style: none; }.balanceChanges::-webkit-details-marker { display: none; }.balanceChanges::before { content: '▸'; font-size: 16px; font-weight: 400; }.balanceDetails[open] .balanceChanges::before { content: '▾'; }.balanceChanges:focus-visible { outline: 2px solid #177daf; outline-offset: 2px; }.balanceBreakdown { display: grid; gap: 3px; margin-top: 5px; padding: 5px; background: #edf6fd; font-size: 16px; font-weight: 400; }.balanceBreakdown > div { display: flex; align-items: center; gap: 5px; }.balanceBreakdown img { width: 22px; height: 22px; flex-shrink: 0; }.balanceBreakdown span { min-width: 0; overflow-wrap: anywhere; }
 @media (max-width: 1050px) { .balanceChanges { min-height: 40px; } }

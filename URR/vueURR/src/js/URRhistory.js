@@ -48,6 +48,9 @@ export function computeHistory(history, creationTimestamp, snapshots = [], times
 		const after = snapshots[index] ?? null
 		if (!before || !after) continue
 		const action = historyAction(entry)
+		// Ending development only hands a queued request to its landowner; the
+		// request entry already says so.
+		if (action?.type === "endDevelopment" && after.gameflow.pendingOffer) displayEntry.hidden = true
 		function addSummary(kind, title, text, details = []) {
 			const summary = [rf.HIST_ACTION, -1, null, 0]
 			summary.historyIndex = index

@@ -18,10 +18,10 @@ test("Currency text escapes markup and leaves words containing SPL untouched", a
 	assert.equal((html.match(/alt="SPL"/g) || []).length, 1)
 })
 
-test("Land icons sit immediately before their hex labels", async () => {
+test("Inline icons sit immediately before their hex labels", async () => {
 	const html = await renderToString(createSSRApp(CurrencyText, {
 		text: "Bought H7 · Sold A1, F8 before buying",
-		landIcons: {
+		inlineIcons: {
 			H7: { src: "/savannah.png", alt: "Savannah" },
 			A1: { src: "/desert.png", alt: "Desert" },
 			F8: { src: "/forest.png", alt: "Forest" },
@@ -34,7 +34,7 @@ test("Land icons sit immediately before their hex labels", async () => {
 test("A longer land label wins over one that prefixes it", async () => {
 	const html = await renderToString(createSSRApp(CurrencyText, {
 		text: "Bought A10",
-		landIcons: {
+		inlineIcons: {
 			A1: { src: "/one.png", alt: "One" },
 			A10: { src: "/ten.png", alt: "Ten" },
 		},

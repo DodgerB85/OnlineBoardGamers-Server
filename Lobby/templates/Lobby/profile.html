@@ -571,7 +571,7 @@
                     </div>
                 </div>
 
-                <div class="form-row" style="border-bottom: none;">
+                <div class="form-row">
                     <label class="form-label">{% translate "Web Colour" %}</label>
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
                         <div class="favWEBchoice">
@@ -595,6 +595,47 @@
                         <div class="favWEBchoice">
                             <label for="webRad3"><svg class="webPrefSVG"><polygon class="webPrefPolygon webPrefPolygon3" points="0,0 100,0 100,20 0,20" /></svg></label>
                             <input type="radio" id="webRad3" name="webColour" value="3" {% if favWEBcolour == 3 %}checked{% endif %} />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row" style="border-bottom: none;">
+                    <label class="form-label">{% translate "Ur Colour" %}</label>
+                    <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
+                        <div class="favURRchoice">
+                            <label for="urrRadM1">{% translate "None" %}</label>
+                            <input type="radio" id="urrRadM1" name="urrColour" value="-1"
+                                   {% if favURRcolour == -1 %}checked{% endif %} />
+                        </div>
+                        <div class="favURRchoice">
+                            <label for="urrRad0"><img src="{% static 'URR/images/ownership-marker-orange.png' %}" width="100" height="100" alt="Orange" /></label>
+                            <b>{% translate "Orange" %}</b>
+                            <input type="radio" id="urrRad0" name="urrColour" value="0" {% if favURRcolour == 0 %}checked{% endif %} />
+                        </div>
+                        <div class="favURRchoice">
+                            <label for="urrRad1"><img src="{% static 'URR/images/ownership-marker-green.png' %}" width="100" height="100" alt="Green" /></label>
+                            <b>{% translate "Green" %}</b>
+                            <input type="radio" id="urrRad1" name="urrColour" value="1" {% if favURRcolour == 1 %}checked{% endif %} />
+                        </div>
+                        <div class="favURRchoice">
+                            <label for="urrRad2"><img src="{% static 'URR/images/ownership-marker-teal.png' %}" width="100" height="100" alt="Teal" /></label>
+                            <b>{% translate "Teal" %}</b>
+                            <input type="radio" id="urrRad2" name="urrColour" value="2" {% if favURRcolour == 2 %}checked{% endif %} />
+                        </div>
+                        <div class="favURRchoice">
+                            <label for="urrRad3"><img src="{% static 'URR/images/ownership-marker-brown.png' %}" width="100" height="100" alt="Brown" /></label>
+                            <b>{% translate "Brown" %}</b>
+                            <input type="radio" id="urrRad3" name="urrColour" value="3" {% if favURRcolour == 3 %}checked{% endif %} />
+                        </div>
+                        <div class="favURRchoice">
+                            <label for="urrRad4"><img src="{% static 'URR/images/ownership-marker-purple.png' %}" width="100" height="100" alt="Purple" /></label>
+                            <b>{% translate "Purple" %}</b>
+                            <input type="radio" id="urrRad4" name="urrColour" value="4" {% if favURRcolour == 4 %}checked{% endif %} />
+                        </div>
+                        <div class="favURRchoice">
+                            <label for="urrRad5"><img src="{% static 'URR/images/ownership-marker-pink.png' %}" width="100" height="100" alt="Pink" /></label>
+                            <b>{% translate "Pink" %}</b>
+                            <input type="radio" id="urrRad5" name="urrColour" value="5" {% if favURRcolour == 5 %}checked{% endif %} />
                         </div>
                     </div>
                 </div>

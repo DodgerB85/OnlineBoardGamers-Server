@@ -53,6 +53,22 @@ test("appending computes only the new entries' display rows", () => {
 })
 
 
+test("history hides the development-end row that only hands over a pending agreement", () => {
+	const before = createGame(["A", "B", "C"])
+	before.gameflow.phase = rf.PHASE_DEVELOPMENT
+	const after = structuredClone(before)
+	after.gameflow.pendingOffer = { state: 0, action: { type: "requestWaterwork", kind: "pump", area: before.board.areas[0].id }, returnPlayer: 0 }
+	const history = [[rf.HIST_NEW_GAME, -1, null], entry({ type: "endDevelopment" }, 10)]
+
+	const pending = computeHistory(history, 1000, [before, after])
+	const actionRow = (rows) => rows.find((row) => row.historyIndex === 1 && !row.administration)
+	assert.equal(actionRow(pending).hidden, true)
+
+	const ended = structuredClone(before)
+	const normal = computeHistory(history, 1000, [before, ended])
+	assert.equal(actionRow(normal).hidden, undefined)
+})
+
 test("history reports First Akkadians dissolution for automatic and manual hiring without duplicates", () => {
 	for (const type of ["endDevelopment", "buyCard", "resolveMaintenance"]) {
 		for (const era of [1, 4]) {

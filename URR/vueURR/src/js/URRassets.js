@@ -1,5 +1,7 @@
 /** Stable names for artwork promoted from tempAssets into static/URR/images. */
 import { PLAYER_COLOUR_FILES } from "./URRreference.js"
+import { useModelStore } from "../stores/URRstore.js"
+import { usePersonalStore } from "../stores/URRpersonal.js"
 const STATIC_IMAGES = "/static/URR/images/"
 const TERRAIN_FILES = ["terrain-hills.png", "terrain-forest.png", "terrain-savannah.png", "terrain-desert.png"]
 const CITY_FILES = ["city-hills.png", "city-forest.png", "city-savannah.png", "city-desert.png"]
@@ -14,7 +16,12 @@ export function getStateTreasuryImage(state) { return getAsset(`state-treasury-$
 export function getStateOrderImage(state) { return getAsset(`state-order-${STATE_FILES[state]}.png`) }
 export function getNationCardImage(nation) { return getAsset(NATION_FILES[nation]) }
 export function getWaterworkImage(state, capacity) { return getAsset(`waterwork-${STATE_FILES[state]}-${capacity === "M" ? "unlimited" : capacity}.png`) }
-export function getPlayerMarkerImage(player) { return getAsset(`ownership-marker-${PLAYER_COLOUR_FILES[player]}.png`) }
+export function getPlayerMarkerImage(playerIndex) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	const colour = store.players[playerIndex]?.colour ?? playerIndex
+	return getAsset(`ownership-marker-${PLAYER_COLOUR_FILES[personal.getCorrectedColour(colour)]}.png`)
+}
 export const mapImage = getAsset("ur-map.jpg")
 export const landPriceTrackImage = getAsset("land-price-track.png")
 

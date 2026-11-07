@@ -1846,6 +1846,10 @@ def profile(request):
             WEBoptions.append(int(request.POST["webColour"]))
             profile.preferredWEBoptions = json.dumps(WEBoptions, separators=(",", ":"))
 
+            URRoptions = []
+            URRoptions.append(int(request.POST.get("urrColour", -1)))
+            profile.preferredURRoptions = json.dumps(URRoptions, separators=(",", ":"))
+
             profile.save()
 
             messages.success(
@@ -1932,6 +1936,9 @@ def profile(request):
         preferredWEBoptions = json.loads(profile.preferredWEBoptions) if profile.preferredWEBoptions != "" and profile.preferredWEBoptions is not None else [-1]
         favWEBcolour = preferredWEBoptions[0]
 
+        preferredURRoptions = json.loads(profile.preferredURRoptions) if profile.preferredURRoptions != "" and profile.preferredURRoptions is not None else [-1]
+        favURRcolour = preferredURRoptions[0]
+
         preferredBUSoptions = []
         if profile.preferredBUSoptions:
             try:
@@ -2011,6 +2018,7 @@ def profile(request):
                 "favCNScolour": preferredCNScolour,
                 "favKFWcolour": favKFWcolour,
                 "favWEBcolour": favWEBcolour,
+                "favURRcolour": favURRcolour,
                 "TGZminimalText": TGZminimalText,
                 "TGZprefersReducedMotion": TGZprefersReducedMotion,
                 "bgStatsEnabled": profile.bgStatsEnabled,

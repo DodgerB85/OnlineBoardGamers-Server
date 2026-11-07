@@ -125,6 +125,7 @@ class Profile(models.Model):
     preferredKFWoptions = models.CharField(max_length=30, blank=True)
     preferredWEBoptions = models.CharField(max_length=30, blank=True)
     preferredRNBoptions = models.CharField(max_length=30, blank=True)
+    preferredURRoptions = models.CharField(max_length=30, blank=True)
 
     FCMtournamentTrophies = models.CharField(
         max_length=100,

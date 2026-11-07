@@ -12,7 +12,7 @@ let sortTimer = null
 const historyPanel = ref(null)
 let previousFocus = null
 const orderedEntries = computed(() => {
-	const entries = store.computedHistory.map((entry) => ({ entry, index: entry.historyIndex }))
+	const entries = store.computedHistory.filter((entry) => !entry.hidden).map((entry) => ({ entry, index: entry.historyIndex }))
 	return newestFirst.value ? entries.reverse() : entries
 })
 const visibleEntries = computed(() => orderedEntries.value.slice(0, visibleCount.value))

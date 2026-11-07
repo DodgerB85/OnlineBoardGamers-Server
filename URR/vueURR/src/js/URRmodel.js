@@ -22,6 +22,8 @@ export function initGame() {
 	// The server sends milliseconds; history times are in seconds.
 	personal.gameCreationTimestamp = Math.floor(initData.gameCreationTimestamp / 1000)
 	personal.pov = initData.pov !== undefined ? initData.pov : -99
+	const options = initData.preferredURRoptions || [-1]
+	personal.preferredColour = options[0]
 	personal.latestUpdate = initData.latestUpdate
 	personal.secondsToNextKickout = initData.secondsToNextKickout !== undefined ? initData.secondsToNextKickout : 99999
 	personal.kickoutSecondsRemaining = personal.secondsToNextKickout

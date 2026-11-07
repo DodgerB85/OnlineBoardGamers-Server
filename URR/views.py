@@ -92,6 +92,7 @@ def showURRgame(request, game_id=1, spoilerFree=False, replayStep=1):
             "pov": -99,
             "allPlayerListBySeat": json.dumps(presenter.getAllPlayersOrderedySeatInArray(True, False)),
             "currentPlayers": currentPlayersArr,
+            "preferredURRoptions": [-1],
         }
     )
 
@@ -100,6 +101,12 @@ def showURRgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     returnData.update(result["auth_data"])
     returnData["pov"] = -9
+
+    profile_options = getattr(result["user_profile"], "preferredURRoptions", "") or ""
+    preferredURRoptions = json.loads(profile_options) if profile_options else [-1]
+    if not isinstance(preferredURRoptions, list) or not preferredURRoptions:
+        preferredURRoptions = [-1]
+    returnData["preferredURRoptions"] = preferredURRoptions
 
     # Chat notification clearing (mirrors the other games)
     all_gps_including_kicked = list(currentGame.players.select_related("player").all())
