@@ -2135,6 +2135,19 @@ class FCMpresenter(GamePresenter):
 
         # need to add in possible new dist options
         if rfFCM.SO_RANDOM_MODULES in starting_options:
+            # Per-module exclusions arrive as SO_EXCLUDED_MODULE_BASE + mod id
+            # (mod ids are at most two digits). NB the range check matters: the
+            # 5-digit min/max codes (210xx/211xx) are larger than the base and
+            # must NOT be stripped.
+            excludedModules = set(
+                x - rfFCM.SO_EXCLUDED_MODULE_BASE
+                for x in starting_options
+                if isinstance(x, int) and rfFCM.SO_EXCLUDED_MODULE_BASE <= x < rfFCM.SO_EXCLUDED_MODULE_BASE + 100
+            )
+            starting_options = [
+                x for x in starting_options
+                if not (isinstance(x, int) and rfFCM.SO_EXCLUDED_MODULE_BASE <= x < rfFCM.SO_EXCLUDED_MODULE_BASE + 100)
+            ]
             availableModules = [
                 rfFCM.SO_KETCHUP_MS,
                 rfFCM.SO_RESERVE_PRICE,
@@ -2162,7 +2175,8 @@ class FCMpresenter(GamePresenter):
                 ),
                 (
                     rfFCM.SO_RANDOM_MODULES_FAN,
-                    [rfFCM.SO_FRIED_CHICKEN, rfFCM.SO_STADIUM, rfFCM.SO_LABOR_MARKET, rfFCM.SO_SECOND_BAILOUT],
+                    [rfFCM.SO_FRIED_CHICKEN, rfFCM.SO_STADIUM, rfFCM.SO_LABOR_MARKET, rfFCM.SO_SECOND_BAILOUT,
+                     rfFCM.SO_MEDIA_LINE, rfFCM.SO_NEW_MAP],
                 ),
             ]:
                 inPool = marker in starting_options or any(x in starting_options for x in flags)
@@ -2173,6 +2187,9 @@ class FCMpresenter(GamePresenter):
             # Add hard choices only with original MS
             if rfFCM.SO_NEW_MS not in starting_options:
                 availableModules.append(rfFCM.SO_HARD_CHOICES)
+            # Drop excluded modules from the pool
+            if excludedModules:
+                availableModules = [m for m in availableModules if m not in excludedModules]
             selectedModules = []
             # Defaults matching the create-game form, used when the min/max options are missing
             minModules = 1
@@ -2184,6 +2201,15 @@ class FCMpresenter(GamePresenter):
                         minModules = int(optionStr[-2:])
                     elif int(optionStr[:3]) == rfFCM.SO_MAX_RANDOM_MODULES:
                         maxModules = int(optionStr[-2:])
+            if maxModules < minModules:
+                maxModules = minModules
+            # Heavy exclusion can shrink the pool below the form's min/max —
+            # clamp both so the roll never asks for more than what is left
+            poolSize = len(availableModules)
+            if minModules > poolSize:
+                minModules = poolSize
+            if maxModules > poolSize:
+                maxModules = poolSize
             if maxModules < minModules:
                 maxModules = minModules
             numberOfModulesToPick = random.randrange(minModules, maxModules + 1, 1)
