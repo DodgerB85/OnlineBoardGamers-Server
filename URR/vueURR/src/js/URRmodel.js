@@ -41,6 +41,7 @@ export function initGame() {
 	store.gameflow.turn = initData.turn || 1
 	store.gameflow.phase = initData.phase !== undefined ? initData.phase : rf.PHASE_DIVIDING_NATIONS
 	store.chatData = funcs.decompressChatData(initData.chatData)
+	if (initData.chatNotification) store.viewSettings.showChat = true
 	store.deleteVotesData = initData.deleteVotesData || {}
 	store.statsExcludeVotesData = initData.statsExcludeVotesData || {}
 	store.kickoutVotesData = initData.kickoutVotesData || {}

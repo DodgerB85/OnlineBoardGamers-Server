@@ -122,15 +122,15 @@ function localCastVote(topic) {
 	<!-- CHAT -->
 	<transition name="fade">
 	<div id="wholeChat" v-if="store.viewSettings.showChat" role="region" :aria-label="$t('chat.aria')">
-		<div class="chatHeading"><h2>{{ $t("chat.title") }}</h2><button @click="store.viewSettings.showChat = false" :aria-label="$t('chat.close')">×</button></div>
 		<div id="chatBox">
+			<h2>{{ $t("chat.title") }}</h2>
 			<p v-if="store.gameMessages.chatErrorText" class="errorText" role="alert">{{ store.gameMessages.chatErrorText }}</p>
 			<div><textarea rows="6" v-model="chatMessage" :aria-label="$t('chat.messageAria')"></textarea></div>
 			<div><button class="actionsLineButton" :disabled="store.viewSettings.isSendingChat || !chatMessage" @click="sendChatMessage">{{ store.viewSettings.isSendingChat ? $t('chat.sending') : $t('chat.send') }}</button></div>
 		</div>
 		<div id="messageList">
 			<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
-				<div class="header"><PlayerMarker v-if="view.playerIndexByName(store, message[0]) >= 0" :index="view.playerIndexByName(store, message[0])" /><span v-else :title="message[0]">{{ message[0] === "WelcomeBot" ? "WelcomeBot" : $t("chat.observer") }}</span><span class="date">{{ new Date(message[1] * 1000).toLocaleString() }}</span></div>
+				<div class="header"><span class="bold">{{ message[0] }}</span><PlayerMarker v-if="view.playerIndexByName(store, message[0]) >= 0" class="chatMarker" :index="view.playerIndexByName(store, message[0])" /><span class="date">{{ new Date(message[1] * 1000).toLocaleString() }}</span></div>
 				<div class="messageBody">{{ message[2] }}</div>
 			</div>
 		</div>
@@ -219,8 +219,8 @@ function localCastVote(topic) {
 	padding-bottom: 10px;
 	text-align: center;
 }
+#chatBox { text-align: center; }
 #chatBox textarea { width: 90%; }
-.chatHeading { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 12px; background: #d4eafd; border-bottom: 1px solid #adc2d0; }.chatHeading h2 { font-size: 20px; }.chatHeading button { font-size: 26px; border: 0; background: none; cursor: pointer; padding: 5px; }
 #notesBox textarea, #bugReport textarea { max-width: 90%; box-sizing: border-box; }
 .actionsLineButton:disabled { cursor: default; opacity: .5; }@media (max-width: 1050px) { .actionsLineButton { min-height: 40px; } }
 .chatentry {
@@ -232,6 +232,7 @@ function localCastVote(topic) {
 	background-color: #d4eafd;
 }
 .chatentry .header { margin-bottom: 7px; border-bottom: #000 1px solid; }
+.chatentry .header .chatMarker { margin-left: 4px; }
 .chatentry .header .date { font-size: 0.7em; font-style: italic; float: right; }
 .chatentry .header .bold { font-weight: bold; }
 .chatentry .messageBody { overflow: auto; white-space: pre-wrap; }
@@ -253,5 +254,4 @@ function localCastVote(topic) {
 .topMenuItem img { width: 38px; height: 38px; }
 .topMenuItem span { font-size: 16px; font-weight: bold; display: block; }
 .topMenuItem { border: 0; background: #303030; color: white; border-radius: 3px; }.topMenuItem:disabled { opacity: .5; cursor: default; }
-@media (max-width: 1050px) { .chatHeading button { min-width: 44px; min-height: 44px; box-sizing: border-box; } }
 </style>

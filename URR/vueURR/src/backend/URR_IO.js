@@ -178,6 +178,10 @@ export async function reloadChatData() {
 		if (!response.ok) throw new Error("Network response was not ok")
 		const data = await response.json()
 		store.chatData = funcs.decompressChatData(data.chatData)
+		if (store.viewSettings.showHistory) {
+			store.clearHistoryHelpers()
+			store.viewSettings.showHistory = false
+		}
 		store.viewSettings.showChat = true
 	} catch (error) {
 		console.error("Error fetching chat data:", error)

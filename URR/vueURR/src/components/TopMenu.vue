@@ -44,7 +44,10 @@ function toggleNotes() {
 }
 
 function toggleChat() {
-	store.viewSettings.showHistory = false
+	if (store.viewSettings.showHistory) {
+		store.viewSettings.showHistory = false
+		store.clearHistoryHelpers()
+	}
 	if (store.viewSettings.showChat) store.viewSettings.showChat = false
 	else {
 		store.viewSettings.showChat = true

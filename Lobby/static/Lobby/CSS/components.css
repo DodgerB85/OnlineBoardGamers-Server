@@ -1976,7 +1976,8 @@ a.create-tile {
 .favTGZchoice,
 .favCNSchoice,
 .favKFWchoice,
-.favWEBchoice {
+.favWEBchoice,
+.favURRchoice {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1990,7 +1991,8 @@ a.create-tile {
 .favTGZchoice label,
 .favCNSchoice label,
 .favKFWchoice label,
-.favWEBchoice label {
+.favWEBchoice label,
+.favURRchoice label {
     cursor: pointer;
     display: block;
 }
@@ -1998,9 +2000,10 @@ a.create-tile {
 /* Image size caps */
 .favRestChoice img { max-height: 90px; width: auto; display: block; }
 .favBusMap img { max-height: 182px; width: auto; display: block; }
-.favHLCchoice img { max-height: 80px; width: auto; display: block; }
+.favHLCchoice img { height: 60px; width: auto; display: block; }
 .favBusColour img { max-height: 60px; width: auto; display: block; }
 .favTGZchoice img { max-height: 100px; width: auto; display: block; }
+.favURRchoice img { max-height: 50px; width: auto; display: block; }
 
 /* SVG swatch sizing */
 .cnsPrefSVG,
