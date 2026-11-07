@@ -1105,6 +1105,13 @@ def SF_M_ProcessAnyTournamentEndGame(
 
     ### Add winner(s) into results
     tournamentProgressionDataArray = json.loads(tournamanetObj.tournamentProgressionData)
+    # A retried finish save must not score the same game twice; the winner list is the marker.
+    if any(
+        isinstance(row, list) and len(row) > 2 and row[1] == _currentGame.id and row[2]
+        for roundData in tournamentProgressionDataArray
+        for row in roundData
+    ):
+        return
     # Find correct index in latest round using game id
     match = next(
         (row for row in tournamentProgressionDataArray[-1] if row[1] == _currentGame.id),

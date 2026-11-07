@@ -444,6 +444,36 @@ class TestTournamentSharedFunctions(PrintSuccessTestCase):
         self.assertEqual(json.loads(tournament.tournamentPointsData)[0], ["P0", 1])
         self.assertEqual(set(tournament.nextRoundPlayers.values_list("username", flat=True)), {"P0"})
 
+    def test_processing_the_same_tl_game_twice_does_not_score_it_twice(self):
+        users = self._create_users(3)
+        tournament = self._create_tournament(users, tournament_type="TL")
+        tournament.nextRoundPlayers.clear()
+        tournament.tournamentSideData = json.dumps([["P0", 2], ["P1", 2], ["P2", 2]])
+        tournament.tournamentPointsData = json.dumps([["P0", 0], ["P1", 0], ["P2", 0]])
+        game = Game.objects.create(gameCode="FCM", creator=users[0], host=users[0])
+        GamePlayer.objects.create(game=game, player=users[0], seat_order=0)
+        GamePlayer.objects.create(game=game, player=users[1], seat_order=1)
+        GamePlayer.objects.create(game=game, player=users[2], seat_order=2)
+        tournament.tournamentProgressionData = json.dumps([[[[user.username for user in users], game.id, [], "Round 1"], [["P9"], 999, [], "Unfinished"]]])
+        tournament.save()
+
+        SF_M_ProcessAnyTournamentEndGame(None, tournament, game, ["P0"], [["P0"], ["P1", 5], ["P2", 2]])
+
+        # Advance to the next round so the duplicate call cannot find the game in the last round.
+        progressionData = json.loads(tournament.tournamentProgressionData)
+        progressionData.append([[["P0", "P1"], 9999, [], "Round 2"]])
+        tournament.tournamentProgressionData = json.dumps(progressionData)
+        tournament.save()
+
+        SF_M_ProcessAnyTournamentEndGame(None, tournament, game, ["P0"], [["P0"], ["P1", 5], ["P2", 2]])
+
+        tournament.refresh_from_db()
+        points = dict(json.loads(tournament.tournamentPointsData))
+        lives = dict(json.loads(tournament.tournamentSideData))
+        self.assertEqual(points["P0"], 1)
+        self.assertEqual(lives.get("P1"), 1)
+        self.assertEqual(lives.get("P2"), 1)
+
 
 class TestSharedGameCreationHelpers(PrintSuccessTestCase):
     def setUp(self):
