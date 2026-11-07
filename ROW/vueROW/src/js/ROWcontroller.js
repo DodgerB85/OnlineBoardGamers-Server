@@ -254,6 +254,7 @@ export async function persistTurn() {
 	if (personal.gameID < 0) return true
 	const g = store.getGame()
 	const ended = g.isEnded()
+	const finalGroups = ended ? g.rankingGroups() : []
 	const order = g.state.playerOrder.length > 0 ? g.state.playerOrder : g.state.players.map((p) => p.name)
 	const current = g.currentPlayer
 	const rotated = [current, ...order.filter((p) => p !== current && !store.missingPlayers.includes(p))]
@@ -268,8 +269,8 @@ export async function persistTurn() {
 			allIsCurrentPlayers: [current],
 			allRemainingPlayersInTurnOrder: rotated,
 			saveRewind: true,
-			winner: ended ? g.ranking()[0] : undefined,
-			finalPositions: ended ? g.ranking().map((name) => g.state.players.findIndex((p) => p.name === name)) : undefined,
+			winner: ended ? finalGroups[0] : undefined,
+			finalPositions: ended ? finalGroups.map((group) => group.map((name) => g.state.players.findIndex((p) => p.name === name))) : undefined,
 		})
 		if (result.syncError) {
 			store.gameMessages.errorText = i18n.global.t("error.olderVersion")

@@ -9,7 +9,7 @@ import { useI18n } from "vue-i18n"
 import * as rf from "../js/ROWreference"
 import * as controller from "../js/ROWcontroller"
 import * as view from "../js/ROWview"
-import { isCattleCard, CattleType } from "../js/ROWcore"
+import { CattleType } from "../js/ROWcore"
 import { CATTLE_COSTS } from "../js/ROWdata"
 import { useModelStore } from "../stores/ROWstore.js"
 import CardView from "./CardView.vue"
@@ -66,6 +66,17 @@ const possibleBuys = computed(() => {
 const drawingTwo = computed(() => store.actions.includes(ActionType.DRAW_2_CATTLE_CARDS))
 
 const selected = ref([])
+const selectedCostIndex = ref(0)
+
+const availableCosts = computed(() => {
+	if (!selected.value.length) return []
+	const value = selected.value[0].value
+	const pair = selected.value.length === 2
+	return possibleBuys.value
+		.filter((o) => o.breedingValue === value && o.pair === pair)
+		.sort((a, b) => a.dollars - b.dollars || a.cowboys - b.cowboys)
+})
+const chosenCost = computed(() => availableCosts.value[selectedCostIndex.value] ?? availableCosts.value[0] ?? null)
 
 const hint = computed(() => {
 	if (takingThree.value) return t("row.cattleMarket.takeThree")
@@ -76,6 +87,7 @@ const hint = computed(() => {
 function drawTwo() {
 	if (!drawingTwo.value) return
 	selected.value = []
+	selectedCostIndex.value = 0
 	controller.perform({ type: ActionType.DRAW_2_CATTLE_CARDS })
 }
 
@@ -116,6 +128,7 @@ function selectCard(card) {
 	const idx = selected.value.indexOf(card)
 	if (idx >= 0) {
 		selected.value.splice(idx, 1)
+		selectedCostIndex.value = 0
 		return
 	}
 	if (selected.value.length === 2) selected.value.splice(0, 1)
@@ -123,27 +136,22 @@ function selectCard(card) {
 		selected.value = []
 	}
 	selected.value.push(card)
+	selectedCostIndex.value = 0
 }
 
 const canConfirm = computed(() => {
 	if (selected.value.length === 0) return false
-	return possibleBuys.value.some((o) => o.breedingValue === selected.value[0].value && o.pair === (selected.value.length === 2))
+	return !!chosenCost.value
 })
 
 function confirm() {
-	const options = possibleBuys.value
-		.filter((o) => o.breedingValue === selected.value[0].value)
-		.filter((o) => o.pair === (selected.value.length === 2))
-		.sort((a, b) => a.cowboys - b.cowboys)
-	const option = options[0]
+	const option = chosenCost.value
 	if (!option) return
-	// Resolve the selected cards to actual market card objects.
-	const cards = selected.value.map((sel) => {
-		const m = g().getCattleMarket().market.find((mc) => isCattleCard(mc) && mc.type === sel.type && mc.value === sel.value)
-		return m ?? sel
-	})
-	controller.perform({ type: ActionType.BUY_CATTLE, cattleCards: cards, cowboys: option.cowboys, dollars: option.dollars })
+	// The selected entries are the live market cards; pass them through so a pair of
+	// identical cards resolves to two distinct cards.
+	controller.perform({ type: ActionType.BUY_CATTLE, cattleCards: [...selected.value], cowboys: option.cowboys, dollars: option.dollars })
 	selected.value = []
+	selectedCostIndex.value = 0
 }
 </script>
 
@@ -151,6 +159,11 @@ function confirm() {
 	<div id="cattleMarket" v-if="game">
 		<div v-if="buying || takingThree || drawingTwo" class="hint">
 			<span>{{ hint }}</span>
+			<select v-if="buying && availableCosts.length > 1" v-model.number="selectedCostIndex" class="costSelect">
+				<option v-for="(opt, i) in availableCosts" :key="i" :value="i">
+					{{ opt.cowboys }} × {{ t('row.cattleMarket.cowboyCost') }} — ${{ opt.dollars }}
+				</option>
+			</select>
 			<button v-if="buying" class="buy" :disabled="!canConfirm" @click="confirm">{{ t('row.cattleMarket.confirmBuy') }}</button>
 		</div>
 		<div class="cards" :class="{ buying: buying || takingThree, selecting: selected.length > 0 }">
@@ -182,6 +195,7 @@ function confirm() {
 <style scoped>
 #cattleMarket { margin: 8px; }
 .hint { margin-bottom: 4px; font-size: 13px; }
+.hint .costSelect { margin-left: 8px; }
 .hint .buy { margin-left: 8px; padding: 2px 10px; cursor: pointer; font-weight: bold; }
 .hint .buy:disabled { opacity: 0.4; cursor: default; }
 .cards { display: flex; flex-wrap: wrap; gap: 4px; }

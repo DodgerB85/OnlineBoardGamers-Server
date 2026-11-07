@@ -9,7 +9,7 @@ export function buildBgStatsUrl() {
 	const game = store.game
 	if (!game || !game.isEnded()) return undefined
 
-	// ranking() sorts by score then balance, so equal scores end up adjacent.
+	// ranking() groups equal scores together.
 	const groups = []
 	for (const name of game.ranking()) {
 		const player = game.state.players.find((p) => p.name === name)

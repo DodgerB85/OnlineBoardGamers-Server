@@ -28,6 +28,7 @@ function g() {
 const available = computed(() => (game.value ? g().getObjectiveCards().available : []))
 const drawStackSize = computed(() => (game.value ? g().getObjectiveCards().drawStack.length : 0))
 const canTake = computed(() => store.actions.includes(ActionType.TAKE_OBJECTIVE_CARD))
+const canTakeFromDraw = computed(() => canTake.value && !(g().edition === "FIRST" && !g().isRailsToTheNorth() && g().atKansasCity()))
 
 function take(id) {
 	if (!canTake.value) return
@@ -36,7 +37,7 @@ function take(id) {
 }
 
 function takeFromDrawStack() {
-	if (!canTake.value) return
+	if (!canTakeFromDraw.value) return
 	controller.perform({ type: ActionType.TAKE_OBJECTIVE_CARD })
 }
 </script>
@@ -52,7 +53,7 @@ function takeFromDrawStack() {
 			:card="card"
 			@click="take(card.id)"
 		/>
-		<div class="drawStack" :class="{ selectable: canTake }" @click="takeFromDrawStack">
+		<div class="drawStack" :class="{ selectable: canTakeFromDraw }" @click="takeFromDrawStack">
 			<img :src="view.cardBackGreyImage()" alt="" draggable="false" />
 			<span class="count">{{ drawStackSize }}</span>
 		</div>

@@ -2066,44 +2066,57 @@ class ROWpresenter(GamePresenter):
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
-        winner_user = User.objects.get(username=_winnerUsername)
-        winner_gp = self.gameObj.players.filter(player=winner_user).first()
-        if winner_gp:
-            winner_gp.winner = True
-            winner_gp.save()
+        names = self.getAllPlayersOrderedySeatInArray()
+        winners = _winnerUsername if isinstance(_winnerUsername, (list, tuple)) else [_winnerUsername]
+        winnerNamesArray = []
+        for username in winners:
+            winner_user = User.objects.get(username=username)
+            winner_gp = self.gameObj.players.filter(player=winner_user).first()
+            if winner_gp:
+                winner_gp.winner = True
+                winner_gp.save()
+            winnerNamesArray.append(username)
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
 
-        finalPositionsArr = []
-        for seatPos in _finalPositions:
-            finalPositionsArr.append(self.getAllPlayersOrderedySeatInArray()[seatPos])
+        positions = _finalPositions or []
+        if positions and not isinstance(positions[0], (list, tuple)):
+            positions = [positions]
 
-        convertedFinalPositions = []
-        for pos, username in enumerate(finalPositionsArr):
-            if pos == 0:
-                posText = "1st - Congratulations!"
-            elif pos == 1:
-                posText = "2nd"
-            elif pos == 2:
-                posText = "3rd"
-            elif pos == 3:
-                posText = "4th"
-            elif pos == 4:
-                posText = "5th"
-            elif pos == 5:
-                posText = "6th"
-            else:
-                posText = "Last"
-            convertedFinalPositions.append([username, posText, pos])
+        finalResults = []
+        placed_seats = set()
+        for group_index, group in enumerate(positions):
+            for seatPos in group:
+                placed_seats.add(seatPos)
+                username = names[seatPos]
+                if group_index == 0:
+                    text = "Joint 1st - Congratulations!" if len(group) > 1 else "1st - Congratulations!"
+                elif group_index == 1:
+                    text = "Joint 2nd" if len(group) > 1 else "2nd"
+                elif group_index == 2:
+                    text = "Joint 3rd" if len(group) > 1 else "3rd"
+                elif group_index == 3:
+                    text = "Joint 4th" if len(group) > 1 else "4th"
+                elif group_index == 4:
+                    text = "Joint 5th" if len(group) > 1 else "5th"
+                elif group_index == 5:
+                    text = "Joint 6th" if len(group) > 1 else "6th"
+                else:
+                    text = "Last"
+                finalResults.append([username, text, group_index])
+
+        for seatPos, username in enumerate(names):
+            if seatPos not in placed_seats:
+                finalResults.append([username, "Last", len(positions)])
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists() and self.gameObj.maxPlayers > 1:
-            async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "ROW", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
+            async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "ROW", finalResults, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 
             if self.gameObj.relatedMainTournament:
-                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMainTournament, self.gameObj, [_winnerUsername], _tournamentData)
+                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMainTournament, self.gameObj, winnerNamesArray, _tournamentData)
             if self.gameObj.relatedMiniTournament:
-                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMiniTournament, self.gameObj, [_winnerUsername], _tournamentData)
+                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMiniTournament, self.gameObj, winnerNamesArray, _tournamentData)
 
 
 class FCMpresenter(GamePresenter):

@@ -122,8 +122,8 @@ On the very first turn of the game, the starting player places their cattleman o
 | :--- | :--- | :--- | :--- |
 | Player count tile | Not used | 3-player side | 4-player side |
 | Starting step limit | 3 | 3 | 4 |
-| Step-limit disc spaces | +2, +1 | +2, +1 | +1, +1 |
-| Maximum step limit | 6 | 6 | 6 |
+| Step-limit disc spaces | +1, +1 | +2, +1 | +1, +1 |
+| Maximum step limit | 5 | 6 | 6 |
 | Starting hand | 4 | 4 | 4 |
 | Starting hand limit | 4 | 4 | 4 |
 | Maximum hand limit | 6 | 6 | 6 |
@@ -135,7 +135,7 @@ On the very first turn of the game, the starting player places their cattleman o
 | Black hand fee | $2 | $1 | $2 |
 | Starting capital by seat order | $6, $7 | $6, $7, $8 | $6, $7, $8, $9 |
 
-Clearing the two step-limit disc spaces raises the step limit from its starting value to 6. Clearing a step-limit space also gives $3 immediately and is worth 3 VP at final scoring.
+Clearing a step-limit space increases the step limit. The two spaces have different secondary rewards: one gives $3 immediately; the other is worth 3 VP at final scoring.
 
 ---
 
@@ -693,10 +693,11 @@ Clearing a disc space means taking the disc off it, usually by delivering to a c
 
 - The player board has 2 step-limit disc spaces.
 - Clearing a space increases the step limit by the value shown on the player count tile (or on the printed Phase A for a 2-player game).
-- For 2–3 players the values are +2 and +1, taking the step limit from 3 to 5 and then 6.
+- For 2 players the values are +1 and +1, taking the step limit from 3 to 4 and then 5.
+- For 3 players the values are +2 and +1, taking the step limit from 3 to 5 and then 6.
 - For 4 players the values are +1 and +1, taking the step limit from 4 to 5 and then 6.
-- When a disc is taken from a step-limit space, the player immediately gains $3 from the bank.
-- Each cleared step-limit space is worth 3 VP at final scoring.
+- One of the two spaces gives $3 immediately when its disc is taken.
+- The other space is worth 3 VP at final scoring.
 
 ### 13.3 Hand-limit spaces
 
@@ -811,9 +812,9 @@ The possible station master tasks are:
 
 The player gains 4 VP for each worker placed on the fifth or sixth space of any row in the worker section.
 
-### 15.10 Category 10 — Step-limit disc spaces
+### 15.10 Category 10 — Step-limit points space
 
-The player gains 3 VP for each cleared step-limit disc space marked with the 3 VP icon on the player board.
+The player gains 3 VP for clearing the step-limit disc space marked with the 3 VP icon. The other step-limit space gives $3 immediately and does not score at the end.
 
 ### 15.11 Category 11 — Job market token
 

@@ -192,7 +192,7 @@ export class PlayerState {
             return 3 + extraDollars + extraPoints;
         if (playerCount === 3)
             return 3 + extraDollars * 2 + extraPoints;
-        return 4 + extraDollars * 2 + extraPoints;
+        return 4 + extraDollars + extraPoints;
     }
     hasUnlocked(u) {
         return (this.unlocked[u] ?? 0) > 0;
@@ -562,7 +562,7 @@ export class Trail {
             const moves = [];
             for (const name of this.getReachableLocations()) {
                 const loc = this.getLocation(name);
-                if (name === "START" || loc.isEmpty() || loc.kind !== "BUILDING")
+                if (name === "START" || loc.isEmpty() || loc.kind !== "BUILDING" || loc.building.player !== null)
                     continue;
                 moves.push({ from: null, steps: [name], cost: 0, playerFees: {} });
             }
@@ -578,24 +578,24 @@ export class Trail {
         let remaining = balance;
         for (const name of steps) {
             const loc = this.getLocation(name);
-            let toOther = false;
-            let owner = null;
-            if (loc.kind === "BUILDING" && loc.building && loc.building.player !== null && loc.building.player !== player) {
-                toOther = true;
-                owner = loc.building.player;
-            }
-            if (!toOther) {
-                cost += loc.getHand(this.edition) === Hand.NONE ? 0 : handFee(loc.getHand(this.edition), playerCount);
-            }
-            else {
-                const fee = Math.min(remaining, handFee(loc.getHand(this.edition), playerCount));
-                if (owner && fee > 0)
-                    fees[owner] = (fees[owner] ?? 0) + fee;
-            }
+            const hand = loc.getHand(this.edition);
+            if (hand === Hand.NONE)
+                continue;
+            let recipient = null;
+            if (loc.kind === "BUILDING" && loc.building && loc.building.player !== null)
+                recipient = loc.building.player;
+            // Own private buildings never charge a hand fee; neutral buildings have no hand.
+            if (recipient === player)
+                continue;
+            const fee = Math.min(remaining, handFee(hand, playerCount));
+            if (fee <= 0)
+                continue;
+            if (recipient)
+                fees[recipient] = (fees[recipient] ?? 0) + fee;
+            else
+                cost += fee;
+            remaining -= fee;
         }
-        // Cap bank cost at balance minus what goes to players.
-        const totalToPlayers = Object.values(fees).reduce((a, b) => a + b, 0);
-        cost = Math.min(Math.max(0, balance - totalToPlayers), cost);
         return { from, steps, cost, playerFees: fees };
     }
     moveTo(player, steps, balance, playerCount) {
@@ -763,8 +763,8 @@ export class CattleMarket {
         return out;
     }
     buy(cards, cowboys, dollars) {
-        if (cards.length === 0)
-            throw new ROWException(ROWError.CATTLE_CARD_NOT_AVAILABLE);
+        if (cards.length === 0 || cards.length > 2)
+            throw new ROWException(ROWError.NOT_PAIR);
         const card = cards[0];
         if (cards.length > 1 && (cards[1].value !== card.value || cards[1] === card))
             throw new ROWException(ROWError.NOT_PAIR);
@@ -915,6 +915,9 @@ export class Foresights {
         return tile;
     }
     removeWorkers() {
+        // Reference-engine behaviour: worker tiles are cleared from foresight when the job
+        // market closes so final turns cannot take them. The rulebook keeps them face up but
+        // unselectable; changing that would break the replay fixtures.
         for (let col = 0; col < 3; col++)
             for (let row = 0; row < 2; row++) {
                 const t = this.spaces[col][row];
@@ -1017,27 +1020,28 @@ export class RailroadTrack {
     reachableSpaces(from, atLeast, atMost, forward) {
         const occupied = (name) => Object.values(this.players).includes(name);
         const reachable = new Map();
-        const walk = (current, remainingAtLeast, remainingAtMost, steps) => {
+        const walk = (current, remainingAtLeast, remainingAtMost, steps, turnouts) => {
             // START may always be shared; every other space must be free to stop on or pass over.
             const available = current !== from && (current === "0" || !occupied(current));
             if (available && remainingAtLeast <= 1 && remainingAtMost > 0) {
                 const cost = steps + 1;
                 const best = reachable.get(current);
-                if (best === undefined || cost < best)
-                    reachable.set(current, cost);
+                if (best === undefined || cost < best.steps)
+                    reachable.set(current, { steps: cost, turnouts });
             }
             const neighbours = (forward ? TRACK_NEXT[current] : TRACK_PREVIOUS[current]) ?? [];
+            const nextTurnouts = (name) => turnouts + (this.isTurnout(name) && (name === "0" || !occupied(name)) ? 1 : 0);
             if (!available) {
                 // Occupied (or the starting space): jump over it without spending a step.
                 for (const n of neighbours)
-                    walk(n, remainingAtLeast, remainingAtMost, steps);
+                    walk(n, remainingAtLeast, remainingAtMost, steps, nextTurnouts(n));
             }
             else if (remainingAtMost > 1) {
                 for (const n of neighbours)
-                    walk(n, Math.max(remainingAtLeast - 1, 0), remainingAtMost - 1, steps + 1);
+                    walk(n, Math.max(remainingAtLeast - 1, 0), remainingAtMost - 1, steps + 1, nextTurnouts(n));
             }
         };
-        walk(from, atLeast, atMost, 0);
+        walk(from, atLeast, atMost, 0, 0);
         return reachable;
     }
     reachableSpacesForward(from, atLeast, atMost) {
@@ -1075,11 +1079,12 @@ export class RailroadTrack {
         const reachable = this.reachableSpaces(from, atLeast, atMost, forward);
         if (!reachable.has(to))
             throw new ROWException(ROWError.SPACE_NOT_REACHABLE);
+        const info = reachable.get(to);
         this.players[player] = to;
         const immediate = this.stationUpgradeImmediate(player, to);
         if (to === "39")
             immediate.push(PossibleAction.mandatory(ActionType.MOVE_ENGINE_AT_LEAST_1_BACKWARDS_AND_GAIN_3_DOLLARS));
-        return { immediate, steps: reachable.get(to) };
+        return { immediate, steps: info.steps, turnouts: info.turnouts };
     }
     moveEngineForward(player, to, atLeast, atMost) {
         return this.moveEngine(player, to, atLeast, atMost, true).immediate;
@@ -2043,6 +2048,10 @@ export class Game {
             case ActionType.HIRE_WORKER_MINUS_2:
                 return { immediate: this.hireWorker(action.row, action.worker, -2), actions: [], canUndo: true };
             case ActionType.TAKE_OBJECTIVE_CARD: {
+                // A green-arrow delivery action runs at Kansas City and may only take from the
+                // display. The generic building action still allows the top of the stack.
+                if (!action.objectiveCard && this.atKansasCity() && this.edition === Edition.FIRST && !this.isRailsToTheNorth())
+                    throw new ROWException(ROWError.OBJECTIVE_CARD_NOT_AVAILABLE);
                 const chosen = action.objectiveCard ? this.state.objectiveCards.remove(action.objectiveCard) : this.state.objectiveCards.draw();
                 // Rules: a taken objective card goes face up onto the personal discard pile.
                 ps.gainCard(chosen);
@@ -2202,8 +2211,8 @@ export class Game {
             }
             case ActionType.EXTRAORDINARY_DELIVERY: {
                 const move = this.state.railroadTrack.moveEngine(this.currentPlayer, action.to, 1, Number.MAX_SAFE_INTEGER, false);
-                // Java's EngineMove.getStepsNotCountingTurnouts: a turnout stop is not a step.
-                ps.lastEngineMove = move.steps - (this.state.railroadTrack.isTurnout(action.to) ? 1 : 0);
+                // Occupied spaces and turnouts do not count towards the delivery distance.
+                ps.lastEngineMove = move.steps - move.turnouts;
                 return { immediate: [PossibleAction.mandatory(ActionType.DELIVER_TO_CITY), ...move.immediate], actions: [], canUndo: true };
             }
             case ActionType.UPGRADE_STATION: {
@@ -2365,6 +2374,8 @@ export class Game {
                 ps.gainDollars(4);
                 return null;
             case ActionType.DISCARD_1_OBJECTIVE_CARD_TO_GAIN_2_CERTIFICATES:
+                if (!isObjectiveCard(action.objectiveCard))
+                    throw new ROWException(ROWError.CARD_NOT_IN_HAND);
                 ps.discardCard(action.objectiveCard);
                 ps.gainTempCertificates(2);
                 return null;
@@ -2477,7 +2488,7 @@ export class Game {
             if (payFeesAndActivate)
                 this.payFees(steps);
         }
-        else if (toLoc.kind !== "BUILDING") {
+        else if (toLoc.kind !== "BUILDING" || !toLoc.building || toLoc.building.player !== null) {
             throw new ROWException(ROWError.MUST_START_ON_NEUTRAL_BUILDING);
         }
         this.state.trail.movePlayer(this.currentPlayer, to);
@@ -2601,9 +2612,9 @@ export class Game {
             if (loc.building.player !== this.currentPlayer)
                 throw new ROWException(ROWError.CANNOT_REPLACE_BUILDING_OF_OTHER_PLAYER);
             const existing = playerBuildingInfo(loc.building.name, this.edition);
-            if (existing.craftsmen >= info.craftsmen)
+            if (existing.number >= info.number)
                 throw new ROWException(ROWError.REPLACEMENT_BUILDING_MUST_BE_HIGHER);
-            craftsmenNeeded = info.craftsmen - existing.craftsmen;
+            craftsmenNeeded = Math.max(0, info.craftsmen - existing.craftsmen);
         }
         if (craftsmenNeeded > ps.getNumberOfCraftsmen())
             throw new ROWException(ROWError.NOT_ENOUGH_CRAFTSMEN);
@@ -2631,11 +2642,11 @@ export class Game {
         if (reward > 0)
             ps.gainDollars(reward);
         else if (reward < 0)
-            ps.payDollars(Math.min(ps.balance, -reward));
+            ps.payDollars(-reward);
         ps.teepees.push(loc.teepee);
         loc.teepee = null;
-        // Java TeepeeLocation.isExchangeToken: a zero-reward teepee space pays an exchange token.
-        if (reward === 0)
+        // Zero-reward space: exchange tokens only exist in the second edition / Rails to the North.
+        if (reward === 0 && (this.edition === Edition.SECOND || this.isRailsToTheNorth()))
             ps.gainExchangeTokens(1);
         return [];
     }
@@ -2724,25 +2735,6 @@ export class Game {
         const track = this.state.railroadTrack;
         const ps = this.currentPlayerState();
         const atKc = this.atKansasCity();
-        if (atKc) {
-            // Normal delivery: bank pays breeding value minus transport costs (+KC bonus).
-            const breedingValue = ps.handValue() + certificates;
-            if (breedingValue < CITY_INFO[city].value && !this.isComputer(this.currentPlayer))
-                throw new ROWException(ROWError.NOT_ENOUGH_BREEDING_VALUE);
-            const transportCosts = track.transportCosts(this.currentPlayer, city);
-            let payout = Math.max(0, breedingValue - transportCosts);
-            if (city === City.KANSAS_CITY)
-                payout += this.edition === Edition.FIRST ? 6 : 4;
-            const tempCerts = Math.max(0, certificates - ps.permanentCertificates());
-            if (tempCerts > 0)
-                ps.spendTempCertificates(tempCerts);
-            ps.gainDollars(payout);
-        }
-        else {
-            // Extraordinary delivery (building 9A): the city value must fit the engine's backward move.
-            if (CITY_INFO[city].value > ps.lastEngineMove)
-                throw new ROWException(ROWError.CITY_VALUE_MUST_BE_LESS_THEN_OR_EQUAL_TO_SPACES_THAT_ENGINE_MOVED_BACKWARDS);
-        }
         // Java's RailroadTrack.deliverToCity: on the active strip (or behind a branchlet) and not
         // delivered to yet, unless the city allows repeat deliveries.
         if (!track.canDeliver(this.currentPlayer, city)) {
@@ -2750,14 +2742,37 @@ export class Game {
                 throw new ROWException(ROWError.CITY_NOT_ACCESSIBLE);
             throw new ROWException(ROWError.ALREADY_DELIVERED_TO_CITY);
         }
+        let upgradeSimmentals = false;
+        if (atKc) {
+            // Income subphase first: permanent certificates always count, and temporary
+            // certificates are the part of the displayed total above them.
+            const permanent = ps.permanentCertificates();
+            const totalCertificates = Math.max(certificates, permanent);
+            const breedingValue = ps.handValue() + totalCertificates;
+            if (breedingValue < CITY_INFO[city].value && !this.isComputer(this.currentPlayer))
+                throw new ROWException(ROWError.NOT_ENOUGH_BREEDING_VALUE);
+            const tempCerts = totalCertificates - permanent;
+            if (tempCerts > 0)
+                ps.spendTempCertificates(tempCerts);
+            ps.gainDollars(breedingValue);
+            upgradeSimmentals = this.edition === Edition.SECOND && ps.simmentalsToUpgrade() > 0;
+            if (!upgradeSimmentals)
+                ps.discardHand();
+            // Delivery subphase: transport costs are paid separately from the income.
+            ps.payDollars(track.transportCosts(this.currentPlayer, city));
+            if (city === City.KANSAS_CITY)
+                ps.gainDollars(this.edition === Edition.FIRST ? 6 : 4);
+        }
+        else {
+            // Extraordinary delivery (building 9A): the city value must fit the engine's backward move.
+            if (CITY_INFO[city].value > ps.lastEngineMove)
+                throw new ROWException(ROWError.CITY_VALUE_MUST_BE_LESS_THEN_OR_EQUAL_TO_SPACES_THAT_ENGINE_MOVED_BACKWARDS);
+        }
         (track.cities[city] ?? (track.cities[city] = [])).push(this.currentPlayer);
         const immediate = this.removeDisc(CITY_INFO[city].discColors).concat(this.deliveryActions(city));
-        if (atKc) {
+        if (atKc && upgradeSimmentals) {
             // Java: upgrade the simmentals in hand instead of discarding it, while any are left.
-            const simmentals = ps.simmentalsToUpgrade();
-            if (simmentals > 0)
-                return immediate.concat([PossibleAction.repeat(0, simmentals, ActionType.UPGRADE_SIMMENTAL)]);
-            ps.discardHand();
+            return immediate.concat([PossibleAction.repeat(0, ps.simmentalsToUpgrade(), ActionType.UPGRADE_SIMMENTAL)]);
         }
         return immediate;
     }
@@ -2842,31 +2857,35 @@ export class Game {
             }
             return out;
         }
+        const baseObjectivePartners = [];
         switch (city) {
             case City.TOPEKA:
-                takeObjectiveCard(City.WICHITA);
+                baseObjectivePartners.push(City.WICHITA);
                 break;
             case City.WICHITA:
-                takeObjectiveCard(City.TOPEKA);
+                baseObjectivePartners.push(City.TOPEKA);
                 break;
             case City.COLORADO_SPRINGS:
             case City.ALBUQUERQUE:
-                takeObjectiveCard(City.SANTA_FE);
+                baseObjectivePartners.push(City.SANTA_FE);
                 break;
             case City.SANTA_FE:
-                takeObjectiveCard(City.COLORADO_SPRINGS);
-                takeObjectiveCard(City.ALBUQUERQUE, true);
+                baseObjectivePartners.push(City.COLORADO_SPRINGS, City.ALBUQUERQUE);
                 break;
         }
+        // A green-arrow action takes from the objective display. The display is refilled
+        // between the two Santa Fe actions, so one display card plus one stack card is
+        // enough for both; an empty display blocks the action even if the stack has cards.
+        const triggers = baseObjectivePartners.filter((partner) => delivered(partner)).length;
+        const actions = objectives.available.length > 0
+            ? Math.min(triggers, objectives.available.length + objectives.drawStack.length)
+            : 0;
+        for (let i = 0; i < actions; i++)
+            out.push(PossibleAction.mandatory(ActionType.TAKE_OBJECTIVE_CARD));
         return out;
     }
     permanentCertificates(ps) {
-        let perm = 0;
-        if (ps.stationMasters.includes("PERM_CERT_POINTS_FOR_EACH_2_CERTS"))
-            perm += 1;
-        if (ps.stationMasters.includes("TWO_PERM_CERTS"))
-            perm += 2;
-        return perm;
+        return ps.permanentCertificates();
     }
     unlockedSingleAuxiliaryActions(ps) {
         const actions = [PossibleAction.optionalAction(ActionType.GAIN_1_DOLLAR), PossibleAction.optionalAction(ActionType.DRAW_CARD)];
@@ -3125,14 +3144,21 @@ export class Game {
             result += this.state.railroadTrack.numberOfAreas(ps.player) * 2;
         return result;
     }
+    /** Players grouped by final score, best group first; ties share a group and seat order. */
+    rankingGroups() {
+        const groups = [];
+        for (const p of this.state.players) {
+            const score = this.getScore(p.name);
+            const group = groups.find((g) => g.score === score);
+            if (group)
+                group.players.push(p.name);
+            else
+                groups.push({ score, players: [p.name] });
+        }
+        groups.sort((a, b) => b.score - a.score);
+        return groups.map((g) => g.players);
+    }
     ranking() {
-        return [...this.state.players]
-            .map((p) => p.name)
-            .sort((a, b) => {
-            const diff = this.getScore(b) - this.getScore(a);
-            if (diff !== 0)
-                return diff;
-            return this.playerState(b).balance - this.playerState(a).balance;
-        });
+        return this.rankingGroups().flat();
     }
 }

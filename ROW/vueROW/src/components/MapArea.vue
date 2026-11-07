@@ -238,7 +238,10 @@ const routeSteps = computed(() => {
 /** What walking onto `name` costs this turn: its hand fee, capped at the balance the way buildMove caps it. */
 function stepCost(name) {
 	const game = g()
-	return Math.min(game.currentPlayerState().balance, handFee(game.getTrail().getLocation(name).getHand(game.edition), game.state.players.length))
+	const loc = game.getTrail().getLocation(name)
+	// Own private buildings never charge a hand fee; neutral buildings have no hand.
+	if (loc.kind === "BUILDING" && loc.building && (loc.building.player === null || loc.building.player === game.currentPlayer)) return 0
+	return Math.min(game.currentPlayerState().balance, handFee(loc.getHand(game.edition), game.state.players.length))
 }
 
 /** Top edge of the spot the planned walk has reached: where the Stay Here popup hangs. */
@@ -268,7 +271,7 @@ function choose(c) {
 function deliveryPayout(city, total) {
 	const ps = g().currentPlayerState()
 	const transport = g().getRailroadTrack().transportCosts(g().currentPlayer, city)
-	let payout = Math.max(0, ps.handValue() + total - transport)
+	let payout = ps.handValue() + total - transport
 	if (city === "KANSAS_CITY") payout += g().edition === "FIRST" ? 6 : 4
 	return payout
 }
