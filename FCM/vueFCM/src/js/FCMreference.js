@@ -831,6 +831,9 @@ export const HOUSE_SQS = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
 export const BOARD_HOUSES = [2, 4, 5, 7, 8, 10, 12, 13, 15, 16, 18, 21, 22] // NB 25 isn't considered a "board" house because it comes with a garden built in
 // New Map mod - board houses printed on tiles 29-43; encoded on board as NEW_MAP_HOUSES[n] + HOUSE
 export const NEW_MAP_HOUSES = [20, 23, 24, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+// Houses printed on tile art that get a stock-house overlay. The New Map houses
+// are always included: a custom map can use those tiles without SO_NEW_MAP.
+export const PASTED_HOUSES = [...BOARD_HOUSES, ...NEW_MAP_HOUSES]
 // True when `number` is a house pre-printed on a board tile. The New Map mod adds
 // NEW_MAP_HOUSES to the board-house set when enabled.
 export function isBoardHouse(number, startingOptions) {

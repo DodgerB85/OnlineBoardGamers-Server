@@ -102,8 +102,7 @@ describe("New Map mod — option parsing", () => {
 	it("isBoardHouse treats new houses as board houses only when the mod is on", () => {
 		expect(rf.isBoardHouse(20, { newMap: false })).toBe(false)
 		expect(rf.isBoardHouse(20, { newMap: true })).toBe(true)
-		expect(rf.isBoardHouse(37, { newMap: true })).toBe(true)
-		expect(rf.isBoardHouse(36, { newMap: true })).toBe(true)
+		for (const n of rf.NEW_MAP_HOUSES) expect(rf.isBoardHouse(n, { newMap: true })).toBe(true)
 		// Without options the new houses are not board houses
 		expect(rf.isBoardHouse(26, undefined)).toBe(false)
 		// Original board houses are always board houses
@@ -112,6 +111,13 @@ describe("New Map mod — option parsing", () => {
 		// Buildable and unknown numbers never are
 		expect(rf.isBoardHouse(1, { newMap: true })).toBe(false)
 		expect(rf.isBoardHouse(99, { newMap: true })).toBe(false)
+	})
+
+	it("always pastes the stock house over New Map house art, even without the option", () => {
+		for (const n of rf.NEW_MAP_HOUSES) expect(rf.PASTED_HOUSES).toContain(n)
+		for (const n of rf.BOARD_HOUSES) expect(rf.PASTED_HOUSES).toContain(n)
+		// House 25's art includes its built-in garden, so it is not overlaid
+		expect(rf.PASTED_HOUSES).not.toContain(25)
 	})
 
 	it("parses 51 as mix mode and 52 as priority mode (which implies 51)", () => {

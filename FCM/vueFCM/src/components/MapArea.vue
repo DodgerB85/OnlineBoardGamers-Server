@@ -508,7 +508,7 @@ const naturalHouseDisplays = computed(() => {
 	const fontSize = (store.refSize / 200) * 1.25
 
 	for (const houseNumber of map.findAllHouses()) {
-		if (!rf.BOARD_HOUSES.includes(houseNumber)) continue
+		if (!rf.PASTED_HOUSES.includes(houseNumber)) continue
 		const idx = map.findIndexForHouse(houseNumber)
 		if (idx < 0) continue
 
