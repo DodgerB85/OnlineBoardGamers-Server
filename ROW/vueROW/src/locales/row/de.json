@@ -647,7 +647,7 @@
       "moveHere": "Hierhin ziehen ({cost}$)",
       "moveHereWithFees": "Hierhin ziehen ({cost}$; {fees})",
       "playerFee": "{fee}$ an {player}",
-      "deliveryOption": "Zertifikate: {certificates} → ${payout}",
+      "deliveryOption": "Zertifikate: {certificates}  Einkommen: ${income}  Transport: -${transport}",
       "stayHere": "Hier bleiben"
     },
     "playerTable": {

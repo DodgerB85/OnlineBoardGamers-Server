@@ -122,8 +122,8 @@ On the very first turn of the game, the starting player places their cattleman o
 | :--- | :--- | :--- | :--- |
 | Player count tile | Not used | 3-player side | 4-player side |
 | Starting step limit | 3 | 3 | 4 |
-| Step-limit disc spaces | +1, +1 | +2, +1 | +1, +1 |
-| Maximum step limit | 5 | 6 | 6 |
+| Step-limit disc spaces | +1, +1 | +2, +1 | +2, +1 |
+| Maximum step limit | 5 | 6 | 7 |
 | Starting hand | 4 | 4 | 4 |
 | Starting hand limit | 4 | 4 | 4 |
 | Maximum hand limit | 6 | 6 | 6 |
@@ -315,6 +315,7 @@ Same as subphase 1, using the 2 tiles below spot 3.
 5. Resolve any delivery actions triggered by the placement:
    - A **green arrow** between two city crests is activated only when both adjacent crests have one of the player's discs. The action then must be performed immediately: choose one objective card from the general objective display, place it face up on the personal discard pile, and refill the display if necessary.
    - If placing the disc completes both adjacent green arrows, perform the action twice. Refill the general objective display before the second action.
+   - **Edition ambiguity:** the first-edition rulebook and this engine require the card to come from the general objective display. The second-edition / Rails to the North reference replay also allows drawing the top card of the objective stack; verify the correct wording if that edition is played.
    - Victory points printed in a green arrow are unlocked only when both adjacent crests have one of the player's discs.
    - Placing a disc on the **Kansas City** crest immediately gives $6 from the bank. At final scoring, that disc is worth −6 VP.
    - Other printed victory points and negative victory points on city crests are scored at the end of the game.
@@ -435,7 +436,7 @@ Rules:
 - The side of each building tile is fixed for the whole game. A tile may never be flipped to its other side.
 - For a new placement, the player must have at least as many craftsmen in the craftsman row as the number printed in the tile's upper-left corner.
 - Pay $2 per craftsman required by the tile to the bank, then place the tile.
-- For a replacement, the new tile must have a higher value than the tile being replaced. The player only needs the craftsman **difference** between the two tiles, and only pays $2 per point of that difference.
+- For a replacement, the new tile must have a higher value than the tile being replaced, where value means the number of craftsmen required to build it. The player only needs the craftsman **difference** between the two tiles, and only pays $2 per point of that difference.
 - The replaced tile is removed from the game and returned to the box.
 - A player may only replace their **own** private building tile, not an opponent's.
 - The placement action is available on neutral building tile B and through the immediate actions of the craftsman row. The craftsman-row version pays only $1 per craftsman instead of $2.
@@ -506,8 +507,9 @@ The available options are:
 | 3 | 1 West Highland cattle card | $6 |
 | 5 | 2 West Highland cattle cards | $8 total |
 | 2 | 1 Texas Longhorn cattle card | $12 |
-| 4 | 1 Texas Longhorn cattle card | $6 |
+| 4 | 1 Texas Longhorn cattle card | $5 |
 
+- The table lists the distinct purchase options. Cowboys may be split across several purchases in the same action; for example, buying two BV3 cards with one cowboy each is simply the 1-cowboy option used twice, not a separate option.
 - Cowboys may be split among several options, as long as no cowboy is used more than once.
 - Only cattle cards currently available in the cattle market may be bought.
 - The player may always buy fewer cattle cards than allowed.
@@ -695,7 +697,7 @@ Clearing a disc space means taking the disc off it, usually by delivering to a c
 - Clearing a space increases the step limit by the value shown on the player count tile (or on the printed Phase A for a 2-player game).
 - For 2 players the values are +1 and +1, taking the step limit from 3 to 4 and then 5.
 - For 3 players the values are +2 and +1, taking the step limit from 3 to 5 and then 6.
-- For 4 players the values are +1 and +1, taking the step limit from 4 to 5 and then 6.
+- For 4 players the values are +2 and +1, taking the step limit from 4 to 6 and then 7.
 - One of the two spaces gives $3 immediately when its disc is taken.
 - The other space is worth 3 VP at final scoring.
 

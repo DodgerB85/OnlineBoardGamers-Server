@@ -237,6 +237,11 @@ export function initialWorkerCount(playerCount) {
 /** JobMarket.getInitialWorkerCount: tiles drawn from supply pile 1 at setup. */
 export const jobMarketInitialWorkerCount = initialWorkerCount;
 /** CattleMarket.COSTS keyed by breeding value. */
+/**
+ * The distinct cattle-market purchase options. Cowboys may be split across several
+ * purchases in the same Buy Cattle action; those split combinations are not listed
+ * here separately (the engine repeats BUY_CATTLE for them).
+ */
 export const CATTLE_COSTS = {
     1: [],
     2: [
@@ -247,23 +252,15 @@ export const CATTLE_COSTS = {
         { dollars: 6, cowboys: 1, pair: false },
         { dollars: 3, cowboys: 2, pair: false },
         { dollars: 5, cowboys: 3, pair: true },
-        { dollars: 12, cowboys: 2, pair: true },
-        { dollars: 9, cowboys: 3, pair: true },
-        { dollars: 6, cowboys: 4, pair: true },
     ],
     4: [
         { dollars: 12, cowboys: 1, pair: false },
         { dollars: 6, cowboys: 3, pair: false },
         { dollars: 8, cowboys: 5, pair: true },
-        { dollars: 12, cowboys: 6, pair: true },
-        { dollars: 24, cowboys: 2, pair: true },
-        { dollars: 18, cowboys: 4, pair: true },
     ],
     5: [
         { dollars: 12, cowboys: 2, pair: false },
-        { dollars: 6, cowboys: 4, pair: false },
-        { dollars: 18, cowboys: 6, pair: true },
-        { dollars: 24, cowboys: 4, pair: true },
+        { dollars: 5, cowboys: 4, pair: false },
     ],
 };
 export function createCattleSet(playerCount, simmental) {

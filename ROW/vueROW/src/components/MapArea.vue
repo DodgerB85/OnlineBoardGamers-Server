@@ -268,12 +268,15 @@ function choose(c) {
 
 // ---------- other click targets ----------
 /** Cash the bank pays for delivering to `city` when using `total` certificates (temp + perm). */
-function deliveryPayout(city, total) {
+/** Breeding-value income the bank pays before the delivery's separate transport cost. */
+function deliveryIncome(city, total) {
 	const ps = g().currentPlayerState()
-	const transport = g().getRailroadTrack().transportCosts(g().currentPlayer, city)
-	let payout = ps.handValue() + total - transport
-	if (city === "KANSAS_CITY") payout += g().edition === "FIRST" ? 6 : 4
-	return payout
+	let income = ps.handValue() + total
+	if (city === "KANSAS_CITY") income += g().edition === "FIRST" ? 6 : 4
+	return income
+}
+function deliveryTransport(city) {
+	return g().getRailroadTrack().transportCosts(g().currentPlayer, city)
 }
 
 function clickCity(idx, city) {
@@ -290,7 +293,7 @@ function clickCity(idx, city) {
 		.filter((cert) => cert >= minTotal)
 		.sort((a, b) => a - b)
 	const cands = totals.map((total) => ({
-		label: t("row.map.deliveryOption", { certificates: total, payout: deliveryPayout(name, total) }),
+		label: t("row.map.deliveryOption", { certificates: total, income: deliveryIncome(name, total), transport: deliveryTransport(name) }),
 		run: () => controller.perform({ type: ActionType.DELIVER_TO_CITY, city: pd.city, certificates: total }),
 	}))
 	if (cands.length === 0) {

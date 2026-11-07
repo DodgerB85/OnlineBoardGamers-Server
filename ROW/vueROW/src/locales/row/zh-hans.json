@@ -647,7 +647,7 @@
       "moveHere": "移动到这里（{cost}$）",
       "moveHereWithFees": "移动到这里（{cost}$；{fees}）",
       "playerFee": "{fee}$ 给 {player}",
-      "deliveryOption": "证书：{certificates} → ${payout}",
+      "deliveryOption": "证书：{certificates}  收入：${income}  运输：-${transport}",
       "stayHere": "留在这里"
     },
     "playerTable": {

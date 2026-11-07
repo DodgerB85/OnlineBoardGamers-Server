@@ -10,9 +10,11 @@ import {
 	OBJECTIVE_CARD_TYPES,
 	PossibleAction,
 	Teepee,
+	Task,
 	Unlockable,
 	Worker,
 	defaultOptions,
+	CATTLE_COSTS,
 } from "./ROWindex";
 
 function players(n) {
@@ -41,14 +43,14 @@ function clearPlayerScore(ps) {
 }
 
 describe("Rulebook audit: step limit", () => {
-	it("uses the player-count tile's +1/+1 for four players", () => {
+	it("uses the physical player-count tile values", () => {
 		const game = freshGame(4);
 		const ps = game.currentPlayerState();
 		expect(game.getStepLimit()).toBe(4);
 		ps.unlocked[Unlockable.EXTRA_STEP_DOLLARS] = 1;
-		expect(game.getStepLimit()).toBe(5);
-		ps.unlocked[Unlockable.EXTRA_STEP_POINTS] = 1;
 		expect(game.getStepLimit()).toBe(6);
+		ps.unlocked[Unlockable.EXTRA_STEP_POINTS] = 1;
+		expect(game.getStepLimit()).toBe(7);
 	});
 
 	it("keeps the 2p/3p step tracks", () => {
@@ -204,25 +206,25 @@ describe("Rulebook audit: shared victory", () => {
 });
 
 describe("Rulebook audit: private building replacement", () => {
-	it("allows a higher-numbered tile with the same craftsman requirement", () => {
+	it("allows a tile that requires more craftsmen", () => {
 		const game = freshGame();
 		const player = game.currentPlayer;
 		const trail = game.getTrail();
 		const loc = [...trail.locations.values()].find((l) => l.kind === "BUILDING" && !l.building);
 		loc.building = { name: "2a", player };
 		game.state.actionStack = ActionStack.initial([PossibleAction.mandatory(ActionType.PLACE_BUILDING)]);
-		expect(() => game.perform(player, { type: ActionType.PLACE_BUILDING, location: loc.name, building: "3a" }, new JavaRandom(7))).not.toThrow();
-		expect(loc.building.name).toBe("3a");
+		expect(() => game.perform(player, { type: ActionType.PLACE_BUILDING, location: loc.name, building: "4a" }, new JavaRandom(7))).not.toThrow();
+		expect(loc.building.name).toBe("4a");
 	});
 
-	it("rejects a lower-numbered replacement", () => {
+	it("rejects an equal or lower craftsman requirement", () => {
 		const game = freshGame();
 		const player = game.currentPlayer;
 		const trail = game.getTrail();
 		const loc = [...trail.locations.values()].find((l) => l.kind === "BUILDING" && !l.building);
-		loc.building = { name: "3a", player };
+		loc.building = { name: "2a", player };
 		game.state.actionStack = ActionStack.initial([PossibleAction.mandatory(ActionType.PLACE_BUILDING)]);
-		expect(() => game.perform(player, { type: ActionType.PLACE_BUILDING, location: loc.name, building: "2a" }, new JavaRandom(8))).toThrow(/REPLACEMENT_BUILDING_MUST_BE_HIGHER/);
+		expect(() => game.perform(player, { type: ActionType.PLACE_BUILDING, location: loc.name, building: "3a" }, new JavaRandom(8))).toThrow(/REPLACEMENT_BUILDING_MUST_BE_HIGHER/);
 	});
 });
 
@@ -267,6 +269,57 @@ describe("Rulebook audit: trade with the Indians", () => {
 });
 
 describe("Rulebook audit: cattle buying", () => {
+	it("uses only the distinct base options, including 4 cowboys / Longhorn for $5", () => {
+		expect(CATTLE_COSTS[3].map((c) => [c.cowboys, c.dollars, c.pair])).toEqual([
+			[1, 6, false],
+			[2, 3, false],
+			[3, 5, true],
+		]);
+		expect(CATTLE_COSTS[4].map((c) => [c.cowboys, c.dollars, c.pair])).toEqual([
+			[1, 12, false],
+			[3, 6, false],
+			[5, 8, true],
+		]);
+		expect(CATTLE_COSTS[5].map((c) => [c.cowboys, c.dollars, c.pair])).toEqual([
+			[2, 12, false],
+			[4, 5, false],
+		]);
+	});
+
+	it("does not expose split-out combinations as separate options", () => {
+		const game = freshGame();
+		const market = game.getCattleMarket();
+		market.market = [
+			{ type: CattleType.HOLSTEIN, points: 1, value: 3 },
+			{ type: CattleType.BROWN_SWISS, points: 2, value: 3 },
+			{ type: CattleType.WEST_HIGHLAND, points: 3, value: 4 },
+			{ type: CattleType.WEST_HIGHLAND, points: 4, value: 4 },
+			{ type: CattleType.TEXAS_LONGHORN, points: 5, value: 5 },
+		];
+		const options = market.possibleBuys(5, 50);
+		expect(options).toContainEqual({ breedingValue: 5, pair: false, dollars: 5, cowboys: 4 });
+		expect(options.some((o) => o.breedingValue === 3 && o.dollars === 12 && o.pair)).toBe(false);
+		expect(options.some((o) => o.breedingValue === 4 && o.dollars === 12 && o.pair)).toBe(false);
+	});
+
+	it("allows splitting cowboys across two purchases in the same action", () => {
+		const game = freshGame();
+		const player = game.currentPlayer;
+		const ps = game.currentPlayerState();
+		ps.workers[Worker.COWBOY] = 4;
+		ps.balance = 20;
+		const market = game.getCattleMarket();
+		const a = { type: CattleType.HOLSTEIN, points: 1, value: 3 };
+		const b = { type: CattleType.BROWN_SWISS, points: 2, value: 3 };
+		market.market = [a, b];
+		game.state.actionStack = ActionStack.initial([PossibleAction.repeat(0, 4, ActionType.BUY_CATTLE)]);
+		game.perform(player, { type: ActionType.BUY_CATTLE, cattleCards: [a], cowboys: 2, dollars: 3 }, new JavaRandom(41));
+		game.perform(player, { type: ActionType.BUY_CATTLE, cattleCards: [b], cowboys: 2, dollars: 3 }, new JavaRandom(42));
+		expect(market.market).toHaveLength(0);
+		expect(ps.balance).toBe(14);
+		expect(ps.numberOfCowboysUsedInTurnTotal()).toBe(4);
+	});
+
 	it("rejects more than two cards for a pair price", () => {
 		const game = freshGame();
 		const market = game.getCattleMarket();
@@ -288,6 +341,29 @@ describe("Rulebook audit: cattle buying", () => {
 		const cost = market.buy([a, b], 3, 5);
 		expect(cost.pair).toBe(true);
 		expect(market.market).toHaveLength(0);
+	});
+});
+
+describe("Rulebook audit: objective scoring", () => {
+	it("maximises the total when one task must be assigned to one of two committed cards", () => {
+		const game = freshGame();
+		const counts = {
+			buildings: 1,
+			greenTeepees: 0,
+			blueTeepees: 0,
+			hazards: 0,
+			stations: 0,
+			breedingValue3: 0,
+			breedingValue4: 0,
+			breedingValue5: 0,
+			sanFrancisco: 0,
+		};
+		const cards = [
+			{ def: { tasks: [Task.BUILDING], points: 1, penalty: 5 }, committed: true },
+			{ def: { tasks: [Task.BUILDING], points: 10, penalty: 1 }, committed: true },
+		];
+		const results = game.scoreObjectiveCards(cards, 0, counts, 0, 0);
+		expect(Math.max(...results.map((r) => r.total))).toBe(5); // +10 − 5: give the building to the better card
 	});
 });
 

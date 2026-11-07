@@ -192,7 +192,7 @@ export class PlayerState {
             return 3 + extraDollars + extraPoints;
         if (playerCount === 3)
             return 3 + extraDollars * 2 + extraPoints;
-        return 4 + extraDollars + extraPoints;
+        return 4 + extraDollars * 2 + extraPoints;
     }
     hasUnlocked(u) {
         return (this.unlocked[u] ?? 0) > 0;
@@ -2612,9 +2612,9 @@ export class Game {
             if (loc.building.player !== this.currentPlayer)
                 throw new ROWException(ROWError.CANNOT_REPLACE_BUILDING_OF_OTHER_PLAYER);
             const existing = playerBuildingInfo(loc.building.name, this.edition);
-            if (existing.number >= info.number)
+            if (existing.craftsmen >= info.craftsmen)
                 throw new ROWException(ROWError.REPLACEMENT_BUILDING_MUST_BE_HIGHER);
-            craftsmenNeeded = Math.max(0, info.craftsmen - existing.craftsmen);
+            craftsmenNeeded = info.craftsmen - existing.craftsmen;
         }
         if (craftsmenNeeded > ps.getNumberOfCraftsmen())
             throw new ROWException(ROWError.NOT_ENOUGH_CRAFTSMEN);

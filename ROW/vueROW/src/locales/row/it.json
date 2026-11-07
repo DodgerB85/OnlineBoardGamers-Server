@@ -649,7 +649,7 @@
       "moveHere": "Muovi qui ({cost}$)",
       "moveHereWithFees": "Muovi qui ({cost}$; {fees})",
       "playerFee": "{fee}$ a {player}",
-      "deliveryOption": "Certificati: {certificates} → ${payout}",
+      "deliveryOption": "Certificati: {certificates}  Reddito: ${income}  Trasporto: -${transport}",
       "stayHere": "Resta qui"
     },
     "playerTable": {
