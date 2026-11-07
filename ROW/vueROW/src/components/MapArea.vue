@@ -663,9 +663,10 @@ const hoveredBuilding = computed(() => {
 		// Pieces standing on the tile ride along with the zoom, so the cattleman
 		// does not vanish behind the enlarged building.
 		ranchers: ranchers.value.filter((rn) => rn.loc === name),
-		// The zoomed tile covers the board's own border, so it draws its own.
-		// Light green while it is a movement option the mouse is over, black otherwise.
-		move: moveTargets.value.has(name),
+		// The zoomed tile covers the board's own border, so it redraws it:
+		// light green while the spot would be lit under the mouse (a clickable
+		// target or part of the shown route), black otherwise.
+		active: moveRoute.value.has(name) || candidatesFor(name).length > 0 || !!inter,
 		mode: inter ? inter.mode : null,
 		regions,
 		transform: `translate(${r.x + r.w / 2},${r.y + r.h / 2}) scale(2) translate(${-(r.x + r.w / 2)},${-(r.y + r.h / 2)})`,
@@ -911,7 +912,7 @@ function leaveTarget(t) {
 							<circle v-for="r in hoveredBuilding.ranchers" :key="'rn' + r.player" :class="'rancher ' + r.color" :cx="r.x" :cy="r.y" r="7" />
 							<rect
 								class="buildingOutline"
-								:class="{ move: hoveredBuilding.move }"
+								:class="{ active: hoveredBuilding.active }"
 								:x="hoveredBuilding.rect.x"
 								:y="hoveredBuilding.rect.y"
 								:width="hoveredBuilding.rect.w"
@@ -1059,7 +1060,7 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 }
 /* Border of the 2x tile, drawn over its artwork so it is not lost behind it. */
 .buildingOutline { fill: none; stroke: black; stroke-width: 6; pointer-events: none; }
-.buildingOutline.move { stroke: #90ee90; }
+.buildingOutline.active { stroke: #90ee90; }
 .hotspot {
 	fill: rgb(255, 255, 0, 0.32);
 	stroke: #ffd400;

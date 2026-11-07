@@ -17,3 +17,28 @@ test("Currency text escapes markup and leaves words containing SPL untouched", a
 	assert.match(html, /&lt;b&gt;SPLENDOR&lt;\/b&gt;/)
 	assert.equal((html.match(/alt="SPL"/g) || []).length, 1)
 })
+
+test("Land icons sit immediately before their hex labels", async () => {
+	const html = await renderToString(createSSRApp(CurrencyText, {
+		text: "Bought H7 · Sold A1, F8 before buying",
+		landIcons: {
+			H7: { src: "/savannah.png", alt: "Savannah" },
+			A1: { src: "/desert.png", alt: "Desert" },
+			F8: { src: "/forest.png", alt: "Forest" },
+		},
+	}))
+	assert.match(html, /Bought <img[^>]*src="\/savannah.png"[^>]*>H7/)
+	assert.match(html, /Sold <img[^>]*src="\/desert.png"[^>]*>A1, <img[^>]*src="\/forest.png"[^>]*>F8/)
+})
+
+test("A longer land label wins over one that prefixes it", async () => {
+	const html = await renderToString(createSSRApp(CurrencyText, {
+		text: "Bought A10",
+		landIcons: {
+			A1: { src: "/one.png", alt: "One" },
+			A10: { src: "/ten.png", alt: "Ten" },
+		},
+	}))
+	assert.match(html, /Bought <img[^>]*src="\/ten.png"[^>]*>A10/)
+	assert.doesNotMatch(html, /<img[^>]*src="\/one.png"/)
+})

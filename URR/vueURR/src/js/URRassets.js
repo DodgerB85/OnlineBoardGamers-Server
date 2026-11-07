@@ -1,5 +1,5 @@
 /** Stable names for artwork promoted from tempAssets into static/URR/images. */
-import { PLAYER_COLOUR_FILES } from "./URRreference"
+import { PLAYER_COLOUR_FILES } from "./URRreference.js"
 const STATIC_IMAGES = "/static/URR/images/"
 const TERRAIN_FILES = ["terrain-hills.png", "terrain-forest.png", "terrain-savannah.png", "terrain-desert.png"]
 const CITY_FILES = ["city-hills.png", "city-forest.png", "city-savannah.png", "city-desert.png"]

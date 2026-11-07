@@ -10,13 +10,35 @@ export const CurrencyIcon = {
 	},
 }
 
+function escapeRegExp(value) {
+	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+const LAND_ICON_STYLE = { width: "1.1em", height: "1.1em", display: "inline-block", verticalAlign: "-0.2em", objectFit: "contain", flexShrink: 0, margin: "0 2px 0 0" }
+
 export default {
-	props: { text: { type: String, default: "" } },
+	props: { text: { type: String, default: "" }, landIcons: { type: Object, default: () => ({}) } },
 	setup(props) {
-		return () => h(Fragment, props.text.split(/(\S+[ \t]+SPL\b|\bSPL\b)/g).map((part) =>
-			/\bSPL$/.test(part)
-				? h("span", { style: { whiteSpace: "nowrap" } }, [part.slice(0, -3), h(CurrencyIcon)])
-				: part
-		))
+		return () => {
+			const labels = Object.keys(props.landIcons).sort((a, b) => b.length - a.length)
+			const landPattern = labels.length ? new RegExp(`(${labels.map(escapeRegExp).join("|")})`, "g") : null
+			const children = []
+			for (const part of props.text.split(/(\S+[ \t]+SPL\b|\bSPL\b)/g)) {
+				if (/\bSPL$/.test(part)) {
+					children.push(h("span", { style: { whiteSpace: "nowrap" } }, [part.slice(0, -3), h(CurrencyIcon)]))
+					continue
+				}
+				if (!landPattern) {
+					children.push(part)
+					continue
+				}
+				for (const piece of part.split(landPattern)) {
+					const icon = props.landIcons[piece]
+					if (icon) children.push(h("img", { src: icon.src, alt: icon.alt, title: icon.alt, style: LAND_ICON_STYLE }))
+					if (piece) children.push(piece)
+				}
+			}
+			return h(Fragment, children)
+		}
 	},
 }

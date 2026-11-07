@@ -18,5 +18,5 @@ function textColour(index) { return personal.getCorrectedTextColourHex(store.pla
 <style scoped>
 .leadershipChange { display: flex; align-items: center; gap: 7px; margin: 6px 0; padding: 5px 7px; border-left: 3px solid #177daf; background: #edf6fd; text-align: left; font-size: 16px; font-weight: 400; line-height: 1.4; }.leadershipChange > span { min-width: 0; overflow-wrap: anywhere; }.leadershipChange img { width: 25px; height: 25px; flex-shrink: 0; }.leadershipChange small { display: block; margin-top: 2px; font-size: 16px; font-weight: 400; color: #655a42; }
 .emergedOwner { display: flex; align-items: center; gap: 5px; margin-left: auto; }
-.leaderName { display: inline-block; flex-shrink: 0; white-space: nowrap; color: white; border: 1px solid black; padding: 0 5px; font-size: 0.9em; line-height: 1.4; }
+.leaderName { display: inline-block; flex-shrink: 0; white-space: nowrap; margin-right: 2px; color: white; border: 1px solid black; padding: 0 5px; font-size: 0.9em; line-height: 1.4; }
 </style>
