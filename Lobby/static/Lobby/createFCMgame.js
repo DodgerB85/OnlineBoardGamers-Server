@@ -390,18 +390,9 @@ function validateOptions(change) {
 			removeOption("includeChineseExpansion")
 			removeOption("includeFanExpansion")
 		}
-	} else if (change === "random_originalMS") {
-		let newOption1 = new Option("15", "15")
-		let newOption2 = new Option("15", "15")
-		let selectBox = document.getElementById("minModules")
-		selectBox.add(newOption1, undefined)
-		selectBox = document.getElementById("maxModules")
-		selectBox.add(newOption2, undefined)
 	} else if (change === "random_newMS") {
 		if (document.getElementById("maxModules").value === "15") document.getElementById("maxModules").value = "14"
 		if (document.getElementById("minModules").value === "15") document.getElementById("minModules").value = "14"
-		document.getElementById("minModules").remove(14)
-		document.getElementById("maxModules").remove(14)
 	} else if (change === "minModules") {
 		var minModules = parseInt(document.getElementById("minModules").value)
 		if (parseInt(document.getElementById("maxModules").value) < minModules) {
@@ -527,14 +518,16 @@ function syncRandomExcludeUI() {
 	var randomBox = document.getElementById("randomModules")
 	var excludeBox = document.getElementById("excludeModules")
 	var randomOn = randomBox && randomBox.checked && !randomBox.disabled
+	if (excludeBox) excludeBox.disabled = !randomOn
 	var excludeOn = excludeBox && excludeBox.checked && !excludeBox.disabled
 
-	// Enable/disable the per-module checkboxes with the master switch
+	// Enable/disable the per-module checkboxes with the master switch and drop
+	// ticks while the master is off so they are never submitted by accident
 	document.querySelectorAll("input.excludeMod").forEach(function (cb) {
-		cb.disabled = !randomOn
+		cb.disabled = !randomOn || !excludeOn
+		if (!excludeOn) cb.checked = false
 	})
 	panel.style.display = randomOn && excludeOn ? "block" : "none"
-	if (excludeBox) excludeBox.disabled = !randomOn
 
 	// Per-pool groups: only show what is actually in the pool, drop dead ticks
 	var chineseOn = document.getElementById("includeChineseExpansion").checked

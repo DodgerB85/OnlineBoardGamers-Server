@@ -73,12 +73,15 @@ def buildFCMstartingOptions(post_data):
                 # Marker only — actual fan mods are rolled in startGame
                 optionsArr.append(rfFCM.SO_RANDOM_MODULES_FAN)
             # Random-module exclusions: each ticked "exclude_<mod id>" checkbox is
-            # stored as SO_EXCLUDED_MODULE_BASE + mod id and consumed in startGame
-            excluded_mods = sorted(
+            # stored as SO_EXCLUDED_MODULE_BASE + mod id and consumed in startGame.
+            # Keep ids in the module range and cap at the 25-module pool so a
+            # crafted POST cannot bloat Game.startingOptions.
+            excluded_mods = [
                 int(key[len("exclude_"):])
                 for key in post_data
                 if key.startswith("exclude_") and key[len("exclude_"):].isdigit()
-            )
+            ]
+            excluded_mods = sorted(mod for mod in excluded_mods if mod < 100)[:25]
             optionsArr.extend(rfFCM.SO_EXCLUDED_MODULE_BASE + mod for mod in excluded_mods)
         if "draftModules" in post_data:
             if post_data.get("draft_MS") == "302":

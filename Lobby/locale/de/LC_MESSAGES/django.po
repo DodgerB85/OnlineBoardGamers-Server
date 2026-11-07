@@ -8074,7 +8074,7 @@ msgstr ""
 
 #: .\Lobby\templates\Lobby\fcm_options_grid.html:233
 msgid "Use Stadium"
-msgstr "Stadium verwenden"
+msgstr "Stadion verwenden"
 
 #: .\Lobby\templates\Lobby\fcm_options_grid.html:234
 msgid ""
@@ -14427,13 +14427,13 @@ msgid "Coffee"
 msgstr "Kaffee"
 
 msgid "Delivery Drivers"
-msgstr "Liefertreiber"
+msgstr "Lieferfahrer"
 
 msgid "Dumplings"
 msgstr "Knödel"
 
 msgid "Fried Chicken"
-msgstr "gebratenes Hühnchen"
+msgstr "Gebratenes Hühnchen"
 
 msgid "Fry Chefs"
 msgstr "Fry Chefs"
@@ -14448,7 +14448,7 @@ msgid "Jazz Musicians"
 msgstr "Jazzmusiker"
 
 msgid "Ketchup Milestone"
-msgstr "Ketchup Milestone"
+msgstr "Ketchup-Meilenstein"
 
 msgid "Kimchi"
 msgstr "Kimchi"
@@ -14469,7 +14469,7 @@ msgid "Movie Stars"
 msgstr "Filmstars"
 
 msgid "New Districts"
-msgstr "neue Bezirke"
+msgstr "Neue Bezirke"
 
 msgid "New Map"
 msgstr "Neue Karte"
@@ -14481,16 +14481,16 @@ msgid "Noodles"
 msgstr "Nudeln"
 
 msgid "Price Changing Reserve Cards"
-msgstr "preisverändernde Reservekarten"
+msgstr "Preisverändernde Reservekarten"
 
 msgid "Rural Marketers"
-msgstr "ländliche Vermarkter"
+msgstr "Ländliche Vermarkter"
 
 msgid "Second Bailout"
 msgstr "Zweite Rettung"
 
 msgid "Stadium"
-msgstr "Stadium"
+msgstr "Stadion"
 
 msgid "Sushi"
 msgstr "Sushi"

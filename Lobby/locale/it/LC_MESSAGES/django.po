@@ -14357,19 +14357,19 @@ msgid "Pool after exclusions:"
 msgstr "Pool dopo le esclusioni:"
 
 msgid "Coffee"
-msgstr "il caffè"
+msgstr "Caffè"
 
 msgid "Delivery Drivers"
-msgstr "i driver di consegna"
+msgstr "Driver di consegna"
 
 msgid "Dumplings"
-msgstr "gli gnocchi"
+msgstr "Gnocchi"
 
 msgid "Fried Chicken"
-msgstr "il pollo fritto"
+msgstr "Pollo fritto"
 
 msgid "Fry Chefs"
-msgstr "i Fry Chef"
+msgstr "Fry Chef"
 
 msgid "Gourmet Food Critic"
 msgstr "Critico gastronomico gourmet"
@@ -14378,46 +14378,46 @@ msgid "Hawker Marketeers"
 msgstr "Hawker Marketeers"
 
 msgid "Jazz Musicians"
-msgstr "musicisti jazz"
+msgstr "Musicisti Jazz"
 
 msgid "Ketchup Milestone"
-msgstr "la pietra miliare del ketchup"
+msgstr "Pietra miliare del ketchup"
 
 msgid "Kimchi"
-msgstr "il Kimchi"
+msgstr "Kimchi"
 
 msgid "Labor Market"
 msgstr "Labor Market"
 
 msgid "Lobbyists"
-msgstr "i lobbisti"
+msgstr "Lobbisti"
 
 msgid "Mass Marketers"
-msgstr "il marketing di massa"
+msgstr "Marketing di massa"
 
 msgid "Media Line"
 msgstr "Media Line"
 
 msgid "Movie Stars"
-msgstr "le star del cinema"
+msgstr "Stelle del cinema"
 
 msgid "New Districts"
-msgstr "nuovi distretti"
+msgstr "Nuovi Distretti"
 
 msgid "New Map"
 msgstr "Nuova Mappa"
 
 msgid "Night Shift Managers"
-msgstr "i gestori del turno di notte"
+msgstr "Gestori del turno di notte"
 
 msgid "Noodles"
-msgstr "le tagliatelle"
+msgstr "Tagliatelle"
 
 msgid "Price Changing Reserve Cards"
-msgstr "le carte di riserva per la modifica del prezzo"
+msgstr "Carte di riserva per la modifica del prezzo"
 
 msgid "Rural Marketers"
-msgstr "gli operatori di marketing rurali"
+msgstr "Operatori di marketing rurali"
 
 msgid "Second Bailout"
 msgstr "Second Bailout"
@@ -14426,7 +14426,7 @@ msgid "Stadium"
 msgstr "Stadium"
 
 msgid "Sushi"
-msgstr "il sushi"
+msgstr "Sushi"
 
 msgid "Include 6 fan expansion options"
 msgstr "Includi 6 opzioni delle espansioni dei fan"

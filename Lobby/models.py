@@ -215,7 +215,7 @@ class Tournament(models.Model):
         related_name="tournament_creator_relName",
     )
 
-    startingOptions = models.CharField(max_length=80, blank=True, default="")
+    startingOptions = models.CharField(max_length=255, blank=True, default="")
     startingMap = models.TextField(blank=True, default="")
     startingPlayers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
@@ -391,11 +391,10 @@ class BaseGame(models.Model):
     # Change to JSON field?
     startingMap = models.TextField(blank=True, default="")
 
-    # The longest was 100 chars, so i set it to that.
-    # Not sure if that's inefficient?
+    # 255 leaves room for random-module exclusions (up to 25 extra codes).
     # IN ANY CASE THIS SHOULD BE REMODELED INTO A JSONFIELD AS IT SHOULD ONLY CONTAIN A JSON DUMPED
     # ARRAY OF INTS / SUBARRS. (Except legacy FCM games perhaps).
-    startingOptions = models.CharField(max_length=100, blank=True)
+    startingOptions = models.CharField(max_length=255, blank=True)
 
     ####### THESE ITEMS ONLY EXIST IN THIS GENERAL GAME MODEL
     activeVotes = models.JSONField(default=dict, blank=True, null=True)

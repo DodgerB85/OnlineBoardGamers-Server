@@ -2152,15 +2152,12 @@ class FCMpresenter(GamePresenter):
             # (mod ids are at most two digits). NB the range check matters: the
             # 5-digit min/max codes (210xx/211xx) are larger than the base and
             # must NOT be stripped.
-            excludedModules = set(
-                x - rfFCM.SO_EXCLUDED_MODULE_BASE
-                for x in starting_options
-                if isinstance(x, int) and rfFCM.SO_EXCLUDED_MODULE_BASE <= x < rfFCM.SO_EXCLUDED_MODULE_BASE + 100
-            )
-            starting_options = [
+            excludedCodes = {
                 x for x in starting_options
-                if not (isinstance(x, int) and rfFCM.SO_EXCLUDED_MODULE_BASE <= x < rfFCM.SO_EXCLUDED_MODULE_BASE + 100)
-            ]
+                if isinstance(x, int) and rfFCM.SO_EXCLUDED_MODULE_BASE <= x < rfFCM.SO_EXCLUDED_MODULE_BASE + 100
+            }
+            excludedModules = {x - rfFCM.SO_EXCLUDED_MODULE_BASE for x in excludedCodes}
+            starting_options = [x for x in starting_options if x not in excludedCodes]
             availableModules = [
                 rfFCM.SO_KETCHUP_MS,
                 rfFCM.SO_RESERVE_PRICE,

@@ -916,7 +916,7 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
     for opt in sorted_options:
         # SPECIAL CASE: Random Modules (200)
         if opt == rfFCM.SO_RANDOM_MODULES:
-            moduleRange = [str(x % 100).zfill(2) for x in startingOptionsArr if 21000 < x < 21116]
+            moduleRange = [str(x % 100).zfill(2) for x in startingOptionsArr if 21000 < x < 21126]
             if len(moduleRange) != 2:
                 moduleRange = ["??", "??"]
 

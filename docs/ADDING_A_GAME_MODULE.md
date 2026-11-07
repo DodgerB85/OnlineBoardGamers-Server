@@ -7,7 +7,8 @@ This doc uses FCM as the reference; the same pattern applies to any game's start
 ## How modules are represented
 
 - Every module has an integer id: an `SO_*` constant in `FCM/FCMconstants.py` (e.g. `SO_FRIED_CHICKEN = 46`, `SO_STADIUM = 47`, `SO_JAZZ_MUSICIANS = 42`). Chosen ids are stored as a **JSON array of ints** in `Game.startingOptions`.
-- Some modules use **encoded values**: min/max module counts for random-module games (`SO_MIN_RANDOM_MODULES`/`SO_MAX_RANDOM_MODULES` + 2-digit count, e.g. `21002`) and range markers parsed in `Lobby/sharedFunctions/sharedRefs.py::SR_getFCMstartingOptionsHTML` (`21000 < x < 21116`).
+- Some modules use **encoded values**: min/max module counts for random-module games (`SO_MIN_RANDOM_MODULES`/`SO_MAX_RANDOM_MODULES` + 2-digit count, e.g. `21002`) and range markers parsed in `Lobby/sharedFunctions/sharedRefs.py::SR_getFCMstartingOptionsHTML` (`21000 < x < 21126`).
+- Random-module exclusions use the reserved `1000–1099` range (`SO_EXCLUDED_MODULE_BASE + module id`) and are stripped in `FCMpresenter.startGame` before the roll. Do not assign new module ids in that range.
 - The **client reads `startingOptions`** in the init payload and enables its own module logic accordingly — the server never re-implements the rules.
 
 ## Checklist for a new FCM module
