@@ -6465,10 +6465,6 @@ msgstr "Massimo:"
 msgid "Include 4 chinese expansion options"
 msgstr "Include 4 opzioni di espansione cinese"
 
-#: .\Lobby\templates\Lobby\createFCM.html:891
-msgid "Include 4 fan expansion options"
-msgstr "Includi 4 opzioni delle espansioni dei fan"
-
 #: .\Lobby\templates\Lobby\createFCM.html:905
 msgid "Draft modules"
 msgstr "Bozze di moduli"
@@ -14431,6 +14427,9 @@ msgstr "Stadium"
 
 msgid "Sushi"
 msgstr "il sushi"
+
+msgid "Include 6 fan expansion options"
+msgstr "Includi 6 opzioni delle espansioni dei fan"
 
 #, python-format
 #~ msgid "Won When Picked %%"
