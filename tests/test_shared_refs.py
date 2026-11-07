@@ -65,6 +65,36 @@ class TestSRgetFCMstartingOptionsHTML(TestCase):
         self.assertIn("so_newMS.svg", result)
         self.assertIn("New Milestones", result)
 
+    def test_random_module_range_shows_max_25(self):
+        result = SR_getFCMstartingOptionsHTML(
+            [rfFCM.SO_RANDOM_MODULES, 21001, 21125]
+        )
+        self.assertIn("01 - 25 Random Modules", result)
+
+    def test_random_module_exclusions_listed_in_tooltip(self):
+        result = SR_getFCMstartingOptionsHTML(
+            [
+                rfFCM.SO_RANDOM_MODULES,
+                21001,
+                21120,
+                rfFCM.SO_EXCLUDED_MODULE_BASE + rfFCM.SO_KIMCHI,
+                rfFCM.SO_EXCLUDED_MODULE_BASE + rfFCM.SO_NEW_MAP,
+            ]
+        )
+        self.assertIn("Excluded: Kimchi, New Map", result)
+
+    def test_random_module_without_exclusions_has_no_excluded_text(self):
+        result = SR_getFCMstartingOptionsHTML(
+            [rfFCM.SO_RANDOM_MODULES, 21001, 21120]
+        )
+        self.assertNotIn("Excluded", result)
+
+    def test_unknown_exclusion_id_is_ignored(self):
+        result = SR_getFCMstartingOptionsHTML(
+            [rfFCM.SO_RANDOM_MODULES, 21001, 21120, rfFCM.SO_EXCLUDED_MODULE_BASE]
+        )
+        self.assertNotIn("Excluded", result)
+
 
 class TestSRgetRNBstartingOptionsHTML(TestCase):
     def test_empty_options_return_empty_html(self):

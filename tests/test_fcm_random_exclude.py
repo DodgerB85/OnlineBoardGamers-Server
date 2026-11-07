@@ -87,6 +87,35 @@ class RandomExcludePoolTests(TestCase):
         codes = [x for x in options if base <= x < base + 100]
         self.assertEqual(codes, sorted(codes))
 
+    def test_out_of_range_and_excess_exclusions_dropped(self):
+        post_data = {
+            "enableAdvancedOptions": "",
+            "randomModules": "",
+            "random_MS": "201",
+            "minModules": "4",
+            "maxModules": "4",
+            "exclude_200": "",
+        }
+        for mod in range(26):
+            post_data[f"exclude_{mod}"] = ""
+        options = buildFCMstartingOptions(post_data)
+        base = rfFCM.SO_EXCLUDED_MODULE_BASE
+        self.assertNotIn(base + 200, options)
+        self.assertEqual(len([x for x in options if base <= x < base + 100]), 25)
+
+    def test_many_exclusions_fit_starting_options(self):
+        # Regression: 25 exclusion codes used to overflow Game.startingOptions
+        excluded = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23,
+                    42, 43, 44, 45, 46, 47, 48, 49, 50, 51]
+        opts = _random_options("25", fan=True, excluded=excluded)
+        self.assertGreater(len(json.dumps(opts)), 100)
+        with patch("Lobby.presenters.random.randrange", side_effect=self._randrange):
+            game = self._join_full_game(opts)
+
+        final = json.loads(game.startingOptions)
+        base = rfFCM.SO_EXCLUDED_MODULE_BASE
+        self.assertFalse([x for x in final if base <= x < base + 100])
+
     def test_excluded_module_not_rolled(self):
         # Exclude nightShift (16): pool is 14 core, pick all of them
         opts = _random_options("14", fan=False, excluded=[rfFCM.SO_NIGHT_SHIFT])

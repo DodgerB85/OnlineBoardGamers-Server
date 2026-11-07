@@ -13007,6 +13007,10 @@ msgid "Include 6 fan expansion options"
 msgstr "包含 6 个粉丝模组选项"
 
 #, python-format
+msgid "Excluded: %(modules)s"
+msgstr "已排除：%(modules)s"
+
+#, python-format
 #~ msgid "Won When Picked %%"
 #~ msgstr "被选时获胜 %%"
 

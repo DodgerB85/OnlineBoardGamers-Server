@@ -921,6 +921,16 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
                 moduleRange = ["??", "??"]
 
             title = f"{moduleRange[0]} - {moduleRange[1]} {gettext('Random Modules')}"
+            excludedIds = sorted(
+                {
+                    x - rfFCM.SO_EXCLUDED_MODULE_BASE
+                    for x in startingOptionsArr
+                    if isinstance(x, int) and rfFCM.SO_EXCLUDED_MODULE_BASE <= x < rfFCM.SO_EXCLUDED_MODULE_BASE + 100
+                }
+            )
+            excludedNames = [gettext(options_map[m][1]) for m in excludedIds if m in options_map]
+            if excludedNames:
+                title += " — " + gettext("Excluded: %(modules)s") % {"modules": ", ".join(excludedNames)}
             startingOptionsHTML += f"<img class='startingOption' src='/static/FCM/images/so_randomMods.svg' title='{title}'>"
             continue
 

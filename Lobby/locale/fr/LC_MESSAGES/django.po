@@ -14523,6 +14523,10 @@ msgid "Include 6 fan expansion options"
 msgstr "Inclure 6 options d'extensions fan"
 
 #, python-format
+msgid "Excluded: %(modules)s"
+msgstr "Exclus : %(modules)s"
+
+#, python-format
 #~ msgid "Won When Picked %%"
 #~ msgstr "Gagné une fois sélectionné %%"
 
