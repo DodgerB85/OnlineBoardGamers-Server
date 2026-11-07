@@ -490,6 +490,90 @@ function validateOptions(change) {
 			addOption("allowRewind")
 		}
 	}
+	syncRandomExcludeUI()
+}
+
+// === Random module exclusion panel ===
+// Pool composition must mirror FCMpresenter.startGame so the live count and
+// the min/max guards match what the server will actually roll from.
+var RANDOM_POOL = {
+	core: [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23],
+	hardChoices: 8,
+	chinese: [42, 43, 44, 45],
+	fan: [46, 47, 48, 49, 50, 51],
+}
+
+function getExcludePool() {
+	var pool = RANDOM_POOL.core.slice()
+	if (document.getElementById("random_originalMS").checked) pool.push(RANDOM_POOL.hardChoices)
+	if (document.getElementById("includeChineseExpansion").checked) pool = pool.concat(RANDOM_POOL.chinese)
+	if (document.getElementById("includeFanExpansion").checked) pool = pool.concat(RANDOM_POOL.fan)
+	return pool
+}
+
+function getExcludedMods() {
+	var out = []
+	document.querySelectorAll("input.excludeMod").forEach(function (cb) {
+		if (cb.checked) out.push(parseInt(cb.id.slice("exclude_".length), 10))
+	})
+	return out
+}
+
+// Recalculates the pool-after-exclusions count, disables min/max options the
+// pool can no longer satisfy, and shows/hides the per-pool exclude groups.
+function syncRandomExcludeUI() {
+	var panel = document.getElementById("excludeModulesPanel")
+	if (!panel) return
+	var randomBox = document.getElementById("randomModules")
+	var excludeBox = document.getElementById("excludeModules")
+	var randomOn = randomBox && randomBox.checked && !randomBox.disabled
+	var excludeOn = excludeBox && excludeBox.checked && !excludeBox.disabled
+
+	// Enable/disable the per-module checkboxes with the master switch
+	document.querySelectorAll("input.excludeMod").forEach(function (cb) {
+		cb.disabled = !randomOn
+	})
+	panel.style.display = randomOn && excludeOn ? "block" : "none"
+	if (excludeBox) excludeBox.disabled = !randomOn
+
+	// Per-pool groups: only show what is actually in the pool, drop dead ticks
+	var chineseOn = document.getElementById("includeChineseExpansion").checked
+	var fanOn = document.getElementById("includeFanExpansion").checked
+	var originalMS = document.getElementById("random_originalMS").checked
+	var chineseList = document.getElementById("excludeChineseList")
+	var fanList = document.getElementById("excludeFanList")
+	if (chineseList) {
+		chineseList.style.display = chineseOn ? "grid" : "none"
+		if (!chineseOn) chineseList.querySelectorAll("input.excludeMod").forEach(function (cb) { cb.checked = false })
+	}
+	if (fanList) {
+		fanList.style.display = fanOn ? "grid" : "none"
+		if (!fanOn) fanList.querySelectorAll("input.excludeMod").forEach(function (cb) { cb.checked = false })
+	}
+	var hardChoice = document.getElementById("exclude_8")
+	if (hardChoice) {
+		hardChoice.parentElement.style.display = originalMS ? "" : "none"
+		if (!originalMS) hardChoice.checked = false
+	}
+
+	// Live pool count + min/max guards
+	var pool = getExcludePool()
+	var excluded = getExcludedMods()
+	var remaining = pool.filter(function (m) { return excluded.indexOf(m) === -1 }).length
+	var countEl = document.getElementById("excludePoolCount")
+	if (countEl) countEl.textContent = remaining
+
+	var minSel = document.getElementById("minModules")
+	var maxSel = document.getElementById("maxModules")
+	if (minSel && maxSel && randomOn) {
+		for (var i = 0; i < minSel.options.length; i++) {
+			var v = parseInt(minSel.options[i].value, 10)
+			minSel.options[i].disabled = v > remaining
+			maxSel.options[i].disabled = v > remaining
+		}
+		if (parseInt(minSel.value, 10) > remaining) minSel.value = String(remaining)
+		if (parseInt(maxSel.value, 10) > remaining) maxSel.value = String(remaining)
+	}
 }
 
 function setPlayersforMapData() {

@@ -6486,10 +6486,6 @@ msgstr "Maximale :"
 msgid "Include 4 chinese expansion options"
 msgstr "Inclut 4 options d'extension chinoises"
 
-#: .\Lobby\templates\Lobby\createFCM.html:891
-msgid "Include 4 fan expansion options"
-msgstr "Inclure 4 options d'extensions fan"
-
 #: .\Lobby\templates\Lobby\createFCM.html:905
 msgid "Draft modules"
 msgstr "Projets de modules"
@@ -10300,17 +10296,9 @@ msgstr "Jeu expérimenté - Voir"
 msgid "New Milestones"
 msgstr "Nouveaux jalons"
 
-#: .\Lobby\templates\Lobby\lobby_icons.html:38
-msgid "Ketchup Milestone"
-msgstr "Étape importante du ketchup"
-
 #: .\Lobby\templates\Lobby\lobby_icons.html:39
 msgid "New Reserve Cards"
 msgstr "Nouvelles cartes de réserve"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:40
-msgid "Movie Stars"
-msgstr "Stars de cinéma"
 
 #: .\Lobby\templates\Lobby\lobby_icons.html:41
 msgid "Mass Marketeers"
@@ -10324,37 +10312,13 @@ msgstr "Critiques gastronomiques"
 msgid "Rural Marketeers"
 msgstr "Commercialisateurs ruraux"
 
-#: .\Lobby\templates\Lobby\lobby_icons.html:44
-msgid "New Districts"
-msgstr "Nouveaux quartiers"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:45
-msgid "Lobbyists"
-msgstr "Les lobbyistes"
-
 #: .\Lobby\templates\Lobby\lobby_icons.html:46
 msgid "Night Shift Manager"
 msgstr "Chef d'équipe de nuit"
 
-#: .\Lobby\templates\Lobby\lobby_icons.html:47
-msgid "Coffee"
-msgstr "Café"
-
 #: .\Lobby\templates\Lobby\lobby_icons.html:48
 msgid "Fry Chef"
 msgstr "Chef de friture"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:49
-msgid "Kimchi"
-msgstr "Kimchi"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:50
-msgid "Sushi"
-msgstr "Sushis"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:51
-msgid "Noodles"
-msgstr "Nouilles"
 
 #: .\Lobby\templates\Lobby\lobby_icons.html:52
 msgid "Turn Order Payday/Fridge"
@@ -10371,18 +10335,6 @@ msgstr "Des choix difficiles"
 #: .\Lobby\templates\Lobby\lobby_icons.html:60
 msgid "Draft Modules"
 msgstr "Projet de modules"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:63
-msgid "Jazz Musicians"
-msgstr "Musiciens de Jazz"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:64
-msgid "Dumplings"
-msgstr "Boulettes"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:65
-msgid "Delivery Drivers"
-msgstr "Chauffeurs-livreurs"
 
 #: .\Lobby\templates\Lobby\lobby_icons.html:66
 msgid "Hawker Truck Marketing"
@@ -14352,6 +14304,224 @@ msgstr ""
 "Ajoute 15 nouvelles tuiles de carte avec de nouvelles maisons ; plafond de "
 "jardins porté à 15"
 
+msgid "12h kickout + 24h Flexi-Time"
+msgstr "Kickout de 12 h + 24 h de Flexi-Time"
+
+msgid "1 day kickout + 24h Flexi-Time"
+msgstr "Kickout d'un jour + 24 h de Flexi-Time"
+
+#, python-format
+msgid "%(days)s days kickout + 24h Flexi-Time"
+msgstr "Kickout de %(days)s jours + 24 h de Flexi-Time"
+
+msgid "Horseless Carriage - Build Factory is in progress"
+msgstr "Horseless Carriage – Phase Build Factory en cours"
+
+#, python-format
+msgid ""
+"Build Factory is in progress at OnlineBoardGamers - Horseless Carriage\n"
+"%(gameName)s - %(currentTurnString)s\n"
+"You can submit your factory now, even if you are not first in Engineering Order. If your factory becomes the one blocking the queue, you will be alerted when your move time starts."
+msgstr ""
+"La phase Build Factory est en cours sur OnlineBoardGamers – Horseless Carriage\n"
+"%(gameName)s – %(currentTurnString)s\n"
+"Vous pouvez soumettre votre usine maintenant, même si vous n'êtes pas le premier dans l'ordre d'ingénierie. Si votre usine bloque la file d'attente, vous serez alerté lorsque votre temps de jeu commencera."
+
+#, python-format
+msgid ""
+"Your factory is now blocking the queue at OnlineBoardGamers - Horseless Carriage\n"
+"Your move time has started\n"
+"%(gameName)s - %(currentTurnString)s."
+msgstr ""
+"Votre usine bloque maintenant la file d'attente sur OnlineBoardGamers – Horseless Carriage\n"
+"Votre temps de jeu a commencé\n"
+"%(gameName)s – %(currentTurnString)s."
+
+#, python-format
+msgid "Flexi-Time remaining: %(flexiTime)s"
+msgstr "Flexi-Time restant : %(flexiTime)s"
+
+#, python-format
+msgid ""
+"Less than 2 hours of standard move time at OnlineBoardGamers!\n"
+"%(boxName)s: %(gameName)s"
+msgstr ""
+"Moins de 2 heures de temps de jeu standard sur OnlineBoardGamers !\n"
+"%(boxName)s : %(gameName)s"
+
+msgid "You could be kicked out at any time. Please move ASAP"
+msgstr ""
+"Vous pourriez être exclu à tout moment. Veuillez jouer dès que possible."
+
+#, python-format
+msgid ""
+"You are now using Flexi-Time. Remaining: %(flexiTime)s. Once that runs out, "
+"other players can kick you. Please move ASAP"
+msgstr ""
+"Vous utilisez maintenant le Flexi-Time. Restant : %(flexiTime)s. Une fois "
+"épuisé, les autres joueurs pourront vous exclure. Veuillez jouer dès que "
+"possible."
+
+msgid ""
+"Your move time and Flexi-Time are used up. Other players can now kick you. "
+"Please move ASAP"
+msgstr ""
+"Votre temps de jeu et votre Flexi-Time sont épuisés. Les autres joueurs "
+"peuvent maintenant vous exclure. Veuillez jouer dès que possible."
+
+#, python-format
+msgid ""
+"Your standard move time has expired at OnlineBoardGamers!\n"
+"%(boxName)s: %(gameName)s"
+msgstr ""
+"Votre temps de jeu standard a expiré sur OnlineBoardGamers !\n"
+"%(boxName)s : %(gameName)s"
+
+#, python-format
+msgid ""
+"\n"
+"Hi %(playerName)s,<br/>\n"
+"<br/>\n"
+"Reminder: You have less than 2 hours of standard move time left in: %(box_name)s<br/>\n"
+"<br/>\n"
+msgstr ""
+"\n"
+"Bonjour %(playerName)s,<br/>\n"
+"<br/>\n"
+"Rappel : il vous reste moins de 2 heures de temps de jeu standard dans : %(box_name)s<br/>\n"
+"<br/>\n"
+
+msgid "Flexi-Time remaining"
+msgstr "Flexi-Time restant"
+
+#, python-format
+msgid ""
+"\n"
+"Hi %(playerName)s,<br/>\n"
+"<br/>\n"
+"Your standard move time has expired for: %(box_name)s<br/>\n"
+"<br/>\n"
+msgstr ""
+"\n"
+"Bonjour %(playerName)s,<br/>\n"
+"<br/>\n"
+"Votre temps de jeu standard a expiré pour : %(box_name)s<br/>\n"
+"<br/>\n"
+
+#, python-format
+msgid ""
+"Flexi-Time remaining: %(flexiTimeString)s. You are now using Flexi-Time; "
+"once that runs out, other players can kick you. Please move as soon as "
+"possible."
+msgstr ""
+"Flexi-Time restant : %(flexiTimeString)s. Vous utilisez maintenant le Flexi-"
+"Time ; une fois épuisé, les autres joueurs pourront vous exclure. Veuillez "
+"jouer dès que possible."
+
+msgid ""
+"Your move time and Flexi-Time are used up. Other players can now kick you. "
+"Please move as soon as possible."
+msgstr ""
+"Votre temps de jeu et votre Flexi-Time sont épuisés. Les autres joueurs "
+"peuvent maintenant vous exclure. Veuillez jouer dès que possible."
+
+msgid "You could be kicked at any time. Please move as soon as possible."
+msgstr ""
+"Vous pourriez être exclu à tout moment. Veuillez jouer dès que possible."
+
+msgid ""
+"HLC always shows the current player's standard move time and remaining "
+"Flexi-Time as two separate timers."
+msgstr ""
+"HLC affiche toujours le temps de jeu standard du joueur actuel et le Flexi-"
+"Time restant sous forme de deux minuteurs séparés."
+
+msgid "In HLC, remaining Flexi-Time is also shown under the turn timer."
+msgstr ""
+"Dans HLC, le Flexi-Time restant est également affiché sous le minuteur de "
+"jeu."
+
+msgid "Exclude specific modules from the random pool"
+msgstr "Exclure des modules spécifiques du pool aléatoire"
+
+msgid "Pool after exclusions:"
+msgstr "Pool après exclusions :"
+
+msgid "Coffee"
+msgstr "café"
+
+msgid "Delivery Drivers"
+msgstr "chauffeurs-livreurs"
+
+msgid "Dumplings"
+msgstr "boulettes"
+
+msgid "Fried Chicken"
+msgstr "poulet frit"
+
+msgid "Fry Chefs"
+msgstr "chefs de friture"
+
+msgid "Gourmet Food Critic"
+msgstr "Gourmet Food Critic"
+
+msgid "Hawker Marketeers"
+msgstr "Hawker Marketeers"
+
+msgid "Jazz Musicians"
+msgstr "musiciens de jazz"
+
+msgid "Ketchup Milestone"
+msgstr "Ketchup Milestone"
+
+msgid "Kimchi"
+msgstr "Kimchi"
+
+msgid "Labor Market"
+msgstr "Labor Market"
+
+msgid "Lobbyists"
+msgstr "lobbyistes"
+
+msgid "Mass Marketers"
+msgstr "spécialistes du marketing de masse"
+
+msgid "Media Line"
+msgstr "Media Line"
+
+msgid "Movie Stars"
+msgstr "stars de cinéma"
+
+msgid "New Districts"
+msgstr "nouveaux quartiers"
+
+msgid "New Map"
+msgstr "Nouvelle Carte"
+
+msgid "Night Shift Managers"
+msgstr "les gestionnaires de nuit"
+
+msgid "Noodles"
+msgstr "nouilles"
+
+msgid "Price Changing Reserve Cards"
+msgstr "cartes de réserve pour changement de prix"
+
+msgid "Rural Marketers"
+msgstr "les spécialistes du marketing rural"
+
+msgid "Second Bailout"
+msgstr "Second Bailout"
+
+msgid "Stadium"
+msgstr "Stadium"
+
+msgid "Sushi"
+msgstr "sushis"
+
+msgid "Include 6 fan expansion options"
+msgstr "Inclure 6 options d'extensions fan"
+
 #, python-format
 #~ msgid "Won When Picked %%"
 #~ msgstr "Gagné une fois sélectionné %%"
@@ -14827,73 +14997,3 @@ msgstr ""
 
 #~ msgid "Final Round"
 #~ msgstr "Tour final"
-
-msgid "12h kickout + 24h Flexi-Time"
-msgstr "Kickout de 12 h + 24 h de Flexi-Time"
-
-msgid "1 day kickout + 24h Flexi-Time"
-msgstr "Kickout d'un jour + 24 h de Flexi-Time"
-
-#, python-format
-msgid "%(days)s days kickout + 24h Flexi-Time"
-msgstr "Kickout de %(days)s jours + 24 h de Flexi-Time"
-
-msgid "Horseless Carriage - Build Factory is in progress"
-msgstr "Horseless Carriage – Phase Build Factory en cours"
-
-#, python-format
-msgid "Build Factory is in progress at OnlineBoardGamers - Horseless Carriage\n%(gameName)s - %(currentTurnString)s\nYou can submit your factory now, even if you are not first in Engineering Order. If your factory becomes the one blocking the queue, you will be alerted when your move time starts."
-msgstr "La phase Build Factory est en cours sur OnlineBoardGamers – Horseless Carriage\n%(gameName)s – %(currentTurnString)s\nVous pouvez soumettre votre usine maintenant, même si vous n'êtes pas le premier dans l'ordre d'ingénierie. Si votre usine bloque la file d'attente, vous serez alerté lorsque votre temps de jeu commencera."
-
-#, python-format
-msgid "Your factory is now blocking the queue at OnlineBoardGamers - Horseless Carriage\nYour move time has started\n%(gameName)s - %(currentTurnString)s."
-msgstr "Votre usine bloque maintenant la file d'attente sur OnlineBoardGamers – Horseless Carriage\nVotre temps de jeu a commencé\n%(gameName)s – %(currentTurnString)s."
-
-#, python-format
-msgid "Flexi-Time remaining: %(flexiTime)s"
-msgstr "Flexi-Time restant : %(flexiTime)s"
-
-#, python-format
-msgid "Less than 2 hours of standard move time at OnlineBoardGamers!\n%(boxName)s: %(gameName)s"
-msgstr "Moins de 2 heures de temps de jeu standard sur OnlineBoardGamers !\n%(boxName)s : %(gameName)s"
-
-msgid "You could be kicked out at any time. Please move ASAP"
-msgstr "Vous pourriez être exclu à tout moment. Veuillez jouer dès que possible."
-
-#, python-format
-msgid "You are now using Flexi-Time. Remaining: %(flexiTime)s. Once that runs out, other players can kick you. Please move ASAP"
-msgstr "Vous utilisez maintenant le Flexi-Time. Restant : %(flexiTime)s. Une fois épuisé, les autres joueurs pourront vous exclure. Veuillez jouer dès que possible."
-
-msgid "Your move time and Flexi-Time are used up. Other players can now kick you. Please move ASAP"
-msgstr "Votre temps de jeu et votre Flexi-Time sont épuisés. Les autres joueurs peuvent maintenant vous exclure. Veuillez jouer dès que possible."
-
-#, python-format
-msgid "Your standard move time has expired at OnlineBoardGamers!\n%(boxName)s: %(gameName)s"
-msgstr "Votre temps de jeu standard a expiré sur OnlineBoardGamers !\n%(boxName)s : %(gameName)s"
-
-#, python-format
-msgid "\nHi %(playerName)s,<br/>\n<br/>\nReminder: You have less than 2 hours of standard move time left in: %(box_name)s<br/>\n<br/>\n"
-msgstr "\nBonjour %(playerName)s,<br/>\n<br/>\nRappel : il vous reste moins de 2 heures de temps de jeu standard dans : %(box_name)s<br/>\n<br/>\n"
-
-msgid "Flexi-Time remaining"
-msgstr "Flexi-Time restant"
-
-#, python-format
-msgid "\nHi %(playerName)s,<br/>\n<br/>\nYour standard move time has expired for: %(box_name)s<br/>\n<br/>\n"
-msgstr "\nBonjour %(playerName)s,<br/>\n<br/>\nVotre temps de jeu standard a expiré pour : %(box_name)s<br/>\n<br/>\n"
-
-#, python-format
-msgid "Flexi-Time remaining: %(flexiTimeString)s. You are now using Flexi-Time; once that runs out, other players can kick you. Please move as soon as possible."
-msgstr "Flexi-Time restant : %(flexiTimeString)s. Vous utilisez maintenant le Flexi-Time ; une fois épuisé, les autres joueurs pourront vous exclure. Veuillez jouer dès que possible."
-
-msgid "Your move time and Flexi-Time are used up. Other players can now kick you. Please move as soon as possible."
-msgstr "Votre temps de jeu et votre Flexi-Time sont épuisés. Les autres joueurs peuvent maintenant vous exclure. Veuillez jouer dès que possible."
-
-msgid "You could be kicked at any time. Please move as soon as possible."
-msgstr "Vous pourriez être exclu à tout moment. Veuillez jouer dès que possible."
-
-msgid "HLC always shows the current player's standard move time and remaining Flexi-Time as two separate timers."
-msgstr "HLC affiche toujours le temps de jeu standard du joueur actuel et le Flexi-Time restant sous forme de deux minuteurs séparés."
-
-msgid "In HLC, remaining Flexi-Time is also shown under the turn timer."
-msgstr "Dans HLC, le Flexi-Time restant est également affiché sous le minuteur de jeu."
