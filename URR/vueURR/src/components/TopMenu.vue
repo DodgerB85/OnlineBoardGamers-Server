@@ -64,6 +64,7 @@ function toggleOverview() {
 
 function toggleHistory() {
 	store.viewSettings.showChat = false
+	store.clearHistoryHelpers()
 	if (store.viewSettings.showHistory) store.viewSettings.showHistory = false
 	else {
 		store.viewSettings.showHistory = true

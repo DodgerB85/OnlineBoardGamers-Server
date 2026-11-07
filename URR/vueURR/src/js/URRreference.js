@@ -18,14 +18,18 @@ export const KICKOUT_SOLO_DELAY_MS = 2 * 24 * 60 * 60 * 1000
 // opponents, replaced by the creator's display names on the first page load.
 export const SHADOW_PLAYER_NAMES = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
 
-// Player colours used by the generic UI (index -> colour)
-export const BLACK = 0
-export const BLUE = 1
-export const GREEN = 2
-export const GREY = 3
-export const RED = 4
-export const YELLOW = 5
-export const ALL_COLOURS = [BLACK, BLUE, GREEN, GREY, RED, YELLOW]
+// Player colours in ownership-marker order (see PLAYER_COLOUR_FILES).
+export const ORANGE = 0
+export const GREEN = 1
+export const TEAL = 2
+export const BROWN = 3
+export const PURPLE = 4
+export const PINK = 5
+export const ALL_COLOURS = [ORANGE, GREEN, TEAL, BROWN, PURPLE, PINK]
+export const PLAYER_COLOUR_FILES = ["orange", "green", "teal", "brown", "purple", "pink"]
+// Ownership-marker background (the top-left pixel), and readable text on it.
+export const PLAYER_COLOUR_HEXES = ["#fac1a4", "#ace0aa", "#a6dfd7", "#c6b0a2", "#d9a5f9", "#fbc5eb"]
+export const PLAYER_COLOUR_TEXT_HEXES = ["#000000", "#000000", "#000000", "#000000", "#000000", "#000000"]
 
 // --- Phases (mirror URRconstants.py) ---
 export const PHASE_DIVIDING_NATIONS = 0

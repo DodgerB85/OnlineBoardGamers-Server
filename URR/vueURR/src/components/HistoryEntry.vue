@@ -41,7 +41,7 @@ const balanceChanges = computed(() => {
 	const changes = []
 	for (const [index, player] of (after.value?.players || []).entries()) {
 		const privateBefore = before.value?.players[index]?.money
-		if (privateBefore !== undefined && player.money !== privateBefore) changes.push({ src: assets.getPlayerMarkerImage(index), title: personal.getHistoryName(index), label: t("history.privateCashChange", { before: privateBefore, after: player.money }), amount: player.money - privateBefore })
+		if (privateBefore !== undefined && player.money !== privateBefore) changes.push({ player: index, src: assets.getPlayerMarkerImage(index), title: personal.getHistoryName(index), label: t("history.privateCashChange", { before: privateBefore, after: player.money }), amount: player.money - privateBefore })
 	}
 	for (const state of after.value?.states || []) {
 		const treasuryBefore = before.value?.states[state.id]?.money
@@ -66,6 +66,8 @@ const phaseHeading = computed(() => {
 	return t("history.phaseHeading", { turn: flow.turn, phase: view.phaseStr(flow.phase) })
 })
 function landLabel(id) { return before.value?.board.areas.find((area) => area.id === id)?.label || id }
+function playerColour(index) { return personal.getCorrectedColourHex(store.players[index]?.colour) }
+function playerTextColour(index) { return personal.getCorrectedTextColourHex(store.players[index]?.colour) }
 function saleLabels(batches = []) { return batches.flat().map(landLabel).join(", ") }
 const eventText = computed(() => {
 	const event = props.entry[0]
@@ -190,7 +192,10 @@ function jumpToEntry() {
 				<p v-if="playbackError" role="alert"><CurrencyText :text="playbackError" /></p>
 				<div class="administrationDetails" v-if="entry.administration.details.length">
 					<div v-for="(detail, detailIndex) in entry.administration.details" :key="detailIndex">
-						<PlayerMarker v-if="detail.player !== undefined" :index="detail.player" />
+						<template v-if="detail.player !== undefined">
+							<PlayerMarker :index="detail.player" />
+							<span class="historyPlayerName" :style="{ backgroundColor: playerColour(detail.player), color: playerTextColour(detail.player) }">{{ personal.getHistoryName(detail.player) }}</span>
+						</template>
 						<img v-else-if="detail.state !== undefined" :src="assets.getStateOrderImage(detail.state)" alt="" />
 						<img v-else-if="detail.terrain !== undefined" :src="assets.getTerrainImage(detail.terrain)" alt="" />
 						<span><CurrencyText :text="detail.text" /></span>
@@ -199,10 +204,10 @@ function jumpToEntry() {
 			</template>
 			<div v-else-if="entry[0] === rf.HIST_NEW_GAME" class="new_turn"><CurrencyText :text="eventText" /></div>
 			<template v-else>
-				<div class="container"><span class="header" v-if="player"><PlayerMarker :index="entry[1]" :name="personal.getHistoryName(entry[1])" /></span><img v-if="eventArtwork" :src="eventArtwork.src" :alt="eventArtwork.alt" :title="eventArtwork.alt" /><span><CurrencyText :text="eventText" /></span></div>
-				<div v-for="award in nationAwards" :key="award.id" class="nationAwardNotice"><PlayerMarker :index="award.owner" :name="personal.getHistoryName(award.owner)" /><span><CurrencyText :text="$t('history.acquiredNation', { nation: rf.NATION_NAMES[award.id], amount: award.price })" /></span></div>
+				<div class="container"><span class="header" v-if="player"><PlayerMarker :index="entry[1]" :name="personal.getHistoryName(entry[1])" /><span class="historyPlayerName" :style="{ backgroundColor: playerColour(entry[1]), color: playerTextColour(entry[1]) }">{{ personal.getHistoryName(entry[1]) }}</span></span><img v-if="eventArtwork" :src="eventArtwork.src" :alt="eventArtwork.alt" :title="eventArtwork.alt" /><span><CurrencyText :text="eventText" /></span></div>
+				<div v-for="award in nationAwards" :key="award.id" class="nationAwardNotice"><PlayerMarker :index="award.owner" :name="personal.getHistoryName(award.owner)" /><span class="historyPlayerName" :style="{ backgroundColor: playerColour(award.owner), color: playerTextColour(award.owner) }">{{ personal.getHistoryName(award.owner) }}</span><span><CurrencyText :text="$t('history.acquiredNation', { nation: rf.NATION_NAMES[award.id], amount: award.price })" /></span></div>
 				<StateLeadership v-for="change in leadershipChanges" :key="change.id" :change="change" />
-				<details class="balanceDetails" v-if="balanceChanges.length" @click.stop @keydown.enter.stop @keydown.space.stop><summary class="balanceChanges" :aria-label="$t('history.showBalances')"><span v-for="change in balanceChanges" :key="change.label" :title="change.title || change.label"><img :src="change.src" :alt="change.label" /><b>{{ change.amount > 0 ? '+' : '' }}{{ change.amount }} <CurrencyIcon /></b></span></summary><div class="balanceBreakdown"><div v-for="change in balanceChanges" :key="change.label"><img :src="change.src" :alt="change.title || change.label" :title="change.title || change.label" /><span><CurrencyText :text="change.label" /></span></div></div></details>
+				<details class="balanceDetails" v-if="balanceChanges.length" @click.stop @keydown.enter.stop @keydown.space.stop><summary class="balanceChanges" :aria-label="$t('history.showBalances')"><span v-for="change in balanceChanges" :key="change.label" :title="change.title || change.label"><img :src="change.src" :alt="change.label" /><span v-if="change.player !== undefined" class="historyPlayerName" :style="{ backgroundColor: playerColour(change.player), color: playerTextColour(change.player) }">{{ personal.getHistoryName(change.player) }}</span><b>{{ change.amount > 0 ? '+' : '' }}{{ change.amount }} <CurrencyIcon /></b></span></summary><div class="balanceBreakdown"><div v-for="change in balanceChanges" :key="change.label"><img :src="change.src" :alt="change.title || change.label" :title="change.title || change.label" /><span v-if="change.player !== undefined" class="historyPlayerName" :style="{ backgroundColor: playerColour(change.player), color: playerTextColour(change.player) }">{{ personal.getHistoryName(change.player) }}</span><span><CurrencyText :text="change.label" /></span></div></div></details>
 				<div class="actionImages" :class="{ multipleCards: actionImages.filter((asset) => asset.card).length > 1 }" v-if="actionImages.length"><template v-for="(asset, idx) in actionImages" :key="idx"><div v-if="asset.card" class="historyCard"><ArtworkCard :src="asset.src" :alt="asset.alt" /></div><img v-else :src="asset.src" :alt="asset.alt" :title="asset.alt" /></template></div>
 				<div v-if="isGameEnd" class="new_turn">{{ after?.gameflow.endReason === 'invasion' ? $t("history.gameEndedInvasion") : after?.gameflow.endReason === 'revolution' ? $t("history.gameEndedRevolution") : $t("history.gameEnded") }}</div>
 			</template>
@@ -216,7 +221,8 @@ function jumpToEntry() {
 .log { direction: ltr; margin: 5px; border: #000 1px solid; text-align: left; padding: 3px; background-color: #d4eafd; z-index: 30; line-height: 25px; }
 .log.separator { padding: 3px; }
 .historyTimestamp { font-size: 0.8em; }.administrationHeading { padding: 6px; background: #303030; color: white; text-align: center; font-weight: bold; }.administrationExplanation { margin: 8px 3px; }.administrationDetails { display: grid; gap: 5px; }.administrationDetails > div { display: flex; align-items: center; gap: 6px; padding: 4px; background: #edf6fd; }.administrationDetails img { width: 30px; height: 30px; flex-shrink: 0; }.administrationDetails span { min-width: 0; overflow-wrap: anywhere; }.administrationDetails button { flex-shrink: 0; min-height: 32px; padding: 4px 6px; border: 1px solid #177daf; border-radius: 3px; background: #fffdf4; font: inherit; cursor: pointer; }
-.header { display: inline-flex; align-items: center; gap: 5px; }.header b { min-width: 0; overflow-wrap: anywhere; }.header img { width: 23px; height: 23px; }
+.header { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; }.header b { min-width: 0; overflow-wrap: anywhere; }.header img { width: 23px; height: 23px; }
+.historyPlayerName { display: inline-block; flex-shrink: 0; white-space: nowrap; color: white; border: 1px solid black; padding: 1px 6px; font-size: 0.9em; line-height: 1.4; }
 .new_turn { background: black; color: white; text-align: center; font-weight: bold; font-size: 1.2em; padding: 8px; }.phaseHeading { background: black; color: white; text-align: center; font-weight: bold; font-size: 1.2em; padding: 8px; margin: 5px; }
 .selectableHistory { cursor: pointer; }.selectableHistory:hover { border: 1px solid yellow; }.selectableHistory:focus-visible { outline: 2px solid yellow; outline-offset: -2px; }
 .log.currentReplay { box-shadow: inset 3px 0 #177daf; background: #e5f3ff; }.replayPosition { display: block; color: #12628c; font-size: 16px; font-weight: bold; }
@@ -224,7 +230,7 @@ function jumpToEntry() {
 .actionImages.multipleCards .historyCard { width: calc((100% - 4px) / 2); max-width: 185px; }
 .nationAwardNotice { display: flex; align-items: center; gap: 5px; margin-top: 4px; padding: 3px 6px; background: #edf6fd; border-left: 3px solid #177daf; font-size: 16px; font-weight: 400; }.nationAwardNotice img { width: 23px; height: 23px; flex-shrink: 0; }.nationAwardNotice span { min-width: 0; overflow-wrap: anywhere; }
 .container > img { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; margin-right: 6px; }.container > span:last-child { min-width: 0; overflow-wrap: anywhere; }
-.balanceChanges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }.balanceChanges span { display: inline-flex; align-items: center; gap: 4px; padding: 2px 5px; background: #edf6fd; border: 1px solid #adc2d0; font-size: 16px; font-weight: 400; }.balanceChanges img { width: 22px; height: 22px; }
+.balanceChanges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }.balanceChanges > span { display: inline-flex; align-items: center; gap: 4px; padding: 2px 5px; background: #edf6fd; border: 1px solid #adc2d0; font-size: 16px; font-weight: 400; }.balanceChanges img { width: 22px; height: 22px; }
 .balanceChanges { cursor: pointer; align-items: center; list-style: none; }.balanceChanges::-webkit-details-marker { display: none; }.balanceChanges::before { content: '▸'; font-size: 16px; font-weight: 400; }.balanceDetails[open] .balanceChanges::before { content: '▾'; }.balanceChanges:focus-visible { outline: 2px solid #177daf; outline-offset: 2px; }.balanceBreakdown { display: grid; gap: 3px; margin-top: 5px; padding: 5px; background: #edf6fd; font-size: 16px; font-weight: 400; }.balanceBreakdown > div { display: flex; align-items: center; gap: 5px; }.balanceBreakdown img { width: 22px; height: 22px; flex-shrink: 0; }.balanceBreakdown span { min-width: 0; overflow-wrap: anywhere; }
 @media (max-width: 1050px) { .balanceChanges { min-height: 40px; } }
 </style>

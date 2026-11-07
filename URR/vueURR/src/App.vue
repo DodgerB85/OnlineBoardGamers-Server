@@ -221,7 +221,7 @@ function showDebug() {
 			<span class="yourTurnBadge">{{ $t("status.yourTurnBadge") }}</span> {{ actionPanelTitle }}
 		</template>
 		<template v-else-if="actingPlayer !== undefined">
-			<span class="turnPlayerChip" :style="{ backgroundColor: personal.getCorrectedColourHex(store.players[actingPlayer].colour) }">{{ store.players[actingPlayer].displayName }}</span> {{ $t("status.acting", { action: actionPanelTitle }) }}
+			<span class="turnPlayerChip" :style="{ backgroundColor: personal.getCorrectedColourHex(store.players[actingPlayer].colour), color: personal.getCorrectedTextColourHex(store.players[actingPlayer].colour) }">{{ store.players[actingPlayer].displayName }}</span> {{ $t("status.acting", { action: actionPanelTitle }) }}
 		</template>
 		<template v-else>{{ $t("status.waitingNoPlayer", { action: actionPanelTitle }) }}</template>
 	</div>

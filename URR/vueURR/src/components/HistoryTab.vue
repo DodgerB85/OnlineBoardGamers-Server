@@ -29,7 +29,7 @@ watch(() => store.viewSettings.showHistory, (isOpen) => {
 	if (!isOpen) return
 	visibleCount.value = INITIAL_ROWS
 	previousFocus = document.activeElement
-	historyPanel.value.querySelector(".closeHistory").focus({ preventScroll: true })
+	historyPanel.value.focus({ preventScroll: true })
 }, { flush: "post" })
 
 function loadMore() {
@@ -56,21 +56,19 @@ async function findReplayPosition() {
 	}
 	const entry = panel.querySelector(".currentReplay")
 	if (!entry) return
-	const controlsHeight = panel.querySelector(".historyControls").offsetHeight
-	const availableHeight = panel.clientHeight - controlsHeight - 16
+	const availableHeight = panel.clientHeight - 16
 	const gap = 8 + Math.max(0, (availableHeight - entry.offsetHeight) / 2)
-	panel.scrollTo({ top: panel.scrollTop + entry.getBoundingClientRect().top - panel.getBoundingClientRect().top - controlsHeight - gap })
+	panel.scrollTo({ top: panel.scrollTop + entry.getBoundingClientRect().top - panel.getBoundingClientRect().top - gap })
 }
 </script>
 
 <template>
 	<transition name="fade">
-		<div id="history" ref="historyPanel" v-if="store.viewSettings.showHistory" :aria-label="$t('historyTab.aria')" @scroll="onScroll" @keydown.esc.stop.prevent="close">
+		<div id="history" ref="historyPanel" v-if="store.viewSettings.showHistory" tabindex="-1" :aria-label="$t('historyTab.aria')" @scroll="onScroll" @keydown.esc.stop.prevent="close">
 			<div class="historyControls"><div id="historyToggleDiv">
 				<span>{{ $t("historyTab.oldestFirst") }}</span>
 				<label class="switch"><input type="checkbox" v-model="toggleNewestFirst" :aria-label="$t('historyTab.newestFirst')" /><span class="slider round"></span></label>
 				<span>{{ $t("historyTab.newestFirst") }}</span>
-				<button class="closeHistory" @click="close" :aria-label="$t('historyTab.close')">×</button>
 			</div>
 			<p v-if="store.viewSettings.showReplay" class="replayHint"><span>{{ $t("historyTab.selectMove") }}</span><button @click="findReplayPosition">{{ $t("historyTab.findCurrent") }}</button></p></div>
 			<div id="historyMainDiv">
@@ -81,9 +79,9 @@ async function findReplayPosition() {
 </template>
 
 <style scoped>
-#history { position: absolute; padding-top: 5px; left: 2px; top: var(--urr-menu-height, 60px); width: 450px; max-height: calc(100vh - var(--urr-menu-height, 60px) - 12px); box-sizing: border-box; z-index: 9999; border: 2px solid black; background-color: #d4eafd; overflow-y: scroll; text-align: center; }
-#history { scroll-padding-top: 60px; scroll-padding-bottom: 8px; }
-.historyControls { position: sticky; top: 0; z-index: 1; background: #d4eafd; }
+#history { position: absolute; padding-top: 5px; left: 2px; top: var(--urr-menu-height, 60px); width: 450px; max-height: calc(100vh - var(--urr-menu-height, 60px) - 12px); box-sizing: border-box; z-index: 9999; border: 2px solid black; background-color: #d4eafd; overflow-y: scroll; text-align: center; outline: none; }
+#history { scroll-padding-bottom: 8px; }
+.historyControls { background: #d4eafd; }
 #historyToggleDiv { display: flex; align-items: center; justify-content: center; padding: 5px; background: #d4eafd; font-size: 16px; font-weight: 400; }
 .switch { position: relative; display: inline-block; width: 60px; height: 34px; margin: 0 10px; flex-shrink: 0; }
 .switch input { opacity: 0; width: 0; height: 0; }
@@ -91,9 +89,8 @@ async function findReplayPosition() {
 .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
 input:checked + .slider:before { transform: translateX(26px); }
 input:focus-visible + .slider { outline: 2px solid black; outline-offset: 2px; }
-.closeHistory { margin-left: auto; font-size: 22px; background: none; border: 0; cursor: pointer; }
 .replayHint { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin: 0; padding: 6px 8px; font-size: 16px; font-weight: bold; }.replayHint button { font: inherit; font-weight: normal; padding: 6px 8px; border: 1px solid #177daf; border-radius: 3px; background: #edf6fd; cursor: pointer; }
 .fade-enter-active, .fade-leave-active { transition: opacity 0.5s ease-in-out; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
-@media (max-width: 1050px) { .closeHistory { min-width: 44px; min-height: 44px; padding: 0; }.replayHint button { min-height: 40px; }.switch { height: 40px; }.slider { top: 3px; bottom: 3px; } }
+@media (max-width: 1050px) { .replayHint button { min-height: 40px; }.switch { height: 40px; }.slider { top: 3px; bottom: 3px; } }
 </style>

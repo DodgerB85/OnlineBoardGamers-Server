@@ -59,13 +59,11 @@ export const usePersonalStore = defineStore("personal", () => {
 	}
 
 	function getCorrectedColourHex(colour) {
-		if (colour === rf.BLACK) return "#333333"
-		if (colour === rf.BLUE) return "#334CCC"
-		if (colour === rf.GREEN) return "#4C9726"
-		if (colour === rf.GREY) return "#7F7F7F"
-		if (colour === rf.RED) return "#CC3333"
-		if (colour === rf.YELLOW) return "#CCBF33"
-		return "none"
+		return rf.PLAYER_COLOUR_HEXES[colour] || "none"
+	}
+
+	function getCorrectedTextColourHex(colour) {
+		return rf.PLAYER_COLOUR_TEXT_HEXES[colour] || "#ffffff"
 	}
 
 	/** Returns the name to show in history: uses player.name if displayName is BOT_NAME (kicked out), else displayName */
@@ -103,6 +101,7 @@ export const usePersonalStore = defineStore("personal", () => {
 		canResign,
 		getCorrectedColour,
 		getCorrectedColourHex,
+		getCorrectedTextColourHex,
 		getHistoryName,
 	}
 })

@@ -390,8 +390,6 @@ export function exportURRmodel(forGameOver = false) {
 	]
 	entry.push(history[0]?.[3] ?? [])
 
-	console.log(JSON.stringify(entry))
-
 	return compressData64(entry)
 }
 
