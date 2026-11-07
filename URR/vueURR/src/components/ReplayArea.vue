@@ -9,7 +9,9 @@ import { usePersonalStore } from "../stores/URRpersonal.js"
 const store = useModelStore()
 const personal = usePersonalStore()
 
-store.replayStep.index = 0
+// Replay opens on the latest position; the slider is 0-based internally but
+// displays the first step as 1.
+store.replayStep.index = Math.max(0, store.history.length - 1)
 const step = computed({ get: () => store.replayStep.index, set: (index) => { store.replayStep.index = index } })
 const liveSnapshot = funcs.simpleExportWholeURRmodel()
 
@@ -64,7 +66,7 @@ function exitReplay() {
 		<button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="step === 0" @click="backToMyLastMove">{{ $t("replay.backToMyLastMove") }}</button>
 		<button class="actionsLineButton" :disabled="step === 0" @click="prev">&lt; {{ $t("replay.prev") }}</button>
 		<input :aria-label="$t('replay.stepAria')" type="range" min="0" :max="Math.max(0, maxStep())" v-model.number="step" />
-		<span>{{ $t("replay.step", { step, total: maxStep() }) }}</span>
+		<span>{{ $t("replay.step", { step: step + 1, total: maxStep() + 1 }) }}</span>
 		<button class="actionsLineButton" :disabled="step >= maxStep()" @click="next">{{ $t("replay.next") }} &gt;</button>
 		<button class="actionsLineButton" @click="store.viewSettings.showHistory = !store.viewSettings.showHistory">{{ $t("replay.history") }}</button>
 		<button class="actionsLineButton" @click="exitReplay">{{ $t("replay.exit") }}</button>
