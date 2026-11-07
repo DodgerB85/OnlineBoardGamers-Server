@@ -86,7 +86,7 @@ function crewTiles(capacity) { return capacity === "1+1" ? ["1", "1"] : [capacit
 				</details>
 				<div class="stateNations"><ArtworkCard v-for="nation in relevantNations(state.id)" :key="nation.id" :src="assets.getNationCardImage(nation.id)" :alt="rf.NATION_NAMES[nation.id]" /></div>
 				<details v-if="otherNations(state.id).length" class="nationInventory"><summary>{{ relevantNations(state.id).length ? $t("stateStrip.otherNations") : $t("nationMarket.aria") }} · {{ otherNations(state.id).length }}</summary><div class="stateNations"><ArtworkCard v-for="nation in otherNations(state.id)" :key="nation.id" :src="assets.getNationCardImage(nation.id)" :alt="rf.NATION_NAMES[nation.id]" /></div></details>
-				<div class="stateFoot">{{ $t("stateStrip.ownedLands", { count: rules.ownedLand(store, state.id).length }) }}<span v-if="state.diggers.length">{{ $t("stateStrip.hiredCrews", { count: state.diggers.length }) }}</span><span v-if="state.hasRevolted">{{ $t("stateStrip.revolution") }}</span></div>
+				<div class="stateFoot">{{ $t("stateStrip.ownedLands", { count: rules.ownedLand(store, state.id).length }) }}<span v-if="state.diggers.length">{{ $t("stateStrip.hiredCrews", { count: state.diggers.length }) }}</span><details class="equipmentTokens"><summary>{{ $t("stateStrip.waterworkTokens") }}</summary><div v-for="capacity in Object.keys(store.board.waterworkLimits[state.id])" :key="capacity"><img :src="assets.getWaterworkImage(state.id, capacity)" :alt="capacity" /> {{ $t("actions.tokensLeft", { tokens: rules.remainingWaterworkTokens(store, state.id, capacity === 'M' ? capacity : Number(capacity)) }) }}</div></details><span v-if="state.hasRevolted">{{ $t("stateStrip.revolution") }}</span></div>
 			</div>
 			<div v-else class="inactiveDetails"><CurrencyText :text="$t('stateStrip.inactive', { amount: state.money, count: rf.LAND_FOR_STATE_TO_ACTIVATE })" /></div>
 		</details>
@@ -94,6 +94,8 @@ function crewTiles(capacity) { return capacity === "1+1" ? ["1", "1"] : [capacit
 </template>
 
 <style scoped>
+.equipmentTokens { margin-top: 5px; }.equipmentTokens > summary { cursor: pointer; }.equipmentTokens > div { margin-top: 3px; }
+.equipmentTokens img { width: 24px; height: 24px; vertical-align: middle; }
 .stateStrip { display: flex; flex-direction: column; align-items: stretch; gap: 6px; width: 100%; margin: 0; padding: 0; box-sizing: border-box; }
 .stateCard { min-width: 0; background: #f7f5ef; border: 1px solid var(--state-color, #8e805e); border-left: 3px solid var(--state-color, #8e805e); border-radius: 4px; text-align: left; font-size: 16px; font-weight: 400; overflow: hidden; }
 .stateCard > summary { display: flex; align-items: stretch; gap: 7px; min-height: 52px; list-style: none; cursor: pointer; }.stateCard > summary::-webkit-details-marker { display: none; }.treasuryHeader { flex: 0 0 36px; width: 36px; padding: 8px 0 8px 7px; }.treasuryHeader img { width: 100%; height: auto; display: block; }.stateSummary { display: flex; flex-direction: column; justify-content: center; min-width: 0; gap: 2px; padding: 4px 4px 4px 0; }.stateName { display: flex; align-items: center; gap: 4px; }.stateName b { font-size: 16px; font-weight: 400; }.stateMeta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #53616a; font-size: 16px; font-weight: 400; }.orderNumber { margin-left: auto; color: #58636a; }

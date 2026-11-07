@@ -15,6 +15,7 @@ import * as rules from "../js/URRrules"
 import * as controller from "../js/URRcontroller"
 import * as model from "../js/URRmodel"
 import { actionPanelGame, groupedDraftSteps, crewRemovalIndices } from "../js/URRturnDraft.js"
+import { previewWaterPlan } from "../js/URRwaterPlan.js"
 import { applyAction, previewMaintenanceSales } from "../js/URRgame"
 import * as boardRules from "../js/URRmap"
 import * as view from "../js/URRview"
@@ -55,8 +56,6 @@ const digButton = ref(null)
 const nationToBuy = ref(null)
 const nationPrice = ref(0)
 const removeWaterwork = ref(null)
-const waterTarget = ref(null)
-const waterAmount = ref(1)
 const activeSection = ref("")
 function chooseSection(section) { activeSection.value = activeSection.value === section ? "" : section }
 // Digging is finished by the button below the canal controls, or by buying anything.
@@ -104,8 +103,18 @@ const nationSaleRecipient = computed(() => {
 const cardEra = computed(() => rules.nextCardEra(game.value))
 const cardData = computed(() => rf.ERA_CARD_DATA[cardEra.value])
 const frame = computed(() => water.currentWaterFrame(game.value))
+const waterAvailable = computed(() => (store.rain.routing?.stack.find((entry) => entry.area === frame.value?.area)?.water ?? 0) - store.turnDraft.waterPlan.reduce((total, selection) => total + selection.amount, 0))
 const waterOptions = computed(() => water.waterChoices(game.value))
-const chosenWater = computed(() => waterOptions.value.find((choice) => choice.area === waterTarget.value))
+const waterPlanError = computed(() => {
+	if (!store.turnDraft.waterPlan.length) return ""
+	try { previewWaterPlan(model.snapshotState(), store.turnDraft.waterPlan); return "" }
+	catch (error) { return error.message }
+})
+function changeWaterAmount(amount) {
+	const selected = store.turnDraft.waterPlan.find((selection) => selection.area === props.selectedArea)
+	if (selected) selected.amount = Number(amount)
+}
+const chosenWater = computed(() => waterOptions.value.find((choice) => choice.area === props.selectedArea))
 const sourceWaterwork = computed(() => game.value.board.areas.find((area) => area.id === frame.value?.area)?.waterwork)
 const targetWaterwork = computed(() => game.value.board.areas.find((area) => area.id === chosenWater.value?.area)?.waterwork)
 const irrigationLand = computed(() => {
@@ -194,6 +203,21 @@ function buyLand(id) {
 }
 // Clicking land on the map edits the plan directly: your land toggles a sale, other land becomes the (single) purchase.
 function planClick(id) {
+	if (!store.debug.tool && controller.canReviewTurn() && store.viewSettings.inspectedState === null && !store.viewSettings.showOwnedLand) {
+		const selected = store.turnDraft.waterPlan.findIndex((selection) => selection.area === id)
+		if (selected >= 0) { store.turnDraft.waterPlan.splice(selected, 1); return }
+		if (personal.canPlay() && water.waterChoices(store).some((choice) => choice.area === id)) {
+			if (waterAvailable.value < 1) { store.gameMessages.actionError = t("actions.noWaterLeft"); return }
+			store.gameMessages.actionError = ""
+			if (!store.turnDraft.start) {
+				store.turnDraft.start = { state: model.snapshotState(), historyLength: store.history.length }
+				store.turnDraft.player = controller.currentPlayerIndex()
+			}
+			store.turnDraft.pauseAutomatic = true
+			store.turnDraft.waterPlan.push({ area: id, amount: 1 })
+			return
+		}
+	}
 	if (game.value.gameflow.phase === rf.PHASE_DEVELOPMENT) {
 		if (store.viewSettings.actionIntent === "sell" && personal.canPlay() && !store.turnDraft.ready) return toggleMaintenanceLand(id)
 		return equipClick(id)
@@ -272,7 +296,7 @@ const developmentTurnAction = computed(() => {
 	return { hasPendingSales: hasSales || maintenanceSelection.value.length > 0, label: willRevolt.value ? t("actions.declareRevolution") : hasSales ? t("actions.sellEnd") : !rules.hasMaintenanceCrew(game.value, state.value.id) ? t("actions.hireEnd") : t("actions.endTurn"), error: props.path.length ? t("actions.addOrClearCanal") : !canFinishDevelopment.value || hasSales ? maintenanceError.value : "" }
 })
 watch(landDraft, (draft) => emit("changeLandDraft", draft), { deep: true, immediate: true })
-watch(developmentTurnAction, (action) => emit("changeTurnAction", action), { immediate: true })
+watch(() => store.turnDraft.waterPlan.length ? { label: t("actions.endTurn"), error: waterPlanError.value, undo: () => store.turnDraft.waterPlan.pop() } : developmentTurnAction.value, (action) => emit("changeTurnAction", action), { immediate: true })
 const digPreview = computed(() => {
 	if (props.path.length < 2) return { cost: null, error: t("actions.selectTwoAreas") }
 	try {
@@ -425,26 +449,31 @@ async function submit(action) {
 	}
 }
 const mapConfirmation = computed(() => {
-	if (!personal.canPlay() || store.viewSettings.showReplay) return null
+	if (!controller.canReviewTurn()) return null
+	const selected = store.turnDraft.waterPlan.find((selection) => selection.area === props.selectedArea)
+	if (selected) {
+		const isPump = game.value.board.areas.find((area) => area.id === selected.area).waterwork !== null
+		return {
+			area: selected.area, label: `${t("actions.waterPlan")} · ${label(selected.area)}`, detail: waterPlanError.value || t("actions.waterPlanReady"),
+			endTurn: true, canConfirm: !waterPlanError.value,
+			pumpAmount: isPump ? selected.amount : null, maxWater: waterAvailable.value + selected.amount,
+		}
+	}
+	if (!personal.canPlay()) return null
 	if (game.value.gameflow.phase === rf.PHASE_DEVELOPMENT && store.viewSettings.actionIntent === "dig" && props.path.length >= 2) return {
 		area: props.path.at(-1), label: game.value.gameflow.developmentStep === "eridu" ? t("actions.addEriduCanal") : t("actions.addCanalCrew", { capacity: chosenCrew.value?.capacity ?? "?" }),
 		detail: digPreview.value.cost ? t("actions.canalPoints", { canals: digPreview.value.cost.canals, junctions: digPreview.value.cost.junctions }) : digError.value, canConfirm: !digError.value,
 	}
-	return chosenWater.value ? {
-		area: chosenWater.value.area, label: chosenWater.value.kind === "pump" ? t("actions.sendWaterTo", { area: label(chosenWater.value.area) }) : t("actions.irrigateArea", { area: label(chosenWater.value.area) }),
-		detail: chosenWater.value.kind === "irrigate" ? t("actions.irrigationYield", { amount: irrigationYield.value }) : t("actions.reviewCanalAmount"),
-		canConfirm: chosenWater.value.kind === "irrigate" || (Number.isInteger(waterAmount.value) && waterAmount.value >= 1 && waterAmount.value <= frame.value.water),
-	} : null
+	return null
 })
 watch(mapConfirmation, (choice) => emit("changeMapAction", choice), { immediate: true })
 function confirmMapAction() {
 	if (!mapConfirmation.value?.canConfirm) return
-	if (game.value.gameflow.phase === rf.PHASE_DEVELOPMENT) return submitDig()
-	return submit({ type: "allocateWater", area: waterTarget.value, amount: chosenWater.value.kind === "irrigate" ? 1 : waterAmount.value })
+	return mapConfirmation.value.endTurn ? controller.endPlayerTurn() : submitDig()
 }
 function cancelMapAction() {
 	if (game.value.gameflow.phase === rf.PHASE_DEVELOPMENT && store.viewSettings.actionIntent === "dig") emit("clearPath")
-	else { waterTarget.value = null; emit("selectArea", null) }
+	else emit("selectArea", null)
 }
 async function finishTurn() {
 	if (game.value.gameflow.phase === rf.PHASE_SETTLEMENT && hasTrade.value) {
@@ -457,7 +486,7 @@ async function finishTurn() {
 	}
 	return controller.endPlayerTurn()
 }
-defineExpose({ finishTurn, confirmMapAction, cancelMapAction, planClick, showDigging })
+defineExpose({ finishTurn, confirmMapAction, cancelMapAction, planClick, changeWaterAmount, showDigging })
 
 watch([() => game.value.gameflow.phase, () => actor.value, () => game.value.gameflow.stateIndex], () => {
 	resetTrade()
@@ -470,20 +499,8 @@ watch([() => game.value.gameflow.phase, () => actor.value, () => game.value.game
 }, { immediate: true })
 watch(() => game.value.gameflow.primogenitureBid?.amount, (amount) => { if (primogenitureAmount.value <= (amount || 0)) primogenitureAmount.value = (amount || 0) + 1 })
 watch(() => props.selectedArea, (id) => {
-	if (game.value.gameflow.phase === rf.PHASE_RAINY_SEASON && game.value.rain.step === "routing") waterTarget.value = waterOptions.value.some((choice) => choice.area === id) ? id : null
 	if (game.value.gameflow.phase === rf.PHASE_RAINY_SEASON && game.value.rain.step === "harvest" && removable.value.includes(id)) removeWaterwork.value = id
 })
-watch(() => frame.value?.area, () => { waterTarget.value = null; waterAmount.value = 1 })
-watch(() => frame.value?.water, (water) => { if (water > 0 && waterAmount.value > water) waterAmount.value = water })
-watch(waterOptions, (choices) => { if (!choices.some((choice) => choice.area === waterTarget.value)) waterTarget.value = null })
-watch(() => store.turnDraft.ready, (ready) => {
-	if (!ready) return
-	const action = store.turnDraft.steps.at(-1).action
-	if (action.type === "allocateWater") {
-		waterTarget.value = action.area
-		waterAmount.value = action.amount
-	}
-}, { flush: "post" })
 watch(() => state.value?.diggers.filter((crew) => !crew.hasDug).map((crew) => crew.id).join(","), () => {
 	if (selectedCrew.value !== null && !unusedCrews.value.some((crew) => crew.id === selectedCrew.value)) selectedCrew.value = null
 })
@@ -600,15 +617,12 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 		</fieldset>
 		<fieldset v-else-if="game.gameflow.phase === rf.PHASE_RAINY_SEASON && game.rain.step === 'routing' && frame" :disabled="!personal.canPlay()">
 			<legend>{{ $t("actions.routeWater", { area: label(frame.area) }) }}</legend>
-			<form @submit.prevent="submit({ type: 'allocateWater', area: waterTarget, amount: chosenWater?.kind === 'irrigate' ? 1 : waterAmount })">
-				<div class="waterSupply"><img class="routingWork" :src="assets.getWaterworkImage(sourceWaterwork.state, sourceWaterwork.capacity)" :alt="`${sourceWaterwork.kind} · ${view.waterworkMeasure(sourceWaterwork)}`" :title="`${sourceWaterwork.kind} · ${view.waterworkMeasure(sourceWaterwork)}`" /><span class="waterDrop" aria-hidden="true"></span><span class="waterCount"><b>{{ frame.water }}</b> {{ $t("actions.waterAvailable") }}<small>{{ sourceWaterwork.kind }}<br>{{ view.waterworkMeasure(sourceWaterwork) }}</small></span></div><p v-if="!store.turnDraft.ready">{{ $t("actions.chooseBlueHex") }}</p><p v-if="!store.turnDraft.ready">{{ $t("actions.pumpsIrrigate") }}</p>
-				<div class="buttonRow">
-					<label>{{ $t("actions.destination") }} <select v-model="waterTarget" @change="emit('selectArea', waterTarget)" required><option :value="null">{{ $t("actions.clickMapOrChoose") }}</option><option v-for="(choice, index) in waterOptions" :key="choice.area" :value="choice.area">{{ index + 1 }}. {{ label(choice.area) }} · {{ choice.kind === 'pump' ? $t("actions.sendToPump") : $t("actions.irrigate") }}</option></select></label>
-					<div v-if="targetWaterwork" class="offeredWork"><img :src="assets.getWaterworkImage(targetWaterwork.state, targetWaterwork.capacity)" :alt="$t('actions.destinationPump')" /><span>{{ $t("actions.pumpOf", { state: rf.STATE_NAMES[targetWaterwork.state] }) }}<br>{{ view.waterworkMeasure(targetWaterwork) }}</span></div>
-				</div>
+			<div class="waterSupply"><img class="routingWork" :src="assets.getWaterworkImage(sourceWaterwork.state, sourceWaterwork.capacity)" alt="" /><span class="waterDrop" aria-hidden="true"></span><span class="waterCount"><b>{{ waterAvailable }}</b> {{ $t("actions.waterAvailable") }}</span></div>
+			<p>{{ $t("actions.chooseBlueHex") }}</p>
+			<p>{{ $t("actions.pumpsIrrigate") }}</p>
+			<label>{{ $t("actions.destination") }} <select :value="null" @change="planClick($event.target.value); emit('selectArea', $event.target.value); $event.target.value = ''"><option value="">{{ $t("actions.clickMapOrChoose") }}</option><option v-for="(choice, index) in waterOptions" :key="choice.area" :value="choice.area">{{ index + 1 }}. {{ label(choice.area) }} · {{ choice.kind === 'pump' ? $t("actions.sendToPump") : $t("actions.irrigate") }}</option></select></label>
 				<div v-if="irrigationLand" class="offeredWork irrigationPreview"><img :src="assets.getTerrainImage(irrigationLand.landType, irrigationLand.isCity)" :alt="`${rf.LAND_NAMES[irrigationLand.landType]}${irrigationLand.isCity ? ' ' + $t('common.city') : ''}`" /><img :src="assets.getPlayerMarkerImage(irrigationLand.owner)" :alt="game.players[irrigationLand.owner].displayName" /><span><small><CurrencyText :text="$t('actions.privateIncome', { amount: irrigationIncome })" /></small><small><CurrencyText :text="$t('actions.stateHarvest', { state: rf.STATE_NAMES[irrigationState], before: rules.harvestAmount(game, irrigationState), after: rules.harvestAmount(game, irrigationState) + irrigationYield })" /></small></span></div>
-				<div class="buttonRow routingControls"><label v-if="chosenWater?.kind === 'pump'">{{ $t("actions.water") }} (max {{ frame.water }}) <input type="number" inputmode="numeric" v-model.number="waterAmount" min="1" :max="frame.water" step="1" required /></label><button class="primaryAction" :disabled="!chosenWater">{{ !chosenWater ? $t("actions.chooseDestination") : chosenWater.kind === 'pump' ? $t("actions.sendWater") : $t("actions.irrigateOne") }}<small v-if="chosenWater"><template v-if="chosenWater.kind === 'pump'">{{ waterAmount }} → </template>{{ label(chosenWater.area) }}<template v-if="chosenWater.kind === 'irrigate'"><br><CurrencyText :text="$t('actions.irrigationYield', { amount: irrigationYield })" /></template></small></button></div>
-			</form>
+			<ul v-if="store.turnDraft.waterPlan.length" class="draftList"><li v-for="selection in store.turnDraft.waterPlan" :key="selection.area"><span>{{ label(selection.area) }} · <label v-if="game.board.areas.find((area) => area.id === selection.area).waterwork">{{ $t("actions.water") }} <input type="number" inputmode="numeric" :value="selection.amount" min="1" :max="waterAvailable + selection.amount" step="1" @input="selection.amount = Number($event.target.value)" /></label><template v-else>{{ selection.amount }} {{ $t("actions.water") }}</template></span><button @click="planClick(selection.area)" :aria-label="$t('actions.removeFromDraft')">×</button></li></ul>
 		</fieldset>
 		<fieldset v-else-if="game.gameflow.phase === rf.PHASE_RAINY_SEASON && game.rain.step === 'harvest'" :disabled="!personal.canPlay()">
 			<legend><CurrencyText :text="$t('actions.harvestLegend', { state: rf.STATE_NAMES[state.id], amount: rules.harvestAmount(game, state.id) })" /></legend>

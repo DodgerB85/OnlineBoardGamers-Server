@@ -400,3 +400,28 @@ test("Reducing to the mandatory minimum restores the unpurchased crew and First 
 	const optional = betweenStatesGame()
 	assert.deepEqual(crewRemovalIndices([{ state: optional, action }, { state: optional, action }], 1, rf.STATE_AKKAD), [1])
 })
+
+
+test("Restoring an irrigation checkpoint returns the water for another hex", () => {
+	const game = createGame(["A", "B", "C"])
+	for (const nation of game.nations) nation.isRemoved = true
+	Object.assign(game.gameflow, { phase: rf.PHASE_RAINY_SEASON, stateOrder: [0], turnOrder: [0] })
+	Object.assign(game.states[0], { isActive: true, king: 0 })
+	const area = (id) => game.board.areas.find((entry) => entry.id === id)
+	const pump = area("printed-3-5")
+	const first = area("printed-3-4")
+	const second = area("printed-4-5")
+	pump.waterwork = { state: 0, kind: "pump", capacity: 1 }
+	first.owner = first.markerOwner = second.owner = second.markerOwner = 0
+	game.board.canals.push([pump.id, first.id], [pump.id, second.id])
+	game.rain.step = "routing"
+	game.rain.routing = { sourceIndex: 3, river: null, arrivals: {}, outflow: 0, stack: [{ area: pump.id, water: 2, downstreamWater: 0, visited: [pump.id], originReservoir: pump.id }] }
+	const checkpoint = structuredClone(game)
+	const selected = applyAction(game, 0, { type: "allocateWater", area: first.id, amount: 1 })
+	assert.equal(selected.board.areas.find((entry) => entry.id === first.id).irrigatedBy, 0)
+	assert.equal(checkpoint.rain.routing.stack[0].water, 2)
+	assert.equal(first.irrigatedBy, null)
+	const changed = applyAction(checkpoint, 0, { type: "allocateWater", area: second.id, amount: 1 })
+	assert.equal(changed.board.areas.find((entry) => entry.id === first.id).irrigatedBy, null)
+	assert.equal(changed.board.areas.find((entry) => entry.id === second.id).irrigatedBy, 0)
+})

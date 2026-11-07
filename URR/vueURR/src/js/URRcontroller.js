@@ -3,6 +3,8 @@ import * as funcs from "./URRfuncs"
 import * as model from "./URRmodel"
 import * as IO from "../backend/URR_IO"
 import * as game from "./URRgame.js"
+import { currentWaterFrame } from "./URRwater.js"
+import { previewWaterPlan } from "./URRwaterPlan.js"
 import * as turnDraft from "./URRturnDraft.js"
 import * as rules from "./URRrules.js"
 import i18n from "../i18n.js"
@@ -146,6 +148,15 @@ export function resetTurn() {
 export async function endPlayerTurn() {
 	const store = useModelStore()
 	if (!canReviewTurn()) return false
+	if (store.turnDraft.waterPlan.length) {
+		let actions
+		try { actions = previewWaterPlan(model.snapshotState(), store.turnDraft.waterPlan) }
+		catch (error) { store.gameMessages.actionError = error.message; return false }
+		const isFullyAllocated = actions.reduce((total, action) => total + action.amount, 0) === currentWaterFrame(store).water
+		for (const action of actions) if (!await submitAction(action)) return false
+		if (isFullyAllocated) store.turnDraft.ready = true
+		store.turnDraft.waterPlan = []
+	}
 	if (!store.turnDraft.ready) {
 		try {
 			// Reuse the existing forced-action rules after an Undo or Reset.
