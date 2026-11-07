@@ -1885,45 +1885,58 @@ class URRpresenter(GamePresenter):
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
-        winner_user = User.objects.get(username=_winnerUsername)
-        winner_gp = self.gameObj.players.filter(player=winner_user).first()
-        if winner_gp:
-            winner_gp.winner = True
-            winner_gp.save()
+        seat_names = self.getAllPlayersOrderedySeatInArray()
+        groups = _finalPositions
+        if groups and not isinstance(groups[0], (list, tuple)):
+            groups = [[seat] for seat in groups]
+        group_names = []
+        for group in groups:
+            names = [seat_names[seat] for seat in group if isinstance(seat, int) and 0 <= seat < len(seat_names)]
+            if names:
+                group_names.append(names)
+        winner_usernames = group_names[0] if group_names else ([_winnerUsername] if isinstance(_winnerUsername, str) else list(_winnerUsername or []))
+
+        for username in winner_usernames:
+            winner_user = User.objects.filter(username=username).first()
+            if not winner_user:
+                continue
+            winner_gp = self.gameObj.players.filter(player=winner_user).first()
+            if winner_gp:
+                winner_gp.winner = True
+                winner_gp.save()
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
 
-        # _finalPositions is an array of seat indexes
-        finalPositionsArr = []
-        for seatPos in _finalPositions:
-            finalPositionsArr.append(self.getAllPlayersOrderedySeatInArray()[seatPos])
-
-        convertedFinalPositions = []
-        for pos, username in enumerate(finalPositionsArr):
-            if pos == 0:
-                posText = "1st - Congratulations!"
-            elif pos == 1:
-                posText = "2nd"
-            elif pos == 2:
-                posText = "3rd"
-            elif pos == 3:
-                posText = "4th"
-            elif pos == 4:
-                posText = "5th"
-            elif pos == 5:
-                posText = "6th"
-            else:
-                posText = "Last"
-            convertedFinalPositions.append([username, posText, pos])
+        # _finalPositions is an array of finishing groups; each group holds seat indexes.
+        finalResults = []
+        rank = 1
+        for pos, names in enumerate(group_names):
+            for username in names:
+                if rank == 1:
+                    posText = "1st - Congratulations!" if len(names) == 1 else "Joint 1st - Congratulations!"
+                elif rank == 2:
+                    posText = "2nd" if len(names) == 1 else "Joint 2nd"
+                elif rank == 3:
+                    posText = "3rd" if len(names) == 1 else "Joint 3rd"
+                elif rank == 4:
+                    posText = "4th" if len(names) == 1 else "Joint 4th"
+                elif rank == 5:
+                    posText = "5th" if len(names) == 1 else "Joint 5th"
+                elif rank == 6:
+                    posText = "6th" if len(names) == 1 else "Joint 6th"
+                else:
+                    posText = "Last"
+                finalResults.append([username, posText, pos])
+            rank += len(names)
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists() and self.gameObj.maxPlayers > 1:
-            async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "URR", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
+            async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "URR", finalResults, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 
             if self.gameObj.relatedMainTournament:
-                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMainTournament, self.gameObj, [_winnerUsername], _tournamentData)
+                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMainTournament, self.gameObj, winner_usernames, _tournamentData)
             if self.gameObj.relatedMiniTournament:
-                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMiniTournament, self.gameObj, [_winnerUsername], _tournamentData)
+                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMiniTournament, self.gameObj, winner_usernames, _tournamentData)
 
 
 class DDLpresenter(GamePresenter):

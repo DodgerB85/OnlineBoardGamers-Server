@@ -17,6 +17,17 @@ export function displayedTurnOrder(game) {
 	return game.gameflow.turnOrder
 }
 
+// Tied players share a rank: [[a,b],[c]] becomes 1,1,3.
+export function finalStandings(game) {
+	const entries = []
+	let position = 1
+	for (const group of game.gameflow.finalPositions || []) {
+		for (const index of group) entries.push({ index, position })
+		position += group.length
+	}
+	return entries
+}
+
 export function currentStateId(game) {
 	if (game.gameflow.pendingOffer) return game.gameflow.pendingOffer.state
 	if (game.gameflow.phase === rf.PHASE_DEVELOPMENT) {

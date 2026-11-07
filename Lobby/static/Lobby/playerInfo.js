@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	document.querySelector("#KFW").addEventListener("click", () => show_playerStatsTab("KFW"))
 	document.querySelector("#WEB").addEventListener("click", () => show_playerStatsTab("WEB"))
 	document.querySelector("#RNB").addEventListener("click", () => show_playerStatsTab("RNB"))
+	document.querySelector("#URR").addEventListener("click", () => show_playerStatsTab("URR"))
 
 	var gameRows = document.querySelectorAll(".gameRow")
 
@@ -153,6 +154,9 @@ function show_playerStatsTab(game) {
 		document.getElementById(game).classList.add("active")
 	} else if (game === "RNB") {
 		document.getElementById(game).classList.add("active")
+	} else if (game === "URR") {
+		document.getElementsByClassName("players2")[11].style.display = "none"
+		document.getElementById(game).classList.add("active")
 	}
 
 	var divToDisplay = "playerStatsDiv"
@@ -166,6 +170,7 @@ function show_playerStatsTab(game) {
 	else if (game === "KFW") divToDisplay += "7"
 	else if (game === "WEB") divToDisplay += "8"
 	else if (game === "RNB") divToDisplay += "9"
+	else if (game === "URR") divToDisplay += "11"
 	// Show the correct Div
 	document.getElementById(divToDisplay).style.display = "block"
 }

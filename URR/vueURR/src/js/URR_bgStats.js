@@ -8,13 +8,17 @@ export function buildBgStatsUrl() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 
-	// finalPositions is already ordered best-first: one group each.
+	// finalPositions groups tied players, best group first.
 	const groups = []
-	for (const index of store.gameflow.finalPositions || []) {
-		const player = store.players[index]
-		// A bot is not a player: solo games export as a one-player play.
-		if (player.isMissing || player.displayName === rf.BOT_NAME) continue
-		groups.push([{ name: player.name, score: player.score }])
+	for (const group of store.gameflow.finalPositions || []) {
+		const players = []
+		for (const index of group) {
+			const player = store.players[index]
+			// A bot is not a player: solo games export as a one-player play.
+			if (player.isMissing || player.displayName === rf.BOT_NAME) continue
+			players.push({ name: player.name, score: player.score })
+		}
+		if (players.length > 0) groups.push(players)
 	}
 	const endTime = store.history.length > 0 ? store.historyTimeAt(store.history.length - 1) : null
 

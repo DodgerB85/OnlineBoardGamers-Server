@@ -19,7 +19,7 @@ const showLand = computed(() => {
 const activePlayer = computed(() => {
 	if (inspectedPlayer.value !== null) return inspectedPlayer.value
 	if (store.turnDraft.ready && !store.viewSettings.showReplay) return view.displayedTurnOrder(store)[0]
-	return store.gameflow.turnOrder[0] ?? store.gameflow.finalPositions?.[0] ?? 0
+	return store.gameflow.turnOrder[0] ?? store.gameflow.finalPositions?.[0]?.[0] ?? 0
 })
 const player = computed(() => store.players[activePlayer.value])
 const land = computed(() => rf.ALL_LAND_TYPES.map((type) => {

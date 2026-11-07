@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	document.querySelector("#KFW").addEventListener("click", () => show_playerStatsTab("KFW"))
 	document.querySelector("#WEB").addEventListener("click", () => show_playerStatsTab("WEB"))
 	document.querySelector("#RNB").addEventListener("click", () => show_playerStatsTab("RNB"))
+	document.querySelector("#URR").addEventListener("click", () => show_playerStatsTab("URR"))
 
 	document.querySelector("#allPlayers").addEventListener("click", () => show_playerStatsTab("allPlayers"))
 	document.querySelector("#players2").addEventListener("click", () => show_playerStatsTab("players2"))
@@ -100,6 +101,7 @@ function show_playerStatsTab(listType) {
 		else if (global.game === "KFW") divToDisplay += "7"
 		else if (global.game === "WEB") divToDisplay += "8"
 		else if (global.game === "RNB") divToDisplay += "9"
+		else if (global.game === "URR") divToDisplay += "10"
 
 		global.fairPlayList = true
 		document.getElementById(global.game).classList.add("active")
@@ -117,8 +119,9 @@ function show_playerStatsTab(listType) {
 		else if (listType === "KFW") global.game = "KFW"
 		else if (listType === "WEB") global.game = "WEB"
 		else if (listType === "RNB") global.game = "RNB"
+		else if (listType === "URR") global.game = "URR"
 
-		if (listType !== "FCM" && listType !== "HLC" && listType !== "BUS" && listType !== "TGZ" && listType !== "CNS" && listType !== "AQY" && listType !== "IND" && listType !== "KFW" && listType !== "WEB" && listType !== "RNB") global.fairPlayList = false
+		if (listType !== "FCM" && listType !== "HLC" && listType !== "BUS" && listType !== "TGZ" && listType !== "CNS" && listType !== "AQY" && listType !== "IND" && listType !== "KFW" && listType !== "WEB" && listType !== "RNB" && listType !== "URR") global.fairPlayList = false
 
 		if (listType === "allPlayers") global.players = "allPlayers"
 		if (listType === "players2") global.players = "players2"
@@ -178,6 +181,11 @@ function show_playerStatsTab(listType) {
 			document.getElementById("players2").style.display = "inline"
 			document.getElementById("players5").style.display = "inline"
 			document.getElementById("players6").style.display = "inline"
+		} else if (global.game === "URR") {
+			if (global.players === "players2") global.players = "allPlayers"
+			document.getElementById("players2").style.display = "none"
+			document.getElementById("players5").style.display = "inline"
+			document.getElementById("players6").style.display = "inline"
 		}
 
 		// Highlight the correct time and playercount
@@ -216,6 +224,7 @@ function show_playerStatsTab(listType) {
 			else if (global.game === "KFW") divToDisplay += "7"
 			else if (global.game === "WEB") divToDisplay += "8"
 			else if (global.game === "RNB") divToDisplay += "9"
+			else if (global.game === "URR") divToDisplay += "10"
 		} else {
 			if (global.game === "FCM") divToDisplay += "Div0"
 			else if (global.game === "HLC") divToDisplay += "Div1"
@@ -227,6 +236,7 @@ function show_playerStatsTab(listType) {
 			else if (global.game === "KFW") divToDisplay += "Div7"
 			else if (global.game === "WEB") divToDisplay += "Div8"
 			else if (global.game === "RNB") divToDisplay += "Div9"
+			else if (global.game === "URR") divToDisplay += "Div10"
 		}
 
 		const el = document.getElementById(divToDisplay)

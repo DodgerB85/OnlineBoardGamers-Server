@@ -139,7 +139,7 @@ function localCastVote(topic) {
 
 	<!-- REWIND PANEL -->
 	<transition name="fade">
-	<div id="rewindPanel" v-if="store.viewSettings.showRewindPanel">
+	<div id="rewindPanel" v-if="store.viewSettings.showRewindPanel && store.gameflow.phase !== rf.PHASE_GAME_OVER">
 		<p>{{ $t("rewind.intro") }}</p>
 		<p>{{ $t("rewind.courtesy") }}</p>
 		<p>{{ $t("rewind.misuse") }}</p>

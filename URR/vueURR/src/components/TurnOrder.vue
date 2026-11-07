@@ -12,11 +12,11 @@ const { t } = useI18n()
 const emit = defineEmits(["inspect"])
 const currentPlayer = computed(() => view.displayedTurnOrder(store)[0])
 const isGameOver = computed(() => store.gameflow.phase === rf.PHASE_GAME_OVER)
-const playerOrder = computed(() => {
-	if (isGameOver.value) return store.gameflow.finalPositions
+const playerEntries = computed(() => {
+	if (isGameOver.value) return view.finalStandings(store)
 	const order = store.gameflow.fullTurnOrder
 	const first = store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS ? 0 : order.indexOf(store.gameflow.primogeniture)
-	return [...order.slice(first), ...order.slice(0, first)]
+	return [...order.slice(first), ...order.slice(0, first)].map((index, position) => ({ index, position: position + 1 }))
 })
 const stateOrder = computed(() => store.gameflow.phase === rf.PHASE_SETTLEMENT ? rules.getDevelopmentOrder(store) : store.gameflow.stateOrder.filter((id) => store.states[id].isActive))
 const currentState = computed(() => view.currentStateId(store))
@@ -51,8 +51,8 @@ watch([() => currentPlayer.value, () => store.gameflow.phase, () => currentState
 	<section class="turnOrder" :aria-label="$t('turnOrder.aria')">
 		<div class="orderRow" role="group" :aria-label="isGameOver ? $t('turnOrder.finalStandings') : $t('turnOrder.playerOrder')">
 			<b class="orderLabel">{{ isGameOver ? $t("turnOrder.standings") : $t("turnOrder.players") }}</b>
-			<button v-for="(index, position) in playerOrder" :key="index" class="playerOrderButton" :class="{ current: !isGameOver && currentPlayer === index, opportunity: exchangeOwner === index, inspected: store.viewSettings.inspectedPlayer === index }" :title="exchangeOwner === index ? $t('turnOrder.optionalExchange', { name: store.players[index].displayName }) : store.players[index].displayName" :aria-current="!isGameOver && currentPlayer === index ? 'step' : undefined" :aria-pressed="store.viewSettings.inspectedPlayer === index" @click="inspectPlayer(index)">
-				<span class="position">{{ position + 1 }}</span><img :src="assets.getPlayerMarkerImage(index)" alt="" /><span>{{ store.players[index].displayName }}<small>{{ isGameOver ? store.players[index].score : store.players[index].money }} <CurrencyIcon /><template v-if="isGameOver"> {{ $t("turnOrder.assetsSuffix") }}</template></small><small v-if="store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS && rules.availableMoney(store, index) < store.players[index].money" :title="$t('turnOrder.reservedTitle', { money: store.players[index].money })">{{ $t("turnOrder.reserved", { available: rules.availableMoney(store, index), reserved: store.players[index].money - rules.availableMoney(store, index) }) }}</small><small v-if="exchangeOwner === index" class="exchangeCue">{{ $t("turnOrder.barahshum") }}</small></span><img v-if="!isGameOver && store.gameflow.primogeniture === index" class="birthright" :src="assets.primogenitureImage" :alt="$t('turnOrder.primogeniture')" :title="$t('turnOrder.primogeniture')" />
+			<button v-for="{ index, position } in playerEntries" :key="index" class="playerOrderButton" :class="{ current: !isGameOver && currentPlayer === index, opportunity: exchangeOwner === index, inspected: store.viewSettings.inspectedPlayer === index }" :title="exchangeOwner === index ? $t('turnOrder.optionalExchange', { name: store.players[index].displayName }) : store.players[index].displayName" :aria-current="!isGameOver && currentPlayer === index ? 'step' : undefined" :aria-pressed="store.viewSettings.inspectedPlayer === index" @click="inspectPlayer(index)">
+				<span class="position">{{ position }}</span><img :src="assets.getPlayerMarkerImage(index)" alt="" /><span>{{ store.players[index].displayName }}<small>{{ isGameOver ? store.players[index].score : store.players[index].money }} <CurrencyIcon /><template v-if="isGameOver"> {{ $t("turnOrder.assetsSuffix") }}</template></small><small v-if="store.gameflow.phase === rf.PHASE_DIVIDING_NATIONS && rules.availableMoney(store, index) < store.players[index].money" :title="$t('turnOrder.reservedTitle', { money: store.players[index].money })">{{ $t("turnOrder.reserved", { available: rules.availableMoney(store, index), reserved: store.players[index].money - rules.availableMoney(store, index) }) }}</small><small v-if="exchangeOwner === index" class="exchangeCue">{{ $t("turnOrder.barahshum") }}</small></span><img v-if="!isGameOver && store.gameflow.primogeniture === index" class="birthright" :src="assets.primogenitureImage" :alt="$t('turnOrder.primogeniture')" :title="$t('turnOrder.primogeniture')" />
 			</button>
 			<span class="phaseLabel" :class="{ yourTurn: canReviewTurn() }" role="status"><b v-if="canReviewTurn()" class="turnCue">{{ $t("turnOrder.yourTurn") }}</b><span>{{ $t("turnOrder.turnPhaseEra", { turn: store.gameflow.turn, phase: view.phaseStr(store.gameflow.phase), era: store.era === 5 ? 'M' : store.era }) }}</span><b v-if="store.gameflow.endReason && !isGameOver" class="finalRound">{{ $t("turnOrder.finalRound") }}</b></span>
 		</div>

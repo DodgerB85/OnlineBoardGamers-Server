@@ -274,6 +274,10 @@ def performSaveURRGame(request, currentGame, jsonData):
     game_id = currentGame.id
     presenter = cast("URRpresenter", currentGame.presenter())
 
+    # A finished game is final: ignore late saves from stale tabs.
+    if currentGame.gameStatus == "FINISHED":
+        return JsonResponse({"latestUpdate": currentGame.latestUpdate, "secondsToNextKickout": 0, "finishedGame": True}, safe=False)
+
     if str(latest_update) != str(db_latest_update):
         message = (
             f"SYNC ERROR IN: URR save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
@@ -321,6 +325,8 @@ def performSaveURRGame(request, currentGame, jsonData):
             (jsonData.get("tournamentData") if jsonData.get("tournamentData") else []),
             jsonData["gameID"],
         )
+        # endGame cleared the rewind stack; a late rewind save must not refill it.
+        jsonData["saveRewind"] = False
     else:
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         allIsCurrentPlayers = jsonData["allIsCurrentPlayers"]

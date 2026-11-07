@@ -69,7 +69,7 @@ test("game-over saves drop transient state but keep the final result", () => {
 	const game = createGame(["A", "B", "C"])
 	game.gameflow.phase = rf.PHASE_GAME_OVER
 	game.gameflow.endReason = "invasion"
-	game.gameflow.finalPositions = [0, 1, 2]
+	game.gameflow.finalPositions = [[0, 1], [2]]
 	game.cardSupply[1] = 4
 	game.rain.step = "complete"
 	game.nextDiggerId = 9
@@ -82,11 +82,22 @@ test("game-over saves drop transient state but keep the final result", () => {
 	const imported = funcs.importURRmodel(encoded).state
 	assert.equal(imported.gameflow.phase, rf.PHASE_GAME_OVER)
 	assert.equal(imported.gameflow.endReason, "invasion")
-	assert.deepEqual(imported.gameflow.finalPositions, [0, 1, 2])
+	assert.deepEqual(imported.gameflow.finalPositions, [[0, 1], [2]])
 	assert.deepEqual(saved[7], [], "play-only card supply is not stored")
 	assert.equal(imported.cardSupply[1], rf.ERA_CARD_COUNTS[1])
 	assert.equal(imported.rain.step, null)
 	assert.deepEqual(imported.players[0].soldLandTypes, [])
+})
+
+test("an older flat game-over save still loads as finishing groups", () => {
+	const game = createGame(["A", "B", "C"])
+	game.gameflow.phase = rf.PHASE_GAME_OVER
+	game.gameflow.endReason = "invasion"
+	game.gameflow.finalPositions = [0, 1, 2]
+	storeGame(game)
+
+	const imported = funcs.importURRmodel(funcs.exportURRmodel(true)).state
+	assert.deepEqual(imported.gameflow.finalPositions, [[0], [1], [2]])
 })
 
 test("the simple export restores state and history without touching the server", () => {

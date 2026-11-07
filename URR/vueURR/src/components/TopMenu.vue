@@ -167,7 +167,7 @@ function getKickoutTimerText() {
 
 			<div class="menuDivider"></div>
 
-			<button type="button" v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showRewindPanel }]" :aria-expanded="store.viewSettings.showRewindPanel" @click="loadRewind()">
+			<button type="button" v-if="personal.pov >= 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showRewindPanel }]" :aria-expanded="store.viewSettings.showRewindPanel" @click="loadRewind()">
 				<img :src="view.getImage('icon-rewind')" alt="" />
 				<span>{{ $t("topMenu.rewind") }}</span>
 			</button>

@@ -267,6 +267,22 @@ test("Accepting the final waterwork advances development to the next state", () 
 })
 
 
+test("a tied final harvest groups the joint winners", () => {
+	const game = createGame(["A", "B", "C"])
+	game.players[0].money = 100
+	game.players[1].money = 100
+	game.players[2].money = 50
+	Object.assign(game.gameflow, { phase: rf.PHASE_RAINY_SEASON, stateOrder: [0], turnOrder: [0], endReason: "invasion" })
+	Object.assign(game.states[0], { isActive: true, king: 0 })
+	game.rain.step = "harvest"
+	game.rain.harvestOrder = [0]
+
+	const finished = applyAction(game, 0, { type: "harvest", choice: "distribute" })
+	assert.equal(finished.gameflow.phase, rf.PHASE_GAME_OVER)
+	assert.deepEqual(finished.gameflow.turnOrder, [])
+	assert.deepEqual(finished.gameflow.finalPositions, [[0, 1], [2]])
+})
+
 test("Declined development restores editable purchases and blocks only the refused site", () => {
 	const game = betweenStatesGame()
 	game.gameflow.developmentStep = "purchasing"

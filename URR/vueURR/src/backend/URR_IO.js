@@ -86,10 +86,28 @@ export async function saveGame(saveRewind = true) {
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
 		postData.status = "FINISHED"
 		postData.saveRewind = false
-		const positions = store.gameflow.finalPositions || Array.from(store.players.keys()).sort((a, b) => store.players[b].score - store.players[a].score)
-		postData.finalPositions = [...positions]
-		postData.winnerUsername = store.players[positions[0]].name
-		postData.tournamentData = positions.map((playerIdx, i) => (i === 0 ? [store.players[playerIdx].name] : [store.players[playerIdx].name, store.players[playerIdx].score]))
+		const finalPositions = store.gameflow.finalPositions?.length
+			? store.gameflow.finalPositions
+			: (() => {
+				const groups = []
+				for (const index of Array.from(store.players.keys()).filter((index) => !store.players[index].isMissing).sort((a, b) => store.players[b].score - store.players[a].score)) {
+					const group = groups.at(-1)
+					if (group && store.players[group[0]].score === store.players[index].score) group.push(index)
+					else groups.push([index])
+				}
+				return groups
+			})()
+		postData.finalPositions = finalPositions
+		postData.winnerUsername = finalPositions[0]?.map((index) => store.players[index].name) ?? []
+		const tournamentData = []
+		finalPositions.forEach((group, groupIndex) => {
+			if (group.length === 0) return
+			const names = group.map((index) => store.players[index].name)
+			// The shared tournament parser takes every entry but the last as a name,
+			// except the winner row which has names only.
+			tournamentData.push(groupIndex === 0 ? names : [...names, store.players[group[0]].score])
+		})
+		postData.tournamentData = tournamentData
 	}
 
 	try {

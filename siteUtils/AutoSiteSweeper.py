@@ -156,8 +156,8 @@ for gameCode in GAME_CODES:
             print(f"WOULD DELETE: {gameCode} - ID: {game_id}")
 
 # 3. Check FINISHED games for proper winner marking
-SINGLE_WINNER_GAMES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "IND", "URR", "DDL", "ROW"]
-AT_LEAST_ONE_WINNER_GAMES = ["AQY", "KFW", "RNB", "WEB"]
+SINGLE_WINNER_GAMES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "IND", "DDL", "ROW"]
+AT_LEAST_ONE_WINNER_GAMES = ["AQY", "KFW", "RNB", "WEB", "URR"]
 
 finished_games = Game.objects.filter(gameStatus="FINISHED").prefetch_related("players")
 winner_check_issues = 0

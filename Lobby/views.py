@@ -1182,7 +1182,7 @@ def stats(request):
         cache.set("stats_excluded_game_ids", excluded_game_ids, 300)
 
     # 3. Batch Fetch ALL Counts (1 Query instead of 18)
-    game_codes = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB", "NTR"]
+    game_codes = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB", "URR"]
 
     # Cache game counts for 2 minutes
     counts_map = cache.get("stats_game_counts")
@@ -1226,7 +1226,7 @@ def stats(request):
         "KFW": {"name": "KFW", "gameCode": "KFW"},
         "WEB": {"name": "WEB", "gameCode": "WEB"},
         "RNB": {"name": "Roads & Boats", "gameCode": "RNB"},
-        "NTR": {"name": "Napoleon's Triumph", "gameCode": "NTR"},
+        "URR": {"name": "Ur: 1830 BC", "gameCode": "URR"},
     }
 
     game_stats = []

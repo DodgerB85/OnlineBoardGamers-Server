@@ -30,6 +30,7 @@ const store = useModelStore()
 const personal = usePersonalStore()
 const { t } = useI18n()
 const game = computed(() => actionPanelGame(store))
+const finalEntries = computed(() => (game.value.gameflow.phase === rf.PHASE_GAME_OVER ? view.finalStandings(store) : []))
 // BG Stats export is opt-in per user (profile.bgStatsEnabled) and only makes
 // sense for someone who actually sat at the table.
 const bgStatsUrl = computed(() => window.initData.bgStatsEnabled === 1 && game.value.gameflow.phase === rf.PHASE_GAME_OVER ? buildBgStatsUrl() : undefined)
@@ -523,7 +524,7 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 		<div v-if="game.gameflow.endReason && game.gameflow.phase !== rf.PHASE_GAME_OVER" class="endNotice" role="status"><b>{{ $t("actions.finalRound") }}</b> {{ game.gameflow.endReason === 'invasion' ? $t("actions.invasionEnd") : $t("actions.revolutionEnd") }}</div>
 		<template v-if="game.gameflow.phase === rf.PHASE_GAME_OVER">
 			<b>{{ game.gameflow.endReason === 'revolution' ? $t("actions.gameEndedRevolution") : $t("actions.invasion") }}</b>
-			<ol class="finalStandings"><li v-for="index in game.gameflow.finalPositions" :key="index"><button :aria-pressed="store.viewSettings.inspectedPlayer === index" @click="inspectPlayer(index)"><PlayerMarker :index="index" /><span>{{ game.players[index].displayName }}</span><b>{{ game.players[index].score }} <CurrencyIcon /></b></button></li></ol><p>{{ $t("actions.finalAssets") }}</p>
+			<ol class="finalStandings"><li v-for="{ index, position } in finalEntries" :key="index" :value="position"><button :aria-pressed="store.viewSettings.inspectedPlayer === index" @click="inspectPlayer(index)"><PlayerMarker :index="index" /><span>{{ game.players[index].displayName }}</span><b>{{ game.players[index].score }} <CurrencyIcon /></b></button></li></ol><p>{{ $t("actions.finalAssets") }}</p>
 			<div v-if="bgStatsUrl" id="bgStatsDiv">
 				<a :href="bgStatsUrl" target="_blank" rel="noopener">{{ $t("actions.bgStats") }}</a>
 				<br />

@@ -654,7 +654,14 @@ function setHarvestTurn(game) {
 		for (let player = 0; player < game.players.length; player++) game.players[player].score = rules.playerAssets(game, player)
 		game.gameflow.phase = rf.PHASE_GAME_OVER
 		game.gameflow.turnOrder = []
-		game.gameflow.finalPositions = Array.from(game.players.keys()).filter(index => !game.players[index].isMissing).sort((a, b) => game.players[b].score - game.players[a].score)
+		// Tied scores share a finishing position, so the server can mark every winner.
+		const finalPositions = []
+		for (const index of Array.from(game.players.keys()).filter((index) => !game.players[index].isMissing).sort((a, b) => game.players[b].score - game.players[a].score)) {
+			const group = finalPositions.at(-1)
+			if (group && game.players[group[0]].score === game.players[index].score) group.push(index)
+			else finalPositions.push([index])
+		}
+		game.gameflow.finalPositions = finalPositions
 	} else {
 		game.gameflow.turn++
 		beginSettlement(game)

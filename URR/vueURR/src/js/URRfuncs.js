@@ -226,7 +226,10 @@ function decodeGameflow(entry, playerCount) {
 	}
 	if (entry.length === 4) {
 		// Game-over saves only carry the fields the final screen still reads.
-		return { ...flow, turn: entry[0], phase: entry[1], endReason: decodeToken(rf.END_REASONS, entry[2]), finalPositions: entry[3] || [], turnOrder: [] }
+		const positions = entry[3] || []
+		// An older finished game stored a flat list; keep it readable.
+		const finalPositions = positions.length && !Array.isArray(positions[0]) ? positions.map((seat) => [seat]) : positions
+		return { ...flow, turn: entry[0], phase: entry[1], endReason: decodeToken(rf.END_REASONS, entry[2]), finalPositions, turnOrder: [] }
 	}
 	flow.turn = entry[0]
 	flow.phase = entry[1]
