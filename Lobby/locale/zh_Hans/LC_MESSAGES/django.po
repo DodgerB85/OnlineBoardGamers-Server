@@ -12852,6 +12852,133 @@ msgstr "地图优先从 15 张新板块中抽取，不够再用随机其他板�
 msgid "Adds 15 new map tiles with new houses; garden cap raised to 15"
 msgstr "加入 15 张新板块和新房；花园上限提升到 15"
 
+msgid "12h kickout + 24h Flexi-Time"
+msgstr "12 小时踢出 + 24 小时弹性时间"
+
+msgid "1 day kickout + 24h Flexi-Time"
+msgstr "1 天踢出 + 24 小时弹性时间"
+
+#, python-format
+msgid "%(days)s days kickout + 24h Flexi-Time"
+msgstr "%(days)s 天踢出 + 24 小时弹性时间"
+
+msgid "Horseless Carriage - Build Factory is in progress"
+msgstr "Horseless Carriage - 建造工厂阶段进行中"
+
+#, python-format
+msgid ""
+"Build Factory is in progress at OnlineBoardGamers - Horseless Carriage\n"
+"%(gameName)s - %(currentTurnString)s\n"
+"You can submit your factory now, even if you are not first in Engineering Order. If your factory becomes the one blocking the queue, you will be alerted when your move time starts."
+msgstr ""
+"Horseless Carriage 的建造工厂阶段正在进行\n"
+"%(gameName)s - %(currentTurnString)s\n"
+"你现在可以提交工厂，即使你不是工程顺序中的第一位。如果你的工厂开始阻塞队列，系统会在你的行动时间开始时通知你。"
+
+#, python-format
+msgid ""
+"Your factory is now blocking the queue at OnlineBoardGamers - Horseless Carriage\n"
+"Your move time has started\n"
+"%(gameName)s - %(currentTurnString)s."
+msgstr ""
+"你的工厂现在阻塞了队列 - OnlineBoardGamers - Horseless Carriage\n"
+"你的行动时间已开始\n"
+"%(gameName)s - %(currentTurnString)s。"
+
+#, python-format
+msgid "Flexi-Time remaining: %(flexiTime)s"
+msgstr "剩余弹性时间：%(flexiTime)s"
+
+#, python-format
+msgid ""
+"Less than 2 hours of standard move time at OnlineBoardGamers!\n"
+"%(boxName)s: %(gameName)s"
+msgstr ""
+"OnlineBoardGamers 上的标准行动时间不足 2 小时！\n"
+"%(boxName)s：%(gameName)s"
+
+msgid "You could be kicked out at any time. Please move ASAP"
+msgstr "你随时可能被踢出。请尽快行动。"
+
+#, python-format
+msgid ""
+"You are now using Flexi-Time. Remaining: %(flexiTime)s. Once that runs out, "
+"other players can kick you. Please move ASAP"
+msgstr "你现在正在使用弹性时间。剩余：%(flexiTime)s。用完后，其他玩家可以踢出你。请尽快行动。"
+
+msgid ""
+"Your move time and Flexi-Time are used up. Other players can now kick you. "
+"Please move ASAP"
+msgstr "你的行动时间和弹性时间都已用完。其他玩家现在可以踢出你。请尽快行动。"
+
+#, python-format
+msgid ""
+"Your standard move time has expired at OnlineBoardGamers!\n"
+"%(boxName)s: %(gameName)s"
+msgstr ""
+"你在 OnlineBoardGamers 上的标准行动时间已到期！\n"
+"%(boxName)s：%(gameName)s"
+
+#, python-format
+msgid ""
+"\n"
+"Hi %(playerName)s,<br/>\n"
+"<br/>\n"
+"Reminder: You have less than 2 hours of standard move time left in: %(box_name)s<br/>\n"
+"<br/>\n"
+msgstr ""
+"\n"
+"%(playerName)s，你好：<br/>\n"
+"<br/>\n"
+"提醒：你在以下游戏中的标准行动时间不足 2 小时：%(box_name)s<br/>\n"
+"<br/>\n"
+
+msgid "Flexi-Time remaining"
+msgstr "剩余弹性时间"
+
+#, python-format
+msgid ""
+"\n"
+"Hi %(playerName)s,<br/>\n"
+"<br/>\n"
+"Your standard move time has expired for: %(box_name)s<br/>\n"
+"<br/>\n"
+msgstr ""
+"\n"
+"%(playerName)s，你好：<br/>\n"
+"<br/>\n"
+"你的标准行动时间已到期：%(box_name)s<br/>\n"
+"<br/>\n"
+
+#, python-format
+msgid ""
+"Flexi-Time remaining: %(flexiTimeString)s. You are now using Flexi-Time; "
+"once that runs out, other players can kick you. Please move as soon as "
+"possible."
+msgstr "剩余弹性时间：%(flexiTimeString)s。你现在正在使用弹性时间；用完后，其他玩家可以踢出你。请尽快行动。"
+
+msgid ""
+"Your move time and Flexi-Time are used up. Other players can now kick you. "
+"Please move as soon as possible."
+msgstr "你的行动时间和弹性时间都已用完。其他玩家现在可以踢出你。请尽快行动。"
+
+msgid "You could be kicked at any time. Please move as soon as possible."
+msgstr "你随时可能被踢出。请尽快行动。"
+
+msgid ""
+"HLC always shows the current player's standard move time and remaining "
+"Flexi-Time as two separate timers."
+msgstr "HLC 始终将当前玩家的标准行动时间和剩余弹性时间显示为两个独立的计时器。"
+
+msgid "In HLC, remaining Flexi-Time is also shown under the turn timer."
+msgstr "在 HLC 中，剩余弹性时间也会显示在行动计时器下方。"
+
+msgid "Exclude specific modules from the random pool"
+msgstr "从随机池中排除指定模组"
+
+msgid "Pool after exclusions:"
+msgstr "排除后剩余模组："
+
 #, python-format
 #~ msgid "Won When Picked %%"
 #~ msgstr "被选时获胜 %%"
@@ -13861,73 +13988,3 @@ msgstr "加入 15 张新板块和新房；花园上限提升到 15"
 #~ "在OnlineBoardGamers网站上的游戏邀请\n"
 #~ "%(gameName)s - 最多%(maxPlayers)s个玩家\n"
 #~ "[点击这里玩 Horseless Carriage](https://www.OnlineBoardGamers.com/)"
-
-msgid "12h kickout + 24h Flexi-Time"
-msgstr "12 小时踢出 + 24 小时弹性时间"
-
-msgid "1 day kickout + 24h Flexi-Time"
-msgstr "1 天踢出 + 24 小时弹性时间"
-
-#, python-format
-msgid "%(days)s days kickout + 24h Flexi-Time"
-msgstr "%(days)s 天踢出 + 24 小时弹性时间"
-
-msgid "Horseless Carriage - Build Factory is in progress"
-msgstr "Horseless Carriage - 建造工厂阶段进行中"
-
-#, python-format
-msgid "Build Factory is in progress at OnlineBoardGamers - Horseless Carriage\n%(gameName)s - %(currentTurnString)s\nYou can submit your factory now, even if you are not first in Engineering Order. If your factory becomes the one blocking the queue, you will be alerted when your move time starts."
-msgstr "Horseless Carriage 的建造工厂阶段正在进行\n%(gameName)s - %(currentTurnString)s\n你现在可以提交工厂，即使你不是工程顺序中的第一位。如果你的工厂开始阻塞队列，系统会在你的行动时间开始时通知你。"
-
-#, python-format
-msgid "Your factory is now blocking the queue at OnlineBoardGamers - Horseless Carriage\nYour move time has started\n%(gameName)s - %(currentTurnString)s."
-msgstr "你的工厂现在阻塞了队列 - OnlineBoardGamers - Horseless Carriage\n你的行动时间已开始\n%(gameName)s - %(currentTurnString)s。"
-
-#, python-format
-msgid "Flexi-Time remaining: %(flexiTime)s"
-msgstr "剩余弹性时间：%(flexiTime)s"
-
-#, python-format
-msgid "Less than 2 hours of standard move time at OnlineBoardGamers!\n%(boxName)s: %(gameName)s"
-msgstr "OnlineBoardGamers 上的标准行动时间不足 2 小时！\n%(boxName)s：%(gameName)s"
-
-msgid "You could be kicked out at any time. Please move ASAP"
-msgstr "你随时可能被踢出。请尽快行动。"
-
-#, python-format
-msgid "You are now using Flexi-Time. Remaining: %(flexiTime)s. Once that runs out, other players can kick you. Please move ASAP"
-msgstr "你现在正在使用弹性时间。剩余：%(flexiTime)s。用完后，其他玩家可以踢出你。请尽快行动。"
-
-msgid "Your move time and Flexi-Time are used up. Other players can now kick you. Please move ASAP"
-msgstr "你的行动时间和弹性时间都已用完。其他玩家现在可以踢出你。请尽快行动。"
-
-#, python-format
-msgid "Your standard move time has expired at OnlineBoardGamers!\n%(boxName)s: %(gameName)s"
-msgstr "你在 OnlineBoardGamers 上的标准行动时间已到期！\n%(boxName)s：%(gameName)s"
-
-#, python-format
-msgid "\nHi %(playerName)s,<br/>\n<br/>\nReminder: You have less than 2 hours of standard move time left in: %(box_name)s<br/>\n<br/>\n"
-msgstr "\n%(playerName)s，你好：<br/>\n<br/>\n提醒：你在以下游戏中的标准行动时间不足 2 小时：%(box_name)s<br/>\n<br/>\n"
-
-msgid "Flexi-Time remaining"
-msgstr "剩余弹性时间"
-
-#, python-format
-msgid "\nHi %(playerName)s,<br/>\n<br/>\nYour standard move time has expired for: %(box_name)s<br/>\n<br/>\n"
-msgstr "\n%(playerName)s，你好：<br/>\n<br/>\n你的标准行动时间已到期：%(box_name)s<br/>\n<br/>\n"
-
-#, python-format
-msgid "Flexi-Time remaining: %(flexiTimeString)s. You are now using Flexi-Time; once that runs out, other players can kick you. Please move as soon as possible."
-msgstr "剩余弹性时间：%(flexiTimeString)s。你现在正在使用弹性时间；用完后，其他玩家可以踢出你。请尽快行动。"
-
-msgid "Your move time and Flexi-Time are used up. Other players can now kick you. Please move as soon as possible."
-msgstr "你的行动时间和弹性时间都已用完。其他玩家现在可以踢出你。请尽快行动。"
-
-msgid "You could be kicked at any time. Please move as soon as possible."
-msgstr "你随时可能被踢出。请尽快行动。"
-
-msgid "HLC always shows the current player's standard move time and remaining Flexi-Time as two separate timers."
-msgstr "HLC 始终将当前玩家的标准行动时间和剩余弹性时间显示为两个独立的计时器。"
-
-msgid "In HLC, remaining Flexi-Time is also shown under the turn timer."
-msgstr "在 HLC 中，剩余弹性时间也会显示在行动计时器下方。"

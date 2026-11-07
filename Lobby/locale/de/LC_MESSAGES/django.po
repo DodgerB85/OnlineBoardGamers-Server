@@ -14327,6 +14327,150 @@ msgstr ""
 "Fügt 15 neue Kartenplättchen mit neuen Häusern hinzu; Gärten-Limit auf 15 "
 "erhöht"
 
+msgid "12h kickout + 24h Flexi-Time"
+msgstr "12 Std. Kickout + 24 Std. Flexi-Time"
+
+msgid "1 day kickout + 24h Flexi-Time"
+msgstr "1 Tag Kickout + 24 Std. Flexi-Time"
+
+#, python-format
+msgid "%(days)s days kickout + 24h Flexi-Time"
+msgstr "%(days)s Tage Kickout + 24 Std. Flexi-Time"
+
+msgid "Horseless Carriage - Build Factory is in progress"
+msgstr "Horseless Carriage – Build Factory läuft"
+
+#, python-format
+msgid ""
+"Build Factory is in progress at OnlineBoardGamers - Horseless Carriage\n"
+"%(gameName)s - %(currentTurnString)s\n"
+"You can submit your factory now, even if you are not first in Engineering Order. If your factory becomes the one blocking the queue, you will be alerted when your move time starts."
+msgstr ""
+"Build Factory läuft bei OnlineBoardGamers – Horseless Carriage\n"
+"%(gameName)s – %(currentTurnString)s\n"
+"Du kannst deine Fabrik jetzt einreichen, auch wenn du nicht als Erster in der Engineering-Reihenfolge dran bist. Wenn deine Fabrik die Warteschlange blockiert, wirst du benachrichtigt, sobald deine Zugzeit beginnt."
+
+#, python-format
+msgid ""
+"Your factory is now blocking the queue at OnlineBoardGamers - Horseless Carriage\n"
+"Your move time has started\n"
+"%(gameName)s - %(currentTurnString)s."
+msgstr ""
+"Deine Fabrik blockiert jetzt die Warteschlange bei OnlineBoardGamers – Horseless Carriage\n"
+"Deine Zugzeit hat begonnen\n"
+"%(gameName)s – %(currentTurnString)s."
+
+#, python-format
+msgid "Flexi-Time remaining: %(flexiTime)s"
+msgstr "Verbleibende Flexi-Time: %(flexiTime)s"
+
+#, python-format
+msgid ""
+"Less than 2 hours of standard move time at OnlineBoardGamers!\n"
+"%(boxName)s: %(gameName)s"
+msgstr ""
+"Weniger als 2 Stunden Standard-Zugzeit bei OnlineBoardGamers!\n"
+"%(boxName)s: %(gameName)s"
+
+msgid "You could be kicked out at any time. Please move ASAP"
+msgstr ""
+"Du könntest jederzeit rausgeworfen werden. Bitte bewege dich so schnell wie "
+"möglich."
+
+#, python-format
+msgid ""
+"You are now using Flexi-Time. Remaining: %(flexiTime)s. Once that runs out, "
+"other players can kick you. Please move ASAP"
+msgstr ""
+"Du nutzt jetzt Flexi-Time. Verbleibend: %(flexiTime)s. Wenn diese "
+"aufgebraucht ist, können dich andere Spieler rauswerfen. Bitte bewege dich "
+"so schnell wie möglich."
+
+msgid ""
+"Your move time and Flexi-Time are used up. Other players can now kick you. "
+"Please move ASAP"
+msgstr ""
+"Deine Zugzeit und Flexi-Time sind aufgebraucht. Andere Spieler können dich "
+"jetzt rauswerfen. Bitte bewege dich so schnell wie möglich."
+
+#, python-format
+msgid ""
+"Your standard move time has expired at OnlineBoardGamers!\n"
+"%(boxName)s: %(gameName)s"
+msgstr ""
+"Deine Standard-Zugzeit ist bei OnlineBoardGamers abgelaufen!\n"
+"%(boxName)s: %(gameName)s"
+
+#, python-format
+msgid ""
+"\n"
+"Hi %(playerName)s,<br/>\n"
+"<br/>\n"
+"Reminder: You have less than 2 hours of standard move time left in: %(box_name)s<br/>\n"
+"<br/>\n"
+msgstr ""
+"\n"
+"Hallo %(playerName)s,<br/>\n"
+"<br/>\n"
+"Erinnerung: Du hast weniger als 2 Stunden Standard-Zugzeit in: %(box_name)s<br/>\n"
+"<br/>\n"
+
+msgid "Flexi-Time remaining"
+msgstr "Verbleibende Flexi-Time"
+
+#, python-format
+msgid ""
+"\n"
+"Hi %(playerName)s,<br/>\n"
+"<br/>\n"
+"Your standard move time has expired for: %(box_name)s<br/>\n"
+"<br/>\n"
+msgstr ""
+"\n"
+"Hallo %(playerName)s,<br/>\n"
+"<br/>\n"
+"Deine Standard-Zugzeit ist abgelaufen für: %(box_name)s<br/>\n"
+"<br/>\n"
+
+#, python-format
+msgid ""
+"Flexi-Time remaining: %(flexiTimeString)s. You are now using Flexi-Time; "
+"once that runs out, other players can kick you. Please move as soon as "
+"possible."
+msgstr ""
+"Verbleibende Flexi-Time: %(flexiTimeString)s. Du nutzt jetzt Flexi-Time; "
+"wenn diese aufgebraucht ist, können dich andere Spieler rauswerfen. Bitte "
+"bewege dich so schnell wie möglich."
+
+msgid ""
+"Your move time and Flexi-Time are used up. Other players can now kick you. "
+"Please move as soon as possible."
+msgstr ""
+"Deine Zugzeit und Flexi-Time sind aufgebraucht. Andere Spieler können dich "
+"jetzt rauswerfen. Bitte bewege dich so schnell wie möglich."
+
+msgid "You could be kicked at any time. Please move as soon as possible."
+msgstr ""
+"Du könntest jederzeit rausgeworfen werden. Bitte bewege dich so schnell wie "
+"möglich."
+
+msgid ""
+"HLC always shows the current player's standard move time and remaining "
+"Flexi-Time as two separate timers."
+msgstr ""
+"HLC zeigt immer die Standard-Zugzeit des aktuellen Spielers und die "
+"verbleibende Flexi-Time als zwei getrennte Timer."
+
+msgid "In HLC, remaining Flexi-Time is also shown under the turn timer."
+msgstr ""
+"In HLC wird die verbleibende Flexi-Time auch unter dem Zug-Timer angezeigt."
+
+msgid "Exclude specific modules from the random pool"
+msgstr "Bestimmte Module aus dem Zufallspool ausschließen"
+
+msgid "Pool after exclusions:"
+msgstr "Pool nach Ausschlüssen:"
+
 #, python-format
 #~ msgid "Won When Picked %%"
 #~ msgstr "Gewonnen, wenn %% ausgewählt wird"
@@ -14803,73 +14947,3 @@ msgstr ""
 
 #~ msgid "Final Round"
 #~ msgstr "Letzte Runde"
-
-msgid "12h kickout + 24h Flexi-Time"
-msgstr "12 Std. Kickout + 24 Std. Flexi-Time"
-
-msgid "1 day kickout + 24h Flexi-Time"
-msgstr "1 Tag Kickout + 24 Std. Flexi-Time"
-
-#, python-format
-msgid "%(days)s days kickout + 24h Flexi-Time"
-msgstr "%(days)s Tage Kickout + 24 Std. Flexi-Time"
-
-msgid "Horseless Carriage - Build Factory is in progress"
-msgstr "Horseless Carriage – Build Factory läuft"
-
-#, python-format
-msgid "Build Factory is in progress at OnlineBoardGamers - Horseless Carriage\n%(gameName)s - %(currentTurnString)s\nYou can submit your factory now, even if you are not first in Engineering Order. If your factory becomes the one blocking the queue, you will be alerted when your move time starts."
-msgstr "Build Factory läuft bei OnlineBoardGamers – Horseless Carriage\n%(gameName)s – %(currentTurnString)s\nDu kannst deine Fabrik jetzt einreichen, auch wenn du nicht als Erster in der Engineering-Reihenfolge dran bist. Wenn deine Fabrik die Warteschlange blockiert, wirst du benachrichtigt, sobald deine Zugzeit beginnt."
-
-#, python-format
-msgid "Your factory is now blocking the queue at OnlineBoardGamers - Horseless Carriage\nYour move time has started\n%(gameName)s - %(currentTurnString)s."
-msgstr "Deine Fabrik blockiert jetzt die Warteschlange bei OnlineBoardGamers – Horseless Carriage\nDeine Zugzeit hat begonnen\n%(gameName)s – %(currentTurnString)s."
-
-#, python-format
-msgid "Flexi-Time remaining: %(flexiTime)s"
-msgstr "Verbleibende Flexi-Time: %(flexiTime)s"
-
-#, python-format
-msgid "Less than 2 hours of standard move time at OnlineBoardGamers!\n%(boxName)s: %(gameName)s"
-msgstr "Weniger als 2 Stunden Standard-Zugzeit bei OnlineBoardGamers!\n%(boxName)s: %(gameName)s"
-
-msgid "You could be kicked out at any time. Please move ASAP"
-msgstr "Du könntest jederzeit rausgeworfen werden. Bitte bewege dich so schnell wie möglich."
-
-#, python-format
-msgid "You are now using Flexi-Time. Remaining: %(flexiTime)s. Once that runs out, other players can kick you. Please move ASAP"
-msgstr "Du nutzt jetzt Flexi-Time. Verbleibend: %(flexiTime)s. Wenn diese aufgebraucht ist, können dich andere Spieler rauswerfen. Bitte bewege dich so schnell wie möglich."
-
-msgid "Your move time and Flexi-Time are used up. Other players can now kick you. Please move ASAP"
-msgstr "Deine Zugzeit und Flexi-Time sind aufgebraucht. Andere Spieler können dich jetzt rauswerfen. Bitte bewege dich so schnell wie möglich."
-
-#, python-format
-msgid "Your standard move time has expired at OnlineBoardGamers!\n%(boxName)s: %(gameName)s"
-msgstr "Deine Standard-Zugzeit ist bei OnlineBoardGamers abgelaufen!\n%(boxName)s: %(gameName)s"
-
-#, python-format
-msgid "\nHi %(playerName)s,<br/>\n<br/>\nReminder: You have less than 2 hours of standard move time left in: %(box_name)s<br/>\n<br/>\n"
-msgstr "\nHallo %(playerName)s,<br/>\n<br/>\nErinnerung: Du hast weniger als 2 Stunden Standard-Zugzeit in: %(box_name)s<br/>\n<br/>\n"
-
-msgid "Flexi-Time remaining"
-msgstr "Verbleibende Flexi-Time"
-
-#, python-format
-msgid "\nHi %(playerName)s,<br/>\n<br/>\nYour standard move time has expired for: %(box_name)s<br/>\n<br/>\n"
-msgstr "\nHallo %(playerName)s,<br/>\n<br/>\nDeine Standard-Zugzeit ist abgelaufen für: %(box_name)s<br/>\n<br/>\n"
-
-#, python-format
-msgid "Flexi-Time remaining: %(flexiTimeString)s. You are now using Flexi-Time; once that runs out, other players can kick you. Please move as soon as possible."
-msgstr "Verbleibende Flexi-Time: %(flexiTimeString)s. Du nutzt jetzt Flexi-Time; wenn diese aufgebraucht ist, können dich andere Spieler rauswerfen. Bitte bewege dich so schnell wie möglich."
-
-msgid "Your move time and Flexi-Time are used up. Other players can now kick you. Please move as soon as possible."
-msgstr "Deine Zugzeit und Flexi-Time sind aufgebraucht. Andere Spieler können dich jetzt rauswerfen. Bitte bewege dich so schnell wie möglich."
-
-msgid "You could be kicked at any time. Please move as soon as possible."
-msgstr "Du könntest jederzeit rausgeworfen werden. Bitte bewege dich so schnell wie möglich."
-
-msgid "HLC always shows the current player's standard move time and remaining Flexi-Time as two separate timers."
-msgstr "HLC zeigt immer die Standard-Zugzeit des aktuellen Spielers und die verbleibende Flexi-Time als zwei getrennte Timer."
-
-msgid "In HLC, remaining Flexi-Time is also shown under the turn timer."
-msgstr "In HLC wird die verbleibende Flexi-Time auch unter dem Zug-Timer angezeigt."

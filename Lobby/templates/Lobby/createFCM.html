@@ -891,6 +891,305 @@
                       <div>{% trans "Include 4 fan expansion options" %}</div>
                     </label>
                   </div>
+                  <div style="margin-top:8px">
+                    <label class="check-label">
+                      <input type="checkbox"
+                             onchange="validateOptions(this.id)"
+                             class="myCheckbox"
+                             id="excludeModules"
+                             name="excludeModules"
+                             value=""
+                             disabled />
+                      <div>{% trans "Exclude specific modules from the random pool" %}</div>
+                    </label>
+                    <div id="excludeModulesPanel"
+                         style="display:none;
+                                margin-left:24px;
+                                margin-top:6px;
+                                font-size:13px">
+                      <div style="margin-bottom:6px;
+                                  color:#888">
+                        {% trans "Pool after exclusions:" %} <span id="excludePoolCount">15</span>
+                      </div>
+                      <div style="border:1px solid #ddd;
+                                  border-radius:4px;
+                                  padding:8px 12px;
+                                  max-height:220px;
+                                  overflow-y:auto">
+                        <div id="excludeCoreList"
+                             style="display:grid;
+                                    grid-template-columns:repeat(2, minmax(0, 1fr));
+                                    gap:2px 16px">
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_8"
+                                   name="exclude_8"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Hard Choices with Original Milestones" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_9"
+                                   name="exclude_9"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Fry Chefs" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_10"
+                                   name="exclude_10"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Kimchi" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_11"
+                                   name="exclude_11"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Sushi" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_12"
+                                   name="exclude_12"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Noodles" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_13"
+                                   name="exclude_13"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Gourmet Food Critic" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_14"
+                                   name="exclude_14"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Movie Stars" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_15"
+                                   name="exclude_15"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Mass Marketers" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_16"
+                                   name="exclude_16"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Night Shift Managers" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_17"
+                                   name="exclude_17"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Rural Marketers" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_18"
+                                   name="exclude_18"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use New Districts" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_19"
+                                   name="exclude_19"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Coffee" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_20"
+                                   name="exclude_20"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Ketchup Milestone" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_22"
+                                   name="exclude_22"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Lobbyists" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_23"
+                                   name="exclude_23"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Price Changing Reserve Cards" %}</div>
+                          </label>
+                        </div>
+                        <div id="excludeChineseList"
+                             style="display:none;
+                                    margin-top:8px;
+                                    border-top:1px solid #eee;
+                                    padding-top:6px;
+                                    grid-template-columns:repeat(2, minmax(0, 1fr));
+                                    gap:2px 16px">
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_42"
+                                   name="exclude_42"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Jazz Musicians" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_43"
+                                   name="exclude_43"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Dumplings" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_44"
+                                   name="exclude_44"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Delivery Drivers" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_45"
+                                   name="exclude_45"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Hawker Marketeers" %}</div>
+                          </label>
+                        </div>
+                        <div id="excludeFanList"
+                             style="display:none;
+                                    margin-top:8px;
+                                    border-top:1px solid #eee;
+                                    padding-top:6px;
+                                    grid-template-columns:repeat(2, minmax(0, 1fr));
+                                    gap:2px 16px">
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_46"
+                                   name="exclude_46"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Fried Chicken" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_47"
+                                   name="exclude_47"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Stadium" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_48"
+                                   name="exclude_48"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Labor Market" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_49"
+                                   name="exclude_49"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Second Bailout" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_50"
+                                   name="exclude_50"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use Media Line" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_51"
+                                   name="exclude_51"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Use New Map" %}</div>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </label>
               <label class="check-label">

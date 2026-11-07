@@ -77,6 +77,10 @@ SO_MIN_RANDOM_MODULES = 210
 SO_MAX_RANDOM_MODULES = 211
 SO_DRAFT_MODULE_BREAKER = 300
 SO_DRAFT_SKIP_MODULE = 999
+# Random modules: per-module exclusions. Each ticked "exclude_<mod id>" checkbox
+# is stored as SO_EXCLUDED_MODULE_BASE + mod id, stripped out in
+# FCMpresenter.startGame before the roll (so the Vue client never sees them).
+SO_EXCLUDED_MODULE_BASE = 1000
 
 # Flag to use new code
 TS_USE_NEW_CODE = 1744974000000
