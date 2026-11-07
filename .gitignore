@@ -60,6 +60,7 @@ staticfiles/
 /RNB/RNBstats/*
 /TGZ/TGZstats/*
 /WEB/WEBstats/*
+/URR/URRstats/*
 # But DO NOT ignore the .gitkeep file (this keeps the folder alive)
 !/Lobby/stats/.gitkeep
 !/AQY/AQYstats/.gitkeep
@@ -73,6 +74,7 @@ staticfiles/
 !/RNB/RNBstats/.gitkeep
 !/TGZ/TGZstats/.gitkeep
 !/WEB/WEBstats/.gitkeep
+!/URR/URRstats/.gitkeep
 
 #Private server files
 Lobby/sharedFunctions/emailCounter.txt
