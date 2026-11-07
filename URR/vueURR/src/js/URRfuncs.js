@@ -4,6 +4,7 @@
 
 import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
+import i18n from "../i18n.js"
 import * as rf from "./URRreference.js"
 import * as historyStorage from "./URRhistoryStorage.js"
 import { normalizeEntry } from "./URRhistoryActions.js"
@@ -88,6 +89,7 @@ export function decompressChatData(data) {
 		currentFullTime += chatArray[i][1]
 		chatArray[i][1] = currentFullTime
 	}
+	chatArray.push(["WelcomeBot", personal.gameCreationTimestamp, i18n.global.t("io.welcomeChat")])
 	return chatArray
 }
 

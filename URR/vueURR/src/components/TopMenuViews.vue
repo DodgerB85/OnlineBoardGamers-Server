@@ -130,7 +130,7 @@ function localCastVote(topic) {
 		</div>
 		<div id="messageList">
 			<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
-				<div class="header"><PlayerMarker v-if="view.playerIndexByName(store, message[0]) >= 0" :index="view.playerIndexByName(store, message[0])" /><span v-else :title="message[0]">{{ $t("chat.observer") }}</span><span class="date">{{ new Date(message[1] * 1000).toLocaleString() }}</span></div>
+				<div class="header"><PlayerMarker v-if="view.playerIndexByName(store, message[0]) >= 0" :index="view.playerIndexByName(store, message[0])" /><span v-else :title="message[0]">{{ message[0] === "WelcomeBot" ? "WelcomeBot" : $t("chat.observer") }}</span><span class="date">{{ new Date(message[1] * 1000).toLocaleString() }}</span></div>
 				<div class="messageBody">{{ message[2] }}</div>
 			</div>
 		</div>

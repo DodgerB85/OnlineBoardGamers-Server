@@ -88,12 +88,47 @@ Shell corrections already made in the donors, required for a new game:
 
 ## 7. Config and finishing touches
 
-- Player profile preferences (colour/board) if wanted → new fields on `Profile` (`Lobby/models.py`) + migration.
+- Player profile preferences (colour/board) if wanted → new fields on `Profile` (`Lobby/models.py`) + migration. See [Per-game colour preferences](#8-per-game-colour-preferences) below.
 - BG Stats export: if the game has an end screen, wire the shared opt-in export. In `showXYZgame.html` load `Lobby/common/qrcode.js` and `Lobby/common/bgStats.js` inside `{% if bgStatsEnabled %}` and set `initData.bgStatsEnabled = {{ bgStatsEnabled|default:0 }}` in the authenticated block; then add a `XYZ_bgStats.js` builder that calls `window.OBGBgStats.buildUrl({ title, bggId, sourceGameId, sourcePlayId, playDate, noPoints, groups })` with the final standings (best group first, bots excluded) and render the link/QR block on the game-over screen (copy `TGZ/vueTGZ/src/components/ActionArea.vue`). The flag, the profile toggle and the migration already exist; only the per-game wiring is new.
 - Experience gate: `SF_getRequiredExp` in `Lobby/sharedFunctions/sharedFunctions.py` — add your code if it should require N completed games before creating/joining.
 - Practice/shadow conventions: reuse `SHADOW`-family accounts via `SF_setupTrainingGameShadows`; add your code to `should_auto_start_game` semantics in the auto-tournament helpers if applicable.
 - i18n (optional): `XYZ/locale/` and message ids; site already wires `statici18n`.
 - Tests in `tests/test_<game>_*.py` — see [UNIT_TESTS.md](UNIT_TESTS.md) (`SF_validatePlayers`, `create_xyz_game` happy paths, and turn-processing gotchas are the highest-value tests).
+
+## 8. Per-game colour preferences
+
+URR is the minimal current example; RNB shows the same pattern with extra options. A colour preference lets a player swap their seat colour for another one on their own screen only. It never changes saved game data.
+
+1. **Profile field** — add one JSON string per game to `Profile` in `Lobby/models.py`:
+   ```python
+   preferredXYZoptions = models.CharField(max_length=30, blank=True)
+   ```
+   Run `manage.py makemigrations Lobby`. Store a JSON array, not a bare number, so later options can be appended. For colour only the value is `[colour]` or `[-1]` for none; RNB stores `[colour, playerAid, colourOverlay]`.
+2. **Profile page** — add a labelled row to `Lobby/templates/Lobby/profile.html` (URR puts **Ur Colour** under **Web Colour**). Use a radio group with `name="xyzColour"`, a `None` option with `value="-1"`, then one radio per colour. Use the game's own marker images or colour swatches so the icons match the board; URR uses the six `URR/images/ownership-marker-*.png` files. Add the wrapper class to `Lobby/static/Lobby/CSS/profile.css` if the options need sizing.
+3. **Save** — in the `updateProfileFavourites` branch of `profile()` in `Lobby/views.py`, read with `.get(..., -1)` so older forms and tests do not fail, then dump a one-element array:
+   ```python
+   profile.preferredXYZoptions = json.dumps([int(request.POST.get("xyzColour", -1))], separators=(",", ":"))
+   ```
+4. **Load on the profile page** — read the field in the GET branch, treating blank as none, and pass it to the template:
+   ```python
+   preferredXYZoptions = json.loads(profile.preferredXYZoptions) if profile.preferredXYZoptions else [-1]
+   favXYZcolour = preferredXYZoptions[0]
+   ```
+   Add `favXYZcolour` to the render context. If you add more options later, pad the list with defaults so old profiles keep loading (`RNB/views.py::profileRNB` and `IND/views.py` show this).
+5. **Pass to the game** — in `showXYZgame`, put a safe default in the base payload (`"preferredXYZoptions": [-1]`) so logged-out spectators and non-players still render. For authenticated users, read `result["user_profile"].preferredXYZoptions`, fall back to `[-1]` when blank, and override the payload. Emit it in `showXYZgame.html`:
+   ```html
+   initData.preferredXYZoptions = {{ preferredXYZoptions|default:"[-1]"|safe }};
+   ```
+6. **Client** — keep the preference in the personal store because it is viewer-specific, not game state. Set it during model init:
+   ```js
+   const options = window.initData.preferredXYZoptions || [-1]
+   personal.preferredColour = options[0]
+   ```
+   Add `getCorrectedColour(colour)` to the personal store. When the player has a preference, swap their own seat colour with the preferred colour and leave every other colour alone; return the original colour when the preference is `-1` or the viewer has no seat. Route **all** player colour lookups through that helper (or through it inside a shared asset helper), including board markers, history chips and the turn-order chip. Fixing only the top bar makes the board disagree with the player list.
+7. **Test** — cover the profile POST, the blank default and the value reaching the show page. `tests/test_urr_show_options.py` is the small template; `tests/test_bus_tgz_show_options.py` and `tests/test_fcm_show_route.py` show other games' versions.
+
+For more than a colour or two, use a separate `profileXYZ` page and link it from the profile page instead of growing `profile.html` — see `profileRNB`, `profileIND` and `profileAQY` in `Lobby/views.py` and `Lobby/templates/Lobby/`.
+
 
 ## Final smoke test
 

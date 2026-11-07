@@ -879,6 +879,7 @@ export default {
 		},
 	},
 	io: {
+		welcomeChat: "Welcome to UR: 1830 BC Online!\n\nIf you have any suggestions, questions or comments, then please do contact the webmaster at the email address in Contact (top right in the lobby). Thanks!",
 		noActivePlayer: "No active player remains to continue this game",
 		olderVersion: "It appears you have an older version of the game. Please refresh the page",
 		saveUnconfirmed: "Unable to confirm that the move was saved. Refresh the page before playing again.",

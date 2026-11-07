@@ -881,6 +881,7 @@ export default {
 		},
 	},
 	io: {
+		welcomeChat: "Willkommen bei UR: 1830 BC Online!\n\nWenn du Vorschläge, Fragen oder Kommentare hast, kontaktiere bitte den Webmaster über die E-Mail-Adresse unter Kontakt (oben rechts in der Lobby). Danke!",
 		noActivePlayer: "Kein aktiver Spieler verbleibt, um dieses Spiel fortzusetzen",
 		olderVersion: "Du scheinst eine ältere Version des Spiels zu haben. Bitte lade die Seite neu",
 		saveUnconfirmed: "Der Zug konnte nicht als gespeichert bestätigt werden. Lade die Seite neu, bevor du weiterspielst.",

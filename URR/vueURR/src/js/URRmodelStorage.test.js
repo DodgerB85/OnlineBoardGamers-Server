@@ -10,9 +10,11 @@ import * as rf from "./URRreference.js"
 import * as funcs from "./URRfuncs.js"
 import * as model from "./URRmodel.js"
 import { useModelStore } from "../stores/URRstore.js"
+import { usePersonalStore } from "../stores/URRpersonal.js"
 
 setActivePinia(createPinia())
 const store = useModelStore()
+const personal = usePersonalStore()
 
 function storeGame(game, history = [[rf.HIST_NEW_GAME, -1, null]]) {
 	funcs.restoreState(game)
@@ -110,6 +112,22 @@ test("the simple export restores state and history without touching the server",
 	funcs.simpleImportWholeURRmodel(snapshot)
 	assert.equal(store.players[0].money, rf.STARTING_MONEY_BY_PLAYER_COUNT[3])
 	assert.equal(store.history.length, 1)
+})
+
+test("chat decompression appends the welcome bot at the game creation time", () => {
+	const previous = personal.gameCreationTimestamp
+	personal.gameCreationTimestamp = 1234
+	try {
+		const compressed = pako.gzip(JSON.stringify([["Alice", 5, "newest"], ["Bob", 2, "older"]]))
+		const chat = funcs.decompressChatData(Buffer.from(compressed).toString("base64"))
+		assert.equal(chat.length, 3)
+		assert.equal(chat[0][1], 1241)
+		assert.equal(chat[1][1], 1236)
+		assert.deepEqual(chat[2].slice(0, 2), ["WelcomeBot", 1234])
+		assert.match(chat[2][2], /UR: 1830 BC/)
+	} finally {
+		personal.gameCreationTimestamp = previous
+	}
 })
 
 test("display history appends without invalidating the map's river reports", () => {

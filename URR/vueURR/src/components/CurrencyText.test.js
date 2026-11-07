@@ -31,6 +31,16 @@ test("Inline icons sit immediately before their hex labels", async () => {
 	assert.match(html, /Sold <img[^>]*src="\/desert.png"[^>]*>A1, <img[^>]*src="\/forest.png"[^>]*>F8/)
 })
 
+test("An inline icon can follow its label", async () => {
+	const html = await renderToString(createSSRApp(CurrencyText, {
+		text: "Elam: built a reservoir at D10",
+		inlineIcons: {
+			reservoir: { src: "/reservoir.png", alt: "Reservoir", after: true },
+		},
+	}))
+	assert.match(html, /built a reservoir<img[^>]*src="\/reservoir.png"[^>]*> at D10/)
+})
+
 test("A longer land label wins over one that prefixes it", async () => {
 	const html = await renderToString(createSSRApp(CurrencyText, {
 		text: "Bought A10",

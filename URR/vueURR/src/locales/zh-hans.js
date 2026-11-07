@@ -881,6 +881,7 @@ export default {
 		},
 	},
 	io: {
+		welcomeChat: "欢迎来到 UR: 1830 BC Online！\n\n如果你有任何建议、问题或意见，请通过大厅右上角“联系”中的电子邮件地址联系网站管理员。谢谢！",
 		noActivePlayer: "没有活跃玩家可以继续本局游戏",
 		olderVersion: "你的游戏版本似乎较旧。请刷新页面",
 		saveUnconfirmed: "无法确认行动已保存。再次游戏前请刷新页面。",

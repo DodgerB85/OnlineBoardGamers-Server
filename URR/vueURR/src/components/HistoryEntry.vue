@@ -120,13 +120,17 @@ const eventInlineIcons = computed(() => {
 	if (move?.type === "requestWaterwork" && stateId.value !== null) {
 		const era = [1, 2, 3, 4].find((era) => before.value?.cardSupply[era] > 0) || 5
 		const capacity = rf.ERA_CARD_DATA[era][move.kind][0]
-		icons[landLabel(move.area)] = { src: assets.getWaterworkImage(stateId.value, capacity), alt: t("history.altWaterwork", { kind: view.kindName(move.kind), measure: view.waterworkMeasure({ kind: move.kind, capacity }) }) }
+		icons[view.kindName(move.kind)] = { after: true, src: assets.getWaterworkImage(stateId.value, capacity), alt: t("history.altWaterwork", { kind: view.kindName(move.kind), measure: view.waterworkMeasure({ kind: move.kind, capacity }) }) }
+	}
+	if (move?.type === "exchangeCalah") {
+		const work = after.value?.board.areas.find((area) => area.id === move.area)?.waterwork
+		if (work && !after.value?.gameflow.pendingOffer) icons[view.kindName(work.kind)] = { after: true, src: assets.getWaterworkImage(work.state, work.capacity), alt: t("history.altBuiltWork", { state: rf.STATE_NAMES[work.state], kind: view.kindName(work.kind), area: landLabel(move.area), measure: view.waterworkMeasure(work) }) }
 	}
 	if (move?.type === "respondOffer") {
 		const offer = before.value?.gameflow.pendingOffer
 		if (offer && offer.action.type !== "offerNation" && move.accept) {
 			const capacity = after.value?.board.areas.find((area) => area.id === offer.action.area)?.waterwork?.capacity
-			if (capacity !== undefined) icons[landLabel(offer.action.area)] = { src: assets.getWaterworkImage(offer.state, capacity), alt: t("history.altAcceptedWork", { kind: view.kindName(offer.action.kind), measure: view.waterworkMeasure({ kind: offer.action.kind, capacity }) }) }
+			if (capacity !== undefined) icons[view.kindName(offer.action.kind)] = { after: true, src: assets.getWaterworkImage(offer.state, capacity), alt: t("history.altAcceptedWork", { kind: view.kindName(offer.action.kind), measure: view.waterworkMeasure({ kind: offer.action.kind, capacity }) }) }
 		}
 	}
 	return icons
@@ -146,10 +150,7 @@ const actionImages = computed(() => {
 	if (move.type === "exchangeBarahshum") return [{ src: assets.getNationCardImage(rf.NATION_BARAHSHUM), alt: t("history.barahshum"), card: true }]
 	if (move.type === "bidPrimogeniture") return [{ src: assets.primogenitureImage, alt: t("history.primogeniture") }]
 	if (move.type === "exchangeCalah") {
-		const images = [{ src: assets.getNationCardImage(rf.NATION_CALAH), alt: t("history.calah"), card: true }]
-		const work = after.value?.board.areas.find((area) => area.id === move.area)?.waterwork
-		if (work && !after.value.gameflow.pendingOffer) images.push({ src: assets.getWaterworkImage(work.state, work.capacity), alt: t("history.altBuiltWork", { state: rf.STATE_NAMES[work.state], kind: view.kindName(work.kind), area: landLabel(move.area), measure: view.waterworkMeasure(work) }) })
-		return images
+		return [{ src: assets.getNationCardImage(rf.NATION_CALAH), alt: t("history.calah"), card: true }]
 	}
 	if (["endDevelopment", "resolveMaintenance"].includes(move.type) && stateId.value !== null && before.value?.states[stateId.value]?.diggers.length === 0 && after.value?.states[stateId.value]?.diggers.length > 0) {
 		const crew = after.value.states[stateId.value].diggers[0]

@@ -14,7 +14,7 @@ function escapeRegExp(value) {
 	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
-const INLINE_ICON_STYLE = { width: "1.1em", height: "1.1em", display: "inline-block", verticalAlign: "-0.2em", objectFit: "contain", flexShrink: 0, margin: "0 2px 0 0" }
+const INLINE_ICON_STYLE = { width: "1.1em", height: "1.1em", display: "inline-block", verticalAlign: "-0.2em", objectFit: "contain", flexShrink: 0, margin: "0 2px" }
 
 export default {
 	props: { text: { type: String, default: "" }, inlineIcons: { type: Object, default: () => ({}) } },
@@ -34,8 +34,18 @@ export default {
 				}
 				for (const piece of part.split(iconPattern)) {
 					const icon = props.inlineIcons[piece]
-					if (icon) children.push(h("img", { src: icon.src, alt: icon.alt, title: icon.alt, style: INLINE_ICON_STYLE }))
-					if (piece) children.push(piece)
+					if (!icon) {
+						if (piece) children.push(piece)
+						continue
+					}
+					const image = h("img", { src: icon.src, alt: icon.alt, title: icon.alt, style: INLINE_ICON_STYLE })
+					if (icon.after) {
+						if (piece) children.push(piece)
+						children.push(image)
+					} else {
+						children.push(image)
+						if (piece) children.push(piece)
+					}
 				}
 			}
 			return h(Fragment, children)
