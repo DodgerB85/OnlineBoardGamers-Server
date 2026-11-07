@@ -5,6 +5,9 @@ import HistoryEntry from "./HistoryEntry.vue"
 const store = useModelStore()
 const newestFirst = ref(true)
 const toggleNewestFirst = ref(true)
+const INITIAL_ROWS = 60
+const LOAD_ROWS = 60
+const visibleCount = ref(INITIAL_ROWS)
 let sortTimer = null
 const historyPanel = ref(null)
 let previousFocus = null
@@ -12,7 +15,11 @@ const orderedEntries = computed(() => {
 	const entries = store.computedHistory.map((entry) => ({ entry, index: entry.historyIndex }))
 	return newestFirst.value ? entries.reverse() : entries
 })
-watch(newestFirst, () => historyPanel.value?.scrollTo({ top: 0 }), { flush: "post" })
+const visibleEntries = computed(() => orderedEntries.value.slice(0, visibleCount.value))
+watch(newestFirst, () => {
+	visibleCount.value = INITIAL_ROWS
+	historyPanel.value?.scrollTo({ top: 0 })
+}, { flush: "post" })
 watch(toggleNewestFirst, (value) => {
 	clearTimeout(sortTimer)
 	sortTimer = setTimeout(() => { newestFirst.value = value }, 400)
@@ -20,17 +27,33 @@ watch(toggleNewestFirst, (value) => {
 onBeforeUnmount(() => clearTimeout(sortTimer))
 watch(() => store.viewSettings.showHistory, (isOpen) => {
 	if (!isOpen) return
+	visibleCount.value = INITIAL_ROWS
 	previousFocus = document.activeElement
 	historyPanel.value.querySelector(".closeHistory").focus({ preventScroll: true })
 }, { flush: "post" })
+
+function loadMore() {
+	if (visibleCount.value >= orderedEntries.value.length) return
+	visibleCount.value = Math.min(orderedEntries.value.length, visibleCount.value + LOAD_ROWS)
+}
+function onScroll() {
+	const panel = historyPanel.value
+	if (!panel || panel.scrollTop + panel.clientHeight < panel.scrollHeight - 400) return
+	loadMore()
+}
 
 function close() {
 	store.viewSettings.showHistory = false
 	store.clearHistoryHelpers()
 	nextTick(() => { if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true }) })
 }
-function findReplayPosition() {
+async function findReplayPosition() {
 	const panel = historyPanel.value
+	const position = orderedEntries.value.findIndex(({ index }) => index === store.replayStep.index)
+	if (position >= visibleCount.value) {
+		visibleCount.value = Math.min(orderedEntries.value.length, position + 1)
+		await nextTick()
+	}
 	const entry = panel.querySelector(".currentReplay")
 	if (!entry) return
 	const controlsHeight = panel.querySelector(".historyControls").offsetHeight
@@ -42,7 +65,7 @@ function findReplayPosition() {
 
 <template>
 	<transition name="fade">
-		<div id="history" ref="historyPanel" v-if="store.viewSettings.showHistory" :aria-label="$t('historyTab.aria')" @keydown.esc.stop.prevent="close">
+		<div id="history" ref="historyPanel" v-if="store.viewSettings.showHistory" :aria-label="$t('historyTab.aria')" @scroll="onScroll" @keydown.esc.stop.prevent="close">
 			<div class="historyControls"><div id="historyToggleDiv">
 				<span>{{ $t("historyTab.oldestFirst") }}</span>
 				<label class="switch"><input type="checkbox" v-model="toggleNewestFirst" :aria-label="$t('historyTab.newestFirst')" /><span class="slider round"></span></label>
@@ -51,7 +74,7 @@ function findReplayPosition() {
 			</div>
 			<p v-if="store.viewSettings.showReplay" class="replayHint"><span>{{ $t("historyTab.selectMove") }}</span><button @click="findReplayPosition">{{ $t("historyTab.findCurrent") }}</button></p></div>
 			<div id="historyMainDiv">
-				<HistoryEntry v-for="{ entry, index } in orderedEntries" :key="entry.historyKey" :entry="entry" :index="index" :newest-first="newestFirst" />
+				<HistoryEntry v-for="{ entry, index } in visibleEntries" :key="entry.historyKey" :entry="entry" :index="index" :newest-first="newestFirst" />
 			</div>
 		</div>
 	</transition>
