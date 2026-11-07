@@ -9308,17 +9308,9 @@ msgstr "熟练游戏 - 见"
 msgid "New Milestones"
 msgstr "新里程碑"
 
-#: .\Lobby\templates\Lobby\lobby_icons.html:38
-msgid "Ketchup Milestone"
-msgstr "番茄酱里程碑"
-
 #: .\Lobby\templates\Lobby\lobby_icons.html:39
 msgid "New Reserve Cards"
 msgstr "新的储备卡"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:40
-msgid "Movie Stars"
-msgstr "电影明星"
 
 #: .\Lobby\templates\Lobby\lobby_icons.html:41
 msgid "Mass Marketeers"
@@ -9332,37 +9324,13 @@ msgstr "美食评论家"
 msgid "Rural Marketeers"
 msgstr "乡村营销"
 
-#: .\Lobby\templates\Lobby\lobby_icons.html:44
-msgid "New Districts"
-msgstr "新城区"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:45
-msgid "Lobbyists"
-msgstr "提案人"
-
 #: .\Lobby\templates\Lobby\lobby_icons.html:46
 msgid "Night Shift Manager"
 msgstr "夜班经理"
 
-#: .\Lobby\templates\Lobby\lobby_icons.html:47
-msgid "Coffee"
-msgstr "咖啡"
-
 #: .\Lobby\templates\Lobby\lobby_icons.html:48
 msgid "Fry Chef"
 msgstr "炸薯条大厨"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:49
-msgid "Kimchi"
-msgstr "泡菜"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:50
-msgid "Sushi"
-msgstr "寿司"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:51
-msgid "Noodles"
-msgstr "面条"
 
 #: .\Lobby\templates\Lobby\lobby_icons.html:52
 msgid "Turn Order Payday/Fridge"
@@ -9379,18 +9347,6 @@ msgstr "艰难的抉择"
 #: .\Lobby\templates\Lobby\lobby_icons.html:60
 msgid "Draft Modules"
 msgstr "轮流选模组"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:63
-msgid "Jazz Musicians"
-msgstr "爵士乐手"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:64
-msgid "Dumplings"
-msgstr "饺子"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:65
-msgid "Delivery Drivers"
-msgstr "配送司机"
 
 #: .\Lobby\templates\Lobby\lobby_icons.html:66
 msgid "Hawker Truck Marketing"
@@ -12979,6 +12935,78 @@ msgstr "从随机池中排除指定模组"
 msgid "Pool after exclusions:"
 msgstr "排除后剩余模组："
 
+msgid "Coffee"
+msgstr "咖啡"
+
+msgid "Delivery Drivers"
+msgstr "配送司机"
+
+msgid "Dumplings"
+msgstr "饺子"
+
+msgid "Fried Chicken"
+msgstr "炸鸡模组"
+
+msgid "Fry Chefs"
+msgstr "炸薯条主厨"
+
+msgid "Gourmet Food Critic"
+msgstr "美食评论家"
+
+msgid "Hawker Marketeers"
+msgstr "小贩营销员"
+
+msgid "Jazz Musicians"
+msgstr "爵士乐手"
+
+msgid "Ketchup Milestone"
+msgstr "番茄酱里程碑"
+
+msgid "Kimchi"
+msgstr "泡菜"
+
+msgid "Labor Market"
+msgstr "劳动力市场"
+
+msgid "Lobbyists"
+msgstr "提案人"
+
+msgid "Mass Marketers"
+msgstr "大众营销"
+
+msgid "Media Line"
+msgstr "电波营销模组"
+
+msgid "Movie Stars"
+msgstr "电影明星"
+
+msgid "New Districts"
+msgstr "新城区"
+
+msgid "New Map"
+msgstr "新地图模组"
+
+msgid "Night Shift Managers"
+msgstr "夜班经理"
+
+msgid "Noodles"
+msgstr "面条"
+
+msgid "Price Changing Reserve Cards"
+msgstr "预设价格储备卡"
+
+msgid "Rural Marketers"
+msgstr "乡村营销"
+
+msgid "Second Bailout"
+msgstr "二次注资模组"
+
+msgid "Stadium"
+msgstr "体育馆模组"
+
+msgid "Sushi"
+msgstr "寿司"
+
 #, python-format
 #~ msgid "Won When Picked %%"
 #~ msgstr "被选时获胜 %%"
@@ -13706,9 +13734,6 @@ msgstr "排除后剩余模组："
 #~ "food (never sushi)"
 #~ msgstr "体育馆模组 - 一座 2 格体育馆每 3 回合举办一场比赛（首场在第 5 回合）；提前 2 回合公告需求，只需求大众食物（不会需要寿司）"
 
-#~ msgid "Stadium"
-#~ msgstr "体育馆"
-
 #~ msgid ""
 #~ "The Stadium is a giant building spanning two map tiles. On game day the "
 #~ "whole city turns into one huge customer: a big crowd with a big appetite for"
@@ -13784,9 +13809,6 @@ msgstr "排除后剩余模组："
 #~ "the bank gains $300 per player and each player gets one free L2 marketing "
 #~ "employee; the third break ends the game"
 #~ msgstr "二次注资模组 - 银行第二次破产时城市出手救市：银行获得每位玩家 $300 的注资，每位玩家免费获赠一名二级营销员工；第三次破产游戏结束"
-
-#~ msgid "Second Bailout"
-#~ msgstr "二次注资"
 
 #~ msgid ""
 #~ "In the base game the bank only breaks once. With this module the city steps "

@@ -10300,17 +10300,9 @@ msgstr "Jeu expérimenté - Voir"
 msgid "New Milestones"
 msgstr "Nouveaux jalons"
 
-#: .\Lobby\templates\Lobby\lobby_icons.html:38
-msgid "Ketchup Milestone"
-msgstr "Étape importante du ketchup"
-
 #: .\Lobby\templates\Lobby\lobby_icons.html:39
 msgid "New Reserve Cards"
 msgstr "Nouvelles cartes de réserve"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:40
-msgid "Movie Stars"
-msgstr "Stars de cinéma"
 
 #: .\Lobby\templates\Lobby\lobby_icons.html:41
 msgid "Mass Marketeers"
@@ -10324,37 +10316,13 @@ msgstr "Critiques gastronomiques"
 msgid "Rural Marketeers"
 msgstr "Commercialisateurs ruraux"
 
-#: .\Lobby\templates\Lobby\lobby_icons.html:44
-msgid "New Districts"
-msgstr "Nouveaux quartiers"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:45
-msgid "Lobbyists"
-msgstr "Les lobbyistes"
-
 #: .\Lobby\templates\Lobby\lobby_icons.html:46
 msgid "Night Shift Manager"
 msgstr "Chef d'équipe de nuit"
 
-#: .\Lobby\templates\Lobby\lobby_icons.html:47
-msgid "Coffee"
-msgstr "Café"
-
 #: .\Lobby\templates\Lobby\lobby_icons.html:48
 msgid "Fry Chef"
 msgstr "Chef de friture"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:49
-msgid "Kimchi"
-msgstr "Kimchi"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:50
-msgid "Sushi"
-msgstr "Sushis"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:51
-msgid "Noodles"
-msgstr "Nouilles"
 
 #: .\Lobby\templates\Lobby\lobby_icons.html:52
 msgid "Turn Order Payday/Fridge"
@@ -10371,18 +10339,6 @@ msgstr "Des choix difficiles"
 #: .\Lobby\templates\Lobby\lobby_icons.html:60
 msgid "Draft Modules"
 msgstr "Projet de modules"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:63
-msgid "Jazz Musicians"
-msgstr "Musiciens de Jazz"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:64
-msgid "Dumplings"
-msgstr "Boulettes"
-
-#: .\Lobby\templates\Lobby\lobby_icons.html:65
-msgid "Delivery Drivers"
-msgstr "Chauffeurs-livreurs"
 
 #: .\Lobby\templates\Lobby\lobby_icons.html:66
 msgid "Hawker Truck Marketing"
@@ -14494,6 +14450,78 @@ msgstr "Exclure des modules spécifiques du pool aléatoire"
 
 msgid "Pool after exclusions:"
 msgstr "Pool après exclusions :"
+
+msgid "Coffee"
+msgstr "café"
+
+msgid "Delivery Drivers"
+msgstr "chauffeurs-livreurs"
+
+msgid "Dumplings"
+msgstr "boulettes"
+
+msgid "Fried Chicken"
+msgstr "poulet frit"
+
+msgid "Fry Chefs"
+msgstr "chefs de friture"
+
+msgid "Gourmet Food Critic"
+msgstr "Gourmet Food Critic"
+
+msgid "Hawker Marketeers"
+msgstr "Hawker Marketeers"
+
+msgid "Jazz Musicians"
+msgstr "musiciens de jazz"
+
+msgid "Ketchup Milestone"
+msgstr "Ketchup Milestone"
+
+msgid "Kimchi"
+msgstr "Kimchi"
+
+msgid "Labor Market"
+msgstr "Labor Market"
+
+msgid "Lobbyists"
+msgstr "lobbyistes"
+
+msgid "Mass Marketers"
+msgstr "spécialistes du marketing de masse"
+
+msgid "Media Line"
+msgstr "Media Line"
+
+msgid "Movie Stars"
+msgstr "stars de cinéma"
+
+msgid "New Districts"
+msgstr "nouveaux quartiers"
+
+msgid "New Map"
+msgstr "Nouvelle Carte"
+
+msgid "Night Shift Managers"
+msgstr "les gestionnaires de nuit"
+
+msgid "Noodles"
+msgstr "nouilles"
+
+msgid "Price Changing Reserve Cards"
+msgstr "cartes de réserve pour changement de prix"
+
+msgid "Rural Marketers"
+msgstr "les spécialistes du marketing rural"
+
+msgid "Second Bailout"
+msgstr "Second Bailout"
+
+msgid "Stadium"
+msgstr "Stadium"
+
+msgid "Sushi"
+msgstr "sushis"
 
 #, python-format
 #~ msgid "Won When Picked %%"
