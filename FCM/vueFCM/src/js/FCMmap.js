@@ -1866,7 +1866,8 @@ export function addElement(type, number, index, rotated, emptying) {
 			}
 		}
 	} else if (type == rf.TYPE_HOUSE) {
-		ref = [2, 3]
+		// SBD apartments are 3x3 and never rotate; every other house is 2x3
+		ref = rf.APARTMENTS.includes(number) ? [3, 3] : [2, 3]
 		val = rf.HOUSE + number
 	} else if (type == rf.TYPE_GARDEN) {
 		ref = [2, 1]

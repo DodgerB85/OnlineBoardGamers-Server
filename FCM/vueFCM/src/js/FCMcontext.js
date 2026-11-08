@@ -37,8 +37,6 @@ export function resetContext() {
 	// trailing zeros; import pads back to full length.
 	store.context.justProduced.added = Array(rf.FRIED_CHICKEN + 1).fill(0)
 	store.context.justBuilt.splice(0)
-	// Senior Business Developer mod - reset the per-turn exclusive action counter
-	store.seniorBusinessDeveloper.sbdExclusiveActions = 0
 	store.context.justLobbied.splice(0)
 	store.context.justOpened.splice(0)
 	store.context.headhunterActionsUsed = 0

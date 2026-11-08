@@ -683,9 +683,9 @@ const computedProducers = computed(() => {
 				<AddItemBox :itemBeingAdded="rf.ITEM_BOX_HOUSE" />
 			</template>
 
-			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
-			<button class="actionsLineButton" @click="controller.resetSubphase()">{{ $t("workingDay.resetHousesGardens") }}</button>
-			<button class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ $t("workingDay.finishHousesGardens") }}</button>
+			<button v-if="!store.context.lobbyistMilestoneActive" class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
+			<button v-if="!store.context.lobbyistMilestoneActive" class="actionsLineButton" @click="controller.resetSubphase()">{{ $t("workingDay.resetHousesGardens") }}</button>
+			<button v-if="!store.context.lobbyistMilestoneActive" class="actionsLineButton" @click="controller.endWorkingDaySubphase()">{{ $t("workingDay.finishHousesGardens") }}</button>
 		</div>
 	</template>
 
@@ -902,6 +902,8 @@ const computedProducers = computed(() => {
 							<td>
 								<template v-for="(item, idx) in store.context.endOfDaySummaryData.houses.built" :key="idx">
 									<img v-if="item === -1" :src="view.getImage('garden')" class="EODsummaryHouseGarden" />
+									<img v-else-if="item === -2" :src="view.getImage('movedOut')" class="EODsummaryHouseGarden" />
+									<img v-else-if="rf.APARTMENTS.includes(item)" :src="view.getImage('apartment')" class="EODsummaryHouseGarden" />
 									<img v-else :src="view.getImage('house_small')" class="EODsummaryHouseGarden" />
 								</template>
 							</td>

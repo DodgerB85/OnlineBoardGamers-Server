@@ -204,13 +204,11 @@ function houseSelectedItemImage() {
 }
 
 // Senior Business Developer mod: extra exclusive actions (apartment / move out)
-// are only offered while the SBD card is itself at work (its own subphase)
+// are only offered while the SBD card is itself at work (its own subphase).
+// The per-card action budget is the shared justBuilt counter, so no extra limit
+// is needed here.
 const computedSbdApartments = computed(() => rules.availableApartments())
-const computedSbdCanExclusive = computed(() => {
-	if (!store.startingOptions.seniorBusinessDeveloper) return false
-	if (store.gameflow.subphase !== rf.SUBPHASE_SBD_HOUSES) return false
-	return rules.sbdExclusiveTotal(controller.currentPlayerIndex()) - store.seniorBusinessDeveloper.sbdExclusiveActions > 0
-})
+const computedSbdCanExclusive = computed(() => store.startingOptions.seniorBusinessDeveloper && store.gameflow.subphase === rf.SUBPHASE_SBD_HOUSES)
 const computedSbdMoveOutAvailable = computed(() => {
 	if (!computedSbdCanExclusive.value) return false
 	return rules.outTokensRemaining() > 0 && rules.moveOutCandidateHouses().length > 0

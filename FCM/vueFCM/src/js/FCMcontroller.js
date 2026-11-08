@@ -251,7 +251,6 @@ export function endWorkingDaySubphase() {
 		store.gameflow.subphase = rf.SUBPHASE_HOUSES
 		store.context.remainingProducers.length = 0
 		store.context.justBuilt.length = 0
-		store.seniorBusinessDeveloper.sbdExclusiveActions = 0
 
 		const newBusinessDevelopers = playerObj.employees.filter((e) => e === rf.NEW_BUSINESS_DEVELOPER)
 		const seniorBusinessDevelopers = playerObj.employees.filter((e) => e === rf.SENIOR_BUSINESS_DEVELOPER)
@@ -686,7 +685,8 @@ export function chooseHousePosition(index) {
 	store.context.justBuilt.push(index)
 	store.context.endOfDaySummaryData.houses.built.push(building)
 
-	setupHousesAndGardensPhase()
+	const isSbdPhase = store.gameflow.subphase === rf.SUBPHASE_SBD_HOUSES
+	if (!(isSbdPhase && sbdMilestoneCheck(playerIndex))) setupHousesAndGardensPhase()
 }
 
 export function chooseHouseForGarden(index) {
@@ -725,7 +725,8 @@ export function chooseHouseEdge(edge, index) {
 	store.context.justBuilt.push(index)
 	store.context.endOfDaySummaryData.houses.built.push(-1)
 
-	setupHousesAndGardensPhase()
+	const isSbdPhase = store.gameflow.subphase === rf.SUBPHASE_SBD_HOUSES
+	if (!(isSbdPhase && sbdMilestoneCheck(currentPlayerIndex()))) setupHousesAndGardensPhase()
 }
 
 // Senior Business Developer mod: place a 3x3 apartment at the clicked square
@@ -733,14 +734,12 @@ export function chooseApartmentPosition(index) {
 	const store = useModelStore()
 	const playerIndex = currentPlayerIndex()
 	const apartmentNumber = store.context.selectedBuilding
-	const rotation = store.context.rotation
 
-	model.addApartment(apartmentNumber, index, rotation)
+	model.addApartment(apartmentNumber, index)
 
-	const histData = [funcs.exportIndex(index), apartmentNumber, rotation]
+	const histData = [funcs.exportIndex(index), apartmentNumber]
 	model.addHistory(rf.HIST_SBD_BUILD_APARTMENT, histData, playerIndex, 0)
 
-	store.seniorBusinessDeveloper.sbdExclusiveActions++
 	store.context.justBuilt.push(index)
 	store.context.endOfDaySummaryData.houses.built.push(apartmentNumber)
 
@@ -757,11 +756,10 @@ export function chooseMoveOutHouse(index) {
 
 	model.evictHouse(houseNumber)
 
-	const histData = [funcs.exportIndex(index), houseNumber]
+	const histData = [houseNumber]
 	model.addHistory(rf.HIST_SBD_MOVE_OUT, histData, playerIndex, 0)
 
 	store.seniorBusinessDeveloper.outTokensUsed++
-	store.seniorBusinessDeveloper.sbdExclusiveActions++
 	store.context.justBuilt.push(index)
 	store.context.endOfDaySummaryData.houses.built.push(-2)
 

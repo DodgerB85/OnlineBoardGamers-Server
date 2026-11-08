@@ -182,13 +182,12 @@ export const useModelStore = defineStore("store", () => {
 	})
 
 	// Senior Business Developer mod - global pool of "moved out" tokens (8 total,
-	// shared by all players) plus a per-turn exclusive-action counter. The pool
-	// only matters for the apartment-count cap; eviction places a token on the
-	// house and the house leaves the board at the next dinnertime (same
-	// pendingMoveOut -> movedOut state machine the Fried Chicken mod uses).
+	// shared by all players). Eviction places a token on the house and the house
+	// leaves the board at the next dinnertime (same pendingMoveOut -> movedOut
+	// state machine the Fried Chicken mod uses). The used count is rebuilt from
+	// history on load, so it does not need a save slot.
 	const seniorBusinessDeveloper = reactive({
 		outTokensUsed: 0, // tokens taken from the global pool (max 8)
-		sbdExclusiveActions: 0, // apartment / moveOut actions taken this turn (max = SBD count)
 	})
 
 	/*************************************** UNSAVED - TEMP VARS -- these do not need to be stored or saved */

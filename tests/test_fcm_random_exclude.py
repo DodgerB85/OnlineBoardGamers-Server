@@ -101,7 +101,7 @@ class RandomExcludePoolTests(TestCase):
         options = buildFCMstartingOptions(post_data)
         base = rfFCM.SO_EXCLUDED_MODULE_BASE
         self.assertNotIn(base + 200, options)
-        self.assertEqual(len([x for x in options if base <= x < base + 100]), 25)
+        self.assertEqual(len([x for x in options if base <= x < base + 100]), 26)
 
     def test_many_exclusions_fit_starting_options(self):
         # Regression: 25 exclusion codes used to overflow Game.startingOptions
@@ -163,6 +163,16 @@ class RandomExcludePoolTests(TestCase):
         final = json.loads(game.startingOptions)
         for flag in FAN_FLAGS:
             self.assertIn(flag, final)
+        self.assertTrue(game.statsExcludedGame)
+
+    def test_fan_pool_includes_senior_business_developer(self):
+        # Pool 14 core + 7 fan; picking all 21 must include the SBD mod
+        opts = _random_options("21", fan=True)
+        with patch("Lobby.presenters.random.randrange", side_effect=self._randrange):
+            game = self._join_full_game(opts)
+
+        final = json.loads(game.startingOptions)
+        self.assertIn(rfFCM.SO_SENIOR_BUSINESS_DEVELOPER, final)
         self.assertTrue(game.statsExcludedGame)
 
     def test_new_map_can_be_excluded_from_fan_pool(self):

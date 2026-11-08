@@ -353,6 +353,16 @@ const computedEntry3 = computed(() => {
 		;[ret.Xcoord, ret.Ycoord] = getCoordinates(gardenIndex)
 		ret.houseNumber = param[1]
 		ret.orientationStr = param.length > 2 && param[2] === 0 ? i18n.global.t("history.horizontally") : i18n.global.t("history.vertically")
+	} else if (entry[0] === rf.HIST_SBD_BUILD_APARTMENT) {
+		const apartmentIndex = funcs.importIndex(param[0])
+		;[ret.Xcoord, ret.Ycoord] = getCoordinates(apartmentIndex)
+		ret.apartmentNumber = translateApartmentNumber(param[1])
+	} else if (entry[0] === rf.HIST_SBD_MOVE_OUT) {
+		// Compact payload is [houseNumber]; accept the earlier [index, houseNumber] too.
+		const houseNumber = param.length > 1 ? param[1] : param[0]
+		const houseIndex = param.length > 1 ? funcs.importIndex(param[0]) : map.findIndexForHouse(houseNumber)
+		;[ret.Xcoord, ret.Ycoord] = getCoordinates(houseIndex)
+		ret.houseNumber = houseNumber
 	} else if (entry[0] === rf.HIST_ADD_FREEWAY) {
 		const freewayIndex = funcs.importIndex(param[0])
 		;[ret.Xcoord, ret.Ycoord] = getCoordinates(freewayIndex)
@@ -622,7 +632,7 @@ const computedEntry3 = computed(() => {
 			if (campaign.length > 1 && campaign[1].length > 0) {
 				campaign[1].forEach((number) => {
 					if (rf.ALL_HOUSES.includes(number) || (store.startingOptions.newMap && rf.NEW_MAP_HOUSES.includes(number))) houses.push(number)
-					if (rf.APARTMENTS.includes(number)) apartments.push(number === 3.2 ? 3.14 : number)
+					if (rf.APARTMENTS.includes(number)) apartments.push(translateApartmentNumber(number))
 					if (number == rf.ruralAreaNum(store.startingOptions)) affectsRMA = true
 				})
 			}
@@ -634,8 +644,7 @@ const computedEntry3 = computed(() => {
 			if (pEarnings.length === 0) return
 			let numItems = pEarnings[0].length
 			pEarnings[0].forEach((bldg) => {
-				if (bldg === 3.2) numItems++
-				if (bldg === 9.7) numItems++
+				if (rf.APARTMENTS.includes(bldg)) numItems++
 				if (bldg === rf.ruralAreaNum(store.startingOptions)) numItems++
 			})
 			const uniqBuildings = [...new Set(pEarnings[0])]
@@ -989,6 +998,26 @@ const computedEntry3 = computed(() => {
 				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ playerName(entry[1]) }}</span></template>
 				<template #num>{{ computedEntry3.houseNumber }}</template>
 				<template #orient>{{ computedEntry3.orientationStr }}</template>
+				<template #x>{{ computedEntry3.Xcoord }}</template>
+				<template #y>{{ computedEntry3.Ycoord }}</template>
+			</i18n-t>
+		</template>
+
+		<!-- HIST_SBD_BUILD_APARTMENT: SBD places an apartment -->
+		<template v-else-if="entry[0] === rf.HIST_SBD_BUILD_APARTMENT">
+			<i18n-t keypath="history.buildApartment" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ playerName(entry[1]) }}</span></template>
+				<template #num>{{ computedEntry3.apartmentNumber }}</template>
+				<template #x>{{ computedEntry3.Xcoord }}</template>
+				<template #y>{{ computedEntry3.Ycoord }}</template>
+			</i18n-t>
+		</template>
+
+		<!-- HIST_SBD_MOVE_OUT: SBD evicts a house -->
+		<template v-else-if="entry[0] === rf.HIST_SBD_MOVE_OUT">
+			<i18n-t keypath="history.movesOutHouse" tag="span" scope="global">
+				<template #name><span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ playerName(entry[1]) }}</span></template>
+				<template #num>{{ computedEntry3.houseNumber }}</template>
 				<template #x>{{ computedEntry3.Xcoord }}</template>
 				<template #y>{{ computedEntry3.Ycoord }}</template>
 			</i18n-t>

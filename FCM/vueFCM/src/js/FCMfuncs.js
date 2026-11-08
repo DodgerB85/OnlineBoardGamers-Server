@@ -469,7 +469,7 @@ function padItemCounts(arr) {
 
 /**
 			Wire slots (module-dependent slots are only pushed when chosen):
-			0 - map tiles (lobbyists)
+			0 - map tiles (lobbyists, or a game with the SBD tile-reward milestone)
 			1 - players
 			2 - bank
 			3 - gameflow (omitted on game over)
@@ -509,8 +509,8 @@ export function exportPracticeFCMmodel() {
 		}
 	}
 	const data = decompressData(exportFCMmodel(false, false, historyCutoff))
-	// The optional lobbyists map-tile block shifts the players/gameflow slots.
-	const mapOffset = store.startingOptions.lobbyists ? 1 : 0
+	// The optional added-tile block shifts the players/gameflow slots.
+	const mapOffset = store.startingOptions.lobbyists || store.startingOptions.seniorBusinessDeveloper ? 1 : 0
 	const players = data[mapOffset]
 	const flow = data[mapOffset + 2]
 
@@ -533,8 +533,9 @@ export function exportFCMmodel(forGameOver, includeContext, historyCutoff) {
 	const store = useModelStore()
 	const temp = []
 
-	// 0: Map - Added Tiles
-	if (store.startingOptions.lobbyists) {
+	// 0: Map - Added Tiles. The SBD mod's First-SBD-Used milestone can add a
+	// tile even when the Lobbyists module is off, so either option needs the slot.
+	if (store.startingOptions.lobbyists || store.startingOptions.seniorBusinessDeveloper) {
 		const tiles = map.getAddedTiles(false).map((tile) => {
 			// Remove rotation (index 2) if it is 0
 			if (tile[2] === 0) {
@@ -616,9 +617,11 @@ export function exportFCMmodel(forGameOver, includeContext, historyCutoff) {
 			.filter((h) => h.needs != null)
 			.map((h) => {
 				const entry = [h.number]
-				// Fried Chicken mod: persist movedOut flag as a bare `1` marker (needs are
-				// always arrays in the legacy format, so this is unambiguous)
+				// Marker 1 = moved out (Fried Chicken / resolved SBD eviction).
+				// Marker 2 = pending move-out (the house still eats tonight), followed
+				// by the turn it was evicted on (-1 for the FC flow, which has no turn).
 				if (h.movedOut) entry.push(1)
+				else if (!forGameOver && h.pendingMoveOut) entry.push(2, h.sbdEvictedTurn === undefined ? -1 : h.sbdEvictedTurn)
 				const needsData = forGameOver ? h.needs.map((n) => n[0]) : h.needs
 				return entry.concat(needsData)
 			})
@@ -755,7 +758,10 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	store.mapData.tiles = map.expandMapToFullGrid(window.initData.startingMap, window.initData.playerNames.length)
 	map.initCoords()
 	let lobbyistData = []
-	if (store.startingOptions.lobbyists) {
+	// Lobbyists always writes the slot; the SBD tile-reward milestone can also
+	// write one without the Lobbyists module. Shape-detect so an SBD game saved
+	// before this gate existed still starts at the players slot.
+	if ((store.startingOptions.lobbyists || store.startingOptions.seniorBusinessDeveloper) && isLobbyistTileSlot(inputArr[IMPORT_INDEX])) {
 		lobbyistData = inputArr[IMPORT_INDEX]
 		IMPORT_INDEX++
 		// Add in rotation 0
@@ -934,11 +940,18 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	store.needs = inputArr[IMPORT_INDEX].map((house) => {
 		const number = house[0]
 		let movedOut = false
+		let pendingMoveOut = false
+		let sbdEvictedTurn
 		let sliceStart = 1
-		// Fried Chicken mod: detect bare `1` marker after house number (movedOut)
+		// Marker 1 = moved out. Marker 2 = pending move-out, followed by the turn
+		// (or -1 for the Fried Chicken pending flow, which has no turn).
 		if (house.length > 1 && house[1] === 1) {
 			movedOut = true
 			sliceStart = 2
+		} else if (house.length > 1 && house[1] === 2 && store.gameflow.phase !== rf.PHASE_GAME_OVER) {
+			pendingMoveOut = true
+			if (house.length > 2 && house[2] !== -1) sbdEvictedTurn = house[2]
+			sliceStart = 3
 		}
 		let needs = []
 
@@ -950,7 +963,12 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 			needs = house.slice(sliceStart).map((good) => [good, -1])
 		}
 
-		return { number, needs, ...(movedOut ? { movedOut: true } : {}) }
+		return {
+			number,
+			needs,
+			...(movedOut ? { movedOut: true } : {}),
+			...(pendingMoveOut ? { pendingMoveOut: true, ...(sbdEvictedTurn !== undefined ? { sbdEvictedTurn } : {}) } : {}),
+		}
 	})
 
 	IMPORT_INDEX++
@@ -1222,12 +1240,22 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	// Media Line mod (trailing slot, shape-detected like the other module states)
 	restoreMediaLineState(inputArr)
 
+	// SBD mod: the used-token count is derived from history, not stored.
+	model.syncSbdOutTokensFromHistory()
+
 	// Online short game is the rulebook introductory variant: no milestones.
 	if (store.startingOptions.shortGame) {
 		store.startingOptions.useMilestones = false
 		store.availableMilestones.length = 0
 		for (const player of store.players) player.milestones.length = 0
 	}
+}
+
+// Shape check for slot 0: the lobbyist/SBD added-tile list is
+// [[tileIndex, tile, rotation?], ...]; the players slot starts with
+// [[name, displayName?], colour, ...]. An empty list is a valid empty tile slot.
+function isLobbyistTileSlot(el) {
+	return Array.isArray(el) && (el.length === 0 || (Array.isArray(el[0]) && typeof el[0][0] === "number"))
 }
 
 // Shape check for both bailout slot formats: the older full object and the
@@ -1662,4 +1690,6 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 	restoreMediaLineState(inputModel)
 
 	applyDumplingCeoActions()
+	// SBD mod: rebuild the used-token count from this snapshot's history.
+	model.syncSbdOutTokensFromHistory()
 }

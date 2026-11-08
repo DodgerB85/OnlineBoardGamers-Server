@@ -57,6 +57,7 @@ export function setupNewGame(opts = {}) {
 	store.parks.splice(0)
 	store.newRoads.splice(0)
 	store.movedOutHouses.splice(0)
+	store.seniorBusinessDeveloper.outTokensUsed = 0
 	store.chatData.splice(0)
 	store.coffeeShopMSplayers.splice(0)
 	store.firstPizzas.splice(0)
@@ -799,12 +800,14 @@ export function addApartment(number, index) {
 		apartment: true,
 	})
 
-	const val = rf.HOUSE + number
-	for (let i = 0; i < 3; i++) {
-		for (let j = 0; j < 3; j++) {
-			store.mapData.coords[index + i + j * rf.ssW] = val
-		}
-	}
+	map.addElement(rf.TYPE_HOUSE, number, index, 0)
+}
+
+// Senior Business Developer mod - outTokensUsed is derived from history, not
+// saved, so every load/rewind recomputes it from the replayed move-out actions.
+export function syncSbdOutTokensFromHistory() {
+	const store = useModelStore()
+	store.seniorBusinessDeveloper.outTokensUsed = store.history.reduce((count, entry) => count + (entry[0] === rf.HIST_SBD_MOVE_OUT ? 1 : 0), 0)
 }
 
 // Senior Business Developer mod - evict a house. The house still eats tonight;

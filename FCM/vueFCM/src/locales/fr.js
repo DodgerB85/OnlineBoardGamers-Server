@@ -766,6 +766,8 @@ export default {
 		"houseMovedOut": "Maison(s) {houses} déménagée(s) hors du quartier",
 		"buildHouse": "{name} construit la maison #{num} {orient} aux coordonnées ({x}, {y})",
 		"buildGarden": "{name} construit un jardin pour la maison #{num} {orient} aux coordonnées ({x}, {y})",
+		"buildApartment": "{name} construit l'appartement #{num} aux coordonnées ({x}, {y})",
+		"movesOutHouse": "{name} fait déménager la maison #{num} aux coordonnées ({x}, {y})",
 		"buildFreeway": "{name} construit une autoroute {orient} aux coordonnées ({x}, {y})",
 		"openRestaurantLocal": "{name} construit un nouveau restaurant aux coordonnées ({x}, {y}) face à {facing}, ouverture au prochain tour",
 		"openRestaurant": "{name} ouvre un nouveau restaurant aux coordonnées ({x}, {y}) face à {facing}",

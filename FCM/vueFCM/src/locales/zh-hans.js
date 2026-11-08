@@ -838,6 +838,8 @@ export default {
 		"eternally": "永远",
 		"buildHouse": "{name} 在坐标 ({x},{y}) 建造房屋 #{num}，朝向 {orient}。",
 		"buildGarden": "{name} 在坐标（{x}，{y}）为房屋 #{num} 建造了一个花园，朝向为 {orient}。",
+		"buildApartment": "{name} 在坐标 ({x},{y}) 建造公寓 #{num}。",
+		"movesOutHouse": "{name} 在坐标 ({x},{y}) 让房屋 #{num} 搬离。",
 		"buildFreeway": "{name} 在坐标 ({x},{y}) 建造高速公路，朝向 {orient}。",
 		"openRestaurantLocal": "{name} 在坐标（{x}，{y}）处开设了一家新的餐厅，面向 {facing}，下一回合开业",
 		"openRestaurant": "{name} 在坐标（{x}，{y}）开了一家新餐厅，朝向 {facing}",

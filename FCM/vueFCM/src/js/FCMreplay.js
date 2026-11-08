@@ -238,6 +238,7 @@ export function resetDataForReplay() {
 	store.parks.splice(0)
 	store.newRoads.splice(0)
 	store.coffeeShopMSplayers.splice(0)
+	store.seniorBusinessDeveloper.outTokensUsed = 0
 
 	// Now set them up
 	model.setInternalStartingOptions(store.externalStartingOptions)
@@ -443,19 +444,18 @@ export function replaySbdBuildApartment(historyIndex, playerIndex, param) {
 	const apartmentNumber = param[1]
 
 	model.addApartment(apartmentNumber, index)
-	store.seniorBusinessDeveloper.sbdExclusiveActions++
-	store.context.highlightHistorySquares.push(index)
+	for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) store.context.highlightHistorySquares.push(index + i + j * rf.ssW)
 }
 
 export function replaySbdMoveOut(historyIndex, playerIndex, param) {
 	const store = useModelStore()
-	const index = funcs.importIndex(param[0])
-	const houseNumber = param[1]
+	// Compact payload is [houseNumber]; accept the earlier [index, houseNumber] too.
+	const houseNumber = param.length > 1 ? param[1] : param[0]
+	const index = param.length > 1 ? funcs.importIndex(param[0]) : map.findIndexForHouse(houseNumber)
 
 	model.evictHouse(houseNumber)
 	store.seniorBusinessDeveloper.outTokensUsed++
-	store.seniorBusinessDeveloper.sbdExclusiveActions++
-	store.context.highlightHistorySquares.push(index)
+	if (index >= 0) for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) store.context.highlightHistorySquares.push(index + i + j * rf.ssW)
 }
 
 export function replayNewTile(historyIndex, playerIndex, param) {

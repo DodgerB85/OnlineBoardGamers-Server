@@ -33,6 +33,14 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 		squares.push(gardenIndex)
 		if (!rotated) squares.push(gardenIndex + 1)
 		else squares.push(gardenIndex + rf.ssW)
+	} else if (action === rf.HIST_SBD_BUILD_APARTMENT) {
+		const index = funcs.importIndex(entry3[0])
+		for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) squares.push(index + i + j * rf.ssW)
+	} else if (action === rf.HIST_SBD_MOVE_OUT) {
+		// Compact payload is [houseNumber]; accept the earlier [index, houseNumber] too.
+		const houseNumber = entry3.length > 1 ? entry3[1] : entry3[0]
+		const index = entry3.length > 1 ? funcs.importIndex(entry3[0]) : map.findIndexForHouse(houseNumber)
+		if (index >= 0) for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) squares.push(index + i + j * rf.ssW)
 	} else if (action === rf.HIST_ADD_FREEWAY) {
 		const index = funcs.importIndex(entry3[0])
 		const rotated = entry3[1] === 1

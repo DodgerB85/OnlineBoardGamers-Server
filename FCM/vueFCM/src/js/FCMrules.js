@@ -1709,7 +1709,7 @@ export function moveOutCandidateHouses() {
 		if (house === rf.STADIUM) continue
 		if (!built.has(house) && !rf.isBoardHouse(house, store.startingOptions)) continue
 		const need = store.needs.find((n) => n.number === house)
-		if (need && need.movedOut) continue
+		if (need && (need.movedOut || need.pendingMoveOut)) continue
 		if (need && need.needs && need.needs.length > 0) continue
 		res.push(house)
 	}
@@ -1721,14 +1721,6 @@ export const SBD_OUT_TOKEN_POOL = 8
 export function outTokensRemaining() {
 	const store = useModelStore()
 	return SBD_OUT_TOKEN_POOL - store.seniorBusinessDeveloper.outTokensUsed
-}
-
-// Apartment / move-out actions are exclusive to the SBD card: at most SBD count per turn
-export function sbdExclusiveTotal(playerIndex) {
-	const store = useModelStore()
-	const p = store.players[playerIndex]
-	if (!p) return 0
-	return p.employees.filter((e) => e === rf.SENIOR_BUSINESS_DEVELOPER).length
 }
 
 export function availableGardens() {
@@ -1933,15 +1925,17 @@ export function doDinnerTime(replayOnly) {
 		const sbdEvictedThisTurn = need.pendingMoveOut && need.sbdEvictedTurn === store.gameflow.turn
 		const sbdEvictedEarlier = need.pendingMoveOut && need.sbdEvictedTurn !== undefined && need.sbdEvictedTurn !== store.gameflow.turn
 
-		// Fried Chicken mod: condemned (pendingMoveOut) houses move out before any matching
-		if ((fcMod || sbdEvictedEarlier) && need.pendingMoveOut && need.number !== rf.ruralAreaNum(store.startingOptions)) {
+		// Fried Chicken mod: condemned (pendingMoveOut) houses move out before any
+		// matching. A Senior Business Developer eviction in THIS turn skips that
+		// early exit so the house still eats tonight, even when both mods are on.
+		if (((fcMod && !sbdEvictedThisTurn) || sbdEvictedEarlier) && need.pendingMoveOut && need.number !== rf.ruralAreaNum(store.startingOptions)) {
 			need.movedOut = true
 			need.pendingMoveOut = false
 			need.needs = []
 			movedOutHouses.push(need.number)
 			continue
 		}
-		if (fcMod && need.movedOut) continue
+		if (need.movedOut) continue
 
 		// [number, needs, historyOfCompetitors]
 		let histoH = [need.number, need.needs.map((sub) => (sub.length > 0 ? sub[0] : -1)), []]
