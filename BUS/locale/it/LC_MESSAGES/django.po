@@ -20,7 +20,7 @@ msgstr ""
 
 #: .\BUS\common.py:214
 msgid "Your Practice game has started"
-msgstr ""
+msgstr "Il tuo gioco di allenamento è iniziato"
 
 #: .\BUS\templates\BUS\BUShelp.html:5
 msgid "Bus Help"

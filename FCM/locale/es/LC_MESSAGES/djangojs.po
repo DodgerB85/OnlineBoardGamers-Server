@@ -649,7 +649,7 @@ msgstr "Casa"
 
 #: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:519
 msgid "player"
-msgstr ""
+msgstr "jugador"
 
 #: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:496
 msgid "No one can fulfill these demands"
@@ -691,7 +691,10 @@ msgid ""
 msgid_plural ""
 "earned $%(earnings)s for %(numberOfItems)s items on buildings %(buildings)s"
 msgstr[0] ""
+"ganó $%(earnings)s por %(numberOfItems)s artículo en edificios %(buildings)s"
 msgstr[1] ""
+"Ganaste $%(earnings)s por %(numberOfItems)s artículos en edificios "
+"%(buildings)s."
 
 #: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:1006
 msgid ""
@@ -719,7 +722,7 @@ msgstr "4 longitud"
 
 #: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\history.js:1404
 msgid "first"
-msgstr ""
+msgstr "primero"
 
 #: .\static\FCM\JS\FCMmainOLD.js:1 .\static\FCM\JS\io.js:425
 #: .\static\FCM\JS\io.js:583 .\static\FCM\JS\io.js:736
@@ -1172,8 +1175,8 @@ msgstr ""
 #: .\static\FCM\JS\controller.js:1876
 msgid "%(recruitingAmountLeft)s remaining point"
 msgid_plural "%(recruitingAmountLeft)s remaining points"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(recruitingAmountLeft)s punto restante"
+msgstr[1] "%(recruitingAmountLeft)s puntos restantes"
 
 #: .\static\FCM\JS\controller.js:1950
 msgid "Your Night Shift Manager allows each trainer to work twice"
@@ -1184,14 +1187,14 @@ msgstr ""
 #: .\static\FCM\JS\controller.js:1955
 msgid "You can train %(trainingAmountLeft)s employee"
 msgid_plural "You can train up to  %(trainingAmountLeft)s slots"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Puedes formar a %(trainingAmountLeft)s empleado"
+msgstr[1] "Puedes entrenar hasta %(trainingAmountLeft)s espacios"
 
 #: .\static\FCM\JS\controller.js:1964
 msgid "You can train %(train2amount)s employee up to 2 levels. "
 msgid_plural "You can train up to %(train2amount)s employees up to 2 level. "
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Puedes formar a %(train2amount)s empleados hasta 2 niveles."
+msgstr[1] "Puedes formar hasta %(train2amount)s empleados hasta el nivel 2."
 
 #: .\static\FCM\JS\controller.js:1967
 msgid "You can train 1 employee up to 3 levels"
@@ -1200,8 +1203,8 @@ msgstr "Puede capacitar a 1 empleado hasta 3 niveles"
 #: .\static\FCM\JS\controller.js:1973
 msgid "You have %(recruitingAmountLeft)s recruiting point remaining"
 msgid_plural "You have %(recruitingAmountLeft)s recruiting points remaining"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Te quedan %(recruitingAmountLeft)s puntos de reclutamiento"
+msgstr[1] "Te quedan %(recruitingAmountLeft)s puntos de reclutamiento"
 
 #: .\static\FCM\JS\controller.js:1978
 msgid "Please choose an employee to train"
@@ -1448,15 +1451,16 @@ msgstr "¡Estás despedido!"
 #: .\static\FCM\JS\controller.js:3759 .\static\FCM\JS\controller.js:5014
 msgid "You have to pay for %(employeesToPayFor)s employee."
 msgid_plural "You have to pay for %(employeesToPayFor)s employees."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Tienes que pagar por %(employeesToPayFor)s empleado."
+msgstr[1] "Tienes que pagar por %(employeesToPayFor)s empleados."
 
 #: .\static\FCM\JS\controller.js:3765 .\static\FCM\JS\controller.js:5020
 msgid "Choose the item you want to use:"
 msgid_plural ""
 "Choose the %(remainingEmployeesToPayFor)s items you want to use:"
-msgstr[0] ""
+msgstr[0] "Elija el artículo que desea utilizar:"
 msgstr[1] ""
+"Elija los %(remainingEmployeesToPayFor)s elementos que desea utilizar:"
 
 #: .\static\FCM\JS\controller.js:3775 .\static\FCM\JS\controller.js:5035
 msgid ""
@@ -1465,7 +1469,11 @@ msgid_plural ""
 "You are currently paying <b>$%(moneyUsed)s</b> and <b>%(itemsUsed)s</b> "
 "items"
 msgstr[0] ""
+"Actualmente estás pagando <b>$%(moneyUsed)s</b> y <b>%(itemsUsed)s</b> "
+"artículo"
 msgstr[1] ""
+"Actualmente estás pagando <b>$%(moneyUsed)s</b> y <b>%(itemsUsed)s</b> "
+"artículos."
 
 #: .\static\FCM\JS\controller.js:3863 .\static\FCM\JS\controller.js:5182
 msgid "You can store either Kimchi or other types of food/drink in a fridge"
@@ -1487,7 +1495,10 @@ msgid_plural ""
 "You may keep up to 10 items. Choose the %(remainingItems)s items you want to"
 " throw away"
 msgstr[0] ""
+"Puedes conservar hasta 10 artículos. Elige el artículo que quieres tirar"
 msgstr[1] ""
+"Puedes conservar hasta 10 artículos. Elige los %(remainingItems)s artículos "
+"que quieres tirar"
 
 #: .\static\FCM\JS\controller.js:3893
 msgid ""
@@ -2001,8 +2012,8 @@ msgstr "el jugador tiene una bonificación de $%(Bonusamunt) s"
 #: .\static\FCM\JS\history.js:576 .\static\FCM\JS\history.js:633
 msgid "A Fry Chef adds a bonus of $%(fryChefsBonus)s"
 msgid_plural "Fry Chefs add a bonus of $%(fryChefsBonus)s"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Un Fry Chef agrega un bono de $%(fryChefsBonus)s"
+msgstr[1] "Fry Chefs agrega un bono de $%(fryChefsBonus)s"
 
 #: .\static\FCM\JS\history.js:579
 msgid "The Fry Chef bonus was already added to the coffee sale."
@@ -2082,8 +2093,8 @@ msgstr "Sin salarios"
 #: .\static\FCM\JS\history.js:735 .\static\FCM\JS\history.js:757
 msgid "%(dollarAmount)s and %(itemsAmount)s item"
 msgid_plural "%(dollarAmount)s and %(itemsAmount)s items"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(dollarAmount)s y %(itemsAmount)s elemento"
+msgstr[1] "%(dollarAmount)s y %(itemsAmount)s artículos"
 
 #: .\static\FCM\JS\history.js:742
 msgid "Salaries"
@@ -2108,8 +2119,8 @@ msgstr "Mass Marketeer Round %(Round) s"
 #: .\static\FCM\JS\history.js:812
 msgid "#%(campaignNumber)s put %(item)s on house %(affectedHouses)s"
 msgid_plural "#%(campaignNumber)s put %(item)s on houses %(affectedHouses)s"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "#%(campaignNumber)s pon %(item)s en la casa %(affectedHouses)s"
+msgstr[1] "#%(campaignNumber)s pon %(item)s en las casas %(affectedHouses)s"
 
 #: .\static\FCM\JS\history.js:830
 msgid ""
@@ -2117,7 +2128,10 @@ msgid ""
 msgid_plural ""
 "#%(campaignNumber)s put 2x %(item)s on apartments %(affectedApartments)s"
 msgstr[0] ""
+"#%(campaignNumber)s ponga 2x %(item)s en el apartamento "
+"%(affectedApartments)s"
 msgstr[1] ""
+"#%(campaignNumber)s pon 2x %(item)s en apartamentos %(affectedApartments)s"
 
 #: .\static\FCM\JS\history.js:835
 msgid "#Giant Billboard put 2x %(item)s on the Rural Area"
@@ -2209,7 +2223,11 @@ msgid ""
 msgid_plural ""
 "earned $%(earnings)s for %(numberOfItems)s items on building %(building)s"
 msgstr[0] ""
+"ganó $%(earnings)s por %(numberOfItems)s artículo en el edificio "
+"%(building)s"
 msgstr[1] ""
+"Ganó $%(earnings)s por %(numberOfItems)s artículos en el edificio "
+"%(building)s."
 
 #: .\static\FCM\JS\history.js:994
 msgid "Marketeers earnings"
