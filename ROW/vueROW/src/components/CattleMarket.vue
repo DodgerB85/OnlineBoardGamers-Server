@@ -94,13 +94,13 @@ function drawTwo() {
 function canBuySingle(breedingValue) {
 	return possibleBuys.value.some((o) => o.breedingValue === breedingValue && !o.pair)
 }
-/** Price tag on a market card: the cheapest single buy the remaining cowboys can pay for. */
+/** Price tag on a market card: the cheapest single buy the remaining cowboys can pay for; a dash when none can. */
 function priceOf(card) {
 	const singles = (CATTLE_COSTS[card.value] ?? []).filter((c) => !c.pair)
 	if (!singles.length) return null
 	const cows = g().currentPlayerState().cowboysRemaining()
 	const withinCowboys = singles.filter((c) => c.cowboys <= cows)
-	return Math.min(...(withinCowboys.length ? withinCowboys : singles).map((c) => c.dollars))
+	return withinCowboys.length ? `$${Math.min(...withinCowboys.map((c) => c.dollars))}` : "—"
 }
 /** Whether any single buy of this card can be paid for right now. */
 function canAfford(card) {
@@ -175,7 +175,7 @@ function confirm() {
 				:card="card"
 				@click="selectCard(card)"
 			>
-				<em v-if="priceOf(card) !== null" class="price" :class="{ cant: !canAfford(card) }">${{ priceOf(card) }}</em>
+				<em v-if="priceOf(card) !== null" class="price" :class="{ cant: !canAfford(card) }">{{ priceOf(card) }}</em>
 			</CardView>
 			<div
 				class="drawStack"
@@ -257,7 +257,7 @@ function confirm() {
 	background: rgba(144, 238, 144, 0.85);
 	text-shadow: -1px -1px 0 #000, 1px 1px 0 #000;
 }
-/* Price of the card: always shown, front and centre, red while it is out of reach this turn. */
+/* Price of the card: cheapest buy within the remaining cowboys, a dash when none; red while out of reach this turn. */
 .price {
 	position: absolute;
 	left: 0;

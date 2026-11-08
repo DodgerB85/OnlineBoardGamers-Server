@@ -600,12 +600,16 @@
       "moveStepsLeft": "Verplaatsen — klik op een gemarkeerde plek ({steps} stappen over; geel = volgende stap, cyaan = verder)",
       "moveAtMost": "Verplaatsen — klik op een gemarkeerde plek (hoogstens {limit} stappen)",
       "hireWorker": "Arbeider aannemen",
+      "hireHint": "Klik op een gemarkeerde werker op de arbeidsmarkt.",
       "placeBuildingHint": "Gebouw plaatsen — kies een plek en plaats dan een gebouw. Dit zijn je beschikbare gebouwen.",
       "placeBranchletHint": "Rails to the North — klik op een gemarkeerde stad op de strook",
       "clickTown": "Klik op een stad",
       "clickWorker": "Klik op een arbeider op je spelersbord",
       "clickCardToDiscard": "Klik op een kaart op je spelersbord om die af te leggen",
-      "cardActionsHint": "Kaartacties — selecteer en klik dan op een kaart op je spelersbord",
+      "cardActionsHint": "Kaartacties — klik op een passende kaart op je spelersbord",
+      "engineHint": "Verplaats je locomotief — klik op een gemarkeerd spoortvak.",
+      "bonusStationMasterHint": "Klik op New York City en kies een bonusstationsmeester-tegel.",
+      "clickHighlighted": "Klik op het gemarkeerde item op het bord of je spelersbord.",
       "otherActions": "Andere acties"
     },
     "buildingInfo": {

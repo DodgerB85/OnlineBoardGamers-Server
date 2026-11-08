@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ActionType, CattleType, Game, JavaRandom, defaultOptions } from "./ROWindex";
-import { armedTrailMove, canAffordAction, canPlaceBuilding, trailMoveTargets, trailRoute } from "./ROWmap";
+import { armedTrailMove, canAffordAction, canPlaceBuilding, cardActionsFor, trailMoveTargets, trailRoute } from "./ROWmap";
 
 function players(n) {
     const colors = ["RED", "BLUE", "YELLOW", "GREEN"];
@@ -64,6 +64,39 @@ describe("canAffordAction (view preview of Game.execute's dollars and cards)", (
         ps.balance = 4;
         // Row 0 costs 6$, so nothing on the market is affordable until a row is refilled.
         expect(canAffordAction(game, ActionType.HIRE_WORKER)).toBe(false);
+    });
+});
+
+describe("cardActionsFor (click a hand card for any live action)", () => {
+    const jersey = { type: CattleType.JERSEY, points: 0, value: 1 };
+    const guernsey = { type: CattleType.GUERNSEY, points: 0, value: 2 };
+    const holstein = { type: CattleType.HOLSTEIN, points: 1, value: 3 };
+    const objective = { id: "DRAW_SGG", tasks: ["STATION"], points: 3, penalty: 2, action: "DRAW_CARD", drawChoice: true };
+    it("matches a typed cattle discard", () => {
+        expect(cardActionsFor(jersey, [jersey], [ActionType.DISCARD_1_JERSEY_TO_GAIN_2_DOLLARS])).toEqual([ActionType.DISCARD_1_JERSEY_TO_GAIN_2_DOLLARS]);
+        expect(cardActionsFor(holstein, [holstein], [ActionType.DISCARD_1_JERSEY_TO_GAIN_2_DOLLARS])).toEqual([]);
+    });
+    it("matches objective-card actions", () => {
+        expect(cardActionsFor(objective, [objective], [ActionType.PLAY_OBJECTIVE_CARD])).toEqual([ActionType.PLAY_OBJECTIVE_CARD]);
+        expect(cardActionsFor(holstein, [holstein], [ActionType.PLAY_OBJECTIVE_CARD])).toEqual([]);
+    });
+    it("only offers a pair action when two cards of the type are in hand", () => {
+        expect(cardActionsFor(jersey, [jersey], [ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS])).toEqual([]);
+        expect(cardActionsFor(jersey, [jersey, { ...jersey }], [ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS])).toEqual([ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS]);
+    });
+    it("matches upgrade Simmental only for a Simmental card", () => {
+        const simmental = { type: CattleType.SIMMENTAL, points: 3, value: 2 };
+        expect(cardActionsFor(simmental, [simmental], [ActionType.UPGRADE_SIMMENTAL])).toEqual([ActionType.UPGRADE_SIMMENTAL]);
+        expect(cardActionsFor(holstein, [holstein], [ActionType.UPGRADE_SIMMENTAL])).toEqual([]);
+    });
+    it("respects the restricted cattle types", () => {
+        expect(cardActionsFor(jersey, [jersey], [ActionType.DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS])).toEqual([]);
+        expect(cardActionsFor(holstein, [holstein], [ActionType.DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS])).toEqual([ActionType.DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS]);
+        expect(cardActionsFor(jersey, [jersey], [ActionType.DISCARD_CATTLE_CARD_TO_PLACE_BRANCHLET])).toEqual([]);
+        expect(cardActionsFor(guernsey, [guernsey], [ActionType.DISCARD_CATTLE_CARD_TO_PLACE_BRANCHLET])).toEqual([ActionType.DISCARD_CATTLE_CARD_TO_PLACE_BRANCHLET]);
+    });
+    it("returns nothing when the live action does not apply", () => {
+        expect(cardActionsFor(jersey, [jersey], [ActionType.MOVE])).toEqual([]);
     });
 });
 

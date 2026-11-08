@@ -85,23 +85,35 @@ const moveOrigin = computed(() => {
 /** A MOVE-family action picked off a building, armed until a spot is clicked or it is cancelled. */
 const armedMove = computed(() => (game.value ? map.armedTrailMove(g(), store.actions, store.selectedAction) : null))
 
+/** Live trail moves other than the turn's own MOVE; objective cards and medium towns grant these. */
+const liveTrailMoves = computed(() => {
+	if (!game.value) return []
+	if (armedMove.value) return [armedMove.value]
+	if (store.selectedAction) return []
+	return store.actions
+		.filter((a) => a !== ActionType.MOVE && map.MOVE_FAMILY.includes(a))
+		.map((a) => ({ type: a, limit: g().moveStepLimit(a) ?? g().getStepLimit() }))
+})
+
 const moves = computed(() => {
 	if (!game.value || !store.currentPlayer) return []
-	// A building move is always one move, not a plan, and starts where the player stands.
-	const armed = armedMove.value
-	if (armed) {
+	// The turn's own move is planned step by step; every other trail move is a single commit.
+	if (!armedMove.value && store.actions.includes(ActionType.MOVE)) {
 		try {
-			return model.possibleMovesFor(store.currentPlayer, armed.limit)
+			return model.possibleMovesFor(store.currentPlayer, store.moveStepsLeft, moveOrigin.value).map((m) => ({ ...m, type: ActionType.MOVE }))
 		} catch {
 			return []
 		}
 	}
-	if (!store.actions.includes(ActionType.MOVE)) return []
-	try {
-		return model.possibleMovesFor(store.currentPlayer, store.moveStepsLeft, moveOrigin.value)
-	} catch {
-		return []
+	const out = []
+	for (const tm of liveTrailMoves.value) {
+		try {
+			for (const m of model.possibleMovesFor(store.currentPlayer, tm.limit)) out.push({ ...m, type: tm.type })
+		} catch {
+			// A building move can be illegal from the current spot; leave the board unlit.
+		}
 	}
+	return out
 })
 
 /**
@@ -113,6 +125,10 @@ const moves = computed(() => {
 function takeMove(name) {
 	const target = moveTargets.value.get(name)
 	if (!target) return
+	if (target.type !== ActionType.MOVE) {
+		controller.perform({ type: target.type, steps: target.steps })
+		return
+	}
 	const steps = [...store.plannedSteps, ...target.steps]
 	const endsMove = !moveOrigin.value || map.moveDestination(target) === "KANSAS_CITY" || store.moveStepsLeft <= target.steps.length
 	if (endsMove) {
@@ -131,20 +147,17 @@ function candidatesFor(name) {
 	const out = []
 
 	const armed = armedMove.value
-	if (armed) {
-		// A building move is all-or-nothing: it has no plan and no staying put.
-		const target = moveTargets.value.get(name)
-		if (target) out.push({ label: moveLabel(target), run: () => controller.perform({ type: armed.type, steps: target.steps }) })
-	} else if (acts.includes(ActionType.MOVE)) {
+	const target = moveTargets.value.get(name)
+	if (target) {
 		// One move per spot: the cheapest route, the same one drawn in light green.
-		const target = moveTargets.value.get(name)
-		if (target) out.push({ label: moveLabel(target), run: () => takeMove(name) })
+		out.push({ label: moveLabel(target), run: armed ? () => controller.perform({ type: armed.type, steps: target.steps }) : () => takeMove(name) })
 	}
 
 	const loc = g().getTrail().locations.get(name)
 	if (!loc) return out
 
 	const sel = store.selectedAction
+	const buildAction = sel && BUILD_ACTIONS.includes(sel) ? sel : !sel ? BUILD_ACTIONS.find((a) => acts.includes(a)) ?? null : null
 	if (loc.hazard) {
 		const hz = HAZARD_ACTIONS.find((a) => acts.includes(a))
 		if (hz) out.push({ label: t("row.map.removeHazard"), run: () => controller.perform({ type: hz, location: name }) })
@@ -152,7 +165,7 @@ function candidatesFor(name) {
 	if (loc.teepee && acts.includes(ActionType.TRADE_WITH_TRIBES)) {
 		out.push({ label: t("row.map.tradeWithTribe"), run: () => controller.perform({ type: ActionType.TRADE_WITH_TRIBES, location: name }) })
 	}
-	if (sel && BUILD_ACTIONS.includes(sel) && loc.kind === "BUILDING" && (!loc.building || loc.building.player === player)) {
+	if (buildAction && loc.kind === "BUILDING" && (!loc.building || loc.building.player === player)) {
 		// The chooser on the clicked spot is where the building is picked; unaffordable
 		// ones are shown dimmed so the spot's options stay readable.
 		const color = colorByPlayer.value[player] ?? "red"
@@ -160,8 +173,8 @@ function candidatesFor(name) {
 			out.push({
 				label: t("row.map.placeBuilding", { building: b }),
 				img: view.buildingImage(g().edition, b, color),
-				enabled: map.canPlaceBuilding(g(), player, loc, b, sel),
-				run: () => controller.perform({ type: sel, location: name, building: b }),
+				enabled: map.canPlaceBuilding(g(), player, loc, b, buildAction),
+				run: () => controller.perform({ type: buildAction, location: name, building: b }),
 			})
 		}
 	} else if (sel === ActionType.USE_ADJACENT_BUILDING && loc.building) {
@@ -311,19 +324,59 @@ function clickCity(idx, city) {
 	chooser.value = { x, y, cands }
 }
 
+/** Bonus station masters are taken at New York City: click the city, then the tile. */
+function clickBonusStationMasters() {
+	if (!game.value || !store.actions.includes(ActionType.TAKE_BONUS_STATION_MASTER)) return
+	const masters = g().getRailroadTrack().stationMasters
+	if (!masters.length) return
+	const grp = cityGroups.value.find((cg) => cg.city === "NEW_YORK_CITY")
+	const pos = grp?.pos?.disc ?? grp?.pos?.rect
+	const x = pos ? (pos.cx ?? pos.x + (pos.w ?? 0) / 2) : 400
+	const y = pos ? (pos.cy ?? pos.y + (pos.h ?? 0) / 2) : 400
+	chooser.value = {
+		x,
+		y,
+		cands: masters.map((m) => ({
+			label: view.humanizeAction(m),
+			img: view.stationMasterImage(m),
+			run: () => controller.perform({ type: ActionType.TAKE_BONUS_STATION_MASTER, stationMaster: m }),
+		})),
+	}
+}
+
 function clickSpace(space) {
 	if (!game.value) return
 	const selected = store.selectedAction
-	if (selected && map.engineMoveRange(selected, g()) && map.reachableSpacesFor(selected, g()).has(space)) {
-		controller.perform({ type: selected, to: space })
-		return
-	}
-	for (const a of store.actions) {
-		if (map.reachableSpacesFor(a, g()).has(space)) {
-			controller.perform({ type: a, to: space })
-			return
+	const live = []
+	if (selected) {
+		if (map.engineMoveRange(selected, g()) && map.reachableSpacesFor(selected, g()).has(space)) live.push(selected)
+	} else {
+		for (const a of store.actions) {
+			if (map.reachableSpacesFor(a, g()).has(space) && !live.includes(a)) live.push(a)
 		}
 	}
+	if (!live.length) return
+	if (live.length === 1) {
+		controller.perform({ type: live[0], to: space })
+		return
+	}
+	const sr = SPACE_RECTS.find((s) => s.space === space)
+	const x = sr ? sr.x + sr.w / 2 : 400
+	const y = sr ? sr.y + sr.h / 2 : 400
+	chooser.value = { x, y, cands: live.map((a) => ({ label: view.humanizeAction(a), run: () => controller.perform({ type: a, to: space }) })) }
+}
+
+function stationClickable(i) {
+	if (!game.value) return false
+	const acts = store.actions
+	const player = g().currentPlayer
+	const rt = g().getRailroadTrack()
+	const station = rt.stations[i]
+	if (!station) return false
+	if (acts.includes(ActionType.UPGRADE_STATION) && station.space === rt.currentSpace(player)) return true
+	if (acts.includes(ActionType.UPGRADE_STATION_TOWN) && (i === 10 || i === 11)) return true
+	if (acts.includes(ActionType.DOWNGRADE_STATION) && station.upgradedBy.includes(player)) return true
+	return acts.includes(ActionType.UPGRADE_ANY_STATION_BEHIND_ENGINE) && parseFloat(rt.currentSpace(player)) > parseFloat(station.space)
 }
 
 function clickStation(i) {
@@ -333,6 +386,8 @@ function clickStation(i) {
 	const rt = g().getRailroadTrack()
 	const station = rt.stations[i]
 	if (!station) return
+	if (acts.includes(ActionType.UPGRADE_STATION) && station.space === rt.currentSpace(player))
+		return controller.perform({ type: ActionType.UPGRADE_STATION })
 	// Rails to the North: the station town you just branched onto offers its own upgrade.
 	if (acts.includes(ActionType.UPGRADE_STATION_TOWN) && (i === 10 || i === 11))
 		return controller.perform({ type: ActionType.UPGRADE_STATION_TOWN })
@@ -530,10 +585,14 @@ const jobToken = computed(() => {
 const reachableSpaces = computed(() => {
 	const out = new Set()
 	if (!game.value) return out
-	// The train only lights up once its own action area has been picked on the
-	// tile, not as soon as a building offers a move as one option among several.
-	const a = store.selectedAction
-	if (a) for (const s of map.reachableSpacesFor(a, g())) out.add(s)
+	// A picked engine move keeps the board focused; otherwise every live engine
+	// move lights its reachable spaces, whether granted by a building or a card.
+	const selected = store.selectedAction
+	if (selected) {
+		for (const s of map.reachableSpacesFor(selected, g())) out.add(s)
+		return out
+	}
+	for (const a of store.actions) for (const s of map.reachableSpacesFor(a, g())) out.add(s)
 	return out
 })
 
@@ -736,6 +795,10 @@ const hitTargets = computed(() => {
 		if (!deliverableCities.value.has(c.city)) continue
 		out.push({ key: "city:" + c.city, type: "city", idx: c.idx, city: c.city, x: c.pos.rect.x, y: c.pos.rect.y, w: 52, h: 50, rx: 2, transform: null })
 	}
+	if (store.actions.includes(ActionType.TAKE_BONUS_STATION_MASTER)) {
+		const ny = cityGroups.value.find((c) => c.city === "NEW_YORK_CITY")
+		if (ny) out.push({ key: "city:bonus", type: "bonus", x: ny.pos.rect.x, y: ny.pos.rect.y, w: 52, h: 50, rx: 2, transform: null })
+	}
 	// Rails to the North: towns the player may put a branchlet on.
 	if (store.actions.includes(ActionType.PLACE_BRANCHLET)) {
 		const allowed = new Set(g().possibleTowns(g().currentPlayer))
@@ -758,6 +821,7 @@ const hitTargets = computed(() => {
 function clickTarget(t) {
 	if (t.type === "location") clickLocation(t.name)
 	else if (t.type === "city") clickCity(t.idx, t.city)
+	else if (t.type === "bonus") clickBonusStationMasters()
 	else if (t.type === "space") clickSpace(t.space)
 	else if (t.type === "foresight") clickForesight(t.col, t.row)
 	else if (t.type === "town") clickTown(t.name)
@@ -818,7 +882,7 @@ function leaveTarget(t) {
 				</g>
 
 				<!-- stations -->
-				<g v-for="st in stations" :key="'station' + st.i" class="stationGroup" @click="clickStation(st.i)">
+				<g v-for="st in stations" :key="'station' + st.i" class="stationGroup" :class="{ selectable: stationClickable(st.i) }" @click="clickStation(st.i)">
 					<rect class="station" :x="st.pos.x" :y="st.pos.y" width="33" height="33" rx="6" ry="6" />
 					<circle v-for="(d, i) in st.discs" :key="i" :class="'disc ' + d.color" :cx="d.cx" :cy="d.cy" r="11" />
 					<image v-if="st.masterImg && st.masterPos" :href="st.masterImg" :x="st.masterPos.x" :y="st.masterPos.y" width="33" height="39" />
@@ -945,6 +1009,8 @@ function leaveTarget(t) {
 			</g>
 		</svg>
 
+		<div v-if="store.selectedAction" class="cancelMove" @click="store.clearAction()">{{ t('panels.cancel') }}</div>
+
 		<div
 			v-if="chooser"
 			class="chooser"
@@ -1006,6 +1072,25 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 	cursor: pointer;
 }
 .stationGroup:hover .station { stroke: black; }
+.stationGroup.selectable .station { stroke: #ffd400; stroke-width: 4; }
+.stationGroup.selectable:hover .station { stroke: #90ee90; stroke-width: 6; }
+
+/* Cancel an armed building move without leaving the board. */
+.cancelMove {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	z-index: 11;
+	background: #fffde8;
+	border: 2px solid #ffd400;
+	border-radius: 5px;
+	padding: 3px 10px;
+	font-size: 12px;
+	font-weight: bold;
+	cursor: pointer;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+.cancelMove:hover { border-color: #90ee90; }
 
 .foresight { cursor: pointer; }
 .workerGroup { cursor: default; }

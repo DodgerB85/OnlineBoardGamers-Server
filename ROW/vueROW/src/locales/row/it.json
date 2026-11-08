@@ -602,12 +602,16 @@
       "moveStepsLeft": "Muovi — fai clic su un punto evidenziato ({steps} passi rimasti; giallo = passo successivo, ciano = più lontano)",
       "moveAtMost": "Muovi — fai clic su un punto evidenziato (al massimo {limit} passi)",
       "hireWorker": "Assumi un lavoratore",
+      "hireHint": "Fai clic su un lavoratore evidenziato nel mercato del lavoro.",
       "placeBuildingHint": "Posiziona edificio — scegli un punto, poi posiziona un edificio. Questi sono i tuoi edifici disponibili.",
       "placeBranchletHint": "Rails to the North — fai clic su una città evidenziata sulla striscia",
       "clickTown": "Fai clic su una città",
       "clickWorker": "Fai clic su un lavoratore sulla tua plancia",
       "clickCardToDiscard": "Fai clic su una carta della tua plancia per scartarla",
-      "cardActionsHint": "Azioni carta — seleziona, poi fai clic su una carta della tua plancia",
+      "cardActionsHint": "Azioni carta — fai clic su una carta corrispondente della tua plancia",
+      "engineHint": "Muovi la tua locomotiva — fai clic su una casella del binario evidenziata.",
+      "bonusStationMasterHint": "Fai clic su New York, poi scegli una tessera capostazione bonus.",
+      "clickHighlighted": "Fai clic sull'elemento evidenziato sul tabellone o sulla tua plancia giocatore.",
       "otherActions": "Altre azioni"
     },
     "buildingInfo": {

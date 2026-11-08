@@ -600,12 +600,16 @@
       "moveStepsLeft": "移动 — 点击高亮地点（剩余 {steps} 步；黄色 = 下一步，青色 = 更远）",
       "moveAtMost": "移动 — 点击高亮地点（最多 {limit} 步）",
       "hireWorker": "雇佣工人",
+      "hireHint": "点击劳动力市场中高亮的工人。",
       "placeBuildingHint": "放置建筑 — 选择一个地点，然后放置建筑。这些是你可用的建筑。",
       "placeBranchletHint": "Rails to the North — 点击条带上高亮的城镇",
       "clickTown": "点击城镇",
       "clickWorker": "点击你玩家板上的工人",
       "clickCardToDiscard": "点击你玩家板上的卡牌以弃掉它",
-      "cardActionsHint": "卡牌行动 — 选择后点击你玩家板上的卡牌",
+      "cardActionsHint": "卡牌行动 — 点击玩家板上对应的卡牌",
+      "engineHint": "移动你的火车头——点击高亮的轨道格。",
+      "bonusStationMasterHint": "点击纽约市，然后选择一枚奖励站长板块。",
+      "clickHighlighted": "点击棋盘或玩家板上高亮的项目。",
       "otherActions": "其他行动"
     },
     "buildingInfo": {

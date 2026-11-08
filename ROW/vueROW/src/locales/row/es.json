@@ -600,12 +600,16 @@
       "moveStepsLeft": "Mover — haz clic en un sitio resaltado ({steps} pasos restantes; amarillo = siguiente paso, cian = más lejos)",
       "moveAtMost": "Mover — haz clic en un sitio resaltado (como máximo {limit} pasos)",
       "hireWorker": "Contratar trabajador",
+      "hireHint": "Haz clic en un trabajador resaltado del mercado de trabajo.",
       "placeBuildingHint": "Colocar edificio — elige un sitio y luego coloca un edificio. Estos son tus edificios disponibles.",
       "placeBranchletHint": "Rails to the North — haz clic en una ciudad resaltada de la franja",
       "clickTown": "Haz clic en una ciudad",
       "clickWorker": "Haz clic en un trabajador de tu tablero",
       "clickCardToDiscard": "Haz clic en una carta de tu tablero para descartarla",
-      "cardActionsHint": "Acciones de carta — selecciona y luego haz clic en una carta de tu tablero",
+      "cardActionsHint": "Acciones de carta — haz clic en una carta compatible de tu tablero",
+      "engineHint": "Mueve tu locomotora — haz clic en una casilla de vía resaltada.",
+      "bonusStationMasterHint": "Haz clic en Nueva York y elige una loseta de jefe de estación de bonificación.",
+      "clickHighlighted": "Haz clic en el elemento resaltado del tablero o de tu tablero de jugador.",
       "otherActions": "Otras acciones"
     },
     "buildingInfo": {

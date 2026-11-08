@@ -17,7 +17,7 @@ import CardView from "./CardView.vue"
 
 const props = defineProps({ playerName: { type: String, default: "" } })
 
-const { ActionType, Unlockable, CattleType } = rf
+const { ActionType, Unlockable } = rf
 const { t } = useI18n()
 const store = useModelStore()
 const personal = usePersonalStore()
@@ -46,6 +46,7 @@ const interactive = computed(() => {
 	if (personal.trainingGame) return props.playerName === g.currentPlayer
 	return !!personal.name && props.playerName === personal.name
 })
+const actable = computed(() => interactive.value && controller.canAct())
 const ps = computed(() => {
 	const g = game.value
 	if (!g) return null
@@ -83,7 +84,7 @@ const certMarkers = [
 // A disc is clickable (yellow) when an unlock action is live and this disc can
 // still be removed. Clicking performs the unlock directly.
 function discUnlockAction(d) {
-	if (!interactive.value || !ps.value) return null
+	if (!actable.value || !ps.value) return null
 	// Only the next disc in the pair can be removed: left first, then right.
 	if ((ps.value.unlocked[d.u] ?? 0) !== d.nth - 1) return null
 	if (!ps.value.canUnlock(d.u, game.value.isRailsToTheNorth())) return null
@@ -116,13 +117,50 @@ const auxRows = computed(() => [...AUX_ROW_DEFS, {
 	action: store.actions.includes(row.double) ? row.double : row.single,
 })))
 
-function activateAuxiliaryAction(action) {
-	if (!interactive.value || !store.actions.includes(action)) return
+const auxWrapper = computed(() => {
+	if (!actable.value) return null
+	return [ActionType.SINGLE_AUXILIARY_ACTION, ActionType.SINGLE_OR_DOUBLE_AUXILIARY_ACTION].find((a) => store.actions.includes(a)) ?? null
+})
+
+/** Actions the live single/double auxiliary wrapper still offers. */
+function auxOfferedActions() {
+	const g = game.value
+	const p = ps.value
+	if (!g || !p || !auxWrapper.value) return new Set()
+	const list = auxWrapper.value === ActionType.SINGLE_AUXILIARY_ACTION ? g.unlockedSingleAuxiliaryActions(p) : g.unlockedSingleOrDoubleAuxiliaryActions(p)
+	const out = new Set()
+	for (const possible of list) for (const action of possible.getPossibleActions()) out.add(action)
+	return out
+}
+
+function auxRowAvailable(row) {
+	if (!actable.value) return false
+	if (store.actions.includes(row.double) || store.actions.includes(row.single)) return true
+	if (!auxWrapper.value) return false
+	const offered = auxOfferedActions()
+	return offered.has(row.double) || offered.has(row.single)
+}
+
+function runAuxiliaryAction(action) {
 	if (map.engineMoveRange(action, game.value)) {
 		store.selectAction(action)
 		return
 	}
 	controller.perform({ type: action })
+}
+
+function activateAuxiliaryAction(row) {
+	if (!actable.value) return
+	const direct = store.actions.includes(row.double) ? row.double : store.actions.includes(row.single) ? row.single : null
+	if (direct) {
+		runAuxiliaryAction(direct)
+		return
+	}
+	if (!auxWrapper.value) return
+	// The wrapper only opens the choice; picking the row's best action is the player's click.
+	if (!controller.perform({ type: auxWrapper.value })) return
+	const after = store.actions.includes(row.double) ? row.double : store.actions.includes(row.single) ? row.single : null
+	if (after) runAuxiliaryAction(after)
 }
 
 // Unlock discs: [unlockable, cx, cy, color] (white = first disc of a pair).
@@ -144,13 +182,13 @@ const DISCS = [
 ]
 
 function workerEligible(index, kind) {
-	if (!interactive.value || store.selectedAction !== ActionType.APPOINT_STATION_MASTER || !ps.value) return false
+	if (!actable.value || !store.actions.includes(ActionType.APPOINT_STATION_MASTER) || !ps.value) return false
 	const total = kind === "cowboy" ? ps.value.getNumberOfCowboys() : kind === "craftsman" ? ps.value.getNumberOfCraftsmen() : ps.value.getNumberOfEngineers()
 	return index === total - 2
 }
 
 function onWorker(kind) {
-	if (interactive.value && store.selectedAction === ActionType.APPOINT_STATION_MASTER) {
+	if (actable.value && store.actions.includes(ActionType.APPOINT_STATION_MASTER)) {
 		controller.perform({ type: ActionType.APPOINT_STATION_MASTER, worker: kind === "cowboy" ? "COWBOY" : kind === "craftsman" ? "CRAFTSMAN" : "ENGINEER" })
 	}
 }
@@ -165,23 +203,32 @@ const hand = computed(() => ps.value?.hand ?? [])
 
 // ---- hand selection (reference canSelectCard / selectCard) ----
 const hoveredCard = ref(null)
-
-/**
- * The card action the table is serving: the player's pick, or a live DISCARD_CARD
- * left behind by a draw-then-discard, which needs no selecting.
- */
-const cardAction = computed(() => {
-	if (store.selectedAction) return store.selectedAction
-	return store.actions.includes(ActionType.DISCARD_CARD) ? ActionType.DISCARD_CARD : null
-})
+const menu = ref(null)
 
 const PAIR_ACTIONS = new Set([ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS, ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS])
+
+function applicableCardActions(card) {
+	if (!actable.value || !card) return []
+	const actions = map.cardActionsFor(card, hand.value, store.actions)
+	// A building hotspot may have armed one specific action: keep the table focused on it.
+	if (store.selectedAction) return actions.filter((a) => a === store.selectedAction)
+	if (actions.length || !auxWrapper.value) return actions
+	// A single/double auxiliary action can also offer card actions (e.g. the RttN
+	// branchlet); they only become live after the wrapper is performed.
+	return map.cardActionsFor(card, hand.value, [...auxOfferedActions()])
+}
+
+function canSelectCard(card) {
+	return applicableCardActions(card).length > 0
+}
 
 /** The two cards a hovered card's pair action would discard (the engine takes the lowest values). */
 const pairToDiscard = computed(() => {
 	const i = hoveredCard.value
 	const card = i === null ? null : hand.value[i]
-	if (!card || !isCattle(card) || !PAIR_ACTIONS.has(cardAction.value)) return new Set()
+	if (!card) return new Set()
+	const pair = applicableCardActions(card).find((a) => PAIR_ACTIONS.has(a))
+	if (!pair) return new Set()
 	const same = hand.value
 		.map((c, k) => ({ c, k }))
 		.filter(({ c }) => isCattle(c) && c.type === card.type)
@@ -215,80 +262,143 @@ const collections = computed(() => {
 		hazards: (p?.hazards ?? []).map((h) => ({ img: view.hazardImage(h.type, h.hand), label: t("row.playerTable.hazardTitle", { type: h.type, hand: h.hand, points: h.points }) })),
 		teepees: (p?.teepees ?? []).map((tp) => ({ img: view.teepeeImage(tp), label: t("row.playerTable.teepeeTitle", { teepee: tp }) })),
 		token: p?.jobMarketToken ?? false,
+		exchangeTokens: p?.exchangeTokens ?? 0,
 	}
 })
 
-function canSelectCard(card) {
-	if (!interactive.value) return false
-	const sel = cardAction.value
-	if (!sel) return false
-	const cattle = isCattle(card)
-	switch (sel) {
-		case ActionType.DISCARD_CARD:
-		case ActionType.REMOVE_CARD:
-			return true
-		case ActionType.UPGRADE_SIMMENTAL:
-			return isCattle(card) && card.type === CattleType.SIMMENTAL
-		case ActionType.DISCARD_1_OBJECTIVE_CARD_TO_GAIN_2_CERTIFICATES:
-		case ActionType.PLAY_OBJECTIVE_CARD:
-			return isObjective(card)
-		case ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_3_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND:
-		case ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_6_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND:
-		case ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_1_CERTIFICATE:
-		case ActionType.DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS:
-		case ActionType.DISCARD_CATTLE_CARD_TO_PLACE_BRANCHLET:
-			return cattle
-		case ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS:
-		case ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS:
-			return cattle && hand.value.filter(isCattle).filter((c) => c.type === card.type).length > 1
-		default:
-			return false
+// These effects have no board target, so the player-board counters are the click surface.
+const DOLLAR_GAINS = new Set([
+	ActionType.GAIN_1_DOLLAR,
+	ActionType.GAIN_2_DOLLARS,
+	ActionType.GAIN_3_DOLLARS,
+	ActionType.GAIN_4_DOLLARS,
+	ActionType.GAIN_5_DOLLARS,
+	ActionType.GAIN_12_DOLLARS,
+	ActionType.GAIN_1_DOLLAR_PER_ENGINEER,
+	ActionType.GAIN_1_DOLLAR_PER_CRAFTSMAN,
+	ActionType.GAIN_2_DOLLARS_PER_BUILDING_IN_WOODS,
+	ActionType.GAIN_2_DOLLARS_PER_STATION,
+	ActionType.GAIN_2_CERTIFICATES_AND_2_DOLLARS_PER_TEEPEE_PAIR,
+	ActionType.GAIN_1_CERTIFICATE_AND_1_DOLLAR_PER_BELL,
+])
+const CERT_GAINS = new Set([
+	ActionType.GAIN_1_CERTIFICATE,
+	ActionType.GAIN_2_CERTIFICATES,
+	ActionType.MAX_CERTIFICATES,
+	ActionType.GAIN_2_CERTIFICATES_AND_2_DOLLARS_PER_TEEPEE_PAIR,
+	ActionType.GAIN_1_CERTIFICATE_AND_1_DOLLAR_PER_BELL,
+])
+const DRAW_ACTIONS = new Set([
+	ActionType.DRAW_CARD,
+	ActionType.DRAW_2_CARDS,
+	ActionType.DRAW_3_CARDS,
+	ActionType.DRAW_4_CARDS,
+	ActionType.DRAW_5_CARDS,
+	ActionType.DRAW_6_CARDS,
+])
+const EXCHANGE_ACTIONS = new Set([ActionType.GAIN_EXCHANGE_TOKEN, ActionType.USE_EXCHANGE_TOKEN])
+
+const liveDollarGains = computed(() => store.actions.filter((a) => DOLLAR_GAINS.has(a)))
+const liveCertGains = computed(() => store.actions.filter((a) => CERT_GAINS.has(a)))
+const liveDraws = computed(() => store.actions.filter((a) => DRAW_ACTIONS.has(a)))
+const liveExchange = computed(() => store.actions.filter((a) => EXCHANGE_ACTIONS.has(a)))
+const canCollectDollars = computed(() => actable.value && liveDollarGains.value.length > 0)
+const canCollectCerts = computed(() => actable.value && liveCertGains.value.length > 0)
+const canDraw = computed(() => actable.value && liveDraws.value.length > 0)
+const canUseExchange = computed(() => actable.value && liveExchange.value.length > 0)
+const exchangeEdition = computed(() => edition.value === "SECOND" || (game.value?.isRailsToTheNorth() ?? false))
+
+function performLive(actions) {
+	if (actions.length === 1) {
+		controller.perform({ type: actions[0] })
+		return
 	}
+	if (actions.length > 1) menu.value = actions.map((a) => ({ label: view.humanizeAction(a), run: () => controller.perform({ type: a }) }))
+}
+
+function pickMenu(option) {
+	menu.value = null
+	option.run()
+}
+
+function collectDollars() {
+	if (actable.value) performLive(liveDollarGains.value)
+}
+function collectCerts() {
+	if (actable.value) performLive(liveCertGains.value)
+}
+function clickExchange() {
+	if (actable.value) performLive(liveExchange.value)
+}
+function clickDrawPile() {
+	if (!actable.value || !liveDraws.value.length) {
+		toggleStack("draw")
+		return
+	}
+	performLive(liveDraws.value)
 }
 
 function isCattle(card) {
 	return card && card.value !== undefined
 }
-function isObjective(card) {
-	return card && card.tasks !== undefined
-}
 
-function selectCard(card) {
-	if (!canSelectCard(card)) return
-	const sel = cardAction.value
-	switch (sel) {
+function performCardAction(action, card) {
+	switch (action) {
 		case ActionType.DISCARD_CARD:
 		case ActionType.REMOVE_CARD:
 		case ActionType.UPGRADE_SIMMENTAL:
 			// These engine actions take the whole card object.
-			controller.perform({ type: sel, card })
+			controller.perform({ type: action, card })
 			return
 		case ActionType.DISCARD_1_OBJECTIVE_CARD_TO_GAIN_2_CERTIFICATES:
 		case ActionType.PLAY_OBJECTIVE_CARD:
-			controller.perform({ type: sel, objectiveCard: card })
+			controller.perform({ type: action, objectiveCard: card })
 			return
 		default:
-			controller.perform({ type: sel, cattleType: card.type })
+			controller.perform({ type: action, cattleType: card.type })
 	}
+}
+
+function performWrappedCardAction(action, card) {
+	if (store.actions.includes(action)) {
+		performCardAction(action, card)
+		return
+	}
+	if (!auxWrapper.value) return
+	if (!controller.perform({ type: auxWrapper.value })) return
+	if (store.actions.includes(action)) performCardAction(action, card)
+}
+
+function selectCard(card) {
+	const actions = applicableCardActions(card)
+	if (!actions.length) return
+	if (actions.length === 1) {
+		performWrappedCardAction(actions[0], card)
+		return
+	}
+	menu.value = actions.map((a) => ({ label: view.humanizeAction(a), run: () => performWrappedCardAction(a, card) }))
 }
 </script>
 
 <template>
 	<div v-if="ps" id="playerBoard" :style="{ borderColor: color }">
 		<div class="header">
-			<span class="balance">${{ ps.balance }}</span>
+			<span class="balance" :class="{ selectable: canCollectDollars }" @click="collectDollars">${{ ps.balance }}</span>
 			<span v-if="ps.handValue()">{{ t('row.playerTable.handValue', { value: ps.handValue() }) }}</span>
-			<span>{{ t('row.playerTable.certs', { temp: ps.tempCertificates, total: ps.tempCertificates + ps.permanentCertificates() }) }}</span>
+			<span :class="{ selectable: canCollectCerts }" @click="collectCerts">{{ t('row.playerTable.certs', { temp: ps.tempCertificates, total: ps.tempCertificates + ps.permanentCertificates() }) }}</span>
 			<span>{{ t('row.playerTable.engine', { space: store.game?.getRailroadTrack().currentSpace(ps.player) }) }}</span>
 		</div>
 		<div class="collections">
-			<span class="stack" :title="t('row.playerTable.drawPileTitle', { count: drawStackSize })" @click="toggleStack('draw')">
+			<span class="stack" :class="{ drawable: canDraw }" :title="canDraw ? t('row.actionArea.clickHighlighted') : t('row.playerTable.drawPileTitle', { count: drawStackSize })" @click="clickDrawPile">
 				<img :src="view.cardBackGreyImage()" alt="" /><b>{{ drawStackSize }}</b><em class="stackLabel">{{ t('app.draw') }}</em>
 			</span>
 			<span class="stack discard" :title="t('row.playerTable.discardPileTitle', { count: discardSize })" @click="toggleStack('discard')">
 				<img :src="view.cardBackGreyImage()" alt="" /><b>{{ discardSize }}</b><em class="stackLabel">{{ t('app.discard') }}</em>
 			</span>
 			<img v-for="m in collections.masters" :key="'sm' + m.name" class="collect" :src="m.img" :title="view.humanizeAction(m.name)" alt="" />
+			<span v-if="exchangeEdition && (collections.exchangeTokens > 0 || canUseExchange)" class="collect exchange" :class="{ selectable: canUseExchange }" :title="t('row.popover.exchangeTokens')" @click="clickExchange">
+				<img :src="view.exchangeTokenImage()" alt="" /><b>{{ collections.exchangeTokens }}</b>
+			</span>
 			<img v-for="(h, i) in collections.hazards" :key="'hz' + i" class="collect" :src="h.img" :title="h.label" alt="" />
 			<img v-for="(tp, i) in collections.teepees" :key="'tp' + i" class="collect" :src="tp.img" :title="tp.label" alt="" />
 			<img v-if="collections.token" class="collect" :src="view.jobMarketTokenImage()" :title="t('row.playerTable.jobMarketToken')" alt="" />
@@ -345,8 +455,8 @@ function selectCard(card) {
 				ry="4"
 				width="155"
 				height="54"
-				:class="{ selectable: interactive && store.actions.includes(row.action), disabled: !interactive || !store.actions.includes(row.action) }"
-				@click="activateAuxiliaryAction(row.action)"
+				:class="{ selectable: auxRowAvailable(row), disabled: !auxRowAvailable(row) }"
+				@click="activateAuxiliaryAction(row)"
 			>
 				<title>{{ view.humanizeAction(row.action) }}</title>
 			</rect>
@@ -380,6 +490,10 @@ function selectCard(card) {
 				<span v-if="viewedCards.length === 0" class="empty">{{ t('app.empty') }}</span>
 			</div>
 		</div>
+		<div v-if="menu" class="actionMenu">
+			<button v-for="(o, i) in menu" :key="i" @click="pickMenu(o)">{{ o.label }}</button>
+			<button class="cancel" @click="menu = null">{{ t('panels.cancel') }}</button>
+		</div>
 	</div>
 </template>
 
@@ -387,10 +501,18 @@ function selectCard(card) {
 #playerBoard { display: block; width: 100%; margin: 8px 0; box-sizing: border-box; border: 4px solid; border-radius: 8px; padding: 4px; }
 .header { margin-bottom: 4px; font-size: 13px; display: flex; gap: 14px; justify-content: center; }
 .header .balance { font-weight: bold; color: #0a6c0a; }
+.header .selectable { cursor: pointer; outline: 2px solid #ffd400; border-radius: 3px; }
+.header .selectable:hover { outline-color: #90ee90; }
 .collections { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; margin-bottom: 4px; min-height: 64px; }
 .collections .collect { width: 26px; height: 30px; border: 1px solid #fff; border-radius: 4px; background: #fff; }
+.collections .collect.exchange { position: relative; box-sizing: border-box; cursor: default; }
+.collections .collect.exchange.selectable { cursor: pointer; border-color: #ffd400; box-shadow: 0 0 0 2px #ffd400; }
+.collections .collect.exchange.selectable:hover { border-color: #90ee90; box-shadow: 0 0 0 2px #90ee90; }
+.collections .collect.exchange img { width: 100%; height: 100%; display: block; }
+.collections .collect.exchange b { position: absolute; right: 1px; bottom: 0; color: #fff; font-size: 12px; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
 .collections .stack { position: relative; box-sizing: border-box; width: 52px; height: 60px; border: 3px solid #ffd400; border-radius: 4px; overflow: hidden; cursor: pointer; }
 .collections .stack:hover { border-color: #90ee90; }
+.collections .stack.drawable { box-shadow: 0 0 0 3px #90ee90; }
 .collections .stack img { width: 100%; height: 100%; display: block; }
 .collections .stack.discard img { filter: grayscale(0.6); }
 .collections .stack b { position: absolute; right: 1px; bottom: 0; color: #fff; font-size: 13px; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
@@ -423,6 +545,21 @@ function selectCard(card) {
 .stackDialogHead button { margin-left: 10px; cursor: pointer; }
 .stackDialogCards { display: flex; flex-wrap: wrap; gap: 4px; max-width: 70vw; max-height: 60vh; overflow-y: auto; background: #fffde8; padding: 8px; border-radius: 6px; }
 .stackDialogCards .empty { color: #666; padding: 8px; }
+
+/* One-click card/gain choices: a small board-side menu instead of action-bar buttons. */
+.actionMenu {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.35);
+	z-index: 95;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+}
+.actionMenu button { padding: 5px 12px; cursor: pointer; font-size: 13px; }
+.actionMenu .cancel { background: #eee; }
 
 .player-board {
 	width: 100%;

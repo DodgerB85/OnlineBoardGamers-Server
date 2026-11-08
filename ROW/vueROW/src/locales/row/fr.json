@@ -600,12 +600,16 @@
       "moveStepsLeft": "Déplacement — clique sur un emplacement surligné ({steps} pas restants ; jaune = prochain pas, cyan = plus loin)",
       "moveAtMost": "Déplacement — clique sur un emplacement surligné (au plus {limit} pas)",
       "hireWorker": "Embaucher un ouvrier",
+      "hireHint": "Clique sur un ouvrier surligné sur le marché du travail.",
       "placeBuildingHint": "Placer un bâtiment — choisis un emplacement, puis place un bâtiment. Voici tes bâtiments disponibles.",
       "placeBranchletHint": "Rails to the North — clique sur une ville surlignée de la bande",
       "clickTown": "Clique sur une ville",
       "clickWorker": "Clique sur un ouvrier de ton plateau",
       "clickCardToDiscard": "Clique sur une carte de ton plateau pour la défausser",
-      "cardActionsHint": "Actions de carte — sélectionne, puis clique sur une carte de ton plateau",
+      "cardActionsHint": "Actions de carte — clique sur une carte correspondante de ton plateau",
+      "engineHint": "Déplace ta locomotive — clique sur une case de voie surlignée.",
+      "bonusStationMasterHint": "Clique sur New York, puis choisis une tuile de chef de gare bonus.",
+      "clickHighlighted": "Clique sur l'élément surligné du plateau ou de ton plateau de joueur.",
       "otherActions": "Autres actions"
     },
     "buildingInfo": {

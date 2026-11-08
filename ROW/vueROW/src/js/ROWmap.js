@@ -270,8 +270,6 @@ export const ENGINE_FORWARD = {
 	[ActionType.MOVE_ENGINE_AT_MOST_3_FORWARD]: [0, 3],
 	[ActionType.MOVE_ENGINE_AT_MOST_4_FORWARD]: [0, 4],
 	[ActionType.MOVE_ENGINE_2_OR_3_FORWARD]: [2, 3],
-	[ActionType.DISCARD_1_JERSEY_TO_MOVE_ENGINE_1_FORWARD]: [1, 1],
-	[ActionType.DISCARD_1_DUTCH_BELT_TO_MOVE_ENGINE_2_FORWARD]: [1, 2],
 }
 
 export const ENGINE_BACKWARD = {
@@ -456,6 +454,78 @@ function cheapestHire(g, action) {
 		if (i < jm.currentRowIndex && row.workers.length) cheapest = Math.min(cheapest, JOB_MARKET_COST[i] + mod)
 	})
 	return cheapest
+}
+
+const REMOVE_CARD_CATTLE = new Set([CattleType.AYRSHIRE, CattleType.BROWN_SWISS, CattleType.HOLSTEIN])
+const BRANCHLET_CATTLE = new Set([CattleType.GUERNSEY, CattleType.BLACK_ANGUS, CattleType.DUTCH_BELT])
+
+/**
+ * Live actions a click on `card` can perform. Returned in the engine's
+ * possible-action order so the caller can open a chooser when there is more
+ * than one.
+ */
+export function cardActionsFor(card, hand, liveActions) {
+	if (!card) return []
+	const cattle = isCattleCard(card)
+	const objective = isObjectiveCard(card)
+	const cards = hand ?? []
+	const out = []
+	for (const a of liveActions) {
+		switch (a) {
+			case ActionType.DISCARD_CARD:
+			case ActionType.REMOVE_CARD:
+				out.push(a)
+				break
+			case ActionType.UPGRADE_SIMMENTAL:
+				if (cattle && card.type === CattleType.SIMMENTAL) out.push(a)
+				break
+			case ActionType.DISCARD_1_OBJECTIVE_CARD_TO_GAIN_2_CERTIFICATES:
+			case ActionType.PLAY_OBJECTIVE_CARD:
+				if (objective) out.push(a)
+				break
+			case ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_1_CERTIFICATE:
+			case ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_3_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND:
+			case ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_6_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND:
+				if (cattle) out.push(a)
+				break
+			case ActionType.DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS:
+				if (cattle && REMOVE_CARD_CATTLE.has(card.type)) out.push(a)
+				break
+			case ActionType.DISCARD_CATTLE_CARD_TO_PLACE_BRANCHLET:
+				if (cattle && BRANCHLET_CATTLE.has(card.type)) out.push(a)
+				break
+			case ActionType.DISCARD_1_JERSEY_TO_GAIN_2_DOLLARS:
+			case ActionType.DISCARD_1_JERSEY_TO_GAIN_4_DOLLARS:
+			case ActionType.DISCARD_1_JERSEY_TO_GAIN_1_CERTIFICATE:
+			case ActionType.DISCARD_1_JERSEY_TO_GAIN_2_CERTIFICATES:
+			case ActionType.DISCARD_1_JERSEY_TO_GAIN_1_CERTIFICATE_AND_2_DOLLARS:
+			case ActionType.DISCARD_1_JERSEY_FOR_SINGLE_AUXILIARY_ACTION:
+			case ActionType.DISCARD_1_JERSEY_TO_MOVE_ENGINE_1_FORWARD:
+				if (cattle && card.type === CattleType.JERSEY) out.push(a)
+				break
+			case ActionType.DISCARD_1_GUERNSEY:
+			case ActionType.DISCARD_1_GUERNSEY_TO_GAIN_4_DOLLARS:
+				if (cattle && card.type === CattleType.GUERNSEY) out.push(a)
+				break
+			case ActionType.DISCARD_1_BLACK_ANGUS_TO_GAIN_2_DOLLARS:
+			case ActionType.DISCARD_1_BLACK_ANGUS_TO_GAIN_2_CERTIFICATES:
+				if (cattle && card.type === CattleType.BLACK_ANGUS) out.push(a)
+				break
+			case ActionType.DISCARD_1_DUTCH_BELT_TO_GAIN_2_DOLLARS:
+			case ActionType.DISCARD_1_DUTCH_BELT_TO_GAIN_3_DOLLARS:
+			case ActionType.DISCARD_1_DUTCH_BELT_TO_MOVE_ENGINE_2_FORWARD:
+				if (cattle && card.type === CattleType.DUTCH_BELT) out.push(a)
+				break
+			case ActionType.DISCARD_1_HOLSTEIN_TO_GAIN_10_DOLLARS:
+				if (cattle && card.type === CattleType.HOLSTEIN) out.push(a)
+				break
+			case ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS:
+			case ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS:
+				if (cattle && cards.filter((c) => c.type === card.type && isCattleCard(c)).length > 1) out.push(a)
+				break
+		}
+	}
+	return out
 }
 
 // ---------------------------------------------------------------------------

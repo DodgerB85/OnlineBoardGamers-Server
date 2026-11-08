@@ -600,12 +600,16 @@
       "moveStepsLeft": "Bewegen — klicke auf ein markiertes Feld ({steps} Schritte übrig; gelb = nächster Schritt, cyan = weiter)",
       "moveAtMost": "Bewegen — klicke auf ein markiertes Feld (höchstens {limit} Schritte)",
       "hireWorker": "Arbeiter einstellen",
+      "hireHint": "Klicke auf einen hervorgehobenen Arbeiter im Arbeitsmarkt.",
       "placeBuildingHint": "Gebäude platzieren — wähle ein Feld und dann ein Gebäude. Hier sind deine verfügbaren Gebäude.",
       "placeBranchletHint": "Rails to the North — klicke auf eine markierte Stadt auf dem Streifen",
       "clickTown": "Klicke auf eine Stadt",
       "clickWorker": "Klicke auf einen Arbeiter auf deinem Spielertableau",
       "clickCardToDiscard": "Klicke auf eine Karte auf deinem Spielertableau, um sie abzulegen",
-      "cardActionsHint": "Kartenaktionen — auswählen und dann auf eine Karte auf deinem Spielertableau klicken",
+      "cardActionsHint": "Kartenaktionen — klicke auf eine passende Karte auf deinem Spielertableau",
+      "engineHint": "Bewege deine Lok — klicke auf ein hervorgehobenes Gleisfeld.",
+      "bonusStationMasterHint": "Klicke auf New York City und wähle dann ein Bonus-Bahnhofsvorsteher-Plättchen.",
+      "clickHighlighted": "Klicke auf das hervorgehobene Element auf dem Spielbrett oder deinem Spielertableau.",
       "otherActions": "Andere Aktionen"
     },
     "buildingInfo": {

@@ -4,7 +4,6 @@
  * objective-cards.component (GPL-3.0, Tom Wetjens).
  */
 import { computed } from "vue"
-import { useI18n } from "vue-i18n"
 import * as rf from "../js/ROWreference"
 import * as controller from "../js/ROWcontroller"
 import * as view from "../js/ROWview"
@@ -12,7 +11,6 @@ import { useModelStore } from "../stores/ROWstore.js"
 import CardView from "./CardView.vue"
 
 const { ActionType } = rf
-const { t } = useI18n()
 const store = useModelStore()
 
 const game = computed(() => {
@@ -27,24 +25,29 @@ function g() {
 
 const available = computed(() => (game.value ? g().getObjectiveCards().available : []))
 const drawStackSize = computed(() => (game.value ? g().getObjectiveCards().drawStack.length : 0))
-const canTake = computed(() => store.actions.includes(ActionType.TAKE_OBJECTIVE_CARD))
-const canTakeFromDraw = computed(() => canTake.value && !(g().edition === "FIRST" && !g().isRailsToTheNorth() && g().atKansasCity()))
+const takeAction = computed(() => {
+	if (store.actions.includes(ActionType.TAKE_OBJECTIVE_CARD)) return ActionType.TAKE_OBJECTIVE_CARD
+	if (store.actions.includes(ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND)) return ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND
+	return null
+})
+const canTake = computed(() => !!takeAction.value)
+const canTakeFromDraw = computed(() => canTake.value && (takeAction.value === ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND || !(g().edition === "FIRST" && !g().isRailsToTheNorth() && g().atKansasCity())))
 
 function take(id) {
 	if (!canTake.value) return
 	const card = g().getObjectiveCards().available.find((c) => c.id === id)
-	if (card) controller.perform({ type: ActionType.TAKE_OBJECTIVE_CARD, objectiveCard: card })
+	if (card) controller.perform({ type: takeAction.value, objectiveCard: card })
 }
 
 function takeFromDrawStack() {
 	if (!canTakeFromDraw.value) return
-	controller.perform({ type: ActionType.TAKE_OBJECTIVE_CARD })
+	controller.perform({ type: takeAction.value })
 }
 </script>
 
 <template>
 	<div id="objectivesMarket" v-if="game">
-		<div v-if="canTake" class="hint">{{ t('row.actions.buttons.TAKE_OBJECTIVE_CARD') }}</div>
+		<div v-if="canTake" class="hint">{{ view.humanizeAction(takeAction) }}</div>
 		<CardView
 			v-for="card in available"
 			:key="card.id"

@@ -600,12 +600,16 @@
       "moveStepsLeft": "Move — click a highlighted spot ({steps} steps left; yellow = next step, cyan = further)",
       "moveAtMost": "Move — click a highlighted spot (at most {limit} steps)",
       "hireWorker": "Hire worker",
+      "hireHint": "Click a highlighted worker in the job market.",
       "placeBuildingHint": "Place building — choose a spot, then place a building. Here are your available buildings.",
       "placeBranchletHint": "Rails to the North — click a highlighted town on the strip",
       "clickTown": "Click a town",
       "clickWorker": "Click a worker on your player board",
       "clickCardToDiscard": "Click a card on your player table to discard it",
-      "cardActionsHint": "Card actions — select, then click a card on your player table",
+      "cardActionsHint": "Card actions — click a matching card on your player table",
+      "engineHint": "Move your engine — click a highlighted track space.",
+      "bonusStationMasterHint": "Click New York City, then pick a bonus station master tile.",
+      "clickHighlighted": "Click the highlighted item on the board or your player board.",
       "otherActions": "Other actions"
     },
     "buildingInfo": {

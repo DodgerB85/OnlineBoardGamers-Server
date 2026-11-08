@@ -600,12 +600,16 @@
       "moveStepsLeft": "Mover — clique num local destacado ({steps} passos restantes; amarelo = próximo passo, ciano = mais adiante)",
       "moveAtMost": "Mover — clique num local destacado (no máximo {limit} passos)",
       "hireWorker": "Contratar trabalhador",
+      "hireHint": "Clique num trabalhador destacado no mercado de trabalho.",
       "placeBuildingHint": "Colocar edifício — escolha um local e depois coloque um edifício. Estes são os seus edifícios disponíveis.",
       "placeBranchletHint": "Rails to the North — clique numa cidade destacada na faixa",
       "clickTown": "Clique numa cidade",
       "clickWorker": "Clique num trabalhador no seu tabuleiro",
       "clickCardToDiscard": "Clique numa carta no seu tabuleiro para descartá-la",
-      "cardActionsHint": "Ações de carta — selecione e depois clique numa carta no seu tabuleiro",
+      "cardActionsHint": "Ações de carta — clique numa carta correspondente no seu tabuleiro",
+      "engineHint": "Mova a sua locomotiva — clique numa casa de via destacada.",
+      "bonusStationMasterHint": "Clique em Nova Iorque e escolha uma peça de chefe de estação bónus.",
+      "clickHighlighted": "Clique no elemento destacado no tabuleiro ou no seu tabuleiro de jogador.",
       "otherActions": "Outras ações"
     },
     "buildingInfo": {

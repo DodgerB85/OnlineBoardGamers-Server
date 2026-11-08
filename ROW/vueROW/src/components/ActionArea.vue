@@ -24,13 +24,7 @@ const stepsLeft = computed(() => store.moveStepsLeft)
 const armedMove = computed(() => (store.game ? map.armedTrailMove(store.game, store.actions, store.selectedAction) : null))
 
 // --- Hire worker ---
-const hireRows = computed(() => {
-	if (!actions.value.includes(ActionType.HIRE_WORKER) && !actions.value.includes(ActionType.HIRE_WORKER_PLUS_2) && !actions.value.includes(ActionType.HIRE_WORKER_MINUS_1) && !actions.value.includes(ActionType.HIRE_WORKER_MINUS_2)) return []
-	const jm = g().getJobMarket()
-	const rows = []
-	for (let i = 0; i < jm.currentRowIndex; i++) rows.push({ index: i, workers: jm.rows[i].workers, cost: jm.rows[i].workers.length })
-	return rows
-})
+const hiring = computed(() => map.WORKER_ACTIONS.some((a) => actions.value.includes(a)))
 
 // --- Buildings ---
 const buildingActions = computed(() => actions.value.filter((a) => a === ActionType.PLACE_BUILDING || a === ActionType.PLACE_CHEAP_BUILDING || a === ActionType.PLACE_BUILDING_FOR_FREE))
@@ -63,14 +57,7 @@ function buildingLabel(building) {
 }
 
 // --- Engine moves ---
-const engineMoves = computed(() => {
-	const out = []
-	for (const a of actions.value) {
-		const spaces = [...map.reachableSpacesFor(a, g())]
-		if (spaces.length) out.push({ type: a, spaces })
-	}
-	return out
-})
+const engineActive = computed(() => actions.value.some((a) => map.engineMoveRange(a, g())))
 
 // --- Actions with no extra target ---
 const TARGET_ACTIONS = new Set([
@@ -89,9 +76,7 @@ const TARGET_ACTIONS = new Set([
 // Actions offered by a placed building are shown on the board (hover the building), not here.
 const buildingActionSet = computed(() => map.activeBuildingActions(g(), actions.value))
 
-const directActions = computed(() => actions.value.filter((a) => a !== ActionType.PLACE_BRANCHLET && a !== ActionType.PLACE_BID && !TARGET_ACTIONS.has(a) && !map.engineMoveRange(a, g()) && !buildingActionSet.value.has(a)))
-
-// Card-target actions: selected here, then the card is clicked on the player table.
+// Card-target actions: click the matching card on the player table.
 const CARD_TARGET_ACTIONS = new Set([
 	ActionType.DISCARD_CARD, ActionType.REMOVE_CARD,
 	ActionType.DISCARD_1_OBJECTIVE_CARD_TO_GAIN_2_CERTIFICATES, ActionType.PLAY_OBJECTIVE_CARD,
@@ -101,18 +86,26 @@ const CARD_TARGET_ACTIONS = new Set([
 	ActionType.DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS,
 	ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS, ActionType.DISCARD_PAIR_TO_GAIN_4_DOLLARS,
 	ActionType.DISCARD_CATTLE_CARD_TO_PLACE_BRANCHLET,
+	ActionType.DISCARD_1_JERSEY_TO_GAIN_2_DOLLARS, ActionType.DISCARD_1_JERSEY_TO_GAIN_4_DOLLARS,
+	ActionType.DISCARD_1_JERSEY_TO_GAIN_1_CERTIFICATE, ActionType.DISCARD_1_JERSEY_TO_GAIN_2_CERTIFICATES,
+	ActionType.DISCARD_1_JERSEY_TO_GAIN_1_CERTIFICATE_AND_2_DOLLARS, ActionType.DISCARD_1_JERSEY_FOR_SINGLE_AUXILIARY_ACTION,
+	ActionType.DISCARD_1_JERSEY_TO_MOVE_ENGINE_1_FORWARD, ActionType.DISCARD_1_DUTCH_BELT_TO_MOVE_ENGINE_2_FORWARD,
+	ActionType.DISCARD_1_DUTCH_BELT_TO_GAIN_2_DOLLARS, ActionType.DISCARD_1_DUTCH_BELT_TO_GAIN_3_DOLLARS,
+	ActionType.DISCARD_1_GUERNSEY, ActionType.DISCARD_1_GUERNSEY_TO_GAIN_4_DOLLARS,
+	ActionType.DISCARD_1_BLACK_ANGUS_TO_GAIN_2_DOLLARS, ActionType.DISCARD_1_BLACK_ANGUS_TO_GAIN_2_CERTIFICATES,
+	ActionType.DISCARD_1_HOLSTEIN_TO_GAIN_10_DOLLARS,
 	ActionType.UPGRADE_SIMMENTAL,
 ])
+
+// Market draw actions are done on the cattle-market draw pile, so they are explained here instead of shown as buttons.
+const drawingTwo = computed(() => actions.value.includes(ActionType.DRAW_2_CATTLE_CARDS))
+
+const directActions = computed(() => actions.value.filter((a) => a !== ActionType.PLACE_BRANCHLET && a !== ActionType.PLACE_BID && !map.MARKET_DRAW_ACTIONS.has(a) && !TARGET_ACTIONS.has(a) && !CARD_TARGET_ACTIONS.has(a) && !map.engineMoveRange(a, g()) && !buildingActionSet.value.has(a)))
+
 const cardActions = computed(() => actions.value.filter((a) => CARD_TARGET_ACTIONS.has(a)))
 /** A draw-then-discard leaves DISCARD_CARD as the only card action: clicking a card discards it. */
 const discardOnly = computed(() => cardActions.value.length === 1 && cardActions.value[0] === ActionType.DISCARD_CARD)
 
-// RttN: the bonus station master pile is a real choice the UI has to present.
-const bonusStationMasters = computed(() => (actions.value.includes(ActionType.TAKE_BONUS_STATION_MASTER) ? g().getRailroadTrack().stationMasters.slice() : []))
-
-function p(type, extra = {}) {
-	controller.perform({ type, ...extra })
-}
 </script>
 
 <template>
@@ -128,16 +121,11 @@ function p(type, extra = {}) {
 
 		<div v-if="armedMove" class="group">
 			<div class="label">{{ t('row.actionArea.moveAtMost', { limit: armedMove.limit }) }}</div>
-			<button class="act" @click="store.clearAction()">{{ t('panels.cancel') }}</button>
 		</div>
 
-		<div v-if="hireRows.length" class="group">
+		<div v-if="hiring" class="group">
 			<div class="label">{{ t('row.actionArea.hireWorker') }}</div>
-			<template v-for="row in hireRows" :key="row.index">
-				<button v-for="w in row.workers" :key="row.index + '-' + w" class="act" @click="p(actions.includes(ActionType.HIRE_WORKER_PLUS_2) ? ActionType.HIRE_WORKER_PLUS_2 : actions.includes(ActionType.HIRE_WORKER_MINUS_1) ? ActionType.HIRE_WORKER_MINUS_1 : actions.includes(ActionType.HIRE_WORKER_MINUS_2) ? ActionType.HIRE_WORKER_MINUS_2 : ActionType.HIRE_WORKER, { row: row.index, worker: w })">
-					r{{ row.index }} {{ w }}
-				</button>
-			</template>
+			<div class="note">{{ t('row.actionArea.hireHint') }}</div>
 		</div>
 
 		<div v-if="buildingOptions && buildingOptions.length" class="group">
@@ -149,53 +137,32 @@ function p(type, extra = {}) {
 
 		<div v-if="actions.includes(ActionType.PLACE_BRANCHLET)" class="group">
 			<div class="label">{{ t('row.actionArea.placeBranchletHint') }}</div>
-			<button class="act" :class="{ active: store.selectedAction === ActionType.PLACE_BRANCHLET }" @click="store.selectAction(ActionType.PLACE_BRANCHLET)">
-				{{ store.selectedAction === ActionType.PLACE_BRANCHLET ? t('row.actionArea.clickTown') : t('row.actions.buttons.PLACE_BRANCHLET') }}
-			</button>
 		</div>
 
 		<div v-if="actions.includes(ActionType.APPOINT_STATION_MASTER)" class="group">
 			<div class="label">{{ t('row.actions.buttons.APPOINT_STATION_MASTER') }}</div>
-			<button class="act" :class="{ active: store.selectedAction === ActionType.APPOINT_STATION_MASTER }" @click="store.selectAction(ActionType.APPOINT_STATION_MASTER)">
-				{{ store.selectedAction === ActionType.APPOINT_STATION_MASTER ? t('row.actionArea.clickWorker') : t('row.actions.buttons.APPOINT_STATION_MASTER') }}
-			</button>
+			<div class="note">{{ t('row.actionArea.clickWorker') }}</div>
 		</div>
 
-		<div v-if="bonusStationMasters.length" class="group">
+		<div v-if="actions.includes(ActionType.TAKE_BONUS_STATION_MASTER)" class="group">
 			<div class="label">{{ t('row.actions.buttons.TAKE_BONUS_STATION_MASTER') }}</div>
-			<div class="supply">
-				<img
-					v-for="m in bonusStationMasters"
-					:key="m"
-					class="buildingTile"
-					:src="view.stationMasterImage(m)"
-					:alt="view.humanizeAction(m)"
-					:title="view.humanizeAction(m)"
-					draggable="false"
-					@click="p(ActionType.TAKE_BONUS_STATION_MASTER, { stationMaster: m })"
-				/>
-			</div>
+			<div class="note">{{ t('row.actionArea.bonusStationMasterHint') }}</div>
 		</div>
 
-		<div v-for="em in engineMoves" :key="em.type" class="group">
-			<div class="label">{{ view.humanizeAction(em.type) }}</div>
-			<button v-for="sp in em.spaces" :key="sp" class="act move" @click="p(em.type, { to: sp })">{{ sp }}</button>
+		<div v-if="engineActive" class="group">
+			<div class="label">{{ t('row.actionArea.engineHint') }}</div>
 		</div>
 
 		<div v-if="cardActions.length" class="group">
 			<div class="label">{{ discardOnly ? t('row.actionArea.clickCardToDiscard') : t('row.actionArea.cardActionsHint') }}</div>
-			<button
-				v-for="a in cardActions"
-				:key="a"
-				class="act"
-				:class="{ active: store.selectedAction === a }"
-				@click="store.selectAction(a)"
-			>{{ view.humanizeAction(a) }}</button>
+			<div v-for="a in cardActions" :key="a" class="note">{{ view.humanizeAction(a) }}</div>
 		</div>
 
-		<div class="group">
+		<div v-if="directActions.length || drawingTwo" class="group">
 			<div class="label">{{ t('row.actionArea.otherActions') }}</div>
-			<button v-for="a in directActions" :key="a" class="act" @click="p(a)">{{ view.humanizeAction(a) }}</button>
+			<div v-for="a in directActions" :key="a" class="note">{{ view.humanizeAction(a) }}</div>
+			<div v-if="drawingTwo" class="note">{{ t('row.cattleMarket.drawTwoHint', { cowboys: g().currentPlayerState().cowboysRemaining() }) }}</div>
+			<div v-if="directActions.length" class="note">{{ t('row.actionArea.clickHighlighted') }}</div>
 		</div>
 		</template>
 
@@ -213,6 +180,7 @@ function p(type, extra = {}) {
 #actionBar { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 6px; }
 .group { border: 1px solid #999; border-radius: 5px; padding: 5px; background: #f4f7d7; max-width: 460px; }
 .label { font-weight: bold; font-size: 12px; margin-bottom: 3px; }
+.note { font-size: 12px; }
 .act { margin: 2px; padding: 3px 7px; cursor: pointer; font-size: 12px; }
 /* Movement options match the board: light-green border on hover, as the map spots do. */
 .act.move:hover { border: 2px solid #90ee90; }

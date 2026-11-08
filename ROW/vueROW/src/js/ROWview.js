@@ -66,6 +66,10 @@ export function jobMarketTokenImage() {
 	return asset("images/row/job_market_token.jpg")
 }
 
+export function exchangeTokenImage() {
+	return asset("images/row/icons/exchange_token.jpg")
+}
+
 const STATION_MASTER_IMAGES = {
 	GAIN_2_DOLLARS_POINT_FOR_EACH_WORKER: "point_per_worker.jpg",
 	REMOVE_HAZARD_OR_TEEPEE_POINTS_FOR_EACH_2_OBJECTIVE_CARDS: "points_per_2_objective_cards.jpg",
