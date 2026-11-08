@@ -210,7 +210,7 @@ function showDebug() {
 
 <template>
 	<Teleport to="body"><dialog ref="mapPreview" class="nationMapPreview" :aria-label="$t('app.gameBoard')" @close="isMapPreviewOpen = false" @click="$event.target === mapPreview && closeMapPreview()">
-		<div class="mapPreviewHeader"><b>{{ $t("app.gameBoard") }}</b><button type="button" @click="closeMapPreview">{{ $t("common.close") }}</button></div>
+		<div class="mapPreviewHeader"><b>{{ $t("app.gameBoard") }}</b><button type="button" class="actionsLineButton" @click="closeMapPreview">{{ $t("common.close") }}</button></div>
 		<div class="mapPreviewViewport" tabindex="0" :aria-label="$t('app.enlargedMap')"><div id="nationMapPreviewBody"></div></div>
 	</dialog></Teleport>
 	<TopMenu />
@@ -251,7 +251,7 @@ function showDebug() {
 				<div v-if="isNationDivision || controlsForViewer || store.gameflow.phase === rf.PHASE_GAME_OVER" class="actionPanelBody"><NationMarket v-if="isNationDivision" :is-board-layout="isNationDivision" />
 				<GameActions v-else ref="gameActions" @inspect="revealStatus" :key="store.turnDraft.revision" @select-area="selectedArea = $event" @change-map-action="mapAction = $event" @change-action-targets="actionTargets = $event" :selected-area="selectedArea" :path="canalPath" @clear-path="map.finishDig()" @change-removal="removalArea = $event" @change-land-draft="landDraft = $event" @change-turn-action="turnAction = $event" @change-dig-capacity="digCapacity = $event" /></div>
 				<TurnControls v-if="controlsForViewer" :is-nation-division="isNationDivision" :turn-action="turnAction" :land-draft="landDraft" @end-turn="finishTurn" />
-				<button v-if="personal.canResign()" class="resignButton" @click="store.viewSettings.showResignPanel = !store.viewSettings.showResignPanel">{{ $t("resign.title") }}</button>
+				<button v-if="personal.canResign()" class="resignButton actionsLineButton" @click="store.viewSettings.showResignPanel = !store.viewSettings.showResignPanel">{{ $t("resign.title") }}</button>
 			</aside>
 		</div>
 		<DevelopmentProgress v-if="!isNationDivision && !store.viewSettings.showReplay" :is-digging="!!gameActions?.showDigging" />
@@ -389,10 +389,16 @@ body {
 .actionSidebar button { text-align: center; }
 .actionSidebar .gameActions > fieldset > button, .actionSidebar .actionGroup > button, .actionSidebar .harvestChoice > button { display: block; margin-left: auto; margin-right: auto; }
 
-/* One appearance for action buttons across panels and previews. */
-:is(#app, dialog) button:not(.topMenuItem) { box-sizing: border-box; min-height: 34px; padding: 5px 8px; border: 1px solid #998a67; border-radius: 3px; background: #fffdf4; color: #302f27; font-family: Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 1.2; opacity: 1; cursor: pointer; }
-:is(#app, dialog) button:not(.topMenuItem):hover:enabled { background: #f1e9d7; border-color: #756440; }
-:is(#app, dialog) button:not(.topMenuItem):focus-visible { outline: 2px solid #177daf; outline-offset: 2px; }
-:is(#app, dialog) button:not(.topMenuItem):is([aria-pressed=true], [aria-current], .current, .selected) { background: #e1edf5; border-color: #177daf; }
-:is(#app, dialog) button:not(.topMenuItem):disabled { opacity: .45; cursor: default; }
+/* Panel controls keep the compact site look; .actionsLineButton follows WEB's action-button style. */
+:is(#app, dialog) button:not(.topMenuItem):not(.actionsLineButton) { box-sizing: border-box; min-height: 34px; padding: 5px 8px; border: 1px solid #998a67; border-radius: 3px; background: #fffdf4; color: #302f27; font-family: Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 1.2; opacity: 1; cursor: pointer; }
+:is(#app, dialog) button:not(.topMenuItem):not(.actionsLineButton):hover:enabled { background: #f1e9d7; border-color: #756440; }
+:is(#app, dialog) button:not(.topMenuItem):not(.actionsLineButton):focus-visible { outline: 2px solid #177daf; outline-offset: 2px; }
+:is(#app, dialog) button:not(.topMenuItem):not(.actionsLineButton):is([aria-pressed=true], [aria-current], .current, .selected) { background: #e1edf5; border-color: #177daf; }
+:is(#app, dialog) button:not(.topMenuItem):not(.actionsLineButton):disabled { opacity: .45; cursor: default; }
+/* WEB's action-button look (vueWEB App.vue), without its 10px margin: dense panels keep their own spacing. */
+.actionsLineButton { box-sizing: border-box; min-height: 34px; width: fit-content; padding: 5px; border: 2px solid green; border-radius: 5px; background: #fffdf4; color: #302f27; font: inherit; font-weight: bolder; line-height: 1.2; cursor: pointer; }
+.actionsLineButton:hover:enabled { background: lightgrey; }
+.actionsLineButton:active:enabled { background: darkgrey; }
+.actionsLineButton:focus-visible { outline: 2px solid #177daf; outline-offset: 2px; }
+.actionsLineButton:disabled { opacity: .45; cursor: default; }
 </style>

@@ -23,8 +23,8 @@ async function confirmResign() {
 		<p v-if="store.gameMessages.errorText" class="resignError" role="alert"><CurrencyText :text="store.gameMessages.errorText" /></p>
 		<img class="resignImage" :src="view.getImage('resign')" :alt="$t('resign.title')" />
 		<div class="resignButtons">
-			<button @click="close">{{ $t("resign.keepPlaying") }}</button>
-			<button :disabled="!!store.turnDraft.start || store.viewSettings.showLoader || store.viewSettings.isSaving" :title="store.turnDraft.start ? $t('resign.resetFirst') : $t('resign.resignGame')" @click="confirmResign">{{ $t("resign.confirm") }}</button>
+			<button class="actionsLineButton" @click="close">{{ $t("resign.keepPlaying") }}</button>
+			<button class="actionsLineButton" :disabled="!!store.turnDraft.start || store.viewSettings.showLoader || store.viewSettings.isSaving" :title="store.turnDraft.start ? $t('resign.resetFirst') : $t('resign.resignGame')" @click="confirmResign">{{ $t("resign.confirm") }}</button>
 		</div>
 	</div>
 </template>

@@ -72,23 +72,23 @@ watch([() => auction.value?.nation, () => auction.value?.amount, () => actor.val
 						<label :for="`nation-bid-${nation.id}`">{{ auction ? $t("nationMarket.bid") : $t("nationMarket.offer") }} <CurrencyIcon /></label>
 						<input :id="`nation-bid-${nation.id}`" type="number" inputmode="numeric" :value="amount(nation)" @input="amounts[nation.id] = Number($event.target.value)" :min="minimum(nation)" :max="moneyForBid(nation)" step="1" required />
 						<template v-if="nation.bids.length"><button v-for="increment in [1, 5, 10]" :key="increment" type="button" class="bidAdjustment" :aria-label="$t('nationMarket.raiseBy', { amount: increment })" :disabled="amount(nation) + increment > moneyForBid(nation)" @click="adjustBid(nation, increment)">+{{ increment }}</button></template>
-						<button :disabled="amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)">{{ auction ? $t("nationMarket.bid") : $t("nationMarket.makeOffer") }}</button>
+						<button class="actionsLineButton" :disabled="amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)">{{ auction ? $t("nationMarket.bid") : $t("nationMarket.makeOffer") }}</button>
 					</form>
 					<p v-if="personal.canPlay() && !auction && treaty?.id !== nation.id && amountError(nation)" class="amountError" role="status"><CurrencyText :text="amountError(nation)" /></p>
 				</template>
 				<div v-if="nation.ownerType === null && !auction && treaty?.id === nation.id && personal.canPlay()" class="marketControls treatyControls">
-					<button class="primaryAction" :disabled="available < price(nation)" @click="endTurnWith({ type: 'buyNation', nation: nation.id })"><CurrencyText :text="$t('nationMarket.buyFor', { price: price(nation) })" /></button>
-					<button class="passButton" @click="endTurnWith({ type: 'pass' })">{{ $t("nationMarket.pass") }}</button>
+					<button class="primaryAction actionsLineButton" :disabled="available < price(nation)" @click="endTurnWith({ type: 'buyNation', nation: nation.id })"><CurrencyText :text="$t('nationMarket.buyFor', { price: price(nation) })" /></button>
+					<button class="passButton actionsLineButton" @click="endTurnWith({ type: 'pass' })">{{ $t("nationMarket.pass") }}</button>
 				</div>
 				<div v-if="nation.ownerType === null && isAuction(nation) && personal.canPlay()" class="marketControls auctionControls">
 					<form @submit.prevent="bid(nation)">
 						<label :for="`nation-bid-${nation.id}`"><CurrencyText :text="$t('nationMarket.bidSpl')" /></label>
 						<input :id="`nation-bid-${nation.id}`" type="number" inputmode="numeric" :value="amount(nation)" @input="amounts[nation.id] = Number($event.target.value)" :min="minimum(nation)" :max="moneyForBid(nation)" step="1" required />
 						<button v-for="increment in [1, 5, 10]" :key="increment" type="button" class="bidAdjustment" :aria-label="$t('nationMarket.raiseBy', { amount: increment })" :disabled="amount(nation) + increment > moneyForBid(nation)" @click="adjustBid(nation, increment)">+{{ increment }}</button>
-						<button class="primaryAction" :disabled="amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)"><CurrencyText :text="$t('nationMarket.bidEndTurn', { amount: amount(nation) })" /></button>
+						<button class="primaryAction actionsLineButton" :disabled="amount(nation) < minimum(nation) || amount(nation) > moneyForBid(nation)"><CurrencyText :text="$t('nationMarket.bidEndTurn', { amount: amount(nation) })" /></button>
 					</form>
 					<p v-if="amountError(nation)" class="amountError" role="status"><CurrencyText :text="amountError(nation)" /></p>
-					<button class="passButton" @click="endTurnWith({ type: 'pass' })">{{ $t("nationMarket.withdrawEndTurn") }}</button>
+					<button class="passButton actionsLineButton" @click="endTurnWith({ type: 'pass' })">{{ $t("nationMarket.withdrawEndTurn") }}</button>
 				</div>
 				</div>
 			</article>
@@ -129,7 +129,7 @@ ol { padding-left: 18px; margin: 4px 0; color: #52616a; }form { display: flex; f
 .nationActions button { max-width: 100%; white-space: nowrap; }
 .nationActions .amountError { flex-basis: 100%; }
 .boardLayout .nationActions { padding-top: 5px; border-top: 1px solid #c8c2b4; }
-.boardLayout .nationActions button { min-height: 34px; font-size: 16px; font-weight: 400; padding: 4px 6px; }
+.boardLayout .nationActions button { min-height: 34px; font-size: 16px; padding: 4px 6px; }
 .boardLayout .nationActions input { min-height: 34px; font-size: 16px; font-weight: 400; }
 @container (max-width: 880px) { .boardLayout .nationList { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @container (max-width: 580px) { .boardLayout .nationList { grid-template-columns: minmax(0, 1fr); } }

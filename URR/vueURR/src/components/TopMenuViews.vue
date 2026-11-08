@@ -169,16 +169,7 @@ function localCastVote(topic) {
 </template>
 
 <style scoped>
-.actionsLineButton {
-	margin: 10px;
-	width: fit-content;
-	border: 2px solid green;
-	border-radius: 5px;
-	font-weight: bolder;
-	padding: 5px;
-	cursor: pointer;
-}
-.actionsLineButton:hover { background-color: lightgrey; }
+.actionsLineButton { margin: 10px; }
 .errorText {
 	width: 100%;
 	font-weight: bolder;
@@ -222,7 +213,7 @@ function localCastVote(topic) {
 #chatBox { text-align: center; }
 #chatBox textarea { width: 90%; }
 #notesBox textarea, #bugReport textarea { max-width: 90%; box-sizing: border-box; }
-.actionsLineButton:disabled { cursor: default; opacity: .5; }@media (max-width: 1050px) { .actionsLineButton { min-height: 40px; } }
+@media (max-width: 1050px) { .actionsLineButton { min-height: 40px; } }
 .chatentry {
 	overflow-wrap: anywhere;
 	margin: 5px;

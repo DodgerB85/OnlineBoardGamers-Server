@@ -75,6 +75,6 @@ function exitReplay() {
 
 <style scoped>
 #replayArea { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; background: #d4eafd; border: 1px solid black; padding: 8px; margin: 10px 12px 0; text-align: center; font-size: 16px; font-weight: 400; }
-#replayArea input { width: min(300px, 35vw); }.actionsLineButton { border: 1px solid #527349; border-radius: 4px; padding: 6px 10px; background: #f7fff4; font: inherit; cursor: pointer; }.actionsLineButton:disabled { opacity: .4; cursor: default; }
+#replayArea input { width: min(300px, 35vw); }
 @media (max-width: 1050px) { .actionsLineButton, #replayArea input { min-height: 44px; box-sizing: border-box; } }
 </style>
