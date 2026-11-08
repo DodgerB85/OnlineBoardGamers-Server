@@ -198,8 +198,24 @@ function getImageForItemBox() {
 
 function houseSelectedItemImage() {
 	if (store.context.selectedBuilding === -1) return view.getImage("garden")
+	if (store.context.selectedBuilding === -2) return view.getImage("movedOut")
+	if (rf.APARTMENTS.includes(store.context.selectedBuilding)) return view.getImage("apartment")
 	return view.getImage("house_garden")
 }
+
+// Senior Business Developer mod: extra exclusive actions (apartment / move out)
+// are only offered while the SBD card is itself at work (its own subphase)
+const computedSbdApartments = computed(() => rules.availableApartments())
+const computedSbdCanExclusive = computed(() => {
+	if (!store.startingOptions.seniorBusinessDeveloper) return false
+	if (store.gameflow.subphase !== rf.SUBPHASE_SBD_HOUSES) return false
+	return rules.sbdExclusiveTotal(controller.currentPlayerIndex()) - store.seniorBusinessDeveloper.sbdExclusiveActions > 0
+})
+const computedSbdMoveOutAvailable = computed(() => {
+	if (!computedSbdCanExclusive.value) return false
+	return rules.outTokensRemaining() > 0 && rules.moveOutCandidateHouses().length > 0
+})
+const computedSbdOutTokensLeft = computed(() => rules.outTokensRemaining())
 
 // --- CAMPAIGN OPTIONS ---
 
@@ -466,19 +482,32 @@ function flipLobbyist(vertical) {
 
 				<img v-if="rules.availableGardens() > 0" :src="view.getImage('garden')" class="gardenBuildChoice" :class="{ selected: store.context.selectedBuilding === -1 }" @click="controller.selectGardenToBuild()" alt="Garden" />
 				<span v-else class="noMoreSpan">{{ $t("items.noMoreGardens") }}</span>
+
+				<!-- Senior Business Developer mod: apartments + move out -->
+				<template v-if="computedSbdCanExclusive">
+					<span v-for="apt in computedSbdApartments" :key="'buildApt-' + apt" class="houseHolder" :class="{ selected: store.context.selectedBuilding === apt }" @click="controller.selectApartmentToBuild(apt)">
+						<img class="sbdSquareChoiceImg" :src="view.getImage('apartment')" :alt="$t('items.apartment')" />
+						<span class="numberHolder sbdAptNumberHolder">{{ apt === rf.APARTMENT_15 ? '15¾' : apt === rf.APARTMENT_21 ? '21¾' : '27¾' }}</span>
+					</span>
+					<span v-if="computedSbdMoveOutAvailable" class="houseHolder" :class="{ selected: store.context.selectedBuilding === -2 }" @click="controller.selectMoveOutToBuild()">
+						<img class="sbdSquareChoiceImg" :src="view.getImage('movedOut')" :alt="$t('items.moveOut')" />
+						<span class="numberHolder">({{ computedSbdOutTokensLeft }})</span>
+					</span>
+				</template>
 			</div>
 
 			<!-- Rotate + selected item -->
 			<div class="addBoxSection rotationSection">
-				<img v-if="store.context.selectedBuilding !== -1" :src="view.getImage('rot_anticlockwise')" class="rotateButton" @click="rotateAntiClockwise" />
+				<img v-if="store.context.selectedBuilding !== -1 && !rf.APARTMENTS.includes(store.context.selectedBuilding) && store.context.selectedBuilding !== -2" :src="view.getImage('rot_anticlockwise')" class="rotateButton" @click="rotateAntiClockwise" />
 				<div id="newComponentImgDiv" :style="rotationStyle">
 					<img id="newComponentImg" :src="houseSelectedItemImage()" />
-					<span v-if="store.context.selectedBuilding !== -1" class="numberHolder">{{ store.context.selectedBuilding }}</span>
+					<span v-if="store.context.selectedBuilding !== -1 && store.context.selectedBuilding !== -2 && !rf.APARTMENTS.includes(store.context.selectedBuilding)" class="numberHolder">{{ store.context.selectedBuilding }}</span>
 				</div>
-				<img v-if="store.context.selectedBuilding !== -1" :src="view.getImage('rot_clockwise')" class="rotateButton" @click="rotateClockwise" />
+				<img v-if="store.context.selectedBuilding !== -1 && !rf.APARTMENTS.includes(store.context.selectedBuilding) && store.context.selectedBuilding !== -2" :src="view.getImage('rot_clockwise')" class="rotateButton" @click="rotateClockwise" />
 				<p v-if="store.context.selectedBuilding === -1" class="gardenHintText">
 					{{ store.context.edges.length > 0 ? $t("items.chooseEdgeForGarden") : $t("items.chooseHouseForGarden") }}
 				</p>
+				<p v-else-if="store.context.selectedBuilding === -2" class="gardenHintText">{{ $t("items.chooseHouseToMoveOut") }}</p>
 			</div>
 		</template>
 
@@ -714,6 +743,12 @@ function flipLobbyist(vertical) {
 	width: 100px;
 }
 
+/* Square thumbnails (apartment / move-out) match the house card's height */
+.houseHolder img.sbdSquareChoiceImg {
+	width: auto;
+	height: 150px;
+}
+
 .houseHolder .numberHolder,
 #newComponentImgDiv .numberHolder {
 	position: absolute;
@@ -726,6 +761,13 @@ function flipLobbyist(vertical) {
 		1px -1px 0 #000,
 		-1px 1px 0 #000,
 		1px 1px 0 #000;
+}
+
+/* Senior Business Developer mod: apartment numbers sit at the top-RIGHT of
+   the thumbnail (matching the FCM board artwork), unlike houses (top-left) */
+.houseHolder .numberHolder.sbdAptNumberHolder {
+	left: auto;
+	right: 10px;
 }
 
 .gardenBuildChoice {

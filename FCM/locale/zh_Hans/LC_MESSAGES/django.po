@@ -1405,6 +1405,73 @@ msgstr ""
 "本模组加入 15 张粉丝设计的板块 - 更多十字路口、更多丁字路口、单板块三个饮料取货点，以及一张刻意设计的道路板块。伴随而来的是 15 栋新房（房号 "
 "20、23、24、26-37）：城市变大，房屋与花园的比例也随之改变 - 新业务开发商的花园上限从 8 提升到 15。"
 
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid "Senior Business Developer"
+msgstr "资深业务拓展经理"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid ""
+"The base game lets you build houses and gardens one at a time. This module "
+"adds apartments and evictions: the Senior Business Developer upgrades the "
+"New Business Developer's toolkit to four choices - place a house, place a "
+"garden, place an apartment, or evict a house. Apartments are bigger "
+"buildings with a 3x3 footprint that behave like the existing apartments; "
+"evictions remove problem houses from the board once their demand is gone. "
+"Each eviction spends one token from a shared global pool of 8 OUT tokens, so"
+" use them sparingly."
+msgstr ""
+"基础游戏里房屋和花园只能一栋栋建。本模组加入公寓和搬迁：资深业务拓展经理把新业务拓展经理的工具箱升级为四种选择——建房屋、建花园、建公寓或让一户搬迁。公寓是占地"
+" 3x3 的更大建筑，行为与现有公寓一致；搬迁则在需求消失后把麻烦的房屋从地图上移除。每次搬迁消耗一枚全局共享的 8 枚 OUT "
+"令牌池中的令牌，请省着用。"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid ""
+"Training chain: New Business Developer → Senior Business Developer (level "
+"2). Six of each in the talent market."
+msgstr "训练链：新业务拓展经理 → 资深业务拓展经理（等级 2）。人才市场各 6 张。"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid ""
+"Per turn, one action per working New Business Developer or Senior Business "
+"Developer: place a house, place a garden, place an apartment (SBD only), or "
+"evict a house (SBD only)."
+msgstr "每回合，每张在岗的新业务拓展经理或资深业务拓展经理执行一次行动：建房屋、建花园、建公寓（仅 SBD）或搬迁一户（仅 SBD）。"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid ""
+"Apartments: three new apartment buildings - house numbers 15¾, 21¾ and 27¾ -"
+" each with a 3x3 footprint (a regular house is 2x3). They behave like the "
+"base-game apartments for demand and marketing."
+msgstr "公寓：三栋新公寓——门牌 15¾、21¾、27¾——各占地 3x3（普通房屋是 2x3）。在需求和营销上的行为与基础游戏公寓相同。"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid ""
+"OUT tokens: a global pool of 8 tokens shared by all players. Each eviction "
+"(house move-out) spends one token permanently - once the pool runs dry, no "
+"more evictions for the rest of the game."
+msgstr "OUT 令牌：全体玩家共享 8 枚的全局令牌池。每次搬迁（房屋搬出）永久消耗一枚——池子空了，本局就再也无法搬迁。"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid ""
+"Eviction rules: you may only evict a house that has no active demand. An "
+"evicted house still eats at tonight's Dinnertime if it has demand - it "
+"physically leaves the board at the next Dinnertime settlement."
+msgstr "搬迁规则：只能搬迁没有活跃需求的房屋。被搬迁的房屋如果当晚有需求仍会进餐——它在下一次晚餐结算时才真正离开地图。"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid ""
+"Compatibility: stacks with all other modules. The house pool, garden cap and"
+" tile pool follow the base game rules (with the New Map module raising the "
+"garden cap as usual)."
+msgstr "兼容性：可与其他所有模组叠加。房屋池、花园上限和板块池遵循基础游戏规则（新地图模组照常把花园上限调高）。"
+
+#: ./FCM/templates/FCM/fanExpansionsHelp.html
+msgid ""
+"Milestone \"First Senior Business Developer used\": the first player to use "
+"one gains this Milestone. Reward: add tile to city (same as the Lobbyist "
+"Milestone)."
+msgstr "里程碑「首位使用资深业务拓展经理」：首个使用该员工的玩家获得此里程碑。奖励：可以向城市增加1个地图板块（与提案人里程碑一致）。"
+
 #~ msgid "Home"
 #~ msgstr "首页"
 

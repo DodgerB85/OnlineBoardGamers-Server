@@ -2186,7 +2186,7 @@ class FCMpresenter(GamePresenter):
                 (
                     rfFCM.SO_RANDOM_MODULES_FAN,
                     [rfFCM.SO_FRIED_CHICKEN, rfFCM.SO_STADIUM, rfFCM.SO_LABOR_MARKET, rfFCM.SO_SECOND_BAILOUT,
-                     rfFCM.SO_MEDIA_LINE, rfFCM.SO_NEW_MAP],
+                     rfFCM.SO_MEDIA_LINE, rfFCM.SO_NEW_MAP, rfFCM.SO_SENIOR_BUSINESS_DEVELOPER],
                 ),
             ]:
                 inPool = marker in starting_options or any(x in starting_options for x in flags)

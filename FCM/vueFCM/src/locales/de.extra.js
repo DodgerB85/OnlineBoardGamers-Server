@@ -31,7 +31,11 @@ export default {
 		"firstTelemarketerUsedDesc": "Verkaufe jedes per Telefon/Fernsehen beworbene Haus: +5 $ pro Haus; Gruppen werden getrennt abgerechnet; entfällt, wenn du heute Abend andere Kampagnen laufen lässt",
 		"firstTvAnnouncerUsed": "Erster TV-Ansager eingesetzt",
 		"firstTvAnnouncerUsedTitle": "Erster TV-Ansager eingesetzt",
-		"firstTvAnnouncerUsedDesc": "Erste TV-Kampagne: 2 Nachfrage pro Antennen-Haus und Nacht"
+		"firstTvAnnouncerUsedDesc": "Erste TV-Kampagne: 2 Nachfrage pro Antennen-Haus und Nacht",
+
+		"firstSeniorBusinessDeveloperUsed": "Erster Senior Business Developer eingesetzt",
+		"firstSeniorBusinessDeveloperUsedTitle": "Erster Senior Business Developer eingesetzt",
+		"firstSeniorBusinessDeveloperUsedDesc": "Kachel zur Stadt hinzufügen"
 	},
 	"employees": {
 		"temporaryWorker": "Aushilfskraft",
@@ -43,7 +47,10 @@ export default {
 		"telemarketer": "Telemarketer",
 		"telemarketerDesc": "Lege Telefonmarker auf freies Feld im 5-Felder-Kreuz um ein Restaurant, keine Straßen nötig",
 		"tvAnnouncer": "TV-Ansager",
-		"tvAnnouncerDesc": "Wähle 5 Häuser im 13-Felder-Rautenmuster um ein Restaurant und veröffentliche pro Runde eine Schlagzeile"
+		"tvAnnouncerDesc": "Wähle 5 Häuser im 13-Felder-Rautenmuster um ein Restaurant und veröffentliche pro Runde eine Schlagzeile",
+
+		"seniorBusinessDeveloper": "Senior Business Developer",
+		"seniorBusinessDeveloperDesc": "Platziere ein Haus, einen Garten oder ein Wohngebäude; oder lass ein Haus ausziehen (einmal pro Runde)"
 	},
 	"laborMarket": {
 		"unionMustWork": "Du musst den Gewerkschaftsorganisator einsetzen"

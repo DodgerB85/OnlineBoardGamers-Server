@@ -672,6 +672,7 @@ export default {
 		"availableParks": "Parcs disponibles :",
 		"availableRoads": "Routes disponibles :",
 		"availableLobbyistTiles": "Tuiles disponibles pour le jalon du lobbyiste :",
+		"availableOutTokens": "Jetons OUT restants :",
 		"flexiTimes": "Horaires flexibles :"
 	},
 	"history": {
@@ -946,7 +947,10 @@ export default {
 		"noMoreRoads": "Plus de routes",
 		"noMoreParks": "Plus de parcs",
 		"chooseEdgeForGarden": "Choisissez une bordure pour le jardin",
-		"chooseHouseForGarden": "Choisissez une maison pour ajouter un jardin"
+		"chooseHouseForGarden": "Choisissez une maison pour ajouter un jardin",
+		"apartment": "Immeuble",
+		"moveOut": "Déménagement",
+		"chooseHouseToMoveOut": "Choisissez une maison à faire déménager (sans demande active)"
 	},
 	"playerDetails": {
 		"noMilestones": "Aucun jalon",

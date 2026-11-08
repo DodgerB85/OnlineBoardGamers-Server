@@ -851,6 +851,7 @@
                       <option value="23">23</option>
                       <option value="24">24</option>
                       <option value="25">25</option>
+                      <option value="26">26</option>
                     </select>
                     <label for="maxModules">{% trans "Max:" %}</label>
                     <select name="maxModules"
@@ -885,6 +886,7 @@
                       <option value="23">23</option>
                       <option value="24">24</option>
                       <option value="25">25</option>
+                      <option value="26">26</option>
                     </select>
                   </div>
                   <div style="margin-top:8px">
@@ -908,7 +910,7 @@
                              name="includeFanExpansion"
                              value=""
                              disabled />
-                      <div>{% trans "Include 6 fan expansion options" %}</div>
+                      <div>{% trans "Include 7 fan expansion options" %}</div>
                     </label>
                   </div>
                   <div style="margin-top:8px">
@@ -1205,6 +1207,16 @@
                                    value=""
                                    disabled />
                             <div>{% trans "New Map" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox excludeMod"
+                                   id="exclude_53"
+                                   name="exclude_53"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Senior Business Developer" %}</div>
                           </label>
                         </div>
                       </div>

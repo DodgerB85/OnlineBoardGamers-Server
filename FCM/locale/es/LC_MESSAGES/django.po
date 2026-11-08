@@ -1804,6 +1804,99 @@ msgstr ""
 "jardines cambia - el límite de jardines del Desarrollador de Negocios sube "
 "de 8 a 15."
 
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid "Senior Business Developer"
+msgstr "Desarrollador de Negocios Senior"
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid ""
+"The base game lets you build houses and gardens one at a time. This module "
+"adds apartments and evictions: the Senior Business Developer upgrades the "
+"New Business Developer's toolkit to four choices - place a house, place a "
+"garden, place an apartment, or evict a house. Apartments are bigger "
+"buildings with a 3x3 footprint that behave like the existing apartments; "
+"evictions remove problem houses from the board once their demand is gone. "
+"Each eviction spends one token from a shared global pool of 8 OUT tokens, so"
+" use them sparingly."
+msgstr ""
+"El juego base permite construir casas y jardines de uno en uno. Este módulo "
+"añade apartamentos y desalojos: el Desarrollador de Negocios Senior amplía "
+"las herramientas del New Business Developer a cuatro opciones: colocar una "
+"casa, colocar un jardín, colocar un apartamento o desalojar una casa. Los "
+"apartamentos son edificios más grandes con una huella de 3x3 que se "
+"comportan como los apartamentos existentes; los desalojos retiran del "
+"tablero las casas problemáticas una vez desaparecida su demanda. Cada "
+"desalojo gasta una ficha de un pool global compartido de 8 fichas OUT, así "
+"que úsalas con moderación."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid ""
+"Training chain: New Business Developer → Senior Business Developer (level "
+"2). Six of each in the talent market."
+msgstr ""
+"Cadena de formación: New Business Developer → Desarrollador de Negocios "
+"Senior (nivel 2). Seis de cada uno en el mercado laboral."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid ""
+"Per turn, one action per working New Business Developer or Senior Business "
+"Developer: place a house, place a garden, place an apartment (SBD only), or "
+"evict a house (SBD only)."
+msgstr ""
+"Por turno, una acción por cada New Business Developer o Desarrollador de "
+"Negocios Senior en el trabajo: colocar una casa, colocar un jardín, colocar "
+"un apartamento (solo SBD) o desalojar una casa (solo SBD)."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid ""
+"Apartments: three new apartment buildings - house numbers 15¾, 21¾ and 27¾ -"
+" each with a 3x3 footprint (a regular house is 2x3). They behave like the "
+"base-game apartments for demand and marketing."
+msgstr ""
+"Apartamentos: tres nuevos edificios de apartamentos - números de casa 15¾, "
+"21¾ y 27¾ - cada uno con una huella de 3x3 (una casa normal es 2x3). Se "
+"comportan como los apartamentos del juego base en demanda y marketing."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid ""
+"OUT tokens: a global pool of 8 tokens shared by all players. Each eviction "
+"(house move-out) spends one token permanently - once the pool runs dry, no "
+"more evictions for the rest of the game."
+msgstr ""
+"Fichas OUT: un pool global de 8 fichas compartido por todos los jugadores. "
+"Cada desalojo (mudanza de casa) gasta una ficha de forma permanente; cuando "
+"el pool se agota, no hay más desalojos en lo que queda de partida."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid ""
+"Eviction rules: you may only evict a house that has no active demand. An "
+"evicted house still eats at tonight's Dinnertime if it has demand - it "
+"physically leaves the board at the next Dinnertime settlement."
+msgstr ""
+"Reglas de desalojo: solo puedes desalojar una casa sin demanda activa. Una "
+"casa desalojada aún cena esta noche si tiene demanda; sale físicamente del "
+"tablero en el siguiente asentamiento de la cena."
+
+#: .\FCM\templates\FCM\fanExpansionsHelp.html
+msgid ""
+"Compatibility: stacks with all other modules. The house pool, garden cap and"
+" tile pool follow the base game rules (with the New Map module raising the "
+"garden cap as usual)."
+msgstr ""
+"Compatibilidad: se combina con todos los demás módulos. El pool de casas, el"
+" límite de jardines y el pool de losas siguen las reglas del juego base (el "
+"módulo New Map sube el límite de jardines como de costumbre)."
+
+#: ./FCM/templates/FCM/fanExpansionsHelp.html
+msgid ""
+"Milestone \"First Senior Business Developer used\": the first player to use "
+"one gains this Milestone. Reward: add tile to city (same as the Lobbyist "
+"Milestone)."
+msgstr ""
+"Hito «Primer Desarrollador de Negocios Senior usado»: el primer jugador en "
+"usar uno obtiene este hito. Recompensa: agregar mosaico a la ciudad (como el"
+" hito del Lobbyista)."
+
 #~ msgid "Open"
 #~ msgstr "Abierto"
 

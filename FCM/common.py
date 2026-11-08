@@ -36,6 +36,7 @@ STATS_EXCLUDED_OPTIONS = [
     rfFCM.SO_MEDIA_LINE,
     rfFCM.SO_NEW_MAP,
     rfFCM.SO_NEW_MAP_ALL,
+    rfFCM.SO_SENIOR_BUSINESS_DEVELOPER,
 ]
 
 
@@ -135,6 +136,7 @@ def buildFCMstartingOptions(post_data):
         "mediaLine",
         "newMap",
         "newMapAll",
+        "seniorBusinessDeveloper",
         "allowRewind",
     ]
     optionsArr.extend(int(post_data[opt]) for opt in option_names if opt in post_data)

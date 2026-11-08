@@ -269,7 +269,11 @@ export default {
 
 		"firstTvAnnouncerUsed": "首位使用电视广播员",
 		"firstTvAnnouncerUsedTitle": "首位使用电视广播员",
-		"firstTvAnnouncerUsedDesc": "首个电视频道：每栋天线房每晚 2 张需求"
+		"firstTvAnnouncerUsedDesc": "首个电视频道：每栋天线房每晚 2 张需求",
+
+		"firstSeniorBusinessDeveloperUsed": "首位使用资深业务拓展经理",
+		"firstSeniorBusinessDeveloperUsedTitle": "首位使用资深业务拓展经理",
+		"firstSeniorBusinessDeveloperUsedDesc": "可以向城市增加1个地图板块"
 	},
 	"employees": {
 		"waitress": "服务员",
@@ -395,7 +399,10 @@ export default {
 		"telemarketerDesc": "在十字五板块范围（餐厅板块加上下左右）的空地放置电话牌，不需要沿路",
 
 		"tvAnnouncer": "电视广播员",
-		"tvAnnouncerDesc": "在菱形十三板块范围内选 5 栋房装天线，每晚可发一条头条"
+		"tvAnnouncerDesc": "在菱形十三板块范围内选 5 栋房装天线，每晚可发一条头条",
+
+		"seniorBusinessDeveloper": "资深业务拓展经理",
+		"seniorBusinessDeveloperDesc": "放置房屋、花园或公寓，或让一座房屋搬离（每回合一次）"
 	},
 	"laborMarket": {
 		"unionMustWork": "你必须安排工会组织者上班"
@@ -646,6 +653,7 @@ export default {
 		"availableParks": "可用的公园：",
 		"availableRoads": "可用道路：",
 		"availableLobbyistTiles": "可用于提案人里程碑的板块:",
+		"availableOutTokens": "剩余 OUT 令牌:",
 		"flexiTimes": "弹性时间:",
 		"bugErrorRequired": "请输入错误报告",
 		"bugGameData": "游戏数据将随您的报告一并提交。",
@@ -987,7 +995,10 @@ export default {
 		"noMoreRoads": "没有更多的板块",
 		"noMoreParks": "没有更多的板块",
 		"chooseHouseForGarden": "选择一所房子新建花园",
-		"chooseEdgeForGarden": "为花园选择一条边"
+		"chooseEdgeForGarden": "为花园选择一条边",
+		"apartment": "公寓",
+		"moveOut": "搬离",
+		"chooseHouseToMoveOut": "选择一所房子搬离（不能有未满足需求）"
 	},
 	"playerDetails": {
 		"noMilestones": "不使用里程碑",

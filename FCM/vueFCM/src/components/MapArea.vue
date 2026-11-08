@@ -242,6 +242,8 @@ const houseDisplays = computed(() => {
 
 	for (const house of store.houses) {
 		if ((house.index ?? -1) < 0) continue
+		// SBD apartments are drawn by naturalApartmentDisplays instead
+		if (rf.APARTMENTS.includes(house.number)) continue
 
 		const [x, y] = view.getXYforSmallSquare(house.index)
 		let adjustedX = x
@@ -541,7 +543,7 @@ const naturalApartmentDisplays = computed(() => {
 		const [x, y] = view.getXYforSmallSquare(idx)
 		const number = store.mapData.coords[idx] - rf.HOUSE
 		const roundedNumber = Number.isInteger(number) ? number : parseFloat(number.toFixed(1))
-		const numberText = roundedNumber === 3.2 ? "\u03C0" : roundedNumber === 9.7 ? "9¾" : String(roundedNumber)
+		const numberText = roundedNumber === 3.2 ? "\u03C0" : roundedNumber === 9.7 ? "9¾" : roundedNumber === rf.APARTMENT_15 ? "15¾" : roundedNumber === rf.APARTMENT_21 ? "21¾" : roundedNumber === rf.APARTMENT_27 ? "27¾" : String(roundedNumber)
 
 		res.push({
 			x: x,
@@ -615,9 +617,14 @@ const needDisplays = computed(() => {
 
 	for (const need of store.needs) {
 		if (need.number === rf.ruralAreaNum(store.startingOptions)) continue
-		if (need.movedOut) {
+		// pendingMoveOut (SBD mod) marks a house as evicted-pending; movedOut
+		// (Fried Chicken mod / post-dinnertime SBD) is the permanent state.
+		// Both show the OUT marker on the house/apartment.
+		if (need.movedOut || need.pendingMoveOut) {
 			// Fried chicken mod: house has moved out — show SOLD sign on house/apartment
-			const houseObj = model.findHouse(need.number)
+			// Apartments (SBD-placed or natural) center their marker on the 3x3
+			// footprint, so route them through the apartment branch below
+			const houseObj = rf.APARTMENTS.includes(need.number) ? -1 : model.findHouse(need.number)
 			if (houseObj !== -1 && houseObj.index > -1) {
 				const [x, y] = view.getXYforSmallSquare(houseObj.index)
 				res.push({ type: "movedOut", x: x + sqSize * 0.5, y: y + sqSize * 0.5, width: store.refSize / 4 })
@@ -628,12 +635,16 @@ const needDisplays = computed(() => {
 					res.push({ type: "movedOut", x: x + sqSize, y: y + sqSize, width: store.refSize / 4 })
 				}
 			}
-			continue
+			if (need.movedOut) continue
+			// pendingMoveOut: still eats tonight, so keep drawing its demand
+			// tokens underneath the OUT marker
 		}
 		if (need.needs.length === 0) continue
 
-		// House needs
-		const houseObj = model.findHouse(need.number)
+		// House needs - SBD apartments live in store.houses too, but they must
+		// render via the apartment branch below (combined demand counters);
+		// without this guard both branches fire and the two displays overlap
+		const houseObj = rf.APARTMENTS.includes(need.number) ? -1 : model.findHouse(need.number)
 		if (houseObj !== -1 && houseObj.index > -1) {
 			const [x, y] = view.getXYforSmallSquare(houseObj.index)
 			let adjustedX = x
@@ -744,7 +755,7 @@ function isPlacementMode() {
 	if (subphase === rf.SUBPHASE_MARKETING && store.context.marketer > -1 && (store.context.campaign > -1 || store.context.hawkerRouteActive)) return true
 	if (store.context.restaurantMilestone && store.context.campaign > -1) return true
 	if (subphase === rf.SUBPHASE_PRODUCE && [rf.CART_OPERATOR, rf.TRUCK_DRIVER, rf.ZEPPELIN_PILOT].includes(store.context.producer)) return true
-	if ([rf.SUBPHASE_HOUSES, rf.SUBPHASE_COFFEE_SHOPS_FROM_TRAIN, rf.SUBPHASE_LOBBYISTS, rf.SUBPHASE_NEW_RESTAURANTS].includes(subphase)) return true
+	if ([rf.SUBPHASE_HOUSES, rf.SUBPHASE_SBD_HOUSES, rf.SUBPHASE_COFFEE_SHOPS_FROM_TRAIN, rf.SUBPHASE_LOBBYISTS, rf.SUBPHASE_NEW_RESTAURANTS].includes(subphase)) return true
 	return store.context.action === rf.ACT_PLACE_FREEWAY
 }
 

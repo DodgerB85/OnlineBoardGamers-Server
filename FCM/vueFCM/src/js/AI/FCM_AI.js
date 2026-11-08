@@ -388,7 +388,7 @@ export async function makeAImove() {
 		}
 
 
-		else if (subphase === rf.SUBPHASE_HOUSES) {
+		else if (rf.isHousesSubphase(subphase)) {
 			const possibleGardenHouses = rules.givePossibleHousesForGarden()
 			const freeHouses = rules.availableHouses()
 

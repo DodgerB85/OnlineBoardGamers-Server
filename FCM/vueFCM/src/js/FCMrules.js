@@ -86,6 +86,10 @@ export function oneLevelAbove(employee, preservingColour) {
 		case rf.TV_ANNOUNCER:
 			level = [rf.BRAND_DIRECTOR]
 			break
+		// Senior Business Developer mod - NBD trains up to SBD
+		case rf.NEW_BUSINESS_DEVELOPER:
+			if (store.startingOptions.seniorBusinessDeveloper) level = [rf.SENIOR_BUSINESS_DEVELOPER]
+			break
 		case rf.WAITRESS:
 			level = [rf.B_MOVIE_STAR, rf.C_MOVIE_STAR, rf.D_MOVIE_STAR, rf.JAZZ_MUSICIAN]
 			break
@@ -1683,6 +1687,50 @@ export function availableHouses() {
 	return rf.AVAILABLE_HOUSES.filter((houseNum) => !builtHouseNumbers.has(houseNum))
 }
 
+// Senior Business Developer mod ------------------------------------------------
+// Apartments still in stock: 3 in total (one per pseudo-number), first come first served
+export function availableApartments() {
+	const store = useModelStore()
+	if (!store.startingOptions.seniorBusinessDeveloper) return []
+	const placed = new Set(map.findAllHouses().filter((h) => rf.APARTMENTS.includes(h)))
+	return [rf.APARTMENT_15, rf.APARTMENT_21, rf.APARTMENT_27].filter((apt) => !placed.has(apt))
+}
+
+// Houses on the map eligible for the SBD move-out action. A house is blocked when
+// it currently has any active demand token. Apartments and already moved-out
+// houses are never eligible.
+export function moveOutCandidateHouses() {
+	const store = useModelStore()
+	if (!store.startingOptions.seniorBusinessDeveloper) return []
+	const built = new Set(store.houses.map((h) => h.number))
+	const res = []
+	for (const house of map.findAllHouses()) {
+		if (rf.APARTMENTS.includes(house)) continue
+		if (house === rf.STADIUM) continue
+		if (!built.has(house) && !rf.isBoardHouse(house, store.startingOptions)) continue
+		const need = store.needs.find((n) => n.number === house)
+		if (need && need.movedOut) continue
+		if (need && need.needs && need.needs.length > 0) continue
+		res.push(house)
+	}
+	return res
+}
+
+// Global pool of "moved out" tokens shared by all players (8 in total)
+export const SBD_OUT_TOKEN_POOL = 8
+export function outTokensRemaining() {
+	const store = useModelStore()
+	return SBD_OUT_TOKEN_POOL - store.seniorBusinessDeveloper.outTokensUsed
+}
+
+// Apartment / move-out actions are exclusive to the SBD card: at most SBD count per turn
+export function sbdExclusiveTotal(playerIndex) {
+	const store = useModelStore()
+	const p = store.players[playerIndex]
+	if (!p) return 0
+	return p.employees.filter((e) => e === rf.SENIOR_BUSINESS_DEVELOPER).length
+}
+
 export function availableGardens() {
 	const store = useModelStore()
 
@@ -1878,8 +1926,15 @@ export function doDinnerTime(replayOnly) {
 	const sortedNeeds = [...store.needs].sort((a, b) => a.number - b.number)
 
 	for (const need of sortedNeeds) {
+		// Senior Business Developer mod: a house evicted during THIS turn's working
+		// day still eats tonight (sbdEvictedTurn === current turn) and moves out at
+		// the next dinnertime. Older evictions behave like Fried Chicken's
+		// pendingMoveOut: skip dinner and leave the board for good.
+		const sbdEvictedThisTurn = need.pendingMoveOut && need.sbdEvictedTurn === store.gameflow.turn
+		const sbdEvictedEarlier = need.pendingMoveOut && need.sbdEvictedTurn !== undefined && need.sbdEvictedTurn !== store.gameflow.turn
+
 		// Fried Chicken mod: condemned (pendingMoveOut) houses move out before any matching
-		if (fcMod && need.pendingMoveOut && need.number !== rf.ruralAreaNum(store.startingOptions)) {
+		if ((fcMod || sbdEvictedEarlier) && need.pendingMoveOut && need.number !== rf.ruralAreaNum(store.startingOptions)) {
 			need.movedOut = true
 			need.pendingMoveOut = false
 			need.needs = []
@@ -2932,8 +2987,10 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 
 				const tryAddNeed = (good, history) => {
 					const needs = store.needs.find((n) => n.number === houseId)
-					// Fried Chicken mod: moved-out houses accept no marketing at all
-					if (needs?.movedOut) return false
+					// Fried Chicken mod: moved-out houses accept no marketing at all.
+					// Senior Business Developer mod: pendingMoveOut (OUT token already
+					// placed, house still eats tonight) also blocks new demand.
+					if (needs?.movedOut || needs?.pendingMoveOut) return false
 					if (isInfiniteHouse || (needs?.needs.length || 0) < limit) {
 						model.addNeedToHouse(good, houseId, playerIndex)
 						if (isApt) model.addNeedToHouse(good, houseId, playerIndex)

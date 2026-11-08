@@ -672,6 +672,7 @@ export default {
 		"availableParks": "Verfügbare Parks:",
 		"availableRoads": "Verfügbare Straßen:",
 		"availableLobbyistTiles": "Verfügbare Plättchen für Lobbyisten-Meilenstein:",
+		"availableOutTokens": "Verbleibende OUT-Marker:",
 		"flexiTimes": "Gleitzeit:"
 	},
 	"history": {
@@ -946,7 +947,10 @@ export default {
 		"noMoreRoads": "Keine Straßen mehr",
 		"noMoreParks": "Keine Parks mehr",
 		"chooseEdgeForGarden": "Wählen Sie eine Kante für den Garten",
-		"chooseHouseForGarden": "Wählen Sie ein Haus, um einen Garten hinzuzufügen"
+		"chooseHouseForGarden": "Wählen Sie ein Haus, um einen Garten hinzuzufügen",
+		"apartment": "Wohnhaus",
+		"moveOut": "Ausziehen",
+		"chooseHouseToMoveOut": "Wählen Sie ein Haus zum Ausziehen (keine aktive Nachfrage)"
 	},
 	"playerDetails": {
 		"noMilestones": "Keine Meilensteine",

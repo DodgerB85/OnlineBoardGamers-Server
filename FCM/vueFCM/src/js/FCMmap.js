@@ -1679,7 +1679,7 @@ export function findIndexForHouse(number) {
 
 export function findIndexForApartment(number) {
 	const store = useModelStore()
-	if (number == 3.2 || number == 9.7) return store.mapData.coords.indexOf(number + rf.HOUSE)
+	if (rf.APARTMENTS.includes(number)) return store.mapData.coords.indexOf(number + rf.HOUSE)
 
 	return -1
 }

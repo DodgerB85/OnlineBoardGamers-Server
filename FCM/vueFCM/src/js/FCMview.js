@@ -255,6 +255,7 @@ export function getImage(image) {
 	else if (image === `emp_${rf.FRY_CHEF}`) return new URL(`../../../static/FCM/images/e_fry_chef.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.TELEMARKETER}`) return new URL(`../../../static/FCM/images/e_telemarketer.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.TV_ANNOUNCER}`) return new URL(`../../../static/FCM/images/e_tv_announcer.jpg`, import.meta.url).href
+	else if (image === `emp_${rf.SENIOR_BUSINESS_DEVELOPER}`) return new URL(`../../../static/FCM/images/e_senior_business_developer.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.KIMCHI_MASTER}`) return new URL(`../../../static/FCM/images/e_kimchi_master.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.NOODLE_COOK}`) return new URL(`../../../static/FCM/images/e_noodle_cook.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.NOODLE_CHEF}`) return new URL(`../../../static/FCM/images/e_noodle_chef.jpg`, import.meta.url).href
@@ -409,6 +410,7 @@ export function getImage(image) {
 	// MEDIA LINE (B line) - antenna channel tokens & headline icons
 	else if (image === "so_mediaLine") return new URL(`../../../static/FCM/images/so_mediaLine.svg`, import.meta.url).href
 	else if (image === "so_newMap") return new URL(`../../../static/FCM/images/so_newMap.svg`, import.meta.url).href
+	else if (image === "so_seniorBusinessDeveloper") return new URL(`../../../static/FCM/images/so_seniorBusinessDeveloper.svg`, import.meta.url).href
 	else if (image === "campaign_28") return new URL(`../../../static/FCM/images/antenna35.png`, import.meta.url).href
 	else if (image === "campaign_29") return new URL(`../../../static/FCM/images/antenna45.png`, import.meta.url).href
 	else if (image === "antenna35") return new URL(`../../../static/FCM/images/antenna35.png`, import.meta.url).href

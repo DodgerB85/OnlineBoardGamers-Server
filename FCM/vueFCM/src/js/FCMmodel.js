@@ -413,6 +413,8 @@ export function setInternalStartingOptions(startingOptionsArray) {
 		if (opts[i] === rf.SO_SECOND_BAILOUT) store.startingOptions.secondBailout = true
 		// Media Line mod
 		if (opts[i] === rf.SO_MEDIA_LINE) store.startingOptions.mediaLine = true
+		// Senior Business Developer mod
+		if (opts[i] === rf.SO_SENIOR_BUSINESS_DEVELOPER) store.startingOptions.seniorBusinessDeveloper = true
 		// New Map mod
 		if (opts[i] === rf.SO_NEW_MAP) store.startingOptions.newMap = true
 		if (opts[i] === rf.SO_NEW_MAP_ALL) {
@@ -545,6 +547,11 @@ export function setupKetchupExpansion(playerNumber) {
 			store.availableMilestones.push(rf.FIRST_TELEMARKETER_USED)
 			store.availableMilestones.push(rf.FIRST_TV_ANNOUNCER_USED)
 		}
+	}
+	// Senior Business Developer mod
+	if (store.startingOptions.seniorBusinessDeveloper) {
+		store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER] = 6
+		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_SENIOR_BUSINESS_DEVELOPER_USED)
 	}
 }
 
@@ -781,6 +788,38 @@ export function addHouse(number, index, rotated) {
 	map.addElement(rf.TYPE_HOUSE, number, index, rotated)
 }
 
+// Senior Business Developer mod - apartments are 3x3, encoded in coords like the
+// board apartments (HOUSE + pseudo-number). They never rotate.
+export function addApartment(number, index) {
+	const store = useModelStore()
+	store.houses.push({
+		number: number,
+		index: index,
+		rotated: 0,
+		apartment: true,
+	})
+
+	const val = rf.HOUSE + number
+	for (let i = 0; i < 3; i++) {
+		for (let j = 0; j < 3; j++) {
+			store.mapData.coords[index + i + j * rf.ssW] = val
+		}
+	}
+}
+
+// Senior Business Developer mod - evict a house. The house still eats tonight;
+// it leaves the board at the next dinnertime (handled by FCMrules).
+export function evictHouse(houseNumber) {
+	const store = useModelStore()
+	let need = store.needs.find((n) => n.number === houseNumber)
+	if (!need) {
+		need = { number: houseNumber, needs: [] }
+		store.needs.push(need)
+	}
+	need.pendingMoveOut = true
+	need.sbdEvictedTurn = store.gameflow.turn
+}
+
 // House 25 sits on tile 20; re-add it after that tile is placed or the map is rebuilt
 export function addHouse25IfTile20() {
 	const store = useModelStore()
@@ -841,7 +880,7 @@ export function findHouse(number) {
 }
 
 export function findApartment(number) {
-	if (number === 3.2 || number === 9.7) {
+	if (rf.APARTMENTS.includes(number)) {
 		let t = map.findIndexForApartment(number)
 		let res = {
 			number: number,
@@ -1428,7 +1467,7 @@ export function adjacentToPark(building) {
 	const store = useModelStore()
 	// building is the number of the bldg, eg 3.2, 9.7, 22
 	if (building == rf.ruralAreaNum(store.startingOptions)) return false
-	const zone = building === 3.2 || building === 9.7 ? map.giveAllSpaceForAToken(map.findIndexForApartment(building), 3, 3) : map.getZoneOfHouse(building)
+	const zone = rf.APARTMENTS.includes(building) ? map.giveAllSpaceForAToken(map.findIndexForApartment(building), 3, 3) : map.getZoneOfHouse(building)
 	return map.neighbours(zone).some((i) => store.mapData.coords[i] === rf.PARK)
 }
 

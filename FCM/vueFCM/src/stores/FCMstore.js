@@ -80,6 +80,8 @@ export const useModelStore = defineStore("store", () => {
 		secondBailout: false,
 		// Media Line mod
 		mediaLine: false,
+		// Senior Business Developer mod
+		seniorBusinessDeveloper: false,
 	}
 
 	// This var affects the ZOOM level
@@ -179,6 +181,16 @@ export const useModelStore = defineStore("store", () => {
 		night: { groups: {}, aLinePushers: [] }, // campaign num -> { owner, houses[] }; players whose own A-line campaigns ran
 	})
 
+	// Senior Business Developer mod - global pool of "moved out" tokens (8 total,
+	// shared by all players) plus a per-turn exclusive-action counter. The pool
+	// only matters for the apartment-count cap; eviction places a token on the
+	// house and the house leaves the board at the next dinnertime (same
+	// pendingMoveOut -> movedOut state machine the Fried Chicken mod uses).
+	const seniorBusinessDeveloper = reactive({
+		outTokensUsed: 0, // tokens taken from the global pool (max 8)
+		sbdExclusiveActions: 0, // apartment / moveOut actions taken this turn (max = SBD count)
+	})
+
 	/*************************************** UNSAVED - TEMP VARS -- these do not need to be stored or saved */
 
 	const context = reactive({
@@ -223,6 +235,7 @@ export const useModelStore = defineStore("store", () => {
 		newRestaurantAction: "", // "" = choose manager, "create" = placing, "move" = choosing one to move
 		newLobbyistTile: -1,
 		lobbyistMilestoneActive: false,
+		lobbyistMilestoneReturnPhase: "lobbyists", // "sbd" for the Senior Business Developer mod milestone
 		nextUrbanPlanningTile: -1,
 		rotation: 0, // This is used for many objects rotation
 		freewaySidesFalse: [], // Possible freeway positions with sides=false (top/bottom)
@@ -497,6 +510,7 @@ export const useModelStore = defineStore("store", () => {
 		laborMarket,
 		bailout,
 		mediaLine,
+		seniorBusinessDeveloper,
 		reserveCards,
 		bank,
 		bankBroken,

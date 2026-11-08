@@ -15,6 +15,7 @@ FAN_FLAGS = [
     rfFCM.SO_SECOND_BAILOUT,
     rfFCM.SO_MEDIA_LINE,
     rfFCM.SO_NEW_MAP,
+    rfFCM.SO_SENIOR_BUSINESS_DEVELOPER,
 ]
 
 
@@ -84,9 +85,9 @@ class RandomFanPoolTests(TestCase):
         self.assertNotIn(rfFCM.SO_RANDOM_MODULES_CHINESE, options)
 
     def test_fan_marker_adds_fan_mods_to_roll(self):
-        # Roll as many modules as the (now 6-strong) fan pool contributes
+        # Roll as many modules as the (now 7-strong) fan pool contributes
         with patch("Lobby.presenters.random.randrange", side_effect=self._randrange):
-            game = self._join_full_game(_random_options("06", fan=True))
+            game = self._join_full_game(_random_options("07", fan=True))
 
         final = json.loads(game.startingOptions)
         self.assertNotIn(rfFCM.SO_RANDOM_MODULES_FAN, final)

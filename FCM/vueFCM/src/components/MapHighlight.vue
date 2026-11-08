@@ -24,7 +24,7 @@ const ghostRoadworkIndexes = ref([])
 // changeGhost early-returns when hovering the same square, so a rotation
 // change while the mouse is still would leave a stale ghost — re-show it
 watch(() => store.context.rotation, () => {
-	if (store.gameflow.subphase === rf.SUBPHASE_HOUSES && store.context.selectedBuilding !== -1 && store.viewSettings.currentGhostIndex != null) {
+	if (rf.isHousesSubphase(store.gameflow.subphase) && store.context.selectedBuilding !== -1 && store.context.selectedBuilding !== -2 && !rf.APARTMENTS.includes(store.context.selectedBuilding) && store.viewSettings.currentGhostIndex != null) {
 		showHouseGhost(store.viewSettings.currentGhostIndex)
 	}
 })
@@ -128,8 +128,10 @@ function clickedOnSquare(index) {
 		lastPreviewTile.value = -1
 		if (store.context.producer === rf.ZEPPELIN_PILOT) controller.selectNextTile(map.giveTileNumber(index))
 		else controller.selectNextPosition(index)
-	} else if (store.gameflow.subphase === rf.SUBPHASE_HOUSES) {
-		controller.clickedHouseSquare(index)
+	} else if (rf.isHousesSubphase(store.gameflow.subphase)) {
+		// Senior Business Developer mod milestone reuses the Lobbyist tile picker
+		if (store.context.lobbyistMilestoneActive) controller.clickedNewTileSquare(index)
+		else controller.clickedHouseSquare(index)
 	} else if (store.gameflow.subphase === rf.SUBPHASE_COFFEE_SHOPS_FROM_TRAIN) {
 		if (store.context.coffeeShopAction === "remove") controller.removeCoffeeShop(index)
 		else controller.placeCoffeeShop(index)
@@ -257,6 +259,46 @@ function showGardenGhost(index) {
 	img.style.borderWidth = "0px"
 	img.style.top = posY + "px"
 	img.style.left = posX + "px"
+	img.style.width = 2 * sqSize + "px"
+	img.style.height = "auto"
+
+	ghostHouseNumberRef.value.style.display = "none"
+}
+
+// Ghost preview of a Senior Business Developer apartment (3x3, no rotation)
+function showApartmentGhost(index) {
+	const sqSize = store.refSize / 5
+	const [x, y] = view.getXYforSmallSquare(index)
+
+	const img = ghostImgRef.value
+	img.src = view.getImage("apartment")
+	img.style.display = "block"
+	img.style.transform = "rotate(0deg)"
+	img.style.transformOrigin = "center center"
+	img.style.opacity = "0.5"
+	img.style.borderWidth = "0px"
+	img.style.top = y + "px"
+	img.style.left = x + "px"
+	img.style.width = 3 * sqSize + "px"
+	img.style.height = "auto"
+
+	ghostHouseNumberRef.value.style.display = "none"
+}
+
+// Ghost preview of a Senior Business Developer move-out (2x2 house block)
+function showMoveOutGhost(index) {
+	const sqSize = store.refSize / 5
+	const [x, y] = view.getXYforSmallSquare(index)
+
+	const img = ghostImgRef.value
+	img.src = view.getImage("movedOut")
+	img.style.display = "block"
+	img.style.transform = "rotate(0deg)"
+	img.style.transformOrigin = "center center"
+	img.style.opacity = "0.5"
+	img.style.borderWidth = "0px"
+	img.style.top = y + "px"
+	img.style.left = x + "px"
 	img.style.width = 2 * sqSize + "px"
 	img.style.height = "auto"
 
@@ -450,7 +492,10 @@ function showSimpleGhost(src, x, y, width, height = "auto") {
 	img.style.top = y + "px"
 	img.style.left = x + "px"
 	img.style.width = width + "px"
-	img.style.height = height + "px"
+	// "auto" + "px" is invalid CSS and gets silently ignored, leaving the
+	// previous ghost's height (e.g. refSize from the tile ghost) behind and
+	// stretching this ghost vertically - append "px" only for numeric values
+	img.style.height = height === "auto" ? "auto" : height + "px"
 }
 
 // Shared preview-route logic for driving/hawker hover
@@ -532,15 +577,21 @@ function changeGhost(index, add, event) {
 		showSimpleGhost(view.getImage("coffeeShop_" + color), x, y, store.refSize / 5, store.refSize / 5)
 		return
 	}
-	// PLACING A HOUSE / GARDEN (New Business Developer)
-	else if (store.gameflow.subphase === rf.SUBPHASE_HOUSES) {
-		if (store.context.selectedBuilding === -1) showGardenGhost(index)
-		else showHouseGhost(index)
+	// PLACING THE LOBBYIST MILESTONE NEW BOARD TILE (also used by the Senior
+	// Business Developer mod milestone, which fires from a Houses subphase) -
+	// must be checked before the Houses branch, otherwise the stale
+	// selectedBuilding (e.g. the move-out -2) wins and the OUT ghost shows
+	// instead of the tile preview
+	else if (store.context.lobbyistMilestoneActive && (store.gameflow.subphase === rf.SUBPHASE_LOBBYISTS || rf.isHousesSubphase(store.gameflow.subphase))) {
+		showLobbyistMSTileGhost(index)
 		return
 	}
-	// PLACING THE LOBBYIST MILESTONE NEW BOARD TILE
-	else if (store.gameflow.subphase === rf.SUBPHASE_LOBBYISTS && store.context.lobbyistMilestoneActive) {
-		showLobbyistMSTileGhost(index)
+	// PLACING A HOUSE / GARDEN (New Business Developer, or the SBD mod's turn)
+	else if (rf.isHousesSubphase(store.gameflow.subphase)) {
+		if (store.context.selectedBuilding === -1) showGardenGhost(index)
+		else if (store.context.selectedBuilding === -2) showMoveOutGhost(index)
+		else if (rf.APARTMENTS.includes(store.context.selectedBuilding)) showApartmentGhost(index)
+		else showHouseGhost(index)
 		return
 	}
 	// PLACING A LOBBYIST ROAD / PARK
@@ -696,7 +747,7 @@ function changeGhost(index, add, event) {
 				v-for="el in freewayHighlights"
 				:key="el.index"
 				class="higlightSquareToClick"
-				:class="{ noBorder: store.gameflow.subphase === rf.SUBPHASE_HOUSES && store.context.selectedBuilding === -1 }"
+				:class="{ noBorder: rf.isHousesSubphase(store.gameflow.subphase) && store.context.selectedBuilding === -1 }"
 				:data-index="el.index"
 				:style="{
 					width: store.refSize / 5 + 'px',

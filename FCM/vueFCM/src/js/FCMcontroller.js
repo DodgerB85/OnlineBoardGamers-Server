@@ -232,7 +232,7 @@ export function endWorkingDaySubphase() {
 		// Compute unused producers (same logic as computedProducers in ActionAreaWorkingDay)
 		let allProducers = rules.availableProducers(playerIndex, store.context.justProduced.team)
 		summary.produce.unused = allProducers
-		summary.houses.total = playerObj.employees.filter((e) => e === rf.NEW_BUSINESS_DEVELOPER).length
+		summary.houses.total = playerObj.employees.filter((e) => e === rf.NEW_BUSINESS_DEVELOPER || e === rf.SENIOR_BUSINESS_DEVELOPER).length
 
 		if (store.context.justProduced.team.length > 0) {
 			const added = store.context.justProduced.added
@@ -247,13 +247,20 @@ export function endWorkingDaySubphase() {
 			if (added[rf.PIZZA] > 0) plyr.awardMilestone(playerIndex, rf.FIRST_PIZZA_PRODUCED)
 		}
 
-		// Set up HOUSES phase
+		// Set up HOUSES phase (NBD only - house / garden)
 		store.gameflow.subphase = rf.SUBPHASE_HOUSES
 		store.context.remainingProducers.length = 0
 		store.context.justBuilt.length = 0
+		store.seniorBusinessDeveloper.sbdExclusiveActions = 0
 
 		const newBusinessDevelopers = playerObj.employees.filter((e) => e === rf.NEW_BUSINESS_DEVELOPER)
+		const seniorBusinessDevelopers = playerObj.employees.filter((e) => e === rf.SENIOR_BUSINESS_DEVELOPER)
 		if (newBusinessDevelopers.length === 0) {
+			// No NBD: fall through to the SBD phase (or skip if neither card is in play)
+			if (seniorBusinessDevelopers.length === 0) {
+				endWorkingDaySubphase()
+				return
+			}
 			endWorkingDaySubphase()
 			return
 		}
@@ -262,6 +269,20 @@ export function endWorkingDaySubphase() {
 
 	// --- PHASE: HOUSES ---
 	else if (subphase === rf.SUBPHASE_HOUSES) {
+		// SET UP SBD (Senior Business Developer works after the NBD, before Lobbyists)
+		store.gameflow.subphase = rf.SUBPHASE_SBD_HOUSES
+		store.context.justBuilt.length = 0
+
+		const seniorBusinessDevelopers = playerObj.employees.filter((e) => e === rf.SENIOR_BUSINESS_DEVELOPER)
+		if (seniorBusinessDevelopers.length === 0) {
+			endWorkingDaySubphase()
+			return
+		}
+		setupHousesAndGardensPhase()
+	}
+
+	// --- PHASE: SBD HOUSES ---
+	else if (subphase === rf.SUBPHASE_SBD_HOUSES) {
 		// SET UP LOBBYISTS
 		summary.lobby.total = playerObj.employees.filter((e) => e === rf.LOBBYIST).length
 		store.gameflow.subphase = rf.SUBPHASE_LOBBYISTS
@@ -522,7 +543,9 @@ export function cancelNewRestaurantMilestone() {
  *
  *****************************************************************/
 
-// Set up the Houses & Gardens subphase.
+// Set up the Houses & Gardens subphase. Phase-aware: during SUBPHASE_HOUSES
+// only the NBD cards are at work (house / garden); during SUBPHASE_SBD_HOUSES
+// only the SBD cards are at work (house / garden / apartment / move out).
 export function setupHousesAndGardensPhase() {
 	const store = useModelStore()
 	const playerObj = currentPlayerObj()
@@ -531,15 +554,25 @@ export function setupHousesAndGardensPhase() {
 	store.context.selectedBuilding = -1
 	resetHouseSelection()
 
-	const numLeft = playerObj.employees.filter((e) => e === rf.NEW_BUSINESS_DEVELOPER).length - store.context.justBuilt.length
+	const isSbdPhase = store.gameflow.subphase === rf.SUBPHASE_SBD_HOUSES
+	const employeeId = isSbdPhase ? rf.SENIOR_BUSINESS_DEVELOPER : rf.NEW_BUSINESS_DEVELOPER
+	const total = playerObj.employees.filter((e) => e === employeeId).length
+	const numLeft = total - store.context.justBuilt.length
 	if (numLeft <= 0) return
 
 	const houses = rules.availableHouses()
-	store.context.selectedBuilding = houses.length > 0 ? houses[0] : -1
+	let defaultChoice = houses.length > 0 ? houses[0] : -1
+	if (defaultChoice === -1 && rules.availableGardens() <= 0 && isSbdPhase) {
+		const apartments = rules.availableApartments()
+		if (apartments.length > 0) defaultChoice = apartments[0]
+		else if (rules.moveOutCandidateHouses().length > 0 && rules.outTokensRemaining() > 0) defaultChoice = -2
+	}
+	store.context.selectedBuilding = defaultChoice
 	updateHousesHighlights()
 }
 
-// Highlight the board for the currently selected building (a house number, or -1 = garden)
+// Highlight the board for the currently selected building
+// -1 = garden, -2 = SBD move-out, an APARTMENTS number = SBD apartment, integer = house
 export function updateHousesHighlights() {
 	const store = useModelStore()
 	context.clearAllHighlights()
@@ -552,6 +585,17 @@ export function updateHousesHighlights() {
 			if (idx > -1) squares.push(idx, idx + 1, idx + rf.ssW, idx + rf.ssW + 1)
 		}
 		store.highlights.indexesToHighlightYellow = squares
+	} else if (store.context.selectedBuilding === -2) {
+		// SBD move-out: highlight the 2x2 block of every candidate house
+		const squares = []
+		for (const houseNum of rules.moveOutCandidateHouses()) {
+			const idx = map.findIndexForHouse(houseNum)
+			if (idx > -1) squares.push(idx, idx + 1, idx + rf.ssW, idx + rf.ssW + 1)
+		}
+		store.highlights.indexesToHighlightYellow = squares
+	} else if (rf.APARTMENTS.includes(store.context.selectedBuilding)) {
+		// SBD apartment: 3x3 footprint, no rotation
+		store.highlights.indexesToHighlightYellow = rules.givePossiblePositionsForBlock(3, 3)
 	} else {
 		const rotated = store.context.rotation === 1 || store.context.rotation === 3
 		const w = rotated ? 3 : 2
@@ -576,6 +620,34 @@ export function selectGardenToBuild() {
 	updateHousesHighlights()
 }
 
+// Senior Business Developer mod: clicked one of the 3 apartments in the build box
+export function selectApartmentToBuild(apartmentNumber) {
+	const store = useModelStore()
+	store.context.selectedBuilding = apartmentNumber
+	resetHouseSelection()
+	updateHousesHighlights()
+}
+
+// Senior Business Developer mod: clicked the "move out" choice in the build box
+export function selectMoveOutToBuild() {
+	const store = useModelStore()
+	store.context.selectedBuilding = -2
+	resetHouseSelection()
+	updateHousesHighlights()
+}
+
+// Senior Business Developer mod: milestone fires on the very first SBD action.
+// Reward is the same board-tile pick as First Lobbyist Used (shared pool).
+function sbdMilestoneCheck(playerIndex) {
+	const store = useModelStore()
+	if (!plyr.hasMilestone(playerIndex, rf.FIRST_SENIOR_BUSINESS_DEVELOPER_USED) && store.availableMilestones.includes(rf.FIRST_SENIOR_BUSINESS_DEVELOPER_USED)) {
+		plyr.awardMilestone(playerIndex, rf.FIRST_SENIOR_BUSINESS_DEVELOPER_USED)
+		selectNewBoardTile("sbd")
+		return true
+	}
+	return false
+}
+
 function resetHouseSelection() {
 	const store = useModelStore()
 	store.context.rotation = 0
@@ -590,6 +662,10 @@ export function clickedHouseSquare(index) {
 	if (store.context.selectedBuilding === -1) {
 		if (store.context.edges.length > 0) chooseHouseEdge(-1, index)
 		else chooseHouseForGarden(index)
+	} else if (store.context.selectedBuilding === -2) {
+		chooseMoveOutHouse(index)
+	} else if (rf.APARTMENTS.includes(store.context.selectedBuilding)) {
+		chooseApartmentPosition(index)
 	} else {
 		chooseHousePosition(index)
 	}
@@ -650,6 +726,46 @@ export function chooseHouseEdge(edge, index) {
 	store.context.endOfDaySummaryData.houses.built.push(-1)
 
 	setupHousesAndGardensPhase()
+}
+
+// Senior Business Developer mod: place a 3x3 apartment at the clicked square
+export function chooseApartmentPosition(index) {
+	const store = useModelStore()
+	const playerIndex = currentPlayerIndex()
+	const apartmentNumber = store.context.selectedBuilding
+	const rotation = store.context.rotation
+
+	model.addApartment(apartmentNumber, index, rotation)
+
+	const histData = [funcs.exportIndex(index), apartmentNumber, rotation]
+	model.addHistory(rf.HIST_SBD_BUILD_APARTMENT, histData, playerIndex, 0)
+
+	store.seniorBusinessDeveloper.sbdExclusiveActions++
+	store.context.justBuilt.push(index)
+	store.context.endOfDaySummaryData.houses.built.push(apartmentNumber)
+
+	if (!sbdMilestoneCheck(playerIndex)) setupHousesAndGardensPhase()
+}
+
+// Senior Business Developer mod: evict the house anchored at the clicked square
+export function chooseMoveOutHouse(index) {
+	const store = useModelStore()
+	const playerIndex = currentPlayerIndex()
+
+	const houseNumber = store.mapData.coords[index] - rf.HOUSE
+	if (!rules.moveOutCandidateHouses().includes(houseNumber)) return
+
+	model.evictHouse(houseNumber)
+
+	const histData = [funcs.exportIndex(index), houseNumber]
+	model.addHistory(rf.HIST_SBD_MOVE_OUT, histData, playerIndex, 0)
+
+	store.seniorBusinessDeveloper.outTokensUsed++
+	store.seniorBusinessDeveloper.sbdExclusiveActions++
+	store.context.justBuilt.push(index)
+	store.context.endOfDaySummaryData.houses.built.push(-2)
+
+	if (!sbdMilestoneCheck(playerIndex)) setupHousesAndGardensPhase()
 }
 
 /*****************************************************************
@@ -853,9 +969,13 @@ function placeLobbyistPark(index) {
  *****************************************************************/
 
 // Show the tile selector for the First Lobbyist Used milestone.
-function selectNewBoardTile() {
+// returnPhase "lobbyists" (default) → back to Lobbyists subphase;
+// "sbd" (Senior Business Developer mod milestone) → back to Houses subphase.
+function selectNewBoardTile(returnPhase = "lobbyists") {
 	const store = useModelStore()
 	context.clearAllHighlights()
+
+	store.context.lobbyistMilestoneReturnPhase = returnPhase
 
 	const allTiles = rules.availableLobbyistTiles()
 	store.context.rotation = 0
@@ -865,9 +985,18 @@ function selectNewBoardTile() {
 	if (allTiles.length > 0) {
 		updateLobbyistMSHighlights()
 	} else {
-		// No more tiles available, skip back to lobbyist flow
-		setupLobbyistsPhase()
+		// No more tiles available, skip back to the calling flow
+		finishLobbyistMilestone()
 	}
+}
+
+// Shared tail: return from the tile selector to whichever subphase opened it
+function finishLobbyistMilestone() {
+	const store = useModelStore()
+	const returnPhase = store.context.lobbyistMilestoneReturnPhase
+	store.context.lobbyistMilestoneReturnPhase = "lobbyists"
+	if (returnPhase === "sbd") setupHousesAndGardensPhase()
+	else setupLobbyistsPhase()
 }
 
 // Select a different tile in the milestone tile selector
@@ -887,13 +1016,13 @@ function updateLobbyistMSHighlights() {
 	store.highlights.indexesToHighlightYellow = rules.givePossibilitiesForNewTile()
 }
 
-// Cancel the milestone tile selection and return to lobbyist flow
+// Cancel the milestone tile selection and return to the calling flow
 export function cancelLobbyistMilestone() {
 	const store = useModelStore()
 	store.context.lobbyistMilestoneActive = false
 	store.context.newLobbyistTile = -1
 	context.clearAllHighlights()
-	setupLobbyistsPhase()
+	finishLobbyistMilestone()
 }
 
 // Clicked a highlighted square during tile placement milestone
@@ -929,7 +1058,7 @@ export function clickedNewTileSquare(index) {
 	store.context.lobbyistMilestoneActive = false
 	context.clearAllHighlights()
 
-	setupLobbyistsPhase()
+	finishLobbyistMilestone()
 }
 
 /*****************************************************************
@@ -2504,8 +2633,8 @@ export function startPlayerWorkingDaySubphase(subphase) {
 		store.context.remainingProducers.length = 0
 	}
 
-	// --- SUBPHASE: HOUSES ---
-	else if (subphase === rf.SUBPHASE_HOUSES) {
+	// --- SUBPHASE: HOUSES (NBD, then the SBD mod's own turn) ---
+	else if (rf.isHousesSubphase(subphase)) {
 		store.context.justBuilt.length = 0
 		setupHousesAndGardensPhase()
 	}
