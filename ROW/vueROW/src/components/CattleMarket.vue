@@ -164,7 +164,7 @@ function confirm() {
 					{{ opt.cowboys }} × {{ t('row.cattleMarket.cowboyCost') }} — ${{ opt.dollars }}
 				</option>
 			</select>
-			<button v-if="buying" class="buy" :disabled="!canConfirm" @click="confirm">{{ t('row.cattleMarket.confirmBuy') }}</button>
+			<button v-if="buying" class="actionsLineButton buy" :disabled="!canConfirm" @click="confirm">{{ t('row.cattleMarket.confirmBuy') }}</button>
 		</div>
 		<div class="cards" :class="{ buying: buying || takingThree, selecting: selected.length > 0 }">
 			<CardView
@@ -196,7 +196,6 @@ function confirm() {
 #cattleMarket { margin: 8px; }
 .hint { margin-bottom: 4px; font-size: 13px; }
 .hint .costSelect { margin-left: 8px; }
-.hint .buy { margin-left: 8px; padding: 2px 10px; cursor: pointer; font-weight: bold; }
 .hint .buy:disabled { opacity: 0.4; cursor: default; }
 .cards { display: flex; flex-wrap: wrap; gap: 4px; }
 .marketCard { box-shadow: 4px 4px 4px rgb(0, 0, 0, 0.75); border: 3px solid #ffffff; border-radius: 6px; cursor: default; }

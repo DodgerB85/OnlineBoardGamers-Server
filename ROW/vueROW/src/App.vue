@@ -82,6 +82,22 @@ body {
 	font-size: 15px;
 }
 
+/* Site action-button style, copied from WEB/vueWEB/src/App.vue. */
+.actionsLineButton {
+	margin: 10px;
+	width: fit-content;
+	border: 2px solid green;
+	border-radius: 5px;
+	font-weight: bolder;
+	padding: 5px;
+}
+.actionsLineButton:hover {
+	background-color: lightgrey;
+}
+.actionsLineButton:active {
+	background-color: darkgrey;
+}
+
 #wholeMiddleArea {
 	width: 100%;
 	min-width: 1050px;

@@ -1009,7 +1009,7 @@ function leaveTarget(t) {
 			</g>
 		</svg>
 
-		<div v-if="store.selectedAction" class="cancelMove" @click="store.clearAction()">{{ t('panels.cancel') }}</div>
+		<button v-if="store.selectedAction" type="button" class="actionsLineButton cancelMove" @click="store.clearAction()">{{ t('panels.cancel') }}</button>
 
 		<div
 			v-if="chooser"
@@ -1019,9 +1019,9 @@ function leaveTarget(t) {
 		>
 			<template v-for="(c, i) in chooser.cands" :key="i">
 				<img v-if="c.img" class="cand" :class="c.enabled === false ? 'disabled' : 'enabled'" :src="c.img" :title="c.label" :alt="c.label" draggable="false" @click="choose(c)" />
-				<button v-else class="act" :disabled="c.enabled === false" @click="choose(c)">{{ c.label }}</button>
+				<button v-else class="actionsLineButton" :disabled="c.enabled === false" @click="choose(c)">{{ c.label }}</button>
 			</template>
-			<button class="act cancel" @click="chooser = null">{{ t('panels.cancel') }}</button>
+			<button class="actionsLineButton cancel" @click="chooser = null">{{ t('panels.cancel') }}</button>
 		</div>
 
 		<!-- Stop the walk early: anchored to the spot the plan has reached. -->
@@ -1075,22 +1075,14 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 .stationGroup.selectable .station { stroke: #ffd400; stroke-width: 4; }
 .stationGroup.selectable:hover .station { stroke: #90ee90; stroke-width: 6; }
 
-/* Cancel an armed building move without leaving the board. */
+/* Cancel an armed action without leaving the board. */
 .cancelMove {
 	position: absolute;
 	top: 6px;
 	right: 6px;
 	z-index: 11;
-	background: #fffde8;
-	border: 2px solid #ffd400;
-	border-radius: 5px;
-	padding: 3px 10px;
-	font-size: 12px;
-	font-weight: bold;
-	cursor: pointer;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+	margin: 0;
 }
-.cancelMove:hover { border-color: #90ee90; }
 
 .foresight { cursor: pointer; }
 .workerGroup { cursor: default; }
@@ -1176,9 +1168,8 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 	z-index: 10;
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
-.chooser .act { font-size: 12px; padding: 3px 8px; cursor: pointer; white-space: nowrap; }
-.chooser .act:disabled { opacity: 0.4; cursor: default; }
-.chooser .cancel { background: #eee; }
+.chooser .actionsLineButton { margin: 2px 0; white-space: nowrap; }
+.chooser .actionsLineButton:disabled { opacity: 0.4; cursor: default; }
 
 /* Numbered step markers on the route to the hovered destination, with its hand fee. */
 .routeNumbers text {

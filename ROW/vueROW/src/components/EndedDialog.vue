@@ -114,15 +114,15 @@ const STAT_ROWS = [
 	<div v-if="ended && store.viewSettings.showEndedDialog" id="endedDialog">
 		<h2>{{ t('row.ended.title') }}</h2>
 		<div class="dialog-actions">
-			<a v-if="nextURL" class="ended-action" :href="nextURL">{{ t('app.nextGame') }}</a>
-			<button class="ended-action" @click="store.viewSettings.showEndedDialog = false">{{ t('panels.close') }}</button>
+			<a v-if="nextURL" class="actionsLineButton ended-action" :href="nextURL">{{ t('app.nextGame') }}</a>
+			<button class="actionsLineButton ended-action" @click="store.viewSettings.showEndedDialog = false">{{ t('panels.close') }}</button>
 		</div>
 		<div v-if="bgStatsUrl" id="bgStatsDiv">
 			<a :href="bgStatsUrl" target="_blank" rel="noopener">{{ t('row.ended.bgStats') }}</a>
-			<button type="button" class="ended-action" @click="copyBgStatsLink">
+			<button type="button" class="actionsLineButton ended-action" @click="copyBgStatsLink">
 				{{ bgStatsCopied ? t('row.ended.bgStatsCopied') : t('row.ended.bgStatsCopy') }}
 			</button>
-			<button type="button" class="ended-action" @click="showBgStatsQr = !showBgStatsQr">{{ t('row.ended.bgStatsQr') }}</button>
+			<button type="button" class="actionsLineButton ended-action" @click="showBgStatsQr = !showBgStatsQr">{{ t('row.ended.bgStatsQr') }}</button>
 			<div v-if="showBgStatsQr" class="bgStatsQr" role="img" :aria-label="t('row.ended.bgStats')" v-html="bgStatsQrSvg"></div>
 		</div>
 		<table>
@@ -183,10 +183,9 @@ td.total { text-align: right; font-weight: bold; }
 .cats { max-width: 420px; }
 .cat { display: inline-block; margin-right: 8px; font-size: 12px; color: #333; }
 .tie { color: #ffe08a; font-weight: bold; margin-top: 8px; }
-.dialog-actions { display: flex; gap: 10px; margin-bottom: 10px; }
-.ended-action { padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer; background: #ffd400; color: #222; text-decoration: none; font-size: 14px; }
-.ended-action:hover { background: #ffe680; }
-#bgStatsDiv { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; max-width: 620px; margin-bottom: 10px; }
+.dialog-actions { display: flex; flex-wrap: wrap; justify-content: center; margin-bottom: 10px; }
+.ended-action { display: inline-block; color: #000; text-decoration: none; background: #efefef; }
+#bgStatsDiv { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; max-width: 620px; margin-bottom: 10px; }
 #bgStatsDiv a { color: #ffd400; }
 .bgStatsQr { flex-basis: 100%; }
 :deep(.bgStatsQr svg) { display: block; width: 100%; max-width: 564px; height: auto; margin: 8px auto; border: 1px solid black; }

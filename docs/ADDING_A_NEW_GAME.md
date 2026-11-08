@@ -72,7 +72,7 @@ Mirroring `WEB/RNB`:
 
 ## 6. Client
 
-The [show-page shell contract](add-new-game/SKILL.md#reuse-the-show-page-shell) is required: adapt URR’s `TopMenu.vue` structure and SVG icons, and WEB’s `.actionsLineButton` styles (or the documented URR panel variant). Preserve the site header, utility panels, typography, background and footer. A custom themed top bar or hand-rolled button palette is not an equivalent substitute. Compare the result against the named donor in a browser.
+The [show-page shell contract](add-new-game/SKILL.md#reuse-the-show-page-shell) is required: adapt URR’s `TopMenu.vue` structure and SVG icons, and WEB’s `.actionsLineButton` styles. Preserve the site header, utility panels, typography, background and footer. A custom themed top bar or hand-rolled button palette is not an equivalent substitute. Compare the result against the named donor in a browser.
 
 Shell corrections already made in the donors, required for a new game:
 

@@ -16,7 +16,7 @@ function showState() {
 		<h4>{{ t('row.debug.title') }}</h4>
 		<div>{{ t('row.debug.current') }} {{ store.currentPlayer }} | {{ t('row.debug.status') }} {{ store.state?.status }}</div>
 		<div>{{ t('row.debug.actions') }} {{ store.actions.join(", ") }}</div>
-		<button @click="showState">{{ t('row.debug.showGameData') }}</button>
+		<button class="actionsLineButton" @click="showState">{{ t('row.debug.showGameData') }}</button>
 	</div>
 </template>
 

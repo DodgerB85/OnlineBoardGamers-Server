@@ -167,10 +167,10 @@ const discardOnly = computed(() => cardActions.value.length === 1 && cardActions
 		</template>
 
 		<div class="group">
-			<button class="act" :disabled="!store.canUndo" @click="controller.undo()">{{ t('app.undo') }}</button>
-			<button class="act reset" @click="controller.resetWholeTurn()">{{ t('app.resetWholeTurn') }}</button>
-			<button class="act end" :disabled="store.saving || store.game?.isEnded()" @click="controller.endTurn()">{{ t('action.endTurn') }}</button>
-			<button v-if="store.canSkip" class="act" :disabled="store.saving" @click="controller.skip()">{{ t('action.skip') }}</button>
+			<button class="actionsLineButton" :disabled="!store.canUndo" @click="controller.undo()">{{ t('app.undo') }}</button>
+			<button class="actionsLineButton" @click="controller.resetWholeTurn()">{{ t('app.resetWholeTurn') }}</button>
+			<button class="actionsLineButton" :disabled="store.saving || store.game?.isEnded()" @click="controller.endTurn()">{{ t('action.endTurn') }}</button>
+			<button v-if="store.canSkip" class="actionsLineButton" :disabled="store.saving" @click="controller.skip()">{{ t('action.skip') }}</button>
 		</div>
 		</template>
 	</div>
@@ -181,11 +181,6 @@ const discardOnly = computed(() => cardActions.value.length === 1 && cardActions
 .group { border: 1px solid #999; border-radius: 5px; padding: 5px; background: #f4f7d7; max-width: 460px; }
 .label { font-weight: bold; font-size: 12px; margin-bottom: 3px; }
 .note { font-size: 12px; }
-.act { margin: 2px; padding: 3px 7px; cursor: pointer; font-size: 12px; }
-/* Movement options match the board: light-green border on hover, as the map spots do. */
-.act.move:hover { border: 2px solid #90ee90; }
-.end { background: #cfe8cf; font-weight: bold; }
-.reset { background: #f6d9c9; font-weight: bold; }
 .supply { display: flex; flex-wrap: wrap; gap: 3px; }
 .buildingTile { width: 44px; height: 52px; border: 2px solid #ffffff; border-radius: 4px; cursor: pointer; background: #fff; }
 .buildingTile:hover { border-color: black; }

@@ -67,7 +67,7 @@ function placeBid(position, points) {
 				<tr v-for="row in rows" :key="row.position">
 					<th>#{{ row.position + 1 }}</th>
 					<td v-for="cell in row.cells" :key="cell.points">
-						<button v-if="canBid && cell.selectable" class="bid" @click="placeBid(row.position, cell.points)">{{ t('row.bidding.bid') }}</button>
+						<button v-if="canBid && cell.selectable" class="actionsLineButton bid" @click="placeBid(row.position, cell.points)">{{ t('row.bidding.bid') }}</button>
 						<span v-for="p in cell.players" :key="p" class="marker" :title="p">{{ p }}</span>
 					</td>
 				</tr>
@@ -83,7 +83,7 @@ function placeBid(position, points) {
 table { border-collapse: collapse; margin: 0 auto; }
 th, td { border: 1px solid #aaa; padding: 2px 4px; font-size: 12px; text-align: center; min-width: 32px; }
 td { height: 26px; }
-.bid { font-size: 11px; padding: 1px 4px; cursor: pointer; }
+.bid { margin: 0; padding: 1px 4px; font-size: 11px; cursor: pointer; }
 .marker { display: inline-block; background: #d0e8ff; border-radius: 3px; padding: 0 3px; margin: 0 1px; }
 .wait { margin-top: 6px; font-style: italic; color: #555; }
 </style>

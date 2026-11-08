@@ -82,16 +82,16 @@ async function castVoteFor(topic) {
 			<p>{{ t('panels.bugIntro') }}</p>
 			<textarea v-model="bugReport" rows="6" cols="80"></textarea>
 			<div>
-				<button @click="submitBugReport">{{ t('panels.submit') }}</button>
-				<button @click="store.viewSettings.showBug = false">{{ t('panels.cancel') }}</button>
+				<button class="actionsLineButton" @click="submitBugReport">{{ t('panels.submit') }}</button>
+				<button class="actionsLineButton" @click="store.viewSettings.showBug = false">{{ t('panels.cancel') }}</button>
 			</div>
 		</div>
 		<div v-if="store.viewSettings.showNotes" class="panel">
 			<h3>{{ t('panels.notesTitle') }} - {{ t('panels.notesPrivate') }}</h3>
 			<textarea v-model="personal.notes" rows="8" cols="80"></textarea>
 			<div>
-				<button @click="saveNotesWithFeedback">{{ t('panels.save') }}</button>
-				<button @click="store.viewSettings.showNotes = false">{{ t('panels.close') }}</button>
+				<button class="actionsLineButton" @click="saveNotesWithFeedback">{{ t('panels.save') }}</button>
+				<button class="actionsLineButton" @click="store.viewSettings.showNotes = false">{{ t('panels.close') }}</button>
 			</div>
 		</div>
 		<div v-if="store.viewSettings.showChat" class="panel">
@@ -101,7 +101,7 @@ async function castVoteFor(topic) {
 			</div>
 			<div>
 				<textarea v-model="chatMessage" rows="3" cols="60"></textarea>
-				<button @click="sendChat">{{ t('panels.send') }}</button>
+				<button class="actionsLineButton" @click="sendChat">{{ t('panels.send') }}</button>
 			</div>
 		</div>
 		<div v-if="store.viewSettings.showInfo" class="panel">
@@ -114,12 +114,12 @@ async function castVoteFor(topic) {
 			<div class="voteBlock">
 				<div>{{ t('votesPanel.deleteExplain') }}</div>
 				<div class="voteSummary">{{ voteSummary(store.deleteVotesData) }}</div>
-				<button v-if="!personal.votedToDelete" @click="castVoteFor(rf.DELETE_VOTE_TOPIC)">{{ t('votesPanel.deleteButton') }}</button>
+				<button v-if="!personal.votedToDelete" class="actionsLineButton" @click="castVoteFor(rf.DELETE_VOTE_TOPIC)">{{ t('votesPanel.deleteButton') }}</button>
 			</div>
 			<div class="voteBlock">
 				<div>{{ t('votesPanel.excludeExplain') }}</div>
 				<div class="voteSummary">{{ voteSummary(store.statsExcludeVotesData) }}</div>
-				<button v-if="!personal.votedToExclude" @click="castVoteFor(rf.STATS_EXCLUDE_VOTE_TOPIC)">{{ t('votesPanel.excludeButton') }}</button>
+				<button v-if="!personal.votedToExclude" class="actionsLineButton" @click="castVoteFor(rf.STATS_EXCLUDE_VOTE_TOPIC)">{{ t('votesPanel.excludeButton') }}</button>
 			</div>
 		</div>
 		<div v-if="store.gameMessages.successText" class="feedback success">{{ store.gameMessages.successText }}</div>
@@ -133,7 +133,6 @@ async function castVoteFor(topic) {
 .missing { color: #b00000; font-weight: bold; }
 .voteBlock { margin: 6px 0; }
 .voteSummary { font-size: 13px; margin: 3px 0; }
-button { margin: 4px; padding: 4px 10px; cursor: pointer; }
 .feedback { margin: 4px; font-weight: bold; }
 .feedback.success { color: #0a6c0a; }
 .feedback.error { color: #b00000; }

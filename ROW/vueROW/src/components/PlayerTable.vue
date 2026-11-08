@@ -483,7 +483,7 @@ function selectCard(card) {
 		<div v-if="showStack" class="stackDialog">
 			<div class="stackDialogHead">
 				{{ showStack === "draw" ? t('row.playerTable.drawPileValueOrder') : t('row.playerTable.discardPile') }} ({{ showStack === "draw" ? drawStackSize : discardSize }})
-				<button @click="showStack = null">{{ t('panels.close') }}</button>
+				<button class="actionsLineButton" @click="showStack = null">{{ t('panels.close') }}</button>
 			</div>
 			<div class="stackDialogCards">
 				<CardView v-for="(c, i) in viewedCards" :key="i" :card="c" />
@@ -491,8 +491,8 @@ function selectCard(card) {
 			</div>
 		</div>
 		<div v-if="menu" class="actionMenu">
-			<button v-for="(o, i) in menu" :key="i" @click="pickMenu(o)">{{ o.label }}</button>
-			<button class="cancel" @click="menu = null">{{ t('panels.cancel') }}</button>
+			<button v-for="(o, i) in menu" :key="i" class="actionsLineButton" @click="pickMenu(o)">{{ o.label }}</button>
+			<button class="actionsLineButton cancel" @click="menu = null">{{ t('panels.cancel') }}</button>
 		</div>
 	</div>
 </template>
@@ -542,7 +542,7 @@ function selectCard(card) {
 
 .stackDialog { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); z-index: 90; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .stackDialogHead { color: #fff; font-weight: bold; margin-bottom: 8px; }
-.stackDialogHead button { margin-left: 10px; cursor: pointer; }
+.stackDialogHead .actionsLineButton { margin: 0 0 0 10px; }
 .stackDialogCards { display: flex; flex-wrap: wrap; gap: 4px; max-width: 70vw; max-height: 60vh; overflow-y: auto; background: #fffde8; padding: 8px; border-radius: 6px; }
 .stackDialogCards .empty { color: #666; padding: 8px; }
 
@@ -558,8 +558,7 @@ function selectCard(card) {
 	justify-content: center;
 	gap: 6px;
 }
-.actionMenu button { padding: 5px 12px; cursor: pointer; font-size: 13px; }
-.actionMenu .cancel { background: #eee; }
+.actionMenu .actionsLineButton { margin: 4px; font-size: 13px; }
 
 .player-board {
 	width: 100%;

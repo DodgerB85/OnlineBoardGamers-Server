@@ -87,26 +87,26 @@ onUnmounted(() => clearInterval(timer))
 		<template v-if="confirming">
 			<div>{{ t('kickout.removeWarning', { player: target }) }}</div>
 			<div>{{ t('kickout.chatHint') }}</div>
-			<button class="ko" :disabled="submitting" @click="confirmKickout">{{ t('kickout.kickOut', { player: target }) }}</button>
-			<button class="ko" :disabled="submitting" @click="confirming = false">{{ t('app.back') }}</button>
+			<button class="actionsLineButton ko" :disabled="submitting" @click="confirmKickout">{{ t('kickout.kickOut', { player: target }) }}</button>
+			<button class="actionsLineButton ko" :disabled="submitting" @click="confirming = false">{{ t('app.back') }}</button>
 		</template>
 		<template v-else-if="personal.kickoutRequired === 1">
 			<div>{{ t('kickout.standardTimeUsed', { player: target }) }}</div>
 			<div>{{ t('kickout.flexTime', { time: duration(Math.max(0, personal.secondsToNextKickout)) }) }}</div>
-			<button class="ko" @click="cancel">{{ t('kickout.notNow') }}</button>
+			<button class="actionsLineButton ko" @click="cancel">{{ t('kickout.notNow') }}</button>
 		</template>
 		<template v-else>
 			<div>{{ t('kickout.timedOut', { player: target }) }}</div>
 			<template v-if="canKickoutNow || isLastVote">
 				<div>{{ t('kickout.votes', { votes: voters.length, threshold: store.kickoutVoteThreshold, voters: voters.join(", ") || t('kickout.none') }) }}</div>
-				<button class="ko" :disabled="submitting" @click="vote">{{ t('kickout.confirmKickout') }}</button>
+				<button class="actionsLineButton ko" :disabled="submitting" @click="vote">{{ t('kickout.confirmKickout') }}</button>
 			</template>
 			<template v-else>
 				<div>{{ t('kickout.votes', { votes: voters.length, threshold: store.kickoutVoteThreshold, voters: voters.join(", ") || t('kickout.none') }) }}</div>
 				<div v-if="myVote">{{ t('kickout.voted', { player: target, time: duration(soloRemaining) }) }}</div>
-				<button v-else class="ko" :disabled="submitting" @click="vote">{{ t('kickout.voteToKick', { player: target }) }}</button>
+				<button v-else class="actionsLineButton ko" :disabled="submitting" @click="vote">{{ t('kickout.voteToKick', { player: target }) }}</button>
 			</template>
-			<button class="ko" @click="cancel">{{ t('kickout.notNow') }}</button>
+			<button class="actionsLineButton ko" @click="cancel">{{ t('kickout.notNow') }}</button>
 		</template>
 	</div>
 </template>
@@ -122,5 +122,5 @@ onUnmounted(() => clearInterval(timer))
 	font-size: 13px;
 }
 #kickoutArea div { margin-bottom: 4px; }
-.ko { margin: 3px; padding: 3px 8px; cursor: pointer; font-size: 12px; }
+.ko:disabled { opacity: 0.5; cursor: default; }
 </style>
