@@ -706,11 +706,14 @@ def changelog_view(request):
             # save the form data to model
             changelogFormVar.save()
             message = changelogFormVar.cleaned_data["update"]
-            requests.post(
-                f"https://discord.com/api/webhooks/{config('WEBHOOK_DISCORD_UPDATES')}",
-                data={"content": message},
-                timeout=5,
-            )
+            try:
+                requests.post(
+                    f"https://discord.com/api/webhooks/{config('WEBHOOK_DISCORD_UPDATES')}",
+                    data={"content": message},
+                    timeout=5,
+                )
+            except requests.exceptions.RequestException as e:
+                print(f"Changelog webhook failed: {e}")
 
         return render(
             request,

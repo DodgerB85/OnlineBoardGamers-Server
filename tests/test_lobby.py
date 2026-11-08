@@ -1,7 +1,9 @@
 import datetime
 from unittest.mock import patch
 
+import requests
 from django.test import RequestFactory, SimpleTestCase, TestCase
+from django.urls import reverse
 from Lobby.sharedFunctions.tournyGenerator import _compute_game_groups
 from siteUtils.auto_tournament_helpers import (
     find_pending_tournament_to_open,
@@ -9,7 +11,7 @@ from siteUtils.auto_tournament_helpers import (
     is_pending_creation_day,
     should_start_open_tournament,
 )
-from Lobby.models import Tournament
+from Lobby.models import Tournament, User, changelog
 from Lobby.views import BGH_API
 
 
@@ -31,6 +33,20 @@ class BGHAPIParsingTests(SimpleTestCase):
         response = BGH_API.__wrapped__(request, "2,1,F,F,F,secret-token")
 
         self.assertJSONEqual(response.content, {"map_tiles": [{"tile_letter": "A"}]})
+
+class ChangelogWebhookFailureTests(TestCase):
+    def test_update_saved_when_discord_webhook_times_out(self):
+        admin = User.objects.create_user("changelogadmin", "a@example.com", "pw")
+        admin.profile.is_site_admin = True
+        admin.profile.save(update_fields=["is_site_admin"])
+        self.client.force_login(admin)
+
+        with patch("Lobby.views.requests.post", side_effect=requests.exceptions.Timeout):
+            response = self.client.post(reverse("changelog"), {"update": "Saved despite webhook"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(changelog.objects.filter(update="Saved despite webhook").exists())
+
 
 class TournamentMatchmakingTests(SimpleTestCase):
 
