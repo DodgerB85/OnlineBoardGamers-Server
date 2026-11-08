@@ -4674,7 +4674,7 @@ export const PH_ALL_COMPANIES = [
 		territories: [],
 		ownerIndex: -1,
 		gfx: "ph_companycard_era_c_rice_soccsksargen",
-		goodsGfx: "prod_marker_rubber",
+		goodsGfx: "prod_marker_rice",
 		operated: false,
 		mergedThisPhase: false,
 		markedForRemoval: false,
