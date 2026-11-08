@@ -71,6 +71,8 @@ export const SO_MEDIA_LINE = 50
 export const SO_NEW_MAP = 51
 // New Map sub-option: draw the map from the 15 new tiles first
 export const SO_NEW_MAP_ALL = 52
+// Senior Business Developer mod
+export const SO_SENIOR_BUSINESS_DEVELOPER = 53
 // Other options
 export const SO_STRICT_PAYDAY_FRIDGE = 101
 export const SO_TRAINING_GAME = 102
@@ -116,10 +118,17 @@ export const SUBPHASE_HEADHUNTING = 2.75
 export const SUBPHASE_MARKETING = 3
 export const SUBPHASE_PRODUCE = 4
 export const SUBPHASE_HOUSES = 5
+export const SUBPHASE_SBD_HOUSES = 5.25
 export const SUBPHASE_LOBBYISTS = 5.5
 export const SUBPHASE_NEW_RESTAURANTS = 6
 
 export const SUBPHASE_CONFIRM_END_TURN = 7
+
+// True while the player is in either Houses subphase (the NBD turn or the
+// SBD mod's own follow-up turn) — they share every map-click / ghost rule
+export function isHousesSubphase(subphase) {
+	return subphase === SUBPHASE_HOUSES || subphase === SUBPHASE_SBD_HOUSES
+}
 
 // CEO actions
 export const CEO_ACTION_HIRE_1 = 0
@@ -223,6 +232,9 @@ export const HIST_BAILOUT_CLAIM = 72
 // Media Line mod
 export const HIST_PUBLISH_HEADLINE = 73
 export const HIST_MEDIA_LINE_BONUS = 74
+// Senior Business Developer mod
+export const HIST_SBD_BUILD_APARTMENT = 75
+export const HIST_SBD_MOVE_OUT = 76
 
 export const LEMONADE = 0
 export const COKE = 1
@@ -306,6 +318,8 @@ export const UNION_ORGANIZER = 58
 // Media Line mod (B line)
 export const TELEMARKETER = 59
 export const TV_ANNOUNCER = 60
+// Senior Business Developer mod
+export const SENIOR_BUSINESS_DEVELOPER = 61
 
 // Fired employees are sent as positive IDs. This offset preserves whether an
 // otherwise identical employee was the copy carrying a job-switch salary.
@@ -322,9 +336,17 @@ export function isHeadhuntedFireToken(fireToken) {
 
 // NB TO INDICATE TRAIN FROM STRUC, 70 IS ADDED TO THE EMPLOYEE NUMBER ???????????
 export const EMPLOYEE_ARRANGEMENT = [
+	// Senior Business Developer mod - NBD + SBD pair moved up to their own row
+	// (Regional Manager's right slot was already taken by CFO)
+	-1,
+	NEW_BUSINESS_DEVELOPER,
+	SENIOR_BUSINESS_DEVELOPER,
+	-1,
+	-1,
+	//
 	NIGHT_SHIFT_MANAGER,
 	// 1
-	NEW_BUSINESS_DEVELOPER,
+	-1,
 	LOCAL_MANAGER,
 	REGIONAL_MANAGER,
 	CFO,
@@ -497,7 +519,7 @@ export const EMPLOYEE_ARRANGEMENT = [
 export const BASE_UNIQUE_CARDS = [REGIONAL_MANAGER, CFO, EXECUTIVE_VICE_PRESIDENT, LUXURIES_MANAGER, HR_DIRECTOR, GURU, ZEPPELIN_PILOT, BRAND_DIRECTOR, BURGER_CHEF, PIZZA_CHEF]
 export const UNIQUE_CARDS = [REGIONAL_MANAGER, CFO, EXECUTIVE_VICE_PRESIDENT, LUXURIES_MANAGER, HR_DIRECTOR, GURU, ZEPPELIN_PILOT, BRAND_DIRECTOR, BURGER_CHEF, PIZZA_CHEF, KIMCHI_MASTER, SUSHI_CHEF, NOODLE_CHEF, LEAD_BARISTA, B_MOVIE_STAR, C_MOVIE_STAR, D_MOVIE_STAR, NIGHT_SHIFT_MANAGER, DUMPLING_CHEF, FRIED_CHICKEN_CHEF]
 export const HIREABLE_EMPLOYEES = [WAITRESS, MANAGEMENT_TRAINEE, PRICING_MANAGER, RECRUITING_GIRL, TRAINER, ERRAND_BOY, MARKETING_TRAINEE, KITCHEN_TRAINEE, BARISTA_TRAINEE, KIMCHI_MASTER, NIGHT_SHIFT_MANAGER, LOBBYIST, DELIVERY_DRIVER]
-export const REQUIRE_SALARY = [NEW_BUSINESS_DEVELOPER, LOCAL_MANAGER, REGIONAL_MANAGER, CFO, JUNIOR_VICE_PRESIDENT, VICE_PRESIDENT, SENIOR_VICE_PRESIDENT, EXECUTIVE_VICE_PRESIDENT, LUXURIES_MANAGER, DISCOUNT_MANAGER, RECRUITING_MANAGER, HR_DIRECTOR, COACH, GURU, CART_OPERATOR, TRUCK_DRIVER, ZEPPELIN_PILOT, CAMPAIGN_MANAGER, BRAND_MANAGER, BRAND_DIRECTOR, BURGER_COOK, BURGER_CHEF, PIZZA_COOK, PIZZA_CHEF, FRY_CHEF, KIMCHI_MASTER, NOODLE_COOK, NOODLE_CHEF, SUSHI_COOK, SUSHI_CHEF, BARISTA, LEAD_BARISTA, B_MOVIE_STAR, C_MOVIE_STAR, D_MOVIE_STAR, GOURMET_FOOD_CRITIC, LOBBYIST, MASS_MARKETEER, NIGHT_SHIFT_MANAGER, RURAL_MARKETEER, DUMPLING_COOK, DUMPLING_CHEF, HAWKER_MARKETEER, DELIVERY_DRIVER, JAZZ_MUSICIAN, FRIED_CHICKEN_COOK, FRIED_CHICKEN_CHEF, HEADHUNTER, UNION_ORGANIZER, TELEMARKETER, TV_ANNOUNCER]
+export const REQUIRE_SALARY = [NEW_BUSINESS_DEVELOPER, SENIOR_BUSINESS_DEVELOPER, LOCAL_MANAGER, REGIONAL_MANAGER, CFO, JUNIOR_VICE_PRESIDENT, VICE_PRESIDENT, SENIOR_VICE_PRESIDENT, EXECUTIVE_VICE_PRESIDENT, LUXURIES_MANAGER, DISCOUNT_MANAGER, RECRUITING_MANAGER, HR_DIRECTOR, COACH, GURU, CART_OPERATOR, TRUCK_DRIVER, ZEPPELIN_PILOT, CAMPAIGN_MANAGER, BRAND_MANAGER, BRAND_DIRECTOR, BURGER_COOK, BURGER_CHEF, PIZZA_COOK, PIZZA_CHEF, FRY_CHEF, KIMCHI_MASTER, NOODLE_COOK, NOODLE_CHEF, SUSHI_COOK, SUSHI_CHEF, BARISTA, LEAD_BARISTA, B_MOVIE_STAR, C_MOVIE_STAR, D_MOVIE_STAR, GOURMET_FOOD_CRITIC, LOBBYIST, MASS_MARKETEER, NIGHT_SHIFT_MANAGER, RURAL_MARKETEER, DUMPLING_COOK, DUMPLING_CHEF, HAWKER_MARKETEER, DELIVERY_DRIVER, JAZZ_MUSICIAN, FRIED_CHICKEN_COOK, FRIED_CHICKEN_CHEF, HEADHUNTER, UNION_ORGANIZER, TELEMARKETER, TV_ANNOUNCER]
 export const NON_TRANSFERABLE_EMPLOYEES = [TEMPORARY_WORKER, HEADHUNTER, UNION_ORGANIZER]
 export const NON_FIREABLE_EMPLOYEES = [TEMPORARY_WORKER, UNION_ORGANIZER]
 export const TEMPORARY_WORKER_ROLES = [WAITRESS, PRICING_MANAGER, RECRUITING_GIRL, TRAINER, ERRAND_BOY, MARKETING_TRAINEE, KITCHEN_TRAINEE]
@@ -572,6 +594,8 @@ export const ORIGINAL_AVAILABLE_EMPLOYEES = [
 	-1,
 	// Media Line mod
 	-1,
+	-1,
+	// Senior Business Developer mod (id 61; stock seeded in setupKetchupExpansion)
 	-1,
 ]
 /*exp, 32-48*/ /*-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]*/
@@ -652,6 +676,8 @@ export const FIRST_STADIUM_SOLD = 41 // module
 // Media Line mod
 export const FIRST_TELEMARKETER_USED = 42 // module
 export const FIRST_TV_ANNOUNCER_USED = 43 // module
+// Senior Business Developer mod
+export const FIRST_SENIOR_BUSINESS_DEVELOPER_USED = 44 // module
 
 export const BASE_GAME_MILESTONES = [FIRST_HIRE_3, FIRST_THROW_AWAY, FIRST_WAITRESS, FIRST_20_DOL, FIRST_100_DOL, FIRST_LOWER_PRICES, FIRST_TRAIN, FIRST_BURGER_PRODUCED, FIRST_PIZZA_PRODUCED, FIRST_ERRAND_BOY, FIRST_CART_OPERATOR, FIRST_20_SALARIES, FIRST_BILLBOARD, FIRST_BURGER_MARKETED, FIRST_PIZZA_MARKETED, FIRST_DRINK_MARKETED, FIRST_AIRPLANE_CAMPAIGN, FIRST_RADIO_CAMPAIGN]
 export const KETCHUP_NEW_MILESTONES = [FIRST_MARKETEER_USED, FIRST_MARKETING_TRAINEE_USED, FIRST_CAMPAIGN_MANAGER_USED, FIRST_BRAND_MANAGER_USED, FIRST_BRAND_DIRECTOR_USED, FIRST_BURGER_SOLD, FIRST_PIZZA_SOLD, FIRST_LEMONADE_SOLD, FIRST_BEER_SOLD, FIRST_COKE_SOLD, FIRST_RECRUITING_GIRL_USED, FIRST_TRAINER_USED, FIRST_DISCOUNT_MANAGER_USED, FIRST_HOUSE_BUILT, FIRST_NEW_RESTAURANT, FIRST_WAITRESS_USED, FIRST_CART_OPERATOR_USED]
@@ -842,7 +868,11 @@ export function isBoardHouse(number, startingOptions) {
 }
 export const APARTMENT_3 = 3.2
 export const APARTMENT_9 = 9.7
-export const APARTMENTS = [APARTMENT_3, APARTMENT_9]
+// Senior Business Developer mod - placed by player action, only present when the mod is on
+export const APARTMENT_15 = 15.7
+export const APARTMENT_21 = 21.7
+export const APARTMENT_27 = 27.7
+export const APARTMENTS = [APARTMENT_3, APARTMENT_9, APARTMENT_15, APARTMENT_21, APARTMENT_27]
 // Stadium mod - pseudo house number; sorts first at Dinnertime (priority 0)
 export const STADIUM = 0.1
 export const AVAILABLE_HOUSES = [1, 3, 6, 9, 11, 14, 17, 19]
@@ -1016,6 +1046,7 @@ export const MILESTONES_STR = [
 	{ text: t('milestones.firstStadiumSold'), type: "waitress", title: t('milestones.firstStadiumSoldTitle'), description: t('milestones.firstStadiumSoldDesc'), img: "m_icon15.png" },
 	{ text: t('milestones.firstTelemarketerUsed'), type: "marketer", title: t('milestones.firstTelemarketerUsedTitle'), description: t('milestones.firstTelemarketerUsedDesc'), img: "m_icon30.png" },
 	{ text: t('milestones.firstTvAnnouncerUsed'), type: "marketer", title: t('milestones.firstTvAnnouncerUsedTitle'), description: t('milestones.firstTvAnnouncerUsedDesc'), img: "m_icon31.png" },
+	{ text: t('milestones.firstSeniorBusinessDeveloperUsed'), type: "waitress", title: t('milestones.firstSeniorBusinessDeveloperUsedTitle'), description: t('milestones.firstSeniorBusinessDeveloperUsedDesc'), img: "m_icon14.png", additionalClass: "house" }, // SBD mod - reuses the house icon
 ]
 
 export const EMPLOYEES_STR = [
@@ -1088,6 +1119,9 @@ export const EMPLOYEES_STR = [
 	{ title: t('employees.unionOrganizer'), description: t('employees.unionOrganizerDesc'), type: "manager" },
 	{ title: t('employees.telemarketer'), description: t('employees.telemarketerDesc'), type: "marketer" },
 	{ title: t('employees.tvAnnouncer'), description: t('employees.tvAnnouncerDesc'), type: "marketer" },
+
+	// Senior Business Developer mod (id 61)
+	{ title: t('employees.seniorBusinessDeveloper'), description: t('employees.seniorBusinessDeveloperDesc'), type: "waitress" },
 ]
 
 export function employeeName(emp) {

@@ -269,6 +269,10 @@ milestones: {
   firstTvAnnouncerUsed: "First TV Announcer used",
   firstTvAnnouncerUsedTitle: "First TV Announcer used",
   firstTvAnnouncerUsedDesc: "First TV campaign: 2 demand per antenna house per night",
+
+  firstSeniorBusinessDeveloperUsed: "First Senior Business Developer used",
+  firstSeniorBusinessDeveloperUsedTitle: "First Senior Business Developer used",
+  firstSeniorBusinessDeveloperUsedDesc: "Add tile to city",
 },
 
 // Employees
@@ -452,7 +456,10 @@ employees: {
   telemarketerDesc: "Place phone tokens on empty ground in the 5-tile cross around a restaurant, no roads needed",
 
   tvAnnouncer: "TV Announcer",
-  tvAnnouncerDesc: "Pick 5 houses in the 13-tile diamond around a restaurant and publish one headline per turn"
+  tvAnnouncerDesc: "Pick 5 houses in the 13-tile diamond around a restaurant and publish one headline per turn",
+
+  seniorBusinessDeveloper: "Senior Business Developer",
+  seniorBusinessDeveloperDesc: "Place a house, garden, or apartment; or move out a house (one per turn)"
 },
 
 laborMarket: {

@@ -31,7 +31,11 @@ export default {
 		"firstTelemarketerUsedDesc": "Vendez chaque maison démarchée par téléphone/TV : +5 $ chacune ; les groupes sont réglés séparément ; annulé si vous avez lancé d'autres campagnes ce soir",
 		"firstTvAnnouncerUsed": "Premier présentateur TV utilisé",
 		"firstTvAnnouncerUsedTitle": "Premier présentateur TV utilisé",
-		"firstTvAnnouncerUsedDesc": "Première campagne TV : 2 de demande par maison avec antenne et par nuit"
+		"firstTvAnnouncerUsedDesc": "Première campagne TV : 2 de demande par maison avec antenne et par nuit",
+
+		"firstSeniorBusinessDeveloperUsed": "Premier Développeur d'Affaires Senior utilisé",
+		"firstSeniorBusinessDeveloperUsedTitle": "Premier Développeur d'Affaires Senior utilisé",
+		"firstSeniorBusinessDeveloperUsedDesc": "Ajouter une tuile à la ville"
 	},
 	"employees": {
 		"temporaryWorker": "Intérimaire",
@@ -43,7 +47,10 @@ export default {
 		"telemarketer": "Télévendeur",
 		"telemarketerDesc": "Placez des jetons téléphone sur un terrain vide dans la croix de 5 cases autour d'un restaurant, aucune route nécessaire",
 		"tvAnnouncer": "Présentateur TV",
-		"tvAnnouncerDesc": "Choisissez 5 maisons dans le losange de 13 cases autour d'un restaurant et publiez un gros titre par tour"
+		"tvAnnouncerDesc": "Choisissez 5 maisons dans le losange de 13 cases autour d'un restaurant et publiez un gros titre par tour",
+
+		"seniorBusinessDeveloper": "Développeur d'Affaires Senior",
+		"seniorBusinessDeveloperDesc": "Placez une maison, un jardin ou un immeuble ; ou faites déménager une maison (une fois par tour)"
 	},
 	"laborMarket": {
 		"unionMustWork": "Vous devez employer l'Organisateur syndical"

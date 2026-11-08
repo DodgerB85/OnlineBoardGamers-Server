@@ -31,7 +31,11 @@ export default {
 		"firstTelemarketerUsedDesc": "Vende todas las casas que promocionaste por teléfono/TV: +$5 cada una; los grupos se liquidan por separado; se anula si esa noche hiciste otras campañas",
 		"firstTvAnnouncerUsed": "Primer locutor de TV usado",
 		"firstTvAnnouncerUsedTitle": "Primer locutor de TV usado",
-		"firstTvAnnouncerUsedDesc": "Primera campaña de TV: 2 de demanda por casa con antena y noche"
+		"firstTvAnnouncerUsedDesc": "Primera campaña de TV: 2 de demanda por casa con antena y noche",
+
+		"firstSeniorBusinessDeveloperUsed": "Primer Desarrollador de Negocios Senior usado",
+		"firstSeniorBusinessDeveloperUsedTitle": "Primer Desarrollador de Negocios Senior usado",
+		"firstSeniorBusinessDeveloperUsedDesc": "Agregar mosaico a la ciudad"
 	},
 	"employees": {
 		"temporaryWorker": "Trabajador temporal",
@@ -43,7 +47,10 @@ export default {
 		"telemarketer": "Teleoperador",
 		"telemarketerDesc": "Coloca fichas de teléfono en terreno vacío en la cruz de 5 casillas alrededor de un restaurante, no hacen falta carreteras",
 		"tvAnnouncer": "Locutor de TV",
-		"tvAnnouncerDesc": "Elige 5 casas en el rombo de 13 casillas alrededor de un restaurante y publica un titular por turno"
+		"tvAnnouncerDesc": "Elige 5 casas en el rombo de 13 casillas alrededor de un restaurante y publica un titular por turno",
+
+		"seniorBusinessDeveloper": "Desarrollador de Negocios Senior",
+		"seniorBusinessDeveloperDesc": "Coloca una casa, jardín o apartamento; o haz que una casa se mude (una vez por turno)"
 	},
 	"laborMarket": {
 		"unionMustWork": "Debes emplear al Organizador sindical"

@@ -96,6 +96,7 @@
     availableParks: "Available Parks:",
     availableRoads: "Available Roads:",
     availableLobbyistTiles: "Available Tiles for Lobbyist Milestone:",
+    availableOutTokens: "Remaining OUT tokens:",
     flexiTimes: "Flexi-Times:",
   },
 }

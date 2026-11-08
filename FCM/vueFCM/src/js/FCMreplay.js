@@ -143,6 +143,10 @@ export function replaySetupKetchupExpansion(playerNumber) {
 		store.availableMarketingCampaigns.push(28, 29, 30, 31, 32, 33, 34, 35)
 		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_TELEMARKETER_USED, rf.FIRST_TV_ANNOUNCER_USED)
 	}
+	if (store.startingOptions.seniorBusinessDeveloper) {
+		store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER] = 6
+		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_SENIOR_BUSINESS_DEVELOPER_USED)
+	}
 	if (store.startingOptions.laborMarket) model.setupLaborMarketExpansion()
 }
 
@@ -315,6 +319,8 @@ export async function generateReplayData(spoilerFree = false) {
 		else if (action === rf.HIST_BANK_BAILOUT) replayBankBailout(i, playerIdx, param)
 		else if (action === rf.HIST_BAILOUT_CLAIM) replayBailoutClaim(i, playerIdx, param)
 		else if (action === rf.HIST_PUBLISH_HEADLINE) replayPublishHeadline(i, playerIdx, param)
+	else if (action === rf.HIST_SBD_BUILD_APARTMENT) replaySbdBuildApartment(i, playerIdx, param)
+	else if (action === rf.HIST_SBD_MOVE_OUT) replaySbdMoveOut(i, playerIdx, param)
 
 		store.replayData.push(funcs.simpleExportWholeFCMmodel())
 
@@ -426,6 +432,30 @@ export function replayFriedChickenHouse(historyIndex, playerIndex, param, movedO
 		const houseData = store.houses.find((hs) => hs.number === houseNumber)
 		store.context.highlightHistorySquares.push(...history.footprintSquares(houseIndex, houseData ? houseData.rotated : 1))
 	}
+}
+
+// Senior Business Developer mod: unlike Fried Chicken, the eviction happens during
+// the working day (not dinnertime), so replay MUST call model.evictHouse() to
+// restore pendingMoveOut / sbdEvictedTurn before the next HIST_DINNER_TIME replays.
+export function replaySbdBuildApartment(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	const index = funcs.importIndex(param[0])
+	const apartmentNumber = param[1]
+
+	model.addApartment(apartmentNumber, index)
+	store.seniorBusinessDeveloper.sbdExclusiveActions++
+	store.context.highlightHistorySquares.push(index)
+}
+
+export function replaySbdMoveOut(historyIndex, playerIndex, param) {
+	const store = useModelStore()
+	const index = funcs.importIndex(param[0])
+	const houseNumber = param[1]
+
+	model.evictHouse(houseNumber)
+	store.seniorBusinessDeveloper.outTokensUsed++
+	store.seniorBusinessDeveloper.sbdExclusiveActions++
+	store.context.highlightHistorySquares.push(index)
 }
 
 export function replayNewTile(historyIndex, playerIndex, param) {
@@ -1058,5 +1088,6 @@ export function setgameflowVars(playerIndex, action) {
 	else if (action === rf.HIST_CHOOSE_MODULE) store.gameflow.phase = rf.PHASE_SETUP_MODULES
 	else if (action === rf.HIST_TEMPORARY_WORKER || action === rf.HIST_HEADHUNT) store.gameflow.phase = rf.PHASE_WORKING_DAY
 	else if (action === rf.HIST_PUBLISH_HEADLINE) store.gameflow.phase = rf.PHASE_WORKING_DAY
+	else if (action === rf.HIST_SBD_BUILD_APARTMENT || action === rf.HIST_SBD_MOVE_OUT) store.gameflow.phase = rf.PHASE_WORKING_DAY
 	else if (action === rf.HIST_UNION_ORGANIZER) store.gameflow.phase = rf.PHASE_CLEAN_UP
 }

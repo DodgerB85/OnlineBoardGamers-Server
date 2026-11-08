@@ -672,6 +672,7 @@ export default {
 		"availableParks": "Parchi disponibili:",
 		"availableRoads": "Strade disponibili:",
 		"availableLobbyistTiles": "Tessere disponibili per il Traguardo Lobbista:",
+		"availableOutTokens": "Gettoni OUT rimanenti:",
 		"flexiTimes": "Orari flessibili:"
 	},
 	"history": {
@@ -946,7 +947,10 @@ export default {
 		"noMoreRoads": "Niente più strade",
 		"noMoreParks": "Niente più parchi",
 		"chooseEdgeForGarden": "Scegli un bordo per il giardino",
-		"chooseHouseForGarden": "Scegli una casa a cui aggiungere un giardino"
+		"chooseHouseForGarden": "Scegli una casa a cui aggiungere un giardino",
+		"apartment": "Condominio",
+		"moveOut": "Trasloco",
+		"chooseHouseToMoveOut": "Scegli una casa da far traslocare (nessuna domanda attiva)"
 	},
 	"playerDetails": {
 		"noMilestones": "Nessuna pietra miliare",

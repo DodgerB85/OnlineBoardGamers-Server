@@ -14522,6 +14522,103 @@ msgstr "Sushis"
 msgid "Include 6 fan expansion options"
 msgstr "Inclure 6 options d'extensions fan"
 
+msgid "Include 7 fan expansion options"
+msgstr "Inclure 7 options d'extensions fan"
+
+#: .\Lobby\templates\Lobby\createFCM.html:1219
+msgid "Senior Business Developer"
+msgstr "Développeur d'Affaires Senior"
+
+#: .\Lobby emplates\Lobby cm_options_grid.html
+msgid "Use Senior Business Developer"
+msgstr "Utiliser le Développeur d'Affaires Senior"
+
+#: .\Lobby emplates\Lobby cm_options_grid.html
+msgid ""
+"Adds the Senior Business Developer: place a house, garden, or apartment; or "
+"move out a house (one per turn); 3 new apartments; milestone adds a board "
+"tile"
+msgstr ""
+"Ajoute le Développeur d'Affaires Senior : placez une maison, un jardin ou un"
+" immeuble ; ou faites déménager une maison (une fois par tour) ; 3 nouveaux "
+"immeubles ; le jalon ajoute une tuile de plateau"
+
+#: FCM/templates/FCM/fanExpansionsHelp.html:0
+msgid ""
+"The Senior Business Developer upgrades the New Business Developer with four "
+"actions: place a house, place a garden, place an apartment, or evict a "
+"house. An eviction stops that house from receiving any more demand for the "
+"rest of the game. 8 shared global OUT tokens."
+msgstr ""
+"Le Senior Business Developer améliore le New Business Developer avec quatre "
+"actions : construire une maison, construire un jardin, construire un "
+"appartement ou expulser une maison. Une expulsion empêche cette maison de "
+"recevoir de la demande pour le reste de la partie. 8 jetons OUT globaux "
+"partagés."
+
+#: FCM/templates/FCM/fanExpansionsHelp.html:0
+msgid ""
+"Training chain: New Business Developer → Senior Business Developer. 6 cards."
+msgstr ""
+"Chaîne de formation : New Business Developer → Senior Business Developer. 6 "
+"cartes."
+
+#: FCM/templates/FCM/fanExpansionsHelp.html:0
+msgid ""
+"Per turn, each Senior Business Developer takes one action: place a house, "
+"place a garden, place an apartment, or evict a house."
+msgstr ""
+"Par tour, chaque Senior Business Developer effectue une action : construire "
+"une maison, construire un jardin, construire un appartement ou expulser une "
+"maison."
+
+#: FCM/templates/FCM/fanExpansionsHelp.html:0
+msgid ""
+"Apartments: three new apartments — house numbers 15¾, 21¾ and 27¾ — each "
+"with a 3x3 footprint. They behave like the base-game apartments for demand "
+"and marketing."
+msgstr ""
+"Appartements : trois nouveaux appartements — numéros 15¾, 21¾ et 27¾ — "
+"occupant chacun une empreinte de 3x3. Ils se comportent comme les "
+"appartements du jeu de base pour la demande et le marketing."
+
+#: FCM/templates/FCM/fanExpansionsHelp.html:0
+msgid ""
+"OUT tokens: a global pool of 8 tokens shared by all players. Each eviction "
+"permanently spends one — once the pool is empty, no more evictions this "
+"game."
+msgstr ""
+"Jetons OUT : une réserve globale de 8 jetons partagée par tous les joueurs. "
+"Chaque expulsion en consomme un définitivement — une fois la réserve vide, "
+"plus d'expulsions pour cette partie."
+
+#: FCM/templates/FCM/fanExpansionsHelp.html:0
+msgid "Eviction rules: you may only evict a house with no active demand."
+msgstr ""
+"Règles d'expulsion : vous ne pouvez expulser qu'une maison sans demande "
+"active."
+
+#: FCM/templates/FCM/fanExpansionsHelp.html:0
+msgid ""
+"Milestone \"First Senior Business Developer used\": the first player to use "
+"one gains this Milestone. Reward: add 1 map tile to the city (same as the "
+"Lobbyist Milestone)."
+msgstr ""
+"Jalon « Premier usage du Senior Business Developer » : le premier joueur à "
+"l'utiliser obtient ce jalon. Récompense : ajouter 1 tuile de carte à la "
+"ville (comme le jalon du Lobbyiste)."
+
+#: FCM/templates/FCM/fanExpansionsHelp.html:0
+msgid ""
+"Compatibility: stacks with all other modules. The house pool, garden cap and"
+" tile pool follow the base game rules (the New Map module still raises the "
+"garden cap as usual)."
+msgstr ""
+"Compatibilité : cumulable avec tous les autres modules. La réserve de "
+"maisons, le plafond de jardins et la réserve de tuiles suivent les règles du"
+" jeu de base (le module New Map relève toujours le plafond de jardins comme "
+"d'habitude)."
+
 #, python-format
 msgid "Excluded: %(modules)s"
 msgstr "Exclus : %(modules)s"

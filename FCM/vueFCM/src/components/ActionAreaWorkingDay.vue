@@ -170,10 +170,13 @@ const computedOptionsToTrainToByLevel = computed(() => {
 // PRODUCERS
 const isCollectingDrinks = computed(() => [rf.CART_OPERATOR, rf.TRUCK_DRIVER, rf.ZEPPELIN_PILOT].includes(store.context.producer))
 
-// HOUSES & GARDENS (New Business Developer)
+// HOUSES & GARDENS (New Business Developer) / SBD HOUSES (Senior Business Developer mod)
+// Phase-aware: the budget is the count of whichever card type is currently at work
 const housesRemaining = computed(() => {
 	const player = controller.currentPlayerObj()
-	return player.employees.filter((e) => e === rf.NEW_BUSINESS_DEVELOPER).length - store.context.justBuilt.length
+	const isSbdPhase = store.gameflow.subphase === rf.SUBPHASE_SBD_HOUSES
+	const employeeId = isSbdPhase ? rf.SENIOR_BUSINESS_DEVELOPER : rf.NEW_BUSINESS_DEVELOPER
+	return player.employees.filter((e) => e === employeeId).length - store.context.justBuilt.length
 })
 
 // LOBBYISTS
@@ -237,7 +240,7 @@ watch(
 		if (store.gameflow.subphase === rf.SUBPHASE_NEW_RESTAURANTS && store.context.newRestaurantAction === "create") {
 			controller.setNewRestaurantPlacementHighlights()
 		}
-		if (store.gameflow.subphase === rf.SUBPHASE_HOUSES && store.context.selectedBuilding !== -1) {
+		if (rf.isHousesSubphase(store.gameflow.subphase) && store.context.selectedBuilding !== -1) {
 			controller.updateHousesHighlights()
 		}
 	}
@@ -645,12 +648,35 @@ const computedProducers = computed(() => {
 		</div>
 	</template>
 
-	<!-- Houses and Gardens Subphase -->
-	<template v-if="store.gameflow.subphase === rf.SUBPHASE_HOUSES">
+	<!-- Houses and Gardens Subphase (NBD first, then the SBD mod's own turn) -->
+	<template v-if="store.gameflow.subphase === rf.SUBPHASE_HOUSES || store.gameflow.subphase === rf.SUBPHASE_SBD_HOUSES">
 		<div>
 			<p>{{ $t("actionArea.buildHousesAndGardens") }}</p>
 
-			<template v-if="housesRemaining > 0">
+			<!-- Senior Business Developer mod milestone: choose and place a new board tile -->
+			<template v-if="store.context.lobbyistMilestoneActive">
+				<p>{{ $t("workingDay.lobbyistMilestoneIntro") }}</p>
+				<p>{{ $t("workingDay.lobbyistMilestoneChooseTile") }}</p>
+
+				<template v-if="computedAvailableLobbyistTiles.length > 0">
+					<div class="addBoxSection">
+						<img v-for="tile in computedAvailableLobbyistTiles" :key="'sbd-lt-' + tile" :src="getTileImageSrc(tile)" class="selectable lobbyistTileChoiceImg" :class="{ selectedChoice: store.context.newLobbyistTile === tile }" @click="controller.selectLobbyistMSTile(tile)" :alt="'Tile ' + (tile + 1)" />
+					</div>
+
+					<div class="addBoxSection rotationSection">
+						<img :src="view.getImage('rot_anticlockwise')" class="rotateButton" @click="rotateMSTile(false)" />
+						<div id="newComponentImgDiv">
+							<img id="newComponentImg" :src="getTileImageSrc(store.context.newLobbyistTile)" :style="tilePreviewStyle" />
+						</div>
+						<img :src="view.getImage('rot_clockwise')" class="rotateButton" @click="rotateMSTile(true)" />
+					</div>
+				</template>
+				<p v-else><b>{{ $t("workingDay.noMoreTiles") }}</b></p>
+
+				<button class="actionsLineButton" @click="controller.cancelLobbyistMilestone()">{{ $t("workingDay.neverMind") }}</button>
+			</template>
+
+			<template v-else-if="housesRemaining > 0">
 				<p>{{ $t("workingDay.canBuildHousesGardens") }}</p>
 				<p v-if="rules.givePossibleHousesForGarden().length === 0">{{ $t("workingDay.noSuitableHouses") }}</p>
 

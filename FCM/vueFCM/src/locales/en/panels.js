@@ -112,6 +112,9 @@
     noMoreParks: "No More Parks",
     chooseEdgeForGarden: "Choose an edge for the garden",
     chooseHouseForGarden: "Choose a house to add a garden",
+    apartment: "Apartment",
+    moveOut: "Move Out",
+    chooseHouseToMoveOut: "Choose a house to move out (no active demand)",
   },
 
   playerDetails: {

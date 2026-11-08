@@ -243,11 +243,21 @@ function getRoadCounts() {
 const computedEmployeeArrangementForDisplay = computed(() => {
 	let employeeArrangement = structuredClone(rf.EMPLOYEE_ARRANGEMENT)
 
+	// Senior Business Developer mod off: restore the original board layout
+	// (drop the extra NBD/SBD top row, put NBD back next to the Night Shift
+	// Manager so every other card stays in its usual spot)
+	if (!store.startingOptions.seniorBusinessDeveloper) {
+		employeeArrangement.splice(0, 5)
+		employeeArrangement[1] = rf.NEW_BUSINESS_DEVELOPER
+	}
+
 	// If you have jazz musicians, but no movie star B, then combine them onto one line
-	// (indexes shifted +5 by the Media Line marketer row inserted at 50-54)
+	// (indexes shifted +5 by the Media Line marketer row, +5 more by the SBD
+	// NBD/SBD top row when that mod is on)
+	const jazzSlot = store.startingOptions.seniorBusinessDeveloper ? 66 : 61
 	if (store.availableEmployees[rf.B_MOVIE_STAR] < 0 && store.availableEmployees[rf.JAZZ_MUSICIAN] >= 0) {
-		employeeArrangement[61] = rf.JAZZ_MUSICIAN
-		employeeArrangement[76] = -1
+		employeeArrangement[jazzSlot] = rf.JAZZ_MUSICIAN
+		employeeArrangement[jazzSlot + 15] = -1
 	}
 
 	// Remove from the general display any employee not in the game
@@ -291,16 +301,26 @@ const svgInstructions = computed(() => {
 	const lines = []
 	const actualArr = computedEmployeeArrangementForDisplay.value.flat().filter((id) => id > -1)
 
-	let currentTop = initialTop + verticalShift
+	// The SBD mod puts the NBD/SBD pair on an extra top row, pushing every other
+	// row one slot down; the train paths below all use that offset
+	const sbdOn = store.startingOptions.seniorBusinessDeveloper
+	const rowShift = sbdOn ? 1 : 0
+
+	let currentTop = initialTop + verticalShift * (1 + rowShift)
 	let currentLeft = initialLeft
 
 	// Helper to push lines to the array
 	const addLine = (x1, y1, x2, y2) => lines.push({ type: "line", x1, y1, x2, y2 })
 
+	// --- ROW 1: NBD <-> SBD chain (SBD mod only) ---
+	if (sbdOn) {
+		addLine(initialLeft + horizontalShift, initialTop, initialLeft + horizontalShift * 2, initialTop)
+	}
+
 	// --- ROW 2: MANAGERS ---
 	addLine(initialLeft, currentTop, initialLeft + horizontalShift * 4, currentTop)
 
-	lines.push(generatePath(initialLeft, currentTop, 1, 1)) // NBD
+	lines.push(generatePath(initialLeft, currentTop, 1, 1 + rowShift)) // NBD
 	if (actualArr.includes(rf.HEADHUNTER)) lines.push(generatePath(initialLeft, currentTop, -1, 1)) // Headhunter
 	lines.push(generatePath(initialLeft, currentTop, -1, 3)) // Lux Mgr
 
@@ -834,6 +854,15 @@ const sortedCampaigns = computed(() => {
 				</div>
 			</div>
 
+			<!-- SBD OUT TOKENS -->
+			<div v-if="store.startingOptions.seniorBusinessDeveloper" class="reserveSection">
+				<p><b>{{ $t('topMenuViews.availableOutTokens') }}</b></p>
+				<p>
+					<img class="reserveOutTokenImage" :src="view.getImage('movedOut')" />
+					<b> x {{ rules.outTokensRemaining() }} / {{ rules.SBD_OUT_TOKEN_POOL }}</b>
+				</p>
+			</div>
+
 			<!-- FLEXI-TIMES -->
 			<div id="timesDiv">
 				{{ $t('topMenuViews.flexiTimes') }}
@@ -1360,6 +1389,12 @@ const sortedCampaigns = computed(() => {
 .reserveGardenImage {
 	height: 50px;
 	width: 100px;
+	vertical-align: middle;
+}
+
+.reserveOutTokenImage {
+	height: 50px;
+	width: 50px;
 	vertical-align: middle;
 }
 

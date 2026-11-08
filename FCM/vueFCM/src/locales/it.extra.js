@@ -31,7 +31,11 @@ export default {
 		"firstTelemarketerUsedDesc": "Vendi ogni casa che hai pubblicizzato per telefono/TV: +$5 ciascuna; i gruppi vengono regolati separatamente; annullato se hai fatto altre campagne stasera",
 		"firstTvAnnouncerUsed": "Primo annunciatore TV utilizzato",
 		"firstTvAnnouncerUsedTitle": "Primo annunciatore TV utilizzato",
-		"firstTvAnnouncerUsedDesc": "Prima campagna TV: 2 di domanda per casa con antenna a notte"
+		"firstTvAnnouncerUsedDesc": "Prima campagna TV: 2 di domanda per casa con antenna a notte",
+
+		"firstSeniorBusinessDeveloperUsed": "Primo Sviluppatore di Business Senior utilizzato",
+		"firstSeniorBusinessDeveloperUsedTitle": "Primo Sviluppatore di Business Senior utilizzato",
+		"firstSeniorBusinessDeveloperUsedDesc": "Aggiungi tessera alla città"
 	},
 	"employees": {
 		"temporaryWorker": "Lavoratore temporaneo",
@@ -43,7 +47,10 @@ export default {
 		"telemarketer": "Telemarketer",
 		"telemarketerDesc": "Posiziona gettoni telefono su terreno vuoto nella croce di 5 caselle attorno a un ristorante, senza bisogno di strade",
 		"tvAnnouncer": "Annunciatore TV",
-		"tvAnnouncerDesc": "Scegli 5 case nel rombo di 13 caselle attorno a un ristorante e pubblica un titolo per turno"
+		"tvAnnouncerDesc": "Scegli 5 case nel rombo di 13 caselle attorno a un ristorante e pubblica un titolo per turno",
+
+		"seniorBusinessDeveloper": "Sviluppatore di Business Senior",
+		"seniorBusinessDeveloperDesc": "Piazza una casa, un giardino o un condominio; oppure fai traslocare una casa (una volta per turno)"
 	},
 	"laborMarket": {
 		"unionMustWork": "Devi impiegare l'Organizzatore sindacale"

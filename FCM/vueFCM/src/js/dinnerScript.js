@@ -98,6 +98,9 @@ function centre(index) {
 function translateApartmentNumber(number) {
 	if (number == 3.2) return 3.14
 	if (number == 9.7) return 9.75
+	if (number == rf.APARTMENT_15) return 15.75
+	if (number == rf.APARTMENT_21) return 21.75
+	if (number == rf.APARTMENT_27) return 27.75
 	return number
 }
 
