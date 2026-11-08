@@ -327,7 +327,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 			<div class="legendRow"><span class="legendExamples"><img v-for="capacity in reservoirCapacities" :key="capacity" :src="assets.getWaterworkImage(rf.STATE_AKKAD, capacity)" :alt="capacity === 'M' ? $t('map.unlimitedCapacity') : $t('map.capacityWater', { capacity })" /></span><span>{{ $t("map.reservoirsLegend") }}</span></div>
 			<div class="legendRow"><span class="legendExamples"><img v-for="capacity in pumpCapacities" :key="capacity" :src="assets.getWaterworkImage(rf.STATE_AKKAD, capacity)" :alt="capacity === 'M' ? $t('map.unlimitedReach') : $t('map.canalsCount', { capacity })" /></span><span>{{ $t("map.pumpsLegend") }}</span></div>
 		</div>
-			<div class="mapZoom"><button :aria-pressed="showCoordinates" @click="showCoordinates = !showCoordinates" :title="$t('map.showCoordinates')">{{ $t("map.hexLabels") }}</button></div>
+			<div class="mapZoom"><button class="actionsLineButton" :aria-pressed="showCoordinates" @click="showCoordinates = !showCoordinates" :title="$t('map.showCoordinates')">{{ $t("map.hexLabels") }}</button></div>
 		</div>
 		<div class="inspection" v-if="store.debug.tool && debug.canDebug()">{{ $t("map.debug", { tool: store.debug.tool }) }} <button @click="store.debug.tool = ''; store.debug.path = []">{{ $t("map.stopPlacement") }}</button></div>
 
@@ -354,7 +354,7 @@ watch(() => [store.gameflow.phase, store.gameflow.turnOrder[0], store.gameflow.s
 .riverStatus { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 8px; box-sizing: border-box; background: #def5ff; font-size: 16px; font-weight: 400; line-height: 1.4; }.riverStatus button { flex-shrink: 0; padding: 6px; font: inherit; border: 1px solid #177daf; border-radius: 3px; background: #fffdf4; cursor: pointer; }.wetHex { fill: #35d6ff; fill-opacity: .22; stroke: #008cb3; stroke-width: 3; pointer-events: none; }.historyOutline { fill: none; stroke: #177daf; stroke-width: 8; pointer-events: none; }
 .boardArea:hover .areaLabel, .boardArea:focus-within .areaLabel, .boardArea.showLabel .areaLabel { opacity: 1; }
 .inspection { overflow-wrap: anywhere; width: 100%; box-sizing: border-box; min-height: 20px; padding: 6px 8px; background: #fff9df; border: 1px solid #bcae85; font-size: 16px; font-weight: 400; text-align: left; }.controls { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; padding: 8px; font-size: 16px; font-weight: 400; }.controls button { cursor: pointer; }.previewError { color: #a40000; font-weight: bold; font-size: 16px; font-weight: 400; }
-.mapZoom { display: inline-flex; gap: 2px; }.mapZoom button { min-width: 28px; min-height: 25px; font: inherit; font-size: 16px; font-weight: 400; background: #fff9df; border: 1px solid #bcae85; border-radius: 3px; cursor: pointer; }.mapZoom button:disabled { opacity: .4; cursor: default; }
+.mapZoom { display: inline-flex; gap: 2px; }.mapZoom button { min-width: 28px; }.mapZoom button:disabled { opacity: .4; cursor: default; }
 .areaHit.tradePurchase { stroke: #177daf; stroke-width: 8; stroke-dasharray: 12 6; }.areaHit.tradeSale { stroke: #aa3d2e; stroke-width: 8; stroke-dasharray: 12 6; }
 .areaHit.tradePurchase.tradeSale { stroke: #177daf; stroke-dasharray: 12 12; }.purchaseSaleOutline { fill: none; stroke: #aa3d2e; stroke-width: 8; stroke-dasharray: 12 12; stroke-dashoffset: 12; pointer-events: none; }
 .areaHit.removalTarget { stroke: #b76400; stroke-width: 8; }

@@ -43,7 +43,7 @@ function reset() { inspectedPlayer.value = null; store.viewSettings.showOwnedLan
 <template>
 	<aside class="holdingsPanel">
 		<div v-if="inspectedPlayer !== null" class="inspectionLabel">{{ $t("holdings.inspectingPlayer") }}</div>
-		<div class="panelTitle"><b :title="player?.displayName"><PlayerMarker :index="activePlayer" /></b><button class="showOwnedLand" :aria-pressed="store.viewSettings.showOwnedLand" @click="store.viewSettings.showOwnedLand = !store.viewSettings.showOwnedLand">{{ store.viewSettings.showOwnedLand ? $t("holdings.hideMyLand") : $t("holdings.showMyLand") }}</button><button v-if="inspectedPlayer !== null" @click="reset">{{ $t("holdings.followTurn") }}</button></div>
+		<div class="panelTitle"><b :title="player?.displayName"><PlayerMarker :index="activePlayer" /></b><button class="showOwnedLand actionsLineButton" :aria-pressed="store.viewSettings.showOwnedLand" @click="store.viewSettings.showOwnedLand = !store.viewSettings.showOwnedLand">{{ store.viewSettings.showOwnedLand ? $t("holdings.hideMyLand") : $t("holdings.showMyLand") }}</button><button v-if="inspectedPlayer !== null" @click="reset">{{ $t("holdings.followTurn") }}</button></div>
 		<div class="money"><span>{{ $t("holdings.privateTreasury") }}</span><b>{{ player?.money ?? 0 }} <small><CurrencyIcon /></small></b></div>
 		<div class="reservedMoney" v-if="player && availableMoney < player.money"><b><CurrencyText :text="$t('holdings.available', { amount: availableMoney })" /></b><span><CurrencyText :text="$t('holdings.reservedForBids', { amount: player.money - availableMoney })" /></span></div>
 		<div class="terrainGrid" v-if="showLand"><div class="terrainRow" v-for="entry in land" :key="entry.type" :title="$t('holdings.landTitle', { land: rf.LAND_NAMES[entry.type], count: entry.count, value: entry.value })"><img :src="assets.getTerrainImage(entry.type)" :alt="rf.LAND_NAMES[entry.type]" /><b>{{ entry.count }}</b><span>{{ rf.LAND_NAMES[entry.type] }}</span><span v-if="entry.cityCount" class="cityCount" :title="entry.cityCount === 1 ? $t('holdings.cityTitleOne', { count: entry.cityCount, land: rf.LAND_NAMES[entry.type].toLowerCase(), total: entry.count }) : $t('holdings.cityTitleMany', { count: entry.cityCount, land: rf.LAND_NAMES[entry.type].toLowerCase(), total: entry.count })"><img :src="assets.getTerrainImage(entry.type, true)" :alt="$t('common.city')" />{{ entry.cityCount }}</span><small v-if="store.gameflow.phase === rf.PHASE_GAME_OVER" class="landValue">{{ entry.value }} <CurrencyIcon /></small></div></div>
@@ -60,7 +60,7 @@ function reset() { inspectedPlayer.value = null; store.viewSettings.showOwnedLan
 <style scoped>
 .holdingsPanel { width: 205px; box-sizing: border-box; background: #fff9df; border: 2px solid #8e805e; border-radius: 7px; padding: 8px; text-align: left; font-size: 16px; font-weight: 400; display: grid; grid-template-columns: minmax(0, 1fr); gap: 5px; align-self: flex-start; }
 .panelTitle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px;  font-size: 16px; }
-.panelTitle b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }.panelTitle button { font: inherit; font-size: 16px; font-weight: 400; flex-shrink: 0; cursor: pointer; }
+.panelTitle b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }.panelTitle button { font: inherit; font-size: 16px; font-weight: 400; flex-shrink: 0; cursor: pointer; }button.actionsLineButton { font-weight: bolder; }
 .money, .assetLine { font-weight: bold; }
 .nationArtwork { margin: 3px 0; }.nationArtwork img { width: 100%; }
 .money { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #eee4c9; border-radius: 4px; }.money > span { font-size: 16px; font-weight: 400; }.money b { font-size: 22px; }.money small { font-size: 16px; font-weight: 400; }
@@ -74,6 +74,6 @@ summary { cursor: pointer; padding: 4px 0; }
 .emergingStates { border-top: 1px solid #c4b894; padding-top: 6px; }.ruledStates small { font-size: 16px; font-weight: 400; color: #655a42; }
 .relevantNationArtwork { display: grid; gap: 5px; }
 @media (max-width: 1050px) { .panelTitle button { min-height: 40px; font-size: 16px; font-weight: 400; padding: 4px 8px; }summary { min-height: 40px; box-sizing: border-box; padding: 12px 0; } }
-.inspectionLabel { font-size: 16px; font-weight: 400; color: #145575; }.showOwnedLand { justify-self: start; font: inherit; padding: 5px 8px; min-height: 32px; background: #fffdf5; border: 1px solid #b3a481; border-radius: 3px; cursor: pointer; }.showOwnedLand[aria-pressed=true] { background: #e1edf5; border-color: #177daf; }
+.inspectionLabel { font-size: 16px; font-weight: 400; color: #145575; }.showOwnedLand { justify-self: start; }.showOwnedLand[aria-pressed=true] { background: #e1edf5; border-color: #177daf; }
 .pendingDissolution { margin: 6px 0; padding: 8px; background: #f6e3cf; color: #663716; text-align: center; text-wrap: balance; }
 </style>
