@@ -949,7 +949,7 @@ function selectC0() {
 							<span class="current-order-compact">
 								<template v-if="store.ongoingVars.newTurnOrderBids.length > 0">
 									<template v-for="(entry, idx) in store.ongoingVars.newTurnOrderBids" :key="idx">
-										<span class="mainEntryPlayer limitedPlayerNameSpan" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[0]].colour)">{{ store.players[entry[0]].displayName }}({{ entry[1] * entry[2] }})</span>
+										<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[0]].colour)"><span class="limitedPlayerNameSpan">{{ store.players[entry[0]].displayName }}</span>({{ entry[1] * entry[2] }})</span>
 									</template>
 								</template>
 								<template v-else>
