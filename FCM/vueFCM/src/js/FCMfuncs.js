@@ -617,10 +617,13 @@ export function exportFCMmodel(forGameOver, includeContext, historyCutoff) {
 			.filter((h) => h.needs != null)
 			.map((h) => {
 				const entry = [h.number]
-				// Marker 1 = moved out (Fried Chicken / resolved SBD eviction).
+				// Marker -1 = moved out (Fried Chicken / resolved SBD eviction).
+				// The marker is a negative scalar because game-over saves flatten
+				// needs to bare good numbers, where a bare `1` would collide with
+				// COKE.
 				// Marker 2 = pending move-out (the house still eats tonight), followed
 				// by the turn it was evicted on (-1 for the FC flow, which has no turn).
-				if (h.movedOut) entry.push(1)
+				if (h.movedOut) entry.push(-1)
 				else if (!forGameOver && h.pendingMoveOut) entry.push(2, h.sbdEvictedTurn === undefined ? -1 : h.sbdEvictedTurn)
 				const needsData = forGameOver ? h.needs.map((n) => n[0]) : h.needs
 				return entry.concat(needsData)
@@ -943,9 +946,13 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 		let pendingMoveOut = false
 		let sbdEvictedTurn
 		let sliceStart = 1
-		// Marker 1 = moved out. Marker 2 = pending move-out, followed by the turn
+		// Marker -1 = moved out (current saves). Legacy saves used a bare `1`,
+		// which is only interpretable mid-game — on game-over saves needs are
+		// flattened to bare good numbers and a leading 1 is a COKE demand, not
+		// the marker.
+		// Marker 2 = pending move-out, followed by the turn
 		// (or -1 for the Fried Chicken pending flow, which has no turn).
-		if (house.length > 1 && house[1] === 1) {
+		if (house.length > 1 && (house[1] === -1 || (house[1] === 1 && store.gameflow.phase !== rf.PHASE_GAME_OVER))) {
 			movedOut = true
 			sliceStart = 2
 		} else if (house.length > 1 && house[1] === 2 && store.gameflow.phase !== rf.PHASE_GAME_OVER) {
