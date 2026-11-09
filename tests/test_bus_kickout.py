@@ -76,6 +76,17 @@ class BusKickoutTests(TestCase):
         self.assertTrue(self.game_player(self.players[1]).is_kicked)
         self.assertEqual(self.game.serverCurrentPlayerNamesInTurnOrder, [])
 
+    def test_kickout_can_repair_a_current_player_already_missing_and_kicked(self):
+        # Legacy rows could keep is_current on a player who was already kicked;
+        # the old code then refused every kickout, leaving the game stuck.
+        self.game.players.filter(player=self.players[1]).update(is_missing=True, is_kicked=True)
+
+        self.assertEqual(self.kickout(self.players[1]).status_code, 200)
+
+        self.game.refresh_from_db()
+        self.assertFalse(self.game_player(self.players[1]).is_current)
+        self.assertEqual(self.game.serverCurrentPlayerNamesInTurnOrder, [])
+
     def test_successful_kickout_clears_the_turn_order_entry(self):
         self.assertEqual(self.kickout(self.players[1]).status_code, 200)
 

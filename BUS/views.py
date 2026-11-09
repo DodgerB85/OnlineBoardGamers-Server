@@ -511,9 +511,12 @@ def _processBUSturn(request):
         # Nobody on turn means the game is already stuck, so there is nothing left to
         # protect: letting the kickout through is what lets the client drop the player
         # from its turn order and save the game back to a playable state.
-        target_on_turn = not currentPlayersArr or currentGame.players.filter(
-            player__username=jsonData["kickedName"], is_current=True, is_missing=False, is_kicked=False
-        ).exists()
+        # A legacy row can also be current while already missing/kicked; treat that
+        # as nobody on turn so the kickout can repair the game instead of refusing.
+        live_current_usernames = set(
+            currentGame.players.filter(is_current=True, is_missing=False, is_kicked=False).values_list("player__username", flat=True)
+        )
+        target_on_turn = not live_current_usernames or jsonData["kickedName"] in live_current_usernames
         if not target_on_turn or presenter.kickoutRequired() != 2:
             return JsonResponse({"error": gettext("This player is not eligible for kickout.")}, status=400)
 
@@ -529,6 +532,9 @@ def _processBUSturn(request):
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
+        # addMissingPlayer/addKickedPlayer no-op when the flags are already set, so a
+        # legacy row can still claim the turn; clear it explicitly.
+        currentGame.players.filter(player__username=jsonData["kickedName"]).update(is_current=False)
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
