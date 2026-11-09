@@ -424,7 +424,7 @@ function getCurrentPlayerNames() {
 	top: 0px;
 	z-index: 2;
 	position: relative;
-	display: inline-block;
+	display: block;
 }
 
 #menuDiv {
