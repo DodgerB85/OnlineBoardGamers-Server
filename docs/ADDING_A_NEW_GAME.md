@@ -19,6 +19,7 @@ The code must appear everywhere the site enumerates games:
 
 - `Lobby/sharedFunctions/sharedRefs.py` → `SR_GAMES_CODES_AND_NAMES_CHOICES` (display name + code; drives choices, game name display and stats filters). Changing the choices also needs `manage.py makemigrations Lobby` — `makemigrations --check` fails otherwise.
 - `Lobby/models.py` → `Game.PRESENTER_MAP` (code → presenter class) and the `startingOptions` HTML helper import if you add one.
+- `Lobby/views.py` → `GAME_NAMES_MODELS` (player profile, join links, delete-game and fair-play loops), plus `stats()` `game_codes` / `GAME_META` from section 9.
 - `Lobby/gameViewHelpers.py` / middleware — the `ForceTrailingSlashMiddleware` game-code list in `Lobby/middleware.py` if game pages live under `/XYZ/`.
 - Option icons: call your `SR_getXYZstartingOptionsHTML` from `SF_serializeGame` (`Lobby/sharedFunctions/sharedFunctions.py`) and from `Tournament.startingOptionsHTML` (`Lobby/models.py`), or lobby/tournament rows show `[None]`.
 - Admin: add `XYZgame` (and `XYZMiniTournament` if mini tournaments are supported) to `Lobby/modelProxies.py` and register them in `Lobby/admin.py`; proxies need an app migration.
@@ -129,6 +130,30 @@ URR is the minimal current example; RNB shows the same pattern with extra option
 
 For more than a colour or two, use a separate `profileXYZ` page and link it from the profile page instead of growing `profile.html` — see `profileRNB`, `profileIND` and `profileAQY` in `Lobby/views.py` and `Lobby/templates/Lobby/`.
 
+## 9. Lobby, landing page and notification wiring
+
+A game can create, save and finish correctly and still be invisible. Grep each file below for an existing code (`WEB` and `URR` are the current references) and add `XYZ` everywhere the site enumerates games.
+
+- `Lobby/templates/Lobby/newGames.html` — add the create tile in the intended order:
+  ```django
+  {% include "Lobby/create_tile.html" with url="createXYZpage" title=_("Game Name") img="XYZ/images/box.jpg" %}
+  ```
+- `Lobby/templates/Lobby/index.html` (logged-out landing page) — add the game to the JSON-LD top-level `"description"` and `"hasPart"` list, the hero sentence, one `Lobby/game_card.html` include (`players` and `tagline`), and one `<details id="game-xyz">` block in `.game-flavour`. The card's `full_id="game-xyz"` is what opens the matching details block.
+- `Lobby/templates/Lobby/layout.html` — title, meta description, keywords and footer text if the game should be advertised globally.
+- `Lobby/templates/Lobby/lobby_icons.html` — game icon in the "What are the icons?" legend.
+- `Lobby/templates/Lobby/lobbyHelp.html` — help pill, required-experience table row (`SF_getRequiredExp`), the no-specific-starting-options note if it applies, and the resign rule.
+- `Lobby/templates/Lobby/about.html` — "Current Games" list.
+- `Lobby/templates/Lobby/lobby.html` — release banner/teaser and, if main tournaments are supported, a branch in the `availableTournaments` icon list. If the teaser is a countdown, at launch replace the timer with a link to `createXYZpage`, remove the dark overlay and delete the countdown script.
+- `Lobby/sharedFunctions/sharedNotifications.py` → `getGameStrings(game)` — without an `XYZ` branch every notification and email falls back to the generic "Game" wording. Add `boxName`, your-turn, click-here-to-play, bug report, invite, tournament and reminder subjects.
+- Every template that maps a game code to a show URL: `Lobby/templates/Lobby/gameEmails/gameStartEmail.html`, `gameEndEmail.html`, `stuckTransactionEmail.html`, `tournamentGameStart.html`, `yourPendingTurnEmail.html`, `yourTurnEmail.html`, `yourTurnFixRNBemail.html`, and `Lobby/templates/Lobby/email/gameReminderEmail.html` / `gameReminderExpiredEmail.html`. Grep `showRNBgame` to find the current list.
+- `Lobby/static/Lobby/Lobby.js` → `ALL_GAMES` (join/leave click parsing).
+- `Lobby/static/Lobby/playerInfo.js` — stats tab listener, stats div index, and the delete-training-game branch.
+- `Lobby/static/Lobby/stats.js` + `Lobby/templates/Lobby/game_tabs.html` — stats tab listener, tab button, fair-play div index and per-game player-count visibility if the game appears on the site stats page.
+- `Lobby/views.py` → `stats()` `game_codes` list and `GAME_META`; `Lobby/extraStats.py` → `read_history()` if the exported history format differs. Otherwise the game is missing from site stats.
+- `Lobby/templates/Lobby/newMiniTournaments.html` — tile if mini tournaments are supported (with the matching `createXYZminiTournament` view and route from section 3).
+- `tests/test_game_creation_all_games.py` — add the game to `GAMES` (creation POST coverage) and `CREATE_PAGE_FIELDS` (create-page markup coverage).
+- `Lobby/templates/Lobby/gameDisplay/gameIcons.html` and `Lobby/templates/Lobby/admin/DBO.html` are already required in section 2; re-check them after UI additions.
+
 
 ## Final smoke test
 
@@ -136,4 +161,5 @@ For more than a colour or two, use a separate `profileXYZ` page and link it from
 2. Submit a move, check `Game.latestUpdate` + `GamePlayer.is_current` updated, notification queued.
 3. Submit a stale move (replay the same POST with an old `latestUpdate`) and confirm a `syncError` response.
 4. Kickout timer unfurls on the lobby; end the game and check winners/points.
-5. `python manage.py test` still green.
+5. Check the new game appears on `/newGames/`, the logged-out `/`, the help page and the icon legend, and that notification/email links resolve to `/XYZ/<id>/show/`.
+6. `python manage.py test` still green.
