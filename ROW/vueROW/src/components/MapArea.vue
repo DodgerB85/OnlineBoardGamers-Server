@@ -608,69 +608,12 @@ const deliverableCities = computed(() => {
 	}
 })
 
-function buildingActionRegions(name, rect, inter) {
-	if (!inter) return []
-	const actions = inter.options
-	const allActions = inter.layoutActions
-	const top = rect.y + rect.h * 0.48
-	const bottom = rect.y + rect.h * 0.91
-	const left = rect.x + rect.w * 0.08
-	const right = rect.x + rect.w * 0.92
-	const middle = rect.x + rect.w / 2
-	const panel = (x1, x2) => `${x1},${top} ${x2},${top} ${x2},${bottom} ${x1},${bottom}`
-	const triangleTop = `${left},${top} ${middle},${top} ${left},${bottom}`
-	const triangleBottom = `${middle},${top} ${middle},${bottom} ${left},${bottom}`
-	let groups
-	let shapes
-
-	// The printed neutral A tile has three columns; C and D split their left
-	// column diagonally, with their remaining action printed on the right.
-	if (name === "A") {
-		groups = [[0], [1], [2]]
-		shapes = [panel(left, left + (right - left) / 3), panel(left + (right - left) / 3, left + (right - left) * 2 / 3), panel(left + (right - left) * 2 / 3, right)]
-	} else if (["C", "D", "8a"].includes(name)) {
-		groups = [[0], [1], [2]]
-		shapes = [triangleTop, triangleBottom, panel(middle, right)]
-	} else if (name === "10b") {
-		groups = [[0], [1], [2]]
-		const horizontal = rect.y + rect.h * 0.70
-		shapes = [
-			`${left},${top} ${middle},${top} ${middle},${horizontal} ${left},${horizontal}`,
-			`${left},${horizontal} ${middle},${horizontal} ${middle},${bottom} ${left},${bottom}`,
-			panel(middle, right),
-		]
-	} else if (["2a", "E"].includes(name)) {
-		groups = [[0], allActions.map((_, index) => index).slice(1)]
-		shapes = [panel(left, middle), panel(middle, right)]
-	} else if (name === "4b") {
-		const moveIndex = allActions.findIndex((action) => action === ActionType.MOVE_3_FORWARD)
-		groups = [allActions.map((_, index) => index).filter((index) => index !== moveIndex), [moveIndex]]
-		shapes = [panel(left, middle), panel(middle, right)]
-	} else if (allActions.length <= 1) {
-		groups = [[0]]
-		shapes = [panel(left, right)]
-	} else {
-		groups = allActions.map((_, index) => [index])
-		shapes = allActions.length === 3
-			? [panel(left, left + (right - left) / 3), panel(left + (right - left) / 3, left + (right - left) * 2 / 3), panel(left + (right - left) * 2 / 3, right)]
-			: [panel(left, middle), panel(middle, right)]
-	}
-
-	return groups
-		.map((slots, index) => ({
-			points: shapes[index],
-			actions: slots.map((slot) => allActions[slot]).filter((action) => actions.includes(action) && !map.MARKET_DRAW_ACTIONS.has(action)),
-		}))
-		.filter((region) => region.actions.length)
-		.map((region) => ({ ...region, affordable: region.actions.some((a) => map.canAffordAction(g(), a)) }))
-}
-
 const activeBuildingRegions = computed(() => {
 	if (!game.value || !actable.value) return []
 	return buildingTiles.value.flatMap((tile) => {
 		const inter = map.buildingInteraction(tile.name, g(), store.actions)
 		const building = g().getTrail().getLocation(tile.name).building.name
-		return buildingActionRegions(building, tile.rect, inter).map((region) => ({ ...region, name: tile.name, mode: inter.mode }))
+		return map.buildingActionRegions(building, tile.rect, inter, g()).map((region) => ({ ...region, name: tile.name, mode: inter.mode }))
 	})
 })
 
@@ -722,7 +665,7 @@ const hoveredBuilding = computed(() => {
 	const inter = map.buildingInteraction(name, g(), store.actions)
 	const r = tile.rect
 	const building = tile.building
-	const regions = actable.value ? buildingActionRegions(building, r, inter).map((region) => ({ ...region, name, mode: inter.mode })) : []
+	const regions = actable.value ? map.buildingActionRegions(building, r, inter, g()).map((region) => ({ ...region, name, mode: inter.mode })) : []
 	return {
 		name,
 		building,

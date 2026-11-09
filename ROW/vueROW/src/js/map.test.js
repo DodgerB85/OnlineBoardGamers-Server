@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ActionType, CattleType, Game, JavaRandom, defaultOptions } from "./ROWindex";
-import { armedTrailMove, canAffordAction, canPlaceBuilding, cardActionsFor, trailMoveTargets, trailRoute } from "./ROWmap";
+import { neutralBuildingAction, playerBuildingAction } from "./ROWdata";
+import { armedTrailMove, buildingActionRegions, canAffordAction, canPlaceBuilding, cardActionsFor, trailMoveTargets, trailRoute } from "./ROWmap";
 
 function players(n) {
     const colors = ["RED", "BLUE", "YELLOW", "GREEN"];
@@ -169,5 +170,41 @@ it("reaches only one step ahead for MOVE_1_FORWARD", () => {
         const steps = trailMoveTargets(game, ActionType.MOVE_3_FORWARD).map((m) => m.steps);
         expect(steps).toContainEqual(["G"]);
         expect(steps).toContainEqual(["G", "KANSAS_CITY"]);
+    });
+});
+
+describe("printed building action regions", () => {
+    function regions(name, edition = "FIRST", options) {
+        const game = Game.start(players(2), defaultOptions(edition), new JavaRandom(0));
+        const local = /^[A-G]$/.test(name) ? neutralBuildingAction(name, 3) : playerBuildingAction(name, edition, 3);
+        const layoutActions = [...local.getPossibleActions()];
+        return buildingActionRegions(name, { x: 0, y: 0, w: 376, h: 376 }, { mode: "activate", layoutActions, options: options ?? layoutActions }, game);
+    }
+    it("follows unequal columns and shallow diagonals", () => {
+        expect(regions("B")[0].points).toBe("32,176 155,176 155,344 32,344");
+        expect(regions("D")[0].points).toBe("32,176 214,176 214,222 32,303");
+        expect(regions("8a")[0].points).toBe("32,176 192,176 192,221 32,316");
+    });
+    it("keeps a section in place when another action is unavailable", () => {
+        expect(regions("D", "FIRST", [ActionType.PAY_2_DOLLARS_TO_MOVE_ENGINE_2_FORWARD])[0].points)
+            .toBe("32,303 214,222 214,344 32,344");
+    });
+    it("uses edition-specific private tile dividers and printed action order", () => {
+        expect(regions("11a", "SECOND")).toHaveLength(2);
+        expect(regions("5a")[0].points).toContain("205,176");
+        expect(regions("5a", "SECOND")[0].points).toContain("183,176");
+        expect(regions("2b", "SECOND")[0].actions).toEqual([ActionType.DISCARD_1_DUTCH_BELT_TO_MOVE_ENGINE_2_FORWARD]);
+    });
+    it("provides valid polygons for all private tiles in both editions", () => {
+        for (const edition of ["FIRST", "SECOND"]) {
+            for (let number = 1; number <= 13; number++) {
+                for (const side of ["a", "b"]) {
+                    for (const region of regions(`${number}${side}`, edition)) {
+                        expect(region.points).not.toMatch(/NaN|undefined/);
+                        expect(region.actions.length).toBeGreaterThan(0);
+                    }
+                }
+            }
+        }
     });
 });
