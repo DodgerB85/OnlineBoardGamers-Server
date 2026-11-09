@@ -1,0 +1,89 @@
+{% extends "Lobby/layout.html" %}
+{% load i18n %}
+{% block body %}
+    <div class="page page-narrow">
+        <div class="page-header">
+            <h1 class="page-title">{% translate "Privacy Policy" %}</h1>
+            <p class="page-subtitle">Last updated: 9 November 2026</p>
+        </div>
+
+        <div class="card section">
+            <p>
+                OnlineBoardGamers ("we", "us") runs this website. This page explains what
+                information we collect, why we collect it, and the choices you have.
+            </p>
+
+            <h2>Information we collect</h2>
+            <ul>
+                <li>
+                    <strong>Account details:</strong> your username, email address, password
+                    (stored as a hash, never in plain text), language preference and
+                    notification settings.
+                </li>
+                <li>
+                    <strong>Sign-in data:</strong> if you sign in with Google or Discord, we
+                    receive an account identifier and your email address from that provider.
+                    We never receive your Google or Discord password.
+                </li>
+                <li>
+                    <strong>Discord notifications:</strong> if you link Discord for direct
+                    messages, we store your Discord user ID and add you to the OnlineBoardGamers
+                    Discord server.
+                </li>
+                <li>
+                    <strong>Gameplay data:</strong> games you create or join, moves, chat
+                    messages, tournament results, statistics and related timestamps.
+                </li>
+                <li>
+                    <strong>Technical data:</strong> session, CSRF and language cookies, and
+                    basic server logs used to keep the site secure and working.
+                </li>
+            </ul>
+
+            <h2>How we use it</h2>
+            <ul>
+                <li>To run your account, games, tournaments and notifications.</li>
+                <li>
+                    To send the notification emails you have enabled, such as turn, invite and
+                    reminder emails. You can change these in your profile.
+                </li>
+                <li>To investigate abuse, bugs and security issues.</li>
+            </ul>
+
+            <h2>Sharing</h2>
+            <ul>
+                <li>We do not sell your personal data.</li>
+                <li>
+                    We use service providers for hosting, database, email delivery and, where
+                    you enable them, Discord, Slack or Telegram notifications.
+                </li>
+                <li>We may disclose data where required by law.</li>
+            </ul>
+
+            <h2>Cookies</h2>
+            <p>
+                We use a session cookie to keep you logged in, a CSRF cookie to protect forms,
+                and a language cookie to remember your language. We do not use advertising or
+                third-party tracking cookies.
+            </p>
+
+            <h2>Retention and deletion</h2>
+            <p>
+                We keep account and gameplay data while your account exists, because it is part
+                of the games and tournaments you take part in. You can request deletion of your
+                account and personal data by contacting us.
+            </p>
+
+            <h2>Changes</h2>
+            <p>
+                We may update this policy from time to time. The latest version is always on
+                this page.
+            </p>
+
+            <h2>Contact</h2>
+            <p>
+                Questions about this policy: <a href="mailto:admin@onlineboardgamers.com">admin@onlineboardgamers.com</a>.
+            </p>
+        </div>
+    </div>
+{% endblock %}

@@ -110,6 +110,7 @@ class Profile(models.Model):
     webhooks = models.TextField(blank=True, null=True)
     discord_id = models.CharField(max_length=100, blank=True, null=True)
     discord_login_id = models.CharField(max_length=100, blank=True, null=True)
+    google_login_id = models.CharField(max_length=100, blank=True, null=True)
 
     preferredFCMoptions = models.CharField(max_length=30, blank=True)
 

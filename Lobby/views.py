@@ -2041,8 +2041,10 @@ def profile(request):
                 "blacklistedPlayers": blacklisted_players,
                 "stop_emails_until": stop_emails_until,  # -1 if not set
                 "discord_client_id": config("DISCORD_CLIENT_ID"),
+                "discord_redirect_uri": DISCORD_REDIRECT_URI,
                 "discord_oauth_state": request.session.setdefault("discord_oauth_state", secrets.token_urlsafe(32)),
                 "discord_id": profile.discord_id,
+                "google_login_id": profile.google_login_id,
             },
         )
 
@@ -4342,7 +4344,12 @@ def dataCheck(request):
     return JsonResponse({"latest": True})
 
 
-DISCORD_REDIRECT_URI = "https://www.onlineboardgamers.com/discord/callback/"
+def _default_oauth_redirect_uri(path):
+    base = "http://localhost:8000" if settings.DEBUG else "https://www.onlineboardgamers.com"
+    return f"{base}{path}"
+
+
+DISCORD_REDIRECT_URI = config("DISCORD_REDIRECT_URI", default=_default_oauth_redirect_uri("/discord/callback/"))
 
 
 def _discord_fetch_identity(code):
@@ -4372,8 +4379,8 @@ def _discord_fetch_identity(code):
     return access_token, user_resp.json()
 
 
-def _discord_unique_username(discord_username):
-    base = re.sub(r"[^\w.@+-]", "", discord_username or "")[:90] or "discord"
+def _unique_username(desired_username):
+    base = re.sub(r"[^\w.@+-]", "", desired_username or "")[:90] or "player"
     username = base
     suffix = 1
     while User.objects.filter(username__iexact=username).exists():
@@ -4449,7 +4456,7 @@ def _discord_login_callback(request, code):
             return redirect("myLogin")
 
         user = User.objects.create_user(
-            username=_discord_unique_username(discord_data.get("username")),
+            username=_unique_username(discord_data.get("username")),
             email=email,
         )
         user.is_active = True
@@ -4521,6 +4528,173 @@ def discord_callback(request):
     #########
 
     messages.success(request, f"Linked as {discord_data['username']}! You'll now get Discord DM notifications.")
+    return redirect("profile")
+
+
+GOOGLE_REDIRECT_URI = config("GOOGLE_REDIRECT_URI", default=_default_oauth_redirect_uri("/google/callback/"))
+
+
+def _google_authorize_url(state):
+    query = urlencode(
+        {
+            "client_id": config("GOOGLE_CLIENT_ID", default=""),
+            "redirect_uri": GOOGLE_REDIRECT_URI,
+            "response_type": "code",
+            "scope": "openid email profile",
+            "state": state,
+            "prompt": "select_account",
+        }
+    )
+    return f"https://accounts.google.com/o/oauth2/v2/auth?{query}"
+
+
+def _google_fetch_identity(code):
+    """Exchange an OAuth code for the Google user's profile."""
+    response = requests.post(
+        "https://oauth2.googleapis.com/token",
+        data={
+            "client_id": config("GOOGLE_CLIENT_ID", default=""),
+            "client_secret": config("GOOGLE_CLIENT_SECRET", default=""),
+            "code": code,
+            "grant_type": "authorization_code",
+            "redirect_uri": GOOGLE_REDIRECT_URI,
+        },
+        timeout=10,
+    )
+    access_token = response.json().get("access_token")
+    if not access_token:
+        return None, None
+
+    user_resp = requests.get(
+        "https://openidconnect.googleapis.com/v1/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=10,
+    )
+    return access_token, user_resp.json()
+
+
+def google_login(request):
+    if request.user.is_authenticated:
+        return redirect("index")
+
+    if not config("GOOGLE_CLIENT_ID", default=""):
+        messages.error(request, gettext("Google login is not configured."))
+        return redirect("myLogin")
+
+    state = secrets.token_urlsafe(32)
+    request.session["google_login_state"] = state
+    request.session["google_login_next"] = request.GET.get("next", "")
+    return redirect(_google_authorize_url(state))
+
+
+def _google_login_callback(request, code):
+    nxt = request.session.pop("google_login_next", "")
+    if not code:
+        messages.error(request, gettext("Google login was cancelled."))
+        return redirect("myLogin")
+
+    access_token, google_data = _google_fetch_identity(code)
+    if not access_token or not google_data or not google_data.get("sub"):
+        messages.error(request, gettext("Google login failed. Please try again."))
+        return redirect("myLogin")
+
+    google_user_id = str(google_data["sub"])
+    profiles = list(Profile.objects.select_related("user").filter(google_login_id=google_user_id)[:2])
+    if len(profiles) > 1:
+        messages.error(
+            request,
+            gettext("This Google account is linked to more than one account. Please contact the webmaster."),
+        )
+        return redirect("myLogin")
+
+    if profiles:
+        user = profiles[0].user
+        if not user.is_active:
+            messages.error(
+                request,
+                gettext("This account is inactive. Check your email for the activation link or contact the webmaster."),
+            )
+            return redirect("myLogin")
+    else:
+        email = (google_data.get("email") or "").strip()
+        if not email or not google_data.get("email_verified"):
+            messages.error(request, gettext("Your Google account needs a verified email address to sign up."))
+            return redirect("myLogin")
+        if User.objects.filter(email__iexact=email).exists():
+            messages.error(
+                request,
+                gettext(
+                    "An account with this email already exists. Log in with your username and password, then link Google from your profile."
+                ),
+            )
+            return redirect("myLogin")
+
+        user = User.objects.create_user(
+            username=_unique_username(email.split("@")[0]),
+            email=email,
+        )
+        user.is_active = True
+        user.save()
+        profile = user.profile
+        profile.google_login_id = google_user_id
+        profile.email_confirmed = True
+        profile.save()
+
+    login(request, user)
+    if nxt and url_has_allowed_host_and_scheme(
+        url=nxt,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return HttpResponseRedirect(nxt)
+    return redirect("index")
+
+
+@login_required
+def google_link(request):
+    if not config("GOOGLE_CLIENT_ID", default=""):
+        messages.error(request, gettext("Google login is not configured."))
+        return redirect("profile")
+
+    state = secrets.token_urlsafe(32)
+    request.session["google_link_state"] = state
+    return redirect(_google_authorize_url(state))
+
+
+def google_callback(request):
+    state = request.GET.get("state")
+    login_state = request.session.get("google_login_state")
+    if login_state and state == login_state:
+        request.session.pop("google_login_state", None)
+        return _google_login_callback(request, request.GET.get("code"))
+
+    if not request.user.is_authenticated:
+        messages.error(request, gettext("Google link expired. Please log in and try again from your profile."))
+        return redirect("myLogin")
+
+    code = request.GET.get("code")
+    if not code:
+        return redirect("profile")
+
+    expected_state = request.session.pop("google_link_state", None)
+    if not expected_state or state != expected_state:
+        messages.error(request, gettext("Google link expired. Please try again from your profile."))
+        return redirect("profile")
+
+    access_token, google_data = _google_fetch_identity(code)
+    if not access_token or not google_data or not google_data.get("sub"):
+        messages.error(request, gettext("Failed to link Google. Please try again."))
+        return redirect("profile")
+
+    google_user_id = str(google_data["sub"])
+    if Profile.objects.filter(google_login_id=google_user_id).exclude(user=request.user).exists():
+        messages.error(request, gettext("That Google account is already linked to another account."))
+        return redirect("profile")
+
+    profile = Profile.objects.get(user=request.user)
+    profile.google_login_id = google_user_id
+    profile.save()
+    messages.success(request, gettext("Google account linked. You can now log in with Google."))
     return redirect("profile")
 
 

@@ -16,7 +16,7 @@ Including another URLconf
 
 from decouple import config
 from django.urls import path
-from django.views.generic import RedirectView
+from django.views.generic import RedirectView, TemplateView
 
 from . import views
 from .extraStats import extra_stats
@@ -145,6 +145,8 @@ urlpatterns = [
     path("donate/success/", views.donate_success, name="donate_success"),
     path("donate/cancel/", views.donate_cancel, name="donate_cancel"),
     path("about/", views.about, name="about"),
+    path("privacy/", TemplateView.as_view(template_name="Lobby/privacy.html"), name="privacy"),
+    path("terms/", TemplateView.as_view(template_name="Lobby/terms.html"), name="terms"),
     path("changelog/", views.changelog_view, name="changelog"),
     path("contact/", views.contact, name="contact"),
     path("feedback/", views.feedback, name="feedback"),
@@ -200,6 +202,9 @@ urlpatterns = [
     # API Routes
     path("discord/login/", views.discord_login, name="discord_login"),
     path("discord/callback/", views.discord_callback, name="discord_callback"),
+    path("google/login/", views.google_login, name="google_login"),
+    path("google/link/", views.google_link, name="google_link"),
+    path("google/callback/", views.google_callback, name="google_callback"),
     path("stop_discord_dms/", views.stop_discord_dms, name="stop_discord_dms"),
     path(
         "join_discord/",

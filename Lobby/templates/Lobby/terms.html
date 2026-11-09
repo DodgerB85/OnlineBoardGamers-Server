@@ -1,0 +1,74 @@
+{% extends "Lobby/layout.html" %}
+{% load i18n %}
+{% block body %}
+    <div class="page page-narrow">
+        <div class="page-header">
+            <h1 class="page-title">{% translate "Terms of Service" %}</h1>
+            <p class="page-subtitle">Last updated: 9 November 2026</p>
+        </div>
+
+        <div class="card section">
+            <p>By using OnlineBoardGamers you agree to these terms.</p>
+
+            <h2>Accounts</h2>
+            <ul>
+                <li>You are responsible for your account and for keeping your login secure.</li>
+                <li>Provide accurate information and do not impersonate other people.</li>
+                <li>Use one account per person.</li>
+            </ul>
+
+            <h2>Acceptable use</h2>
+            <ul>
+                <li>Do not abuse, harass, threaten or spam other players.</li>
+                <li>Do not cheat, exploit bugs, or manipulate games or tournaments.</li>
+                <li>Do not attempt to access other accounts, break the site, or scrape it at scale.</li>
+                <li>Do not upload unlawful content or use the site for unlawful purposes.</li>
+            </ul>
+
+            <h2>Games and content</h2>
+            <ul>
+                <li>
+                    Game rules are enforced by the site software and may contain bugs. Results
+                    may be corrected when a problem is found.
+                </li>
+                <li>
+                    You keep ownership of content you post, such as chat messages, and grant us
+                    permission to store and display it as needed to run the site.
+                </li>
+                <li>
+                    We may remove content or suspend accounts that break these terms.
+                </li>
+            </ul>
+
+            <h2>Availability and changes</h2>
+            <ul>
+                <li>
+                    The site is provided as-is. We may change, suspend or discontinue features
+                    at any time.
+                </li>
+                <li>
+                    We do not guarantee uninterrupted availability or that saved games will
+                    never be lost.
+                </li>
+            </ul>
+
+            <h2>Liability</h2>
+            <p>
+                To the extent permitted by law, we are not liable for indirect or consequential
+                loss arising from your use of the site. Nothing in these terms limits liability
+                that cannot be limited by law.
+            </p>
+
+            <h2>Termination</h2>
+            <p>
+                You may stop using the site at any time. We may suspend or close accounts that
+                break these terms.
+            </p>
+
+            <h2>Contact</h2>
+            <p>
+                Questions about these terms: <a href="mailto:admin@onlineboardgamers.com">admin@onlineboardgamers.com</a>.
+            </p>
+        </div>
+    </div>
+{% endblock %}
