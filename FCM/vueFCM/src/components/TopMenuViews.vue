@@ -632,7 +632,6 @@ const sortedCampaigns = computed(() => {
 		<div id="reserveDiv" v-if="store.viewSettings.showReserve">
 			<div class="reserveHeader">
 				<h2 id="reserveTitle">{{ $t('topMenuViews.reserveTitle') }}</h2>
-				<button class="actionsLineButton" @click="store.viewSettings.showReserve = false">{{ $t('topMenuViews.close') }}</button>
 			</div>
 			<!-- SELECTED MODULES -->
 			<template v-if="store.startingOptionsHTML !== ''">
@@ -1086,8 +1085,7 @@ const sortedCampaigns = computed(() => {
 .reserveHeader {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	gap: 12px;
+	justify-content: center;
 }
 
 #reserveTitle {
