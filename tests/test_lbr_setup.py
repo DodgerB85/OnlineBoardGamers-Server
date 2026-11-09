@@ -295,6 +295,30 @@ class LBRTurnTests(TestCase):
         self.assertNotEqual(str(self.game.latestUpdate), str(old_latest_update))
         self.assertEqual(response.json()["missingPlayers"], [target])
 
+    def test_kickout_can_repair_a_current_player_already_missing_and_kicked(self):
+        self.game.kickoutDuration = 10
+        self.game.latestUpdate = str(int(time.time() * 1000) - 20 * 60 * 1000)
+        self.game.save()
+        target = self.seat_names[0]
+        voter = self.seat_names[1]
+        self.game.players.filter(player__username=target).update(is_missing=True, is_kicked=True)
+        self.client.force_login(User.objects.get(username=voter))
+        response = self.client.post(
+            reverse("LBR:processLBRturn"),
+            {
+                "action": "kickout",
+                "gameID": self.game.id,
+                "latestUpdate": self.game.latestUpdate,
+                "kickedName": target,
+            },
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        target_gp = self.game.players.get(player__username=target)
+        self.assertTrue(target_gp.is_kicked)
+        self.assertFalse(target_gp.is_current)
+
     def test_kickout_of_a_non_current_player_is_rejected(self):
         self.game.kickoutDuration = 10
         self.game.latestUpdate = str(int(time.time() * 1000) - 20 * 60 * 1000)

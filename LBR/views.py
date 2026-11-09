@@ -154,9 +154,12 @@ def _processLBRturn(request):
         target_is_current = currentGame.players.filter(
             player__username=jsonData["kickedName"], is_current=True, is_missing=False, is_kicked=False, is_ai=False
         ).exists()
+        # A legacy row can be current while already kicked; allow that so the
+        # kickout can repair the game instead of refusing forever.
+        legacy_kicked_current = currentGame.players.filter(player__username=jsonData["kickedName"], is_current=True, is_kicked=True).exists()
         if not participant or request.user.username == jsonData["kickedName"]:
             return JsonResponse({"error": gettext("Only another active player can initiate kickout.")}, status=403)
-        if not target_is_current or presenter.kickoutRequired() != 2:
+        if not (target_is_current or legacy_kicked_current) or presenter.kickoutRequired() != 2:
             return JsonResponse({"error": gettext("This player is not eligible for kickout.")}, status=400)
         if latest_update != str(currentGame.latestUpdate):
             SN_sendAdminErrorMessage(
@@ -174,6 +177,9 @@ def _processLBRturn(request):
         presenter.addKickedPlayer(missing_player)
         presenter.handSeatToAi(missing_player)
         presenter.checkForHostChange(missing_player)
+        # addMissingPlayer/addKickedPlayer no-op when the flags are already set,
+        # so a legacy row can still claim the turn; clear it explicitly.
+        currentGame.players.filter(player__username=jsonData["kickedName"]).update(is_current=False)
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)

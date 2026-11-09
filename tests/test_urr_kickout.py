@@ -76,6 +76,17 @@ class UrrKickoutTests(TestCase):
         self.assertNotEqual(data["latestUpdate"], previous_update)
 
     @patch("Lobby.presenters.GamePresenter.kickoutRequired", return_value=2)
+    @patch("Lobby.presenters.GamePresenter.getKickoutVoteThreshold", return_value=1)
+    def test_kickout_can_repair_a_current_player_already_missing_and_kicked(self, _threshold, _kickout_required):
+        self.game.players.filter(player=self.players[2]).update(is_missing=True, is_kicked=True)
+
+        self.assertEqual(self.kickout().status_code, 200)
+
+        seat = self.game.players.get(player=self.players[2])
+        self.assertTrue(seat.is_kicked)
+        self.assertFalse(seat.is_current)
+
+    @patch("Lobby.presenters.GamePresenter.kickoutRequired", return_value=2)
     def test_own_two_day_vote_allows_solo_kickout(self, kickout_required):
         self.game.activeVotes = {KICKOUT_VOTE_TOPIC: {self.players[0].username: [self.players[2].username, int((time.time() - 2 * 86400 - 1) * 1000)]}}
         self.game.save(update_fields=["activeVotes"])

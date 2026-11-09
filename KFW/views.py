@@ -691,7 +691,10 @@ def _processKFWturn(request):
         target_on_turn = currentGame.players.filter(
             player__username=kicked_name, is_current=True, is_missing=False, is_kicked=False
         ).exists()
-        if kicked_name == request.user.username or not target_on_turn or presenter.kickoutRequired() != 2:
+        # A legacy row can be current while already kicked; allow that so the
+        # kickout can repair the game instead of refusing forever.
+        legacy_kicked_current = currentGame.players.filter(player__username=kicked_name, is_current=True, is_kicked=True).exists()
+        if kicked_name == request.user.username or not (target_on_turn or legacy_kicked_current) or presenter.kickoutRequired() != 2:
             return JsonResponse({"error": gettext("This player is not eligible for kickout.")}, status=400)
 
         # Voting layer: 3p+ games need a majority vote to kick, unless the
@@ -706,6 +709,9 @@ def _processKFWturn(request):
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
+        # addMissingPlayer/addKickedPlayer no-op when the flags are already set,
+        # so a legacy row can still claim the turn; clear it explicitly.
+        currentGame.players.filter(player__username=kicked_name).update(is_current=False)
         presenter.clearAllMoveData()
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
