@@ -703,7 +703,7 @@ function localForkGame() {
 	z-index: 2;
 	margin: 0px important;
 	position: relative;
-	display: inline-block;
+	display: block;
 }
 
 #menu {
