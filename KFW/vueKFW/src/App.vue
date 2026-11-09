@@ -51,13 +51,31 @@ import * as IO from "./backend/KFW_IO"
 import * as model from "./js/KFWmodel"
 import * as rf from "./js/KFWreference"
 
-import { watchEffect } from "vue"
+import { computed, watchEffect } from "vue"
+import * as controller from "./js/KFWcontroller"
+import * as view from "./js/KFWview"
+import GameStatusBanner from "../../../Lobby/static/Lobby/common/GameStatusBanner.vue"
+import { getStatusBannerLabels } from "../../../Lobby/static/Lobby/common/statusBannerLabels.js"
 
 import { useModelStore } from "./stores/KFWstore.js"
 const store = useModelStore()
 
 import { usePersonalStore } from "./stores/KFWpersonal.js"
 const personal = usePersonalStore()
+
+const statusBanner = computed(() => {
+	const playerIndex = store.gameflow.turnOrder[0]
+	const playerObj = playerIndex === undefined ? null : store.players[playerIndex]
+	const isMyTurn = personal.canPlay()
+	return {
+		labels: getStatusBannerLabels(window.initData.locale, { turn: store.gameflow.turn }),
+		phase: view.phaseStr(),
+		isMyTurn,
+		isGameOver: store.gameflow.phase === rf.PHASE_GAME_OVER,
+		isReplay: store.viewSettings.showReplay || store.viewSettings.generatingReplay,
+		player: !isMyTurn && playerObj ? { name: playerObj.displayName, background: personal.getCorrectedColourHex(playerObj.colour) } : null,
+	}
+})
 
 watchEffect(() => {
 	let backgroundColour = "floralwhite"
@@ -169,6 +187,7 @@ function removeTileInfoPopup() {
 		</defs>
 	</svg>
 	<TopMenu />
+	<GameStatusBanner v-bind="statusBanner" />
 	<div
 		id="wholeMiddleArea"
 		:class="store.viewSettings.showReplay ? 'greyBackground222' : 'normalBackground222'"

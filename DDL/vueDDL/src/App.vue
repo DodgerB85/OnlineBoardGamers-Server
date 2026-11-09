@@ -1,8 +1,12 @@
 <script setup>
-import { onMounted, onUnmounted } from "vue"
+import { computed, onMounted, onUnmounted } from "vue"
 import * as model from "./js/DDLmodel"
 import * as controller from "./js/DDLcontroller"
 import * as IO from "./backend/DDL_IO"
+import * as view from "./js/DDLview"
+import * as rf from "./js/DDLreference"
+import GameStatusBanner from "../../../Lobby/static/Lobby/common/GameStatusBanner.vue"
+import { getStatusBannerLabels } from "../../../Lobby/static/Lobby/common/statusBannerLabels.js"
 
 import TopMenu from "./components/TopMenu.vue"
 import TopMenuViews from "./components/TopMenuViews.vue"
@@ -54,10 +58,23 @@ onUnmounted(() => {
 function showDebug() {
 	return personal.name === "admin" || personal.name === "BotKickStarter"
 }
+
+const statusBanner = computed(() => {
+	const playerObj = controller.currentPlayerObj()
+	return {
+		labels: getStatusBannerLabels(window.initData.locale, { turn: store.gameflow.turn }),
+		phase: view.phaseStr(store.gameflow.phase),
+		isMyTurn: personal.canPlay(),
+		isGameOver: store.gameflow.phase === rf.PHASE_GAME_OVER,
+		isReplay: store.viewSettings.showReplay,
+		player: !personal.canPlay() && playerObj ? { name: playerObj.displayName, background: personal.getCorrectedColourHex(playerObj.colour) } : null,
+	}
+})
 </script>
 
 <template>
 	<TopMenu />
+	<GameStatusBanner v-bind="statusBanner" />
 	<div id="wholeMiddleArea" :class="{ greyBackground: store.viewSettings.showReplay }">
 		<TopMenuViews />
 		<HistoryTab />

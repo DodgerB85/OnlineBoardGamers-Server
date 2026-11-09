@@ -16,6 +16,10 @@ import ActionArea from "./components/ActionArea.vue"
 import ResourceArea from "./components/ResourceArea.vue"
 import ProductionLine from "./components/ProductionLine.vue"
 import ReplayArea from "./components/ReplayArea.vue"
+import GameStatusBanner from "../../../Lobby/static/Lobby/common/GameStatusBanner.vue"
+import { getStatusBannerLabels } from "../../../Lobby/static/Lobby/common/statusBannerLabels.js"
+
+import { computed } from "vue"
 
 import * as rf from "./js/CNSreference"
 import * as funcs from "./js/CNSfuncs"
@@ -36,6 +40,19 @@ const store = useModelStore()
 
 import { usePersonalStore } from "./stores/CNSpersonal.js"
 const personal = usePersonalStore()
+
+const statusBanner = computed(() => {
+	const playerIndex = store.gameflow.turnOrder[0]
+	const playerObj = playerIndex === undefined ? null : store.players[playerIndex]
+	return {
+		labels: getStatusBannerLabels(window.initData.locale, { turn: store.gameflow.turn }),
+		phase: view.phaseStr(),
+		isMyTurn: personal.canPlay() && !store.topMenuViews.showReplay && !store.topMenuViews.generatingReplay,
+		isGameOver: store.gameflow.phase === rf.PHASE_GAME_OVER,
+		isReplay: store.topMenuViews.showReplay || store.topMenuViews.generatingReplay,
+		player: !personal.canPlay() && playerObj ? { name: playerObj.displayName, background: personal.getCorrectedColourHex(playerObj.colour) } : null,
+	}
+})
 
 async function initGame() {
 	personal.haltPlay = true
@@ -278,6 +295,7 @@ document.addEventListener("keyup", function (event) {
 
 <template>
 	<TopMenu />
+	<GameStatusBanner v-bind="statusBanner" />
 	<div
 		id="wholeMiddleArea"
 		:class="store.topMenuViews.showReplay ? 'greyBackground' : 'normalBackground'"

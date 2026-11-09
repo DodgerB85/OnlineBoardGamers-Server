@@ -11,6 +11,8 @@ import * as rules from "./js/URRrules"
 import * as controller from "./js/URRcontroller"
 import * as assets from "./js/URRassets"
 import { MAP_WIDTH, MAP_HEIGHT } from "./js/URRboardDisplay"
+import GameStatusBanner from "../../../Lobby/static/Lobby/common/GameStatusBanner.vue"
+import { getStatusBannerLabels } from "../../../Lobby/static/Lobby/common/statusBannerLabels.js"
 
 import PlayerMarker from "./components/PlayerMarker.vue"
 import TopMenu from "./components/TopMenu.vue"
@@ -141,6 +143,19 @@ const actingLabel = computed(() => {
 	if (store.gameflow.turnOrder[0] === undefined) return t("app.automaticResolution")
 	return ""
 })
+const statusBanner = computed(() => {
+	const playerIndex = actingPlayer.value
+	const playerObj = playerIndex === undefined ? null : store.players[playerIndex]
+	return {
+		labels: getStatusBannerLabels(window.initData.locale, { turn: store.gameflow.turn }),
+		phase: view.phaseStr(store.gameflow.phase),
+		action: actionPanelTitle.value,
+		isMyTurn: personal.canPlay() && !store.viewSettings.showReplay,
+		isGameOver: store.gameflow.phase === rf.PHASE_GAME_OVER,
+		isReplay: store.viewSettings.showReplay,
+		player: !personal.canPlay() && playerObj ? { name: playerObj.displayName, background: personal.getCorrectedColourHex(playerObj.colour) } : null,
+	}
+})
 const actionPanelTitle = computed(() => {
 	const game = actionPanelGame(store)
 	if (game.gameflow.pendingOffer) return t("app.agreementRequested")
@@ -219,17 +234,7 @@ function showDebug() {
 		<div class="mapPreviewViewport" tabindex="0" :aria-label="$t('app.enlargedMap')"><div id="nationMapPreviewBody"></div></div>
 	</dialog></Teleport>
 	<TopMenu />
-	<div id="turnStatus" :class="{ myTurn: personal.canPlay() && !store.viewSettings.showReplay, gameOver: store.gameflow.phase === rf.PHASE_GAME_OVER }">
-		<template v-if="store.viewSettings.showReplay">{{ $t("status.replay") }}</template>
-		<template v-else-if="store.gameflow.phase === rf.PHASE_GAME_OVER">{{ $t("status.gameOver") }}</template>
-		<template v-else-if="personal.canPlay()">
-			<span class="yourTurnBadge">{{ $t("status.yourTurnBadge") }}</span> {{ actionPanelTitle }}
-		</template>
-		<template v-else-if="actingPlayer !== undefined">
-			<span class="turnPlayerChip" :style="{ backgroundColor: personal.getCorrectedColourHex(store.players[actingPlayer].colour), color: personal.getCorrectedTextColourHex(store.players[actingPlayer].colour) }">{{ store.players[actingPlayer].displayName }}</span> {{ $t("status.acting", { action: actionPanelTitle }) }}
-		</template>
-		<template v-else>{{ $t("status.waitingNoPlayer", { action: actionPanelTitle }) }}</template>
-	</div>
+	<GameStatusBanner v-bind="statusBanner" />
 	<div id="wholeMiddleArea" :class="{ historyOpen: store.viewSettings.showHistory, nationDivision: isNationDivision, greyBackground: waitingForTurn, normalBackground: !waitingForTurn }">
 		<TopMenuViews />
 		<HistoryTab />
@@ -283,32 +288,6 @@ body {
 /* 1380, not the 1400 viewport width: leaves room for a classic scrollbar so a 1400px window gets no horizontal scrollbar. */
 #app { display: flex; flex-direction: column; min-width: 1380px; min-height: 100vh; }
 #app > #footer { flex-shrink: 0; }
-
-#turnStatus {
-	text-align: center;
-	font-weight: bolder;
-	padding: 4px 8px;
-	background-color: #c4dff7;
-	border-bottom: 1px solid #8bb8d8;
-}
-#turnStatus.myTurn { background-color: lightgreen; }
-#turnStatus.gameOver { background-color: lightgoldenrodyellow; }
-.yourTurnBadge {
-	display: inline-block;
-	background-color: darkgreen;
-	color: white;
-	border-radius: 10px;
-	padding: 1px 8px;
-	margin-right: 6px;
-	font-size: 0.9em;
-}
-.turnPlayerChip {
-	display: inline-block;
-	color: white;
-	border: 1px solid black;
-	padding: 1px 6px;
-	margin-right: 6px;
-}
 
 #wholeMiddleArea {
 	flex: 1 0 auto;

@@ -21,16 +21,32 @@ import HistoryTab from "./components/HistoryTab.vue"
 import ReplayArea from "./components/ReplayArea.vue"
 import PlayerDetails from "./components/PlayerDetails.vue"
 import FooterBar from "./components/FooterBar.vue"
+import GameStatusBanner from "../../../Lobby/static/Lobby/common/GameStatusBanner.vue"
+import { getStatusBannerLabels } from "../../../Lobby/static/Lobby/common/statusBannerLabels.js"
 
 import * as controller from "./js/TGZcontroller"
 
-import { watchEffect, ref, watch, nextTick } from "vue"
+import { computed, watchEffect, ref, watch, nextTick } from "vue"
 
 import { useModelStore } from "./stores/TGZstore.js"
 const store = useModelStore()
 
 import { usePersonalStore } from "./stores/TGZpersonal.js"
 const personal = usePersonalStore()
+
+const statusBanner = computed(() => {
+	const playerIndex = store.gameflow.turnOrder[0]
+	const playerObj = playerIndex === undefined ? null : store.players[playerIndex]
+	const isMyTurn = personal.canPlay()
+	return {
+		labels: getStatusBannerLabels(window.initData.locale, { turn: store.gameflow.turn }),
+		phase: view.phaseStr(),
+		isMyTurn,
+		isGameOver: store.gameflow.phase === rf.PHASE_GAME_OVER,
+		isReplay: store.topMenuViews.showReplay || store.topMenuViews.generatingReplay,
+		player: !isMyTurn && playerObj ? { name: playerObj.displayName, background: personal.getCorrectedColourHex(playerObj.colour) } : null,
+	}
+})
 
 const turnBanner = ref("")
 let turnBannerTimer
@@ -403,6 +419,7 @@ function getSplitUIleftMinWidth() {
 
 <template>
 	<TopMenu />
+	<GameStatusBanner v-bind="statusBanner" />
 	<transition name="turnBanner">
 		<div v-if="turnBanner" class="turn-banner">{{ turnBanner }}</div>
 	</transition>

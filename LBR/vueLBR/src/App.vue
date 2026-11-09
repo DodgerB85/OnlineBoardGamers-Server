@@ -11,6 +11,8 @@ import PlayerPanel from "./components/PlayerPanel.vue";
 import HistoryPanel from "./components/HistoryPanel.vue";
 import ChatPanel from "./components/ChatPanel.vue";
 import NotesPanel from "./components/NotesPanel.vue";
+import GameStatusBanner from "../../../Lobby/static/Lobby/common/GameStatusBanner.vue";
+import { getStatusBannerLabels } from "../../../Lobby/static/Lobby/common/statusBannerLabels.js";
 
 import { useModelStore } from "./stores/LBRstore.js";
 import { usePersonalStore } from "./stores/LBRpersonal.js";
@@ -31,6 +33,21 @@ const mySeat = computed(() => personal.pov);
 // Your own card sits on the right, alone; every other player stacks on the left.
 const rightSeats = computed(() => (seats.value.includes(mySeat.value) ? [mySeat.value] : []));
 const leftSeats = computed(() => seats.value.filter((seat) => seat !== mySeat.value));
+
+const LBR_SEAT_COLOURS = ["#8a5a2b", "#4a6fa5", "#b08a2e", "#3f7d4f"];
+const statusBanner = computed(() => {
+	const actor = model.actorSeat();
+	const isMyTurn = model.isMyTurn();
+	const isGameOver = !!store.game?.gameOver || store.finishedGame;
+	return {
+		labels: getStatusBannerLabels(window.initData.locale, {}),
+		phase: "",
+		action: isGameOver ? "" : model.turnText(),
+		isMyTurn,
+		isGameOver,
+		player: !isMyTurn && !isGameOver && actor >= 0 ? { name: model.seatName(actor), background: LBR_SEAT_COLOURS[actor] || "#555555" } : null,
+	};
+});
 
 let pollTimer = null;
 let kickoutTimer = null;
@@ -67,6 +84,7 @@ onUnmounted(() => {
 
 <template>
 	<TopMenu />
+	<GameStatusBanner v-bind="statusBanner" />
 	<TopMenuViews />
 	<KickoutDialog />
 	<div v-if="isSpectator" class="observer-note">You are watching this game. The board is read-only.</div>

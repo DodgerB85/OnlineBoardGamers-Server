@@ -23,7 +23,11 @@ import TutorialPanel from "./components/tutorial/TutorialPanel.vue"
 import GameToast from "./components/GameToast.vue"
 
 import * as replay from "./js/FCMreplay"
-import { watch } from "vue"
+import * as controller from "./js/FCMcontroller"
+import * as view from "./js/FCMview"
+import GameStatusBanner from "../../../Lobby/static/Lobby/common/GameStatusBanner.vue"
+import { getStatusBannerLabels } from "../../../Lobby/static/Lobby/common/statusBannerLabels.js"
+import { computed, watch } from "vue"
 
 /*
 import * as view from './js/FCMview'
@@ -42,6 +46,20 @@ import ActionArea from "./components/ActionArea.vue"
 const personal = usePersonalStore()
 
 model.initGame()
+
+const statusBanner = computed(() => {
+	const playerIndex = store.gameflow.turnOrder[0]
+	const playerObj = playerIndex === undefined ? null : store.players[playerIndex]
+	const isMyTurn = personal.canPlay() && !store.viewSettings.showReplay && !store.viewSettings.generatingReplay
+	return {
+		labels: getStatusBannerLabels(window.initData.locale, { turn: store.gameflow.turn }),
+		phase: String(view.phaseStr(store.gameflow.phase) || "").trim(),
+		isMyTurn,
+		isGameOver: store.gameflow.phase === rf.PHASE_GAME_OVER,
+		isReplay: store.viewSettings.showReplay || store.viewSettings.generatingReplay,
+		player: !isMyTurn && playerObj ? { name: playerObj.displayName, background: personal.getCorrectedColourHexForRestoBorder(playerObj.colour) } : null,
+	}
+})
 
 store.wholeTestResetData = funcs.simpleExportWholeFCMmodel()
 
@@ -72,6 +90,7 @@ document.addEventListener("keyup", function (event) {
 
 <template>
 	<TopMenu />
+	<GameStatusBanner v-bind="statusBanner" />
 	<GameToast />
 
 	<div

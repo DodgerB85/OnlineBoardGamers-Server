@@ -32,6 +32,10 @@ import ActionArea from "./components/ActionArea.vue"
 import DebugArea from "./components/DebugArea.vue"
 import TopMenuViews from "./components/TopMenuViews.vue"
 import ReplayArea from "./components/ReplayArea.vue"
+import GameStatusBanner from "../../../Lobby/static/Lobby/common/GameStatusBanner.vue"
+import { getStatusBannerLabels } from "../../../Lobby/static/Lobby/common/statusBannerLabels.js"
+
+import { computed } from "vue"
 
 import { useModelStore } from "./stores/BUSstore.js"
 
@@ -67,6 +71,19 @@ function isMyTurn() {
 	return personal.canPlay() && !store.topMenuViews.showReplay && !store.topMenuViews.generatingReplay
 }
 
+const BUS_PLAYER_COLOURS = ["#0C64AE", "#0E7964", "#6E365E", "#EB2E0F", "#FB9907"]
+const statusBanner = computed(() => {
+	const playerObj = currentTurnPlayer()
+	return {
+		labels: getStatusBannerLabels(window.initData.locale, { turn: store.gameflow.turn, names: playerObj?.displayName }),
+		phase: view.phaseStr(),
+		isMyTurn: isMyTurn(),
+		isGameOver: store.gameflow.gameEnded > 0,
+		isReplay: store.topMenuViews.showReplay || store.topMenuViews.generatingReplay,
+		player: playerObj ? { name: playerObj.displayName, background: BUS_PLAYER_COLOURS[personal.getCorrectedColour(playerObj.colour)] || "#555555" } : null,
+	}
+})
+
 // THis is needed as it's used right here to display under the board
 function getFlexiTimeString(playerName) {
 	let KickoutFlexiDataArray = window.initData.KickoutFlexiDataArray
@@ -101,22 +118,7 @@ function getFlexiTimeString(playerName) {
 
 <template>
 	<TopMenu />
-	<div id="turnStatus" :class="{ myTurn: isMyTurn(), gameOver: store.gameflow.gameEnded > 0 }">
-		<template v-if="store.gameflow.gameEnded > 0">
-			{{ $t('status.gameOver') }}
-		</template>
-		<template v-else-if="isMyTurn()">
-			<span class="yourTurnBadge">{{ $t('status.yourTurnBadge') }}</span>
-			{{ $t('status.yourTurn', { phase: view.phaseStr() }) }}
-		</template>
-		<template v-else-if="currentTurnPlayer()">
-			<span class="turnPlayerChip" :class="'mainEntryPlayer' + personal.getCorrectedColour(currentTurnPlayer().colour)">{{ currentTurnPlayer().displayName }}</span>
-			{{ $t('status.waiting', { phase: view.phaseStr() }) }}
-		</template>
-		<template v-else>
-			{{ $t('status.waitingNoPlayer', { phase: view.phaseStr() }) }}
-		</template>
-	</div>
+	<GameStatusBanner v-bind="statusBanner" />
 	<div id="wholeMiddleArea" :class="store.topMenuViews.showReplay ? 'greyBackground' : 'normalBackground'">
 		<transition name="fadeMainArea">
 			<div id="middle" v-if="!store.performingRewind">
@@ -163,40 +165,6 @@ function getFlexiTimeString(playerName) {
 </template>
 
 <style>
-#turnStatus {
-	text-align: center;
-	font-weight: bolder;
-	padding: 4px 8px;
-	background-color: #c4dff7;
-	border-bottom: 1px solid #8bb8d8;
-}
-
-#turnStatus.myTurn {
-	background-color: lightgreen;
-}
-
-#turnStatus.gameOver {
-	background-color: lightgoldenrodyellow;
-}
-
-.yourTurnBadge {
-	display: inline-block;
-	background-color: darkgreen;
-	color: white;
-	border-radius: 10px;
-	padding: 1px 8px;
-	margin-right: 6px;
-	font-size: 0.9em;
-}
-
-.turnPlayerChip {
-	display: inline-block;
-	color: white;
-	border: 1px solid black;
-	padding: 1px 6px;
-	margin-right: 6px;
-}
-
 [role="button"]:focus-visible {
 	outline: 3px solid #0055ff;
 	outline-offset: 2px;

@@ -178,6 +178,16 @@
                             <div id="players"></div>
                           </div>
                         </div>
+                        <div id="statusBanner" role="status" aria-live="polite">
+                          <span id="statusBannerMeta"></span>
+                          <span id="statusBannerState"></span>
+                          <span id="statusBannerText" hidden
+                                data-turn="{% translate 'Turn' %}"
+                                data-your-turn="{% translate 'Your turn' %}"
+                                data-waiting-next="{% translate 'Waiting for other players' %}"
+                                data-replay="{% translate 'Replay' %}"
+                                data-game-over="{% translate 'Game over' %}"></span>
+                        </div>
                         <div id="wholeChat">
                           <div id="chatBox">
                             <h2>{% translate "Send a message" %}</h2>

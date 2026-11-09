@@ -232,17 +232,6 @@ function toggleReserve() {
 	store.topMenuViews.showReserve = !store.topMenuViews.showReserve
 }
 
-function getCurrentPlayerNames() {
-	if (!controller.isSimulPhase(store.gameflow.phase)) return controller.currentPlayerObj().displayName
-	let res = []
-	for (let i = 0; i < store.gameflow.turnOrder.length; i++) res.push(store.players[store.gameflow.turnOrder[i]].displayName)
-	return res.join(", ")
-}
-
-const phaseName = computed(() => (store.gameflow.phase === rf.PHASE_FIRST_CITY ? t("aqyUi.status.firstCity") : (rf.PHASE_STRINGS[store.gameflow.phase] ?? "")))
-const phaseNumber = computed(() => (store.gameflow.phase === rf.PHASE_FIRST_CITY ? 0 : Math.min(10, Math.max(1, store.gameflow.phase))))
-const isMyTurn = computed(() => personal.canPlay())
-const currentNames = computed(() => getCurrentPlayerNames())
 </script>
 
 <template>
@@ -353,11 +342,6 @@ const currentNames = computed(() => getCurrentPlayerNames())
 			</div>
 		</div>
 
-		<div id="statusBanner" :class="{ myTurn: isMyTurn, gameOver: store.gameflow.phase === rf.PHASE_GAME_OVER }">
-			<span class="statusTurn">{{ $t("aqyUi.status.turn", { turn: store.gameflow.turn }) }}</span>
-			<span class="statusPhase"><template v-if="phaseNumber > 0">{{ $t("aqyUi.status.phase", { number: phaseNumber }) }} · </template>{{ phaseName }}</span>
-			<span class="statusWho" v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER">{{ isMyTurn ? $t("aqyUi.status.yourTurn") : $t("aqyUi.status.waitingFor", { names: currentNames }) }}</span>
-		</div>
 	</div>
 </template>
 
@@ -499,36 +483,6 @@ const currentNames = computed(() => getCurrentPlayerNames())
 	font-size: 14px;
 	text-align: center;
 	margin-right: 5px;
-}
-
-#statusBanner {
-	flex-basis: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 14px;
-	padding: 4px 8px;
-	background-color: #c4dff7;
-	border-bottom: 1px solid #8bb8d8;
-	color: black;
-	font-weight: bolder;
-	font-size: 15px;
-}
-
-#statusBanner.myTurn {
-	background-color: lightgreen;
-}
-
-#statusBanner.gameOver {
-	background-color: lightgoldenrodyellow;
-}
-
-.statusPhase {
-	color: #1a4f73;
-}
-
-.statusWho {
-	color: #1a5c1a;
 }
 
 #topInfos {

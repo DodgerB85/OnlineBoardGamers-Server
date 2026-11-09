@@ -46,9 +46,27 @@ import * as IO from "./backend/WEB_IO"
 import * as replay from "./js/WEBreplay"
 import PlayerTable from "./components/PlayerTable.vue"
 import AvailableTiles from "./components/AvailableTiles.vue"
+import GameStatusBanner from "../../../Lobby/static/Lobby/common/GameStatusBanner.vue"
+import { getStatusBannerLabels } from "../../../Lobby/static/Lobby/common/statusBannerLabels.js"
+
+import { computed } from "vue"
 
 //import { ref } from 'vue';
 const personal = usePersonalStore()
+
+const statusBanner = computed(() => {
+	const playerIndex = store.gameflow.turnOrder[0]
+	const playerObj = playerIndex === undefined ? null : store.players[playerIndex]
+	const isMyTurn = personal.canPlay() && !store.viewSettings.showReplay && !store.viewSettings.generatingReplay
+	return {
+		labels: getStatusBannerLabels(window.initData.locale, { turn: store.gameflow.turn }),
+		phase: view.phaseStr(),
+		isMyTurn,
+		isGameOver: store.gameflow.phase === rf.PHASE_GAME_OVER,
+		isReplay: store.viewSettings.showReplay || store.viewSettings.generatingReplay,
+		player: !isMyTurn && playerObj ? { name: playerObj.displayName, background: personal.getCorrectedColourHex(playerObj.colour) } : null,
+	}
+})
 
 // import WEB profile options here
 let options = window.initData.preferredWEBoptions
@@ -106,6 +124,7 @@ function getUniqueTileGfx() {
 		</defs>
 	</svg>
 	<TopMenu />
+	<GameStatusBanner v-bind="statusBanner" />
 	<div
 		id="wholeMiddleArea"
 		:class="store.viewSettings.showReplay ? 'greyBackground' : 'normalBackground'"

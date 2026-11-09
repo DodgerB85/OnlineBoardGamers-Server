@@ -31,6 +31,8 @@ const store = useModelStore()
 
 import { usePersonalStore } from "./stores/ROWpersonal.js"
 const personal = usePersonalStore()
+import GameStatusBanner from "../../../Lobby/static/Lobby/common/GameStatusBanner.vue"
+import { getStatusBannerLabels } from "../../../Lobby/static/Lobby/common/statusBannerLabels.js"
 
 model.initGame()
 
@@ -46,13 +48,23 @@ const waitingForTurn = computed(() => {
 const myTurn = computed(() => personal.canPlay(store.currentPlayer) && !store.viewSettings.showReplay && !store.viewSettings.performingRewind && !store.game?.isEnded())
 const actingPlayer = computed(() => store.state?.players.find((p) => p.name === store.currentPlayer) ?? null)
 const turnStatusText = computed(() => {
-	if (store.viewSettings.showReplay) return t("row.status.replay")
-	if (store.game?.isEnded()) return t("row.status.gameOver")
+	if (store.viewSettings.showReplay || store.game?.isEnded()) return ""
 	return view.actionPanelTitle(store)
 })
-function playerColorClass(color) {
-	return String(color ?? "white").toLowerCase()
-}
+const phaseLabel = computed(() => {
+	if (store.game?.isEnded()) return t("row.status.gameOver")
+	if (store.state?.status === rf.Status.BIDDING) return t("row.bidding.title")
+	return t("row.status.playing")
+})
+const statusBanner = computed(() => ({
+	labels: getStatusBannerLabels(window.initData.locale, { turn: store.game?.turnNumber }),
+	phase: phaseLabel.value,
+	action: turnStatusText.value,
+	isMyTurn: myTurn.value,
+	isGameOver: !store.viewSettings.showReplay && !!store.game?.isEnded(),
+	isReplay: store.viewSettings.showReplay,
+	player: !myTurn.value && actingPlayer.value ? { name: actingPlayer.value.name, background: actingPlayer.value.color } : null,
+}))
 
 let kickoutTimer = null
 onMounted(() => {
@@ -67,17 +79,7 @@ onUnmounted(() => {
 
 <template>
 	<TopMenu />
-	<div id="turnStatus" :class="{ myTurn: myTurn, gameOver: !store.viewSettings.showReplay && store.game?.isEnded() }">
-		<template v-if="store.viewSettings.showReplay">{{ t('row.status.replay') }}</template>
-		<template v-else-if="store.game?.isEnded()">{{ t('row.status.gameOver') }}</template>
-		<template v-else-if="myTurn">
-			<span class="yourTurnBadge">{{ t('row.status.yourTurnBadge') }}</span> {{ turnStatusText }}
-		</template>
-		<template v-else-if="actingPlayer">
-			<span class="turnPlayerChip" :class="playerColorClass(actingPlayer.color)">{{ actingPlayer.name }}</span> {{ turnStatusText }}
-		</template>
-		<template v-else>{{ t('app.waitingForOthers') }}</template>
-	</div>
+	<GameStatusBanner v-bind="statusBanner" />
 	<ResignPanel />
 
 	<div id="wholeMiddleArea" :class="waitingForTurn ? 'greyBackground' : 'normalBackground'">
@@ -131,41 +133,6 @@ body {
 	font-size: 15px;
 }
 
-#turnStatus {
-	text-align: center;
-	font-weight: bolder;
-	padding: 4px 8px;
-	background-color: #c4dff7;
-	border-bottom: 1px solid #8bb8d8;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-#turnStatus.myTurn { background-color: lightgreen; }
-#turnStatus.gameOver { background-color: lightgoldenrodyellow; }
-.yourTurnBadge {
-	display: inline-block;
-	background-color: darkgreen;
-	color: white;
-	border-radius: 10px;
-	padding: 1px 8px;
-	margin-right: 6px;
-	font-size: 0.9em;
-}
-.turnPlayerChip {
-	display: inline-block;
-	border: 1px solid black;
-	padding: 1px 6px;
-	margin-right: 6px;
-}
-.turnPlayerChip.red { background-color: red; color: white; }
-.turnPlayerChip.blue { background-color: blue; color: white; }
-.turnPlayerChip.yellow { background-color: yellow; color: black; }
-.turnPlayerChip.green { background-color: green; color: white; }
-.turnPlayerChip.white { background-color: #d9d9d9; color: black; }
-.turnPlayerChip.orange { background-color: orange; color: black; }
-.turnPlayerChip.purple { background-color: purple; color: white; }
-.turnPlayerChip.black { background-color: black; color: white; }
 
 /* Site action-button style: URR's refinement of WEB's .actionsLineButton. */
 .actionsLineButton {

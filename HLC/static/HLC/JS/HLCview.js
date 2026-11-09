@@ -82,6 +82,7 @@ var View = function (model) {
 		$("#turnNumber").html(String(this.model.gameFlow.turn))
 		$("#phase").html(PHASES_STR[this.model.gameFlow.phase])
 		$("#currentPlayer").html(global.currentPlayers.join(", "))
+		this.renderStatusBanner()
 
 		this.renderPlayerLineDiv(item)
 		if (item === -1) {
@@ -3977,6 +3978,46 @@ var View = function (model) {
 		else $("#kickoutTimerTimer").removeClass("redText")
 		$("#kickoutTimerTimer").toggleClass("kickoutTimerBlink", standardSeconds < 60)
 		$("#flexiTimerTimer").toggleClass("kickoutTimerBlink", flexiSeconds < 60)
+	}
+
+	this.renderStatusBanner = function () {
+		var banner = $("#statusBanner")
+		if (!banner.length) return
+		var labels = $("#statusBannerText")
+		var turnLabel = labels.data("turn") || "Turn"
+		var yourTurnLabel = labels.data("yourTurn") || "Your turn"
+		var waitingNextLabel = labels.data("waitingNext") || "Waiting for other players"
+		var replayLabel = labels.data("replay") || "Replay"
+		var gameOverLabel = labels.data("gameOver") || "Game over"
+		var phase = PHASES_STR[this.model.gameFlow.phase] || ""
+		var meta = turnLabel + " " + this.model.gameFlow.turn + (phase ? " · " + phase : "")
+		var state = $("#statusBannerState").empty()
+		var myTurn = Rules.canPlay()
+		var gameOver = this.model.gameEnded > 0
+		var showingReplay = replay.showingReplay
+		var currentPlayer = getHeaderCurrentPlayer()
+
+		$("#statusBannerMeta").text(meta)
+		if (showingReplay) state.text(replayLabel)
+		else if (gameOver) state.text(gameOverLabel)
+		else if (myTurn) state.append($("<span>").addClass("yourTurnBadge").text(yourTurnLabel))
+		else if (currentPlayer) {
+			var player = null
+			for (var i = 0; i < this.model.players.length; i++) {
+				if (this.model.players[i].name === currentPlayer) {
+					player = this.model.players[i]
+					break
+				}
+			}
+			var colour = player ? getCorrectedColour(player.colour) : null
+			var chip = $("<span>").addClass("turnPlayerChip").text(currentPlayer)
+			if (colour !== null && colour !== undefined) {
+				chip.css({ backgroundColor: getPlayerHexColourFromNumber(colour), color: colour === YELLOW ? "black" : "white" })
+			}
+			state.append(chip)
+		} else state.text(waitingNextLabel)
+
+		banner.toggleClass("myTurn", myTurn && !gameOver && !showingReplay).toggleClass("gameOver", gameOver)
 	}
 
 	this.renderKickoutCountdown = function () {

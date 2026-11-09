@@ -16,6 +16,8 @@ import FooterBar from "./components/FooterBar.vue"
 import HistoryTab from "./components/HistoryTab.vue"
 
 import ReplayArea from "./components/ReplayArea.vue"
+import GameStatusBanner from "../../../Lobby/static/Lobby/common/GameStatusBanner.vue"
+import { getStatusBannerLabels } from "../../../Lobby/static/Lobby/common/statusBannerLabels.js"
 
 import * as view from "./js/AQYview"
 //import * as country from "./js/AQYcountry"
@@ -48,10 +50,31 @@ const personal = usePersonalStore()
 import { useI18n } from "vue-i18n"
 const { t } = useI18n()
 
-import { ref, watch } from "vue"
+import { computed, ref, watch } from "vue"
 
 const turnBanner = ref("")
 let turnBannerTimer
+
+const phaseName = computed(() => (store.gameflow.phase === rf.PHASE_FIRST_CITY ? t("aqyUi.status.firstCity") : (rf.PHASE_STRINGS[store.gameflow.phase] ?? "")))
+const phaseNumber = computed(() => (store.gameflow.phase === rf.PHASE_FIRST_CITY ? 0 : Math.min(10, Math.max(1, store.gameflow.phase))))
+const currentNames = computed(() => {
+	if (!controller.isSimulPhase(store.gameflow.phase)) return controller.currentPlayerObj()?.displayName ?? ""
+	return store.gameflow.turnOrder.map((index) => store.players[index]?.displayName).filter(Boolean).join(", ")
+})
+const statusBanner = computed(() => {
+	const isMyTurn = personal.canPlay()
+	const simul = controller.isSimulPhase(store.gameflow.phase)
+	const playerObj = controller.currentPlayerObj()
+	return {
+		labels: getStatusBannerLabels(window.initData.locale, { turn: store.gameflow.turn, names: isMyTurn || !simul ? "" : currentNames.value }),
+		phase: phaseNumber.value > 0 ? `${t("aqyUi.status.phase", { number: phaseNumber.value })} · ${phaseName.value}` : phaseName.value,
+		isMyTurn,
+		isGameOver: store.gameflow.phase === rf.PHASE_GAME_OVER,
+		isReplay: store.topMenuViews.showReplay || store.topMenuViews.generatingReplay,
+		player: !isMyTurn && !simul && playerObj ? { name: playerObj.displayName, background: personal.getCorrectedColourHex(playerObj.colour) } : null,
+		currentNames: !isMyTurn && simul ? currentNames.value : "",
+	}
+})
 
 async function initGame() {
 	personal.haltPlay = true
@@ -419,6 +442,7 @@ document.addEventListener("keyup", function (event) {
 	</svg>
 
 	<TopMenu />
+	<GameStatusBanner v-bind="statusBanner" />
 
 	<transition name="turnBanner">
 		<div v-if="turnBanner" class="turn-banner">{{ turnBanner }}</div>

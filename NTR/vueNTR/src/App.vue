@@ -20,7 +20,9 @@ import MapArea from "./components/MapArea.vue"
 import ActionArea from "./components/ActionArea.vue"
 import PlayerTable from "./components/PlayerTable.vue"
 
-import { onMounted, onUnmounted } from "vue"
+import { computed, onMounted, onUnmounted } from "vue"
+import GameStatusBanner from "../../../Lobby/static/Lobby/common/GameStatusBanner.vue"
+import { getStatusBannerLabels } from "../../../Lobby/static/Lobby/common/statusBannerLabels.js"
 
 import { useModelStore } from "./stores/NTRstore.js"
 import i18n from "./i18n"
@@ -41,6 +43,19 @@ model.initGame()
 
 // Poll for other players' moves. The game has no websocket, so this is the
 // only way an opponent's save reaches this tab.
+const statusBanner = computed(() => {
+	const names = store.currentPlayers.join(", ")
+	const isGameOver = store.isGameOver
+	return {
+		labels: getStatusBannerLabels(window.initData.locale, { turn: store.turn }),
+		phase: i18n.global.t(store.phase === rf.PHASE_ALLIED_TURN ? "phases.alliedTurn" : store.phase === rf.PHASE_FRENCH_TURN ? "phases.frenchTurn" : "phases.gameOver"),
+		isMyTurn: store.myMove,
+		isGameOver,
+		isReplay: store.viewSettings.showReplay,
+		player: !store.myMove && !isGameOver && names ? { name: names, background: view.getPhaseColor(store.phase) } : null,
+	}
+})
+
 let pollTimer = null
 let kickoutTimer = null
 onMounted(() => {
@@ -91,6 +106,7 @@ document.addEventListener("keyup", function (event) {
     </defs>
   </svg>
   <TopMenu />
+  <GameStatusBanner v-bind="statusBanner" />
   <div
     id="wholeMiddleArea"
     :class="store.viewSettings.showReplay ? 'greyBackground' : 'normalBackground'"

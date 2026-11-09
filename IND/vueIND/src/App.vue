@@ -34,17 +34,33 @@ import * as model from "./js/INDmodel"
 import * as rf from "./js/INDreference"
 import * as rfm from "./js/INDmapData"
 import * as funcs from "./js/INDfuncs"
-//import * as controller from "./js/INDcontroller"
+import * as controller from "./js/INDcontroller"
+import GameStatusBanner from "../../../Lobby/static/Lobby/common/GameStatusBanner.vue"
+import { getStatusBannerLabels } from "../../../Lobby/static/Lobby/common/statusBannerLabels.js"
 
 import i18n from "./i18n"
 
-import { watchEffect } from "vue"
+import { computed, watchEffect } from "vue"
 
 import { usePersonalStore } from "./stores/INDpersonal.js"
 const personal = usePersonalStore()
 
 import { useModelStore } from "./stores/INDstore.js"
 const store = useModelStore()
+
+const statusBanner = computed(() => {
+	const playerIndex = store.gameflow.turnOrder[0]
+	const playerObj = playerIndex === undefined ? null : store.players[playerIndex]
+	const isMyTurn = personal.canPlay()
+	return {
+		labels: getStatusBannerLabels(window.initData.locale, { turn: store.gameflow.turn }),
+		phase: view.phaseStr(),
+		isMyTurn,
+		isGameOver: store.gameflow.phase === rf.PHASE_GAME_OVER,
+		isReplay: store.topMenuViews.showReplay || store.topMenuViews.generatingReplay,
+		player: !isMyTurn && playerObj ? { name: playerObj.displayName, background: personal.getCorrectedColourHex(playerObj.colour) } : null,
+	}
+})
 
 // Check if we're in history-only mode
 if (window.initData.historyOnly === true) {
@@ -497,6 +513,7 @@ function getWholeMiddleAreaClass() {
 		</defs>
 	</svg>
 	<TopMenu v-if="!store.historyOnly" />
+	<GameStatusBanner v-if="!store.historyOnly" v-bind="statusBanner" />
 	<GameSummary />
 	<div
 		id="wholeMiddleArea"

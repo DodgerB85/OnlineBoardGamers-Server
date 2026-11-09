@@ -23,7 +23,7 @@ sort out plus/excess res
  */
 //import * as map from "./js/RNBmap"
 import * as model from "./js/RNBmodel"
-//import * as controller from "./js/RNBcontroller"
+import * as controller from "./js/RNBcontroller"
 import * as rf from "./js/RNBreference"
 import * as view from "./js/RNBview"
 //import * as funcs from "./js/RNBfuncs"
@@ -41,6 +41,10 @@ import MapEditor from "./components/MapEditor/MapEditor.vue"
 import MapZoomPanel from "./components/ZoomPanel/MapZoomPanel.vue"
 import MapControlPanel from "./components/MapControlPanel.vue"
 import ReplayArea from "./components/History/ReplayArea.vue"
+import GameStatusBanner from "../../../Lobby/static/Lobby/common/GameStatusBanner.vue"
+import { getStatusBannerLabels } from "../../../Lobby/static/Lobby/common/statusBannerLabels.js"
+
+import { computed } from "vue"
 
 import { useModelStore } from "./stores/RNBstore.js"
 import i18n from "./i18n"
@@ -51,6 +55,21 @@ import PlayerTable from "./components/PlayerTable.vue"
 import BuildingInfo from "./components/Utils/BuildingInfo.vue"
 //import { ref } from 'vue';
 const personal = usePersonalStore()
+
+const statusBanner = computed(() => {
+	const playerIndex = store.gameflow.turnOrder[0]
+	const playerObj = playerIndex === undefined ? null : store.players[playerIndex]
+	const isMyTurn = personal.canPlay()
+	return {
+		labels: getStatusBannerLabels(window.initData.locale, { turn: store.gameflow.turn }),
+		phase: view.phaseStr(store.gameflow.phase),
+		isMyTurn,
+		isGameOver: store.gameflow.phase === rf.PHASE_GAME_OVER,
+		isReplay: store.viewSettings.showReplay || store.viewSettings.generatingReplay,
+		player: !isMyTurn && playerObj ? { name: playerObj.displayName, background: personal.getCorrectedColourHex(playerObj.colour) } : null,
+	}
+})
+
 personal.mapName = window.initData?.mapName || ""
 personal.mapDescription = window.initData?.mapDescription || ""
 
@@ -157,6 +176,7 @@ if (!window.initData.showMapOnly && !window.initData.mapEditor) {
 	</template>
 	<template v-else>
 		<TopMenu />
+		<GameStatusBanner v-bind="statusBanner" />
 		<div
 			id="wholeMiddleArea"
 			:class="store.viewSettings.showReplay ? 'greyBackground' : 'normalBackground'"
