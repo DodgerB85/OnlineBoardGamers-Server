@@ -1091,6 +1091,12 @@ const sortedCampaigns = computed(() => {
 #reserveTitle {
 	font-size: 30px;
 	font-weight: bolder;
+	margin-bottom: 0px;
+}
+
+#reserveDiv > h3 {
+	margin-top: 0px;
+	margin-bottom: 5px;
 }
 
 .parkRoadReserveHolder {
