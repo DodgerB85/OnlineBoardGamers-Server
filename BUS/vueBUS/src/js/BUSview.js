@@ -11,11 +11,14 @@ export function kickoutTimerTicker() {
 		clearInterval(personal.kickoutCountdownIntervalTimer)
 	} else {
 		personal.secondsToNextKickout--
-		if (personal.secondsToNextKickout < 60) {
-			// toggle the red class on and off
-			if (document.getElementById("kickoutTimerSpan").classList.contains("redText")) document.getElementById("kickoutTimerSpan").classList.remove("redText")
-			else document.getElementById("kickoutTimerSpan").classList.add("redText")
-		} else document.getElementById("kickoutTimerSpan").classList.remove("redText")
+		// Observers (pov < 0) have no timer span; keep counting without touching the DOM.
+		const timerSpan = document.getElementById("kickoutTimerSpan")
+		if (timerSpan) {
+			if (personal.secondsToNextKickout < 60) {
+				// toggle the red class on and off
+				timerSpan.classList.toggle("redText")
+			} else timerSpan.classList.remove("redText")
+		}
 
 		if (personal.secondsToNextKickout < 0) personal.secondsToNextKickout = 0
 	}
@@ -28,11 +31,13 @@ export function kickoutFlexiTimerTicker() {
 		return
 	} else {
 		personal.flexiSecondsToNextKickout--
-		if (personal.flexiSecondsToNextKickout < 60) {
-			// toggle the red class on and off
-			if (document.getElementById("flexiKickoutTimerSpan").classList.contains("redText")) document.getElementById("flexiKickoutTimerSpan").classList.remove("redText")
-			else document.getElementById("flexiKickoutTimerSpan").classList.add("redText")
-		} else document.getElementById("flexiKickoutTimerSpan").classList.remove("redText")
+		const timerSpan = document.getElementById("flexiKickoutTimerSpan")
+		if (timerSpan) {
+			if (personal.flexiSecondsToNextKickout < 60) {
+				// toggle the red class on and off
+				timerSpan.classList.toggle("redText")
+			} else timerSpan.classList.remove("redText")
+		}
 
 		if (personal.flexiSecondsToNextKickout < 0) personal.flexiSecondsToNextKickout = 0
 	}
