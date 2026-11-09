@@ -498,7 +498,7 @@ onUnmounted(() => {
 			<br />
 			<br />
 			{{ $t('actionArea.remainingFlexTime') }}
-			<span id="flexiKickoutTimerSpan">{{ getFlexiKickoutTImerText() }}</span>
+			<span id="flexiKickoutTimerSpan" :class="{ kickoutTimerBlink: personal.flexiSecondsToNextKickout < 60 }">{{ getFlexiKickoutTImerText() }}</span>
 			<br />
 			<br />
 			{{ $t('actionArea.forMoreInfo') }}
@@ -594,6 +594,15 @@ onUnmounted(() => {
 	margin: 0;
 	text-align: center;
 	margin-bottom: 5px;
+}
+
+.kickoutTimerBlink {
+	animation: kickoutTimerBlink 1s step-end infinite;
+}
+
+@keyframes kickoutTimerBlink {
+	0%, 100% { color: red; }
+	50% { color: inherit; }
 }
 
 #rewindErrorText,

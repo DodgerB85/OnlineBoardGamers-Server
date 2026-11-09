@@ -278,6 +278,7 @@ function updateKickoutData(data) {
 	personal.kickoutFlexiData = data.KickoutFlexiDataArray
 	personal.kickoutSecondsRemaining = data.secondsToNextKickout
 	personal.kickoutTimerUpdatedAt = Date.now()
+	personal.secondsToNextKickout = data.secondsToNextKickout
 	store.kickoutVotesData = data.kickoutVotesData
 	store.kickoutVoteThreshold = data.kickoutVoteThreshold
 	model.setMissingPlayers(data.missingPlayers)

@@ -217,7 +217,7 @@ onUnmounted(() => {
 				<br />
 				<br />
 				{{ $t("action.remainingFlexiTime") }}
-				<span id="flexiKickoutTimerSpan">{{ view.getFlexiKickoutTImerText() }}</span>
+				<span id="flexiKickoutTimerSpan" :class="{ kickoutTimerBlink: personal.flexiSecondsToNextKickout < 60 }">{{ view.getFlexiKickoutTImerText() }}</span>
 				<br />
 				<br />
 				{{ $t("action.forMoreInfoSee") }}
@@ -491,6 +491,15 @@ onUnmounted(() => {
 #actionAreaDiv {
 	font-weight: bolder;
 	background-color: lightblue;
+}
+
+.kickoutTimerBlink {
+	animation: kickoutTimerBlink 1s step-end infinite;
+}
+
+@keyframes kickoutTimerBlink {
+	0%, 100% { color: red; }
+	50% { color: inherit; }
 }
 
 .containerDiv {

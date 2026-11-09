@@ -33,6 +33,7 @@ const rightSeats = computed(() => (seats.value.includes(mySeat.value) ? [mySeat.
 const leftSeats = computed(() => seats.value.filter((seat) => seat !== mySeat.value));
 
 let pollTimer = null;
+let kickoutTimer = null;
 
 function schedulePoll() {
 	pollTimer = setTimeout(async () => {
@@ -51,11 +52,15 @@ function onKeydown(event) {
 onMounted(() => {
 	IO.checkForLatestData(true);
 	schedulePoll();
+	kickoutTimer = setInterval(() => {
+		if (store.secondsToNextKickout > 0) store.secondsToNextKickout--;
+	}, 1000);
 	document.addEventListener("keydown", onKeydown);
 });
 
 onUnmounted(() => {
 	if (pollTimer) clearTimeout(pollTimer);
+	if (kickoutTimer) clearInterval(kickoutTimer);
 	document.removeEventListener("keydown", onKeydown);
 });
 </script>

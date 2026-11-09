@@ -96,39 +96,20 @@ export function kickoutTimerTicker() {
 	if (personal.trainingGame) return
 
 	if (personal.secondsToNextKickout == undefined || personal.secondsToNextKickout > 1200) {
-		clearInterval(personal.kickoutCountdownIntervalTimer) // FIXXXXXXXXXXXXXXXX
-	} else {
-		personal.secondsToNextKickout--
-		const timerSpan = document.getElementById("kickoutTimerSpan")
-		if (timerSpan) {
-			if (personal.secondsToNextKickout < 60) {
-				// toggle the red class on and off
-				timerSpan.classList.toggle("redText")
-			} else timerSpan.classList.remove("redText")
-		}
-
-		if (personal.secondsToNextKickout < 0) personal.secondsToNextKickout = 0
+		clearInterval(personal.kickoutCountdownIntervalTimer)
+		return
 	}
+	personal.secondsToNextKickout = Math.max(0, personal.secondsToNextKickout - 1)
 }
 
 export function kickoutFlexiTimerTicker() {
 	const personal = usePersonalStore()
 
 	if (personal.kickoutRequired !== 1 || personal.secondsToNextKickout > 1200 || personal.canPlay()) {
-		clearInterval(personal.kickoutFlexiCountdownIntervalTimer) // FIXXXXXXXXXXXXXXXX
+		clearInterval(personal.kickoutFlexiCountdownIntervalTimer)
 		return
-	} else {
-		personal.flexiSecondsToNextKickout--
-		const timerSpan = document.getElementById("flexiKickoutTimerSpan")
-		if (timerSpan) {
-			if (personal.flexiSecondsToNextKickout < 60) {
-				// toggle the red class on and off
-				timerSpan.classList.toggle("redText")
-			} else timerSpan.classList.remove("redText")
-		}
-
-		if (personal.flexiSecondsToNextKickout < 0) personal.flexiSecondsToNextKickout = 0
 	}
+	personal.flexiSecondsToNextKickout = Math.max(0, personal.flexiSecondsToNextKickout - 1)
 }
 
 export function phaseStr() {

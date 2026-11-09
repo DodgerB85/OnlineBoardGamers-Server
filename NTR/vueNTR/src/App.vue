@@ -42,13 +42,18 @@ model.initGame()
 // Poll for other players' moves. The game has no websocket, so this is the
 // only way an opponent's save reaches this tab.
 let pollTimer = null
+let kickoutTimer = null
 onMounted(() => {
   pollTimer = setInterval(() => {
     if (!document.hidden) IO.checkForLatestData()
   }, IO.POLL_INTERVAL_MS)
+  kickoutTimer = setInterval(() => {
+    if (store.secondsToNextKickout > 0) store.secondsToNextKickout--
+  }, 1000)
 })
 onUnmounted(() => {
   if (pollTimer) clearInterval(pollTimer)
+  if (kickoutTimer) clearInterval(kickoutTimer)
 })
 
 /********************************* */

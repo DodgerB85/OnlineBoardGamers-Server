@@ -1316,20 +1316,8 @@ export function kickoutFlexiTimerTicker() {
 	if (personal.kickoutRequired !== 1 || personal.secondsToNextKickout > 1200 || personal.canPlay()) {
 		clearInterval(personal.kickoutFlexiCountdownIntervalTimer)
 		return
-	} else {
-		personal.flexiSecondsToNextKickout--
-		// The span only renders when the kickout info box is showing, so may be absent
-		const span = document.getElementById("flexiKickoutTimerSpan")
-		if (span) {
-			if (personal.flexiSecondsToNextKickout < 60) {
-				// toggle the red class on and off
-				if (span.classList.contains("redText")) span.classList.remove("redText")
-				else span.classList.add("redText")
-			} else span.classList.remove("redText")
-		}
-
-		if (personal.flexiSecondsToNextKickout < 0) personal.flexiSecondsToNextKickout = 0
 	}
+	personal.flexiSecondsToNextKickout = Math.max(0, personal.flexiSecondsToNextKickout - 1)
 }
 
 export function kickoutTimerTicker() {
@@ -1337,22 +1325,11 @@ export function kickoutTimerTicker() {
 
 	if (personal.trainingGame) return
 
-	if (personal.secondsToNextKickout > 1200) {
-		clearInterval(personal.kickoutCountdownIntervalTimer) // FIXXXXXXXXXXXXXXXX
-	} else {
-		personal.secondsToNextKickout--
-		// The span only renders when pov is a seat and the game is not over, so may be absent
-		const span = document.getElementById("kickoutTimerSpan")
-		if (span) {
-			if (personal.secondsToNextKickout < 60) {
-				// toggle the red class on and off
-				if (span.classList.contains("redText")) span.classList.remove("redText")
-				else span.classList.add("redText")
-			} else span.classList.remove("redText")
-		}
-
-		if (personal.secondsToNextKickout < 0) personal.secondsToNextKickout = 0
+	if (personal.secondsToNextKickout == undefined || personal.secondsToNextKickout > 1200) {
+		clearInterval(personal.kickoutCountdownIntervalTimer)
+		return
 	}
+	personal.secondsToNextKickout = Math.max(0, personal.secondsToNextKickout - 1)
 }
 
 export function resetConflictPreferences() {

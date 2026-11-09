@@ -514,7 +514,7 @@ function localForkGame() {
 				<br />
 
 				<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
-					<span id="kickoutTimerSpan">
+					<span id="kickoutTimerSpan" :class="{ kickoutTimerBlink: personal.secondsToNextKickout < 60 }">
 						{{ $t('topMenu.timeToNextKickout') }}
 						<span id="kickoutTimerTimer">{{ getKickoutTImerText() }}</span>
 					</span>
@@ -767,9 +767,17 @@ function localForkGame() {
 	background-color: darkred;
 }
 
-/* Only needed to flash tiimer  */
 .redText {
 	color: red;
+}
+
+.kickoutTimerBlink {
+	animation: kickoutTimerBlink 1s step-end infinite;
+}
+
+@keyframes kickoutTimerBlink {
+	0%, 100% { color: red; }
+	50% { color: inherit; }
 }
 
 #menu a {

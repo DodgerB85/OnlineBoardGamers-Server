@@ -91,6 +91,7 @@ function resizeBoard() {
 model.initGame()
 controller.startPlayerTurn()
 let updateTimer = null
+let kickoutTimer = null
 onMounted(() => {
 	boardObserver = new ResizeObserver(resizeBoard)
 	boardObserver.observe(mainArea.value)
@@ -98,12 +99,16 @@ onMounted(() => {
 	window.addEventListener("resize", resizeBoard)
 	if (personal.gameID === undefined || personal.pov < -9) return
 	WS.StartWebSocket()
+	kickoutTimer = window.setInterval(() => {
+		if (personal.secondsToNextKickout > 0) personal.secondsToNextKickout--
+	}, 1000)
 	updateTimer = window.setInterval(() => {
 		if (!document.hidden && store.gameflow.phase !== rf.PHASE_GAME_OVER) IO.checkForLatestData()
 	}, 10000)
 })
 onBeforeUnmount(() => {
 	window.clearInterval(updateTimer)
+	window.clearInterval(kickoutTimer)
 	boardObserver.disconnect()
 	window.removeEventListener("resize", resizeBoard)
 })

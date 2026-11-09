@@ -472,7 +472,7 @@ function skipModuleAndEndTurn() {
 					<br />
 					<br />
 					{{ $t("actionArea.remainingFlexTime") }}
-					<span id="flexiKickoutTimerSpan">{{ view.getFlexiKickoutTImerText() }}</span>
+					<span id="flexiKickoutTimerSpan" :class="{ kickoutTimerBlink: personal.flexiSecondsToNextKickout < 60 }">{{ view.getFlexiKickoutTImerText() }}</span>
 					<br />
 					<br />
 					<i18n-t keypath="actionArea.forMoreInfoSeeHelp" tag="div" scope="global">
@@ -1193,6 +1193,15 @@ function skipModuleAndEndTurn() {
 
 .redText {
 	color: red;
+}
+
+.kickoutTimerBlink {
+	animation: kickoutTimerBlink 1s step-end infinite;
+}
+
+@keyframes kickoutTimerBlink {
+	0%, 100% { color: red; }
+	50% { color: inherit; }
 }
 
 #successText {

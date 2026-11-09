@@ -50,7 +50,7 @@ onUnmounted(() => clearInterval(timer))
 	<div v-if="personal.kickoutRequired > 0 && personal.pov >= 0 && !store.players[personal.pov]?.isMissing && !controller.timedOutPlayerObj().isMissing && !personal.trainingGame && !personal.canPlay() && !store.viewSettings.showReplay && store.gameflow.phase !== rf.PHASE_GAME_OVER && !isDismissed" class="kickoutDialog">
 		<template v-if="personal.kickoutRequired === 1">
 			<p>{{ $t("kickout.player") }} <PlayerMarker :index="view.playerIndexByName(store, target)" /> {{ $t("kickout.usedStandardTime") }}</p>
-			<p>{{ $t("kickout.remainingFlex", { time: duration(flexSeconds) }) }}</p>
+			<p :class="{ kickoutTimerBlink: flexSeconds < 60 }">{{ $t("kickout.remainingFlex", { time: duration(flexSeconds) }) }}</p>
 			<p>{{ $t("kickout.forMoreInfo") }} <a href="/help/" target="_blank">{{ $t("kickout.help") }}</a>.</p>
 		</template>
 		<template v-else>
@@ -76,4 +76,6 @@ onUnmounted(() => clearInterval(timer))
 .kickoutDialog { padding: 12px; margin-bottom: 12px; border: 2px solid #a85838; background: #fff4df; }
 .kickoutDialog button { padding: 6px 10px; margin: 4px; cursor: pointer; }
 .kickoutDialog button:disabled { cursor: default; opacity: .5; }
+.kickoutTimerBlink { animation: kickoutTimerBlink 1s step-end infinite; }
+@keyframes kickoutTimerBlink { 0%, 100% { color: red; } 50% { color: inherit; } }
 </style>

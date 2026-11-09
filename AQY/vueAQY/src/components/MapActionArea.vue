@@ -799,7 +799,7 @@ function flatmapResourceArray(array) {
 			<br />
 			<br />
 			{{ $t("mapActionArea.remainingFlexTime") }}
-			<span id="flexiKickoutTimerSpan">{{ getFlexiKickoutTImerText() }}</span>
+			<span id="flexiKickoutTimerSpan" :class="{ kickoutTimerBlink: personal.flexiSecondsToNextKickout < 60 }">{{ getFlexiKickoutTImerText() }}</span>
 			<br />
 			<br />
 			<i18n-t keypath="mapActionArea.forMoreInfoSeeHelp" tag="span" scope="global">
@@ -1707,6 +1707,15 @@ function flatmapResourceArray(array) {
 .redText {
 	font-weight: bolder;
 	color: red;
+}
+
+.kickoutTimerBlink {
+	animation: kickoutTimerBlink 1s step-end infinite;
+}
+
+@keyframes kickoutTimerBlink {
+	0%, 100% { color: red; }
+	50% { color: inherit; }
 }
 
 .greenText {

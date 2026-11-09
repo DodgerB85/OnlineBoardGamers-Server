@@ -593,7 +593,7 @@ const getGameOverReason = computed(() => {
 				<br />
 				<br />
 				{{ $t("action.remainingFlexTime") }}
-				<span id="flexiKickoutTimerSpan">{{ view.getFlexiKickoutTImerText() }}</span>
+				<span id="flexiKickoutTimerSpan" :class="{ kickoutTimerBlink: personal.flexiSecondsToNextKickout < 60 }">{{ view.getFlexiKickoutTImerText() }}</span>
 				<br />
 				<br />
 				{{ $t("action.forMoreInfoSee") }}
@@ -1265,6 +1265,15 @@ const getGameOverReason = computed(() => {
 #actionAreaDiv {
 	font-weight: bolder;
 	background-color: aliceblue;
+}
+
+.kickoutTimerBlink {
+	animation: kickoutTimerBlink 1s step-end infinite;
+}
+
+@keyframes kickoutTimerBlink {
+	0%, 100% { color: red; }
+	50% { color: inherit; }
 }
 .tradeAreaStandalone {
 	display: flex;

@@ -732,7 +732,7 @@ function failedToJustPlaceCraftsmanFlag() {
 			<br />
 			<br />
 			{{ $t("actionArea.remainingFlexTime") }}
-			<span id="flexiKickoutTimerSpan">{{ getFlexiKickoutTImerText() }}</span>
+			<span id="flexiKickoutTimerSpan" :class="{ kickoutTimerBlink: personal.flexiSecondsToNextKickout < 60 }">{{ getFlexiKickoutTImerText() }}</span>
 			<br />
 			<br />
 			{{ $t("actionArea.forMoreInfo") }}
@@ -1854,6 +1854,15 @@ function failedToJustPlaceCraftsmanFlag() {
 
 .redText {
 	color: red;
+}
+
+.kickoutTimerBlink {
+	animation: kickoutTimerBlink 1s step-end infinite;
+}
+
+@keyframes kickoutTimerBlink {
+	0%, 100% { color: red; }
+	50% { color: inherit; }
 }
 
 .greenText {

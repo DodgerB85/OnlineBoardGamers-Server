@@ -3975,6 +3975,8 @@ var View = function (model) {
 		$("#flexiTimerTimer").html(formatHHMM(flexiSeconds))
 		if (standardSeconds < 2 * 60 * 60) $("#kickoutTimerTimer").addClass("redText")
 		else $("#kickoutTimerTimer").removeClass("redText")
+		$("#kickoutTimerTimer").toggleClass("kickoutTimerBlink", standardSeconds < 60)
+		$("#flexiTimerTimer").toggleClass("kickoutTimerBlink", flexiSeconds < 60)
 	}
 
 	this.renderKickoutCountdown = function () {
@@ -4012,6 +4014,7 @@ var View = function (model) {
 		let secsToGo = String(Math.floor(global.remainingFlexiSeconds % 60)).padStart(2, "0")
 
 		$("#flexiKickoutTimerSpan").html(" " + hoursToGo + ":" + minsToGo + ":" + secsToGo)
+		$("#flexiKickoutTimerSpan").toggleClass("kickoutTimerBlink", global.remainingFlexiSeconds < 60)
 	}
 
 	function topMenuItem(e) {

@@ -30,6 +30,7 @@ model.initGame()
 controller.startPlayerTurn()
 
 let pollTimer = null
+let kickoutTimer = null
 function poll() {
 	if (personal.pov < 0 || personal.finishedGame || personal.haltPlay) return
 	if (store.gameflow.phase === 0 && store.gameflow.setup.auction && !store.gameflow.setup.auctionResolved) {
@@ -41,9 +42,13 @@ function poll() {
 
 onMounted(() => {
 	pollTimer = setInterval(poll, 5000)
+	kickoutTimer = setInterval(() => {
+		if (personal.secondsToNextKickout > 0) personal.secondsToNextKickout--
+	}, 1000)
 })
 onUnmounted(() => {
 	if (pollTimer) clearInterval(pollTimer)
+	if (kickoutTimer) clearInterval(kickoutTimer)
 })
 
 function showDebug() {

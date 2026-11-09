@@ -30,25 +30,13 @@ export function getFlexiKickoutTImerText() {
 	return hoursToGo + ":" + minsToGo + ":" + secsToGo
 }
 
-function blinkRed(el, blink) {
-	if (!el) return
-	if (blink) el.classList.toggle("redText")
-	else el.classList.remove("redText")
-}
-
 export function kickoutTimerTicker() {
 	const personal = usePersonalStore()
-	if (personal.trainingGame) {
+	if (personal.trainingGame || personal.secondsToNextKickout == undefined || personal.secondsToNextKickout > 1200) {
 		clearInterval(personal.kickoutCountdownIntervalTimer)
 		return
 	}
-	if (personal.secondsToNextKickout > 1200) {
-		clearInterval(personal.kickoutCountdownIntervalTimer)
-	} else {
-		personal.secondsToNextKickout--
-		blinkRed(document.getElementById("kickoutTimerTimer"), personal.secondsToNextKickout < 60)
-		if (personal.secondsToNextKickout < 0) personal.secondsToNextKickout = 0
-	}
+	personal.secondsToNextKickout = Math.max(0, personal.secondsToNextKickout - 1)
 }
 
 export function kickoutFlexiTimerTicker() {
@@ -57,9 +45,7 @@ export function kickoutFlexiTimerTicker() {
 		clearInterval(personal.flexiKickoutCountdownIntervalTimer)
 		return
 	}
-	personal.flexiSecondsToNextKickout--
-	blinkRed(document.getElementById("flexiKickoutTimerSpan"), personal.flexiSecondsToNextKickout < 60)
-	if (personal.flexiSecondsToNextKickout < 0) personal.flexiSecondsToNextKickout = 0
+	personal.flexiSecondsToNextKickout = Math.max(0, personal.flexiSecondsToNextKickout - 1)
 }
 
 export function fitHeightToFooter(el) {

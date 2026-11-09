@@ -72,7 +72,7 @@ const chatEntries = computed(() => {
         <span v-if="store.kickoutRequired > 0" class="kickoutAlert">
           ⚠ {{ t('footer.kickoutWarning') }}
         </span>
-        <span v-else-if="store.secondsToNextKickout > 0" class="turnTimer">
+        <span v-else-if="store.secondsToNextKickout > 0" class="turnTimer" :class="{ kickoutTimerBlink: store.secondsToNextKickout < 60 }">
           ⏱ {{ Math.floor(store.secondsToNextKickout / 60) }}:{{ String(store.secondsToNextKickout % 60).padStart(2, '0') }}
         </span>
       </div>
@@ -178,6 +178,7 @@ const chatEntries = computed(() => {
 
 .kickoutAlert { color: #e74c3c; font-weight: bold; animation: blink 0.5s infinite; }
 .turnTimer { color: #f39c12; font-family: monospace; }
+.kickoutTimerBlink { animation: blink 0.5s infinite; }
 
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 </style>

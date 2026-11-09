@@ -244,7 +244,7 @@ function cancelSales() {
 				<br />
 				<br />
 				{{ $t("action.remainingFlexTime") }}
-				<span id="flexiKickoutTimerSpan">{{ getFlexiKickoutTImerText() }}</span>
+				<span id="flexiKickoutTimerSpan" :class="{ kickoutTimerBlink: personal.flexiSecondsToNextKickout < 60 }">{{ getFlexiKickoutTImerText() }}</span>
 				<br />
 				<br />
 				<i18n-t keypath="action.forMoreInfo" tag="span" scope="global">
@@ -592,6 +592,15 @@ function cancelSales() {
 .warningSpan {
 	font-weight: 900;
 	color: darkgoldenrod;
+}
+
+.kickoutTimerBlink {
+	animation: kickoutTimerBlink 1s step-end infinite;
+}
+
+@keyframes kickoutTimerBlink {
+	0%, 100% { color: red; }
+	50% { color: inherit; }
 }
 
 .resignButton {

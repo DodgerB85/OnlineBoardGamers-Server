@@ -195,7 +195,7 @@ function getKickoutTimerText() {
 				<div id="WSstatus" v-if="personal.pov >= 0" :class="personal.WSstatus"></div>
 				<br alt="" />
 				<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
-					<span id="kickoutTimerSpan">{{ $t("topMenu.timeToNextKickout") }} <span id="kickoutTimerTimer">{{ getKickoutTimerText() }}</span></span>
+					<span id="kickoutTimerSpan" :class="{ kickoutTimerBlink: personal.secondsToNextKickout < 60 }">{{ $t("topMenu.timeToNextKickout") }} <span id="kickoutTimerTimer">{{ getKickoutTimerText() }}</span></span>
 				</template>
 			</div>
 			<div id="zoomDiv" class="mapZoom">
@@ -208,6 +208,15 @@ function getKickoutTimerText() {
 </template>
 
 <style scoped>
+.kickoutTimerBlink {
+	animation: kickoutTimerBlink 1s step-end infinite;
+}
+
+@keyframes kickoutTimerBlink {
+	0%, 100% { color: red; }
+	50% { color: inherit; }
+}
+
 #WSstatus {
 	border: 2px solid white;
 	border-radius: 100%;

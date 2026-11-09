@@ -58,7 +58,7 @@ function downloadGameData() {
         {{ store.viewSettings.showChat ? t('menu.hideChat') : t('menu.showChat') }}
         <span v-if="store.chatNotification" class="notificationBadge">●</span>
       </button>
-      <div v-if="store.secondsToNextKickout > 0" class="kickoutTimer">
+      <div v-if="store.secondsToNextKickout > 0" class="kickoutTimer" :class="{ kickoutTimerBlink: store.secondsToNextKickout < 60 }">
         ⏱ {{ Math.floor(store.secondsToNextKickout / 60) }}:{{ String(store.secondsToNextKickout % 60).padStart(2, '0') }}
       </div>
       <div v-if="store.kickoutRequired > 0" class="kickoutWarning">
@@ -164,4 +164,6 @@ function downloadGameData() {
   font-size: 0.85rem;
   animation: blink 0.5s infinite;
 }
+
+.kickoutTimerBlink { animation: blink 0.5s infinite; }
 </style>

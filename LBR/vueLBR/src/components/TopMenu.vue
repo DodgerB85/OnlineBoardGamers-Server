@@ -161,7 +161,7 @@ const showKickoutTimer = computed(
 				<span v-if="isInvolved">{{ model.seatName(personal.pov) }}</span>
 				<span v-else>Spectator</span>
 				<br />
-				<span v-if="showKickoutTimer" id="kickoutTimerSpan">Next kickout in <span id="kickoutTimerTimer">{{ kickoutText() }}</span></span>
+				<span v-if="showKickoutTimer" id="kickoutTimerSpan" :class="{ kickoutTimerBlink: store.secondsToNextKickout < 60 }">Next kickout in <span id="kickoutTimerTimer">{{ kickoutText() }}</span></span>
 			</div>
 			<div id="zoomDiv" class="mapZoom">
 				<button type="button" class="zoomButton" @click="zoomBy(-0.25)" :disabled="currentZoom <= 0.5" aria-label="Zoom out">−</button>
@@ -228,6 +228,8 @@ const showKickoutTimer = computed(
 #topRight { flex-shrink: 0; height: 100%; font-size: 16px; font-weight: 400; text-align: center; margin-right: 5px; }
 #loggedInDiv { height: 34px; overflow: hidden; }
 #kickoutTimerSpan { font-size: 12px; }
+.kickoutTimerBlink { animation: kickoutTimerBlink 1s step-end infinite; }
+@keyframes kickoutTimerBlink { 0%, 100% { color: red; } 50% { color: inherit; } }
 #zoomDiv { display: flex; justify-content: flex-end; gap: 4px; margin-top: 3px; }
 #zoomDiv button { min-height: 22px; height: 22px; padding: 0 6px; font: inherit; font-size: 16px; font-weight: 400; cursor: pointer; border: 1px solid #998a67; border-radius: 3px; background: #fffdf4; color: #302f27; }
 #zoomDiv button:hover:enabled { background: #f1e9d7; }

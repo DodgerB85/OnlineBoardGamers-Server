@@ -337,7 +337,7 @@ const currentNames = computed(() => getCurrentPlayerNames())
 				<br />
 
 				<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
-					<span id="kickoutTimerSpan">
+					<span id="kickoutTimerSpan" :class="{ kickoutTimerBlink: personal.secondsToNextKickout < 60 }">
 						{{ $t("topMenu.timeToNextKickout") }}
 						<span id="kickoutTimerTimer">{{ getKickoutTImerText() }}</span>
 					</span>
@@ -356,7 +356,7 @@ const currentNames = computed(() => getCurrentPlayerNames())
 		<div id="statusBanner" :class="{ myTurn: isMyTurn, gameOver: store.gameflow.phase === rf.PHASE_GAME_OVER }">
 			<span class="statusTurn">{{ $t("aqyUi.status.turn", { turn: store.gameflow.turn }) }}</span>
 			<span class="statusPhase"><template v-if="phaseNumber > 0">{{ $t("aqyUi.status.phase", { number: phaseNumber }) }} · </template>{{ phaseName }}</span>
-			<span class="statusWho">{{ isMyTurn ? $t("aqyUi.status.yourTurn") : $t("aqyUi.status.waitingFor", { names: currentNames }) }}</span>
+			<span class="statusWho" v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER">{{ isMyTurn ? $t("aqyUi.status.yourTurn") : $t("aqyUi.status.waitingFor", { names: currentNames }) }}</span>
 		</div>
 	</div>
 </template>
@@ -545,6 +545,15 @@ const currentNames = computed(() => getCurrentPlayerNames())
 .redText {
 	font-weight: bolder;
 	color: red;
+}
+
+.kickoutTimerBlink {
+	animation: kickoutTimerBlink 1s step-end infinite;
+}
+
+@keyframes kickoutTimerBlink {
+	0%, 100% { color: red; }
+	50% { color: inherit; }
 }
 
 .menuDivider {
