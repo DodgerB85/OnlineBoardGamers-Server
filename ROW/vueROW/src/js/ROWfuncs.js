@@ -14,6 +14,13 @@ export function detach(value) {
 	return JSON.parse(JSON.stringify(value))
 }
 
+/** Convert player-name ranking groups to server seat indexes (the order in initData.playerNames). */
+export function finalPositionsFor(groups, seatNames) {
+	return groups
+		.map((group) => group.map((name) => seatNames.indexOf(name)).filter((index) => index >= 0))
+		.filter((group) => group.length > 0)
+}
+
 export function serializeGame(game, rng) {
 	return serializeGameImpl(game, rng)
 }

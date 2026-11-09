@@ -49,6 +49,24 @@ def read_history(game, data):
     """Return (player index, epoch seconds), retaining entries without timestamps."""
     created = int(game.created) / 1000
     code = game.gameCode
+    if code == "ROW":
+        if not isinstance(data, dict) or not isinstance(data.get("history"), list):
+            raise ValueError("Unrecognized ROW history format")
+        # ROW history is newest-first and stores player names plus Date.now() milliseconds.
+        seat_by_name = {
+            gp.player.username: gp.seat_order
+            for gp in game.players.select_related("player")
+            if gp.player
+        }
+        entries = []
+        for entry in reversed(data["history"]):
+            if not isinstance(entry, dict):
+                continue
+            timestamp = entry.get("time")
+            if isinstance(timestamp, (int, float)) and timestamp > 10_000_000_000:
+                timestamp = timestamp / 1000
+            entries.append((seat_by_name.get(entry.get("player"), -1), timestamp))
+        return entries
     if code == "HLC":
         reference = data[15][0]
         return [(entry[0], reference + offset) for entry, offset in zip(data[15][1:], data[16], strict=True)]

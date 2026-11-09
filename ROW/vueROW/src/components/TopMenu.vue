@@ -71,6 +71,11 @@ const phaseLabel = computed(() => {
 	if (store.state?.status === Status.BIDDING) return t("row.bidding.title")
 	return t("row.status.playing")
 })
+const canReplay = computed(
+	() =>
+		store.replayFrames.length > 1 ||
+		(!!store.replayInitial && !personal.automaGame && store.history.some((entry) => entry.action || entry.type === "END_TURN" || entry.type === "SKIP")),
+)
 const canResign = computed(
 	() =>
 		personal.pov >= 0 &&
@@ -154,7 +159,7 @@ function playerColor(color) {
 				<span>{{ t('app.results') }}</span>
 			</button>
 
-			<button type="button" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showReplay }]" :aria-expanded="store.viewSettings.showReplay" @click="toggleReplay">
+			<button v-if="canReplay" type="button" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showReplay }]" :aria-expanded="store.viewSettings.showReplay" @click="toggleReplay">
 				<img :src="view.getImage('icon-replay')" alt="" />
 				<span>{{ t('topMenu.replay') }}</span>
 			</button>

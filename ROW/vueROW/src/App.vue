@@ -57,7 +57,7 @@ const phaseLabel = computed(() => {
 	return t("row.status.playing")
 })
 const statusBanner = computed(() => ({
-	labels: getStatusBannerLabels(window.initData.locale, { turn: store.game?.turnNumber }),
+	labels: getStatusBannerLabels(window.initData.locale, { turn: store.turn }),
 	phase: phaseLabel.value,
 	action: turnStatusText.value,
 	isMyTurn: myTurn.value,

@@ -67,7 +67,9 @@ export const useModelStore = defineStore("store", () => {
 	/** The live position saved when entering replay, restored on exit. */
 	const liveBeforeReplay = ref(null)
 
-	/** Client-side replay: a snapshot per turn start + the currently viewed frame. */
+	/** Starting position + RNG for rebuilding the replay from the recorded actions. */
+	const replayInitial = ref(null)
+	/** Client-side replay frames (one per rebuilt action, or turn starts for old/automa games). */
 	const replayFrames = ref([])
 	const replayIndex = ref(-1)
 
@@ -168,6 +170,7 @@ export const useModelStore = defineStore("store", () => {
 		wholeTurnResetData,
 		undoSnapshot,
 		liveBeforeReplay,
+		replayInitial,
 		replayFrames,
 		replayIndex,
 		state,

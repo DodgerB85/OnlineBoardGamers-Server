@@ -60,10 +60,15 @@ export function actionParams(action) {
 		.map(([k, v]) => `${k}: ${typeof v === "object" ? JSON.stringify(v) : String(v)}`)
 }
 
-export function recordHistory(type, player, params = []) {
+export function recordHistory(type, player, params = [], action = null, snapshot = null) {
 	const store = useModelStore()
-	store.history.unshift({ type, player, time: Date.now(), params })
-	if (store.history.length > 200) store.history.length = 200
+	const entry = { type, player, time: Date.now(), params }
+	// Structured action data lets the replay rebuild the game from the initial position.
+	// shortcut: history is capped at 1000 entries, upgrade to a replay base snapshot if games grow longer.
+	if (action) entry.action = JSON.parse(JSON.stringify(action))
+	if (snapshot) entry.snapshot = JSON.parse(JSON.stringify(snapshot))
+	store.history.unshift(entry)
+	if (store.history.length > 1000) store.history.length = 1000
 }
 
 /** Restore the RNG seed captured in a serialized snapshot, if present. */
@@ -74,7 +79,15 @@ export function restoreRng(serialized) {
 
 export function savedPayload() {
 	const store = useModelStore()
-	return { ...makeSavedPayload(getGame(), rng, store.history), turn: store.turn }
+	const payload = { ...makeSavedPayload(getGame(), rng, store.history), turn: store.turn }
+	if (store.replayInitial) payload.replayInitial = store.replayInitial
+	return payload
+}
+
+/** Restore the replay starting position carried in a saved payload. */
+export function restoreReplayInitial(payload) {
+	if (!payload?.replayInitial) return
+	useModelStore().replayInitial = JSON.parse(JSON.stringify(payload.replayInitial))
 }
 
 /** Detach a serialized copy of the current (turn-start) position + RNG. */
@@ -102,8 +115,8 @@ export function alignToCurrentPlayers(order) {
 	const same = valid.length === g.state.playerOrder.length && valid.every((n, i) => n === g.state.playerOrder[i]) && g.state.currentPlayer === valid[0]
 	if (same) return false
 	g.state.playerOrder = valid
-	// Keep `state.players` in the same order as the (server) seat order: `finalPositions`,
-	// `ranking()` and the presenter's seat lookups all index this array.
+	// Keep `state.players` aligned with the server turn order so board order and
+	// engine iteration agree; final positions are mapped through initData.playerNames.
 	const byName = new Map(g.state.players.map((p) => [p.name, p]))
 	g.state.players = valid.map((n) => byName.get(n)).filter(Boolean)
 	g.state.currentPlayer = valid[0]
@@ -127,6 +140,7 @@ export function initFromGameData(gameData, players, options) {
 		restoreRng(gameData)
 		store.setGame(deserializeGame(gameData))
 		restoreHistoryFrom(gameData)
+		restoreReplayInitial(gameData)
 		if (Number.isFinite(Number(gameData.turn))) store.turn = Number(gameData.turn)
 		snapshotTurn()
 		return
@@ -138,7 +152,9 @@ export function initFromGameData(gameData, players, options) {
 		store.gameMessages.errorText = i18n.global.t("error.loadGame")
 		return
 	}
-	store.setGame(Game.start(players, { ...defaultOptions(options.edition, options) }, rng))
+	const game = Game.start(players, { ...defaultOptions(options.edition, options) }, rng)
+	store.setGame(game)
+	store.replayInitial = JSON.parse(JSON.stringify(serializeGame(game, rng)))
 	snapshotTurn()
 }
 
@@ -222,7 +238,7 @@ export function initGame() {
 	}
 
 	setupLiveUpdates()
-	void controller.runAutomaIfNeeded()
+	if (personal.pov !== -99) void controller.runAutomaIfNeeded()
 }
 
 /**
@@ -232,7 +248,9 @@ export function initGame() {
  */
 function setupLiveUpdates() {
 	const personal = usePersonalStore()
-	if (personal.gameID < 0) return
+	// Anonymous viewers get the rendered position but cannot call the login-only
+	// data endpoint, so do not start the websocket/poll loop for them.
+	if (personal.gameID < 0 || personal.pov === -99) return
 	// Register the handler once; ROWwebsocket re-attaches it to every new socket,
 	// so live push survives reconnects.
 	setOnMessage(() => {

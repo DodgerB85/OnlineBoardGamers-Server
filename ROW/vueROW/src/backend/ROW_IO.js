@@ -69,8 +69,9 @@ export async function saveGame(payload) {
 	return response.json()
 }
 
-export async function reloadGameData(gameID) {
-	const response = await post("/ROW/data/1/", { gameID })
+/** Poll the lightweight version endpoint; the server sends the full state only when it changed. */
+export async function reloadGameData(gameID, latestUpdate) {
+	const response = await post("/ROW/data/3/", { gameID, latestUpdate })
 	if (!response.ok) throw new Error("Network response was not ok")
 	return response.json()
 }
@@ -124,8 +125,10 @@ export async function updateDataFromLoadRewind(payload) {
 	return response.json()
 }
 
-export async function resign(gameID) {
-	await post("/ROW/processROWturn/", { action: "resign", gameID })
+export async function resign(gameID, latestUpdate) {
+	const response = await post("/ROW/processROWturn/", { action: "resign", gameID, latestUpdate })
+	if (!response.ok) throw new Error("Network response was not ok")
+	return response.json()
 }
 
 /** Cast a vote (delete game / exclude from stats / rewind consent). */
@@ -137,46 +140,12 @@ export async function castVote(gameID, topic, choice = true) {
 
 /** Vote to kick out (or actually kick out) the timed-out player. */
 export async function kickout(gameID, kickedName, latestUpdate) {
-	const store = useModelStore()
-	const personal = usePersonalStore()
 	const response = await post("/ROW/processROWturn/", { action: "kickout", gameID, kickedName, latestUpdate })
-	if (!response.ok) throw new Error("Network response was not ok")
-	const data = await response.json()
-
-	// Apply kickout result to local state so subsequent saves don't revert it
-	personal.latestUpdate = data.latestUpdate
-	personal.secondsToNextKickout = data.secondsToNextKickout
-
-	if (data.missingPlayers && data.missingPlayers.length > 0) {
-		// Find all missing player indices in the players array
-		const missingIndices = []
-		for (const missingName of data.missingPlayers) {
-			const idx = store.players.findIndex(p => p.name === missingName)
-			if (idx >= 0) {
-				missingIndices.push(idx)
-			}
-		}
-
-		// Remove from ACTIVE turn orders only (keep in fullTurnOrder as placeholders)
-		const filterTurnOrder = (arr) => arr.filter(idx => !missingIndices.includes(idx))
-		store.gameflow.turnOrder = filterTurnOrder(store.gameflow.turnOrder)
-		store.gameflow.fullTurnOrder = filterTurnOrder(store.gameflow.fullTurnOrder)
-		store.gameflow.wonderTurnOrder = filterTurnOrder(store.gameflow.wonderTurnOrder)
-		store.gameflow.wonderPrayingOrder = filterTurnOrder(store.gameflow.wonderPrayingOrder)
-		store.gameflow.newWonderTurnOrder = filterTurnOrder(store.gameflow.newWonderTurnOrder)
-		store.gameflow.newWonderPrayingOrder = filterTurnOrder(store.gameflow.newWonderPrayingOrder)
-		// NOTE: fullTurnOrder is NOT filtered - kicked players remain as placeholders
-
-		// Mark kicked players as bots
-		for (const idx of missingIndices) {
-			store.players[idx].displayName = rf.BOT_NAME
-		}
-
-		// Update wholeTurnResetData so resetWholeTurn() doesn't revert the kickout
-		store.wholeTurnResetData = funcs.simpleExportWholeWEBmodel()
+	if (!response.ok) {
+		const body = await response.json().catch(() => ({}))
+		throw new Error(body.error || "Network response was not ok")
 	}
-
-	return data
+	return response.json()
 }
 
 export async function submitBug(gameID, description, gameData) {

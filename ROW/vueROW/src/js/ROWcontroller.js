@@ -4,7 +4,7 @@
  */
 import * as model from "./ROWmodel"
 import i18n from "../i18n"
-import { deserializeGame, serializeGame } from "./ROWfuncs"
+import { deserializeGame, finalPositionsFor, serializeGame } from "./ROWfuncs"
 import { useModelStore } from "../stores/ROWstore"
 import { usePersonalStore } from "../stores/ROWpersonal"
 import { decompress, loadChat, loadRewind, reloadGameData, resign, saveGame, saveZoom, updateDataFromLoadRewind, kickout } from "../backend/ROW_IO"
@@ -54,7 +54,7 @@ export function submit(action) {
 	store.clearAction()
 	store.clearMovePlan()
 	store.undoSnapshot = g.canUndo() ? before : null
-	model.recordHistory(action.type, g.currentPlayer, model.actionParams(action))
+	model.recordHistory(action.type, g.currentPlayer, model.actionParams(action), action)
 	store.touch()
 	return true
 }
@@ -165,10 +165,12 @@ export function resetWholeTurn() {
 	const store = useModelStore()
 	const snap = store.wholeTurnResetData
 	if (!snap) return
+	const player = store.game?.currentPlayer
 	store.clearAction()
 	store.undoSnapshot = null
 	model.restoreRng(snap)
 	store.setGame(deserializeGame(snap))
+	model.recordHistory("RESET_WHOLE_TURN", player, [], null, snap)
 	store.touch()
 }
 
@@ -194,6 +196,10 @@ export async function rewind() {
 			store.gameMessages.rewindErrorText = i18n.global.t("error.olderVersion")
 			return
 		}
+		if (data.finishedGame) {
+			store.gameMessages.rewindErrorText = i18n.global.t("error.gameEnded")
+			return
+		}
 		if (data.errorMessage || !data.gameData) {
 			store.gameMessages.rewindErrorText = data.errorMessage ?? i18n.global.t("error.noRewindData")
 			return
@@ -203,6 +209,7 @@ export async function rewind() {
 		model.restoreRng(parsed)
 		store.setGame(deserializeGame(parsed))
 		model.restoreHistoryFrom(parsed)
+		model.restoreReplayInitial(parsed)
 		if (Number.isFinite(Number(parsed.turn))) store.turn = Number(parsed.turn)
 		personal.latestUpdate = Number(data.latestUpdate ?? personal.latestUpdate)
 		window.initData.latestUpdate = data.latestUpdate
@@ -234,6 +241,10 @@ export async function rewind() {
 			store.gameMessages.rewindErrorText = i18n.global.t("error.olderVersion")
 			return
 		}
+		if (result.finishedGame) {
+			store.gameMessages.rewindErrorText = i18n.global.t("error.gameEnded")
+			return
+		}
 		personal.latestUpdate = Number(result.latestUpdate)
 		window.initData.latestUpdate = result.latestUpdate
 		personal.secondsToNextKickout = result.secondsToNextKickout
@@ -254,7 +265,13 @@ export async function persistTurn() {
 	if (personal.gameID < 0) return true
 	const g = store.getGame()
 	const ended = g.isEnded()
-	const finalGroups = ended ? g.rankingGroups() : []
+	const finalGroups = ended
+		? g
+				.rankingGroups()
+				.map((group) => group.filter((name) => !store.missingPlayers.includes(name)))
+				.filter((group) => group.length > 0)
+		: []
+	const seatNames = Array.isArray(window.initData?.playerNames) ? window.initData.playerNames : g.state.players.map((p) => p.name)
 	const order = g.state.playerOrder.length > 0 ? g.state.playerOrder : g.state.players.map((p) => p.name)
 	const current = g.currentPlayer
 	const rotated = [current, ...order.filter((p) => p !== current && !store.missingPlayers.includes(p))]
@@ -270,11 +287,15 @@ export async function persistTurn() {
 			allRemainingPlayersInTurnOrder: rotated,
 			saveRewind: true,
 			winner: ended ? finalGroups[0] : undefined,
-			finalPositions: ended ? finalGroups.map((group) => group.map((name) => g.state.players.findIndex((p) => p.name === name))) : undefined,
+			finalPositions: ended ? finalPositionsFor(finalGroups, seatNames) : undefined,
 		})
 		if (result.syncError) {
 			store.gameMessages.errorText = i18n.global.t("error.olderVersion")
 			return false
+		}
+		if (result.finishedGame) {
+			await reloadFromServer()
+			return true
 		}
 		personal.latestUpdate = Number(result.latestUpdate)
 		window.initData.latestUpdate = result.latestUpdate
@@ -298,11 +319,13 @@ export async function reloadFromServer() {
 	// the state that exitReplay restores.
 	if (store.viewSettings.showReplay) return
 	try {
-		const data = await reloadGameData(personal.gameID)
+		const data = await reloadGameData(personal.gameID, personal.latestUpdate)
+		if (data.gameDoesNotExist) return
 		if (Array.isArray(data.missingPlayers)) store.missingPlayers = data.missingPlayers
 		if (data.kickoutVotesData) store.kickoutVotesData = data.kickoutVotesData
 		if (data.kickoutVoteThreshold != null) store.kickoutVoteThreshold = Number(data.kickoutVoteThreshold)
 		if (data.kickoutRequired != null) personal.kickoutRequired = Number(data.kickoutRequired)
+		if (data.latest) return
 		if (String(data.latestUpdate) === String(personal.latestUpdate)) return
 		let gd = data.gameData
 		if (typeof gd === "string") gd = JSON.parse(gd)
@@ -312,6 +335,7 @@ export async function reloadFromServer() {
 			model.restoreRng(gd)
 			store.setGame(deserializeGame(gd))
 			model.restoreHistoryFrom(gd)
+			model.restoreReplayInitial(gd)
 			if (Number.isFinite(Number(data.turn))) store.turn = Number(data.turn)
 			else if (Number.isFinite(Number(gd.turn))) store.turn = Number(gd.turn)
 			// OBG is authoritative for turn order; realign to its current players,
@@ -335,7 +359,7 @@ export async function reloadFromServer() {
 export async function runAutomaIfNeeded() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	if (!personal.automaGame || store.saving || store.viewSettings.showReplay) return
+	if (personal.pov < 0 || !personal.automaGame || store.saving || store.viewSettings.showReplay) return
 	const g = store.game
 	if (!g || g.isEnded() || g.currentPlayer !== AI_NAME) return
 	store.saving = true
@@ -382,7 +406,12 @@ export async function resignGame() {
 	const personal = usePersonalStore()
 	if (personal.gameID < 0) return
 	try {
-		await resign(personal.gameID)
+		const result = await resign(personal.gameID, personal.latestUpdate)
+		if (result.syncError) {
+			store.gameMessages.errorText = i18n.global.t("error.olderVersion")
+			await reloadFromServer()
+			return
+		}
 		model.recordHistory("RESIGN", personal.name)
 		await reloadFromServer()
 	} catch (error) {
@@ -402,10 +431,15 @@ export async function kickoutPlayer(kickedName) {
 	if (personal.gameID < 0 || !kickedName) return
 	try {
 		const result = await kickout(personal.gameID, kickedName, personal.latestUpdate)
-		if (result.syncError) return
+		if (result.syncError) {
+			store.gameMessages.errorText = i18n.global.t("error.olderVersion")
+			await reloadFromServer()
+			return
+		}
 		if (result.voteCast) {
 			if (result.votesData) store.kickoutVotesData = JSON.parse(result.votesData)
 			if (result.threshold != null) store.kickoutVoteThreshold = Number(result.threshold)
+			broadcastGameUpdate()
 			return
 		}
 		personal.kickoutRequired = 0
@@ -413,5 +447,6 @@ export async function kickoutPlayer(kickedName) {
 		await reloadFromServer()
 	} catch (error) {
 		console.error("Error kicking out player:", error)
+		store.gameMessages.errorText = error?.message || i18n.global.t("error.kickingOut")
 	}
 }

@@ -596,9 +596,7 @@
     "status": {
       "garthThinking": "Garth denkt na…",
       "playing": "In spel",
-      "yourTurnBadge": "JIJ BENT AAN ZET",
-      "gameOver": "Spel afgelopen",
-      "replay": "Herhaling"
+      "gameOver": "Spel afgelopen"
     },
     "actionArea": {
       "moveStepsLeft": "Verplaatsen — klik op een gemarkeerde plek ({steps} stappen over; geel = volgende stap, cyaan = verder)",

@@ -8,10 +8,13 @@ import * as view from "../js/ROWview"
 import { playerBuildingInfo } from "../js/ROWdata"
 import { AI_NAME } from "../js/automa/index"
 import { useModelStore } from "../stores/ROWstore.js"
+import { usePersonalStore } from "../stores/ROWpersonal.js"
+import TurnNudge from "./utils/TurnNudge.vue"
 
 const { ActionType, Hand, Status } = rf
 const { t } = useI18n()
 const store = useModelStore()
+const personal = usePersonalStore()
 
 const g = () => store.getGame()
 const actions = computed(() => store.actions)
@@ -173,6 +176,7 @@ const discardOnly = computed(() => cardActions.value.length === 1 && cardActions
 			<button v-if="store.canSkip" class="actionsLineButton" :disabled="store.saving" @click="controller.skip()">{{ t('action.skip') }}</button>
 		</div>
 		</template>
+		<TurnNudge v-if="!store.viewSettings.showReplay && personal.gameID > 0 && personal.pov >= 0 && !personal.trainingGame" :game-id="personal.gameID" :latest-update="personal.latestUpdate" />
 	</div>
 </template>
 

@@ -10,7 +10,7 @@ from unittest.mock import patch
 from lzstring import LZString
 
 from Lobby.extraStats import collect_extra_stats, decode_game_data, read_history
-from Lobby.models import Game, User
+from Lobby.models import Game, GamePlayer, User
 
 
 CREATED = 1_790_985_600
@@ -69,6 +69,33 @@ class ExtraStatsTests(TestCase):
         data = [[], [], [], [], [], [], [], history]
         return Game.objects.create(gameCode="CNS", creator=self.user, host=self.user, gameStatus="FINISHED", maxPlayers=2, created=str(CREATED * 1000), latestUpdate=str((CREATED + 86400 * 4) * 1000), gameData=base64.b64encode(gzip.compress(json.dumps(data).encode())).decode(), **kwargs)
 
+    def test_row_history_maps_player_names_to_seats_and_milliseconds(self):
+        other = User.objects.create_user(username="row-other", password="testpass123")
+        game = Game.objects.create(
+            gameCode="ROW",
+            creator=self.user,
+            host=self.user,
+            gameStatus="FINISHED",
+            maxPlayers=2,
+            created=str(CREATED * 1000),
+            latestUpdate=str((CREATED + 400) * 1000),
+            gameData=json.dumps(
+                {
+                    "history": [
+                        {"type": "END_TURN", "player": "row-other", "time": (CREATED + 300) * 1000},
+                        {"type": "MOVE", "player": "stats-player", "time": (CREATED + 100) * 1000},
+                    ]
+                }
+            ),
+        )
+        GamePlayer.objects.create(game=game, player=self.user, seat_order=0)
+        GamePlayer.objects.create(game=game, player=other, seat_order=1)
+
+        self.assertEqual(read_history(game, decode_game_data(game)), [(0, CREATED + 100), (1, CREATED + 300)])
+        stats = next(item for item in collect_extra_stats() if item["gameCode"] == "ROW")
+        self.assertEqual(stats["finished"], 1)
+        self.assertEqual(stats["unreadable"], 0)
+
     def test_splits_lobby_play_and_tail_and_counts_player_samples(self):
         self.create_game([[0, -1, 0, []], [1, 0, 86400, []], [2, 1, 86400 * 3, []], [3, 1, 86400 * 3, []]])
         stats = next(game for game in collect_extra_stats() if game["gameCode"] == "CNS")
@@ -106,7 +133,7 @@ class ExtraStatsTests(TestCase):
         count = Game.objects.count()
         response = self.client.get("/extraStats?demo=FCM")
         self.assertContains(response, 'id="extraStatsGameTabs"')
-        self.assertContains(response, 'class="statsIMG"', count=12)
+        self.assertContains(response, 'class="statsIMG"', count=13)
         self.assertContains(response, '"isSynthetic": true')
         self.assertContains(response, 'Synthetic FCM preview')
         self.assertEqual(Game.objects.count(), count)

@@ -2066,8 +2066,22 @@ class ROWpresenter(GamePresenter):
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
-        names = self.getAllPlayersOrderedySeatInArray()
+        # Keep the real names for missing seats: final positions must never be
+        # credited to the RowBot placeholder, and missing players rank last.
+        names = self.getAllPlayersOrderedySeatInArray(True)
+        missing = set(self.getMissingPlayersNamesArray())
+        positions = _finalPositions or []
+        if positions and not isinstance(positions[0], (list, tuple)):
+            positions = [positions]
+
         winners = _winnerUsername if isinstance(_winnerUsername, (list, tuple)) else [_winnerUsername]
+        winners = [username for username in winners if username and username not in missing]
+        if not winners and positions:
+            for seatPos in positions[0]:
+                if isinstance(seatPos, int) and 0 <= seatPos < len(names) and names[seatPos] not in missing:
+                    winners = [names[seatPos]]
+                    break
+
         winnerNamesArray = []
         for username in winners:
             winner_user = User.objects.get(username=username)
@@ -2080,28 +2094,28 @@ class ROWpresenter(GamePresenter):
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
 
-        positions = _finalPositions or []
-        if positions and not isinstance(positions[0], (list, tuple)):
-            positions = [positions]
-
         finalResults = []
         placed_seats = set()
         for group_index, group in enumerate(positions):
-            for seatPos in group:
+            group_entries = [
+                (seatPos, names[seatPos])
+                for seatPos in group
+                if isinstance(seatPos, int) and 0 <= seatPos < len(names) and names[seatPos] not in missing
+            ]
+            for seatPos, username in group_entries:
                 placed_seats.add(seatPos)
-                username = names[seatPos]
                 if group_index == 0:
-                    text = "Joint 1st - Congratulations!" if len(group) > 1 else "1st - Congratulations!"
+                    text = "Joint 1st - Congratulations!" if len(group_entries) > 1 else "1st - Congratulations!"
                 elif group_index == 1:
-                    text = "Joint 2nd" if len(group) > 1 else "2nd"
+                    text = "Joint 2nd" if len(group_entries) > 1 else "2nd"
                 elif group_index == 2:
-                    text = "Joint 3rd" if len(group) > 1 else "3rd"
+                    text = "Joint 3rd" if len(group_entries) > 1 else "3rd"
                 elif group_index == 3:
-                    text = "Joint 4th" if len(group) > 1 else "4th"
+                    text = "Joint 4th" if len(group_entries) > 1 else "4th"
                 elif group_index == 4:
-                    text = "Joint 5th" if len(group) > 1 else "5th"
+                    text = "Joint 5th" if len(group_entries) > 1 else "5th"
                 elif group_index == 5:
-                    text = "Joint 6th" if len(group) > 1 else "6th"
+                    text = "Joint 6th" if len(group_entries) > 1 else "6th"
                 else:
                     text = "Last"
                 finalResults.append([username, text, group_index])

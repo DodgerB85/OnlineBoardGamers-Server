@@ -22,7 +22,7 @@ The code must appear everywhere the site enumerates games:
 - `Lobby/views.py` → `GAME_NAMES_MODELS` (player profile, join links, delete-game and fair-play loops), plus `stats()` `game_codes` / `GAME_META` from section 9.
 - `Lobby/gameViewHelpers.py` / middleware — the `ForceTrailingSlashMiddleware` game-code list in `Lobby/middleware.py` if game pages live under `/XYZ/`.
 - Option icons: call your `SR_getXYZstartingOptionsHTML` from `SF_serializeGame` (`Lobby/sharedFunctions/sharedFunctions.py`) and from `Tournament.startingOptionsHTML` (`Lobby/models.py`), or lobby/tournament rows show `[None]`.
-- Admin: add `XYZgame` (and `XYZMiniTournament` if mini tournaments are supported) to `Lobby/modelProxies.py` and register them in `Lobby/admin.py`; proxies need an app migration.
+- Admin: add `XYZgame` (and `XYZMiniTournament` if mini tournaments are supported) to `Lobby/modelProxies.py` and register them in `Lobby/admin.py`; proxies need an app migration (`manage.py makemigrations XYZ`, e.g. `URR/migrations/0002_urrminitournament.py`).
 - `Lobby/templates/Lobby/gameDisplay/gameIcons.html` (game icon) and `Lobby/templates/Lobby/admin/DBO.html` (admin show-page link).
 - Tournaments: `start_next_any_tournament_round` in `Lobby/sharedFunctions/sharedFunctions.py` dispatches per game code — without a branch every generated game falls into the legacy call and 500s.
 - `siteUtils/AutoSiteSweeper.py` → `GAME_CODES` (stale-game deletion; add it to `SINGLE_WINNER_GAMES`/`AT_LEAST_ONE_WINNER_GAMES` only if its end-game always marks winners).
@@ -46,7 +46,7 @@ Then add the create page:
 - `Lobby/templates/Lobby/createXYZ.html` (copy `createWEB.html`). It comes with the shared create-page pieces already wired in: `Lobby/createGamePage.js` (autocomplete, `getCookie`, `removeOption`/`addOption`, `setKickoutOptions`, `showSeats`/`clearSeatNames`, `validateGameType`), `Lobby/createCommonOptions.html` (the Common Options card, parameterised by the practice-game sentence) and `Lobby/kickoutOptions.html` (translated kickout labels). Keep only the per-game `validateOptions` / `selectPlayers` / `initGameCreation` in `Lobby/createXYZ.js` - do not copy the shared helpers into it.
 - Only render a Game Options card when the game actually has options. Do not ship a placeholder "options will be added here" card. If the page ends up with two cards, add `setup-cards-grid-two` to the grid so a wide screen does not leave an empty third column.
 - `createXYZpage` view in `Lobby/views.py` (copy `createWEBpage`; it also implements the rematch/`gameID` prefill),
-- routes in `Lobby/urls.py`: `createXYZpage/` and `createXYZpage/<int:gameID>/`, plus `createXYZminiTournament/` and its view/reverse entries if mini tournaments are wanted.
+- routes in `Lobby/urls.py`: `createXYZpage/` and `createXYZpage/<int:gameID>/`, plus `createXYZminiTournament/` and its view/reverse entries if mini tournaments are wanted. The mini route reuses this same create page with `MT_Creation=True` and creates a `Tournament`, not a `Game` — see section 10.
 
 ## 4. Presenter
 
@@ -150,10 +150,27 @@ A game can create, save and finish correctly and still be invisible. Grep each f
 - `Lobby/static/Lobby/playerInfo.js` — stats tab listener, stats div index, and the delete-training-game branch.
 - `Lobby/static/Lobby/stats.js` + `Lobby/templates/Lobby/game_tabs.html` — stats tab listener, tab button, fair-play div index and per-game player-count visibility if the game appears on the site stats page.
 - `Lobby/views.py` → `stats()` `game_codes` list and `GAME_META`; `Lobby/extraStats.py` → `read_history()` if the exported history format differs. Otherwise the game is missing from site stats.
-- `Lobby/templates/Lobby/newMiniTournaments.html` — tile if mini tournaments are supported (with the matching `createXYZminiTournament` view and route from section 3).
+- `Lobby/templates/Lobby/newMiniTournaments.html` — tile if mini tournaments are supported; the full mini-tournament checklist is in section 10.
 - `tests/test_game_creation_all_games.py` — add the game to `GAMES` (creation POST coverage) and `CREATE_PAGE_FIELDS` (create-page markup coverage).
 - `Lobby/templates/Lobby/gameDisplay/gameIcons.html` and `Lobby/templates/Lobby/admin/DBO.html` are already required in section 2; re-check them after UI additions.
 
+## 10. Mini tournaments
+
+Mini tournaments reuse the normal create page and `create_xyz_game` tournament path. The missing pieces are the creation route, the `MT_Creation` branch and the round dispatch.
+
+- Creation page — branch on `MT_Creation` exactly like `createWEB.html` / `createKFW.html`:
+  - title and back link (`newMiniTournaments` instead of `newGamesPage`),
+  - form action `{% url 'createXYZminiTournament' %}` instead of the game creation route,
+  - a "Mini Tournament Setup Options" card with tournament name, description, format, players per game, total players and the private checkbox,
+  - the Common Options invite card (`playerToInviteMT`, `invtePlayersListMT`, `invitePlayerMTbutton`) instead of the normal game-type card,
+  - `Lobby/miniTournament.js` loaded so the total-players select rebuilds to multiples of players-per-game.
+- `createXYZ.js` — in `initGameCreation`, when `global.MT_Creation` is true, set `global.invitedPlayersArr = []`, attach `autocomplete(playerToInviteMT)`, bind `invitePlayerMTbutton` to `invitePlayerMT`, then return before touching normal-only fields (`playerNumber`, `trainingGame`, `pace`, etc.).
+- View and route — add `createXYZminiTournament` to `Lobby/views.py` and `Lobby/urls.py`. It creates a `Tournament` with `tournamentCategory="Mini"`, `gameCode="XYZ"`, `maxGamePlayers`, `maxTournamentPlayers`, `roundsBeforeKnockout=4`, optional private status, and sends `SN_sendMiniTournamentInvite`. Validate the game's legal per-game player range server-side (URR: 3–6).
+- Tournament start — `start_next_any_tournament_round` in `Lobby/sharedFunctions/sharedFunctions.py` needs an `elif tournamentObj.gameCode == "XYZ": newGameID = create_xyz_game(...)` branch. Without it the legacy `else` call 500s.
+- Byes — if the game cannot be played with 2 players, add it to the `["HLC", "BUS", "URR"]` list in `SF_createNextRoundGamesSetup` so 1–2 leftovers get byes instead of a short game.
+- Admin — add the `XYZMiniTournament` proxy to `Lobby/modelProxies.py`, register `XYZMiniTournamentAdmin` in `Lobby/admin.py`, then `manage.py makemigrations XYZ`.
+- Tiles — add the game to `Lobby/templates/Lobby/newMiniTournaments.html` in the intended order.
+- Tests — cover the GET page fields, creation POST, illegal player-count rejection, starting the tournament creates an `ACTIVE` game, and the bye rule. `tests/test_urr_mini_tournament.py` is the current template.
 
 ## Final smoke test
 
@@ -162,4 +179,5 @@ A game can create, save and finish correctly and still be invisible. Grep each f
 3. Submit a stale move (replay the same POST with an old `latestUpdate`) and confirm a `syncError` response.
 4. Kickout timer unfurls on the lobby; end the game and check winners/points.
 5. Check the new game appears on `/newGames/`, the logged-out `/`, the help page and the icon legend, and that notification/email links resolve to `/XYZ/<id>/show/`.
-6. `python manage.py test` still green.
+6. Create a mini tournament, fill it, start it, and verify the generated games are `ACTIVE`, have the intended number of players, and advance to the next round.
+7. `python manage.py test` still green.

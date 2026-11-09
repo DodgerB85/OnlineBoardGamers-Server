@@ -2,18 +2,12 @@ import base64
 import gzip
 import json
 import time
-import uuid
-from datetime import timedelta
 from typing import TYPE_CHECKING, cast
-
-from decouple import config
 
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
-from django.utils import timezone
 from django.utils.translation import gettext
-from django_q.tasks import schedule
 
 import Lobby.sharedFunctions.constants as rf
 from Lobby.gameViewHelpers import (
@@ -65,7 +59,6 @@ def showROWgame(request, game_id=1, spoilerFree=False, replayStep=1):
         "ROW",
         default_zoom=16,
         settings_debug_key="ROW_USE_SOURCE_CODE",
-        clear_chat_notification=False,
     )
     if isinstance(result, HttpResponseRedirect):
         return result
@@ -95,7 +88,7 @@ def showROWgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     currentPlayersArr = []
     if currentGame.phase in rfROW.MAIN_PHASES:
-        currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else [])
+        currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder or [])
     elif currentGame.phase == rfROW.PHASE_GAME_OVER:
         currentPlayersArr = json.dumps(presenter.getArrayOfIsCurrentPlayers())
 
@@ -116,14 +109,6 @@ def showROWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData.update(result["auth_data"])
     returnData["pov"] = -9
 
-    # Chat notification clearing (mirrors the other games)
-    all_gps_including_kicked = list(currentGame.players.select_related("player").all())
-    chat_notify_ids_all = {gp.player.id for gp in all_gps_including_kicked if gp.player and gp.has_chat_notification}
-    if request.user.id in chat_notify_ids_all:
-        returnData["chatNotification"] = True
-        presenter.removeChatNotification(request.user)
-        currentGame.save()
-
     if not result["is_involved"]:
         return render(request, "ROW/showROWgame.html", returnData)
 
@@ -136,6 +121,24 @@ def showROWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     )
 
     return render(request, "ROW/showROWgame.html", returnData)
+
+
+def _promoteNextCurrentPlayer(currentGame, presenter):
+    """Move the turn to the next active player after the current seat leaves.
+
+    ``addMissingPlayer``/``addKickedPlayer`` only remove the seat from the
+    server turn order. Without this, a resignation on your own turn leaves the
+    game with no current player and every client refuses to act.
+    """
+    missing = set(presenter.getMissingPlayersNamesArray())
+    names = [name for name in (currentGame.serverCurrentPlayerNamesInTurnOrder or []) if name not in missing]
+    if not names:
+        currentGame.players.update(is_current=False)
+        currentGame.serverCurrentPlayerNamesInTurnOrder = []
+        currentGame.save()
+        return
+    presenter.setCurrentPlayersFromArrInTurnOrder([names[0]])
+    presenter.setServerCurrentPlayerNamesInTurnOrder(names)
 
 
 def processROWturn(request):
@@ -161,6 +164,18 @@ def _processROWturn(request):
     if not can_act_in_game(request.user, currentGame):
         return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
+    # A finished game is final: ignore late saves, votes and resignations from
+    # stale tabs instead of letting them overwrite the stored result.
+    if currentGame.gameStatus == "FINISHED":
+        return JsonResponse(
+            {
+                "finishedGame": True,
+                "latestUpdate": currentGame.latestUpdate,
+                "secondsToNextKickout": 0,
+            },
+            safe=False,
+        )
+
     if jsonData["action"] == "saveGame":
         return performSaveROWGame(request, currentGame, jsonData)
 
@@ -172,15 +187,22 @@ def _processROWturn(request):
         return performSaveROWGame(request, currentGame, jsonData)
 
     elif jsonData["action"] == "resign":
+        if str(latest_update) != str(currentGame.latestUpdate):
+            return JsonResponse({"syncError": True}, safe=False)
+
+        was_current = currentGame.players.filter(player__username=request.user.username, is_current=True).exists()
         _missingPlayer = User.objects.get(username=request.user.username)
         presenter.addMissingPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
+        if was_current:
+            _promoteNextCurrentPlayer(currentGame, presenter)
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
         currentGame.save()
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
+                "missingPlayers": presenter.getMissingPlayersNamesArray(),
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             },
             safe=False,
@@ -192,21 +214,41 @@ def _processROWturn(request):
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
-        kickout_vote_result = presenter.processKickoutVote(request.user.username, jsonData["kickedName"])
+        participant = currentGame.players.filter(player=request.user, is_missing=False, is_kicked=False).exists()
+        if not participant and not is_game_admin(request.user):
+            return JsonResponse({"error": gettext("Only another active player can initiate kickout.")}, status=403)
+
+        target_username = jsonData["kickedName"]
+        target_gp = currentGame.players.filter(player__username=target_username).first()
+        if target_username == request.user.username or target_gp is None or target_gp.is_missing or target_gp.is_kicked:
+            return JsonResponse({"error": gettext("Invalid kickout target")}, status=400)
+
+        # Mirror URR/BUS: only the player actually on turn can be kicked, and
+        # only when the server itself says the timer expired. A dialog left open
+        # on a client can outlive the move that reset the clock.
+        live_current_usernames = set(
+            currentGame.players.filter(is_current=True, is_missing=False, is_kicked=False).values_list("player__username", flat=True)
+        )
+        target_on_turn = not live_current_usernames or target_username in live_current_usernames
+        if not target_on_turn or presenter.kickoutRequired() != 2:
+            return JsonResponse({"error": gettext("This player is not eligible for kickout.")}, status=400)
+
+        kickout_vote_result = presenter.processKickoutVote(request.user.username, target_username)
         if kickout_vote_result["voteCast"]:
             currentGame.save()
             return JsonResponse(kickout_vote_result, safe=False)
 
-        # The kickout target is client-supplied; only trust it if it is a real seat
-        # in this game and not the requester themselves.
-        target_username = jsonData["kickedName"]
-        if target_username == request.user.username or not currentGame.players.filter(player__username=target_username).exists():
-            return JsonResponse({"error": "Invalid kickout target"}, status=400)
-
+        was_current = target_username in live_current_usernames
         _missingPlayer = User.objects.get(username=target_username)
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
+        if was_current or not live_current_usernames:
+            _promoteNextCurrentPlayer(currentGame, presenter)
+
+        # Cannot rewind past a kickout.
+        currentGame.rewindData = ""
+        currentGame.rewindTempData = ""
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
@@ -214,6 +256,7 @@ def _processROWturn(request):
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
+                "missingPlayers": presenter.getMissingPlayersNamesArray(),
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
             },
             safe=False,
@@ -286,6 +329,17 @@ def performSaveROWGame(request, currentGame, jsonData):
     game_id = currentGame.id
     presenter = cast("ROWpresenter", currentGame.presenter())
 
+    # A finished game is final: ignore late saves from stale tabs.
+    if currentGame.gameStatus == "FINISHED":
+        return JsonResponse(
+            {
+                "finishedGame": True,
+                "latestUpdate": currentGame.latestUpdate,
+                "secondsToNextKickout": 0,
+            },
+            safe=False,
+        )
+
     if str(latest_update) != str(db_latest_update):
         message = (
             f"SYNC ERROR IN: ROW save - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} "
@@ -340,7 +394,7 @@ def performSaveROWGame(request, currentGame, jsonData):
             if len(playerListToNotify) > 0:
                 presenter.sendYourTurnNotification("ROW", playerListToNotify, currentGame.id, presenter.getGameName(), currentGame, oldVer)
 
-    if jsonData.get("saveRewind", True):
+    if jsonData.get("saveRewind", True) and jsonData.get("status") != "FINISHED":
         doSaveRewind(currentGame, jsonData)
 
     presenter.clearKickoutVotes()
@@ -499,16 +553,33 @@ def ROWdata(request, dataType=1):
         return JsonResponse({"chatData": currentGame.chatData}, safe=True)
 
     if dataType == 3:
-        gameUpdate = int(jsonData["latestUpdate"])
+        gameUpdate = int(jsonData.get("latestUpdate", 0) or 0)
         latestUpdate = int(currentGame.latestUpdate)
         if gameUpdate == latestUpdate:
-            return JsonResponse({"latest": True}, safe=False)
+            # Kickout votes do not bump latestUpdate (that would reset the timer),
+            # so still return the small vote snapshot on an otherwise unchanged poll.
+            return JsonResponse(
+                {
+                    "latest": True,
+                    "kickoutVotesData": presenter.getKickoutVotesData(),
+                    "kickoutVoteThreshold": presenter.getKickoutVoteThreshold(),
+                    "kickoutRequired": presenter.kickoutRequired(),
+                },
+                safe=False,
+            )
         return JsonResponse(
             {
                 "latest": False,
                 "gameData": currentGame.gameData if currentGame.gameData else "{}",
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+                "finishedGame": currentGame.gameStatus == "FINISHED",
                 "latestUpdate": currentGame.latestUpdate,
+                "turn": currentGame.turn,
+                "missingPlayers": presenter.getMissingPlayersNamesArray(),
+                "currentPlayerNames": currentGame.serverCurrentPlayerNamesInTurnOrder or [],
+                "kickoutVotesData": presenter.getKickoutVotesData(),
+                "kickoutVoteThreshold": presenter.getKickoutVoteThreshold(),
+                "kickoutRequired": presenter.kickoutRequired(),
                 "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
                 "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
                 "transactionID": currentGame.transactionID,

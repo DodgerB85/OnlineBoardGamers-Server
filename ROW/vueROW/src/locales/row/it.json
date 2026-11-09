@@ -598,9 +598,7 @@
     "status": {
       "garthThinking": "Garth sta pensando…",
       "playing": "In gioco",
-      "yourTurnBadge": "TOCCA A TE",
-      "gameOver": "Partita terminata",
-      "replay": "Replay"
+      "gameOver": "Partita terminata"
     },
     "actionArea": {
       "moveStepsLeft": "Muovi — fai clic su un punto evidenziato ({steps} passi rimasti; giallo = passo successivo, ciano = più lontano)",
