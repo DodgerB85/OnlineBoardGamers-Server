@@ -594,7 +594,11 @@
       }
     },
     "status": {
-      "garthThinking": "Garth está pensando…"
+      "garthThinking": "Garth está pensando…",
+      "playing": "Em jogo",
+      "yourTurnBadge": "A TUA VEZ",
+      "gameOver": "Jogo terminado",
+      "replay": "Repetição"
     },
     "actionArea": {
       "moveStepsLeft": "Mover — clique num local destacado ({steps} passos restantes; amarelo = próximo passo, ciano = mais adiante)",

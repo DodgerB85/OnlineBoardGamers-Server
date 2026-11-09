@@ -22,4 +22,5 @@ function showState() {
 
 <style scoped>
 #debugArea { border: 1px dashed darkred; background: #fff3cd; padding: 4px; margin: 6px auto; max-width: 700px; font-size: 12px; text-align: left; }
+#debugArea .actionsLineButton { margin: 4px 0; }
 </style>

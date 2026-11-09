@@ -7,6 +7,7 @@
  * working with Django serving static in both dev and prod.
  */
 import i18n from "../i18n"
+import { ActionType, Status } from "./ROWcore"
 
 const STATIC_BASE = "/static/ROW/"
 
@@ -19,6 +20,7 @@ export function getImage(image) {
 	if (image === "icon-nextGame") return asset("images/icon-nextGame.svg")
 	if (image === "icon-rulebook") return asset("images/icon-rulebook.svg")
 	if (image === "icon-info") return asset("images/icon-info.svg")
+	if (image === "icon-help") return asset("images/icon-help.svg")
 	if (image === "icon-rewind") return asset("images/icon-rewind.svg")
 	if (image === "icon-chat") return asset("images/icon-chat.svg")
 	if (image === "icon-stop") return asset("images/icon-stop.svg")
@@ -117,4 +119,16 @@ export function humanizeAction(a) {
 		.replace(/_/g, " ")
 		.toLowerCase()
 		.replace(/^\w/, (c) => c.toUpperCase())
+}
+
+/** One-line status shared by the turn bar and the action panel. */
+export function actionPanelTitle(store) {
+	const game = store.game
+	if (!game) return i18n.global.t("app.waitingForOthers")
+	if (game.isEnded()) return i18n.global.t("row.status.gameOver")
+	if (store.state?.status === Status.BIDDING) return i18n.global.t("row.bidding.title")
+	const actions = store.actions ?? []
+	if (actions.includes(ActionType.MOVE)) return humanizeAction(ActionType.MOVE)
+	if (actions.length) return humanizeAction(actions[0])
+	return i18n.global.t("app.waitingForOthers")
 }

@@ -594,7 +594,11 @@
       "NOT_IMPLEMENTED": "Cette action n'est pas encore implémentée."
     },
     "status": {
-      "garthThinking": "Garth réfléchit…"
+      "garthThinking": "Garth réfléchit…",
+      "playing": "En jeu",
+      "yourTurnBadge": "À TOI DE JOUER",
+      "gameOver": "Partie terminée",
+      "replay": "Relecture"
     },
     "actionArea": {
       "moveStepsLeft": "Déplacement — clique sur un emplacement surligné ({steps} pas restants ; jaune = prochain pas, cyan = plus loin)",

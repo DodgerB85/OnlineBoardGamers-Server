@@ -594,7 +594,11 @@
       "NOT_IMPLEMENTED": "Diese Aktion ist noch nicht umgesetzt."
     },
     "status": {
-      "garthThinking": "Garth denkt nach…"
+      "garthThinking": "Garth denkt nach…",
+      "playing": "Im Spiel",
+      "yourTurnBadge": "DU BIST DRAN",
+      "gameOver": "Spiel beendet",
+      "replay": "Wiederholung"
     },
     "actionArea": {
       "moveStepsLeft": "Bewegen — klicke auf ein markiertes Feld ({steps} Schritte übrig; gelb = nächster Schritt, cyan = weiter)",

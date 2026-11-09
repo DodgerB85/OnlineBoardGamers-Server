@@ -594,7 +594,11 @@
       "stopsHazard": "Stops bij ramptegel"
     },
     "status": {
-      "garthThinking": "Garth denkt na…"
+      "garthThinking": "Garth denkt na…",
+      "playing": "In spel",
+      "yourTurnBadge": "JIJ BENT AAN ZET",
+      "gameOver": "Spel afgelopen",
+      "replay": "Herhaling"
     },
     "actionArea": {
       "moveStepsLeft": "Verplaatsen — klik op een gemarkeerde plek ({steps} stappen over; geel = volgende stap, cyaan = verder)",

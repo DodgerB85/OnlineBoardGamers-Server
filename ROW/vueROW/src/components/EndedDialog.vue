@@ -183,9 +183,9 @@ td.total { text-align: right; font-weight: bold; }
 .cats { max-width: 420px; }
 .cat { display: inline-block; margin-right: 8px; font-size: 12px; color: #333; }
 .tie { color: #ffe08a; font-weight: bold; margin-top: 8px; }
-.dialog-actions { display: flex; flex-wrap: wrap; justify-content: center; margin-bottom: 10px; }
-.ended-action { display: inline-block; color: #000; text-decoration: none; background: #efefef; }
-#bgStatsDiv { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; max-width: 620px; margin-bottom: 10px; }
+.dialog-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 10px; }
+.ended-action { display: inline-block; color: #000; text-decoration: none; }
+#bgStatsDiv { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; max-width: 620px; margin-bottom: 10px; }
 #bgStatsDiv a { color: #ffd400; }
 .bgStatsQr { flex-basis: 100%; }
 :deep(.bgStatsQr svg) { display: block; width: 100%; max-width: 564px; height: auto; margin: 8px auto; border: 1px solid black; }

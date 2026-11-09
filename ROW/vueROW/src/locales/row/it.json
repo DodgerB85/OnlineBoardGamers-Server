@@ -596,7 +596,11 @@
       "stopsHazard": "Soste ai pericoli"
     },
     "status": {
-      "garthThinking": "Garth sta pensando…"
+      "garthThinking": "Garth sta pensando…",
+      "playing": "In gioco",
+      "yourTurnBadge": "TOCCA A TE",
+      "gameOver": "Partita terminata",
+      "replay": "Replay"
     },
     "actionArea": {
       "moveStepsLeft": "Muovi — fai clic su un punto evidenziato ({steps} passi rimasti; giallo = passo successivo, ciano = più lontano)",

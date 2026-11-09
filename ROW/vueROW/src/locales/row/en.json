@@ -594,7 +594,11 @@
       "NOT_IMPLEMENTED": "This action is not implemented yet."
     },
     "status": {
-      "garthThinking": "Garth is thinking…"
+      "garthThinking": "Garth is thinking…",
+      "playing": "Playing",
+      "yourTurnBadge": "YOUR TURN",
+      "gameOver": "Game over",
+      "replay": "Replay"
     },
     "actionArea": {
       "moveStepsLeft": "Move — click a highlighted spot ({steps} steps left; yellow = next step, cyan = further)",

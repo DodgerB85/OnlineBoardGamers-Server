@@ -92,7 +92,7 @@ onUnmounted(() => clearInterval(timer))
 		</template>
 		<template v-else-if="personal.kickoutRequired === 1">
 			<div>{{ t('kickout.standardTimeUsed', { player: target }) }}</div>
-			<div>{{ t('kickout.flexTime', { time: duration(Math.max(0, personal.secondsToNextKickout)) }) }}</div>
+			<div :class="{ kickoutTimerBlink: personal.secondsToNextKickout < 60 }">{{ t('kickout.flexTime', { time: duration(Math.max(0, personal.secondsToNextKickout)) }) }}</div>
 			<button class="actionsLineButton ko" @click="cancel">{{ t('kickout.notNow') }}</button>
 		</template>
 		<template v-else>
@@ -122,5 +122,8 @@ onUnmounted(() => clearInterval(timer))
 	font-size: 13px;
 }
 #kickoutArea div { margin-bottom: 4px; }
+.kickoutTimerBlink { animation: kickoutTimerBlink 1s step-end infinite; }
+@keyframes kickoutTimerBlink { 0%, 100% { color: red; } 50% { color: inherit; } }
+.ko { margin: 4px; }
 .ko:disabled { opacity: 0.5; cursor: default; }
 </style>

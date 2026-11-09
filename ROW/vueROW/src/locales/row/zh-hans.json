@@ -594,7 +594,11 @@
       "NOT_IMPLEMENTED": "该行动尚未实现。"
     },
     "status": {
-      "garthThinking": "Garth 正在思考…"
+      "garthThinking": "Garth 正在思考…",
+      "playing": "进行中",
+      "yourTurnBadge": "轮到你了",
+      "gameOver": "游戏结束",
+      "replay": "回放"
     },
     "actionArea": {
       "moveStepsLeft": "移动 — 点击高亮地点（剩余 {steps} 步；黄色 = 下一步，青色 = 更远）",

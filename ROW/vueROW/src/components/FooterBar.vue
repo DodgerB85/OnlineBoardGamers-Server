@@ -6,11 +6,25 @@ const { t } = useI18n()
 
 <template>
 	<div id="footer">
-		<p>{{ t('app.footerAttribution') }}</p>
-		<p>{{ t('app.footerLicense') }} <code>static/ROW/artwork-license.txt</code>.</p>
+		<div class="content">
+			<p>{{ t('app.footerAttribution') }}</p>
+			<p>{{ t('app.footerLicense') }}</p>
+			<p>{{ t('app.footerIcons') }} <a href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a>.</p>
+		</div>
 	</div>
 </template>
 
 <style scoped>
-#footer { background: #333; color: #eee; min-height: 60px; padding: 10px; font-size: 12px; }
+#footer {
+	background-color: #333;
+	color: #eee;
+	margin: 0;
+	min-height: 100px;
+	height: fit-content;
+	padding: 10px;
+	position: relative;
+	flex-shrink: 0;
+}
+#footer .content { width: 95%; margin: auto; text-align: left; position: relative; }
+#footer a { color: #d4eafd; }
 </style>

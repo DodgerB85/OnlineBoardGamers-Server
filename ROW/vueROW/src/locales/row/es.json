@@ -594,7 +594,11 @@
       "NOT_IMPLEMENTED": "Esta acción aún no está implementada."
     },
     "status": {
-      "garthThinking": "Garth está pensando…"
+      "garthThinking": "Garth está pensando…",
+      "playing": "En juego",
+      "yourTurnBadge": "TU TURNO",
+      "gameOver": "Partida terminada",
+      "replay": "Repetición"
     },
     "actionArea": {
       "moveStepsLeft": "Mover — haz clic en un sitio resaltado ({steps} pasos restantes; amarillo = siguiente paso, cian = más lejos)",

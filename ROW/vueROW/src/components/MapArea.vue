@@ -48,6 +48,8 @@ function g() {
 	return v
 }
 
+const actable = computed(() => !!game.value && controller.canAct())
+
 const rttn = computed(() => game.value?.isRailsToTheNorth() ?? false)
 const shift = computed(() => (rttn.value ? 195 : 0))
 const board = computed(() => (game.value ? view.boardImage(game.value.edition) : ""))
@@ -141,7 +143,7 @@ function takeMove(name) {
 }
 
 function candidatesFor(name) {
-	if (!game.value) return []
+	if (!game.value || !actable.value) return []
 	const acts = store.actions
 	const player = g().currentPlayer
 	const out = []
@@ -265,6 +267,7 @@ const stayHereAt = computed(() => {
 })
 
 function clickLocation(name) {
+	if (!actable.value) return
 	const cands = candidatesFor(name)
 	if (!cands.length) return
 	if (cands.length === 1 && cands[0].enabled !== false) return cands[0].run()
@@ -274,7 +277,7 @@ function clickLocation(name) {
 }
 
 function choose(c) {
-	if (c.enabled === false) return
+	if (!actable.value || c.enabled === false) return
 	c.run()
 	chooser.value = null
 }
@@ -293,7 +296,7 @@ function deliveryTransport(city) {
 }
 
 function clickCity(idx, city) {
-	if (!game.value || !store.actions.includes(ActionType.DELIVER_TO_CITY)) return
+	if (!game.value || !actable.value || !store.actions.includes(ActionType.DELIVER_TO_CITY)) return
 	const name = city ?? cityStrip(g().edition, g().isRailsToTheNorth())[idx]
 	const pd = g().possibleDeliveries().find((d) => d.city === name)
 	if (!pd) return
@@ -326,7 +329,7 @@ function clickCity(idx, city) {
 
 /** Bonus station masters are taken at New York City: click the city, then the tile. */
 function clickBonusStationMasters() {
-	if (!game.value || !store.actions.includes(ActionType.TAKE_BONUS_STATION_MASTER)) return
+	if (!game.value || !actable.value || !store.actions.includes(ActionType.TAKE_BONUS_STATION_MASTER)) return
 	const masters = g().getRailroadTrack().stationMasters
 	if (!masters.length) return
 	const grp = cityGroups.value.find((cg) => cg.city === "NEW_YORK_CITY")
@@ -345,7 +348,7 @@ function clickBonusStationMasters() {
 }
 
 function clickSpace(space) {
-	if (!game.value) return
+	if (!game.value || !actable.value) return
 	const selected = store.selectedAction
 	const live = []
 	if (selected) {
@@ -367,7 +370,7 @@ function clickSpace(space) {
 }
 
 function stationClickable(i) {
-	if (!game.value) return false
+	if (!game.value || !actable.value) return false
 	const acts = store.actions
 	const player = g().currentPlayer
 	const rt = g().getRailroadTrack()
@@ -380,7 +383,7 @@ function stationClickable(i) {
 }
 
 function clickStation(i) {
-	if (!game.value) return
+	if (!game.value || !actable.value) return
 	const acts = store.actions
 	const player = g().currentPlayer
 	const rt = g().getRailroadTrack()
@@ -398,7 +401,7 @@ function clickStation(i) {
 }
 
 function hireActionFor(row, worker) {
-	if (!game.value) return null
+	if (!game.value || !actable.value) return null
 	const jm = g().getJobMarket()
 	if (row >= jm.currentRowIndex) return null
 	const hire = WORKER_ACTIONS.find((a) => store.actions.includes(a))
@@ -415,7 +418,7 @@ function clickWorker(row, worker) {
 }
 
 function clickForesight(col, row) {
-	if (!game.value) return
+	if (!game.value || !actable.value) return
 	const a = [ActionType.CHOOSE_FORESIGHT_1, ActionType.CHOOSE_FORESIGHT_2, ActionType.CHOOSE_FORESIGHT_3][col]
 	if (!store.actions.includes(a)) return
 	controller.perform({ type: a, choice: row })
@@ -597,7 +600,7 @@ const reachableSpaces = computed(() => {
 })
 
 const deliverableCities = computed(() => {
-	if (!game.value || !store.actions.includes(ActionType.DELIVER_TO_CITY)) return new Set()
+	if (!game.value || !actable.value || !store.actions.includes(ActionType.DELIVER_TO_CITY)) return new Set()
 	try {
 		return new Set(g().possibleDeliveries().map((d) => d.city))
 	} catch {
@@ -663,7 +666,7 @@ function buildingActionRegions(name, rect, inter) {
 }
 
 const activeBuildingRegions = computed(() => {
-	if (!game.value || !controller.canAct()) return []
+	if (!game.value || !actable.value) return []
 	return buildingTiles.value.flatMap((tile) => {
 		const inter = map.buildingInteraction(tile.name, g(), store.actions)
 		const building = g().getTrail().getLocation(tile.name).building.name
@@ -672,7 +675,7 @@ const activeBuildingRegions = computed(() => {
 })
 
 const foresightActive = computed(() => {
-	const acts = store.actions
+	const acts = actable.value ? store.actions : []
 	return {
 		0: acts.includes(ActionType.CHOOSE_FORESIGHT_1),
 		1: acts.includes(ActionType.CHOOSE_FORESIGHT_2),
@@ -719,7 +722,7 @@ const hoveredBuilding = computed(() => {
 	const inter = map.buildingInteraction(name, g(), store.actions)
 	const r = tile.rect
 	const building = tile.building
-	const regions = controller.canAct() ? buildingActionRegions(building, r, inter).map((region) => ({ ...region, name, mode: inter.mode })) : []
+	const regions = actable.value ? buildingActionRegions(building, r, inter).map((region) => ({ ...region, name, mode: inter.mode })) : []
 	return {
 		name,
 		building,
@@ -739,7 +742,7 @@ const hoveredBuilding = computed(() => {
 })
 
 function runHotspot(opt, name, mode) {
-	if (!controller.canAct()) return
+	if (!actable.value) return
 	if (mode === "adjacent") {
 		controller.perform({ type: ActionType.USE_ADJACENT_BUILDING, location: name })
 		return
@@ -783,7 +786,7 @@ function clickBuildingRegion(region, mode = region.mode) {
 
 // ---- top-layer clickable borders (drawn last so they are never covered) ----
 const hitTargets = computed(() => {
-	if (!game.value) return []
+	if (!game.value || !actable.value) return []
 	const out = []
 	for (const l of trailLocations.value) {
 		const hasTargets = candidatesFor(l.name).length > 0
@@ -818,6 +821,16 @@ const hitTargets = computed(() => {
 	return out
 })
 
+function targetLabel(t) {
+	if (t.type === "location") return t.name
+	if (t.type === "city") return t.city
+	if (t.type === "space") return t.space
+	if (t.type === "town") return t.name
+	if (t.type === "foresight") return `${t.col + 1}-${t.row + 1}`
+	if (t.type === "bonus") return "NEW_YORK_CITY"
+	return t.key
+}
+
 function clickTarget(t) {
 	if (t.type === "location") clickLocation(t.name)
 	else if (t.type === "city") clickCity(t.idx, t.city)
@@ -829,7 +842,7 @@ function clickTarget(t) {
 
 /** Rails to the North: drop a branchlet on the clicked town. */
 function clickTown(name) {
-	if (!game.value) return
+	if (!game.value || !actable.value) return
 	controller.perform({ type: ActionType.PLACE_BRANCHLET, town: name })
 }
 
@@ -882,7 +895,18 @@ function leaveTarget(t) {
 				</g>
 
 				<!-- stations -->
-				<g v-for="st in stations" :key="'station' + st.i" class="stationGroup" :class="{ selectable: stationClickable(st.i) }" @click="clickStation(st.i)">
+				<g
+					v-for="st in stations"
+					:key="'station' + st.i"
+					class="stationGroup"
+					:class="{ selectable: stationClickable(st.i) }"
+					:tabindex="stationClickable(st.i) ? 0 : undefined"
+					role="button"
+					:aria-label="t('row.actions.buttons.UPGRADE_STATION')"
+					@click="clickStation(st.i)"
+					@keydown.enter.prevent="clickStation(st.i)"
+					@keydown.space.prevent="clickStation(st.i)"
+				>
 					<rect class="station" :x="st.pos.x" :y="st.pos.y" width="33" height="33" rx="6" ry="6" />
 					<circle v-for="(d, i) in st.discs" :key="i" :class="'disc ' + d.color" :cx="d.cx" :cy="d.cy" r="11" />
 					<image v-if="st.masterImg && st.masterPos" :href="st.masterImg" :x="st.masterPos.x" :y="st.masterPos.y" width="33" height="39" />
@@ -890,7 +914,18 @@ function leaveTarget(t) {
 				</g>
 
 				<!-- job market -->
-				<g v-for="w in jobWorkers" :key="'jm' + w.key" class="workerGroup" :class="{ hireable: w.hireable }" @click="clickWorker(w.row, w.worker)">
+				<g
+					v-for="w in jobWorkers"
+					:key="'jm' + w.key"
+					class="workerGroup"
+					:class="{ hireable: w.hireable }"
+					:tabindex="w.hireable ? 0 : undefined"
+					role="button"
+					:aria-label="view.humanizeAction(ActionType.HIRE_WORKER)"
+					@click="clickWorker(w.row, w.worker)"
+					@keydown.enter.prevent="clickWorker(w.row, w.worker)"
+					@keydown.space.prevent="clickWorker(w.row, w.worker)"
+				>
 					<image :href="w.img" :x="w.x" :y="w.y" width="33" height="39" />
 					<rect class="hireOutline" :x="w.x" :y="w.y" width="33" height="39" rx="4" ry="4" />
 				</g>
@@ -941,19 +976,24 @@ function leaveTarget(t) {
 				<!-- clickable-target borders, drawn on top so they never get covered -->
 				<g class="hitLayer">
 					<rect
-						v-for="t in hitTargets"
-						:key="t.key"
-						:class="t.tone ? 'hit ' + t.tone : 'hit'"
-						:x="t.x"
-						:y="t.y"
-						:width="t.w"
-						:height="t.h"
-						:rx="t.rx"
-						:ry="t.rx"
-						:transform="t.transform || undefined"
-						@mouseenter="enterTarget(t)"
-						@mouseleave="leaveTarget(t)"
-						@click="clickTarget(t)"
+						v-for="target in hitTargets"
+						:key="target.key"
+						:class="target.tone ? 'hit ' + target.tone : 'hit'"
+						:x="target.x"
+						:y="target.y"
+						:width="target.w"
+						:height="target.h"
+						:rx="target.rx"
+						:ry="target.rx"
+						:transform="target.transform || undefined"
+						tabindex="0"
+						role="button"
+						:aria-label="targetLabel(target)"
+						@mouseenter="enterTarget(target)"
+						@mouseleave="leaveTarget(target)"
+						@click="clickTarget(target)"
+						@keydown.enter.prevent="clickTarget(target)"
+						@keydown.space.prevent="clickTarget(target)"
 					/>
 				</g>
 				<polygon
@@ -962,9 +1002,14 @@ function leaveTarget(t) {
 					class="hotspot originalHotspot"
 					:class="{ disabled: !region.affordable }"
 					:points="region.points"
+					tabindex="0"
+					role="button"
+					:aria-label="region.actions.map((a) => view.humanizeAction(a)).join(', ')"
 					@mouseenter="enterBuilding(region.name)"
 					@mouseleave="leaveBuilding"
 					@click.stop="clickBuildingRegion(region)"
+					@keydown.enter.prevent="clickBuildingRegion(region)"
+					@keydown.space.prevent="clickBuildingRegion(region)"
 				/>
 
 				<!-- hovered building: zoomed, with action hotspots -->
@@ -996,7 +1041,12 @@ function leaveTarget(t) {
 								class="hotspot"
 								:class="{ disabled: !region.affordable }"
 								:points="region.points"
+								tabindex="0"
+								role="button"
+								:aria-label="region.actions.map((a) => view.humanizeAction(a)).join(', ')"
 								@click.stop="clickBuildingRegion(region)"
+								@keydown.enter.prevent="clickBuildingRegion(region)"
+								@keydown.space.prevent="clickBuildingRegion(region)"
 							/>
 						</g>
 					</g>
@@ -1074,6 +1124,7 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 .stationGroup:hover .station { stroke: black; }
 .stationGroup.selectable .station { stroke: #ffd400; stroke-width: 4; }
 .stationGroup.selectable:hover .station { stroke: #90ee90; stroke-width: 6; }
+.stationGroup:focus-visible .station { stroke: #177daf; stroke-width: 6; }
 
 /* Cancel an armed action without leaving the board. */
 .cancelMove {
@@ -1090,6 +1141,7 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 .hireOutline { fill: transparent; stroke: none; pointer-events: none; }
 .workerGroup.hireable .hireOutline { stroke: #ffd400; stroke-width: 4; }
 .workerGroup.hireable:hover .hireOutline { stroke: #90ee90; stroke-width: 6; }
+.workerGroup:focus-visible .hireOutline { stroke: #177daf; stroke-width: 6; }
 
 /* Clickable targets: yellow border, cyan when more than one step away, light green on hover or on a shown route. */
 .hit {
@@ -1101,6 +1153,7 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 .hit.far { stroke: #00cfe0; }
 .hit.route { stroke: #90ee90; stroke-width: 7; }
 .hit:hover { stroke: #90ee90; stroke-width: 7; }
+.hit:focus-visible { stroke: #177daf; stroke-width: 7; }
 .hitLayer { pointer-events: all; }
 
 .points {
@@ -1151,6 +1204,7 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 	cursor: pointer;
 }
 .hotspot:hover { fill: rgb(144, 238, 144, 0.55); stroke: #90ee90; }
+.hotspot:focus-visible { fill: rgb(144, 238, 144, 0.55); stroke: #177daf; stroke-width: 3; }
 /* No dollars or no card to discard: orange, no hover state, click ignored. */
 .hotspot.disabled { fill: rgb(255, 165, 0, 0.4); stroke: orange; cursor: default; }
 .hotspot.disabled:hover { fill: rgb(255, 165, 0, 0.4); stroke: orange; }

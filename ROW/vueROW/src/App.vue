@@ -2,14 +2,17 @@
 /**
  * main app file. Initialise the store/model here.
  */
-import { computed } from "vue"
+import { computed, onMounted, onUnmounted } from "vue"
+import { useI18n } from "vue-i18n"
 
 import * as model from "./js/ROWmodel"
 import * as rf from "./js/ROWreference"
 import * as player from "./js/ROWplayer"
+import * as view from "./js/ROWview"
 
 import TopMenu from "./components/TopMenu.vue"
 import TopMenuViews from "./components/TopMenuViews.vue"
+import ResignPanel from "./components/ResignPanel.vue"
 import ActionArea from "./components/ActionArea.vue"
 import MapArea from "./components/MapArea.vue"
 import BiddingArea from "./components/BiddingArea.vue"
@@ -31,14 +34,53 @@ const personal = usePersonalStore()
 
 model.initGame()
 
+const { t } = useI18n()
 const boardPlayers = computed(() => player.boardPlayersOrder())
 const showDebug = computed(() => rf.DEBUG_USERS.includes(personal.name))
+const waitingForTurn = computed(() => {
+	if (store.viewSettings.showReplay) return true
+	if (store.game?.isEnded()) return false
+	if (personal.trainingGame || personal.pov < 0) return false
+	return store.currentPlayer !== personal.name
+})
+const myTurn = computed(() => personal.canPlay(store.currentPlayer) && !store.viewSettings.showReplay && !store.viewSettings.performingRewind && !store.game?.isEnded())
+const actingPlayer = computed(() => store.state?.players.find((p) => p.name === store.currentPlayer) ?? null)
+const turnStatusText = computed(() => {
+	if (store.viewSettings.showReplay) return t("row.status.replay")
+	if (store.game?.isEnded()) return t("row.status.gameOver")
+	return view.actionPanelTitle(store)
+})
+function playerColorClass(color) {
+	return String(color ?? "white").toLowerCase()
+}
+
+let kickoutTimer = null
+onMounted(() => {
+	kickoutTimer = setInterval(() => {
+		if (personal.secondsToNextKickout > 0) personal.secondsToNextKickout--
+	}, 1000)
+})
+onUnmounted(() => {
+	if (kickoutTimer) clearInterval(kickoutTimer)
+})
 </script>
 
 <template>
 	<TopMenu />
+	<div id="turnStatus" :class="{ myTurn: myTurn, gameOver: !store.viewSettings.showReplay && store.game?.isEnded() }">
+		<template v-if="store.viewSettings.showReplay">{{ t('row.status.replay') }}</template>
+		<template v-else-if="store.game?.isEnded()">{{ t('row.status.gameOver') }}</template>
+		<template v-else-if="myTurn">
+			<span class="yourTurnBadge">{{ t('row.status.yourTurnBadge') }}</span> {{ turnStatusText }}
+		</template>
+		<template v-else-if="actingPlayer">
+			<span class="turnPlayerChip" :class="playerColorClass(actingPlayer.color)">{{ actingPlayer.name }}</span> {{ turnStatusText }}
+		</template>
+		<template v-else>{{ t('app.waitingForOthers') }}</template>
+	</div>
+	<ResignPanel />
 
-	<div id="wholeMiddleArea" :class="store.viewSettings.showReplay ? 'greyBackground' : 'normalBackground'">
+	<div id="wholeMiddleArea" :class="waitingForTurn ? 'greyBackground' : 'normalBackground'">
 		<transition name="fadeMainArea">
 			<div id="boardContainer" v-if="!store.viewSettings.performingRewind">
 				<div id="middle">
@@ -75,6 +117,13 @@ const showDebug = computed(() => rf.DEBUG_USERS.includes(personal.name))
 </template>
 
 <style>
+#app {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+	height: auto;
+}
+
 body {
 	margin: 0 !important;
 	background-color: #d4eafd;
@@ -82,23 +131,74 @@ body {
 	font-size: 15px;
 }
 
-/* Site action-button style, copied from WEB/vueWEB/src/App.vue. */
+#turnStatus {
+	text-align: center;
+	font-weight: bolder;
+	padding: 4px 8px;
+	background-color: #c4dff7;
+	border-bottom: 1px solid #8bb8d8;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+#turnStatus.myTurn { background-color: lightgreen; }
+#turnStatus.gameOver { background-color: lightgoldenrodyellow; }
+.yourTurnBadge {
+	display: inline-block;
+	background-color: darkgreen;
+	color: white;
+	border-radius: 10px;
+	padding: 1px 8px;
+	margin-right: 6px;
+	font-size: 0.9em;
+}
+.turnPlayerChip {
+	display: inline-block;
+	border: 1px solid black;
+	padding: 1px 6px;
+	margin-right: 6px;
+}
+.turnPlayerChip.red { background-color: red; color: white; }
+.turnPlayerChip.blue { background-color: blue; color: white; }
+.turnPlayerChip.yellow { background-color: yellow; color: black; }
+.turnPlayerChip.green { background-color: green; color: white; }
+.turnPlayerChip.white { background-color: #d9d9d9; color: black; }
+.turnPlayerChip.orange { background-color: orange; color: black; }
+.turnPlayerChip.purple { background-color: purple; color: white; }
+.turnPlayerChip.black { background-color: black; color: white; }
+
+/* Site action-button style: URR's refinement of WEB's .actionsLineButton. */
 .actionsLineButton {
-	margin: 10px;
+	box-sizing: border-box;
+	min-height: 34px;
 	width: fit-content;
+	padding: 5px;
 	border: 2px solid green;
 	border-radius: 5px;
+	background: #fffdf4;
+	color: #302f27;
+	font: inherit;
 	font-weight: bolder;
-	padding: 5px;
+	line-height: 1.2;
+	cursor: pointer;
 }
-.actionsLineButton:hover {
+.actionsLineButton:hover:enabled {
 	background-color: lightgrey;
 }
-.actionsLineButton:active {
+.actionsLineButton:active:enabled {
 	background-color: darkgrey;
+}
+.actionsLineButton:focus-visible {
+	outline: 2px solid #177daf;
+	outline-offset: 2px;
+}
+.actionsLineButton:disabled {
+	opacity: 0.45;
+	cursor: default;
 }
 
 #wholeMiddleArea {
+	flex: 1 0 auto;
 	width: 100%;
 	min-width: 1050px;
 	min-height: 500px;

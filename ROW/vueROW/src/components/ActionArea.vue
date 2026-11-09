@@ -179,6 +179,7 @@ const discardOnly = computed(() => cardActions.value.length === 1 && cardActions
 <style scoped>
 #actionBar { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 6px; }
 .group { border: 1px solid #999; border-radius: 5px; padding: 5px; background: #f4f7d7; max-width: 460px; }
+.group .actionsLineButton { margin: 4px; }
 .label { font-weight: bold; font-size: 12px; margin-bottom: 3px; }
 .note { font-size: 12px; }
 .supply { display: flex; flex-wrap: wrap; gap: 3px; }

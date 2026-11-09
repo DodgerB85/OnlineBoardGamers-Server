@@ -4,7 +4,7 @@
  * (GPL-3.0, Tom Wetjens): market cards as artwork, click-to-select and confirm
  * a buy (single or pair), plus a draw-stack placeholder.
  */
-import { computed, ref } from "vue"
+import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import * as rf from "../js/ROWreference"
 import * as controller from "../js/ROWcontroller"
@@ -53,8 +53,9 @@ function marketOrder(a, b) {
 }
 const displayMarket = computed(() => [...market.value].sort(marketOrder))
 const drawStackSize = computed(() => (game.value ? g().getCattleMarket().drawStack.length : 0))
-const buying = computed(() => store.actions.includes(ActionType.BUY_CATTLE))
-const takingThree = computed(() => store.actions.includes(ActionType.TAKE_BREEDING_VALUE_3_CATTLE_CARD))
+const actable = computed(() => controller.canAct())
+const buying = computed(() => actable.value && store.actions.includes(ActionType.BUY_CATTLE))
+const takingThree = computed(() => actable.value && store.actions.includes(ActionType.TAKE_BREEDING_VALUE_3_CATTLE_CARD))
 
 const possibleBuys = computed(() => {
 	if (!game.value || !buying.value) return []
@@ -63,10 +64,16 @@ const possibleBuys = computed(() => {
 })
 
 /** DRAW_2_CATTLE_CARDS lives on the draw pile: 1 cowboy for 2 cards, repeatable. */
-const drawingTwo = computed(() => store.actions.includes(ActionType.DRAW_2_CATTLE_CARDS))
+const drawingTwo = computed(() => actable.value && store.actions.includes(ActionType.DRAW_2_CATTLE_CARDS))
 
 const selected = ref([])
 const selectedCostIndex = ref(0)
+watch(actable, (can) => {
+	if (!can) {
+		selected.value = []
+		selectedCostIndex.value = 0
+	}
+})
 
 const availableCosts = computed(() => {
 	if (!selected.value.length) return []
@@ -79,6 +86,7 @@ const availableCosts = computed(() => {
 const chosenCost = computed(() => availableCosts.value[selectedCostIndex.value] ?? availableCosts.value[0] ?? null)
 
 const hint = computed(() => {
+	if (!actable.value) return ""
 	if (takingThree.value) return t("row.cattleMarket.takeThree")
 	if (buying.value) return possibleBuys.value.length ? t("row.cattleMarket.selectToBuy") : t("row.cattleMarket.notEnough")
 	return t("row.cattleMarket.drawTwoHint", { cowboys: g().currentPlayerState().cowboysRemaining() })
@@ -111,6 +119,7 @@ function canBuyPair(breedingValue) {
 	return possibleBuys.value.some((o) => o.breedingValue === breedingValue && o.pair)
 }
 function canSelectCard(card) {
+	if (!actable.value) return false
 	if (takingThree.value) return card.value === 3
 	return buying.value && canBuySingle(card.value)
 }
@@ -140,11 +149,12 @@ function selectCard(card) {
 }
 
 const canConfirm = computed(() => {
-	if (selected.value.length === 0) return false
+	if (!actable.value || selected.value.length === 0) return false
 	return !!chosenCost.value
 })
 
 function confirm() {
+	if (!actable.value) return
 	const option = chosenCost.value
 	if (!option) return
 	// The selected entries are the live market cards; pass them through so a pair of
@@ -196,6 +206,7 @@ function confirm() {
 #cattleMarket { margin: 8px; }
 .hint { margin-bottom: 4px; font-size: 13px; }
 .hint .costSelect { margin-left: 8px; }
+.hint .buy { margin: 4px 0 4px 8px; }
 .hint .buy:disabled { opacity: 0.4; cursor: default; }
 .cards { display: flex; flex-wrap: wrap; gap: 4px; }
 .marketCard { box-shadow: 4px 4px 4px rgb(0, 0, 0, 0.75); border: 3px solid #ffffff; border-radius: 6px; cursor: default; }

@@ -25,7 +25,9 @@ function g() {
 
 const available = computed(() => (game.value ? g().getObjectiveCards().available : []))
 const drawStackSize = computed(() => (game.value ? g().getObjectiveCards().drawStack.length : 0))
+const actable = computed(() => controller.canAct())
 const takeAction = computed(() => {
+	if (!actable.value) return null
 	if (store.actions.includes(ActionType.TAKE_OBJECTIVE_CARD)) return ActionType.TAKE_OBJECTIVE_CARD
 	if (store.actions.includes(ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND)) return ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND
 	return null
@@ -34,13 +36,13 @@ const canTake = computed(() => !!takeAction.value)
 const canTakeFromDraw = computed(() => canTake.value && (takeAction.value === ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND || !(g().edition === "FIRST" && !g().isRailsToTheNorth() && g().atKansasCity())))
 
 function take(id) {
-	if (!canTake.value) return
+	if (!canTake.value || !actable.value) return
 	const card = g().getObjectiveCards().available.find((c) => c.id === id)
 	if (card) controller.perform({ type: takeAction.value, objectiveCard: card })
 }
 
 function takeFromDrawStack() {
-	if (!canTakeFromDraw.value) return
+	if (!canTakeFromDraw.value || !actable.value) return
 	controller.perform({ type: takeAction.value })
 }
 </script>

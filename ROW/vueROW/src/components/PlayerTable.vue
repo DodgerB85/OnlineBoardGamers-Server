@@ -411,9 +411,13 @@ function selectCard(card) {
 					class="handCard"
 					:class="{ selectable: canSelectCard(card), pair: pairToDiscard.has(i), dimmed: !!store.selectedAction && !canSelectCard(card) }"
 					:card="card"
+					:tabindex="canSelectCard(card) ? 0 : undefined"
+					role="button"
 					@mouseenter="hoveredCard = i"
 					@mouseleave="hoveredCard = null"
 					@click="selectCard(card)"
+					@keydown.enter.prevent="selectCard(card)"
+					@keydown.space.prevent="selectCard(card)"
 				/>
 			</template>
 			<template v-else>
@@ -430,15 +434,15 @@ function selectCard(card) {
 			<!-- workers (count-1 like the original; the last one is on deck) -->
 			<g v-for="i in cowboys" :key="'c' + i" transform="scale(2.2,2.2)">
 				<image :href="view.workerImage('COWBOY')" :x="122 + (i - 1) * 36.7" y="71" width="33" height="39" />
-				<rect class="worker" :x="122 + (i - 1) * 36.7" y="71" width="33" height="39" rx="6" ry="6" :class="{ selectable: workerEligible(i - 1, 'cowboy') }" @click="onWorker('cowboy')" />
+				<rect class="worker" :x="122 + (i - 1) * 36.7" y="71" width="33" height="39" rx="6" ry="6" :class="{ selectable: workerEligible(i - 1, 'cowboy') }" :tabindex="workerEligible(i - 1, 'cowboy') ? 0 : undefined" role="button" :aria-label="view.humanizeAction(ActionType.APPOINT_STATION_MASTER)" @click="onWorker('cowboy')" @keydown.enter.prevent="onWorker('cowboy')" @keydown.space.prevent="onWorker('cowboy')" />
 			</g>
 			<g v-for="i in craftsmen" :key="'k' + i" transform="scale(2.2,2.2)">
 				<image :href="view.workerImage('CRAFTSMAN')" :x="122 + (i - 1) * 36.7" y="113" width="33" height="39" />
-				<rect class="worker" :x="122 + (i - 1) * 36.7" y="113" width="33" height="39" rx="6" ry="6" :class="{ selectable: workerEligible(i - 1, 'craftsman') }" @click="onWorker('craftsman')" />
+				<rect class="worker" :x="122 + (i - 1) * 36.7" y="113" width="33" height="39" rx="6" ry="6" :class="{ selectable: workerEligible(i - 1, 'craftsman') }" :tabindex="workerEligible(i - 1, 'craftsman') ? 0 : undefined" role="button" :aria-label="view.humanizeAction(ActionType.APPOINT_STATION_MASTER)" @click="onWorker('craftsman')" @keydown.enter.prevent="onWorker('craftsman')" @keydown.space.prevent="onWorker('craftsman')" />
 			</g>
 			<g v-for="i in engineers" :key="'e' + i" transform="scale(2.2,2.2)">
 				<image :href="view.workerImage('ENGINEER')" :x="122 + (i - 1) * 36.7" y="155" width="33" height="39" />
-				<rect class="worker" :x="122 + (i - 1) * 36.7" y="155" width="33" height="39" rx="6" ry="6" :class="{ selectable: workerEligible(i - 1, 'engineer') }" @click="onWorker('engineer')" />
+				<rect class="worker" :x="122 + (i - 1) * 36.7" y="155" width="33" height="39" rx="6" ry="6" :class="{ selectable: workerEligible(i - 1, 'engineer') }" :tabindex="workerEligible(i - 1, 'engineer') ? 0 : undefined" role="button" :aria-label="view.humanizeAction(ActionType.APPOINT_STATION_MASTER)" @click="onWorker('engineer')" @keydown.enter.prevent="onWorker('engineer')" @keydown.space.prevent="onWorker('engineer')" />
 			</g>
 
 			<!-- temporary certificates -->
@@ -456,7 +460,12 @@ function selectCard(card) {
 				width="155"
 				height="54"
 				:class="{ selectable: auxRowAvailable(row), disabled: !auxRowAvailable(row) }"
+				:tabindex="auxRowAvailable(row) ? 0 : undefined"
+				role="button"
+				:aria-label="view.humanizeAction(row.action)"
 				@click="activateAuxiliaryAction(row)"
+				@keydown.enter.prevent="activateAuxiliaryAction(row)"
+				@keydown.space.prevent="activateAuxiliaryAction(row)"
 			>
 				<title>{{ view.humanizeAction(row.action) }}</title>
 			</rect>
@@ -470,7 +479,12 @@ function selectCard(card) {
 				:cx="d.cx"
 				:cy="d.cy"
 				r="25"
+				:tabindex="discUnlockAction(d) ? 0 : undefined"
+				role="button"
+				:aria-label="d.u"
 				@click="unlock(d)"
+				@keydown.enter.prevent="unlock(d)"
+				@keydown.space.prevent="unlock(d)"
 			>
 				<title>{{ d.u }}</title>
 			</circle>
@@ -538,6 +552,7 @@ function selectCard(card) {
    discard) turns light green, like the board's other clickable targets. */
 .handCard.selectable { cursor: pointer; outline: 5px solid #ffd400; }
 .handCard.selectable:hover, .handCard.pair { outline: 5px solid #90ee90; }
+.handCard.selectable:focus-visible { outline: 5px solid #177daf; }
 .handCard.dimmed { opacity: 0.45; }
 
 .stackDialog { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); z-index: 90; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -577,6 +592,7 @@ function selectCard(card) {
 }
 .action.selectable { cursor: pointer; stroke: #ffd400; stroke-width: 4; }
 .action.selectable:hover { stroke: #90ee90; stroke-width: 6; }
+.action.selectable:focus-visible { stroke: #177daf; stroke-width: 6; }
 .action.disabled { stroke: none; }
 
 .disc {
@@ -587,6 +603,7 @@ function selectCard(card) {
 .disc.unlocked { display: none; }
 .disc.selectable { cursor: pointer; stroke: #ffd400; stroke-width: 4; }
 .disc.selectable:hover { stroke: #90ee90; stroke-width: 6; }
+.disc.selectable:focus-visible { stroke: #177daf; stroke-width: 6; }
 .disc.disabled { stroke: none; }
 
 /* Disc colors: white discs start brownish on the artwork; black discs black. */
@@ -601,6 +618,7 @@ function selectCard(card) {
 .worker { fill: transparent; cursor: default; }
 .worker.selectable { cursor: pointer; stroke: #ffd400; stroke-width: 2; }
 .worker.selectable:hover { stroke: #90ee90; stroke-width: 3; }
+.worker.selectable:focus-visible { stroke: #177daf; stroke-width: 3; }
 
 .cowboysRemaining {
 	font-size: 32px;
