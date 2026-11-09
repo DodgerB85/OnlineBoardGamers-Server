@@ -147,23 +147,28 @@
                 <!-- Not logged in TOP BAR -->
                 <div id="loginForm">
                     <div id="loginFormStack">
-                        <form action="{% url 'myLogin' %}" method="post">
-                            {% csrf_token %}
-                            <input class="loginInput"
-                                   type="text"
-                                   name="username"
-                                   placeholder="{% translate " Username" %}"
-                                   required>
-                            <input class="loginInput"
-                                   type="password"
-                                   name="password"
-                                   placeholder="{% translate " Password" %}"
-                                   required>
-                            <input type="hidden" name="next" value="{{ request.GET.next }}" />
-                            <input class="button button-primary loginSubmit"
-                                   type="submit"
-                                   value="{% translate " Login" %}">
-                        </form>
+                        {% if request.resolver_match.url_name == "index" %}
+                            <a class="button button-primary loginSubmit"
+                               href="{% url 'myLogin' %}">{% translate "Log in" %}</a>
+                        {% else %}
+                            <form action="{% url 'myLogin' %}" method="post">
+                                {% csrf_token %}
+                                <input class="loginInput"
+                                       type="text"
+                                       name="username"
+                                       placeholder="{% translate " Username" %}"
+                                       required>
+                                <input class="loginInput"
+                                       type="password"
+                                       name="password"
+                                       placeholder="{% translate " Password" %}"
+                                       required>
+                                <input type="hidden" name="next" value="{{ request.GET.next }}" />
+                                <input class="button button-primary loginSubmit"
+                                       type="submit"
+                                       value="{% translate " Login" %}">
+                            </form>
+                        {% endif %}
                         <div id="registerLink">
                             <a class="topBarLink" href="{% url 'register' %}">
                                 <span id="registerLinkTextLong">{% translate "Register New Account" %}</span>

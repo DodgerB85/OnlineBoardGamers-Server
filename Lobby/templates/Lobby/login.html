@@ -36,6 +36,12 @@
            href="{% url 'discord_login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">
           {% translate "Login or sign up with Discord" %}
         </a>
+        <p style="font-size:12px;color:var(--color-muted);text-align:center;margin-top:12px;margin-bottom:0;">
+          {% translate "By signing in you agree to our" %}
+          <a href="{% url 'terms' %}">{% translate "Terms of Service" %}</a>
+          {% translate "and" %}
+          <a href="{% url 'privacy' %}">{% translate "Privacy Policy" %}</a>.
+        </p>
         <p style="font-size:14px;color:var(--color-muted);margin-top:14px;margin-bottom:0;">
           {% translate "No account yet?" %}
           <a href="{% url 'register' %}">{% translate "Create a free account" %}</a>

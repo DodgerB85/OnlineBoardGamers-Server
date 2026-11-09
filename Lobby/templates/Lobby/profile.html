@@ -683,18 +683,6 @@
                     <button type="submit" class="button button-primary">{% translate "Change Password" %}</button>
                 </div>
             </form>
-            <div class="form-row" style="border-bottom: none;">
-                <label class="form-label">{% translate "Google login" %}</label>
-                <div class="field">
-                    {% if google_login_id %}
-                        <p style="font-size: 13px; margin: 0;">{% translate "Linked" %}</p>
-                    {% else %}
-                        <a class="button button-primary button-sm" href="{% url 'google_link' %}">
-                            {% translate "Link Google" %}
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
         </div>
 
         {# ── Card 5: Privacy / Blacklist ── #}

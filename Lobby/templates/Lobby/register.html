@@ -37,20 +37,26 @@
           </div>
         </div>
         <div class="card section">
-          <form method="post" class="register-form">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <div class="form-actions">
-              <button type="submit" class="button button-primary">{% translate "Register" %}</button>
-            </div>
-          </form>
-          <p style="text-align:center;color:var(--color-muted);margin:16px 0 12px;">{% translate "or" %}</p>
           <a class="button"
              style="display:block;text-align:center"
              href="{% url 'discord_login' %}">
             {% translate "Login or sign up with Discord" %}
           </a>
-          <p class="form-footer-link">
+          <p style="text-align:center;color:var(--color-muted);margin:16px 0 12px;">{% translate "or" %}</p>
+          <form method="post" class="register-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="form-actions" style="justify-content:center">
+              <button type="submit" class="button button-primary">{% translate "Register" %}</button>
+            </div>
+          </form>
+          <p style="font-size:12px;color:var(--color-muted);text-align:center;margin-top:12px;margin-bottom:0;">
+            {% translate "By creating an account you agree to our" %}
+            <a href="{% url 'terms' %}">{% translate "Terms of Service" %}</a>
+            {% translate "and" %}
+            <a href="{% url 'privacy' %}">{% translate "Privacy Policy" %}</a>.
+          </p>
+          <p class="form-footer-link" style="text-align:center">
             {% translate "Already have an account?" %} <a href="{% url 'myLogin' %}">{% translate "Log In here" %}</a>.
           </p>
         </div>

@@ -36,9 +36,9 @@ class GoogleLoginTests(TestCase):
             get.return_value.json.return_value = identity
             return self.client.get(self.callback_url, {"code": "code", "state": "state"})
 
-    def test_login_and_register_pages_link_to_google(self):
-        self.assertContains(self.client.get(reverse("myLogin")), reverse("google_login"))
-        self.assertContains(self.client.get(reverse("register")), reverse("google_login"))
+    def test_login_and_register_pages_do_not_link_to_google(self):
+        self.assertNotContains(self.client.get(reverse("myLogin")), reverse("google_login"))
+        self.assertNotContains(self.client.get(reverse("register")), reverse("google_login"))
 
     def test_google_login_uses_configured_redirect_uri(self):
         with (
@@ -139,13 +139,13 @@ class GoogleLoginTests(TestCase):
 
         self.assertEqual(response["Location"], reverse("index"))
 
-    def test_profile_page_links_google(self):
+    def test_profile_page_does_not_link_google(self):
         user = User.objects.create_user("profiled", "profile@example.com", "pw")
         self.client.force_login(user)
 
         response = self.client.get(reverse("profile"))
 
-        self.assertContains(response, reverse("google_link"))
+        self.assertNotContains(response, reverse("google_link"))
 
     def test_link_flow_stores_google_id(self):
         user = User.objects.create_user("linker", "linker@example.com", "pw")
