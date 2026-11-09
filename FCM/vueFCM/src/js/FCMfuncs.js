@@ -616,15 +616,13 @@ export function exportFCMmodel(forGameOver, includeContext, historyCutoff) {
 		store.needs
 			.filter((h) => h.needs != null)
 			.map((h) => {
-				const entry = [h.number]
-				// Marker -1 = moved out (Fried Chicken / resolved SBD eviction).
-				// The marker is a negative scalar because game-over saves flatten
-				// needs to bare good numbers, where a bare `1` would collide with
-				// COKE.
+				// A moved-out house is marked by negating its number. Game-over saves
+				// flatten needs to bare good numbers, so an extra marker value would
+				// collide with a good (e.g. COKE = 1); a negative house number cannot.
+				const entry = [h.movedOut ? -h.number : h.number]
 				// Marker 2 = pending move-out (the house still eats tonight), followed
 				// by the turn it was evicted on (-1 for the FC flow, which has no turn).
-				if (h.movedOut) entry.push(-1)
-				else if (!forGameOver && h.pendingMoveOut) entry.push(2, h.sbdEvictedTurn === undefined ? -1 : h.sbdEvictedTurn)
+				if (!h.movedOut && !forGameOver && h.pendingMoveOut) entry.push(2, h.sbdEvictedTurn === undefined ? -1 : h.sbdEvictedTurn)
 				const needsData = forGameOver ? h.needs.map((n) => n[0]) : h.needs
 				return entry.concat(needsData)
 			})
@@ -941,24 +939,26 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 
 	// 8? - needs
 	store.needs = inputArr[IMPORT_INDEX].map((house) => {
-		const number = house[0]
-		let movedOut = false
+		// A negative house number marks a moved-out house (current saves).
+		let movedOut = house[0] < 0
+		const number = movedOut ? -house[0] : house[0]
 		let pendingMoveOut = false
 		let sbdEvictedTurn
 		let sliceStart = 1
-		// Marker -1 = moved out (current saves). Legacy saves used a bare `1`,
-		// which is only interpretable mid-game — on game-over saves needs are
-		// flattened to bare good numbers and a leading 1 is a COKE demand, not
-		// the marker.
+		// Legacy mid-game saves used a bare `1` marker. It is only readable
+		// mid-game: game-over saves flatten needs to bare good numbers and a
+		// leading 1 is a COKE demand, not the marker.
 		// Marker 2 = pending move-out, followed by the turn
 		// (or -1 for the Fried Chicken pending flow, which has no turn).
-		if (house.length > 1 && (house[1] === -1 || (house[1] === 1 && store.gameflow.phase !== rf.PHASE_GAME_OVER))) {
-			movedOut = true
-			sliceStart = 2
-		} else if (house.length > 1 && house[1] === 2 && store.gameflow.phase !== rf.PHASE_GAME_OVER) {
-			pendingMoveOut = true
-			if (house.length > 2 && house[2] !== -1) sbdEvictedTurn = house[2]
-			sliceStart = 3
+		if (!movedOut && house.length > 1 && store.gameflow.phase !== rf.PHASE_GAME_OVER) {
+			if (house[1] === 1) {
+				movedOut = true
+				sliceStart = 2
+			} else if (house[1] === 2) {
+				pendingMoveOut = true
+				if (house.length > 2 && house[2] !== -1) sbdEvictedTurn = house[2]
+				sliceStart = 3
+			}
 		}
 		let needs = []
 

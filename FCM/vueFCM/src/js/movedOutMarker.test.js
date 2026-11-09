@@ -1,8 +1,9 @@
 /**
  * Regression tests for the movedOut wire-format marker:
- * game-over exports flatten needs to bare good numbers, so a leading `1`
- * (COKE) used to be misread as the Fried Chicken movedOut marker, hanging a
- * false OUT sign on the house and eating one coke demand.
+ * a moved-out house is stored with a negated house number. Game-over saves
+ * flatten needs to bare good numbers, so a leading `1` (COKE) used to be
+ * misread as the old Fried Chicken movedOut marker, hanging a false OUT sign
+ * on the house and eating one coke demand.
  */
 /* global pako */
 import { describe, it, expect, beforeAll } from "vitest"
@@ -86,11 +87,12 @@ function importInto(decoded, forGameOver = false) {
 	return useModelStore()
 }
 // The needs slot is the array containing one entry per house, each entry
-// leading with the house number - find it by looking up a known house number.
+// leading with the house number (negated when the house moved out) - find it
+// by looking up a known house number.
 function findNeedEntry(decoded, houseNum) {
 	for (const slot of decoded) {
 		if (!Array.isArray(slot)) continue
-		const hit = slot.find((e) => Array.isArray(e) && e[0] === houseNum)
+		const hit = slot.find((e) => Array.isArray(e) && Math.abs(e[0]) === houseNum)
 		if (hit) return hit
 	}
 	throw new Error("needs entry not found for house " + houseNum)
@@ -103,7 +105,7 @@ describe("movedOut marker round-trips", () => {
 
 		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
 		const entry = findNeedEntry(decoded, 47)
-		expect(entry).toEqual([47, -1])
+		expect(entry).toEqual([-47])
 
 		const store2 = importInto(decoded, false)
 		const imported = store2.needs.find((n) => n.number === 47)
@@ -118,7 +120,7 @@ describe("movedOut marker round-trips", () => {
 
 		const decoded = decodeExport(funcs.exportFCMmodel(true, false))
 		const entry = findNeedEntry(decoded, 47)
-		expect(entry).toEqual([47, -1])
+		expect(entry).toEqual([-47])
 
 		const store2 = importInto(decoded, true)
 		const imported = store2.needs.find((n) => n.number === 47)
@@ -145,14 +147,29 @@ describe("movedOut marker round-trips", () => {
 		])
 	})
 
+	it("distinguishes an empty house from a moved-out one", () => {
+		const store = freshGame()
+		store.gameflow.phase = rf.PHASE_GAME_OVER
+		store.needs.push({ number: 43, needs: [] })
+
+		const decoded = decodeExport(funcs.exportFCMmodel(true, false))
+		expect(findNeedEntry(decoded, 43)).toEqual([43])
+
+		const store2 = importInto(decoded, true)
+		const imported = store2.needs.find((n) => n.number === 43)
+		expect(imported.movedOut).toBeUndefined()
+		expect(imported.needs).toEqual([])
+	})
+
 	it("still honours the legacy bare `1` marker on mid-game saves", () => {
 		const store = freshGame()
 		store.needs.push({ number: 45, needs: [], movedOut: true })
 
 		const decoded = decodeExport(funcs.exportFCMmodel(false, false))
-		// Rewrite the marker the way pre-fix saves stored it
+		// Rewrite the marker the way pre-fix saves stored it: [45, 1]
 		const entry = findNeedEntry(decoded, 45)
-		entry[1] = 1
+		entry[0] = -entry[0]
+		entry.push(1)
 
 		const store2 = importInto(decoded, false)
 		const imported = store2.needs.find((n) => n.number === 45)
