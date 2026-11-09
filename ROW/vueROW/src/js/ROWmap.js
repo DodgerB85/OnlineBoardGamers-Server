@@ -619,3 +619,81 @@ export function activeBuildingActions(game, liveActions) {
 	}
 	return set
 }
+
+/** Printed action regions used by both the trail and its enlarged building preview. */
+export function buildingActionRegions(name, rect, inter, game) {
+	if (!inter) return []
+	const actions = inter.options
+	const allActions = inter.layoutActions
+	// Coordinates follow the dividers on the 376px tile artwork, shared by every colour.
+	const second = game.edition === "SECOND"
+	const dividers = {
+		A: 132, B: 155, C: 184, D: 214, E: 199, F: 199, G: 191,
+		"1b": 185, "2a": 185, "2b": second ? 190 : 193,
+		"3a": 185, "3b": 182, "4a": 182, "4b": 182,
+		"5a": second ? 183 : 205, "5b": 185, "6a": second ? 183 : 185,
+		"8a": 192, "9a": 192, "10a": 192, "10b": 192,
+		"11a": 188, "12b": 189, "13a": second ? 190 : 189, "13b": second ? 190 : 189,
+	}
+	const x = (value) => rect.x + rect.w * value / 376
+	const y = (value) => rect.y + rect.h * value / 376
+	const left = 32, right = 344, top = 176, bottom = 344
+	const middle = dividers[name]
+	const polygon = (points) => points.map(([px, py]) => `${x(px)},${y(py)}`).join(" ")
+	const panel = (x1, x2) => polygon([[x1, top], [x2, top], [x2, bottom], [x1, bottom]])
+	let groups
+	let shapes
+
+	if (inter.mode === "activate" && name === "11a" && second) {
+		groups = [[0], [0]]
+		shapes = [panel(left, middle), panel(middle, right)]
+	} else if (inter.mode === "adjacent" || allActions.length <= 1) {
+		groups = [[0]]
+		shapes = [panel(left, right)]
+	} else if (name === "A") {
+		groups = [[0], [1], [2]]
+		shapes = [panel(left, middle), panel(middle, 242), panel(242, right)]
+	} else if (name === "C") {
+		groups = [[0], [1], [2]]
+		shapes = [
+			polygon([[left, top], [179, top], [left, 340]]),
+			polygon([[179, top], [middle, top], [middle, bottom], [left, bottom], [left, 340]]),
+			panel(middle, right),
+		]
+	} else if (["D", "8a"].includes(name)) {
+		groups = [[0], [1], [2]]
+		// Extend each printed slash to the edges of its action panel.
+		const [leftY, rightY] = name === "D" ? [303, 222] : [316, 221]
+		shapes = [
+			polygon([[left, top], [middle, top], [middle, rightY], [left, leftY]]),
+			polygon([[left, leftY], [middle, rightY], [middle, bottom], [left, bottom]]),
+			panel(middle, right),
+		]
+	} else if (name === "10b") {
+		groups = [[0], [1], [2]]
+		const horizontal = 256
+		shapes = [
+			polygon([[left, top], [middle, top], [middle, horizontal], [left, horizontal]]),
+			polygon([[left, horizontal], [middle, horizontal], [middle, bottom], [left, bottom]]),
+			panel(middle, right),
+		]
+	} else if (["2a", "E"].includes(name)) {
+		groups = [[0], allActions.map((_, index) => index).slice(1)]
+		shapes = [panel(left, middle), panel(middle, right)]
+	} else if (name === "4b") {
+		const moveIndex = allActions.findIndex((action) => action === ActionType.MOVE_3_FORWARD)
+		groups = [allActions.map((_, index) => index).filter((index) => index !== moveIndex), [moveIndex]]
+		shapes = [panel(left, middle), panel(middle, right)]
+	} else {
+		groups = name === "2b" && second ? [[1], [0]] : [[0], [1]]
+		shapes = [panel(left, middle), panel(middle, right)]
+	}
+
+	return groups
+		.map((slots, index) => ({
+			points: shapes[index],
+			actions: slots.map((slot) => allActions[slot]).filter((action) => actions.includes(action) && !MARKET_DRAW_ACTIONS.has(action)),
+		}))
+		.filter((region) => region.actions.length)
+		.map((region) => ({ ...region, affordable: region.actions.some((a) => canAffordAction(game, a)) }))
+}
