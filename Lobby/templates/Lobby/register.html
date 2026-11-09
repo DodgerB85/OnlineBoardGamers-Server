@@ -44,6 +44,12 @@
               <button type="submit" class="button button-primary">{% translate "Register" %}</button>
             </div>
           </form>
+          <p style="text-align:center;color:var(--color-muted);margin:16px 0 12px;">{% translate "or" %}</p>
+          <a class="button"
+             style="display:block;text-align:center"
+             href="{% url 'discord_login' %}">
+            {% translate "Login or sign up with Discord" %}
+          </a>
           <p class="form-footer-link">
             {% translate "Already have an account?" %} <a href="{% url 'myLogin' %}">{% translate "Log In here" %}</a>.
           </p>

@@ -30,6 +30,12 @@
             <button type="submit" class="button button-primary">{% translate "Login" %}</button>
           </div>
         </form>
+        <p style="text-align:center;color:var(--color-muted);margin:16px 0 12px;">{% translate "or" %}</p>
+        <a class="button"
+           style="display:block;text-align:center"
+           href="{% url 'discord_login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">
+          {% translate "Login or sign up with Discord" %}
+        </a>
         <p style="font-size:14px;color:var(--color-muted);margin-top:14px;margin-bottom:0;">
           {% translate "No account yet?" %}
           <a href="{% url 'register' %}">{% translate "Create a free account" %}</a>

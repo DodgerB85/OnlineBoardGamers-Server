@@ -198,6 +198,7 @@ urlpatterns = [
     path("userStats/", views.userStats, name="userStats"),
     path("sendAdminMessage/", views.sendAdminMessage, name="sendAdminMessage"),
     # API Routes
+    path("discord/login/", views.discord_login, name="discord_login"),
     path("discord/callback/", views.discord_callback, name="discord_callback"),
     path("stop_discord_dms/", views.stop_discord_dms, name="stop_discord_dms"),
     path(

@@ -10,6 +10,7 @@ import time
 import traceback
 from collections import Counter
 from datetime import timedelta
+from urllib.parse import urlencode
 
 import requests
 
@@ -4341,50 +4342,165 @@ def dataCheck(request):
     return JsonResponse({"latest": True})
 
 
-@login_required
+DISCORD_REDIRECT_URI = "https://www.onlineboardgamers.com/discord/callback/"
+
+
+def _discord_fetch_identity(code):
+    """Exchange an OAuth code for the Discord user's profile."""
+    data = {
+        "client_id": config("DISCORD_CLIENT_ID"),
+        "client_secret": config("DISCORD_CLIENT_SECRET"),
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": DISCORD_REDIRECT_URI,
+    }
+    response = requests.post(
+        "https://discord.com/api/oauth2/token",
+        data=data,
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        timeout=10,
+    )
+    access_token = response.json().get("access_token")
+    if not access_token:
+        return None, None
+
+    user_resp = requests.get(
+        "https://discord.com/api/users/@me",
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=10,
+    )
+    return access_token, user_resp.json()
+
+
+def _discord_unique_username(discord_username):
+    base = re.sub(r"[^\w.@+-]", "", discord_username or "")[:90] or "discord"
+    username = base
+    suffix = 1
+    while User.objects.filter(username__iexact=username).exists():
+        suffix += 1
+        username = f"{base[:90]}_{suffix}"
+    return username
+
+
+def discord_login(request):
+    if request.user.is_authenticated:
+        return redirect("index")
+
+    client_id = config("DISCORD_CLIENT_ID", default="")
+    if not client_id:
+        messages.error(request, gettext("Discord login is not configured."))
+        return redirect("myLogin")
+
+    state = secrets.token_urlsafe(32)
+    request.session["discord_login_state"] = state
+    request.session["discord_login_next"] = request.GET.get("next", "")
+    query = urlencode(
+        {
+            "client_id": client_id,
+            "redirect_uri": DISCORD_REDIRECT_URI,
+            "response_type": "code",
+            "scope": "identify email",
+            "state": state,
+        }
+    )
+    return redirect(f"https://discord.com/api/oauth2/authorize?{query}")
+
+
+def _discord_login_callback(request, code):
+    nxt = request.session.pop("discord_login_next", "")
+    if not code:
+        messages.error(request, gettext("Discord login was cancelled."))
+        return redirect("myLogin")
+
+    access_token, discord_data = _discord_fetch_identity(code)
+    if not access_token or not discord_data or not discord_data.get("id"):
+        messages.error(request, gettext("Discord login failed. Please try again."))
+        return redirect("myLogin")
+
+    discord_user_id = str(discord_data["id"])
+    profiles = list(Profile.objects.select_related("user").filter(discord_login_id=discord_user_id)[:2])
+    if len(profiles) > 1:
+        messages.error(
+            request,
+            gettext("This Discord account is linked to more than one account. Please contact the webmaster."),
+        )
+        return redirect("myLogin")
+
+    if profiles:
+        user = profiles[0].user
+        if not user.is_active:
+            messages.error(
+                request,
+                gettext("This account is inactive. Check your email for the activation link or contact the webmaster."),
+            )
+            return redirect("myLogin")
+    else:
+        email = (discord_data.get("email") or "").strip()
+        if not email or not discord_data.get("verified"):
+            messages.error(request, gettext("Your Discord account needs a verified email address to sign up."))
+            return redirect("myLogin")
+        if User.objects.filter(email__iexact=email).exists():
+            messages.error(
+                request,
+                gettext(
+                    "An account with this email already exists. Log in with your username and password, then link Discord from your profile."
+                ),
+            )
+            return redirect("myLogin")
+
+        user = User.objects.create_user(
+            username=_discord_unique_username(discord_data.get("username")),
+            email=email,
+        )
+        user.is_active = True
+        user.save()
+        profile = user.profile
+        profile.discord_login_id = discord_user_id
+        profile.email_confirmed = True
+        profile.save()
+
+    login(request, user)
+    if nxt and url_has_allowed_host_and_scheme(
+        url=nxt,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return HttpResponseRedirect(nxt)
+    return redirect("index")
+
+
 def discord_callback(request):
+    state = request.GET.get("state")
+    login_state = request.session.get("discord_login_state")
+    if login_state and state == login_state:
+        request.session.pop("discord_login_state", None)
+        return _discord_login_callback(request, request.GET.get("code"))
+
+    if not request.user.is_authenticated:
+        messages.error(request, gettext("Discord link expired. Please log in and try again from your profile."))
+        return redirect("myLogin")
+
     code = request.GET.get("code")
     if not code:
         return redirect("profile")
 
     expected_state = request.session.pop("discord_oauth_state", None)
-    if not expected_state or request.GET.get("state") != expected_state:
+    if not expected_state or state != expected_state:
         messages.error(request, gettext("Discord link expired. Please try again from your profile."))
         return redirect("profile")
 
-    # Use config to get secrets from your .env file
-    client_id = config("DISCORD_CLIENT_ID")
-    client_secret = config("DISCORD_CLIENT_SECRET")
-
-    data = {
-        "client_id": client_id,
-        "client_secret": client_secret,
-        "grant_type": "authorization_code",
-        "code": code,
-        "redirect_uri": "https://www.onlineboardgamers.com/discord/callback/",
-    }
-
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
-
-    response = requests.post("https://discord.com/api/oauth2/token", data=data, headers=headers, timeout=10)
-    credentials = response.json()
-    access_token = credentials.get("access_token")
-
-    if not access_token:
-        messages.error(request, "Failed to link Discord: No access token received.")
+    access_token, discord_data = _discord_fetch_identity(code)
+    if not access_token or not discord_data or not discord_data.get("id"):
+        messages.error(request, gettext("Failed to link Discord: No access token received."))
         return redirect("profile")
 
     bot_token = config("DISCORD_BOT_TOKEN")
-
-    # 2. GET THE USER ID
-    user_headers = {"Authorization": f"Bearer {access_token}"}
-    user_resp = requests.get("https://discord.com/api/users/@me", headers=user_headers, timeout=10)
-    discord_data = user_resp.json()
     discord_user_id = discord_data["id"]
 
     # 3. SAVE TO YOUR MODEL
     profile = Profile.objects.get(user=request.user)
     profile.discord_id = discord_user_id
+    profile.discord_login_id = discord_user_id
     profile.save()
 
     # 4. FORCE-JOIN YOUR SERVER
