@@ -15,13 +15,14 @@ from Lobby.models import Game, GamePlayer
 from Lobby.sharedFunctions.availability import should_skip_availability_username
 from Lobby.sharedFunctions.db_mutex import db_mutex
 from Lobby.sharedFunctions.hotStreaks import get_hot_streak, get_turn_nudge_message
+from Lobby.sharedFunctions.permissions import is_game_admin
 
 
 NUDGE_COOLDOWN = timedelta(hours=24)
 
 
 def is_active_participant(game, user):
-    if user.is_superuser:
+    if user.is_superuser or is_game_admin(user):
         return True
     return game.players.filter(player=user, is_kicked=False, is_missing=False).exists()
 
@@ -43,10 +44,8 @@ def game_momentum(request, game_id):
     game = get_object_or_404(Game, pk=game_id)
     if not is_active_participant(game, request.user):
         return JsonResponse({"error": gettext("Only players in this game can view its momentum.")}, status=403)
-    if request.user.is_superuser:
-        return JsonResponse({"nudge": None, "streak": get_hot_streak(game) if request.user.profile.hotStreakEnabled else None, "isActive": game.gameStatus == "ACTIVE", "latestUpdate": game.latestUpdate, "targets": get_nudge_targets(game, request.user)})
-    own_seat = game.players.get(player=request.user)
-    has_nudge = own_seat.is_current and own_seat.lastNudgedAt and own_seat.lastNudgedAt.timestamp() * 1000 >= int(game.latestUpdate)
+    own_seat = game.players.filter(player=request.user, is_kicked=False, is_missing=False).first()
+    has_nudge = own_seat is not None and own_seat.is_current and own_seat.lastNudgedAt and own_seat.lastNudgedAt.timestamp() * 1000 >= int(game.latestUpdate)
     return JsonResponse({"nudge": get_turn_nudge_message(game, own_seat.lastNudgedBy) if has_nudge else None, "streak": get_hot_streak(game) if request.user.profile.hotStreakEnabled else None, "isActive": game.gameStatus == "ACTIVE", "latestUpdate": game.latestUpdate, "targets": get_nudge_targets(game, request.user)})
 
 

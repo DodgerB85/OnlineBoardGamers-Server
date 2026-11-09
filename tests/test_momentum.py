@@ -99,6 +99,18 @@ class MomentumTests(TestCase):
         self.assertIn("streak", data)
         self.assertIn("targets", data)
 
+    def test_game_admin_can_view_momentum_without_being_player(self):
+        game_admin = User.objects.create_user(username="game-admin", password="testpass123")
+        game_admin.profile.is_game_admin = True
+        game_admin.profile.save()
+        self.client.force_login(game_admin)
+        response = self.client.get(reverse("gameMomentum", args=[self.game.id]))
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIsNone(data["nudge"])
+        self.assertIn("streak", data)
+        self.assertIn("targets", data)
+
     def test_nudge_respects_recipient_opt_out(self):
         self.other.profile.receiveTurnNudges = False
         self.other.profile.save()
