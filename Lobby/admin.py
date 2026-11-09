@@ -41,6 +41,7 @@ from .modelProxies import (
     TGZMainTournament,
     TGZMiniTournament,
     URRgame,
+    URRMiniTournament,
     WEBgame,
     WEBMainTournament,
     WEBMiniTournament,
@@ -819,6 +820,15 @@ class NTRMiniTournamentAdmin(TournamentAdmin):
 
     class Meta:
         app_label = "NTR"
+
+
+@admin.register(URRMiniTournament)
+class URRMiniTournamentAdmin(TournamentAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="URR", tournamentCategory="Mini")
+
+    class Meta:
+        app_label = "URR"
 
 
 ################### END Register Tournament objects to specific app

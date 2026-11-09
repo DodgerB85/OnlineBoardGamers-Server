@@ -5166,6 +5166,70 @@ def createAQYminiTournament(request):
 
 @login_required
 @rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
+def createURRminiTournament(request):
+    if request.method != "POST":
+        return render(
+            request,
+            "Lobby/createURR.html",
+            {
+                "experienced": False,
+                "MT_Creation": True,
+            },
+        )
+
+    # Now it is a POST response
+    players_per_game = int(request.POST.get("playersPerGameMT", 3))
+    if players_per_game < 3 or players_per_game > 6:
+        messages.error(request, gettext("UR: 1830 BC games need 3 to 6 players"))
+        return HttpResponseRedirect(reverse("createURRminiTournament"))
+
+    startingOptions = []
+    invitedPlayers = json.loads(request.POST["invtedPlayersListMT"]) if request.POST["invtedPlayersListMT"] else []
+
+    with transaction.atomic():
+        newTournament = Tournament.objects.create(
+            tournamentCategory="Mini",
+            gameCode="URR",
+            tournamentName=request.POST["tournamentName"],
+            tournamentDescription=request.POST["tournamentDescription"],
+            tournamentStatus="OP",
+            tournamentType=request.POST["tournamentFormat"],
+            startingOptions=json.dumps(startingOptions),
+            maxTournamentPlayers=request.POST["totalPlayersMT"],
+            maxGamePlayers=players_per_game,
+            roundsBeforeKnockout=4,
+            creator=request.user,
+        )
+        newTournament.startingPlayers.add(request.user)
+        if "privateTournament" in request.POST:
+            newTournament.tournamentStatus = "PR"
+
+        for username in invitedPlayers:
+            user = User.objects.get(username=username)
+            newTournament.invitedPlayers.add(user)
+
+        newTournament.save()
+
+    from django_q.tasks import async_task
+
+    async_task(
+        "Lobby.sharedFunctions.sharedNotifications.SN_sendMiniTournamentInvite",
+        invitedPlayers,
+        newTournament.gameCode,
+        newTournament.tournamentName,
+        newTournament.tournamentDescription,
+        newTournament.maxTournamentPlayers,
+        newTournament.maxGamePlayers,
+        SR_getTournamentTypeDisplay(newTournament.tournamentType),
+        newTournament.id,
+    )
+
+    messages.success(request, SF_getMiniTournamentCreationJsonReturn(newTournament.id))
+    return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
+
+
+@login_required
+@rate_limit("createMT", 5, 3600, redirect_to="MiniTournaments")
 def createINDminiTournament(request):
     if request.method != "POST":
         return render(

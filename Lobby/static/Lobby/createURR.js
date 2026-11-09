@@ -3,6 +3,13 @@
 // A game is either practice, learning or experienced, never a mixture.
 // Kickout choices per pace come from Lobby/kickoutOptions.html so the labels stay translated.
 function initGameCreation(fillData, setupData = {}) {
+	if (global.MT_Creation) {
+		global.invitedPlayersArr = []
+		autocomplete(document.getElementById("playerToInviteMT"))
+		document.getElementById("invitePlayerMTbutton").addEventListener("click", invitePlayerMT)
+		return
+	}
+
 	if (global.experienced) document.getElementById("experiencedGame").disabled = false
 
 	selectPlayers()

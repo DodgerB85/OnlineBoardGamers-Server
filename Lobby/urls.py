@@ -87,6 +87,11 @@ urlpatterns = [
         views.createAQYminiTournament,
         name="createAQYminiTournament",
     ),
+    path(
+        "createURRminiTournament/",
+        views.createURRminiTournament,
+        name="createURRminiTournament",
+    ),
     path("createINDpage/", views.createINDpage, name="createINDpage"),
     path("createINDpage2/", views.createINDpage2, name="createINDpage2"),
     path("createINDpage/<int:gameID>/", views.createINDpage, name="createINDpage"),

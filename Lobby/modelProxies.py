@@ -212,6 +212,17 @@ class KFWMainTournament(Tournament):
         return super().get_queryset(request).filter(gameCode="KFW", tournamentCategory="Main")
 
 
+class URRMiniTournament(Tournament):
+    class Meta:
+        proxy = True
+        app_label = "URR"
+        verbose_name = "URR Mini Tournament"
+        verbose_name_plural = "URR Mini Tournaments"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(gameCode="URR", tournamentCategory="Mini")
+
+
 ################### Register Tournament objects when MINI to specific app
 
 

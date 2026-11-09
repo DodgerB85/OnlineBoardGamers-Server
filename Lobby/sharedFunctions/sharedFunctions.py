@@ -767,6 +767,7 @@ def start_next_any_tournament_round(
     from NTR.common import create_ntr_game
     from RNB.common import create_rnb_game
     from TGZ.common import create_tgz_game
+    from URR.common import create_urr_game
     from WEB.common import create_web_game
 
     # MG tournaments don't add next round players dynamically
@@ -875,6 +876,8 @@ def start_next_any_tournament_round(
             newGameID = create_lbr_game(request, tournamentObj, tournamentGameName, currentPlayers)
         elif tournamentObj.gameCode == "NTR":
             newGameID = create_ntr_game(request, tournamentObj, tournamentGameName, currentPlayers)
+        elif tournamentObj.gameCode == "URR":
+            newGameID = create_urr_game(request, tournamentObj, tournamentGameName, currentPlayers)
         else:
             # LEGACY CODE FOR SEPERARTE TOURNAMENT MODELS
             # THIS WILL FAIL! THIS FUNCTION NO LONGER EXISTS
@@ -961,7 +964,7 @@ def SF_createNextRoundGamesSetup(tournamentObj):
 
     else:  # MiniT logic
         remainder = num_players % max_p
-        if tournamentObj.gameCode in ["HLC", "BUS"]:
+        if tournamentObj.gameCode in ["HLC", "BUS", "URR"]:
             # If 3+ remain, they form a game. If 1 or 2 remain, they get byes.
             if remainder > 0 and remainder < 3:
                 byesRequired = remainder
