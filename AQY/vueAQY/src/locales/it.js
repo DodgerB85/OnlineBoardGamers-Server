@@ -165,6 +165,7 @@ export default {
 		differentLuxury: "2 x Lusso diverso",
 		sanChristofori: "San Christofori",
 		sanGiorgioUnenclosed: "San Giorgio (esagoni non racchiusi)",
+		sanGiorgioExcluded: "{player} ha lasciato la partita e non conterà per una vittoria di San Giorgio",
 		unpollutedArea: '"Non inquinata" (in realtà non occupata)',
 		size: "Dimensione",
 		flexiTimes: "Tempi flessibili:",

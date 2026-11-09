@@ -20,3 +20,8 @@ export function actingPlayerIndex(trainingGame, pov, currentPlayerIndex) {
 	if (trainingGame) return currentPlayerIndex
 	return pov
 }
+
+// A player who left before placing a city has an empty ZoC and must not count for San Giorgio.
+export function countsForSanGiorgioWin(isGone, zocSize) {
+	return !isGone || zocSize >= 37
+}

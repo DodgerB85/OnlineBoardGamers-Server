@@ -89,6 +89,7 @@ export default {
     differentLuxury: "2 x Different Luxury",
     sanChristofori: "San Christofori",
     sanGiorgioUnenclosed: "San Giorgio (Unenclosed Hexes)",
+    sanGiorgioExcluded: "{player} left the game and will not count towards a San Giorgio win",
     unpollutedArea: '"Unpolluted" (actually unoccupied) Area',
     size: "Size",
     flexiTimes: "Flexi-Times:",

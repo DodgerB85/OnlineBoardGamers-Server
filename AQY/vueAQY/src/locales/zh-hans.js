@@ -165,6 +165,7 @@ export default {
 		differentLuxury: "2 份不同奢侈品",
 		sanChristofori: "San Christofori",
 		sanGiorgioUnenclosed: "San Giorgio（未围住的六角格）",
+		sanGiorgioExcluded: "{player} 已离开游戏，不计入 San Giorgio 的胜利",
 		unpollutedArea: "“未污染”（实际上是未占用）区域",
 		size: "尺寸",
 		flexiTimes: "弹性时间：",

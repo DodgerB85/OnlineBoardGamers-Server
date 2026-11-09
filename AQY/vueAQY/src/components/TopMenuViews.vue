@@ -480,6 +480,11 @@ function localCastVote(topic) {
 					</tr>
 				</tbody>
 			</table>
+			<template v-for="(player, playerIndex) in store.players" :key="'giorgioExcluded' + playerIndex">
+				<p v-if="!model.isGiorgioTargetCounted(playerIndex)" class="giorgioExcludedNote">
+					{{ $t("topMenuViews.sanGiorgioExcluded", { player: personal.getHistoryName(playerIndex) }) }}
+				</p>
+			</template>
 			<h2>{{ $t("topMenuViews.unpollutedArea") }}</h2>
 			<table class="resultSummaryTable">
 				<thead>
@@ -816,5 +821,11 @@ function localCastVote(topic) {
 
 .winCondMet {
 	background-color: lightgreen;
+}
+
+.giorgioExcludedNote {
+	text-align: center;
+	font-weight: bold;
+	color: darkred;
 }
 </style>

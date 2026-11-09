@@ -161,6 +161,7 @@ export default {
 		differentLuxury: "2 bienes de lujo diferentes",
 		sanChristofori: "San Christofori",
 		sanGiorgioUnenclosed: "San Giorgio (hexágonos no cerrados)",
+		sanGiorgioExcluded: "{player} abandonó la partida y no contará para una victoria de San Giorgio",
 		unpollutedArea: '"Sin contaminar" (en realidad, zona desocupada)',
 		size: "Tamaño",
 		flexiTimes: "Tiempos flexibles:",

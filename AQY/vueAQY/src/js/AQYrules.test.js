@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-import { actingPlayerIndex, assignArray, canPairNicoloHouse, clampFamine } from "./AQYrules.js"
+import { actingPlayerIndex, assignArray, canPairNicoloHouse, clampFamine, countsForSanGiorgioWin } from "./AQYrules.js"
 
 test("San Nicolo can pair house 25 with a free lower house", () => {
 	assert.equal(canPairNicoloHouse(25), true)
@@ -22,4 +22,10 @@ test("famine display never goes below zero", () => {
 test("training games act as the current player", () => {
 	assert.equal(actingPlayerIndex(true, 0, 2), 2)
 	assert.equal(actingPlayerIndex(false, 0, 2), 0)
+})
+
+test("a player gone before placing a city does not count for San Giorgio", () => {
+	assert.equal(countsForSanGiorgioWin(true, 0), false)
+	assert.equal(countsForSanGiorgioWin(true, 37), true)
+	assert.equal(countsForSanGiorgioWin(false, 30), true)
 })

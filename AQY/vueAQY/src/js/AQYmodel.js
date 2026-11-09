@@ -31,7 +31,7 @@ import * as country from "./AQYcountry.js"
 import * as map from "./AQYmap.js"
 import * as IO from "../backend/AQY_IO.js"
 import * as Bot from "./AQYbot.js"
-import { clampFamine } from "./AQYrules.js"
+import { clampFamine, countsForSanGiorgioWin } from "./AQYrules.js"
 
 export function addHistory(event, playerIndex, timeOffset, params) {
 	const personal = usePersonalStore()
@@ -742,6 +742,16 @@ export function data_christo_3foodLux(playerIndex) {
 	return [grain, sheep, olives, fish, gold, wine, pearls, dye]
 }
 
+export function isGiorgioTargetCounted(playerIndex) {
+	/**
+	 * A player who left before placing a city has an empty ZoC and would otherwise
+	 * count as enclosed without San Giorgio doing anything.
+	 */
+	const store = useModelStore()
+	const isGone = store.players[playerIndex].displayName === rf.BOT_NAME
+	return countsForSanGiorgioWin(isGone, country.getZocTiles(playerIndex, true).length)
+}
+
 export function status_giorgio_enclosing(playerIndex) {
 	/**
 	 * San Giorgio
@@ -768,7 +778,7 @@ export function status_giorgio_enclosing(playerIndex) {
 	let resDisplay = []
 
 	for (let i = 0; i < store.players.length; i++) {
-		if (i != playerIndex) {
+		if (i != playerIndex && isGiorgioTargetCounted(i)) {
 			//let targetPlayer = store.players[i]
 
 			let targetPlayerZocTileID = country.getZocTiles(i, false, true, true, true) //.map((tile) => tile.id)
