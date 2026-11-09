@@ -3,18 +3,11 @@
 {% block head %}
     <link href="{% static 'Lobby/CSS/lobby_new.css' %}?v=20" rel="stylesheet" />
     <style>
-        /* UR: 1830 BC release teaser - remove after launch */
+        /* UR: 1830 BC release banner */
         .new-game-teaser { text-align: center; margin-bottom: 14px; }
         .new-game-teaser-box { position: relative; display: inline-block; line-height: 0; }
         .new-game-teaser-box img { height: 300px; display: block; border-radius: 8px; }
-        .new-game-teaser-box::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.55);
-            border-radius: 8px;
-        }
-        .new-game-teaser-timer {
+        .new-game-teaser-label {
             position: absolute;
             inset: 0;
             z-index: 1;
@@ -101,14 +94,12 @@
         </div>
         <!-- hidden map editor forms (required by Lobby.js) -->
         {% include 'Lobby/map_editor_forms.html' %}
-        <!-- UR: 1830 BC countdown - remove after launch -->
+        <!-- UR: 1830 BC release banner -->
         <div class="new-game-teaser">
-            <div class="new-game-teaser-box">
+            <a class="new-game-teaser-box" href="{% url 'createURRpage' %}">
                 <img src="{% static 'URR/images/ur-box.jpg' %}" alt="UR: 1830 BC" />
-                <span class="new-game-teaser-timer"
-                      id="newGameCountdown"
-                      data-done="{% translate "Available now!" %}"></span>
-            </div>
+                <span class="new-game-teaser-label">{% translate "Click Here to Play!" %}</span>
+            </a>
         </div>
         <!-- TABS -->
         <div class="tabs">
@@ -440,30 +431,6 @@
     <!-- end lobby -->
     {% block script %}
         <script>
-        /* UR: 1830 BC countdown - remove after launch */
-        (function () {
-            var el = document.getElementById("newGameCountdown");
-            if (!el) return;
-            var release = Date.UTC(2026, 10, 9, 12, 0, 0); /* 9 Nov 2026, 12:00 GMT */
-            var timer;
-            function tick() {
-                var distance = release - Date.now();
-                if (distance < 0) {
-                    el.textContent = el.dataset.done;
-                    clearInterval(timer);
-                    return;
-                }
-                var s = Math.floor(distance / 1000);
-                var days = Math.floor(s / 86400);
-                var hours = Math.floor((s % 86400) / 3600);
-                var minutes = Math.floor((s % 3600) / 60);
-                var seconds = s % 60;
-                el.textContent = (days > 0 ? days + "d " : "") + hours + "h " + minutes + "m " + seconds + "s";
-            }
-            timer = setInterval(tick, 1000);
-            tick();
-        })();
-
         var global = {};
         {% if listType %}
         global.listType = "{{ listType }}";

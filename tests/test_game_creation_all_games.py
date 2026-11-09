@@ -14,6 +14,7 @@ GAMES = [
     {"code": "TGZ", "url": "TGZ:createTGZgame", "page": "createTGZpage", "extra": {}},
     {"code": "IND", "url": "IND:createINDgame", "page": "createINDpage", "extra": {}},
     {"code": "AQY", "url": "AQY:createAQYgame", "page": "createAQYpage", "extra": {}},
+    {"code": "URR", "url": "URR:createURRgame", "page": "createURRpage", "extra": {}},
     {"code": "BUS", "url": "BUS:createBUSgame", "page": "createBUSpage", "extra": {}},
     {"code": "CNS", "url": "CNS:createCNSgame", "page": "createCNSpage", "extra": {}},
     {"code": "WEB", "url": "WEB:createWEBgame", "page": "createWEBpage", "extra": {}},

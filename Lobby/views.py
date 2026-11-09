@@ -1229,7 +1229,7 @@ def stats(request):
         "KFW": {"name": "KFW", "gameCode": "KFW"},
         "WEB": {"name": "WEB", "gameCode": "WEB"},
         "RNB": {"name": "Roads & Boats", "gameCode": "RNB"},
-        "URR": {"name": "Ur: 1830 BC", "gameCode": "URR"},
+        "URR": {"name": "UR: 1830 BC", "gameCode": "URR"},
     }
 
     game_stats = []

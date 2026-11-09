@@ -48,6 +48,10 @@
          href="{% url 'RNB:RNBhelp' %}">
         {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="RNB" %}
       Roads &amp; Boats</a>
+      <a class="button button-sm help-pill-wide"
+         href="{% url 'URR:URRhelp' %}">
+        {% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="URR" %}
+      UR: 1830 BC</a>
     </div>
   </div>
   <div class="card section">
@@ -130,7 +134,7 @@
     <div class="help-qa">
       {% include 'Lobby/lobby_icons.html' %}
       <p>
-        {% translate "<b>Note:</b> There are no specific starting options for Horseless Carriage, Bus, and Antiquity" %}
+        {% translate "<b>Note:</b> There are no specific starting options for Horseless Carriage, Bus, Antiquity, and UR: 1830 BC" %}
       </p>
       <b><u>{% translate "What are the kickout icons?" %}</u></b>
       <p>
@@ -336,6 +340,10 @@
             <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="RNB" %} {% translate "Roads and Boats" %}</td>
             <td>2</td>
           </tr>
+          <tr>
+            <td>{% include 'Lobby/gameDisplay/gameIcons.html' with gameCode="URR" %} {% translate "UR: 1830 BC" %}</td>
+            <td>2</td>
+          </tr>
         </tbody>
       </table>
       <p>
@@ -466,6 +474,9 @@
       </p>
       <p>
         <b>Roads and Boats:</b> {% translate "You can resign during your production turn (not during a pre-move)." %}
+      </p>
+      <p>
+        <b>UR: 1830 BC:</b> {% translate "You can resign during your own settlement turn." %}
       </p>
       <b><u>{% translate "What is the penalty for Resigning?" %}</u></b>
       <p>

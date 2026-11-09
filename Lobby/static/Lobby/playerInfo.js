@@ -56,6 +56,9 @@ document.addEventListener("DOMContentLoaded", function () {
 			}else if (this.parentNode.parentNode.id.slice(0, 3) === "RNB") {
 				_gameID = parseInt(this.parentNode.parentNode.id.slice(11))
 				URLstring = "RNB"
+			}else if (this.parentNode.parentNode.id.slice(0, 3) === "URR") {
+				_gameID = parseInt(this.parentNode.parentNode.id.slice(11))
+				URLstring = "URR"
 			}
 
 			let csrftoken = getCookie("csrftoken")

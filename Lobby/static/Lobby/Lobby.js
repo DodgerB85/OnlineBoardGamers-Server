@@ -8,7 +8,7 @@ var global = {}
 
 
 document.addEventListener("DOMContentLoaded", function () {
-	let ALL_GAMES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB"]
+	let ALL_GAMES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "RNB", "URR"]
 	//var forcerefresh;
 
 	// Update all times to local

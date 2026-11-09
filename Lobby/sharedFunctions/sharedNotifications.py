@@ -259,6 +259,25 @@ def getGameStrings(game):
             "yourPendingTurnSubject": gettext("You can set a move in Roads & Boats"),
             "yourTurnFixSubject": gettext("You need to fix your move in Roads & Boats"),
         }
+    elif game == "URR":
+        return {
+            "boxName": gettext("UR: 1830 BC"),
+            "finishedSubject": gettext("Your UR: 1830 BC game has finished"),
+            "yourTurnSubject": gettext("It is your turn in UR: 1830 BC"),
+            "clickHereToPlayText": gettext("Click here to play UR: 1830 BC"),
+            "bugReportSubject": gettext("URR Bug Report"),
+            "inviteSubject": gettext("UR: 1830 BC - Invitation Received"),
+            "tournamentGameStartSubject": gettext("UR: 1830 BC - Tournament Game Started"),
+            "miniTournamentGameStartSubject": gettext("UR: 1830 BC - Mini Tournament Game Started"),
+            "tournamentWinSubject": gettext("UR: 1830 BC - Tournament Won!"),
+            "miniTournamentWinSubject": gettext("UR: 1830 BC - Mini Tournament Won!"),
+            "gameStartSubject": gettext("Your UR: 1830 BC game has started"),
+            "gameDeclineSubject": gettext("A player has declined your invitation for UR: 1830 BC"),
+            "lessThan2hoursSubject": gettext("UR: 1830 BC - Less than 2 hours to move"),
+            "turnExpiredSubject": gettext("UR: 1830 BC - Turn Expired"),
+            "tournmentOpenSubject": gettext("UR: 1830 BC - Tournament Open for Signup"),
+            "MTinviteSubject": gettext("UR: 1830 BC - Mini Tournament Invitation Received"),
+        }
 
     # Provide a default return
     return {

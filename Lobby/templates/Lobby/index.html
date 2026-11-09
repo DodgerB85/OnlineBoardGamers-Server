@@ -15,7 +15,7 @@
   "operatingSystem": "All",
   "browserRequirements": "Requires JavaScript",
   "inLanguage": ["en", "zh-Hans"],
-  "description": "An online platform to play heavy strategy board games directly in your browser. Play asynchronously with full rules enforcement, tournaments, and sandbox practice modes. Games include Food Chain Magnate (with all Ketchup expansions), Horseless Carriage, The Great Zimbabwe, Bus, Cannes, Antiquity, Indonesia, Keyflower, Web, and Roads & Boats.",
+  "description": "An online platform to play heavy strategy board games directly in your browser. Play asynchronously with full rules enforcement, tournaments, and sandbox practice modes. Games include Food Chain Magnate (with all Ketchup expansions), Horseless Carriage, The Great Zimbabwe, Bus, Cannes, Antiquity, UR: 1830 BC, Indonesia, Keyflower, Web, and Roads & Boats.",
   "featureList": [
     "Asynchronous turn-based play",
     "Automated rules enforcement",
@@ -75,6 +75,12 @@
     },
     {
       "@type": "WebApplication",
+      "name": "UR: 1830 BC",
+      "url": "https://www.onlineboardgamers.com/URR/help/",
+      "description": "UR: 1830 BC — an irrigation and land-trading strategy game set in ancient Mesopotamia by Splotter Spellen."
+    },
+    {
+      "@type": "WebApplication",
       "name": "Indonesia",
       "url": "https://www.onlineboardgamers.com/IND/help/",
       "description": "Indonesia — an economic game about production and shipping by Splotter Spellen."
@@ -109,7 +115,7 @@
         <div class="hero-text">
           <h1 class="hero-title">{% translate "Play Splotter & other classics online — free, live, with friends or solo." %}</h1>
           <p class="hero-sub">
-            {% translate "Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Antiquity, Indonesia, Bus, Cannes, Web, Roads & Boats and Keyflower — live updates, replays, stats, and regular tournaments." %}
+            {% translate "Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Antiquity, UR: 1830 BC, Indonesia, Bus, Cannes, Web, Roads & Boats and Keyflower — live updates, replays, stats, and regular tournaments." %}
           </p>
           <div class="hero-actions">
             <a class="button button-primary" href="{% url 'register' %}">{% translate "Create a free account" %}</a>
@@ -146,6 +152,7 @@
           {% include "Lobby/game_card.html" with title=_("Horseless Carriage") img="HLC/images/hlc-box.jpg" players="3–5" tagline=_("Race rivals to build and sell the most automobiles in a brand-new market.") full_id="game-hlc" %}
           {% include "Lobby/game_card.html" with title=_("The Great Zimbabwe") img="TGZ/images/TGZ_box.jpg" players="2–5" tagline=_("Raise monuments to your chosen god across an ancient African trade network.") full_id="game-tgz" %}
           {% include "Lobby/game_card.html" with title=_("Antiquity") img="AQY/images/AQYbox.jpg" players="2–4" tagline=_("Grow cities and please your patron saint before the land is depleted.") full_id="game-aqy" %}
+          {% include "Lobby/game_card.html" with title=_("UR: 1830 BC") img="URR/images/ur-box.jpg" players="3–6" tagline=_("Buy land, build irrigation works, and turn Mesopotamia's rivers into wealth.") full_id="game-urr" %}
           {% include "Lobby/game_card.html" with title=_("Indonesia") img="IND/images/INDbox.jpg" players="2–5" tagline=_("Ship goods, merge companies, and dominate an emerging economy.") full_id="game-ind" %}
           {% include "Lobby/game_card.html" with title=_("Bus") img="BUS/images/bus-box.jpg" players="3–5" tagline=_("Carry passengers across an expanding city — with time itself in play.") full_id="game-bus" %}
           {% include "Lobby/game_card.html" with title=_("Cannes") img="CNS/images/CNSbox.jpg" players="2–4" tagline=_("Produce films and work the network to win Cannes.") full_id="game-cns" %}
@@ -251,6 +258,21 @@
                 <i>{% translate "Antiquity is a strategy game for 2-4 players. It is set in an environment loosely modeled on Italy in the late Middle Ages. Players choose their own victory condition: they can focus on population growth, trade, conquest, or city building by choosing their patron saint.<br /><br />Each strategy requires a completely different style of play. Or you can choose to adore Santa Maria, the most powerful saint of all -- but you'll be expected to build a civilization twice as impressive as any other player.<br /><br />While your economy is constantly improving, with more and more advanced cities bringing new options each turn, the land around your cities is slowly being depleted, forcing you to travel further and further to gather your raw materials -- until finally, there is no more land left to farm. Let's hope one of you has won the game before that time!" %}</i>
               </p>
               <p>{% translate "Play with 2-4 people or start a practice game to play as all players on one device." %}</p>
+            </div>
+          </details>
+          <details id="game-urr">
+            <summary>UR: 1830 BC</summary>
+            <div class="flavour-body">
+              <p>{% translate "Control a dynasty in ancient Mesopotamia: trade land, build canals and waterworks, and profit from the rainy season." %}</p>
+              <p>
+                {% blocktranslate trimmed %}
+                  From <a href="https://www.splottershop.com/" target="_blank">Splotter's</a> website:
+                {% endblocktranslate %}
+              </p>
+              <p>
+                <i>{% translate "Ur, 1830 BC is a game about irrigation in Mesopotamia. Each player controls a dynasty in ancient Mesopotamia. The game is played in rounds: players buy and sell land, states build canals, reservoirs and pumps, and the rainy season brings water and income. As more states are founded, technological development drives old equipment out of use and more and more land becomes available for agriculture." %}</i>
+              </p>
+              <p>{% translate "Play with 3-6 people or start a practice game to play as all players on one device." %}</p>
             </div>
           </details>
           <details id="game-bus">
