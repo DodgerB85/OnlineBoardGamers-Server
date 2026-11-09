@@ -5,6 +5,7 @@ from django.contrib.auth.models import Group
 from django.db import models
 from django.urls import reverse
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 from .modelProxies import (
     AQYgame,
@@ -87,7 +88,7 @@ class TournamentAdmin(admin.ModelAdmin):
 
     @admin.display(description="")
     def tournament_name_note(self, obj):
-        return format_html(
+        return mark_safe(
             '<div style="color:#666; font-size:0.9em;">'
             "Name structure is critical: must match the auto-scheduler format "
             '(e.g., "June 26 TGZ Tournament") for pending/opening to work.'
@@ -251,7 +252,9 @@ class GameAdmin(admin.ModelAdmin):
                 links.append(format_html('<a href="{}">{}</a>', url, p.player.username))
 
         # 4. Join with commas and return as safe HTML
-        return format_html(", ".join(["{}"] * len(links)), *links) or "No players"
+        if not links:
+            return "No players"
+        return format_html(", ".join(["{}"] * len(links)), *links)
 
     @admin.display(
         description="Game (Click to view)", ordering="gameName"
