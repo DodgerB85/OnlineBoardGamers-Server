@@ -23,6 +23,27 @@ class DiscordLoginTests(TestCase):
         self.assertContains(self.client.get(reverse("myLogin")), reverse("discord_login"))
         self.assertContains(self.client.get(reverse("register")), reverse("discord_login"))
 
+    def test_discord_login_uses_configured_redirect_uri(self):
+        with patch("Lobby.views.DISCORD_REDIRECT_URI", "http://localhost:8000/discord/callback/"):
+            response = self.client.get(reverse("discord_login"))
+
+        self.assertIn(
+            "redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fdiscord%2Fcallback%2F",
+            response["Location"],
+        )
+
+    def test_profile_discord_link_uses_configured_redirect_uri(self):
+        user = User.objects.create_user("profiled", "profile@example.com", "pw")
+        self.client.force_login(user)
+
+        with patch("Lobby.views.DISCORD_REDIRECT_URI", "http://localhost:8000/discord/callback/"):
+            response = self.client.get(reverse("profile"))
+
+        self.assertContains(
+            response,
+            "redirect_uri=http%3A//localhost%3A8000/discord/callback/",
+        )
+
     def test_new_user_is_created_active_with_profile_and_verified_email(self):
         response = self.login_with_discord(
             {

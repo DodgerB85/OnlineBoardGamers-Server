@@ -3,11 +3,6 @@
 <!DOCTYPE html>
 <html lang="en"{% if user.is_authenticated and user.profile.darkMode %} data-theme="dark"{% endif %}>
     <head>
-        <style>
-        html {
-          display: none;
-        }
-        </style>
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-XVXK8Q50KN"></script>
         <script>
@@ -39,6 +34,8 @@
             {% endblock %}
         </title>
         <meta name="title" content="{% translate "Online Board Gamers" %}">
+        <meta name="application-name" content="Online Board Gamers">
+        <meta property="og:site_name" content="Online Board Gamers">
         {% block description %}
             <meta name="description"
                   content="{% blocktranslate trimmed %}Play Splotter's Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Indonesia, Antiquity, UR: 1830 BC, Bus, Cannes, and Web Online for free with others, or solo!{% endblocktranslate %}">
