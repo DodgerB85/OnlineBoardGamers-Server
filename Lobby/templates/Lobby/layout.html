@@ -147,7 +147,7 @@
                 <!-- Not logged in TOP BAR -->
                 <div id="loginForm">
                     <div id="loginFormStack">
-                        {% if request.resolver_match.url_name == "index" %}
+                        {% if request.resolver_match.url_name == "index" or request.resolver_match.url_name == "privacy" or request.resolver_match.url_name == "terms" %}
                             <a class="button button-primary loginSubmit"
                                href="{% url 'myLogin' %}">{% translate "Log in" %}</a>
                         {% else %}

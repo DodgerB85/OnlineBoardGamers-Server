@@ -15,6 +15,7 @@ class LegalPageTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Privacy Policy")
         self.assertContains(response, "Google API Services User Data Policy")
+        self.assertNotContains(response, 'name="password"')
 
     def test_terms_of_service_is_public(self):
         response = self.client.get(reverse("terms"))
