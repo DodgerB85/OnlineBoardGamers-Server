@@ -268,7 +268,7 @@ milestones: {
 
   firstTvAnnouncerUsed: "First TV Announcer used",
   firstTvAnnouncerUsedTitle: "First TV Announcer used",
-  firstTvAnnouncerUsedDesc: "First TV campaign: 2 demand per antenna house per night",
+  firstTvAnnouncerUsedDesc: "During your first TV ad: antenna houses get 2 demand per night instead of 1",
 
   firstSeniorBusinessDeveloperUsed: "First Senior Business Developer used",
   firstSeniorBusinessDeveloperUsedTitle: "First Senior Business Developer used",
