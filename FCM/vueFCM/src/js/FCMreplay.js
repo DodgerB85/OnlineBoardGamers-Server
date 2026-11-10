@@ -868,7 +868,8 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 	// entry, so the replay can distinguish it without changing the legacy
 	// campaign-history payload.
 	const temporaryCampaign = store.laborMarket.temporaryCampaignOwners[campaignNumber] === playerIndex
-	// Media Line mod: the second phone token of a telemarketer hangs off the
+	// Media Line mod: the second phone token of a telemarketer (or a TV
+	// announcer / brand director in phone-compat mode) hangs off the
 	// same employee (live play used addCampaignToMarketer, no employee moved).
 	// New saves flag it explicitly after the duration; older saves fall back to
 	// "the telemarketer already left the bench" (only reliable with one copy).

@@ -442,7 +442,7 @@ describe("Media Line stage 3 - phone token action", () => {
 		expect(store.context.marketer).toBe(-1)
 	})
 
-	it("TV announcer placing a phone token does not chain a second one", () => {
+	it("TV announcer placing a phone token chains a second one like the telemarketer", () => {
 		const store = phoneActionBoard()
 		store.players[0].employees.push(rf.TV_ANNOUNCER)
 		controller.selectMarketer(rf.TV_ANNOUNCER, false)
@@ -451,11 +451,37 @@ describe("Media Line stage 3 - phone token action", () => {
 		controller.chooseDuration(2)
 		controller.placeMarketingCampaign(mapMod.giveIndex(40, 39))
 
-		// Only the telemarketer chains - the announcer's action is done
-		expect(store.context.mediaLineSecondCall).toBe(false)
+		// Backward compat inherits the full telemarketer action - the second
+		// token is armed with the remaining phone cards
+		expect(store.context.mediaLineSecondCall).toBe(true)
 		expect(store.campaigns).toHaveLength(1)
 		expect(store.campaigns[0]).toMatchObject({ number: 30, good: 1, duration: 2 })
 		expect(store.players[0].marketers).toEqual([{ campaign: 30, marketer: rf.TV_ANNOUNCER, nightShift: false }])
+
+		controller.placeMarketingCampaign(mapMod.giveIndex(40, 42))
+		expect(store.context.mediaLineSecondCall).toBe(false)
+		expect(store.campaigns).toHaveLength(2)
+		expect(store.campaigns[1]).toMatchObject({ number: 31, good: 1, duration: 2 })
+		expect(store.players[0].marketers).toHaveLength(2)
+		expect(store.players[0].marketers[1].marketer).toBe(rf.TV_ANNOUNCER)
+	})
+
+	it("brand director placing a phone token chains a second one like the telemarketer", () => {
+		const store = phoneActionBoard()
+		store.players[0].employees.push(rf.BRAND_DIRECTOR)
+		controller.selectMarketer(rf.BRAND_DIRECTOR, false)
+		controller.chooseCampaign(30)
+		controller.chooseGood(1)
+		controller.chooseDuration(2)
+		controller.placeMarketingCampaign(mapMod.giveIndex(40, 39))
+
+		expect(store.context.mediaLineSecondCall).toBe(true)
+		expect(store.players[0].marketers).toEqual([{ campaign: 30, marketer: rf.BRAND_DIRECTOR, nightShift: false }])
+
+		controller.placeMarketingCampaign(mapMod.giveIndex(40, 42))
+		expect(store.context.mediaLineSecondCall).toBe(false)
+		expect(store.campaigns).toHaveLength(2)
+		expect(store.players[0].marketers[1].marketer).toBe(rf.BRAND_DIRECTOR)
 	})
 })
 
