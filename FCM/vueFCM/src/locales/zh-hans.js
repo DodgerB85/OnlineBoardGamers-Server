@@ -269,7 +269,7 @@ export default {
 
 		"firstTvAnnouncerUsed": "首位使用电视广播员",
 		"firstTvAnnouncerUsedTitle": "首位使用电视广播员",
-		"firstTvAnnouncerUsedDesc": "首个电视频道：每栋天线房每晚 2 张需求",
+		"firstTvAnnouncerUsedDesc": "首个电视频道广告期间的每晚产生 2 张需求而非 1 张",
 
 		"firstSeniorBusinessDeveloperUsed": "首位使用资深业务拓展经理",
 		"firstSeniorBusinessDeveloperUsedTitle": "首位使用资深业务拓展经理",

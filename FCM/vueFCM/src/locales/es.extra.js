@@ -31,7 +31,7 @@ export default {
 		"firstTelemarketerUsedDesc": "Vende todas las casas que promocionaste por teléfono/TV: +$5 cada una; los grupos se liquidan por separado; se anula si esa noche hiciste otras campañas",
 		"firstTvAnnouncerUsed": "Primer locutor de TV usado",
 		"firstTvAnnouncerUsedTitle": "Primer locutor de TV usado",
-		"firstTvAnnouncerUsedDesc": "Primera campaña de TV: 2 de demanda por casa con antena y noche",
+		"firstTvAnnouncerUsedDesc": "Durante tu primer anuncio de TV: las casas con antena reciben 2 de demanda por noche en vez de 1",
 
 		"firstSeniorBusinessDeveloperUsed": "Primer Desarrollador de Negocios Senior usado",
 		"firstSeniorBusinessDeveloperUsedTitle": "Primer Desarrollador de Negocios Senior usado",
