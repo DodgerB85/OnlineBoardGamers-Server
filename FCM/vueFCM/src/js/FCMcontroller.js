@@ -1608,11 +1608,12 @@ export function placeMarketingCampaign(index) {
 			playNightShiftCampaign()
 			return
 		}
-		// MEDIA LINE - phone tokens: a telemarketer places up to two identical
+		// MEDIA LINE - phone tokens: the telemarketer places up to two identical
 		// tokens in one action; the second keeps the first token's good and
-		// duration. Only the telemarketer chains - TV announcers and brand
-		// directors may place phone tokens too, but just one per action.
-		else if (rf.MARKETING_CAMPAIGNS[store.context.campaign].type === rf.PHONE && store.context.marketer === rf.TELEMARKETER && !store.context.mediaLineSecondCall) {
+		// duration. TV announcers and brand directors placing a phone campaign
+		// in backward-compat mode inherit the full telemarketer action, so
+		// they chain the second token as well.
+		else if (rf.MARKETING_CAMPAIGNS[store.context.campaign].type === rf.PHONE && [rf.TELEMARKETER, rf.TV_ANNOUNCER, rf.BRAND_DIRECTOR].includes(store.context.marketer) && !store.context.mediaLineSecondCall) {
 			const remaining = store.availableMarketingCampaigns.filter((c) => rf.MARKETING_CAMPAIGNS[c].type === rf.PHONE)
 			if (remaining.length > 0) {
 				mlChain = true
