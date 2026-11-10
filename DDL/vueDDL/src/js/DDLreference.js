@@ -12,7 +12,9 @@ import { ROAD_CELLS, JUNCTION_CELLS } from "./DDLroadCells.js"
 
 const t = i18n.global.t
 
-export const SUPER_USERS = ["BotKickStarter", "admin"]
+// Automated accounts only. A human or administrator here would bypass the turn
+// check and submit actions for whichever seat is active.
+export const SUPER_USERS = ["BotKickStarter"]
 export const DEBUG_USERS = []
 export const BOT_NAME = "DdlBot"
 

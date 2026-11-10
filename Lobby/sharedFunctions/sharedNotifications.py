@@ -278,6 +278,25 @@ def getGameStrings(game):
             "tournmentOpenSubject": gettext("UR: 1830 BC - Tournament Open for Signup"),
             "MTinviteSubject": gettext("UR: 1830 BC - Mini Tournament Invitation Received"),
         }
+    elif game == "DDL":
+        return {
+            "boxName": gettext("Duck Dealer"),
+            "finishedSubject": gettext("Your Duck Dealer game has finished"),
+            "yourTurnSubject": gettext("It is your turn in Duck Dealer"),
+            "clickHereToPlayText": gettext("Click here to play Duck Dealer"),
+            "bugReportSubject": gettext("DDL Bug Report"),
+            "inviteSubject": gettext("Duck Dealer - Invitation Received"),
+            "tournamentGameStartSubject": gettext("Duck Dealer - Tournament Game Started"),
+            "miniTournamentGameStartSubject": gettext("Duck Dealer - Mini Tournament Game Started"),
+            "tournamentWinSubject": gettext("Duck Dealer - Tournament Won!"),
+            "miniTournamentWinSubject": gettext("Duck Dealer - Mini Tournament Won!"),
+            "gameStartSubject": gettext("Your Duck Dealer game has started"),
+            "gameDeclineSubject": gettext("A player has declined your invitation for Duck Dealer"),
+            "lessThan2hoursSubject": gettext("Duck Dealer - Less than 2 hours to move"),
+            "turnExpiredSubject": gettext("Duck Dealer - Turn Expired"),
+            "tournmentOpenSubject": gettext("Duck Dealer - Tournament Open for Signup"),
+            "MTinviteSubject": gettext("Duck Dealer - Mini Tournament Invitation Received"),
+        }
 
     # Provide a default return
     return {

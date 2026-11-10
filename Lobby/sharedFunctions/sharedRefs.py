@@ -1305,6 +1305,21 @@ def SR_getROWstartingOptionsHTML(startingOptionsArr):
     return startingOptionsHTML
 
 
+def SR_getDDLstartingOptionsHTML(startingOptionsArr):
+    if not startingOptionsArr:
+        return ""
+    startingOptionsHTML = ""
+    for option in startingOptionsArr:
+        if option == rf.SO_LEARNING_GAME:
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_learningGame.svg' title='" + gettext("Learning Game") + "'>"
+        if option == rf.SO_EXPERIENCED_GAME:
+            startingOptionsHTML += "<img class ='startingOption' src='/static/Lobby/images/startingOptions/so_experiencedGame.svg' title='" + gettext("Experienced Game") + "'>"
+        if option == rfDDL.SO_AUCTION:
+            startingOptionsHTML += "<span class='startingOption startingOptionText' title='" + gettext("Starting auction") + "'>Auction</span>"
+
+    return startingOptionsHTML
+
+
 def SR_getRNBstartingOptionsHTML(startingOptionsArr):
     if not startingOptionsArr:
         return ""

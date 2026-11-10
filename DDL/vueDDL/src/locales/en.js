@@ -102,12 +102,16 @@ export default {
 		map: "Map",
 		zoomIn: "Zoom in",
 		zoomOut: "Zoom out",
+		spectator: "Spectator",
+
 	},
 	footer: {
 		credit: "Duck Dealer is a board game by Jeroen Doumen and Joris Wiersinga, published by",
 		permissions: "Permissions provided. Menu icons from",
 	},
 	action: {
+		chooseTurn: "Collect energy or take your action turn",
+		placeHighways: "Place highways",
 		bgStats: "Post to BG Stats",
 		bgStatsCopy: "Copy link",
 		bgStatsCopied: "Link copied",
@@ -372,6 +376,7 @@ export default {
 	errors: {
 		couldNotSaveBid: "Could not save your bid.",
 		staleVersion: "It appears you have an older version of the game. Please refresh the page",
+		noHighwayParts: "You have no highway parts left.",
 		saveGame: "Error saving the game",
 		sendChat: "Error sending chat message",
 		webmaster: "Sorry, there was a problem. Please email the webmaster directly",

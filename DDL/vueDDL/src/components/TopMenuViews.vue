@@ -180,7 +180,7 @@ function localCastVote(topic) {
 .chatentry .header .date { font-size: 0.7em; font-style: italic; float: right; }
 .chatentry .header .bold { font-weight: bold; }
 .chatentry .messageBody { overflow: auto; white-space: pre-wrap; }
-#rewindPanel { position: absolute; background-color: black; border: 1px solid white; padding: 5px; width: 400px; top: 60px; left: 440px; font-size: 14px; z-index: 10000; color: white; }
+#rewindPanel { position: absolute; background-color: white; border: 2px solid #333; padding: 8px; width: 400px; top: 60px; left: 440px; font-size: 14px; z-index: 10000; color: #333; }
 .topMenuItem { display: inline-block; width: 62px; height: 55px; cursor: pointer; text-align: center; }
 .topMenuItem img { width: 38px; height: 38px; }
 .topMenuItem span { font-size: 14px; font-weight: bold; display: block; }
