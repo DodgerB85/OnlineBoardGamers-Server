@@ -71,6 +71,36 @@
 
             <div class="card">
                 <div class="card-header">
+                    <h2 class="card-title">{% translate "Change Username" %}</h2>
+                </div>
+                <p style="font-size: 13px; margin: 0 0 10px;">
+                    {% translate "You can change your username once every 90 days, and only when you are not in any unfinished game or tournament. Finished games keep the name you used at the time." %}
+                </p>
+                {% if usernameChangeBlockedReason %}
+                    <p style="font-size: 13px; margin: 0 0 10px; color: var(--color-danger);">{{ usernameChangeBlockedReason }}</p>
+                {% endif %}
+                {% if usernameChangeAvailableAt %}
+                    <p style="font-size: 13px; margin: 0 0 10px;">
+                        {% blocktranslate with available=usernameChangeAvailableAt|date:"j M Y" %}Next change available on {{ available }}.{% endblocktranslate %}
+                    </p>
+                {% endif %}
+                {% if not usernameChangeBlockedReason and not usernameChangeAvailableAt %}
+                    <form method="post" id="changeUsernameForm" class="stacked-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="changeUsername">
+                        <div class="form-row">
+                            <label class="form-label" for="{{ changeUsernameForm.username.id_for_label }}">{{ changeUsernameForm.username.label }}</label>
+                            {{ changeUsernameForm.username }}
+                        </div>
+                        <div style="margin-top: 16px;">
+                            <button type="submit" class="button button-primary">{% translate "Change Username" %}</button>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+
+            <div class="card">
+                <div class="card-header">
                     <h2 class="card-title">{% translate "Google login" %}</h2>
                 </div>
                 {% if google_login_id %}

@@ -139,6 +139,8 @@ class Profile(models.Model):
     email_confirmed = models.BooleanField(default=False)
     # Social signups may pick a real username once, before joining games.
     username_change_allowed = models.BooleanField(default=False)
+    # Last successful username change; limits changes to one every 90 days.
+    usernameLastChanged = models.DateTimeField(null=True, blank=True)
     # Explicit staff rights; usernames are not permission checks.
     is_site_admin = models.BooleanField(default=False)
     is_game_admin = models.BooleanField(default=False)

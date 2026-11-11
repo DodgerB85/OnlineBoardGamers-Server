@@ -4,6 +4,31 @@ from typing import Final
 SHADOW_PLAYER_NAMES = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
 # Full set of bot/shadow usernames for membership checks (is-my-move, kickout, etc.)
 SHADOW_USERNAMES = {*SHADOW_PLAYER_NAMES, "FcmAI"}
+# Accounts that must never be taken through registration or a username change.
+RESERVED_USERNAMES = {
+    *SHADOW_USERNAMES,
+    "AqyBot",
+    "BusBot",
+    "BotKickStarter",
+    "CnsBot",
+    "DdlBot",
+    "FCMtourneyAdmin",
+    "FcmBot",
+    "HcBot",
+    "HlcBot",
+    "IndBot",
+    "KfwBot",
+    "NtrBot",
+    "RnbBot",
+    "RowAI",
+    "RowBot",
+    "TGZtourneyAdmin",
+    "TgzBot",
+    "UrrBot",
+    "WebBot",
+    "admin",
+}
+RESERVED_USERNAMES_CASEFOLD = {name.casefold() for name in RESERVED_USERNAMES}
 DELETE_VOTE_TOPIC: Final = "delete_game_votes"
 STATS_EXCLUDE_VOTE_TOPIC = "stats_exclude_votes"
 REWIND_CONSENT_VOTE_TOPIC = "rewind_consent_votes"

@@ -51,6 +51,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.encoding import force_bytes, force_str
+from django.utils.formats import date_format
 from django.utils.http import (
     url_has_allowed_host_and_scheme,
     urlsafe_base64_decode,
@@ -113,6 +114,7 @@ from Lobby.sharedFunctions.sharedRefs import (
 )
 
 from .forms import (
+    ChangeUsernameForm,
     ChooseUsernameForm,
     NewUserForm,
     PasswordChangeCustomForm,
@@ -1832,9 +1834,65 @@ def AQYmapEditor(request):
         return render(request, "Lobby/AQYmapEditor.html")
 
 
+USERNAME_CHANGE_COOLDOWN = timedelta(days=90)
+
+
+def _username_change_block_reason(user):
+    if (
+        Game.objects.filter(Q(creator=user) | Q(host=user) | Q(players__player=user))
+        .exclude(gameStatus="FINISHED")
+        .exists()
+    ):
+        return gettext("You cannot change your username while you are in an unfinished game.")
+    if (
+        Tournament.objects.filter(Q(creator=user) | Q(startingPlayers=user) | Q(nextRoundPlayers=user))
+        .exclude(tournamentStatus="FN")
+        .exists()
+    ):
+        return gettext("You cannot change your username while you are in an unfinished tournament.")
+    return None
+
+
+def _username_change_available_at(profile):
+    if not profile.usernameLastChanged:
+        return None
+    available_at = profile.usernameLastChanged + USERNAME_CHANGE_COOLDOWN
+    return available_at if timezone.now() < available_at else None
+
+
 @login_required
 def profile(request):
     if request.method == "POST":
+        if request.POST.get("action") == "changeUsername":
+            with transaction.atomic():
+                profile = Profile.objects.select_for_update().select_related("user").get(user=request.user)
+                user = profile.user
+                old_username = user.username
+                available_at = _username_change_available_at(profile)
+                if available_at:
+                    messages.error(
+                        request,
+                        gettext("You can change your username again on %(date)s.")
+                        % {"date": date_format(timezone.localtime(available_at), "DATE_FORMAT")},
+                    )
+                    return redirect("profile")
+                block_reason = _username_change_block_reason(user)
+                if block_reason:
+                    messages.error(request, block_reason)
+                    return redirect("profile")
+                form = ChangeUsernameForm(request.POST, instance=user)
+                if form.is_valid():
+                    if form.cleaned_data["username"] == old_username:
+                        messages.info(request, gettext("That is already your username."))
+                    else:
+                        form.save()
+                        profile.usernameLastChanged = timezone.now()
+                        profile.username_change_allowed = False
+                        profile.save(update_fields=["usernameLastChanged", "username_change_allowed"])
+                        messages.success(request, gettext("Your username has been changed."))
+                else:
+                    messages.error(request, " ".join(str(error) for errors in form.errors.values() for error in errors))
+            return redirect("profile")
         if request.POST["action"] == "changePassword":
             form = PasswordChangeCustomForm(request.user, request.POST)
             if form.is_valid():
@@ -1971,6 +2029,9 @@ def profile(request):
         else:
             stop_emails_until = -1
         profile_form = UpdateProfileForm(instance=request.user.profile)
+        changeUsernameForm = ChangeUsernameForm(instance=request.user)
+        usernameChangeBlockedReason = _username_change_block_reason(request.user)
+        usernameChangeAvailableAt = _username_change_available_at(profile)
         preferredFCMoptions = []
         if profile.preferredFCMoptions:
             try:
@@ -2064,6 +2125,9 @@ def profile(request):
             {
                 "form": profile_form,
                 "form2": passwordResetForm,
+                "changeUsernameForm": changeUsernameForm,
+                "usernameChangeBlockedReason": usernameChangeBlockedReason,
+                "usernameChangeAvailableAt": usernameChangeAvailableAt,
                 "favColour": favColour,
                 "favHLCcolour": favHLCcolour,
                 "highContrastBoardItems": highContrastBoardItems,

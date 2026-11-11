@@ -8,9 +8,28 @@ from django.contrib.auth.forms import (
 )
 from django.utils.translation import gettext_lazy
 
+from Lobby.sharedFunctions.constants import RESERVED_USERNAMES_CASEFOLD
+
 from .models import Profile, changelog
 
 User = get_user_model()
+
+
+class UsernameValidationMixin:
+    """Shared username rules for registration, social signup and profile changes."""
+
+    def clean_username(self):
+        username = (self.cleaned_data.get("username") or "").strip()
+        if not username:
+            raise forms.ValidationError(gettext_lazy("Enter a username"))
+        if username.casefold() in RESERVED_USERNAMES_CASEFOLD:
+            raise forms.ValidationError(gettext_lazy("That username is reserved"))
+        taken = User.objects.filter(username__iexact=username)
+        if self.instance.pk:
+            taken = taken.exclude(pk=self.instance.pk)
+        if taken.exists():
+            raise forms.ValidationError(gettext_lazy("Username already taken"))
+        return username
 
 
 # Create your forms here.
@@ -81,7 +100,7 @@ class PasswordChangeCustomForm(PasswordChangeForm):
         self.fields["new_password2"].label = ""
 
 
-class NewUserForm(UserCreationForm):
+class NewUserForm(UsernameValidationMixin, UserCreationForm):
     username = forms.CharField(
         max_length=100,
         label=gettext_lazy("Username"),
@@ -145,16 +164,27 @@ class NewUserForm(UserCreationForm):
         return user
 
 
-class ChooseUsernameForm(forms.ModelForm):
+class ChooseUsernameForm(UsernameValidationMixin, forms.ModelForm):
     class Meta:
         model = User
         fields = ["username"]
 
-    def clean_username(self):
-        username = self.cleaned_data["username"]
-        if User.objects.filter(username__iexact=username).exclude(pk=self.instance.pk).exists():
-            raise forms.ValidationError(gettext_lazy("Username already taken"))
-        return username
+
+class ChangeUsernameForm(UsernameValidationMixin, forms.ModelForm):
+    username = forms.CharField(
+        max_length=150,
+        label=gettext_lazy("New username"),
+        widget=forms.TextInput(
+            attrs={
+                "class": "registerInput",
+                "autocomplete": "username",
+            }
+        ),
+    )
+
+    class Meta:
+        model = User
+        fields = ["username"]
 
 
 class UpdateProfileForm(forms.ModelForm):
