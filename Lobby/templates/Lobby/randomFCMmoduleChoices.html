@@ -1,0 +1,288 @@
+{% load i18n %}
+                      <div style="border:1px solid #ddd;
+                                  border-radius:4px;
+                                  padding:8px 12px;
+                                  max-height:220px;
+                                  overflow-y:auto">
+                        <div id="{{ choice }}CoreList"
+                             style="display:grid;
+                                    grid-template-columns:repeat(2, minmax(0, 1fr));
+                                    gap:2px 16px">
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_8"
+                                   name="{{ choice }}_8"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Hard Choices with Original Milestones" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_9"
+                                   name="{{ choice }}_9"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Fry Chefs" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_10"
+                                   name="{{ choice }}_10"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Kimchi" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_11"
+                                   name="{{ choice }}_11"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Sushi" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_12"
+                                   name="{{ choice }}_12"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Noodles" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_13"
+                                   name="{{ choice }}_13"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Gourmet Food Critic" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_14"
+                                   name="{{ choice }}_14"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Movie Stars" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_15"
+                                   name="{{ choice }}_15"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Mass Marketers" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_16"
+                                   name="{{ choice }}_16"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Night Shift Managers" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_17"
+                                   name="{{ choice }}_17"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Rural Marketers" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_18"
+                                   name="{{ choice }}_18"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "New Districts" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_19"
+                                   name="{{ choice }}_19"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Coffee" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_20"
+                                   name="{{ choice }}_20"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Ketchup Milestone" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_22"
+                                   name="{{ choice }}_22"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Lobbyists" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_23"
+                                   name="{{ choice }}_23"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Price Changing Reserve Cards" %}</div>
+                          </label>
+                        </div>
+                        <div id="{{ choice }}ChineseList"
+                             style="display:none;
+                                    margin-top:8px;
+                                    border-top:1px solid #eee;
+                                    padding-top:6px;
+                                    grid-template-columns:repeat(2, minmax(0, 1fr));
+                                    gap:2px 16px">
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_42"
+                                   name="{{ choice }}_42"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Jazz Musicians" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_43"
+                                   name="{{ choice }}_43"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Dumplings" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_44"
+                                   name="{{ choice }}_44"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Delivery Drivers" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_45"
+                                   name="{{ choice }}_45"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Hawker Marketeers" %}</div>
+                          </label>
+                        </div>
+                        <div id="{{ choice }}FanList"
+                             style="display:none;
+                                    margin-top:8px;
+                                    border-top:1px solid #eee;
+                                    padding-top:6px;
+                                    grid-template-columns:repeat(2, minmax(0, 1fr));
+                                    gap:2px 16px">
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_46"
+                                   name="{{ choice }}_46"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Fried Chicken" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_47"
+                                   name="{{ choice }}_47"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Stadium" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_48"
+                                   name="{{ choice }}_48"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Labor Market" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_49"
+                                   name="{{ choice }}_49"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Second Bailout" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_50"
+                                   name="{{ choice }}_50"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Media Line" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_51"
+                                   name="{{ choice }}_51"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "New Map" %}</div>
+                          </label>
+                          <label class="check-label" style="display:flex;align-items:center;gap:6px">
+                            <input type="checkbox"
+                                   onchange="validateOptions(this.id)"
+                                   class="myCheckbox {{ choice }}Mod"
+                                   id="{{ choice }}_53"
+                                   name="{{ choice }}_53"
+                                   value=""
+                                   disabled />
+                            <div>{% trans "Senior Business Developer" %}</div>
+                          </label>
+                        </div>
+                      </div>

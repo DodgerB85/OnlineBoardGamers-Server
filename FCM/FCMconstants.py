@@ -82,6 +82,8 @@ SO_DRAFT_SKIP_MODULE = 999
 # is stored as SO_EXCLUDED_MODULE_BASE + mod id, stripped out in
 # FCMpresenter.startGame before the roll (so the Vue client never sees them).
 SO_EXCLUDED_MODULE_BASE = 1000
+# Mandatory picks count inside the random total; setup-only, never gameplay flags.
+SO_INCLUDED_MODULE_BASE = 1100
 
 # Flag to use new code
 TS_USE_NEW_CODE = 1744974000000

@@ -62,8 +62,8 @@ def buildFCMstartingOptions(post_data):
             if post_data.get("random_MS") == "202":
                 optionsArr.append(rfFCM.SO_NEW_MS)
             optionsArr.append(rfFCM.SO_RANDOM_MODULES)
-            min_modules = post_data["minModules"].zfill(2)  # Pad to two digits
-            max_modules = post_data["maxModules"].zfill(2)
+            min_modules = (post_data.get("minModules") or "1").zfill(2)  # Pad to two digits
+            max_modules = (post_data.get("maxModules") or "15").zfill(2)
             minStr = f"{rfFCM.SO_MIN_RANDOM_MODULES}{min_modules}"
             maxStr = f"{rfFCM.SO_MAX_RANDOM_MODULES}{max_modules}"
             optionsArr.extend([int(minStr), int(maxStr)])
@@ -84,6 +84,13 @@ def buildFCMstartingOptions(post_data):
             ]
             excluded_mods = sorted(mod for mod in excluded_mods if mod < 100)[:26]
             optionsArr.extend(rfFCM.SO_EXCLUDED_MODULE_BASE + mod for mod in excluded_mods)
+            # Whitelist exact field names: unknown ids and aliases are not options.
+            random_module_ids = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23,
+                                 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 53]
+            optionsArr.extend(
+                rfFCM.SO_INCLUDED_MODULE_BASE + mod
+                for mod in random_module_ids if f"include_{mod}" in post_data
+            )
         if "draftModules" in post_data:
             if post_data.get("draft_MS") == "302":
                 optionsArr.append(rfFCM.SO_NEW_MS)

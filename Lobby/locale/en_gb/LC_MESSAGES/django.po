@@ -2079,3 +2079,11 @@ msgstr ""
 #: .\views.py:1839 .\views.py:1850
 msgid "This is a test message from Online Board Gamers"
 msgstr ""
+
+#: templates/Lobby/createFCM.html
+msgid "Specify mandatory modules"
+msgstr "Specify mandatory modules"
+
+#: templates/Lobby/createFCM.html
+msgid "Mandatory modules count toward Min/Max. Excluded modules take precedence."
+msgstr "Mandatory modules count toward Min/Max. Excluded modules take precedence."

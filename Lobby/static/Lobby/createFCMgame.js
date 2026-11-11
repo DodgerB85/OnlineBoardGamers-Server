@@ -41,7 +41,7 @@ function initGameCreation(fillData, setupData = {}) {
 		document.getElementById("kickoutDuration").value = setupData.kickoutDuration
 		if (document.getElementById("kickoutDuration").value == "") document.getElementById("kickoutDuration").selectedIndex = "0"
 
-		var startingOptions = setupData.startingOptions.split(/,/)
+		var startingOptions = setupData.startingOptions.replace(/[\[\]\s]/g, "").split(/,/)
 
 		//if (startingOptions.includes("5")) document.getElementById("allowSurrender").checked = true;
 		if (startingOptions.includes("101")) document.getElementById("strictPaydayFridge").checked = true
@@ -121,6 +121,33 @@ function initGameCreation(fillData, setupData = {}) {
 			// Employee options
 			if (startingOptions.includes("14")) document.getElementById("movieStars").checked = true
 			if (startingOptions.includes("16")) document.getElementById("nightShift").checked = true
+
+			if (startingOptions.includes("200")) {
+				document.getElementById("enableAdvancedOptions").checked = true
+				validateOptions("enableAdvancedOptions")
+				document.getElementById("randomModules").checked = true
+				validateOptions("randomModules")
+				document.getElementById("random_originalMS").checked = !startingOptions.includes("21")
+				document.getElementById("random_newMS").checked = startingOptions.includes("21")
+				document.getElementById("includeChineseExpansion").checked = startingOptions.includes("203") || RANDOM_POOL.chinese.some(function (m) { return startingOptions.includes(String(m)) })
+				document.getElementById("includeFanExpansion").checked = startingOptions.includes("204") || RANDOM_POOL.fan.some(function (m) { return startingOptions.includes(String(m)) })
+				startingOptions.forEach(function (code) {
+					if (/^210\d{2}$/.test(code)) document.getElementById("minModules").value = String(parseInt(code.slice(3), 10))
+					if (/^211\d{2}$/.test(code)) document.getElementById("maxModules").value = String(parseInt(code.slice(3), 10))
+				})
+				;["exclude", "include"].forEach(function (choice) {
+					var base = choice === "exclude" ? 1000 : 1100
+					var hasChoices = false
+					document.querySelectorAll("input." + choice + "Mod").forEach(function (cb) {
+						var mod = parseInt(cb.id.slice(choice.length + 1), 10)
+						cb.checked = startingOptions.includes(String(base + mod))
+						if (cb.checked) hasChoices = true
+					})
+					document.getElementById(choice + "Modules").checked = hasChoices
+				})
+				syncRandomExcludeUI()
+			}
+
 		}
 	}
 }
@@ -549,9 +576,29 @@ function syncRandomExcludeUI() {
 		if (!originalMS) hardChoice.checked = false
 	}
 
-	// Live pool count + min/max guards
 	var pool = getExcludePool()
 	var excluded = getExcludedMods()
+	var includeBox = document.getElementById("includeModules")
+	if (includeBox) includeBox.disabled = !randomOn
+	var includeOn = includeBox && includeBox.checked && !includeBox.disabled
+	var included = []
+	document.querySelectorAll("input.includeMod").forEach(function (cb) {
+		var mod = parseInt(cb.id.slice("include_".length), 10)
+		// Exclusions win here and on the server, including restored conflicts.
+		cb.disabled = !includeOn || pool.indexOf(mod) === -1 || excluded.indexOf(mod) !== -1
+		if (cb.disabled) cb.checked = false
+		if (cb.checked) included.push(mod)
+	})
+	var includeChinese = document.getElementById("includeChineseList")
+	var includeFan = document.getElementById("includeFanList")
+	if (includeChinese) includeChinese.style.display = chineseOn ? "grid" : "none"
+	if (includeFan) includeFan.style.display = fanOn ? "grid" : "none"
+	var includeHardChoice = document.getElementById("include_8")
+	if (includeHardChoice) includeHardChoice.parentElement.style.display = originalMS ? "" : "none"
+	var includePanel = document.getElementById("includeModulesPanel")
+	if (includePanel) includePanel.style.display = includeOn ? "block" : "none"
+
+	// Live pool count + min/max guards
 	var remaining = pool.filter(function (m) { return excluded.indexOf(m) === -1 }).length
 	var countEl = document.getElementById("excludePoolCount")
 	if (countEl) countEl.textContent = remaining
@@ -559,13 +606,17 @@ function syncRandomExcludeUI() {
 	var minSel = document.getElementById("minModules")
 	var maxSel = document.getElementById("maxModules")
 	if (minSel && maxSel && randomOn) {
+		var lowerBound = remaining === 0 ? 0 : Math.max(1, included.length)
 		for (var i = 0; i < minSel.options.length; i++) {
 			var v = parseInt(minSel.options[i].value, 10)
-			minSel.options[i].disabled = v > remaining
-			maxSel.options[i].disabled = v > remaining
+			minSel.options[i].disabled = v > remaining || v < lowerBound
+			maxSel.options[i].disabled = v > remaining || v < lowerBound
 		}
+		if (parseInt(minSel.value, 10) < lowerBound) minSel.value = String(lowerBound)
+		if (parseInt(maxSel.value, 10) < lowerBound) maxSel.value = String(lowerBound)
 		if (parseInt(minSel.value, 10) > remaining) minSel.value = String(remaining)
 		if (parseInt(maxSel.value, 10) > remaining) maxSel.value = String(remaining)
+		if (parseInt(minSel.value, 10) > parseInt(maxSel.value, 10)) maxSel.value = minSel.value
 	}
 }
 

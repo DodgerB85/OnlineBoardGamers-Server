@@ -14084,3 +14084,11 @@ msgstr "已排除：%(modules)s"
 #~ "在OnlineBoardGamers网站上的游戏邀请\n"
 #~ "%(gameName)s - 最多%(maxPlayers)s个玩家\n"
 #~ "[点击这里玩 Horseless Carriage](https://www.OnlineBoardGamers.com/)"
+
+#: templates/Lobby/createFCM.html
+msgid "Specify mandatory modules"
+msgstr "指定必选模块"
+
+#: templates/Lobby/createFCM.html
+msgid "Mandatory modules count toward Min/Max. Excluded modules take precedence."
+msgstr "必选模块计入最少/最多模块总数。排除模块优先。"
