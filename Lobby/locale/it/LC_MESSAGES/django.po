@@ -15000,3 +15000,11 @@ msgstr "Esclusi: %(modules)s"
 
 #~ msgid "Final Round"
 #~ msgstr "Turno finale"
+
+#: templates/Lobby/createFCM.html
+msgid "Specify mandatory modules"
+msgstr "Specifica i moduli obbligatori"
+
+#: templates/Lobby/createFCM.html
+msgid "Mandatory modules count toward Min/Max. Excluded modules take precedence."
+msgstr "I moduli obbligatori contano nel totale Min/Max. I moduli esclusi hanno la precedenza."

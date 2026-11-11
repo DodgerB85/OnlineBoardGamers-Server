@@ -2154,6 +2154,15 @@ class FCMpresenter(GamePresenter):
         self.gameObj.save()
         starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
 
+        # Setup-only include markers are never gameplay options, even in crafted saves.
+        includedCodes = {
+            x for x in starting_options
+            if isinstance(x, int) and rfFCM.SO_INCLUDED_MODULE_BASE <= x < rfFCM.SO_INCLUDED_MODULE_BASE + 100
+        }
+        if includedCodes:
+            starting_options = [x for x in starting_options if x not in includedCodes]
+            self.gameObj.startingOptions = json.dumps(starting_options, separators=(",", ":"))
+
         # need to add in possible new dist options
         if rfFCM.SO_RANDOM_MODULES in starting_options:
             # Per-module exclusions arrive as SO_EXCLUDED_MODULE_BASE + mod id
@@ -2165,6 +2174,7 @@ class FCMpresenter(GamePresenter):
                 if isinstance(x, int) and rfFCM.SO_EXCLUDED_MODULE_BASE <= x < rfFCM.SO_EXCLUDED_MODULE_BASE + 100
             }
             excludedModules = {x - rfFCM.SO_EXCLUDED_MODULE_BASE for x in excludedCodes}
+            includedModules = {x - rfFCM.SO_INCLUDED_MODULE_BASE for x in includedCodes}
             starting_options = [x for x in starting_options if x not in excludedCodes]
             availableModules = [
                 rfFCM.SO_KETCHUP_MS,
@@ -2205,10 +2215,13 @@ class FCMpresenter(GamePresenter):
             # Add hard choices only with original MS
             if rfFCM.SO_NEW_MS not in starting_options:
                 availableModules.append(rfFCM.SO_HARD_CHOICES)
-            # Drop excluded modules from the pool
+            # With mandatory picks, direct module flags cannot bypass the total.
+            if includedCodes:
+                starting_options = [x for x in starting_options if x not in availableModules and x != rfFCM.SO_HARD_CHOICES]
+            # Drop excluded modules from the pool (exclusions win conflicts).
             if excludedModules:
                 availableModules = [m for m in availableModules if m not in excludedModules]
-            selectedModules = []
+            selectedModules = [m for m in availableModules if m in includedModules]
             # Defaults matching the create-game form, used when the min/max options are missing
             minModules = 1
             maxModules = 15
@@ -2230,8 +2243,12 @@ class FCMpresenter(GamePresenter):
                 maxModules = poolSize
             if maxModules < minModules:
                 maxModules = minModules
+            # Mandatory modules are part of the total, not extra picks.
+            minModules = max(minModules, len(selectedModules))
+            maxModules = max(maxModules, len(selectedModules))
             numberOfModulesToPick = random.randrange(minModules, maxModules + 1, 1)
-            for _i in range(numberOfModulesToPick):
+            availableModules = [m for m in availableModules if m not in selectedModules]
+            for _i in range(numberOfModulesToPick - len(selectedModules)):
                 currentIndex = random.randrange(0, len(availableModules), 1)
                 selectedModules.append(availableModules.pop(currentIndex))
             if rfFCM.SO_NEW_DISTRICTS in selectedModules:
