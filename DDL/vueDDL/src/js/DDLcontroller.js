@@ -441,7 +441,10 @@ export async function respondTrade(tradeId, accept) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	if (store.viewSettings.showReplay) return false
-	const result = rules.respondTrade(model.stateFromStore(), tradeId, actingPlayerIndex(), accept)
+	// A practice game drives every seat, so the offer itself names the answerer.
+	const trade = store.board.trades.find((t) => t.id === tradeId)
+	const responder = personal.trainingGame && trade ? trade.to : actingPlayerIndex()
+	const result = rules.respondTrade(model.stateFromStore(), tradeId, responder, accept)
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
@@ -482,6 +485,10 @@ export async function endActionTurn() {
 	const endingTurn = store.gameflow.turn
 	const result = rules.finishActionTurn(model.stateFromStore())
 	if (!result.ok) {
+		if (result.needsExplore) {
+			store.viewSettings.showExplore = true
+			return false
+		}
 		if (result.needsEnergyDiscard) {
 			store.viewSettings.showDiscardEnergy = true
 			return false

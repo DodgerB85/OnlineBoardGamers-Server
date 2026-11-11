@@ -141,6 +141,7 @@ describe("building and trading", () => {
 		player.ship.node = "P0"
 		player.goods.push(...factory.input)
 		player.energy[rf.YELLOW_ENERGY] = 1
+		state.gameflow.turnType = rf.TURN_ACTION
 		const before = player.score
 		const result = rules.buildFactory(state, 0, factory.id)
 		expect(result.ok).toBe(true)
@@ -155,6 +156,7 @@ describe("building and trading", () => {
 		player.ship.node = "P8"
 		player.goods.push(...factory.input)
 		player.energy[rf.YELLOW_ENERGY] = 1
+		state.gameflow.turnType = rf.TURN_ACTION
 		const result = rules.buildFactory(state, 0, factory.id)
 		expect(result.ok).toBe(false)
 		expect(rules.planetState(state, 8).factory).toBeNull()
@@ -168,6 +170,7 @@ describe("building and trading", () => {
 		const other = rf.PRIMARY_GOODS.find((g) => g !== yard.cost[0])
 		player.goods.push(yard.cost[0], other)
 		player.energy[rf.YELLOW_ENERGY] = 1
+		state.gameflow.turnType = rf.TURN_ACTION
 		const result = rules.buildSite(state, 0, other)
 		expect(result.ok).toBe(true)
 		expect(planet.site.built).toBe(true)
@@ -183,6 +186,7 @@ describe("building and trading", () => {
 		planet.site = { kind: "consumer", tileId: 10, built: false }
 		player.goods.push(10)
 		player.energy[rf.YELLOW_ENERGY] = 1
+		state.gameflow.turnType = rf.TURN_ACTION
 		const result = rules.buildSite(state, 0, -1)
 		expect(result.ok).toBe(true)
 		expect(result.points).toBe(25)
@@ -201,6 +205,7 @@ describe("building and trading", () => {
 		const other = rf.PRIMARY_GOODS.find((g) => g !== yard.cost[0])
 		player.goods.push(yard.cost[0], other)
 		player.energy[rf.YELLOW_ENERGY] = 1
+		state.gameflow.turnType = rf.TURN_ACTION
 		const failed = rules.buildSite(state, 0, other)
 		expect(failed.ok).toBe(false)
 		expect(planet.site.built).toBe(false)
@@ -219,6 +224,7 @@ describe("building and trading", () => {
 		planet.site.built = true
 		player.goods.push(yard.cost[0], other)
 		player.energy[rf.BLUE_ENERGY] = 1
+		state.gameflow.turnType = rf.TURN_ACTION
 		const failed = rules.buyGear(state, 0, 3, other)
 		expect(failed.ok).toBe(false)
 		const result = rules.buyGear(state, 0, 0, other)
@@ -234,6 +240,7 @@ describe("building and trading", () => {
 		planet.site = { kind: "consumer", tileId: 10, built: true }
 		player.goods.push(10)
 		player.energy[rf.BLUE_ENERGY] = 1
+		state.gameflow.turnType = rf.TURN_ACTION
 		const result = rules.tradeConsumer(state, 0)
 		expect(result.ok).toBe(true)
 		expect(player.score).toBe(10)
@@ -252,6 +259,68 @@ describe("building and trading", () => {
 		expect(state.players[0].goods).toContain(1)
 		expect(state.players[1].goods).toContain(0)
 	})
+
+	it("builds with virtual build energy", () => {
+		const state = game()
+		const player = state.players[0]
+		player.ship.node = "P0"
+		player.goods.push(...rf.FACTORY_TYPES[0].input)
+		player.virtual[rf.YELLOW_ENERGY] = 1
+		state.gameflow.turnType = rf.TURN_ACTION
+		expect(rules.buildFactory(state, 0, 0).ok).toBe(true)
+		expect(player.virtual[rf.YELLOW_ENERGY]).toBe(0)
+	})
+
+	it("ends movement when a privilege is claimed", () => {
+		const state = game()
+		const player = state.players[0]
+		player.ship.node = "P0"
+		player.energy[rf.YELLOW_ENERGY] = 3
+		state.gameflow.turnType = rf.TURN_ACTION
+		state.gameflow.movement = { remaining: 4, active: true }
+		expect(rules.claimPrivilege(state, 0, "mine").ok).toBe(true)
+		expect(state.gameflow.movement.remaining).toBe(0)
+	})
+})
+
+describe("action guards", () => {
+	it("refuses everything until the obligatory exploration is taken", () => {
+		const state = game()
+		const player = state.players[0]
+		player.ship.node = "P0"
+		player.goods.push(3, 0)
+		player.energy[rf.YELLOW_ENERGY] = 1
+		state.gameflow.turnType = rf.TURN_ACTION
+		state.gameflow.pendingExplore = { player: 0, planetId: 0 }
+		expect(rules.buildFactory(state, 0, 0).ok).toBe(false)
+		expect(rules.startMovement(state, 0).ok).toBe(false)
+		expect(rules.finishActionTurn(state).needsExplore).toBe(true)
+		expect(rules.explorePlanet(state, 0, 0).ok).toBe(true)
+		expect(rules.buildFactory(state, 0, 0).ok).toBe(true)
+	})
+
+	it("refuses planet actions from a player who is not current", () => {
+		const state = game()
+		state.players[1].ship.node = "P0"
+		state.players[1].energy[rf.BLUE_ENERGY] = 1
+		state.gameflow.turnType = rf.TURN_ACTION
+		expect(rules.tradeMine(state, 1).ok).toBe(false)
+		expect(rules.placePathways(state, 1, 0, 1).ok).toBe(false)
+	})
+
+	it("re-uses a highway part once the cube supply is out", () => {
+		const state = game()
+		const player = state.players[0]
+		state.gameflow.turnType = rf.TURN_ACTION
+		state.gameflow.freeHighwaysLeft = 2
+		const [first, second] = map.ROAD_NODES.filter((node) => map.shipsOnNode(state, node).length === 0)
+		player.cubes = 1
+		expect(rules.placeHighway(state, 0, first, true).ok).toBe(true)
+		expect(player.cubes).toBe(0)
+		expect(rules.placeHighway(state, 0, second, true).ok).toBe(true)
+		expect(state.board.highways[first]).toBeUndefined()
+		expect(state.board.highways[second]).toBe(0)
+	})
 })
 
 describe("auction and game end", () => {
@@ -265,6 +334,12 @@ describe("auction and game end", () => {
 		const order = rules.orderWithTiebreak(firstOrder, firstBids, { 1: 20, 2: 15 })
 		expect(order).toEqual([0, 1, 2])
 		expect(rules.orderWithTiebreak(firstOrder, firstBids, { 1: 15, 2: 20 })).toEqual([0, 2, 1])
+	})
+
+	it("settles a second tie inside the tied group", () => {
+		const order = rules.orderWithTiebreak([0, 1, 2], { 0: 10, 1: 5, 2: 5 }, { 1: 7, 2: 7 })
+		expect(order[0]).toBe(0)
+		expect(order.slice(1).sort()).toEqual([1, 2])
 	})
 
 	it("ends after action turn 24 and groups ties", () => {

@@ -48,10 +48,17 @@ const me = computed(() => (myIndex.value >= 0 ? store.players[myIndex.value] : n
 const currentIndex = computed(() => store.gameflow.turnOrder[0])
 const current = computed(() => (currentIndex.value >= 0 ? store.players[currentIndex.value] : null))
 const isMyTurn = computed(() => personal.canPlay() && currentIndex.value === myIndex.value)
+// Virtual markers spend like real ones during a free action turn.
+const yellowAvailable = computed(() => (me.value ? me.value.energy[rf.YELLOW_ENERGY] + me.value.virtual[rf.YELLOW_ENERGY] : 0))
+const blueAvailable = computed(() => (me.value ? me.value.energy[rf.BLUE_ENERGY] + me.value.virtual[rf.BLUE_ENERGY] : 0))
+const redAvailable = computed(() => (me.value ? me.value.energy[rf.RED_ENERGY] + me.value.virtual[rf.RED_ENERGY] : 0))
+const canUsePathway = computed(() => me.value && rules.canUsePathway(store, myIndex.value))
 const planet = computed(() => (me.value ? rules.playerPlanet(store, myIndex.value) : null))
 const planetState = computed(() => (planet.value ? rules.planetState(store, planet.value.id) : null))
 const incomingTrades = computed(() => store.board.trades.filter((t) => t.status === "pending" && t.to === myIndex.value))
-const outgoingTrades = computed(() => store.board.trades.filter((t) => t.status === "pending" && t.from === myIndex.value))
+// A practice game drives every seat, so it answers every offer and never waits on one.
+const openOffers = computed(() => (personal.trainingGame ? store.board.trades.filter((t) => t.status === "pending") : incomingTrades.value))
+const outgoingTrades = computed(() => (personal.trainingGame ? [] : store.board.trades.filter((t) => t.status === "pending" && t.from === myIndex.value)))
 const otherPlayersHere = computed(() => {
 	if (!me.value || !me.value.ship.node) return []
 	return store.players
@@ -100,7 +107,7 @@ const buildableFactories = computed(() => {
 			return {
 				...factory,
 				count: stock.count,
-				affordable: me.value && rules.hasGoods(me.value, factory.input) && me.value.energy[rf.YELLOW_ENERGY] > 0,
+				affordable: me.value && rules.hasGoods(me.value, factory.input) && yellowAvailable.value > 0,
 			}
 		})
 })
@@ -108,7 +115,7 @@ const canClaim = (kind) => {
 	if (!planetState.value) return false
 	if (kind === "site" && !planetState.value.site) return false
 	if (kind === "factory" && !planetState.value.factory) return false
-	return planetState.value.privileges[kind] === -1 && me.value && me.value.privileges > 0 && me.value.energy[rf.YELLOW_ENERGY] >= 3
+	return planetState.value.privileges[kind] === -1 && me.value && me.value.privileges > 0 && yellowAvailable.value >= 3
 }
 const pathwayPlanets = computed(() => rf.PLANETS)
 const canPlacePathways = computed(() => me.value && !me.value.pathways.placed && store.gameflow.turnType === rf.TURN_ACTION && pathwayIn.value >= 0 && pathwayOut.value >= 0 && pathwayIn.value !== pathwayOut.value)
@@ -265,8 +272,9 @@ function openTradeModal() {
 					</div>
 					<div class="buttonGrid">
 						<button class="actionsLineButton" :disabled="store.gameflow.freeHighwaysLeft <= 0" @click="openHighways(false)">{{ $t("action.placeFreeHighway", { count: store.gameflow.freeHighwaysLeft }) }}</button>
-						<button class="actionsLineButton" :disabled="me.energy[rf.YELLOW_ENERGY] <= 0" @click="openHighways(true)">{{ $t("action.buildHighway") }}</button>
-						<button class="actionsLineButton" :disabled="store.gameflow.movement.remaining > 0 ? false : me.energy[rf.RED_ENERGY] + me.virtual[rf.RED_ENERGY] <= 0" @click="openMove">{{ $t("action.move") }}</button>
+						<button class="actionsLineButton" :disabled="yellowAvailable <= 0" @click="openHighways(true)">{{ $t("action.buildHighway") }}</button>
+						<button class="actionsLineButton" :disabled="store.gameflow.movement.remaining > 0 ? false : redAvailable <= 0" @click="openMove">{{ $t("action.move") }}</button>
+						<button v-if="canUsePathway" class="actionsLineButton" :disabled="redAvailable <= 0" @click="controller.usePathway">{{ $t("action.usePathway") }}</button>
 						<button class="actionsLineButton" @click="openBuild">{{ $t("action.build") }}</button>
 						<button class="actionsLineButton" @click="openTrade">{{ $t("action.trade") }}</button>
 						<button class="actionsLineButton" @click="openPathways">{{ $t("action.pathways") }}</button>
@@ -314,7 +322,7 @@ function openTradeModal() {
 										<option :value="-1">{{ $t("common.chooseSlot") }}</option>
 										<option v-for="entry in validSiteGearSlots" :key="entry.index" :value="entry.index">{{ $t("action.slotOption", { number: entry.index + 1, gear: view.gearLabel(me.gear[entry.index]) }) }}</option>
 									</select>
-									<button class="actionsLineButton" :disabled="me.energy[rf.YELLOW_ENERGY] <= 0 || (siteGearSlotNeeded && siteGearSlot < 0)" @click="buildSiteNow">{{ $t("action.buildSite") }}</button>
+									<button class="actionsLineButton" :disabled="yellowAvailable <= 0 || (siteGearSlotNeeded && siteGearSlot < 0)" @click="buildSiteNow">{{ $t("action.buildSite") }}</button>
 								</div>
 							</div>
 							<div class="subSection">
@@ -335,17 +343,17 @@ function openTradeModal() {
 							<div class="subSection">
 								<b>{{ $t("action.mine") }}</b>
 								<div>{{ $t("action.produces", { good: rf.goodName(planetState.mine) }) }}</div>
-								<button class="actionsLineButton" :disabled="me.energy[rf.BLUE_ENERGY] + me.virtual[rf.BLUE_ENERGY] <= 0 && !me.freeTradeTiles.includes(planet.id + ':mine')" @click="controller.tradeMine">{{ $t("action.takeGood", { good: rf.goodName(planetState.mine) }) }}</button>
+								<button class="actionsLineButton" :disabled="blueAvailable <= 0 && !me.freeTradeTiles.includes(planet.id + ':mine')" @click="controller.tradeMine">{{ $t("action.takeGood", { good: rf.goodName(planetState.mine) }) }}</button>
 							</div>
 							<div v-if="factoryRecipe" class="subSection">
 								<b>{{ $t("action.factory") }}</b>
 								<div>{{ rf.factoryName(factoryRecipe.id) }}</div>
-								<button class="actionsLineButton" :disabled="me.energy[rf.BLUE_ENERGY] + me.virtual[rf.BLUE_ENERGY] <= 0" @click="controller.tradeFactory">{{ $t("action.produceGood", { good: rf.goodName(factoryRecipe.output) }) }}</button>
+								<button class="actionsLineButton" :disabled="blueAvailable <= 0" @click="controller.tradeFactory">{{ $t("action.produceGood", { good: rf.goodName(factoryRecipe.output) }) }}</button>
 							</div>
 							<div v-if="site && site.built && site.kind === 'consumer'" class="subSection">
 								<b>{{ $t("action.consumer") }}</b>
 								<div>{{ $t("action.wants", { good: rf.goodName(consumerTile.good), points: consumerTile.points }) }}</div>
-								<button class="actionsLineButton" :disabled="me.energy[rf.BLUE_ENERGY] + me.virtual[rf.BLUE_ENERGY] <= 0" @click="controller.tradeConsumer">{{ $t("action.sellGood", { good: rf.goodName(consumerTile.good) }) }}</button>
+								<button class="actionsLineButton" :disabled="blueAvailable <= 0" @click="controller.tradeConsumer">{{ $t("action.sellGood", { good: rf.goodName(consumerTile.good) }) }}</button>
 							</div>
 							<div v-if="site && site.built && site.kind === 'spaceyard'" class="subSection">
 								<b>{{ $t("action.spaceyardSection") }}</b>
@@ -358,7 +366,7 @@ function openTradeModal() {
 									<option :value="-1">{{ $t("common.chooseSecondGood") }}</option>
 									<option v-for="g in goodChoices" :key="g.id" :value="g.id" :disabled="g.id === spaceyardType.cost[0]">{{ $t("common.goodCount", { good: rf.goodName(g.id), count: g.count }) }}</option>
 								</select>
-								<button class="actionsLineButton" :disabled="gearSlot < 0 || me.energy[rf.BLUE_ENERGY] + me.virtual[rf.BLUE_ENERGY] <= 0" @click="buyGearNow">{{ $t("action.buyGear") }}</button>
+								<button class="actionsLineButton" :disabled="gearSlot < 0 || blueAvailable <= 0" @click="buyGearNow">{{ $t("action.buyGear") }}</button>
 							</div>
 							<div class="subSection">
 								<b>{{ $t("action.tradeWithPlayers") }}</b>
@@ -390,9 +398,9 @@ function openTradeModal() {
 						</template>
 					</div>
 
-					<div class="subSection offers" v-if="incomingTrades.length || outgoingTrades.length">
+					<div class="subSection offers" v-if="openOffers.length || outgoingTrades.length">
 						<b>{{ $t("action.tradeOffers") }}</b>
-						<div v-for="trade in incomingTrades" :key="trade.id" class="tradeOffer">
+						<div v-for="trade in openOffers" :key="trade.id" class="tradeOffer">
 							<div>{{ $t("action.offerLine", { player: store.players[trade.from].displayName, give: funcs.formatGoods(trade.give), receive: funcs.formatGoods(trade.receive) }) }}</div>
 							<button class="actionsLineButton" @click="respond(trade.id, true)">{{ $t("common.accept") }}</button>
 							<button class="actionsLineButton" @click="respond(trade.id, false)">{{ $t("common.decline") }}</button>
@@ -409,7 +417,7 @@ function openTradeModal() {
 					<p>{{ $t("action.waitingFor", { player: current ? current.displayName : $t("action.otherPlayers") }) }}</p>
 					<div v-if="hasIncoming" class="subSection offers">
 						<b>{{ $t("action.tradeOffersForYou") }}</b>
-						<div v-for="trade in incomingTrades" :key="trade.id" class="tradeOffer">
+						<div v-for="trade in openOffers" :key="trade.id" class="tradeOffer">
 							<div>{{ $t("action.offerLine", { player: store.players[trade.from].displayName, give: funcs.formatGoods(trade.give), receive: funcs.formatGoods(trade.receive) }) }}</div>
 							<button class="actionsLineButton" @click="respond(trade.id, true)">{{ $t("common.accept") }}</button>
 							<button class="actionsLineButton" @click="respond(trade.id, false)">{{ $t("common.decline") }}</button>

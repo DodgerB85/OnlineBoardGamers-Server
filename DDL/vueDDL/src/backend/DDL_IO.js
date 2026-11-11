@@ -4,6 +4,7 @@
 
 import * as funcs from "../js/DDLfuncs.js"
 import * as rf from "../js/DDLreference.js"
+import * as rules from "../js/DDLrules.js"
 import * as model from "../js/DDLmodel.js"
 import * as controller from "../js/DDLcontroller.js"
 import * as WS from "./DDLwebsocket.js"
@@ -39,7 +40,7 @@ function buildTournamentData() {
 	const result = []
 	for (let i = 0; i < groups.length; i++) {
 		for (const idx of groups[i]) {
-			result.push(i === 0 ? [store.players[idx].name] : [store.players[idx].name, store.gameflow.tournamentScores?.[idx] ?? store.players[idx].score])
+			result.push(i === 0 ? [store.players[idx].name] : [store.players[idx].name, store.gameflow.tournamentScores?.[idx] ?? rules.finalScore(store.players[idx])])
 		}
 	}
 	return result
