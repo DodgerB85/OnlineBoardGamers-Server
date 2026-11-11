@@ -30,22 +30,30 @@ Export edits before using **Restore supplied region** or changing source revisio
 ## Review state and limits
 
 The full-board pass is a **draft**, not a claim of exhaustive, verified extraction.
-The supplied seed contains 1,911 elements: 168 locale footprints, 470 road
-segments, 406 approach traces, 465 penalties, 165 capacities, 43 objectives,
+The supplied seed contains 1,779 elements: 168 locale footprints, 181 continuous
+road runs, 406 approach traces, 622 penalties, 165 capacities, 43 objectives,
 15 setup groups, 11 hills and 168 reserve anchors.
 The numbered reference supplies 168 located IDs. IDs 145 and 146 have not been
 located; their registry entries remain null and their navigation entries are
 disabled. They are not assigned invented positions.
 
-Roads follow separated red/brown source ink. Short nearly collinear gaps may be
-joined provisionally; those joins are recorded in `inferred_gaps`. Shared junction
-vertices describe the drawing, not gameplay connectivity. The nine manually traced
-pilot roads replace automatic traces inside the pilot rectangle.
+Roads follow separated red/brown source ink. The traces are treated as one
+network that never interrupts: pieces that touch are merged into a single run,
+and remaining ends are joined to the nearest road ahead (up to 200 source
+pixels) even where the print is broken by labels or icons. Traces that only
+followed village text or objective stars were removed. Shared junction vertices
+describe the drawing, not gameplay connectivity. The nine manually traced pilot
+roads replace automatic traces inside the pilot rectangle. Traces were re-fitted
+to the source skeleton, and pale dashed ink missed by the first colour pass is
+now included.
 
 Approach candidates follow the pale printed bars. Measured stroke thickness is
 separate from one/two-piece frontage. Unknown frontage is `null`, editable as
 **Unreviewed**. Unresolved locale pairs remain empty rather than receiving guessed
 identities. Paired approaches and sided penalty associations are provisional.
+Penalty glyphs are re-read from their crops: a boxed cross is infantry, an
+unboxed bowtie is impassable. Boxed crosses previously filed as impassable were
+corrected, and glyphs with no feature were added from template matches.
 
 Locale footprints are convex envelopes of faces separated by the detected bars.
 Where closures are missing, a face containing several reference anchors is
