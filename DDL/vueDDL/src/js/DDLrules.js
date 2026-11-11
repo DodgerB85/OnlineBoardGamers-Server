@@ -8,7 +8,7 @@
 
 import * as rf from "./DDLreference.js"
 import * as map from "./DDLmap.js"
-import { seededShuffle } from "./DDLfuncs.js"
+import { seededShuffle, shuffle } from "./DDLfuncs.js"
 import i18n from "../i18n.js"
 
 const t = i18n.global.t
@@ -36,6 +36,50 @@ export function currentPlayerIndex(state) {
 export function currentPlayer(state) {
 	const idx = currentPlayerIndex(state)
 	return idx >= 0 ? state.players[idx] : null
+}
+
+// Every action belongs to the player whose action turn it is.
+function actionTurnError(state, playerIndex) {
+	if (state.gameflow.turnType !== rf.TURN_ACTION) return { ok: false, message: t("errors.notActionTurn") }
+	if (currentPlayerIndex(state) !== playerIndex) return { ok: false, message: t("errors.notYourTurn") }
+	return null
+}
+
+// Exploration is obligatory, so nothing on the planet may happen before it.
+function planetActionError(state, playerIndex) {
+	const error = actionTurnError(state, playerIndex)
+	if (error) return error
+	const pending = state.gameflow.pendingExplore
+	if (pending && pending.player === playerIndex) return { ok: false, message: t("errors.explorePending"), needsExplore: true }
+	return null
+}
+
+function hasEnergy(player, colour, count = 1) {
+	return player.energy[colour] + player.virtual[colour] >= count
+}
+
+// A highway part or privilege already on the board can stand in for a spare cube.
+function takeCube(state, playerIndex) {
+	const player = state.players[playerIndex]
+	if (player.cubes > 0) {
+		player.cubes--
+		return true
+	}
+	const highwayNode = Object.keys(state.board.highways).find((node) => state.board.highways[node] === playerIndex)
+	if (highwayNode) {
+		delete state.board.highways[highwayNode]
+		return true
+	}
+	for (const planet of state.board.planets) {
+		for (const kind of Object.keys(planet.privileges)) {
+			if (planet.privileges[kind] === playerIndex) {
+				planet.privileges[kind] = -1
+				player.privileges--
+				return true
+			}
+		}
+	}
+	return false
 }
 
 export function playerPlanet(state, playerIndex) {
@@ -318,9 +362,18 @@ export function orderWithTiebreak(firstOrder, firstBids, tieBids) {
 		if (last && Number(firstBids[last[0]] || 0) === bid) last.push(idx)
 		else groups.push([idx])
 	}
+	// A bid re-raised to the same value is a second tie, decided randomly.
 	return groups.flatMap((group) => {
 		if (group.length === 1) return group
-		return [...group].sort((a, b) => Number(tieBids[b] || 0) - Number(tieBids[a] || 0) || firstOrder.indexOf(a) - firstOrder.indexOf(b))
+		const byBid = [...group].sort((a, b) => Number(tieBids[b] || 0) - Number(tieBids[a] || 0))
+		const order = []
+		for (let i = 0; i < byBid.length; ) {
+			let j = i + 1
+			while (j < byBid.length && Number(tieBids[byBid[j]] || 0) === Number(tieBids[byBid[i]] || 0)) j++
+			order.push(...shuffle(byBid.slice(i, j)))
+			i = j
+		}
+		return order
 	})
 }
 
@@ -381,21 +434,7 @@ export function beginActionTurn(state, playerIndex, free = false) {
 
 	// Put a cube on the turn track. If the supply is out, take a highway cube
 	// (or a privilege) back off the board, as the rulebook allows.
-	let cubeTaken = false
-	if (player.cubes > 0) {
-		player.cubes--
-		cubeTaken = true
-	} else {
-		const highwayNode = Object.keys(state.board.highways).find((node) => state.board.highways[node] === playerIndex)
-		if (highwayNode) {
-			delete state.board.highways[highwayNode]
-			cubeTaken = true
-		} else if (player.privileges > 0) {
-			player.privileges--
-			cubeTaken = true
-		}
-	}
-	if (cubeTaken) state.board.turnCubes.push({ player: playerIndex, turn: state.gameflow.turn })
+	if (takeCube(state, playerIndex)) state.board.turnCubes.push({ player: playerIndex, turn: state.gameflow.turn })
 	return { ok: true, free }
 }
 
@@ -447,26 +486,28 @@ export function spendEnergy(state, playerIndex, colour) {
 }
 
 export function placeHighway(state, playerIndex, segmentNode, free = false) {
-	if (state.gameflow.turnType !== rf.TURN_ACTION) return { ok: false, message: t("errors.notActionTurn") }
+	const blocked = actionTurnError(state, playerIndex)
+	if (blocked) return blocked
 	if (!map.isRoadNode(segmentNode)) return { ok: false, message: t("errors.highwayOnDot") }
 	if (state.board.highways[segmentNode] !== undefined) return { ok: false, message: t("errors.dotHasHighway") }
 	const ships = map.shipsOnNode(state, segmentNode)
 	if (ships.length > 0) return { ok: false, message: t("errors.shipOnDot") }
 	const player = state.players[playerIndex]
-	if (player.cubes <= 0) return { ok: false, message: t("errors.noHighwayParts") }
 	if (free) {
 		if (state.gameflow.freeHighwaysLeft <= 0) return { ok: false, message: t("errors.noFreeHighways") }
-		state.gameflow.freeHighwaysLeft--
-	} else {
-		if (!spendEnergy(state, playerIndex, rf.YELLOW_ENERGY)) return { ok: false, message: t("errors.highwayCost") }
+	} else if (!hasEnergy(player, rf.YELLOW_ENERGY)) {
+		return { ok: false, message: t("errors.highwayCost") }
 	}
-	player.cubes--
+	if (!takeCube(state, playerIndex)) return { ok: false, message: t("errors.noHighwayParts") }
+	if (free) state.gameflow.freeHighwaysLeft--
+	else spendEnergy(state, playerIndex, rf.YELLOW_ENERGY)
 	state.board.highways[segmentNode] = playerIndex
 	return { ok: true, free }
 }
 
 export function startMovement(state, playerIndex) {
-	if (state.gameflow.turnType !== rf.TURN_ACTION) return { ok: false, message: t("errors.notActionTurn") }
+	const blocked = planetActionError(state, playerIndex)
+	if (blocked) return blocked
 	if (state.gameflow.movement.remaining > 0) return { ok: true, remaining: state.gameflow.movement.remaining }
 	if (cargoOverflow(state.players[playerIndex]) > 0) return { ok: false, message: t("errors.discardBeforeMoving"), needsCargoDiscard: true }
 	if (!spendEnergy(state, playerIndex, rf.RED_ENERGY)) return { ok: false, message: t("errors.movementCost") }
@@ -478,7 +519,8 @@ export function startMovement(state, playerIndex) {
 }
 
 export function moveToNode(state, playerIndex, targetNode) {
-	if (state.gameflow.turnType !== rf.TURN_ACTION) return { ok: false, message: t("errors.notActionTurn") }
+	const blocked = planetActionError(state, playerIndex)
+	if (blocked) return blocked
 	if (state.gameflow.movement.remaining <= 0) return { ok: false, message: t("errors.spendMovementFirst") }
 	const player = state.players[playerIndex]
 	const path = map.findPath(state, playerIndex, player.ship.node, targetNode)
@@ -503,6 +545,8 @@ export function stopMovement(state) {
 }
 
 export function explorePlanet(state, playerIndex, column) {
+	const blocked = actionTurnError(state, playerIndex)
+	if (blocked) return blocked
 	const pending = state.gameflow.pendingExplore
 	if (!pending || pending.player !== playerIndex) return { ok: false, message: t("errors.noPlanetToExplore") }
 	const slots = state.board.consumerSlots
@@ -523,7 +567,8 @@ export function explorePlanet(state, playerIndex, column) {
 }
 
 export function placePathways(state, playerIndex, inPlanetId, outPlanetId) {
-	if (state.gameflow.turnType !== rf.TURN_ACTION) return { ok: false, message: t("errors.pathwaysDuringAction") }
+	const blocked = planetActionError(state, playerIndex)
+	if (blocked) return blocked
 	const player = state.players[playerIndex]
 	if (player.pathways.placed) return { ok: false, message: t("errors.pathwaysAlreadyPlaced") }
 	if (inPlanetId === outPlanetId) return { ok: false, message: t("errors.chooseTwoPlanets") }
@@ -544,6 +589,8 @@ export function canUsePathway(state, playerIndex) {
 }
 
 export function usePathway(state, playerIndex) {
+	const blocked = planetActionError(state, playerIndex)
+	if (blocked) return blocked
 	const planet = playerPlanet(state, playerIndex)
 	if (!planet) return { ok: false, message: t("errors.planetToUsePathway") }
 	const entrance = planet.pathways.find((p) => p.dir === "in")
@@ -564,6 +611,8 @@ export function usePathway(state, playerIndex) {
 // Building -----------------------------------------------------------------
 
 export function buildFactory(state, playerIndex, factoryTypeId) {
+	const blocked = planetActionError(state, playerIndex)
+	if (blocked) return blocked
 	const player = state.players[playerIndex]
 	const planet = playerPlanet(state, playerIndex)
 	if (!planet) return { ok: false, message: t("errors.planetRequired") }
@@ -575,7 +624,7 @@ export function buildFactory(state, playerIndex, factoryTypeId) {
 	const stock = state.board.factoryStock.find((f) => f.id === factoryTypeId)
 	if (!stock || stock.count <= 0) return { ok: false, message: t("errors.factoryOutOfStock") }
 	if (!hasGoods(player, factory.input)) return { ok: false, message: t("errors.missingInputGoods") }
-	if (player.energy[rf.YELLOW_ENERGY] <= 0) return { ok: false, message: t("errors.buildCost") }
+	if (!hasEnergy(player, rf.YELLOW_ENERGY)) return { ok: false, message: t("errors.buildCost") }
 	removeGoods(player, factory.input)
 	spendEnergy(state, playerIndex, rf.YELLOW_ENERGY)
 	stock.count--
@@ -604,6 +653,8 @@ function spaceyardRewardSlot(player, requestedSlot) {
 }
 
 export function buildSite(state, playerIndex, randomGoodId, gearSlotIndex = -1) {
+	const blocked = planetActionError(state, playerIndex)
+	if (blocked) return blocked
 	const player = state.players[playerIndex]
 	const planet = playerPlanet(state, playerIndex)
 	if (!planet) return { ok: false, message: t("errors.planetRequired") }
@@ -616,7 +667,7 @@ export function buildSite(state, playerIndex, randomGoodId, gearSlotIndex = -1) 
 	} else if (!hasGoods(player, [cost.printed])) {
 		return { ok: false, message: t("errors.missingRequiredGoods") }
 	}
-	if (player.energy[rf.YELLOW_ENERGY] <= 0) return { ok: false, message: t("errors.buildCost") }
+	if (!hasEnergy(player, rf.YELLOW_ENERGY)) return { ok: false, message: t("errors.buildCost") }
 	let rewardSlot = -1
 	if (planetObj.site.kind === "spaceyard") {
 		rewardSlot = spaceyardRewardSlot(player, gearSlotIndex)
@@ -633,6 +684,8 @@ export function buildSite(state, playerIndex, randomGoodId, gearSlotIndex = -1) 
 }
 
 export function claimPrivilege(state, playerIndex, kind) {
+	const blocked = planetActionError(state, playerIndex)
+	if (blocked) return blocked
 	const player = state.players[playerIndex]
 	const planet = playerPlanet(state, playerIndex)
 	if (!planet) return { ok: false, message: t("errors.planetRequired") }
@@ -641,10 +694,11 @@ export function claimPrivilege(state, playerIndex, kind) {
 	if (kind === "factory" && !planetObj.factory) return { ok: false, message: t("errors.noFactoryToClaim") }
 	if (planetObj.privileges[kind] !== -1) return { ok: false, message: t("errors.privilegeAlready") }
 	if (player.privileges <= 0) return { ok: false, message: t("errors.noPrivileges") }
-	if (player.energy[rf.YELLOW_ENERGY] < 3) return { ok: false, message: t("errors.privilegeCost") }
+	if (!hasEnergy(player, rf.YELLOW_ENERGY, 3)) return { ok: false, message: t("errors.privilegeCost") }
 	for (let i = 0; i < 3; i++) spendEnergy(state, playerIndex, rf.YELLOW_ENERGY)
 	planetObj.privileges[kind] = playerIndex
 	player.privileges--
+	state.gameflow.movement.remaining = 0
 	return { ok: true }
 }
 
@@ -660,6 +714,8 @@ function payTradeEnergy(state, playerIndex, planetId, kind) {
 }
 
 export function tradeMine(state, playerIndex) {
+	const blocked = planetActionError(state, playerIndex)
+	if (blocked) return blocked
 	const player = state.players[playerIndex]
 	const planet = playerPlanet(state, playerIndex)
 	if (!planet) return { ok: false, message: t("errors.planetRequired") }
@@ -672,6 +728,8 @@ export function tradeMine(state, playerIndex) {
 }
 
 export function tradeFactory(state, playerIndex) {
+	const blocked = planetActionError(state, playerIndex)
+	if (blocked) return blocked
 	const player = state.players[playerIndex]
 	const planet = playerPlanet(state, playerIndex)
 	if (!planet) return { ok: false, message: t("errors.planetRequired") }
@@ -687,6 +745,8 @@ export function tradeFactory(state, playerIndex) {
 }
 
 export function tradeConsumer(state, playerIndex) {
+	const blocked = planetActionError(state, playerIndex)
+	if (blocked) return blocked
 	const player = state.players[playerIndex]
 	const planet = playerPlanet(state, playerIndex)
 	if (!planet) return { ok: false, message: t("errors.planetRequired") }
@@ -702,6 +762,8 @@ export function tradeConsumer(state, playerIndex) {
 }
 
 export function buyGear(state, playerIndex, slotIndex, randomGoodId) {
+	const blocked = planetActionError(state, playerIndex)
+	if (blocked) return blocked
 	const player = state.players[playerIndex]
 	const planet = playerPlanet(state, playerIndex)
 	if (!planet) return { ok: false, message: t("errors.planetRequired") }
@@ -797,6 +859,7 @@ export function energyOverflow(player) {
 
 export function finishActionTurn(state) {
 	if (state.gameflow.turnType !== rf.TURN_ACTION) return { ok: false, message: t("errors.notActionTurn") }
+	if (state.gameflow.pendingExplore) return { ok: false, message: t("errors.explorePending"), needsExplore: true }
 	cleanupTrades(state)
 	const player = currentPlayer(state)
 	if (player && energyOverflow(player) > 0) return { ok: false, message: t("errors.maxFourEnergy"), needsEnergyDiscard: true }
