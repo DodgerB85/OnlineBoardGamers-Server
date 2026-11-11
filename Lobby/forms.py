@@ -145,6 +145,18 @@ class NewUserForm(UserCreationForm):
         return user
 
 
+class ChooseUsernameForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["username"]
+
+    def clean_username(self):
+        username = self.cleaned_data["username"]
+        if User.objects.filter(username__iexact=username).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError(gettext_lazy("Username already taken"))
+        return username
+
+
 class UpdateProfileForm(forms.ModelForm):
     class Meta:
         model = Profile

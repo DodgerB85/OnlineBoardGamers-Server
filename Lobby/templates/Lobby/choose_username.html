@@ -1,0 +1,29 @@
+{% extends "Lobby/layout.html" %}
+{% load i18n %}
+{% block body %}
+    <div class="page page-narrow">
+        {% include "Lobby/messages.html" %}
+        <div class="page-header">
+            <h1 class="page-title">{% translate "Choose your username" %}</h1>
+        </div>
+        <div class="card section">
+            <p>
+                {% blocktranslate trimmed %}
+                    Your account was created with Google or Discord, so we generated a username from it.
+                    You can set your own username once, now. Usernames are visible to other players and are
+                    used in games.
+                {% endblocktranslate %}
+            </p>
+            <p>
+                {% translate "You can keep your current username by submitting it unchanged." %}
+            </p>
+            <form method="post" class="register-form">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="form-actions" style="justify-content:center">
+                    <button type="submit" class="button button-primary">{% translate "Save username" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

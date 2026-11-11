@@ -113,6 +113,7 @@ from Lobby.sharedFunctions.sharedRefs import (
 )
 
 from .forms import (
+    ChooseUsernameForm,
     NewUserForm,
     PasswordChangeCustomForm,
     PasswordResetFormCustom,
@@ -1680,7 +1681,19 @@ def login_view(request):
 
             nxt = request.POST.get("next", None)  # Use .get() to avoid KeyError
 
-            if nxt is None or nxt == "":  # Check if nxt is None or empty
+            if profile.username_change_allowed:
+                request.session["choose_username_next"] = (
+                    nxt
+                    if nxt
+                    and url_has_allowed_host_and_scheme(
+                        url=nxt,
+                        allowed_hosts={request.get_host()},
+                        require_https=request.is_secure(),
+                    )
+                    else ""
+                )
+                response = redirect("choose_username")
+            elif nxt is None or nxt == "":  # Check if nxt is None or empty
                 response = HttpResponseRedirect(reverse("index"))
             elif not url_has_allowed_host_and_scheme(
                 url=nxt,
@@ -1736,6 +1749,46 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
+
+
+@login_required
+def choose_username(request):
+    profile = Profile.objects.get(user=request.user)
+    if not profile.username_change_allowed:
+        messages.info(request, gettext("Your username has already been set."))
+        return redirect("index")
+
+    has_history = (
+        request.user.games.exists()
+        or request.user.startingPlayersRelName_Tournament.exists()
+        or request.user.currentRoundPlayersRelName_Tournament.exists()
+    )
+    if has_history:
+        profile.username_change_allowed = False
+        profile.save(update_fields=["username_change_allowed"])
+        messages.error(request, gettext("Usernames cannot be changed after joining a game."))
+        return redirect("index")
+
+    if request.method == "POST":
+        form = ChooseUsernameForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            profile.username_change_allowed = False
+            profile.save(update_fields=["username_change_allowed"])
+            messages.success(request, gettext("Your username has been set."))
+
+            nxt = request.session.pop("choose_username_next", "")
+            if nxt and url_has_allowed_host_and_scheme(
+                url=nxt,
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure(),
+            ):
+                return HttpResponseRedirect(nxt)
+            return redirect("index")
+    else:
+        form = ChooseUsernameForm(instance=request.user)
+
+    return render(request, "Lobby/choose_username.html", {"form": form})
 
 
 @login_required
@@ -4413,6 +4466,28 @@ def discord_login(request):
     return redirect(f"https://discord.com/api/oauth2/authorize?{query}")
 
 
+def _post_login_redirect(request, user, nxt):
+    if user.profile.username_change_allowed:
+        request.session["choose_username_next"] = (
+            nxt
+            if nxt
+            and url_has_allowed_host_and_scheme(
+                url=nxt,
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure(),
+            )
+            else ""
+        )
+        return redirect("choose_username")
+    if nxt and url_has_allowed_host_and_scheme(
+        url=nxt,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return HttpResponseRedirect(nxt)
+    return redirect("index")
+
+
 def _discord_login_callback(request, code):
     nxt = request.session.pop("discord_login_next", "")
     if not code:
@@ -4464,16 +4539,11 @@ def _discord_login_callback(request, code):
         profile = user.profile
         profile.discord_login_id = discord_user_id
         profile.email_confirmed = True
+        profile.username_change_allowed = True
         profile.save()
 
     login(request, user)
-    if nxt and url_has_allowed_host_and_scheme(
-        url=nxt,
-        allowed_hosts={request.get_host()},
-        require_https=request.is_secure(),
-    ):
-        return HttpResponseRedirect(nxt)
-    return redirect("index")
+    return _post_login_redirect(request, user, nxt)
 
 
 def discord_callback(request):
@@ -4638,16 +4708,11 @@ def _google_login_callback(request, code):
         profile = user.profile
         profile.google_login_id = google_user_id
         profile.email_confirmed = True
+        profile.username_change_allowed = True
         profile.save()
 
     login(request, user)
-    if nxt and url_has_allowed_host_and_scheme(
-        url=nxt,
-        allowed_hosts={request.get_host()},
-        require_https=request.is_secure(),
-    ):
-        return HttpResponseRedirect(nxt)
-    return redirect("index")
+    return _post_login_redirect(request, user, nxt)
 
 
 @login_required

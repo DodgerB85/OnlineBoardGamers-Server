@@ -38,6 +38,7 @@ urlpatterns = [
     path("profileIND/", views.profileIND, name="profileIND"),
     path("profileRNB/", views.profileRNB, name="profileRNB"),
     path("register/", registerView.as_view(), name="register"),
+    path("choose-username/", views.choose_username, name="choose_username"),
     path("help/", views.lobbyHelp, name="lobbyHelp"),
     path("helpTournaments/", views.helpTournaments, name="helpTournaments"),
     path("helpTournamentsMini/", views.helpTournamentsMini, name="helpTournamentsMini"),

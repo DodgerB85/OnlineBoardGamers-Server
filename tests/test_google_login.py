@@ -62,11 +62,12 @@ class GoogleLoginTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], reverse("index"))
+        self.assertEqual(response["Location"], reverse("choose_username"))
         user = User.objects.get(email="new@example.com")
         self.assertTrue(user.is_active)
         self.assertFalse(user.has_usable_password())
         self.assertTrue(user.profile.email_confirmed)
+        self.assertTrue(user.profile.username_change_allowed)
         self.assertEqual(user.profile.google_login_id, "123")
         self.assertIsNone(user.profile.discord_login_id)
         self.assertEqual(int(self.client.session["_auth_user_id"]), user.pk)
@@ -137,7 +138,8 @@ class GoogleLoginTests(TestCase):
             }
             response = self.client.get(self.callback_url, {"code": "code", "state": "state"})
 
-        self.assertEqual(response["Location"], reverse("index"))
+        self.assertEqual(response["Location"], reverse("choose_username"))
+        self.assertEqual(self.client.session.get("choose_username_next"), "")
 
     def test_profile_page_links_google(self):
         user = User.objects.create_user("profiled", "profile@example.com", "pw")
