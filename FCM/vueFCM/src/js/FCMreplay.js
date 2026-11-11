@@ -757,8 +757,11 @@ export function replayKickout(historyIndex, playerIndex, param) {
 	bot.makeBot(store.players[kickedPlayerIndex])
 }
 
+// The entry is only logged when live play actually took the $100, so apply it
+// unconditionally.
 export function replayDiscountManagerMS(historyIndex, playerIndex, param) {
-	rules.enforceDiscountMilestone(playerIndex, true)
+	const store = useModelStore()
+	store.bank -= 100
 }
 
 export function replayAddFreeway(historyIndex, playerIndex, param) {
@@ -998,6 +1001,10 @@ export function replayHire(historyIndex, playerIndex, param) {
 
 export function replayTurnOrder(historyIndex, playerIndex, param) {
 	const store = useModelStore()
+	// Short games (and some older histories) start turn 1 without logging a
+	// HIST_NEW_TURN; the first turn order choice means turn 1 has begun.
+	// Mirrors the same inference in importFCMmodel.
+	if (store.gameflow.turn === 0) store.gameflow.turn = 1
 	const turnOrderActions = [rf.HIST_CHOOSE_TURN_ORDER, rf.HIST_CHOOSE_TURN_ORDER_FORCED, rf.HIST_CHOOSE_TURN_ORDER_AUTO_EARLY, rf.HIST_CHOOSE_TURN_ORDER_AUTO_LATE]
 	if (turnOrderActions.includes(store.computedHistory[historyIndex][0])) store.gameflow.newTurnOrder[param[0]] = playerIndex
 
@@ -1011,7 +1018,10 @@ export function replayTurnOrder(historyIndex, playerIndex, param) {
 
 export function replayNewTurn(historyIndex, playerIndex, param) {
 	const store = useModelStore()
-	if (store.gameflow.turn === 1) {
+	// Live play records the turn it is starting in param[0]; use it rather than
+	// counting entries, since some histories have no HIST_NEW_TURN for turn 1
+	const newTurn = Array.isArray(param) && typeof param[0] === "number" ? param[0] : store.gameflow.turn + 1
+	if (newTurn === 1) {
 		store.gameflow.phase = rf.PHASE_TURN_ORDER
 		store.gameflow.turnOrder.reverse()
 	} else store.gameflow.phase = rf.PHASE_RESTRUCTURING
@@ -1033,7 +1043,7 @@ export function replayNewTurn(historyIndex, playerIndex, param) {
 
 	model.clearForNewTurn()
 	model.startLaborMarketTurn()
-	store.gameflow.turn++
+	store.gameflow.turn = newTurn
 }
 
 export function replayChooseReserveCard(historyIndex, playerIndex, param) {
