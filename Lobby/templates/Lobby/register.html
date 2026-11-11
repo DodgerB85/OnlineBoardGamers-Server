@@ -38,6 +38,11 @@
         </div>
         <div class="card section">
           <a class="button"
+             style="display:block;text-align:center;margin-bottom:8px"
+             href="{% url 'google_login' %}">
+            {% translate "Login or sign up with Google" %}
+          </a>
+          <a class="button"
              style="display:block;text-align:center"
              href="{% url 'discord_login' %}">
             {% translate "Login or sign up with Discord" %}
