@@ -101,7 +101,16 @@ export function compressGameData(obj) {
 	const json = JSON.stringify(obj)
 	// eslint-disable-next-line no-undef
 	const compressed = pako.gzip(json)
-	return btoa(String.fromCharCode(...new Uint8Array(compressed)))
+	return bytesToBase64(new Uint8Array(compressed))
+}
+
+function bytesToBase64(bytes) {
+	let binary = ""
+	const chunk = 8192
+	for (let i = 0; i < bytes.length; i += chunk) {
+		binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk))
+	}
+	return btoa(binary)
 }
 
 export function decompressGameData(input) {

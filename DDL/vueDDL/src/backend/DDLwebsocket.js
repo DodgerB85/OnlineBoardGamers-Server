@@ -3,6 +3,7 @@
  * via IO.checkForLatestData(), so updates still arrive if the socket drops.
  */
 
+import { useModelStore } from "../stores/DDLstore.js"
 import { usePersonalStore } from "../stores/DDLpersonal.js"
 import * as IO from "./DDL_IO"
 
@@ -90,14 +91,23 @@ async function DDLwebSocketOnInfo(IncomingInfo) {
 		if (IncomingInfo.data.slice(9, -13) == personal.gameID) {
 			let newTS = parseInt(IncomingInfo.data.slice(-13))
 			if (newTS > personal.latestUpdate) {
-				personal.haltPlay = true
-				personal.latestUpdate = newTS
-				window.initData.latestUpdate = newTS
-				await IO.reloadGameData()
-				personal.haltPlay = false
-			} else DDLwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
+				latestAnnouncedUpdate = Math.max(latestAnnouncedUpdate, newTS)
+				// Import before advancing the version, and defer during replay or
+				// an in-flight save rather than losing the update.
+				await refreshPendingGameUpdate()
+			} else if (newTS < personal.latestUpdate) DDLwebSocket.send("NEWDATATS" + String(personal.gameID) + String(personal.latestUpdate))
 		}
 	}
+}
+
+let latestAnnouncedUpdate = 0
+
+export async function refreshPendingGameUpdate() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	if (latestAnnouncedUpdate <= personal.latestUpdate) return
+	if (personal.haltPlay || store.viewSettings.showReplay) return
+	await IO.checkForLatestData()
 }
 
 export async function broadcastGameUpdate(existingPromise = null) {

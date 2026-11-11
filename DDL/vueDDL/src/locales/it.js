@@ -99,12 +99,19 @@ export default {
 		turn: "Turno",
 		timeToNextKickout: "Tempo alla prossima espulsione:",
 		resignConfirm: "Vuoi davvero abbandonare? Verrai trattato come un giocatore assente.",
+		spectator: "Spettatore",
+		map: "Mappa",
+		zoomIn: "Ingrandisci",
+		zoomOut: "Riduci",
+
 	},
 	footer: {
 		credit: "Duck Dealer è un gioco da tavolo di Jeroen Doumen e Joris Wiersinga, pubblicato da",
 		permissions: "Con permesso. Icone del menu di",
 	},
 	action: {
+		chooseTurn: "Raccogli energia o fai il tuo turno azione",
+		placeHighways: "Posiziona autostrade",
 		bgStats: "Pubblica in BG Stats",
 		bgStatsCopy: "Copia collegamento",
 		bgStatsCopied: "Collegamento copiato",
@@ -215,6 +222,8 @@ export default {
 		crew: "equipaggio: {colour}",
 		selected: "{count} / 3 selezionati",
 		confirm: "Conferma equipaggiamento",
+		clear: "Svuota",
+
 	},
 	planetPicker: {
 		title: "Scegli un pianeta iniziale",
@@ -368,6 +377,7 @@ export default {
 	errors: {
 		couldNotSaveBid: "Impossibile salvare la tua offerta.",
 		staleVersion: "Sembra che tu abbia una versione più vecchia del gioco. Aggiorna la pagina.",
+		noHighwayParts: "Non hai più pezzi di autostrada.",
 		saveGame: "Errore nel salvataggio della partita",
 		sendChat: "Errore nell'invio del messaggio di chat",
 		webmaster: "Spiacenti, si è verificato un problema. Scrivi direttamente al webmaster.",

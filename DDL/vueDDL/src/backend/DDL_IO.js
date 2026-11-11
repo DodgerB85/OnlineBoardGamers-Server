@@ -26,11 +26,11 @@ export function getNextCurrentPlayers() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	if (!store.players.length || !store.gameflow.turnOrder.length) {
-		return { allIsCurrentPlayers: [], allRemainingPlayersInTurnOrder: [], pendingPlayersArr: [] }
+		return { allIsCurrentPlayers: [], allRemainingPlayersInTurnOrder: [] }
 	}
 	const allRemainingPlayersInTurnOrder = store.gameflow.turnOrder.map((idx) => store.players[idx].name)
 	const allIsCurrentPlayers = [allRemainingPlayersInTurnOrder[0]]
-	return { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, pendingPlayersArr: [] }
+	return { allIsCurrentPlayers, allRemainingPlayersInTurnOrder }
 }
 
 function buildTournamentData() {
@@ -58,14 +58,14 @@ export function saveGame(saveRewind = true, options = {}) {
 async function performSave(saveRewind = true, options = {}) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	if (personal.haltPlay) return
+	if (personal.haltPlay || store.viewSettings.showReplay) return
 	let wsConnecting = null
 	if (personal.liveWS) wsConnecting = WS.StartWebSocket()
 
 	personal.haltPlay = true
 	store.viewSettings.showLoader = true
 
-	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, pendingPlayersArr } = getNextCurrentPlayers()
+	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder } = getNextCurrentPlayers()
 
 	const postData = {
 		action: "saveGame",
@@ -78,7 +78,6 @@ async function performSave(saveRewind = true, options = {}) {
 		saveRewind: saveRewind,
 		allIsCurrentPlayers,
 		allRemainingPlayersInTurnOrder,
-		pendingPlayersArr,
 		noNotify: options.noNotify === true,
 	}
 
@@ -115,7 +114,9 @@ async function performSave(saveRewind = true, options = {}) {
 		if (personal.liveWS) WS.broadcastGameUpdate(wsConnecting)
 		store.viewSettings.showLoader = false
 		personal.haltPlay = false
+		personal.kickoutRequired = 0
 		controller.startPlayerTurn()
+		if (personal.liveWS) WS.refreshPendingGameUpdate()
 	} catch (error) {
 		console.error("Error saving game:", error)
 		store.gameMessages.errorText = t("errors.saveGame")
@@ -195,29 +196,6 @@ export async function reloadChatData() {
 	}
 }
 
-export async function reloadGameData() {
-	const store = useModelStore()
-	const personal = usePersonalStore()
-	store.viewSettings.showLoader = true
-	try {
-		const response = await fetch("/DDL/data/1/", {
-			method: "POST",
-			body: JSON.stringify({ gameID: personal.gameID }),
-			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
-		})
-		if (!response.ok) throw new Error("Network response was not ok")
-		const data = await response.json()
-		model.importGameData(data.gameData)
-		model.rebuildTurnOrder()
-		personal.secondsToNextKickout = data.secondsToNextKickout
-		personal.latestUpdate = data.latestUpdate
-		window.initData.latestUpdate = data.latestUpdate
-	} catch (error) {
-		console.error("Error fetching game data:", error)
-	}
-	store.viewSettings.showLoader = false
-}
-
 export async function saveNotes() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
@@ -269,6 +247,7 @@ export async function resign() {
 export async function kickout() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	if (store.viewSettings.showReplay) return
 	store.viewSettings.showLoader = true
 	const kickedPlayerObj = controller.currentPlayerObj()
 	try {
@@ -289,34 +268,23 @@ export async function kickout() {
 			return data
 		}
 
-		// Apply kickout result to local state so subsequent saves don't revert it
 		personal.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
 
 		if (data.missingPlayers && data.missingPlayers.length > 0) {
-			// Find all missing player indices in the players array
+			// A kicked player can be current; drop every missing seat from the
+			// turn orders, then persist the next real player's turn.
 			const missingIndices = []
 			for (const missingName of data.missingPlayers) {
-				const idx = store.players.findIndex(p => p.name === missingName)
-				if (idx >= 0) {
-					missingIndices.push(idx)
-				}
+				const idx = store.players.findIndex((p) => p.name === missingName)
+				if (idx >= 0) missingIndices.push(idx)
 			}
-
-			// Remove from ACTIVE turn orders only (keep in fullTurnOrder as placeholders)
-			const filterTurnOrder = (arr) => arr.filter(idx => !missingIndices.includes(idx))
+			const filterTurnOrder = (arr) => arr.filter((idx) => !missingIndices.includes(idx))
 			store.gameflow.turnOrder = filterTurnOrder(store.gameflow.turnOrder)
 			store.gameflow.fullTurnOrder = filterTurnOrder(store.gameflow.fullTurnOrder)
-			store.gameflow.wonderTurnOrder = filterTurnOrder(store.gameflow.wonderTurnOrder)
-			store.gameflow.wonderPrayingOrder = filterTurnOrder(store.gameflow.wonderPrayingOrder)
-			store.gameflow.newWonderTurnOrder = filterTurnOrder(store.gameflow.newWonderTurnOrder)
-			store.gameflow.newWonderPrayingOrder = filterTurnOrder(store.gameflow.newWonderPrayingOrder)
-			// NOTE: fullTurnOrder is NOT filtered - kicked players remain as placeholders
-
-			// Mark kicked players as bots
-			for (const idx of missingIndices) {
-				store.players[idx].displayName = rf.BOT_NAME
-			}
+			for (const idx of missingIndices) store.players[idx].displayName = rf.BOT_NAME
+			personal.kickoutRequired = 0
+			await saveGame(true)
 		}
 
 		return data
@@ -377,6 +345,7 @@ export async function checkForLatestData() {
 		model.rebuildTurnOrder()
 		personal.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
+		personal.kickoutRequired = data.kickoutRequired || 0
 		window.initData.latestUpdate = data.latestUpdate
 		controller.startPlayerTurn()
 	} catch (error) {
@@ -429,6 +398,7 @@ export async function loadRewind() {
 		}
 		model.importGameData(data.gameData)
 		personal.latestUpdate = data.latestUpdate
+		personal.kickoutRequired = 0
 		window.initData.latestUpdate = data.latestUpdate
 		await updateDataFromLoadRewind()
 		store.gameMessages.successText = t("messages.rewindLoaded")
@@ -444,7 +414,7 @@ export async function loadRewind() {
 async function updateDataFromLoadRewind() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, pendingPlayersArr } = getNextCurrentPlayers()
+	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder } = getNextCurrentPlayers()
 	try {
 		const response = await fetch("/DDL/processDDLturn/", {
 			method: "POST",
@@ -453,8 +423,7 @@ async function updateDataFromLoadRewind() {
 				turn: store.gameflow.turn,
 				allIsCurrentPlayers,
 				allRemainingPlayersInTurnOrder,
-				pendingPlayersArr,
-				gameID: personal.gameID,
+						gameID: personal.gameID,
 				phase: store.gameflow.phase,
 				gameData: model.exportGameData(),
 			}),

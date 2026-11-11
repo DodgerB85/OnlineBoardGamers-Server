@@ -440,6 +440,7 @@ export async function proposeTrade(toIndex, give, receive) {
 export async function respondTrade(tradeId, accept) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	if (store.viewSettings.showReplay) return false
 	const result = rules.respondTrade(model.stateFromStore(), tradeId, actingPlayerIndex(), accept)
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
@@ -503,6 +504,7 @@ export async function endActionTurn() {
 export async function skipMissingPlayerTurn() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	if (store.viewSettings.showReplay) return false
 	const currentIdx = currentPlayerIndex()
 	const current = currentPlayerObj()
 	if (!current) return false

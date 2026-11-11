@@ -21,6 +21,8 @@ User = get_user_model()
 class DDLTests(TestCase):
     def setUp(self):
         self.users = [User.objects.create_user(username=f"ddl{i}", password="pw") for i in range(3)]
+        for name in ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]:
+            User.objects.create_user(username=name, password="pw")
         self.game = Game.objects.create(
             gameCode="DDL",
             gameStatus="ACTIVE",
@@ -138,3 +140,73 @@ class DDLTests(TestCase):
         self.assertTrue(GamePlayer.objects.get(game=self.game, player=self.users[0]).winner)
         self.assertTrue(GamePlayer.objects.get(game=self.game, player=self.users[1]).winner)
         self.assertFalse(GamePlayer.objects.get(game=self.game, player=self.users[2]).winner)
+
+    def test_create_page_uses_shared_pieces(self):
+        self.client.force_login(self.users[0])
+        response = self.client.get(reverse("createDDLpage"))
+        self.assertEqual(response.status_code, 200)
+        for marker in (
+            "createGamePage.js",
+            "createDDL.js",
+            "global.kickoutOptions",
+            'id="kickoutDuration"',
+            'id="blitzWarningSpan"',
+            'id="startingOptionAuction"',
+            'id="selPlayer5"',
+            'id="player2help"',
+        ):
+            self.assertContains(response, marker)
+
+    def test_practice_game_skips_the_auction(self):
+        self.client.force_login(self.users[0])
+        response = self.client.post(
+            reverse("DDL:createDDLgame"),
+            {"gameName": "Practice", "playerNumber": "3", "trainingGame": "102", "startingOptionAuction": "1"},
+        )
+        self.assertEqual(response.status_code, 302)
+        game = Game.objects.get(gameCode="DDL", gameName="Practice")
+        self.assertNotIn(rfDDL.SO_AUCTION, json.loads(game.startingOptions))
+
+    def test_non_player_cannot_save_or_kick(self):
+        outsider = User.objects.create_user(username="ddlout", password="pw")
+        self.client.force_login(outsider)
+        save = self.post_turn(
+            {
+                "action": "saveGame",
+                "gameID": self.game.id,
+                "latestUpdate": self.game.latestUpdate,
+                "gameData": "x",
+                "turn": 1,
+                "phase": rfDDL.PHASE_MAIN,
+                "status": "ACTIVE",
+                "allIsCurrentPlayers": ["ddlout"],
+            }
+        )
+        self.assertEqual(save.status_code, 403)
+        kick = self.post_turn({"action": "kickout", "gameID": self.game.id, "kickedName": "ddl0", "latestUpdate": self.game.latestUpdate})
+        self.assertEqual(kick.status_code, 403)
+
+    def test_kickout_requires_an_active_player_and_the_current_target(self):
+        # Old enough that the kickout window is open.
+        self.game.latestUpdate = str(int(time.time() * 1000) - 3 * 24 * 60 * 60 * 1000)
+        self.game.kickoutDuration = 100
+        self.game.save()
+
+        self.client.force_login(self.users[1])
+        self_kick = self.post_turn({"action": "kickout", "gameID": self.game.id, "kickedName": "ddl1", "latestUpdate": self.game.latestUpdate})
+        self.assertEqual(self_kick.status_code, 403)
+
+        not_current = self.post_turn({"action": "kickout", "gameID": self.game.id, "kickedName": "ddl2", "latestUpdate": self.game.latestUpdate})
+        self.assertEqual(not_current.status_code, 400)
+
+    def test_kickout_reports_the_missing_player(self):
+        self.game.latestUpdate = str(int(time.time() * 1000) - 3 * 24 * 60 * 60 * 1000)
+        self.game.kickoutDuration = 100
+        self.game.save()
+        # A single vote executes the kickout when the threshold is one.
+        self.client.force_login(self.users[1])
+        with patch.object(DDLpresenter, "processKickoutVote", return_value={"voteCast": False}):
+            response = self.post_turn({"action": "kickout", "gameID": self.game.id, "kickedName": "ddl0", "latestUpdate": self.game.latestUpdate})
+        data = response.json()
+        self.assertIn("ddl0", data["missingPlayers"])
+        self.assertTrue(GamePlayer.objects.get(game=self.game, player=self.users[0]).is_kicked)

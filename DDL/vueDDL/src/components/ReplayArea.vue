@@ -16,8 +16,7 @@ function step(amount) {
 	replay.performStep(amount)
 }
 function exitReplay() {
-	store.viewSettings.showReplay = false
-	window.location.reload()
+	replay.exitReplay()
 }
 </script>
 

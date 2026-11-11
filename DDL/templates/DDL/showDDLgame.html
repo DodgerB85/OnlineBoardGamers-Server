@@ -97,9 +97,6 @@
     initData.kickoutVotesData = {{ kickoutVotesData|default:'{}'|safe }};
     initData.kickoutVoteThreshold = {{ kickoutVoteThreshold|default:'0' }};
     {% if involvedPlayer %}
-    initData.currentMoveData = {{ currentMoveData|safe }};
-    initData.allMyMoveData = {{ allMyMoveData|safe }};
-    initData.statsExcludedGame = {{ statsExcludedGame|lower }};
     initData.secondsToNextKickout = {{ secondsToNextKickout }};
     {% if kickoutRequired > 0 and not myMove %}
     initData.kickoutRequired = {{ kickoutRequired }};

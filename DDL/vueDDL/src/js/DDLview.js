@@ -15,6 +15,24 @@ export function phaseStr(phase) {
 	return t("phase.unknown", { phase })
 }
 
+// The current step of the game, shared by the action panel title and the status
+// bar so the two cannot disagree.
+export function actionTitle(store) {
+	const gameflow = store.gameflow
+	if (gameflow.phase === rf.PHASE_SETUP) return t("phase.setup")
+	if (gameflow.phase === rf.PHASE_GAME_OVER) return t("action.gameOver")
+	if (gameflow.turnType === rf.TURN_CHOOSE) return t("action.chooseTurn")
+	if (gameflow.movement && gameflow.movement.remaining > 0) return t("action.move")
+	if (gameflow.freeHighwaysLeft > 0) return t("action.placeHighways")
+	if (store.context.action === rf.ACT_PLACE_HIGHWAYS) return t("action.placeHighways")
+	if (store.context.action === rf.ACT_MOVE) return t("action.move")
+	if (store.context.action === rf.ACT_BUILD) return t("action.build")
+	if (store.context.action === rf.ACT_TRADE) return t("action.trade")
+	if (store.context.action === rf.ACT_PATHWAY) return t("action.pathways")
+	if (gameflow.pendingExplore) return t("explore.title")
+	return t("action.title")
+}
+
 export function turnTypeStr(turnType) {
 	if (turnType === rf.TURN_CHOOSE) return t("turnType.choose")
 	if (turnType === rf.TURN_ACTION) return t("turnType.action")

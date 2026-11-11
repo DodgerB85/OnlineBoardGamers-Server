@@ -1974,7 +1974,6 @@ class DDLpresenter(GamePresenter):
         from django_q.tasks import async_task
 
         from Lobby.models import User
-        from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
@@ -2019,11 +2018,6 @@ class DDLpresenter(GamePresenter):
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists() and self.gameObj.maxPlayers > 1:
             async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "DDL", finalResults, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
-
-            if self.gameObj.relatedMainTournament:
-                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMainTournament, self.gameObj, winner_usernames, _tournamentData)
-            if self.gameObj.relatedMiniTournament:
-                SF_M_ProcessAnyTournamentEndGame(request, self.gameObj.relatedMiniTournament, self.gameObj, winner_usernames, _tournamentData)
 
 
 class ROWpresenter(GamePresenter):

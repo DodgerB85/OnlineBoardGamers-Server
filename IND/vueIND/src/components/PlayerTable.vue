@@ -185,6 +185,15 @@ function clickedSlot(companySlot, slotIdx, playerIndex) {
 	}
 }
 
+// Clicking a company deed highlights that company's territories on the map
+function clickedCompany(companyID, playerIndex) {
+	// Operating a company already outlines its whole slot in blue
+	if (!store.topMenuViews.showReplay && store.gameflow.phase === rf.PHASE_OPERATIONS && playerIndex === controller.currentPlayerIndex()) return
+	let terrIDs = model.getActiveCompanyDataFromID(companyID).territories.map((territory) => territory[0])
+	store.clearHistoryHelpers()
+	store.historyHelpers.histTerritoriesToHighlight = terrIDs
+}
+
 function getPlayerNameClass(playerIndex) {
 	//return "activePLayer"
 	if (store.gameflow.phase === rf.PHASE_MERGER_BIDDING) {
@@ -345,7 +354,7 @@ function getRndTooltip(playerIndex) {
 								<template v-if="companySlot.length > 0">
 									<div class="slotImgsMinimalDiv" :class="[{ selectableSlot: canSelectSlot(playerIndex, slotIdx, companySlot) }, { selectedSlotToOperate: controller.currentPlayerIndex() === playerIndex && store.context.selectedSlotToOperate === slotIdx }, { mergedSlotPulse: model.getActiveCompanyDataFromID(companySlot[0]).mergedThisPhase }]" @click="clickedSlot(companySlot, slotIdx, playerIndex)" :style="{ width: companySlot.length * 20 + 5 * (companySlot.length - 1) + 'px' }">
 										<template v-for="(companyID, idx2) in companySlot" :key="idx2">
-											<img class="companyCardMinimalIMG" :src="view.getImage(view.getCompanyGfxFromID(companyID))" alt="Company" :style="{ left: idx2 * 20 + (5 * idx2 - 1) + 'px' }" />
+											<img class="companyCardMinimalIMG" :src="view.getImage(view.getCompanyGfxFromID(companyID))" alt="Company" :style="{ left: idx2 * 20 + (5 * idx2 - 1) + 'px' }" @click="clickedCompany(companyID, playerIndex)" />
 											<div :class="{ crossBackground: model.getActiveCompanyDataFromID(companyID).operated }"></div>
 										</template>
 									</div>
@@ -363,7 +372,7 @@ function getRndTooltip(playerIndex) {
 									<div class="slotsTDdiv">
 										<div class="slotImgsDiv" :class="[{ selectableSlot: canSelectSlot(playerIndex, slotIdx, companySlot) }, { unMergeableSlot: companySlot.length > 0 && model.getActiveCompanyDataFromID(companySlot[0]).mergedThisPhase }, { mergedSlotPulse: model.getActiveCompanyDataFromID(companySlot[0]).mergedThisPhase }, { selectedSlotToOperate: playerIndex === controller.currentPlayerIndex() && store.context.selectedSlotToOperate === slotIdx }]" @click="clickedSlot(companySlot, slotIdx, playerIndex)" :style="{ height: companySlot.length > 1 ? 79 + 20 * (companySlot.length - 1) + 'px' : '81px' }">
 											<template v-for="(companyID, idx2) in companySlot" :key="idx2">
-												<img class="companyCardIMG" :src="view.getImage(view.getCompanyGfxFromID(companyID))" alt="Company" :style="{ top: (companySlot.length - 1 - idx2) * 20 + 'px' }" />
+												<img class="companyCardIMG" :src="view.getImage(view.getCompanyGfxFromID(companyID))" alt="Company" :style="{ top: (companySlot.length - 1 - idx2) * 20 + 'px' }" @click="clickedCompany(companyID, playerIndex)" />
 												<div :class="{ crossBackground: model.getActiveCompanyDataFromID(companyID).operated }"></div>
 											</template>
 											<template v-if="model.getActiveCompanyDataFromID(companySlot[0]).type === rf.COMPANY_SHIPPING">
@@ -624,6 +633,8 @@ function getRndTooltip(playerIndex) {
 	left: 0px;
 	width: 100%;
 	height: 100%;
+	/* clicks must reach the company card below (deed highlight) */
+	pointer-events: none;
 	background: linear-gradient(to top left, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) calc(50% - 4px), rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) calc(50% + 4px), rgba(0, 0, 0, 0) 100%), linear-gradient(to top right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) calc(50% - 4px), rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) calc(50% + 4px), rgba(0, 0, 0, 0) 100%);
 }
 
