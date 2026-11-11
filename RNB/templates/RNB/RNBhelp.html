@@ -1,6 +1,11 @@
 {% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
+{% block title %}{% translate "Roads & Boats Help" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "Rules and gameplay help for Roads & Boats, Splotter's logistics and transport strategy game. Play online for free." %}">
+{% endblock description %}
 {% block page_title %}
   {% translate "Roads & Boats Help" %}
 {% endblock page_title %}

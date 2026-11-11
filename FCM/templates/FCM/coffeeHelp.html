@@ -1,6 +1,11 @@
 {% extends "Lobby/layout.html" %}
 {% load static %}
 {% load i18n %}
+{% block title %}{% translate "Coffee Help" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "How coffee works in Food Chain Magnate online: coffee tokens, pricing, reserves and timing explained." %}">
+{% endblock description %}
 {% block head %}
   
   <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">

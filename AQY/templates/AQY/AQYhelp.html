@@ -1,6 +1,11 @@
 {% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
+{% block title %}{% translate "Antiquity Help" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "Rules, setup and gameplay help for Antiquity, Splotter's city-building survival board game, playable online for free." %}">
+{% endblock description %}
 {% block page_title %}
   {% translate "Antiquity Help" %}
 {% endblock page_title %}

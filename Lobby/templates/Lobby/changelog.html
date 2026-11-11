@@ -1,5 +1,10 @@
 {% extends "Lobby/layout.html" %}
 {% load static i18n compress %}
+{% block title %}{% translate "Updates" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "Latest updates, new features and fixes on Online Board Gamers." %}">
+{% endblock description %}
 {% block head %}
   
 {% endblock head %}

@@ -2,8 +2,6 @@
 {% load static %}
 {% load i18n %}
 {% block head %}
-  <link rel="canonical" href="https://www.onlineboardgamers.com/" />
-  
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -168,6 +166,7 @@
           <details id="game-fcm">
             <summary>Food Chain Magnate</summary>
             <div class="flavour-body">
+              <p><a href="{% url 'FCM:FCMhelp' %}">{% translate "Food Chain Magnate rules &amp; help" %}</a></p>
               <p>
                 {% translate "Build up your fast food empire by out advertising and out producing your opponents to win the match" %}
               </p>
@@ -187,6 +186,7 @@
           <details id="game-rnb">
             <summary>Roads &amp; Boats</summary>
             <div class="flavour-body">
+              <p><a href="{% url 'RNB:RNBhelp' %}">{% translate "Roads & Boats rules &amp; help" %}</a></p>
               <p>
                 {% translate "Build your civilisation through logistics and transport - manage goods, roads, boats and more to outproduce your rivals" %}
               </p>
@@ -204,6 +204,7 @@
           <details id="game-hlc">
             <summary>Horseless Carriage</summary>
             <div class="flavour-body">
+              <p><a href="{% url 'HLC:HLChelp' %}">{% translate "Horseless Carriage rules &amp; help" %}</a></p>
               <p>
                 {% translate "Compete to build and sell the most vehicles - research and influence the market to forge your path to victory" %}
               </p>
@@ -221,6 +222,7 @@
           <details id="game-tgz">
             <summary>The Great Zimbabwe</summary>
             <div class="flavour-body">
+              <p><a href="{% url 'TGZ:TGZhelp' %}">{% translate "The Great Zimbabwe rules &amp; help" %}</a></p>
               <p>{% translate "Raise your monuments to establish your empire as having the best mythology" %}</p>
               <p>
                 {% blocktranslate trimmed %}
@@ -236,6 +238,7 @@
           <details id="game-ind">
             <summary>Indonesia</summary>
             <div class="flavour-body">
+              <p><a href="{% url 'IND:INDhelp' %}">{% translate "Indonesia rules &amp; help" %}</a></p>
               <p>{% translate "Ship your goods as efficiently as possible to dominate the economy!" %}</p>
               <p>
                 {% blocktranslate trimmed %}
@@ -251,6 +254,7 @@
           <details id="game-aqy">
             <summary>Antiquity</summary>
             <div class="flavour-body">
+              <p><a href="{% url 'AQY:AQYhelp' %}">{% translate "Antiquity rules &amp; help" %}</a></p>
               <p>{% translate "Build up your cities to exploit the countryside and please your chosen Saint!" %}</p>
               <p>
                 {% blocktranslate trimmed %}
@@ -266,6 +270,7 @@
           <details id="game-urr">
             <summary>UR: 1830 BC</summary>
             <div class="flavour-body">
+              <p><a href="{% url 'URR:URRhelp' %}">{% translate "UR: 1830 BC rules &amp; help" %}</a></p>
               <p>{% translate "Control a dynasty in ancient Mesopotamia: trade land, build canals and waterworks, and profit from the rainy season." %}</p>
               <p>
                 {% blocktranslate trimmed %}
@@ -281,6 +286,7 @@
           <details id="game-bus">
             <summary>Bus</summary>
             <div class="flavour-body">
+              <p><a href="{% url 'BUS:BUShelp' %}">{% translate "Bus rules &amp; help" %}</a></p>
               <p>
                 {% translate "Transport as many passengers as you can - but with a time altering clock in the mix, the outcome can be hard to predict!" %}
               </p>
@@ -298,6 +304,7 @@
           <details id="game-cns">
             <summary>Cannes</summary>
             <div class="flavour-body">
+              <p><a href="{% url 'CNS:CNShelp' %}">{% translate "Cannes rules &amp; help" %}</a></p>
               <p>{% translate "Shift your network of connections to produce and release movies in Cannes" %}</p>
               <p>
                 {% blocktranslate trimmed %}
@@ -313,6 +320,7 @@
           <details id="game-web">
             <summary>Web</summary>
             <div class="flavour-body">
+              <p><a href="{% url 'WEB:WEBhelp' %}">{% translate "Web rules &amp; help" %}</a></p>
               <p>{% translate "Connect servers up to computers to outscore and outmaneuver your opponents" %}</p>
               <p>
                 {% blocktranslate trimmed %}
@@ -328,6 +336,7 @@
           <details id="game-kfw">
             <summary>Keyflower</summary>
             <div class="flavour-body">
+              <p><a href="{% url 'KFW:KFWhelp' %}">{% translate "Keyflower rules &amp; help" %}</a></p>
               <p>
                 {% translate "Bid for tiles and use actions with your workers. Build up your village to achieve the highest score at the end of Winter!" %}
               </p>

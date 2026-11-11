@@ -1,6 +1,11 @@
 {% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
+{% block title %}{% translate "Tournaments" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "How online board game tournaments work on Online Board Gamers: brackets, scoring, scheduling and joining." %}">
+{% endblock description %}
 {% block page_id_attr %}
   id="lobbyHelpPage"
 {% endblock page_id_attr %}

@@ -1,6 +1,11 @@
 {% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
+{% block title %}{% translate "Indonesia Help" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "Rules and gameplay help for Indonesia, Splotter's shipping and production strategy game. Play Indonesia online for free." %}">
+{% endblock description %}
 {% block page_title %}
   {% translate "Indonesia Help" %}
 {% endblock page_title %}

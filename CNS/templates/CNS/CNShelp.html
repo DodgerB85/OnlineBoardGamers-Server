@@ -1,6 +1,11 @@
 {% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
+{% block title %}{% translate "Cannes Help" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "Rules and gameplay help for Cannes, the film-industry strategy board game. Play Cannes online for free at Online Board Gamers." %}">
+{% endblock description %}
 {% block page_title %}
   {% translate "Cannes Help" %}
 {% endblock page_title %}

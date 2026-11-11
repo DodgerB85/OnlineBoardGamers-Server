@@ -1,6 +1,11 @@
 {% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
+{% block title %}{% translate "Mini Tournaments" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "How mini tournaments work on Online Board Gamers: create, join and win community-run board game events." %}">
+{% endblock description %}
 {% block page_id_attr %}
   id="lobbyHelpPage"
 {% endblock page_id_attr %}

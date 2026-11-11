@@ -1,6 +1,11 @@
 {% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
+{% block title %}{% translate "Duck Dealer Help" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "Rules and gameplay help for Duck Dealer, Splotter's economic board game. Play Duck Dealer online for free with friends or solo." %}">
+{% endblock description %}
 {% block page_title %}
   {% translate "Duck Dealer Help" %}
 {% endblock page_title %}

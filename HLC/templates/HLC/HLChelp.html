@@ -1,6 +1,11 @@
 {% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
+{% block title %}{% translate "Horseless Carriage Help" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "Rules and gameplay help for Horseless Carriage, Splotter's automobile-industry strategy game. Play online for free." %}">
+{% endblock description %}
 {% block page_title %}
   {% translate "Horseless Carriage Help" %}
 {% endblock page_title %}

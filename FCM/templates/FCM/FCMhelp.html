@@ -1,6 +1,11 @@
 {% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
+{% block title %}{% translate "Food Chain Magnate Help" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "Rules, strategy tips, coffee rules and expansion help for playing Food Chain Magnate online for free with friends or solo." %}">
+{% endblock description %}
 {% block page_title %}
   {% translate "Food Chain Magnate Help" %}
 {% endblock page_title %}

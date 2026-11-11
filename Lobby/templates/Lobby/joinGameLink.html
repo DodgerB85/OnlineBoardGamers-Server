@@ -4,12 +4,13 @@
     <meta name="description"
           content="{{ availableGamesList.0.gameName }} - {{ availableGamesList.0.gameDescription }}" />
 {% endblock description %}
+{% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock robots %}
 {% block canonical %}
     <link rel="canonical"
-          href="https://www.onlineboardgamers.com/join/{{ gameCode }}{{ gameID }}" />
+          href="https://www.onlineboardgamers.com/join/{{ gameCode }}{{ gameID }}/" />
     <meta property="og:url"
           content="https://www.onlineboardgamers.com/join/{{ gameCode }}{{ gameID }}/" />
-    <meta property="og:type" content="Online Board Gamers" />
+    <meta property="og:type" content="website" />
     <meta property="og:title" content="Online Board Gamers" />
     <meta property="og:image"
           content="https://www.onlineboardgamers.com{% static 'Lobby/favicons/web-app-manifest-512x512.png' %}" />

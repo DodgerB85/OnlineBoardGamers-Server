@@ -1,6 +1,11 @@
 {% extends "Lobby/layout.html" %}
 {% load static %}
 {% load i18n %}
+{% block title %}{% translate "About Online Board Gamers" %} | Play Splotter Board Games Online{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "About Online Board Gamers: a free browser platform to play Splotter board games online with friends or solo." %}">
+{% endblock description %}
 {% block head %}
 {% endblock head %}
 {% block body %}

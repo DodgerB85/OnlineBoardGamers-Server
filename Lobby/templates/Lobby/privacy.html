@@ -1,5 +1,10 @@
 {% extends "Lobby/layout.html" %}
 {% load i18n %}
+{% block title %}{% translate "Privacy Policy" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+    <meta name="description"
+          content="{% translate "How Online Board Gamers collects, uses and protects personal data." %}">
+{% endblock description %}
 {% block body %}
     <div class="page page-narrow">
         <div class="page-header">

@@ -15,10 +15,23 @@
         <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Online Board Gamers",
-  "operatingSystem": "WEB",
-  "applicationCategory": "GameApplication"
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://www.onlineboardgamers.com/#organization",
+      "name": "Online Board Gamers",
+      "url": "https://www.onlineboardgamers.com/",
+      "logo": "https://www.onlineboardgamers.com{% static 'Lobby/favicons/web-app-manifest-512x512.png' %}"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.onlineboardgamers.com/#website",
+      "name": "Online Board Gamers",
+      "url": "https://www.onlineboardgamers.com/",
+      "publisher": { "@id": "https://www.onlineboardgamers.com/#organization" },
+      "inLanguage": ["en", "zh-Hans"]
+    }
+  ]
 }
         </script>
         <title>
@@ -42,7 +55,7 @@
         {% endblock %}
         <meta name="keywords"
               content="Food,Chain,Magnate,Online,Play,Board,Game,Games,Gamers,Horseless,Carriage,Bus,Great,Zimbabwe,Cannes,Antiquity,UR,1830,BC,Indonesia,Keyflower,Web">
-        <meta name="robots" content="index, follow">
+        {% block robots %}<meta name="robots" content="index, follow">{% endblock %}
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta name="language" content="English">
         <meta name="revisit-after" content="2 days">
@@ -69,7 +82,9 @@
         <!-- Social Media (Open Graph) -->
         <meta property="og:image"
               content="https://www.onlineboardgamers.com{% static 'Lobby/favicons/web-app-manifest-512x512.png' %}?v=20261022b" />
-        {% block canonical %}<link rel="canonical" href="https://www.onlineboardgamers.com/">{% endblock %}
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://www.onlineboardgamers.com{{ request.path }}">
+        {% block canonical %}<link rel="canonical" href="https://www.onlineboardgamers.com{{ request.path }}">{% endblock %}
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap"

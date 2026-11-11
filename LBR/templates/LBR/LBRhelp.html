@@ -1,5 +1,10 @@
 {% extends "Lobby/help_shell.html" %}
 {% load i18n %}
+{% block title %}{% translate "Land Between Rivers Help" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "Rules and gameplay help for Land Between Rivers. Play this civilisation strategy board game online for free." %}">
+{% endblock description %}
 {% block page_title %}{% translate "Land Between Rivers Help" %}{% endblock %}
 {% block content %}
 <h2>{% translate "Goal" %}</h2>

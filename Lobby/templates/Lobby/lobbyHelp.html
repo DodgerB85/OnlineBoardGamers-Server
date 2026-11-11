@@ -1,6 +1,11 @@
 {% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
+{% block title %}{% translate "Board Game Rules &amp; Help" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "Rules and help for every board game on Online Board Gamers: Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Indonesia, Antiquity and more." %}">
+{% endblock description %}
 {% block page_id_attr %}id="lobbyHelpPage"{% endblock %}
 {% block page_title %}
   {% translate "Games Help" %}

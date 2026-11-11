@@ -1,6 +1,11 @@
 {% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
+{% block title %}{% translate "Napoleon's Triumph Help" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "Rules and gameplay help for Napoleon's Triumph, Bowen Simmons' Battle of Austerlitz block wargame. Play online for free." %}">
+{% endblock description %}
 {% block page_title %}
   {% translate "Napoleon's Triumph Help" %}
 {% endblock page_title %}

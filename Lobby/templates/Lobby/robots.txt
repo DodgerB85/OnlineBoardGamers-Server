@@ -1,4 +1,6 @@
 User-Agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /join/
+Disallow: /profile/
 Sitemap: https://www.onlineboardgamers.com/sitemap.xml

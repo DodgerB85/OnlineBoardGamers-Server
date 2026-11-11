@@ -1,6 +1,11 @@
 {% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
+{% block title %}{% translate "UR: 1830 BC Help" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "Rules and gameplay help for UR: 1830 BC, Splotter's irrigation and land-trading game in ancient Mesopotamia. Play online for free." %}">
+{% endblock description %}
 {% block page_title %}
   {% translate "UR: 1830 BC Help" %}
 {% endblock page_title %}

@@ -1,6 +1,11 @@
 {% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
+{% block title %}{% translate "Roads & Boats Map Editor Help" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "How to create and edit Roads & Boats maps for online play on Online Board Gamers." %}">
+{% endblock description %}
 {% block page_title %}
   {% translate "Roads & Boats Map Editor Help" %}
 {% endblock page_title %}

@@ -1,6 +1,11 @@
 {% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
+{% block title %}{% translate "Web Help" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "Rules and gameplay help for Web, the network-building strategy board game. Play Web online for free at Online Board Gamers." %}">
+{% endblock description %}
 {% block page_title %}
   {% translate "Web Help" %}
 {% endblock page_title %}

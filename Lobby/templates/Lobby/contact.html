@@ -1,6 +1,11 @@
 {% extends "Lobby/layout.html" %}
 {% load static %}
 {% load i18n %}
+{% block title %}{% translate "Contact" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "Contact Online Board Gamers for support, bug reports, feedback or questions about playing board games online." %}">
+{% endblock description %}
 {% block head %}
   
 {% endblock head %}

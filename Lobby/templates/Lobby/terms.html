@@ -1,5 +1,10 @@
 {% extends "Lobby/layout.html" %}
 {% load i18n %}
+{% block title %}{% translate "Terms of Service" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+    <meta name="description"
+          content="{% translate "Terms of Service for using Online Board Gamers to play board games online." %}">
+{% endblock description %}
 {% block body %}
     <div class="page page-narrow">
         <div class="page-header">
