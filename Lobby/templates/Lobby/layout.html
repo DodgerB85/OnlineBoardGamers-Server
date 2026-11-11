@@ -40,9 +40,7 @@
                     {% if myMoveGames %}({{ myMoveGames }}){% endif %}
                     {% translate "Online Board Gamers" %}
                 {% else %}
-                    {% blocktranslate trimmed %}
-                        Online Board Gamers - Play Splotter's Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Indonesia, Antiquity, UR: 1830 BC, Bus, Cannes, and Web Online for free with others, or solo!
-                    {% endblocktranslate %}
+                    {% translate "Online Board Gamers – Play Splotter Board Games Online" %}
                 {% endif %}
             {% endblock %}
         </title>
@@ -51,7 +49,7 @@
         <meta property="og:site_name" content="Online Board Gamers">
         {% block description %}
             <meta name="description"
-                  content="{% blocktranslate trimmed %}Play Splotter's Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Indonesia, Antiquity, UR: 1830 BC, Bus, Cannes, and Web Online for free with others, or solo!{% endblocktranslate %}">
+                  content="{% translate "Play Food Chain Magnate, Horseless Carriage, The Great Zimbabwe and more Splotter board games online for free with friends or solo." %}">
         {% endblock %}
         <meta name="keywords"
               content="Food,Chain,Magnate,Online,Play,Board,Game,Games,Gamers,Horseless,Carriage,Bus,Great,Zimbabwe,Cannes,Antiquity,UR,1830,BC,Indonesia,Keyflower,Web">
@@ -85,10 +83,11 @@
         <meta property="og:type" content="website">
         <meta property="og:url" content="https://www.onlineboardgamers.com{{ request.path }}">
         {% block canonical %}<link rel="canonical" href="https://www.onlineboardgamers.com{{ request.path }}">{% endblock %}
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap"
-              rel="stylesheet">
+        <link rel="preload"
+              href="{% static 'Lobby/fonts/outfit-latin.woff2' %}"
+              as="font"
+              type="font/woff2"
+              crossorigin>
         <link href="{% static 'Lobby/CSS/components.css' %}?v=32"
               rel="stylesheet">
         <link href="{% static 'Lobby/CSS/layout_new.css' %}" rel="stylesheet">

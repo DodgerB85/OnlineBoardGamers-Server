@@ -40,16 +40,20 @@
           <a class="button"
              style="display:block;text-align:center;margin-bottom:8px"
              href="{% url 'google_login' %}">
-            {% translate "Login or sign up with Google" %}
+            {% include "Lobby/google_icon.html" %}{% translate "Sign up with Google" %}
           </a>
           <a class="button"
              style="display:block;text-align:center"
              href="{% url 'discord_login' %}">
-            {% translate "Login or sign up with Discord" %}
+            {% include "Lobby/discord_icon.html" %}{% translate "Sign up with Discord" %}
           </a>
           <p style="text-align:center;color:var(--color-muted);margin:16px 0 12px;">{% translate "or" %}</p>
           <form method="post" class="register-form">
             {% csrf_token %}
+            <p id="usernameEmailWarning"
+               style="display:none;color:var(--color-danger);font-size:13px;margin:4px 0 0;">
+              {% translate "Usernames are visible to other players. Are you sure you want to use an email as a username?" %}
+            </p>
             {{ form.as_p }}
             <div class="form-actions" style="justify-content:center">
               <button type="submit" class="button button-primary">{% translate "Register" %}</button>
@@ -70,6 +74,6 @@
   </div>
   
   {% block script %}
-    <script src="{% static 'Lobby/register.js' %}"></script>
+    <script src="{% static 'Lobby/register.js' %}?v=20261111"></script>
   {% endblock script %}
 {% endblock body %}

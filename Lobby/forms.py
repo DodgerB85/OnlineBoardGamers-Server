@@ -84,7 +84,7 @@ class PasswordChangeCustomForm(PasswordChangeForm):
 class NewUserForm(UserCreationForm):
     username = forms.CharField(
         max_length=100,
-        label="",
+        label=gettext_lazy("Username"),
         widget=forms.TextInput(
             attrs={
                 "class": "registerInput",
@@ -97,7 +97,7 @@ class NewUserForm(UserCreationForm):
     email = forms.EmailField(
         max_length=200,
         help_text="",
-        label="",
+        label=gettext_lazy("Email Address"),
         widget=forms.TextInput(
             attrs={
                 "class": "registerInput",
@@ -114,7 +114,7 @@ class NewUserForm(UserCreationForm):
 
     password1 = forms.CharField(
         max_length=100,
-        label="",
+        label=gettext_lazy("Password"),
         widget=forms.PasswordInput(
             attrs={
                 "class": "registerInput",
@@ -124,7 +124,7 @@ class NewUserForm(UserCreationForm):
     )
     password2 = forms.CharField(
         max_length=100,
-        label="",
+        label=gettext_lazy("Confirm Password"),
         widget=forms.PasswordInput(
             attrs={
                 "class": "registerInput",

@@ -2,7 +2,10 @@
 {% load i18n %}
 {% load static %}
 {% block head %}
-  
+  <style>
+    .login-form .form-row { gap: 8px; }
+    .login-form .form-label { flex: 0 0 auto; }
+  </style>
 {% endblock %}
 {% block body %}
   <div class="page page-narrow">
@@ -17,26 +20,26 @@
         <a class="button"
            style="display:block;text-align:center;margin-bottom:8px"
            href="{% url 'google_login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">
-          {% translate "Login or sign up with Google" %}
+          {% include "Lobby/google_icon.html" %}{% translate "Login with Google" %}
         </a>
         <a class="button"
            style="display:block;text-align:center"
            href="{% url 'discord_login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">
-          {% translate "Login or sign up with Discord" %}
+          {% include "Lobby/discord_icon.html" %}{% translate "Login with Discord" %}
         </a>
         <p style="text-align:center;color:var(--color-muted);margin:16px 0 12px;">{% translate "or" %}</p>
-        <form action="{% url 'myLogin' %}" method="post">
+        <form action="{% url 'myLogin' %}" method="post" class="login-form">
           {% csrf_token %}
           <div class="form-row">
-            <label for="id_username" class="form-label">{% translate "Username" %}</label>
+            <label for="id_username" class="form-label">{% translate "Username" %}: </label>
             <input id="id_username" type="text" name="username" placeholder="{% translate "Username" %}" required>
           </div>
           <div class="form-row">
-            <label for="id_password" class="form-label">{% translate "Password" %}</label>
+            <label for="id_password" class="form-label">{% translate "Password" %}: </label>
             <input id="id_password" type="password" name="password" placeholder="{% translate "Password" %}" required>
           </div>
           <input type="hidden" name="next" value="{{ request.GET.next }}" />
-          <div class="form-row" style="border-bottom:none;justify-content:flex-end;">
+          <div class="form-row" style="border-bottom:none;justify-content:center;gap:12px;">
             <a class="button" href="{% url 'password_reset' %}">{% translate "Forgot password?" %}</a>
             <button type="submit" class="button button-primary">{% translate "Login" %}</button>
           </div>
