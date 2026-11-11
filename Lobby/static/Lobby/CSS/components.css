@@ -897,14 +897,12 @@ button {
 .hero-title {
     font-size: 30px;
     line-height: 1.2;
-    max-width: 760px;
     margin: 0 0 10px;
 }
 
 .hero-sub {
     font-size: 15px;
     color: var(--color-ink-soft);
-    max-width: 760px;
     margin: 0 0 16px;
 }
 
