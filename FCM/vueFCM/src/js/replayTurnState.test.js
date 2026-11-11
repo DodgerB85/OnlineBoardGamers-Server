@@ -84,6 +84,51 @@ describe("replay turn bookkeeping", () => {
 		expect(store.campaigns).toHaveLength(0)
 	})
 
+	// Live play logs HIST_DISCOUNT_MILESTONE before the HIST_CHOOSE_STRUCTURE that
+	// puts the Discount Manager to work, so the replayed player still has last
+	// turn's employees when the entry is reached. The $100 must come off anyway.
+	it("takes the discount milestone $100 even before the new structure is replayed", () => {
+		const store = setup()
+		replay.resetDataForReplay()
+		const bank = store.bank
+		replay.replayGetMS(0, 0, [rf.FIRST_DISCOUNT_MANAGER_USED])
+		replay.replayDiscountManagerMS(1, 0, [])
+		expect(store.bank).toBe(bank - 100)
+	})
+
+	it("takes the turn number from the HIST_NEW_TURN entry", () => {
+		const store = setup()
+		replay.resetDataForReplay()
+		replay.replayNewTurn(0, -1, [1, store.bank, [0, 0]])
+		expect(store.gameflow.turn).toBe(1)
+		expect(store.gameflow.phase).toBe(rf.PHASE_TURN_ORDER)
+		replay.replayNewTurn(1, -1, [2, store.bank, [0, 0]])
+		expect(store.gameflow.turn).toBe(2)
+		expect(store.gameflow.phase).toBe(rf.PHASE_RESTRUCTURING)
+	})
+
+	it("only reverses the turn order at the start of turn 1, not turn 2", () => {
+		const store = setup()
+		replay.resetDataForReplay()
+		replay.replayNewTurn(0, -1, [1, store.bank, [0, 0]])
+		expect(store.gameflow.turnOrder).toEqual([1, 0])
+		store.gameflow.turnOrder = [0, 1]
+		replay.replayNewTurn(1, -1, [2, store.bank, [0, 0]])
+		expect(store.gameflow.turnOrder).toEqual([0, 1])
+	})
+
+	// Short games go straight to turn 1 without a HIST_NEW_TURN entry
+	it("starts turn 1 at the first turn order choice when no HIST_NEW_TURN was logged", () => {
+		const store = setup()
+		replay.resetDataForReplay()
+		// replayTurnOrder reads the entry type from computedHistory
+		store.history.push([rf.HIST_CHOOSE_TURN_ORDER, 0, 0, [0]])
+		replay.replayTurnOrder(0, 0, [0])
+		expect(store.gameflow.turn).toBe(1)
+		replay.replayNewTurn(1, -1, [2, store.bank, [0, 0]])
+		expect(store.gameflow.turn).toBe(2)
+	})
+
 	it("ends on the game over phase", () => {
 		const store = setup()
 		replay.resetDataForReplay()
