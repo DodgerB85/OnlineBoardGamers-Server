@@ -98,8 +98,8 @@
       element(feature.type === 'locale' ? 'polygon' : 'polyline', {
         points: geometry.points.map(p => p.join(',')).join(' '),
         fill: feature.type === 'locale' ? '#43ac8130' : 'none',
-        stroke: feature.type === 'locale' ? '#298b64' : feature.type === 'approach' ? '#a3b0b6' : props.road_class === 'main' ? '#ca4350' : '#a48c76',
-        'stroke-width': geometry.stroke_width || (feature.type === 'approach' ? 22 : feature.type === 'locale' ? 2 : 1.9),
+        stroke: feature.type === 'locale' ? '#298b64' : feature.type === 'approach' ? '#a3b0b6' : props.road_class === 'main' ? '#b03a2e' : '#7a4a2a',
+        'stroke-width': geometry.stroke_width || (feature.type === 'approach' ? 22 : feature.type === 'locale' ? 2 : 2.6),
         'stroke-opacity': feature.type === 'approach' ? 0.4 : 1,
         'stroke-linecap': feature.type === 'approach' ? 'butt' : 'round', 'stroke-linejoin': 'round',
         'stroke-dasharray': feature.type === 'locale' && feature.status === 'draft' ? '8 5' : '',
@@ -112,11 +112,11 @@
       const shape = element('g', {transform: `translate(${geometry.x} ${geometry.y}) rotate(${geometry.angle})`}, group)
       const width = geometry.width
       const height = geometry.height
-      const stroke = '#5f7064'
+      const stroke = '#8e44ad'
       if (feature.type === 'penalty') {
         const w = width
         const h = height
-        const symbol = element('g', {fill: 'none', stroke, 'stroke-width': 1.5}, shape)
+        const symbol = element('g', {fill: 'none', stroke, 'stroke-width': 1.9}, shape)
         if (props.penalty === 'impassable') {
           element('path', {d: `M ${-w/2} ${-h/2} L 0 ${-h/6} L ${w/2} ${-h/2} V ${-h/6} L ${w/6} 0 L ${w/2} ${h/6} V ${h/2} L 0 ${h/6} L ${-w/2} ${h/2} V ${h/6} L ${-w/6} 0 L ${-w/2} ${-h/6} Z`, 'stroke-width': 1}, symbol)
         } else element('rect', {x: -w / 2, y: -h / 2, width: w, height: h}, symbol)
