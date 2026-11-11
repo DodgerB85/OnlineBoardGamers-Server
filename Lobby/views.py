@@ -1918,7 +1918,11 @@ def profile(request):
         elif request.POST["action"] == "updateProfileNotifications":
             profile = Profile.objects.get(user=request.user)
 
-            profile.liveNotification = request.POST["liveNotif"]
+            live_notification = request.POST.get("liveNotif")
+            if live_notification in ("0", "1", "2"):
+                profile.liveNotification = int(live_notification)
+            elif profile.liveNotification not in (0, 1, 2):
+                profile.liveNotification = 1
 
             profile.sendEmailNotificationOnTurn = "sendEmails" in request.POST
             profile.hotStreakEnabled = "hotStreakEnabled" in request.POST
@@ -2028,7 +2032,7 @@ def profile(request):
 
         sendEmails = profile.sendEmailNotificationOnTurn
 
-        liveNotification = profile.liveNotification
+        liveNotification = profile.liveNotification if profile.liveNotification in (0, 1, 2) else 1
 
         passwordResetForm = PasswordChangeCustomForm(request.user)
 

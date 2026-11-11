@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		})
 			.then((response) => {
 				if (!response.ok) throw new Error("Appearance save failed: " + response.status)
+				showProfileSaveStatus("Preferences Saved", darkMode)
 			})
 			.catch((error) => console.error(error))
 	})
@@ -103,6 +104,12 @@ document.addEventListener("DOMContentLoaded", function () {
 	wireAsyncProfileForm("gamePreferencesForm", "Saving Game Preferences...", "Preferences Saved")
 	wireAsyncProfileForm("changePasswordForm", "Changing Password...", "Password Changed")
 
+	wireAutoSave("notificationForm")
+	wireAutoSave("gamePreferencesForm")
+
+	const saveStatus = document.getElementById("profileSaveStatus")
+	if (saveStatus) saveStatus.addEventListener("mouseenter", hideProfileSaveStatus)
+
 	autocomplete(document.getElementById("blacklistPlayer"))
 
 	//let ALL_GAMES = ["FCM", "HLC", "BUS", "TGZ", "CNS", "AQY", "IND", "RNB"]
@@ -176,6 +183,8 @@ function wireAsyncProfileForm(formId, savingText, savedText) {
 			}
 
 			button.innerHTML = savedText
+			showProfileSaveStatus(savedText, e.submitter || profileSaveAnchor || button)
+			profileSaveAnchor = null
 		} catch (error) {
 			console.error("Error saving preferences:", error)
 			button.innerHTML = originalHTML
@@ -186,6 +195,66 @@ function wireAsyncProfileForm(formId, savingText, savedText) {
 			button.innerHTML = originalHTML
 		}, 3000)
 	})
+}
+
+// Auto-save preference forms shortly after any change, so the bottom Save
+// buttons are only a manual fallback.
+let profileSaveAnchor = null
+
+function wireAutoSave(formId) {
+	const form = document.getElementById(formId)
+	if (!form) return
+	let timer
+	form.addEventListener("change", (event) => {
+		profileSaveAnchor = event.target
+		clearTimeout(timer)
+		timer = setTimeout(() => form.requestSubmit(), 400)
+	})
+}
+
+let profileSaveStatusTimer
+function showProfileSaveStatus(text, anchor) {
+	const status = document.getElementById("profileSaveStatus")
+	if (!status) return
+	status.textContent = text
+	status.classList.add("visible")
+
+	if (anchor) {
+		const rect = anchor.getBoundingClientRect()
+		const gap = 25
+		const half = status.offsetWidth / 2
+		const left = Math.min(Math.max(rect.left + rect.width / 2, half + 8), window.innerWidth - half - 8)
+		const top = rect.top - gap
+		status.style.left = left + "px"
+		// Flip below the control when there is no room for the gap above it.
+		if (top - status.offsetHeight < 8) {
+			status.style.top = rect.bottom + gap + "px"
+			status.style.transform = "translate(-50%, 0)"
+		} else {
+			status.style.top = top + "px"
+			status.style.transform = "translate(-50%, -100%)"
+		}
+	}
+
+	clearTimeout(profileSaveStatusTimer)
+	profileSaveStatusTimer = setTimeout(hideProfileSaveStatus, 2000)
+}
+
+function hideProfileSaveStatus() {
+	const status = document.getElementById("profileSaveStatus")
+	if (!status) return
+	status.classList.remove("visible")
+	clearTimeout(profileSaveStatusTimer)
+}
+
+function setAllEmailNotifications(value, button) {
+	const want = String(value)
+	document.querySelectorAll(".emailSelectTable input[type='radio']").forEach((radio) => {
+		radio.checked = radio.value === want
+	})
+	profileSaveAnchor = button || null
+	const form = document.getElementById("notificationForm")
+	if (form) form.requestSubmit()
 }
 
 function askForBrowserNotifications() {

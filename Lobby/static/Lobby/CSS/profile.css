@@ -376,8 +376,9 @@
 }
 
 .emailSelectTable {
-	width: 400px;
-	margin: auto;
+	width: 100%;
+	max-width: 640px;
+	margin: 0 auto;
 }
 
 /* same accent header band as lobby/stats/tournaments tables; keeps the shared white th text */
@@ -561,4 +562,56 @@
 
 .profile-game-heading:first-of-type {
     margin-top: 0;
+}
+
+/* Per-type email settings fold away behind the All on / All off shortcuts. */
+.profile-email-options {
+    margin-top: 8px;
+}
+
+.profile-email-options > summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    font-weight: 600;
+    color: var(--color-accent-strong);
+}
+
+.profile-email-options > summary::-webkit-details-marker {
+    display: none;
+}
+
+.profile-email-options > summary::before {
+    content: "▸";
+    font-size: 12px;
+    color: var(--color-muted);
+    transition: transform 0.1s;
+}
+
+.profile-email-options[open] > summary::before {
+    transform: rotate(90deg);
+}
+
+/* Transient confirmation for auto-saved profile changes, shown above the control. */
+.profile-save-status {
+    position: fixed;
+    z-index: 1200;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    background: var(--color-accent-strong);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: var(--shadow-md);
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate(-50%, -100%);
+    transition: opacity 0.15s;
+}
+
+.profile-save-status.visible {
+    opacity: 1;
 }

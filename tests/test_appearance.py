@@ -42,6 +42,12 @@ class AppearanceTests(TestCase):
         for panel in ("profile-account", "profile-notifications", "profile-games", "profile-privacy"):
             self.assertContains(response, f'id="{panel}"')
 
+    def test_notification_update_without_sound_still_saves(self):
+        response = self.client.post(reverse("profile"), {"action": "updateProfileNotifications"})
+        self.assertRedirects(response, reverse("profile"), fetch_redirect_response=False)
+        self.user.profile.refresh_from_db()
+        self.assertIn(self.user.profile.liveNotification, (0, 1, 2))
+
     def test_profile_has_one_preview_stylesheet_in_both_modes(self):
         for is_dark in (False, True):
             with self.subTest(is_dark=is_dark):
