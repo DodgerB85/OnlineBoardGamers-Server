@@ -22,23 +22,68 @@
             </div>
         </div>
 
-        <div class="card" style="margin-bottom: 16px;">
-            <div class="card-header">
-                <h2 class="card-title">{% translate "Appearance" %}</h2>
-            </div>
-            <form method="post" id="appearanceForm">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="updateProfileAppearance">
-                <div class="form-row">
-                    <label class="form-label" for="darkMode">{% translate "Dark mode" %}</label>
-                    <div class="field appearance-control">
-                        <input type="checkbox" role="switch" class="appearance-toggle" id="darkMode" name="darkMode" aria-describedby="darkModeHelp" {% if request.user.profile.darkMode %}checked{% endif %}>
-                        <p id="darkModeHelp">{% translate "Applies to the lobby and account pages. Game views keep their current appearance." %}</p>
-                    </div>
-                </div>
-            </form>
+        <div class="tabs profile-tabs" role="tablist" aria-label="{% translate 'Profile sections' %}">
+            <button type="button" class="tab tablinks active" id="profileTabAccount" role="tab" aria-selected="true" aria-controls="profile-account" data-profile-tab="account">{% translate "Account" %}</button>
+            <button type="button" class="tab tablinks" id="profileTabNotifications" role="tab" aria-selected="false" aria-controls="profile-notifications" data-profile-tab="notifications">{% translate "Notifications" %}</button>
+            <button type="button" class="tab tablinks" id="profileTabGames" role="tab" aria-selected="false" aria-controls="profile-games" data-profile-tab="games">{% translate "Games" %}</button>
+            <button type="button" class="tab tablinks" id="profileTabPrivacy" role="tab" aria-selected="false" aria-controls="profile-privacy" data-profile-tab="privacy">{% translate "Privacy" %}</button>
         </div>
 
+        <div id="profile-account" class="profile-tab-panel active" role="tabpanel" aria-labelledby="profileTabAccount">
+        <div class="profile-top-grid">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">{% translate "Appearance" %}</h2>
+                </div>
+                <form method="post" id="appearanceForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="updateProfileAppearance">
+                    <div class="form-row">
+                        <label class="form-label" for="darkMode">{% translate "Dark mode" %}</label>
+                        <div class="field appearance-control">
+                            <input type="checkbox" role="switch" class="appearance-toggle" id="darkMode" name="darkMode" aria-describedby="darkModeHelp" {% if request.user.profile.darkMode %}checked{% endif %}>
+                            <p id="darkModeHelp">{% translate "Applies to the lobby and account pages. Game views keep their current appearance." %}</p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">{% translate "Change Password" %}</h2>
+                </div>
+                <form method="post" id="changePasswordForm" class="stacked-form">
+                    {% csrf_token %}
+                    {% for field in form2 %}
+                        <div class="form-row">
+                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}<p style="flex-basis:100%; margin:0; font-size:12px; color:var(--color-danger);">{{ field.errors }}</p>{% endif %}
+                        </div>
+                    {% endfor %}
+                    <input type="hidden" id="action" name="action" value="changePassword" />
+                    <div style="margin-top: 16px;">
+                        <button type="submit" class="button button-primary">{% translate "Change Password" %}</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">{% translate "Google login" %}</h2>
+                </div>
+                {% if google_login_id %}
+                    <p style="font-size: 13px; margin: 0;">{% translate "Linked" %}</p>
+                {% else %}
+                    <a class="button button-primary button-sm" href="{% url 'google_link' %}">
+                        {% translate "Link Google" %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        </div>
+
+        <div id="profile-notifications" class="profile-tab-panel" role="tabpanel" aria-labelledby="profileTabNotifications">
         {# ── Card 1: Notifications ── #}
         <div class="card" style="margin-bottom: 16px;">
             <div class="card-header">
@@ -294,6 +339,22 @@
             </div>
         </div>
 
+        </div>
+
+        <div id="profile-games" class="profile-tab-panel" role="tabpanel" aria-labelledby="profileTabGames">
+        <div class="profile-game-preferences" style="margin-top: 0; margin-bottom: 16px;">
+            <div class="card-header">
+                <h2 class="card-title">{% translate "Individual Game Preferences" %}</h2>
+            </div>
+            <p class="" style="font-size:13px;margin:0 0 12px;">
+                {% translate "Click these buttons to set up more detailed preferences for the following games:" %}
+            </p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <a class="button button-ghost" href="{% url 'profileAQY' %}">{% translate "Antiquity Preferences" %} &rarr;</a>
+                <a class="button button-ghost" href="{% url 'profileIND' %}">{% translate "Indonesia Preferences" %} &rarr;</a>
+                <a class="button button-ghost" href="{% url 'profileRNB' %}">{% translate "Roads & Boats Preferences" %} &rarr;</a>
+            </div>
+        </div>
         {# ── Card 3: Game Preferences ── #}
         <div class="card" style="margin-bottom: 16px;">
             <div class="card-header">
@@ -303,6 +364,7 @@
                 {% csrf_token %}
                 <input type="hidden" id="action" name="action" value="updateProfileFavourites" />
 
+                <h3 class="profile-game-heading">{% translate "Food Chain Magnate" %}</h3>
                 <div class="form-row">
                     <label class="form-label">{% translate "FCM Restaurant" %}</label>
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
@@ -361,6 +423,7 @@
                     </div>
                 </div>
 
+                <h3 class="profile-game-heading">{% translate "Horseless Carriage" %}</h3>
                 <div class="form-row">
                     <label class="form-label">{% translate "HLC Colour" %}</label>
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
@@ -393,6 +456,7 @@
                     </div>
                 </div>
 
+                <h3 class="profile-game-heading">{% translate "Bus" %}</h3>
                 <div class="form-row">
                     <label class="form-label">{% translate "Bus Colour" %}</label>
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
@@ -453,6 +517,7 @@
                     </div>
                 </div>
 
+                <h3 class="profile-game-heading">{% translate "The Great Zimbabwe" %}</h3>
                 <div class="form-row">
                     <label class="form-label">{% translate "TGZ Colour" %}</label>
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
@@ -507,6 +572,7 @@
                     </div>
                 </div>
 
+                <h3 class="profile-game-heading">{% translate "Cannes" %}</h3>
                 <div class="form-row">
                     <label class="form-label">{% translate "Cannes Colour" %}</label>
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
@@ -535,6 +601,7 @@
                     </div>
                 </div>
 
+                <h3 class="profile-game-heading">{% translate "Keyflower" %}</h3>
                 <div class="form-row">
                     <label class="form-label">{% translate "Keyflower Colour" %}</label>
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
@@ -571,6 +638,7 @@
                     </div>
                 </div>
 
+                <h3 class="profile-game-heading">{% translate "Web" %}</h3>
                 <div class="form-row">
                     <label class="form-label">{% translate "Web Colour" %}</label>
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
@@ -599,6 +667,7 @@
                     </div>
                 </div>
 
+                <h3 class="profile-game-heading">{% translate "UR: 1830 BC" %}</h3>
                 <div class="form-row" style="border-bottom: none;">
                     <label class="form-label">{% translate "Ur Colour" %}</label>
                     <div class="field row-flex" style="flex-wrap:wrap; gap:12px; align-items:flex-start;">
@@ -634,6 +703,7 @@
                     </div>
                 </div>
 
+                <h3 class="profile-game-heading">{% translate "Other" %}</h3>
                 <div class="form-row">
                     <label class="form-label">{% translate "BG Stats" %}</label>
                     <div class="field">
@@ -649,61 +719,15 @@
                     <button type="submit" class="button button-primary">{% translate "Save Game Preferences" %}</button>
                 </div>
             </form>
-            <div class="profile-game-preferences">
-                <div class="card-header">
-                    <h2 class="card-title">{% translate "Individual Game Preferences" %}</h2>
-                </div>
-                <p class="" style="font-size:13px;margin:0 0 12px;">
-                    {% translate "Click these buttons to set up more detailed preferences for the following games:" %}
-                </p>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <a class="button button-ghost" href="{% url 'profileAQY' %}">{% translate "Antiquity Preferences" %} &rarr;</a>
-                    <a class="button button-ghost" href="{% url 'profileIND' %}">{% translate "Indonesia Preferences" %} &rarr;</a>
-                    <a class="button button-ghost" href="{% url 'profileRNB' %}">{% translate "Roads & Boats Preferences" %} &rarr;</a>
-                </div>
-            </div>
         </div>
 
-        {# ── Card 4: Account ── #}
-        <div class="card" style="margin-bottom: 16px;">
-            <div class="card-header">
-                <h2 class="card-title">{% translate "Account" %}</h2>
-            </div>
-            <form method="post" id="changePasswordForm" class="stacked-form">
-                {% csrf_token %}
-                {% for field in form2 %}
-                    <div class="form-row">
-                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                        {{ field }}
-                        {% if field.errors %}<p style="flex-basis:100%; margin:0; font-size:12px; color:var(--color-danger);">{{ field.errors }}</p>{% endif %}
-                    </div>
-                {% endfor %}
-                <input type="hidden" id="action" name="action" value="changePassword" />
-                <div style="margin-top: 16px;">
-                    <button type="submit" class="button button-primary">{% translate "Change Password" %}</button>
-                </div>
-            </form>
         </div>
 
-        {# ── Card 5: Google login ── #}
-        <div class="card" style="margin-bottom: 16px;">
-            <div class="card-header">
-                <h2 class="card-title">{% translate "Google login" %}</h2>
-            </div>
-            {% if google_login_id %}
-                <p style="font-size: 13px; margin: 0;">{% translate "Linked" %}</p>
-            {% else %}
-                <a class="button button-primary button-sm" href="{% url 'google_link' %}">
-                    {% translate "Link Google" %}
-                </a>
-            {% endif %}
-        </div>
-
-        {# ── Card 6: Privacy / Blacklist ── #}
+        <div id="profile-privacy" class="profile-tab-panel" role="tabpanel" aria-labelledby="profileTabPrivacy">
+        {# ── Card 4: Privacy / Blacklist ── #}
         <div class="card">
             <div class="card-header">
                 <h2 class="card-title">{% translate "Player Blacklist" %}</h2>
-                <span class="pill pill-warn">{% translate "Privacy" %}</span>
             </div>
             <p style="font-size: 13px; color: var(--color-ink-soft); margin: 0 0 12px;">
                 {% translate "Blacklisted players cannot join your Available Games, and you won't see games they create." %}
@@ -736,6 +760,7 @@
                     <div id="noBlacklistedPlayers" class="" style="font-size:13px;">{% translate "No players blacklisted" %}</div>
                 {% endif %}
             </div>
+        </div>
         </div>
     </div>
     

@@ -525,3 +525,40 @@
     outline: 2px solid var(--color-accent-strong);
     outline-offset: 3px;
 }
+
+/* Layout: Appearance, Account and Google login sit side by side when there's room. */
+.profile-top-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    align-items: stretch;
+    margin-bottom: 16px;
+}
+
+.profile-top-grid > .card {
+    margin: 0;
+}
+
+/* Profile sections share the lobby's .tabs / .tab strip; one panel at a time. */
+.profile-tabs {
+    justify-content: flex-start;
+}
+
+.profile-tab-panel {
+    display: none;
+}
+
+.profile-tab-panel.active {
+    display: block;
+}
+
+/* Game names inside the Game Preferences tab. */
+.profile-game-heading {
+    margin: 20px 0 4px;
+    font-size: 15px;
+    color: var(--color-accent-strong);
+}
+
+.profile-game-heading:first-of-type {
+    margin-top: 0;
+}

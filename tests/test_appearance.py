@@ -36,6 +36,12 @@ class AppearanceTests(TestCase):
                 self.assertEqual('data-theme="dark"' in html, is_dark)
                 self.assertEqual("Lobby/CSS/dark.css" in html, is_dark)
 
+    def test_profile_uses_tabbed_sections(self):
+        response = self.client.get(reverse("profile"))
+        self.assertContains(response, 'class="tabs profile-tabs"')
+        for panel in ("profile-account", "profile-notifications", "profile-games", "profile-privacy"):
+            self.assertContains(response, f'id="{panel}"')
+
     def test_profile_has_one_preview_stylesheet_in_both_modes(self):
         for is_dark in (False, True):
             with self.subTest(is_dark=is_dark):

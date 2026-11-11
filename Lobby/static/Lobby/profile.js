@@ -22,6 +22,20 @@ document.addEventListener("DOMContentLoaded", function () {
 			.catch((error) => console.error(error))
 	})
 
+	// Profile tabs: one section visible at a time, reusing the lobby tab strip.
+	const profileTabs = document.querySelectorAll(".profile-tabs [data-profile-tab]")
+	const profilePanels = document.querySelectorAll(".profile-tab-panel")
+	profileTabs.forEach((tab) => {
+		tab.addEventListener("click", () => {
+			profileTabs.forEach((other) => {
+				const active = other === tab
+				other.classList.toggle("active", active)
+				other.setAttribute("aria-selected", active)
+			})
+			profilePanels.forEach((panel) => panel.classList.toggle("active", panel.id === "profile-" + tab.dataset.profileTab))
+		})
+	})
+
 	let stopEmailsButton = document.querySelector("#stopEmailsButton")
 	if (global.stopEmailsUntil >= 0) {
 		let milliseconds = global.stopEmailsUntil * 60 * 1000 // Convert seconds to milliseconds
