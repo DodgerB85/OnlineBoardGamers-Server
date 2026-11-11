@@ -551,7 +551,8 @@ class GamePlayer(models.Model):
 
     moveDataJSON = models.JSONField(default=list, null=True, blank=True)
 
-    # TODO, these two fields are currently used only in AQY. Remove from the Game model at some point.
+    # Simple per-player current-move scratch. AQY and HLC use these directly;
+    # structured per-game state belongs in moveDataJSON instead.
     currentMoveTime = models.CharField(max_length=15, blank=True)
     currentMoveData = models.TextField(blank=True)
 

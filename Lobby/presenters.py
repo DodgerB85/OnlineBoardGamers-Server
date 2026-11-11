@@ -1707,61 +1707,6 @@ class RNBpresenter(GamePresenter):
         # This returns True if data exists, False if it is {}
         return bool(currentMove)
 
-    def updateSingleMove(self, name, data, deleteMove=False):
-        import time
-
-        currentTime = str(int(time.time()) * 1000)
-        seat = self.seatPosition(name)
-
-        if deleteMove:
-            currentTime = ""
-            data = ""
-
-        gp = self.gameObj.players.filter(seat_order=seat).first()
-        if gp:
-            gp.currentMoveTime = currentTime
-            gp.currentMoveData = data
-            gp.save()
-
-    def updatePreMove(self, name, phase, data):
-        import base64
-        import gzip
-        import json
-
-        seat = self.seatPosition(name)
-        newJsonEntry = {"playerIndex": seat, "phase": phase, "data": data}
-
-        gp = self.gameObj.players.filter(seat_order=seat).first()
-        if not gp:
-            return
-
-        if (gp.currentMoveData == "" or gp.currentMoveData is None) and data[0] != -999:
-            dataArray = []
-            dataArray.append(newJsonEntry)
-            gp.currentMoveTime = "PRE_MOVE"
-            gp.currentMoveData = base64.b64encode(gzip.compress(json.dumps(dataArray).encode("utf-8"))).decode("utf-8")
-            gp.save()
-            return
-
-        current_data = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(gp.currentMoveData))).decode("utf-8"))
-        index_to_remove = next(
-            (index for index, entry in enumerate(current_data) if entry.get("phase") == phase),
-            None,
-        )
-        if index_to_remove is not None:
-            del current_data[index_to_remove]
-        if data[0] != -999:
-            current_data.append(newJsonEntry)
-        gp.currentMoveData = base64.b64encode(gzip.compress(json.dumps(current_data).encode("utf-8"))).decode("utf-8")
-        gp.save()
-
-    def deleteAllPreMoves(self):
-        for gp in self.gameObj.players.all():
-            if gp.currentMoveTime == "PRE_MOVE":
-                gp.currentMoveTime = ""
-                gp.currentMoveData = ""
-                gp.save()
-
     def getCurrentMoveDataForPlayer(self, name):
         seat = self.seatPosition(name)
         if seat == -1:
@@ -1806,52 +1751,6 @@ class RNBpresenter(GamePresenter):
         if len(updated_move_data) != len(gp_move_data):
             gp.moveDataJSON = updated_move_data
             gp.save(update_fields=["moveDataJSON"])
-
-    def getMoveDataTime(self, name):
-        seat = self.seatPosition(name)
-        gp = self.gameObj.players.filter(seat_order=seat).first()
-        return gp.currentMoveTime if gp else ""
-
-    def clearAllMoveData(self):
-        for gp in self.gameObj.players.all():
-            gp.currentMoveTime = ""
-            gp.currentMoveData = ""
-            gp.save()
-
-    def getJsonMoveResponse(self):
-        import time
-
-        readyPlayers = []
-        jsonResponse = []
-
-        for i in range(self.gameObj.maxPlayers):
-            gp = self.gameObj.players.filter(seat_order=i).first()
-            player_data = gp.currentMoveData if gp else ""
-            player_time = gp.currentMoveTime if gp else ""
-
-            if player_data == "":
-                readyPlayers.append(False)
-                if not player_time:
-                    player_time = int(time.time() * 1000)
-                jsonResponse.append({"timestamp": int(player_time), "content": player_data})
-            else:
-                readyPlayers.append(True)
-                jsonResponse.append({"timestamp": int(player_time), "content": player_data})
-
-        readyWithBots = False
-        readyCount = sum(readyPlayers)
-        nbBots = self.gameObj.players.filter(is_missing=True).count()
-        if readyCount + nbBots == self.gameObj.maxPlayers:
-            readyWithBots = True
-
-        if all(readyPlayers) or readyWithBots:
-            self.clearAllMoveData()
-            jsonResponse.append({"allReady": True})
-        else:
-            jsonResponse = [{"ready": readyPlayers}]
-            jsonResponse.append({"allReady": False})  # ignore this linting error for now
-
-        return jsonResponse
 
 
 class URRpresenter(GamePresenter):
