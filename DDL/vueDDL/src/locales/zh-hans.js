@@ -99,12 +99,19 @@ export default {
 		turn: "回合",
 		timeToNextKickout: "距下次踢出：",
 		resignConfirm: "确定要认输吗？你将被视为缺席玩家。",
+		spectator: "旁观者",
+		map: "地图",
+		zoomIn: "放大",
+		zoomOut: "缩小",
+
 	},
 	footer: {
 		credit: "Duck Dealer 是一款由 Jeroen Doumen 和 Joris Wiersinga 设计、由以下出版社出版的桌游：",
 		permissions: "已获授权。菜单图标来自",
 	},
 	action: {
+		chooseTurn: "收集能量或执行你的行动回合",
+		placeHighways: "放置高速公路",
 		bgStats: "发布到 BG Stats",
 		bgStatsCopy: "复制链接",
 		bgStatsCopied: "链接已复制",
@@ -215,6 +222,8 @@ export default {
 		crew: "船员：{colour}",
 		selected: "已选择 {count} / 3",
 		confirm: "确认装备",
+		clear: "清空",
+
 	},
 	planetPicker: {
 		title: "选择起始星球",
@@ -368,6 +377,7 @@ export default {
 	errors: {
 		couldNotSaveBid: "无法保存你的出价。",
 		staleVersion: "你似乎在使用旧版游戏。请刷新页面。",
+		noHighwayParts: "你没有剩余的高速公路部件。",
 		saveGame: "保存游戏时出错",
 		sendChat: "发送聊天消息时出错",
 		webmaster: "抱歉，出现了问题。请直接给网站管理员发邮件。",

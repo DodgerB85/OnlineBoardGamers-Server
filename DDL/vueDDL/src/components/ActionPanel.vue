@@ -215,7 +215,7 @@ function openTradeModal() {
 
 <template>
 	<div id="actionPanel">
-		<div class="actionTitle">{{ $t("action.title") }}</div>
+		<div class="actionTitle">{{ view.actionTitle(store) }}</div>
 		<div v-if="store.gameMessages.errorText" class="errorText">{{ store.gameMessages.errorText }}</div>
 		<div v-if="store.gameMessages.actionError" class="errorText">{{ store.gameMessages.actionError }}</div>
 		<div v-if="store.gameMessages.successText" class="successText">{{ store.gameMessages.successText }}</div>
@@ -415,8 +415,8 @@ function openTradeModal() {
 							<button class="actionsLineButton" @click="respond(trade.id, false)">{{ $t("common.decline") }}</button>
 						</div>
 					</div>
-					<button v-if="personal.kickoutRequired > 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER" class="actionsLineButton" @click="skipMissing">{{ $t("action.skipTimedOut") }}</button>
-					<button v-if="personal.kickoutRequired > 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER" class="actionsLineButton" @click="IO.kickout()">{{ $t("action.voteKickout", { player: current ? current.displayName : $t("action.playerFallback") }) }}</button>
+					<button v-if="personal.kickoutRequired > 0 && current && current.displayName !== rf.BOT_NAME && store.gameflow.phase !== rf.PHASE_GAME_OVER" class="actionsLineButton" @click="skipMissing">{{ $t("action.skipTimedOut") }}</button>
+					<button v-if="personal.kickoutRequired > 0 && current && current.displayName !== rf.BOT_NAME && store.gameflow.phase !== rf.PHASE_GAME_OVER" class="actionsLineButton" @click="IO.kickout()">{{ $t("action.voteKickout", { player: current ? current.displayName : $t("action.playerFallback") }) }}</button>
 				</div>
 			</template>
 		</template>

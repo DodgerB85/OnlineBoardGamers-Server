@@ -23,6 +23,8 @@
     {% url "RNB:showRNBgame" gameID as the_url %}
 {% elif game == "URR" %}
     {% url "URR:showURRgame" gameID as the_url %}
+    {% elif game == "DDL" %}
+    {% url "DDL:showDDLgame" gameID as the_url %}
 {% endif %}
     {% url 'discordInviteLink' as discord_url %}
 

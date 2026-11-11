@@ -19,6 +19,7 @@ export function initGame() {
 	personal.pov = initData.pov !== undefined ? initData.pov : -99
 	personal.latestUpdate = initData.latestUpdate
 	personal.secondsToNextKickout = initData.secondsToNextKickout !== undefined ? initData.secondsToNextKickout : 99999
+	personal.kickoutRequired = initData.kickoutRequired || 0
 	personal.notes = initData.notes || ""
 	personal.yourTurnAudioType = initData.yourTurnAudioType || 0
 	personal.chatNotification = initData.chatNotification || false
@@ -38,7 +39,6 @@ export function initGame() {
 
 	const startingOptions = initData.startingOptions || []
 	personal.trainingGame = startingOptions.includes(102)
-	personal.soloGame = (initData.playerNames || []).length === 1
 
 	if (initData.gameData) {
 		importGameData(initData.gameData)
@@ -84,9 +84,6 @@ export function initGameFresh(initData, startingOptions) {
 		auction,
 	})
 
-	for (let i = 0; i < state.players.length; i++) {
-		state.players[i].displayName = displayNameFor(initData, state.players[i].name, i)
-	}
 	state.players.forEach((player, index) => {
 		player.displayName = displayNameFor(initData, player.name, index)
 	})
@@ -132,7 +129,6 @@ export function importGameData(input) {
 export function exportObject() {
 	const store = useModelStore()
 	return {
-		version: 1,
 		players: funcs.deepClone(store.players),
 		board: funcs.deepClone(store.board),
 		gameflow: funcs.deepClone(store.gameflow),
@@ -156,7 +152,9 @@ export function snapshotState() {
 export function addHistory(event, playerIndex, params = []) {
 	const store = useModelStore()
 	store.history.push([event, playerIndex, snapshotState(), params])
-	if (store.history.length > 200) store.history.splice(0, store.history.length - 200)
+	// A complete game is under 400 actions: 24 action turns plus collect turns,
+	// highways, moves, builds and trades.
+	if (store.history.length > 400) store.history.splice(0, store.history.length - 400)
 }
 
 export function rebuildTurnOrder() {

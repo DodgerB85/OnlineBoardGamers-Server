@@ -35,6 +35,7 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getAQYstartingOptionsHTML,
     SR_getBUSstartingOptionsHTML,
     SR_getCNSstartingOptionsHTML,
+    SR_getDDLstartingOptionsHTML,
     SR_getFCMstartingOptionsHTML,
     SR_getHLCstartingOptionsHTML,
     SR_getINDstartingOptionsHTML,
@@ -243,6 +244,8 @@ def SF_serializeGame(game, user, player_context):
         startingOptionsHTML = SR_getWEBstartingOptionsHTML(startingOptionsArr)
     if game_code == "ROW":
         startingOptionsHTML = SR_getROWstartingOptionsHTML(startingOptionsArr)
+    if game_code == "DDL":
+        startingOptionsHTML = SR_getDDLstartingOptionsHTML(startingOptionsArr)
     if game_code == "RNB":
         startingOptionsHTML = SR_getRNBstartingOptionsHTML(startingOptionsArr)
     if game_code == "LBR":

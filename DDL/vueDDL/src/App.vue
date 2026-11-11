@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted } from "vue"
 import * as model from "./js/DDLmodel"
 import * as controller from "./js/DDLcontroller"
 import * as IO from "./backend/DDL_IO"
+import * as WS from "./backend/DDLwebsocket"
 import * as view from "./js/DDLview"
 import * as rf from "./js/DDLreference"
 import GameStatusBanner from "../../../Lobby/static/Lobby/common/GameStatusBanner.vue"
@@ -36,7 +37,7 @@ controller.startPlayerTurn()
 let pollTimer = null
 let kickoutTimer = null
 function poll() {
-	if (personal.pov < 0 || personal.finishedGame || personal.haltPlay) return
+	if (personal.pov < 0 || personal.finishedGame || personal.haltPlay || store.viewSettings.showReplay) return
 	if (store.gameflow.phase === 0 && store.gameflow.setup.auction && !store.gameflow.setup.auctionResolved) {
 		controller.pollAuction()
 		return
@@ -45,6 +46,9 @@ function poll() {
 }
 
 onMounted(() => {
+	// Anonymous spectators have no account to save or poll with; the page they
+	// loaded already holds the state.
+	if (personal.pov >= -9) WS.StartWebSocket()
 	pollTimer = setInterval(poll, 5000)
 	kickoutTimer = setInterval(() => {
 		if (personal.secondsToNextKickout > 0) personal.secondsToNextKickout--
@@ -59,11 +63,21 @@ function showDebug() {
 	return personal.name === "admin" || personal.name === "BotKickStarter"
 }
 
+// Grey while a seated player waits for another player's turn and while replaying.
+// Your turn, spectators, practice games and the game-over screen stay blue.
+const waitingForTurn = computed(() => {
+	if (store.viewSettings.showReplay) return true
+	if (personal.pov < 0 || personal.trainingGame) return false
+	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return false
+	return personal.pov !== store.gameflow.turnOrder[0]
+})
+
 const statusBanner = computed(() => {
 	const playerObj = controller.currentPlayerObj()
 	return {
 		labels: getStatusBannerLabels(window.initData.locale, { turn: store.gameflow.turn }),
 		phase: view.phaseStr(store.gameflow.phase),
+		action: view.actionTitle(store),
 		isMyTurn: personal.canPlay(),
 		isGameOver: store.gameflow.phase === rf.PHASE_GAME_OVER,
 		isReplay: store.viewSettings.showReplay,
@@ -75,7 +89,7 @@ const statusBanner = computed(() => {
 <template>
 	<TopMenu />
 	<GameStatusBanner v-bind="statusBanner" />
-	<div id="wholeMiddleArea" :class="{ greyBackground: store.viewSettings.showReplay }">
+	<div id="wholeMiddleArea" :class="{ greyBackground: waitingForTurn }">
 		<TopMenuViews />
 		<HistoryTab />
 		<ReplayArea v-if="store.viewSettings.showReplay" />
@@ -119,7 +133,8 @@ body {
 	width: 100%;
 	text-align: center;
 	min-height: 500px;
-	transition: background-color 0.3s;
+	background-color: #d4eafd;
+	transition: background-color 1s;
 }
 #wholeMiddleArea.greyBackground { background-color: lightgray; }
 #mainAreaLessHistory {
@@ -158,15 +173,17 @@ body {
 	font-size: 36px;
 }
 .actionsLineButton {
-	margin: 5px;
+	margin: 10px;
+	width: fit-content;
 	border: 2px solid green;
 	border-radius: 5px;
 	font-weight: bolder;
-	padding: 6px 10px;
+	padding: 5px;
 	cursor: pointer;
 	background-color: #f7fff7;
 }
 .actionsLineButton:hover:enabled { background-color: lightgrey; }
+.actionsLineButton:active:enabled { background-color: darkgray; }
 .actionsLineButton:disabled { background-color: darkgray; cursor: default; }
 .errorText {
 	width: 100%;

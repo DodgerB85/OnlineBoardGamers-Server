@@ -2,6 +2,7 @@
 import * as rf from "../js/DDLreference"
 import * as view from "../js/DDLview"
 import * as IO from "../backend/DDL_IO"
+import * as replay from "../js/DDLreplay.js"
 import { useI18n } from "vue-i18n"
 
 import { useModelStore } from "../stores/DDLstore.js"
@@ -74,7 +75,8 @@ function toggleHistory() {
 }
 
 function toggleReplay() {
-	store.viewSettings.showReplay = !store.viewSettings.showReplay
+	if (store.viewSettings.showReplay) replay.exitReplay()
+	else store.viewSettings.showReplay = true
 }
 
 function nextGame() {
@@ -109,68 +111,68 @@ function getKickoutTimerText() {
 		<div id="menu">
 			<a href="/">
 				<span class="topMenuItem">
-					<img :src="view.getImage('icon-house')" />
+					<img :src="view.getImage('icon-house')" alt="" />
 					<span>{{ $t("topMenu.home") }}</span>
 				</span>
 			</a>
 
-			<span v-if="personal.name !== undefined" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showChat }]" @click="toggleChat">
-				<img :src="view.getImage('icon-chat')" />
+			<button type="button" v-if="personal.name" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showChat }]" :aria-expanded="store.viewSettings.showChat" @click="toggleChat">
+				<img :src="view.getImage('icon-chat')" alt="" />
 				<span>{{ $t("topMenu.chat") }}</span>
-			</span>
+			</button>
 
-			<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showBug }]" @click="toggleBug">
-				<img :src="view.getImage('icon-stop')" />
+			<button type="button" v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showBug }]" :aria-expanded="store.viewSettings.showBug" @click="toggleBug">
+				<img :src="view.getImage('icon-stop')" alt="" />
 				<span>{{ $t("topMenu.bug") }}</span>
-			</span>
+			</button>
 
-			<span v-if="personal.name !== undefined" class="topMenuItem" @click="nextGame">
-				<img :src="view.getImage('icon-nextGame')" />
+			<button type="button" v-if="personal.name" class="topMenuItem" :disabled="personal.haltPlay" @click="nextGame">
+				<img :src="view.getImage('icon-nextGame')" alt="" />
 				<span>{{ $t("topMenu.next") }}</span>
-			</span>
+			</button>
 
 			<div class="menuDivider"></div>
 
 			<a href="/DDL/help/" target="_blank">
 				<span class="topMenuItem">
-					<img :src="view.getImage('icon-rulebook')" />
+					<img :src="view.getImage('icon-rulebook')" alt="" />
 					<span>{{ $t("topMenu.rules") }}</span>
 				</span>
 			</a>
 
-			<span v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showNotes }]" @click="toggleNotes">
-				<img :src="view.getImage('icon-notebook')" />
+			<button type="button" v-if="personal.pov >= 0" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showNotes }]" :aria-expanded="store.viewSettings.showNotes" @click="toggleNotes">
+				<img :src="view.getImage('icon-notebook')" alt="" />
 				<span>{{ $t("topMenu.notes") }}</span>
-			</span>
+			</button>
 
-			<span :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showInfo }]" @click="toggleInfo">
-				<img :src="view.getImage('icon-info')" />
+			<button type="button" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showInfo }]" :aria-expanded="store.viewSettings.showInfo" @click="toggleInfo">
+				<img :src="view.getImage('icon-info')" alt="" />
 				<span>{{ $t("topMenu.info") }}</span>
-			</span>
+			</button>
 
 			<div class="menuDivider"></div>
 
-			<span :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showHistory }]" @click="toggleHistory">
-				<img :src="view.getImage('icon-scroll')" />
+			<button type="button" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showHistory }]" :aria-expanded="store.viewSettings.showHistory" @click="toggleHistory">
+				<img :src="view.getImage('icon-scroll')" alt="" />
 				<span>{{ $t("topMenu.history") }}</span>
-			</span>
+			</button>
 
-			<span :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showReplay }]" @click="toggleReplay">
-				<img :src="view.getImage('icon-replay')" />
+			<button type="button" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showReplay }]" :aria-expanded="store.viewSettings.showReplay" @click="toggleReplay">
+				<img :src="view.getImage('icon-replay')" alt="" />
 				<span>{{ $t("topMenu.replay") }}</span>
-			</span>
+			</button>
 
 			<div class="menuDivider"></div>
 
-			<span v-if="personal.pov >= 0 && !personal.trainingGame" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showRewindPanel }]" @click="store.viewSettings.showRewindPanel = !store.viewSettings.showRewindPanel">
-				<img :src="view.getImage('icon-rewind')" />
+			<button type="button" v-if="personal.pov >= 0 && !personal.trainingGame" :class="['topMenuItem', { topMenuItemSelected: store.viewSettings.showRewindPanel }]" :aria-expanded="store.viewSettings.showRewindPanel" @click="store.viewSettings.showRewindPanel = !store.viewSettings.showRewindPanel">
+				<img :src="view.getImage('icon-rewind')" alt="" />
 				<span>{{ $t("topMenu.rewind") }}</span>
-			</span>
+			</button>
 
-			<span v-if="personal.canResign()" class="topMenuItem" @click="resignGame">
-				<img :src="view.getImage('resign')" />
+			<button type="button" v-if="personal.canResign()" class="topMenuItem" @click="resignGame">
+				<img :src="view.getImage('resign')" alt="" />
 				<span>{{ $t("topMenu.resign") }}</span>
-			</span>
+			</button>
 		</div>
 
 		<div id="topInfos">
@@ -180,14 +182,18 @@ function getKickoutTimerText() {
 			</span>
 			<div class="playerLineDiv">
 				<template v-for="(playerIndex, idx) in store.gameflow.turnOrder" :key="idx">
-					<span v-if="playerIndex !== -1" class="mainEntryPlayer turnOrderSpan" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[playerIndex].colour)">{{ store.players[playerIndex].displayName }}</span>
+					<span v-if="playerIndex !== -1" class="turnOrderSpan">
+						<span class="turnOrderChip" :style="{ backgroundColor: personal.getCorrectedColourHex(store.players[playerIndex].colour) }"></span>
+						<span class="turnOrderName">{{ store.players[playerIndex].displayName }}</span>
+					</span>
 				</template>
 			</div>
 		</div>
 
 		<div id="topRight">
 			<div id="loggedInDiv" v-if="personal.name">
-				{{ personal.name }}
+				<span v-if="personal.pov >= 0">{{ personal.name }}</span>
+				<span v-else>{{ $t("topMenu.spectator") }}</span>
 				<div id="WSstatus" v-if="personal.pov >= 0" :class="personal.WSstatus"></div>
 				<br />
 				<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">
@@ -255,7 +261,7 @@ function getKickoutTimerText() {
 }
 #menu { flex-shrink: 0; color: white; }
 #menu a { color: white; }
-#menu a:hover, #menu span:hover { color: lightblue; }
+#menu a:hover, .topMenuItem:hover { color: lightblue; }
 
 .topMenuItem {
 	display: inline-block;
@@ -264,7 +270,24 @@ function getKickoutTimerText() {
 	border-radius: 5px;
 	cursor: pointer;
 	text-align: center;
+	background: transparent;
+	border: 0;
+	padding: 0;
+	color: white;
+	font-family: inherit;
+	font-size: inherit;
+	vertical-align: top;
 }
+.topMenuItem:focus-visible {
+	outline: 2px solid lightblue;
+	outline-offset: -2px;
+}
+.topMenuItem:disabled {
+	opacity: 0.45;
+	cursor: default;
+}
+.topMenuItem:disabled:hover { color: white; }
+.topMenuItem:disabled:hover img { filter: none; }
 .topMenuItem:hover img {
 	filter: brightness(0) saturate(100%) invert(100%) sepia(17%) saturate(6440%) hue-rotate(174deg) brightness(98%) contrast(102%);
 }
@@ -276,9 +299,11 @@ function getKickoutTimerText() {
 .topMenuItem span { font-size: 14px; font-weight: bold; display: block; }
 
 #topRight { flex-shrink: 0; height: 100%; font-size: 14px; text-align: center; margin-right: 5px; }
-#topInfos { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; min-width: fit-content; flex-shrink: 0; margin: 0 auto; }
+#topInfos { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; min-width: 0; flex: 1 1 auto; overflow: hidden; }
 .menuDivider { display: inline-block; width: 5px; height: 50px; background-color: darkgray; margin: 0px 10px 0px 10px; }
-.turnOrderSpan { display: inline-block; padding: 5px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
-.gameInfoSpan { white-space: nowrap; }
-.playerLineDiv { white-space: nowrap; }
+.turnOrderSpan { display: inline-flex; align-items: center; gap: 4px; padding: 5px; max-width: 150px; }
+.turnOrderChip { width: 11px; height: 11px; border-radius: 50%; border: 1px solid #000; display: inline-block; flex: 0 0 auto; }
+.turnOrderName { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gameInfoSpan { white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; display: block; }
+.playerLineDiv { white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 </style>

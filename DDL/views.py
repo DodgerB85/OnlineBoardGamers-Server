@@ -2,18 +2,12 @@ import base64
 import gzip
 import json
 import time
-import uuid
-from datetime import timedelta
 from typing import TYPE_CHECKING, cast
-
-from decouple import config
 
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
-from django.utils import timezone
 from django.utils.translation import gettext
-from django_q.tasks import schedule
 
 import Lobby.sharedFunctions.constants as rf
 from Lobby.gameViewHelpers import (
@@ -25,7 +19,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
-from Lobby.sharedFunctions.permissions import is_game_admin
+from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -36,8 +30,6 @@ from Lobby.sharedFunctions.sharedNotifications import (
 from . import DDLconstants as rfDDL
 from .common import create_ddl_game
 from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
-
-DDL_DB_LOCK_NAME = "lockDDLgame_"
 
 if TYPE_CHECKING:
     from Lobby.presenters import DDLpresenter
@@ -118,12 +110,6 @@ def showDDLgame(request, game_id=1, spoilerFree=False, replayStep=1):
         return render(request, "DDL/showDDLgame.html", returnData)
 
     returnData.update(result["involved_data"])
-    returnData.update(
-        {
-            "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
-            "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
-        }
-    )
 
     return render(request, "DDL/showDDLgame.html", returnData)
 
@@ -148,6 +134,9 @@ def _processDDLturn(request):
 
     presenter = cast("DDLpresenter", currentGame.presenter())
 
+    if not can_act_in_game(request.user, currentGame):
+        return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
+
     if jsonData["action"] == "saveBid":
         return saveDDLBid(request, currentGame, jsonData)
 
@@ -169,9 +158,19 @@ def _processDDLturn(request):
         presenter.addMissingPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
         currentGame.save()
-        return JsonResponse({"latestUpdate": currentGame.latestUpdate}, safe=False)
+        return JsonResponse({"latestUpdate": currentGame.latestUpdate, "missingPlayers": presenter.getMissingPlayersNamesArray()}, safe=False)
 
     elif jsonData["action"] == "kickout":
+        participant = currentGame.players.filter(player=request.user, is_missing=False, is_kicked=False).exists()
+        target_is_current = currentGame.players.filter(player__username=jsonData["kickedName"], is_current=True, is_missing=False, is_kicked=False).exists()
+        # A legacy row can be current while already kicked; allow that so the
+        # kickout can repair the game instead of refusing forever.
+        legacy_kicked_current = currentGame.players.filter(player__username=jsonData["kickedName"], is_current=True, is_kicked=True).exists()
+        if not participant or request.user.username == jsonData["kickedName"]:
+            return JsonResponse({"error": gettext("Only another active player can initiate kickout.")}, status=403)
+        if not (target_is_current or legacy_kicked_current) or presenter.kickoutRequired() != 2:
+            return JsonResponse({"error": gettext("This player is not eligible for kickout.")}, status=400)
+
         if str(latest_update) != str(currentGame.latestUpdate):
             message = f"SYNC ERROR IN: DDL kickout - gameID: {game_id} - User: {request.user.username} - JSON_LU: {latest_update} - DB_LU: {currentGame.latestUpdate}"
             SN_sendAdminErrorMessage(message)
@@ -194,6 +193,7 @@ def _processDDLturn(request):
             {
                 "latestUpdate": currentGame.latestUpdate,
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
+                "missingPlayers": presenter.getMissingPlayersNamesArray(),
             },
             safe=False,
         )
@@ -335,6 +335,9 @@ def performSaveDDLGame(request, currentGame, jsonData):
     if check_name:
         nameToUse = check_name
 
+    # Rewind points are the position before the save, so a rewind restores the
+    # state before the last decision.
+    previous_game_data = currentGame.gameData
     currentGame.gameData = jsonData["gameData"]
     previous_phase = currentGame.phase
     currentGame.turn = jsonData["turn"]
@@ -378,7 +381,7 @@ def performSaveDDLGame(request, currentGame, jsonData):
                 presenter.sendYourTurnNotification("DDL", playerListToNotify, currentGame.id, presenter.getGameName(), currentGame, oldVer)
 
     if jsonData.get("saveRewind", True):
-        doSaveRewind(currentGame, jsonData)
+        doSaveRewind(currentGame, previous_game_data)
 
     presenter.clearKickoutVotes()
     currentGame.save()
@@ -392,8 +395,8 @@ def performSaveDDLGame(request, currentGame, jsonData):
     )
 
 
-def doSaveRewind(currentGame, jsonData):
-    new_point = jsonData["gameData"]
+def doSaveRewind(currentGame, previous_game_data):
+    new_point = previous_game_data
 
     if currentGame.rewindData:
         try:
@@ -410,7 +413,9 @@ def doSaveRewind(currentGame, jsonData):
             currentRewindData.append(currentGame.rewindTempData)
         currentGame.rewindTempData = ""
 
-    if not currentRewindData or currentRewindData[-1] != new_point:
+    # The first save has no stored position yet; an empty entry must never
+    # become a rewind point.
+    if new_point and (not currentRewindData or currentRewindData[-1] != new_point):
         currentRewindData.append(new_point)
         if len(currentRewindData) > 20:
             currentRewindData = currentRewindData[-20:]
@@ -483,6 +488,7 @@ def saveZoomDDL(request):
 
 
 @login_required()
+@login_required()
 def DDLdata(request, dataType=1):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
@@ -510,8 +516,7 @@ def DDLdata(request, dataType=1):
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "finishedGame": currentGame.gameStatus == "FINISHED",
                 "latestUpdate": currentGame.latestUpdate,
-                "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
-                "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
+                "kickoutRequired": presenter.kickoutRequired(),
                 "transactionID": currentGame.transactionID,
             }
         )
@@ -531,8 +536,7 @@ def DDLdata(request, dataType=1):
                 "gameData": currentGame.gameData if currentGame.gameData else "",
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
-                "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
-                "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
+                "kickoutRequired": presenter.kickoutRequired(),
                 "transactionID": currentGame.transactionID,
             }
         )
