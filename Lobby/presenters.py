@@ -3034,25 +3034,18 @@ class KFWpresenter(GamePresenter):
         meeple_bag = serverDataArr[0]
         skills_bag = serverDataArr[1]
 
-        # Scaffold the playersHiddenData
-        # This has one subarray per player. Index in arr is playerIndex ["name", [meeplesArray], [skillsArray], [historyArray] ]
-        playerHiddenArr = []
-        for name in allPlayersL:
-            entry = [name, [0, 0, 0, 0], [0, 0, 0], []]
+        # Scaffold per-seat hidden data and clear move scratch.
+        for gp in all_players_gp_sorted:
+            if not gp.player:
+                continue
             [startingMeeples, meeple_bag] = self.pull_items_from_bag(8, meeple_bag)
-            entry[1] = startingMeeples
-            playerHiddenArr.append(entry)
-        self.gameObj.KFWplayersHiddenData = json.dumps(playerHiddenArr)
+            gp.moveDataJSON = {"hidden": [startingMeeples, [0, 0, 0], []]}
+            gp.currentMoveTime = ""
+            gp.currentMoveData = ""
+        GamePlayer.objects.bulk_update(all_players_gp_sorted, ["moveDataJSON", "currentMoveTime", "currentMoveData"])
+        self.gameObj.KFWplayersHiddenData = ""
+        self.gameObj.KFWplayersMoveData = ""
         self.gameObj.KFWserverData = json.dumps([meeple_bag, skills_bag])
-
-        # Scaffold the playersMoveData
-        # This has one subarray per player. Index in arr is playerIndex ["name", compressedData]
-        playerMoveArr = []
-        for name in allPlayersL:
-            # Name, TS, compressed data
-            entry = [name, "", ""]
-            playerMoveArr.append(entry)
-        self.gameObj.KFWplayersMoveData = json.dumps(playerMoveArr)
 
         self.gameObj.save()
 
@@ -3079,67 +3072,112 @@ class KFWpresenter(GamePresenter):
 
         return _currentPlayers
 
+    def _get_game_player(self, name):
+        return self.gameObj.players.select_related("player").filter(player__username=name).first()
+
+    def getAllHiddenDataRows(self):
+        """Return [[name, [meeples], [skills], [history]], ...] in seat order."""
+        game_players = list(self.gameObj.players.select_related("player").order_by("seat_order"))
+        old_rows = []
+        if self.gameObj.KFWplayersHiddenData:
+            try:
+                old_rows = json.loads(self.gameObj.KFWplayersHiddenData)
+                if not isinstance(old_rows, list):
+                    old_rows = []
+            except (TypeError, ValueError):
+                old_rows = []
+
+        rows = []
+        for index, gp in enumerate(game_players):
+            old_row = old_rows[index] if index < len(old_rows) and isinstance(old_rows[index], list) else None
+            display_name = gp.player.username if gp.player else (old_row[0] if old_row else f"Seat {gp.seat_order}")
+            state = gp.moveDataJSON if isinstance(gp.moveDataJSON, dict) else None
+            hidden = state.get("hidden") if state else None
+            if not (isinstance(hidden, list) and len(hidden) >= 3):
+                if old_row and len(old_row) >= 4:
+                    hidden = old_row[1:4]
+                else:
+                    hidden = [[0, 0, 0, 0], [0, 0, 0], []]
+            rows.append([display_name, hidden[0], hidden[1], hidden[2]])
+        return rows
+
+    def saveAllHiddenDataRows(self, rows):
+        for row, gp in zip(rows, self.gameObj.players.order_by("seat_order")):
+            if not isinstance(row, list) or len(row) < 4:
+                continue
+            state = gp.moveDataJSON if isinstance(gp.moveDataJSON, dict) else {}
+            state["hidden"] = row[1:4]
+            gp.moveDataJSON = state
+            gp.save(update_fields=["moveDataJSON"])
+
+    def restoreHiddenDataRows(self, rows):
+        self.saveAllHiddenDataRows(rows)
+
+    def getAllMoveDataRows(self):
+        """Return [[name, timestamp, data], ...] in seat order."""
+        game_players = list(self.gameObj.players.select_related("player").order_by("seat_order"))
+        old_rows = []
+        if self.gameObj.KFWplayersMoveData:
+            try:
+                old_rows = json.loads(self.gameObj.KFWplayersMoveData)
+                if not isinstance(old_rows, list):
+                    old_rows = []
+            except (TypeError, ValueError):
+                old_rows = []
+
+        rows = []
+        for index, gp in enumerate(game_players):
+            old_row = old_rows[index] if index < len(old_rows) and isinstance(old_rows[index], list) else None
+            display_name = gp.player.username if gp.player else (old_row[0] if old_row else f"Seat {gp.seat_order}")
+            time_value = gp.currentMoveTime
+            move_value = gp.currentMoveData
+            if not time_value and not move_value and old_row and len(old_row) >= 3:
+                time_value = str(old_row[1]) if old_row[1] else ""
+                move_value = old_row[2] or ""
+            rows.append([display_name, time_value, move_value])
+        return rows
+
     #####################################################################
     ###################### Simul turns code
     #####################################################################
 
     def anyMoveData(self):
-        if self.gameObj.KFWplayersMoveData == "":
-            return False
-        playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
-        return any(playerMoveData[2] != "" for playerMoveData in playersMoveDataArr)
+        return any(row[2] != "" for row in self.getAllMoveDataRows())
 
     def getMoveData(self, name):
-        if self.gameObj.KFWplayersMoveData == "":
-            return ""
-        seat = self.seatPosition(name)
-        if seat < 0:
-            return ""
-        playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
-        if playersMoveDataArr[seat][2] == "":
-            return ""
-        return playersMoveDataArr[seat][2]
+        row = next((row for row in self.getAllMoveDataRows() if row[0] == name), None)
+        return row[2] if row else ""
 
     def updateSingleMove(self, name, data, deleteMove=False):
-        currentTime = str(int(time.time()) * 1000)
-        seat = self.seatPosition(name, True)
-
+        gp = self._get_game_player(name)
+        if not gp:
+            return
         if deleteMove:
-            currentTime = 0
-            data = ""
-
-        playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
-
-        playerMoveData = playersMoveDataArr[seat]
-        playerMoveData[1] = currentTime
-        playerMoveData[2] = data
-
-        playersMoveDataArr[seat] = playerMoveData
-
-        self.gameObj.KFWplayersMoveData = json.dumps(playersMoveDataArr)
-
-        self.gameObj.save()
+            gp.currentMoveTime = ""
+            gp.currentMoveData = ""
+        else:
+            gp.currentMoveTime = str(int(time.time()) * 1000)
+            gp.currentMoveData = data
+        gp.save(update_fields=["currentMoveTime", "currentMoveData"])
 
     def getJsonMoveResponse(self):
         readyPlayers = []
         jsonResponse = []
 
-        currentPlayersArr = self.getArrayOfIsCurrentPlayers()
-        playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
-
-        for i in range(len(playersMoveDataArr)):
-            player_time = playersMoveDataArr[i][1]
-            player_data = playersMoveDataArr[i][2]
+        game_players = list(self.gameObj.players.order_by("seat_order"))
+        move_rows = self.getAllMoveDataRows()
+        for gp, row in zip(game_players, move_rows, strict=True):
+            player_time = row[1]
+            player_data = row[2]
             # ALWAYS add the move data, even if blank, in case of bots
-            # If you dont't have a move, AND you're in currentPlayers, then you need to move
-            if player_data == "" and playersMoveDataArr[i][0] in currentPlayersArr:  # or allPlayersWithBots[self.getSeat]:
+            # If you don't have a move, AND you're current, then you need to move
+            if player_data == "" and gp.is_current:
                 readyPlayers.append(False)
                 if player_time == "":
                     player_time = int(time.time() * 1000)
                 jsonResponse.append({"timestamp": int(player_time), "content": player_data})
             else:
                 readyPlayers.append(True)
-                # if readyPlayers[i]:
                 if player_time == "":
                     player_time = int(time.time() * 1000)
                 jsonResponse.append({"timestamp": int(player_time), "content": player_data})
@@ -3160,15 +3198,14 @@ class KFWpresenter(GamePresenter):
         allPlayerReturnData = []
         jsonResponse = []
 
-        currentPlayersArr = self.getArrayOfIsCurrentPlayers()
-        playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
-
-        for i in range(len(playersMoveDataArr)):
-            player_time = playersMoveDataArr[i][1]
-            player_data = playersMoveDataArr[i][2]
+        game_players = list(self.gameObj.players.order_by("seat_order"))
+        move_rows = self.getAllMoveDataRows()
+        for gp, row in zip(game_players, move_rows, strict=True):
+            player_time = row[1]
+            player_data = row[2]
             # ALWAYS add the move data, even if blank, in case of bots
-            # If you dont't have a move, AND you're in currentPlayers, then you need to move
-            if player_data == "" and playersMoveDataArr[i][0] in currentPlayersArr:
+            # If you don't have a move, AND you're current, then you need to move
+            if player_data == "" and gp.is_current:
                 readyPlayers.append(False)
                 if player_time == "":
                     player_time = int(time.time() * 1000)
@@ -3177,23 +3214,18 @@ class KFWpresenter(GamePresenter):
                 readyPlayers.append(True)
                 if player_time == "":
                     player_time = int(time.time() * 1000)
-                # if readyPlayers[i]:
                 allPlayerReturnData.append({"timestamp": int(player_time), "content": player_data})
 
         readyWithBots = False
-        absent_names = {gp.player.username for gp in self.gameObj.players.select_related("player") if gp.player and (gp.is_missing or gp.is_kicked)}
         # Never finish on an empty slot: a submit while nobody is current would otherwise end the game without that player's scoring data
-        allRequiredMovesIn = all(playerMoveData[2] != "" for playerMoveData in playersMoveDataArr if playerMoveData[0] not in absent_names)
+        allRequiredMovesIn = all(row[2] != "" for gp, row in zip(game_players, move_rows, strict=True) if not gp.is_missing and not gp.is_kicked)
 
         if (all(readyPlayers) and allRequiredMovesIn) or readyWithBots:
             jsonResponse.append({"allPlayerReturnData": allPlayerReturnData})
             # Not cleared here: if the client's saveEndGame never arrives, endGame() cannot recover the moves, so keep them for a retry
 
             ### GAME DATA 1
-            playersHiddenDataArr = json.loads(self.gameObj.KFWplayersHiddenData)
-            returnData1 = []
-            for playerData in playersHiddenDataArr:
-                returnData1.append(playerData[1:])
+            returnData1 = [row[1:] for row in self.getAllHiddenDataRows()]
             gameData1 = self.compressData(returnData1)
 
             ### GAME DATA 3
@@ -3215,29 +3247,15 @@ class KFWpresenter(GamePresenter):
         return jsonResponse
 
     def hasMoveEndData(self, name):
-        if self.gameObj.KFWplayersMoveData == "":
+        row = next((row for row in self.getAllMoveDataRows() if row[0] == name), None)
+        if not row:
             return False
-        seat = self.seatPosition(name)
-
-        playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
-        player_time = playersMoveDataArr[seat][1]
-        player_move = playersMoveDataArr[seat][2]
-
-        return bool(player_move != "" and player_time != "" and player_time != "MID_PHASE" and player_time != "PRE_MOVE")
+        return bool(row[2] != "" and row[1] != "" and row[1] != "MID_PHASE" and row[1] != "PRE_MOVE")
 
     def clearAllMoveData(self):
-        if self.gameObj.KFWplayersMoveData == "":
-            # Move data was never scaffolded (or was wiped) - rebuild it with all moves empty
-            playersMoveDataArr = [[name, "", ""] for name in self.getAllPlayersOrderedySeatInArray(True)]
-        else:
-            playersMoveDataArr = json.loads(self.gameObj.KFWplayersMoveData)
-            for i in range(len(playersMoveDataArr)):
-                playersMoveDataArr[i][1] = ""
-                playersMoveDataArr[i][2] = ""
-
-        self.gameObj.KFWplayersMoveData = json.dumps(playersMoveDataArr)
-
-        self.gameObj.save()
+        self.gameObj.players.update(currentMoveTime="", currentMoveData="")
+        self.gameObj.KFWplayersMoveData = ""
+        self.gameObj.save(update_fields=["KFWplayersMoveData"])
 
     # TODO mvoe to general?
     def getCurrentSimulPlayers(self):
@@ -3291,21 +3309,18 @@ class KFWpresenter(GamePresenter):
         return self.compressData(returnData)
 
     def getGameData1Compressed(self, username):
-        if self.gameObj.KFWplayersHiddenData == "":
+        if self.gameObj.gameStatus == "FINISHED":
             return ""
-        # This has one subarray per player. Index in arr is playerIndex ["name", [meeplesArray], [skillsArray], [historyArray] ]
-        playersHiddenDataArr = json.loads(self.gameObj.KFWplayersHiddenData)
+        hidden_rows = self.getAllHiddenDataRows()
+        if not hidden_rows:
+            return ""
         if self.isTrainingGame():
-            returnData = []
-            for playerData in playersHiddenDataArr:
-                returnData.append(playerData[1:])
-            return self.compressData(returnData)
+            return self.compressData([row[1:] for row in hidden_rows])
 
-        # Find the subarray with the username we want to return data for
-        for playerData in playersHiddenDataArr:
-            if playerData[0] == username:
-                # return the data without the username
-                return self.compressData(playerData[1:])
+        # Find the row for the username and return the data without the name.
+        for row in hidden_rows:
+            if row[0] == username:
+                return self.compressData(row[1:])
         return self.compressData([[], [], []])
 
     def pull_items_from_bag(self, num_items, items_bag, pullingSkills=False):
@@ -3354,7 +3369,7 @@ class KFWpresenter(GamePresenter):
         newInformation = [[], [], -1]
         if len(dataArr) > 0:
             newInformation[2] = dataArr[0][0]
-        allPlayersHiddenData = json.loads(self.gameObj.KFWplayersHiddenData)
+        allPlayersHiddenData = self.getAllHiddenDataRows()
         serverDataArr = json.loads(self.gameObj.KFWserverData)
         meeple_bag = serverDataArr[0]
         skills_bag = serverDataArr[1]
@@ -3536,7 +3551,7 @@ class KFWpresenter(GamePresenter):
                     # Add to the bag
                     skills_bag[num] += 1
 
-        self.gameObj.KFWplayersHiddenData = json.dumps(allPlayersHiddenData)
+        self.saveAllHiddenDataRows(allPlayersHiddenData)
         self.gameObj.KFWserverData = json.dumps([meeple_bag, skills_bag])
 
         return newInformation

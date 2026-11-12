@@ -339,7 +339,7 @@ def _processKFWturn(request):
                     [
                         jsonData["data"],
                         json.loads(currentGame.KFWserverData),
-                        json.loads(currentGame.KFWplayersHiddenData),
+                        presenter.getAllHiddenDataRows(),
                     ]
                 )
             else:
@@ -349,7 +349,7 @@ def _processKFWturn(request):
                         [
                             jsonData["data"],
                             json.loads(currentGame.KFWserverData),
-                            json.loads(currentGame.KFWplayersHiddenData),
+                            presenter.getAllHiddenDataRows(),
                         ]
                     )
                     # Limit to 20 rewind points by removing oldest
@@ -570,7 +570,7 @@ def _processKFWturn(request):
             ####################################
             currentGame.gameData = loadDataArr[0]
             currentGame.KFWserverData = json.dumps(loadDataArr[1])
-            currentGame.KFWplayersHiddenData = json.dumps(loadDataArr[2])
+            presenter.restoreHiddenDataRows(loadDataArr[2])
             ####################################
 
             newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -607,7 +607,7 @@ def _processKFWturn(request):
         currentGame.gameData = loadDataArr[0]
 
         currentGame.KFWserverData = json.dumps(loadDataArr[1])
-        currentGame.KFWplayersHiddenData = json.dumps(loadDataArr[2])
+        presenter.restoreHiddenDataRows(loadDataArr[2])
 
         currentGame.rewindTempData = json.dumps(loadDataArr)
         currentGame.rewindData = json.dumps(currentRewindDataArray)
@@ -731,10 +731,7 @@ def _processKFWturn(request):
         if not is_game_admin(request.user):
             return JsonResponse({"error": gettext("Permissions missing")}, status=403)
         # data1
-        playersHiddenDataArr = json.loads(currentGame.KFWplayersHiddenData)
-        returnData1 = []
-        for playerData in playersHiddenDataArr:
-            returnData1.append(playerData[1:])
+        returnData1 = [] if currentGame.gameStatus == "FINISHED" else [row[1:] for row in presenter.getAllHiddenDataRows()]
         gameData1 = presenter.compressData(returnData1)
         # data3
         serverDataArr = json.loads(currentGame.KFWserverData)
@@ -827,7 +824,7 @@ def bugEntry(request):
     return shared_bug_entry(
         request,
         "KFW",
-        extra_info_fn=lambda g: "Options: " + g.startingOptions + "ServerData: " + g.KFWserverData + "  PlayersHiddenData: " + g.KFWplayersHiddenData + "  PlayersMoveData: " + g.KFWplayersMoveData,
+        extra_info_fn=lambda g: "Options: " + g.startingOptions + " ServerData: " + g.KFWserverData + " Players: " + str([(gp.seat_order, gp.is_current, bool(gp.currentMoveData), gp.moveDataJSON is not None) for gp in g.players.all()]),
     )
 
 

@@ -99,37 +99,32 @@ class KFWFinalScoringTests(TestCase):
             phase=4,
             startingOptions="[]",
         )
-        GamePlayer.objects.bulk_create(
-            [
-                GamePlayer(game=self.game, player=self.player_one, seat_order=0),
-                GamePlayer(game=self.game, player=self.player_two, seat_order=1),
-            ]
-        )
-        self.game.KFWplayersHiddenData = json.dumps(
-            [
-                [self.player_one.username, [0, 0, 0, 0], [0, 0, 0], []],
-                [self.player_two.username, [0, 0, 0, 0], [0, 0, 0], []],
-            ]
-        )
+        self.gp_one = GamePlayer.objects.create(game=self.game, player=self.player_one, seat_order=0)
+        self.gp_two = GamePlayer.objects.create(game=self.game, player=self.player_two, seat_order=1)
+        self.gp_one.moveDataJSON = {"hidden": [[0, 0, 0, 0], [0, 0, 0], []]}
+        self.gp_two.moveDataJSON = {"hidden": [[0, 0, 0, 0], [0, 0, 0], []]}
+        self.gp_one.save(update_fields=["moveDataJSON"])
+        self.gp_two.save(update_fields=["moveDataJSON"])
         self.game.KFWserverData = json.dumps([[0, 0, 0, 0], [0, 0, 0]])
         self.set_moves("final-a", "final-b")
         self.game.save()
 
     def set_moves(self, move_one, move_two):
-        self.game.KFWplayersMoveData = json.dumps(
-            [
-                [self.player_one.username, "1710000000001" if move_one else "", move_one],
-                [self.player_two.username, "1710000000002" if move_two else "", move_two],
-            ]
-        )
-        self.game.save(update_fields=["KFWplayersMoveData"])
+        for gp, move, timestamp in (
+            (self.gp_one, move_one, "1710000000001"),
+            (self.gp_two, move_two, "1710000000002"),
+        ):
+            gp.currentMoveTime = timestamp if move else ""
+            gp.currentMoveData = move
+            gp.save(update_fields=["currentMoveTime", "currentMoveData"])
 
     def test_all_ready_keeps_moves_until_the_game_over_save_lands(self):
         response = self.game.presenter().getJsonMoveResponseFinalScoring()
 
         self.assertTrue(response[-1]["allReady"])
-        moves = json.loads(self.game.KFWplayersMoveData)
-        self.assertEqual([move[2] for move in moves], ["final-a", "final-b"])
+        self.gp_one.refresh_from_db()
+        self.gp_two.refresh_from_db()
+        self.assertEqual([self.gp_one.currentMoveData, self.gp_two.currentMoveData], ["final-a", "final-b"])
 
     def test_does_not_finish_when_a_required_player_has_no_move(self):
         # This is the state a failed game-over save used to leave behind: nobody current, a move missing.
@@ -138,8 +133,9 @@ class KFWFinalScoringTests(TestCase):
         response = self.game.presenter().getJsonMoveResponseFinalScoring()
 
         self.assertFalse(response[-1]["allReady"])
-        moves = json.loads(self.game.KFWplayersMoveData)
-        self.assertEqual([move[2] for move in moves], ["final-a", ""])
+        self.gp_one.refresh_from_db()
+        self.gp_two.refresh_from_db()
+        self.assertEqual([self.gp_one.currentMoveData, self.gp_two.currentMoveData], ["final-a", ""])
 
 
 class KFWKickoutVoteTests(TestCase):
