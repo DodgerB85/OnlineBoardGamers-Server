@@ -1197,10 +1197,11 @@ def _processRNBturn(request):
         # requester's own vote for this target is more than 2 days old.
         # If the vote is only recorded, return straight away without kicking.
         # A super-user (BotKickStarter) votes as the seat it is currently POV-ing
-        nameToUse = request.user.username
+        voter = request.user
         if is_game_admin(request.user):
-            nameToUse = jsonData.get("BKSN", nameToUse)
-        kickout_vote_result = presenter.processKickoutVote(nameToUse, jsonData["kickedName"])
+            pov_name = jsonData.get("BKSN", request.user.username)
+            voter = currentGame.players.filter(player__username=pov_name).first() or request.user
+        kickout_vote_result = presenter.processKickoutVote(voter, jsonData["kickedName"])
         if kickout_vote_result["voteCast"]:
             currentGame.save()
             return JsonResponse(kickout_vote_result, safe=False)

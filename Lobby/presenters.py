@@ -188,18 +188,51 @@ class GamePresenter:
 
     # KICKOUT VOTE STUFF
     # Votes live on GamePlayer.votesJSON as {topic: choice}. A kickout vote is
-    # [target_username, vote_time_ms]. A kickout goes ahead when the votes for the
-    # target reach a majority of the remaining players (2p stays a single-player
-    # kickout), or when a voter's own vote for that target is more than 2 days old.
-    def getKickoutVotesData(self):
-        votes_data = {}
-        for gp in self.gameObj.players.select_related("player"):
-            if not gp.player or not isinstance(gp.votesJSON, dict):
+    # [target_gameplayer_id, vote_time_ms]. Storing the participant id keeps the
+    # target stable across renames; the client still receives usernames from
+    # getKickoutVotesData(). A kickout goes ahead when the votes for the target
+    # reach a majority of the remaining players (2p stays a single-player kickout),
+    # or when a voter's own vote for that target is more than 2 days old.
+    def _getKickoutTargetId(self, vote):
+        """Return the target GamePlayer id for a stored kickout vote."""
+        if not isinstance(vote, (list, tuple)) or len(vote) < 2:
+            return None
+        target = vote[0]
+        if isinstance(target, int):
+            return target
+        # Legacy votes were [target_username, timestamp].
+        if isinstance(target, str):
+            return self.gameObj.players.filter(player__username=target).values_list("pk", flat=True).first()
+        return None
+
+    def _getKickoutVoteRows(self):
+        """Return ({gp_id: gp}, {voter_gp_id: (target_gp_id, timestamp)})."""
+        players = {gp.pk: gp for gp in self.gameObj.players.select_related("player") if gp.player}
+        ids_by_username = {gp.player.username: gp.pk for gp in players.values()}
+        votes = {}
+        for gp_id, gp in players.items():
+            if not isinstance(gp.votesJSON, dict):
                 continue
             vote = gp.votesJSON.get(rf.KICKOUT_VOTE_TOPIC)
-            if vote:
-                votes_data[gp.player.username] = vote
-        return votes_data
+            if not isinstance(vote, (list, tuple)) or len(vote) < 2:
+                continue
+            target = vote[0]
+            if isinstance(target, int):
+                target_id = target if target in players else None
+            elif isinstance(target, str):
+                target_id = ids_by_username.get(target)
+            else:
+                target_id = None
+            if target_id is not None:
+                votes[gp_id] = (target_id, vote[1])
+        return players, votes
+
+    def getKickoutVotesData(self):
+        players, votes = self._getKickoutVoteRows()
+        return {
+            players[voter_id].player.username: [players[target_id].player.username, vote_time]
+            for voter_id, (target_id, vote_time) in votes.items()
+        }
 
     def hasAnyVotes(self, topic):
         return any(isinstance(gp.votesJSON, dict) and topic in gp.votesJSON for gp in self.gameObj.players.all())
@@ -208,22 +241,24 @@ class GamePresenter:
         remaining_players = self.gameObj.players.filter(is_missing=False, is_ai=False).count()
         return (remaining_players + 1) // 2
 
-    def castKickoutVote(self, voter_username, target_username):
-        gp = self.gameObj.players.filter(player__username=voter_username).first()
-        if not gp:
+    def _getVoterGp(self, voter):
+        from Lobby.models import GamePlayer
+
+        if isinstance(voter, GamePlayer):
+            return voter if voter.game_id == self.gameObj.id else None
+        return self.gameObj.players.filter(player=voter).first()
+
+    def castKickoutVote(self, voter_gp, target_gp):
+        if not voter_gp or not target_gp or voter_gp.game_id != self.gameObj.id or target_gp.game_id != self.gameObj.id:
             return
-        votes = gp.votesJSON if isinstance(gp.votesJSON, dict) else {}
-        existing_vote = votes.get(rf.KICKOUT_VOTE_TOPIC)
-        if (
-            isinstance(existing_vote, (list, tuple))
-            and len(existing_vote) >= 2
-            and existing_vote[0] == target_username
-        ):
+        votes = voter_gp.votesJSON if isinstance(voter_gp.votesJSON, dict) else {}
+        existing_target_id = self._getKickoutTargetId(votes.get(rf.KICKOUT_VOTE_TOPIC))
+        if existing_target_id == target_gp.pk:
             # Keep the original vote time so the 2-day solo-kickout counter is not reset
             return
-        votes[rf.KICKOUT_VOTE_TOPIC] = [target_username, int(time.time() * 1000)]
-        gp.votesJSON = votes
-        gp.save(update_fields=["votesJSON"])
+        votes[rf.KICKOUT_VOTE_TOPIC] = [target_gp.pk, int(time.time() * 1000)]
+        voter_gp.votesJSON = votes
+        voter_gp.save(update_fields=["votesJSON"])
 
     def clearKickoutVotes(self):
         for gp in self.gameObj.players.all():
@@ -234,32 +269,25 @@ class GamePresenter:
             gp.votesJSON = votes
             gp.save(update_fields=["votesJSON"])
 
-    def canSoloKickout(self, voter_username, target_username):
-        vote = self.getKickoutVotesData().get(voter_username)
-        if not isinstance(vote, (list, tuple)) or len(vote) < 2:
-            return False
-        if vote[0] != target_username:
+    def canSoloKickout(self, voter_gp_id, target_gp_id):
+        _, votes = self._getKickoutVoteRows()
+        vote = votes.get(voter_gp_id)
+        if not vote or vote[0] != target_gp_id:
             return False
         return (int(time.time() * 1000) - vote[1]) >= rf.KICKOUT_VOTE_SOLO_DELAY_SECONDS * 1000
 
-    def getKickoutVoteCountForTarget(self, target_username):
-        valid_voters = (
-            set(
-                self.gameObj.players.exclude(is_missing=True)
-                .filter(player__isnull=False, is_ai=False)
-                .values_list("player__username", flat=True)
-            )
-            - {target_username}
-            - rf.SHADOW_USERNAMES
+    def getKickoutVoteCountForTarget(self, target_gp_id):
+        valid_voters = set(
+            self.gameObj.players.exclude(is_missing=True)
+            .filter(player__isnull=False, is_ai=False)
+            .exclude(player__username__in=rf.SHADOW_USERNAMES)
+            .exclude(pk=target_gp_id)
+            .values_list("pk", flat=True)
         )
-        votes = self.getKickoutVotesData()
-        return sum(
-            1
-            for voter, vote in votes.items()
-            if voter in valid_voters and isinstance(vote, (list, tuple)) and len(vote) >= 1 and vote[0] == target_username
-        )
+        _, votes = self._getKickoutVoteRows()
+        return sum(1 for voter_id, (target_id, _) in votes.items() if voter_id in valid_voters and target_id == target_gp_id)
 
-    def processKickoutVote(self, voter_username, target_username):
+    def processKickoutVote(self, voter, target_username):
         """Voting layer for kickouts.
 
         Returns a dict. If ``voteCast`` is True the vote was recorded and the
@@ -267,13 +295,24 @@ class GamePresenter:
         (majority reached, 2-player game, or a stale 2-day-old own vote).
         """
         threshold = self.getKickoutVoteThreshold()
+        voter_gp = self._getVoterGp(voter)
+        target_gp = self.gameObj.players.filter(player__username=target_username).first()
 
-        if threshold <= 1 or self.canSoloKickout(voter_username, target_username):
+        if not voter_gp or not target_gp:
+            # A stale tab can name a player who is no longer here. Record nothing
+            # and stop the view from proceeding with a kick it cannot validate.
+            return {
+                "voteCast": True,
+                "threshold": threshold,
+                "votesData": json.dumps(self.getKickoutVotesData()),
+            }
+
+        if threshold <= 1 or self.canSoloKickout(voter_gp.pk, target_gp.pk):
             self.clearKickoutVotes()
             return {"voteCast": False, "threshold": threshold, "votesData": "{}"}
 
-        self.castKickoutVote(voter_username, target_username)
-        if self.getKickoutVoteCountForTarget(target_username) >= threshold:
+        self.castKickoutVote(voter_gp, target_gp)
+        if self.getKickoutVoteCountForTarget(target_gp.pk) >= threshold:
             self.clearKickoutVotes()
             return {"voteCast": False, "threshold": threshold, "votesData": "{}"}
 
@@ -521,7 +560,7 @@ class GamePresenter:
         )
 
     ###### VOTING METHODS #######
-    def castVote(self, topic, username, choice):
+    def castVote(self, topic, user, choice):
         """
         Saves a specific choice for a user.
         Example: topic='rewind', choice=2
@@ -533,7 +572,7 @@ class GamePresenter:
         if self.gameObj.gameStatus == "FINISHED" and topic in (rf.REWIND_CONSENT_VOTE_TOPIC, rf.KICKOUT_VOTE_TOPIC):
             return False
 
-        gp = self.gameObj.players.filter(player__username=username).first()
+        gp = self.gameObj.players.filter(player=user).first()
         if not gp:
             return False
         votes = dict(gp.votesJSON) if isinstance(gp.votesJSON, dict) else {}
@@ -542,12 +581,12 @@ class GamePresenter:
         gp.save(update_fields=["votesJSON"])
         return True
 
-    def processVoteLogic(self, topic, username, choice):
+    def processVoteLogic(self, topic, user, choice):
         """
         Processes a vote and returns a dict ready for JsonResponse.
         """
         # 1. Cast the vote (castVote persists the GamePlayer row)
-        success = self.castVote(topic, username, choice)
+        success = self.castVote(topic, user, choice)
         if not success:
             return {"voteChanged": False}
 

@@ -210,7 +210,7 @@ class VotesClearedOnGameEndTests(TestCase):
 
         for topic in (self.rf.REWIND_CONSENT_VOTE_TOPIC, self.rf.KICKOUT_VOTE_TOPIC):
             with self.subTest(topic=topic):
-                self.assertFalse(game.presenter().castVote(topic, playerA.username, 0))
+                self.assertFalse(game.presenter().castVote(topic, playerA, 0))
 
         game.refresh_from_db()
         self.assertIsNone(game.activeVotes, "A late vote re-created activeVotes on a FINISHED game")
@@ -224,7 +224,7 @@ class VotesClearedOnGameEndTests(TestCase):
 
         for topic in (self.rf.DELETE_VOTE_TOPIC, self.rf.STATS_EXCLUDE_VOTE_TOPIC):
             with self.subTest(topic=topic):
-                self.assertTrue(game.presenter().castVote(topic, playerA.username, 1))
+                self.assertTrue(game.presenter().castVote(topic, playerA, 1))
 
         gp = game.players.get(player=playerA)
         self.assertTrue(gp.votesJSON[self.rf.DELETE_VOTE_TOPIC])
@@ -233,7 +233,7 @@ class VotesClearedOnGameEndTests(TestCase):
     def test_rewind_vote_still_allowed_while_active(self):
         game, playerA, _b = _dirty_game_and_players("FCM")
 
-        self.assertTrue(game.presenter().castVote(self.rf.REWIND_CONSENT_VOTE_TOPIC, playerA.username, 2))
+        self.assertTrue(game.presenter().castVote(self.rf.REWIND_CONSENT_VOTE_TOPIC, playerA, 2))
         gp = game.players.get(player=playerA)
         self.assertEqual(gp.votesJSON[self.rf.REWIND_CONSENT_VOTE_TOPIC], 2)
 

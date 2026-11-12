@@ -233,7 +233,7 @@ def _processROWturn(request):
         if not target_on_turn or presenter.kickoutRequired() != 2:
             return JsonResponse({"error": gettext("This player is not eligible for kickout.")}, status=400)
 
-        kickout_vote_result = presenter.processKickoutVote(request.user.username, target_username)
+        kickout_vote_result = presenter.processKickoutVote(request.user, target_username)
         if kickout_vote_result["voteCast"]:
             currentGame.save()
             return JsonResponse(kickout_vote_result, safe=False)

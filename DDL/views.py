@@ -176,7 +176,7 @@ def _processDDLturn(request):
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
-        kickout_vote_result = presenter.processKickoutVote(request.user.username, jsonData["kickedName"])
+        kickout_vote_result = presenter.processKickoutVote(request.user, jsonData["kickedName"])
         if kickout_vote_result["voteCast"]:
             currentGame.save()
             return JsonResponse(kickout_vote_result, safe=False)

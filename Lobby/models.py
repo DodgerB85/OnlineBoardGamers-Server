@@ -547,7 +547,8 @@ class GamePlayer(models.Model):
 
     moveDataJSON = models.JSONField(default=list, null=True, blank=True)
 
-    # Per-player votes: {topic: choice}. Cleared when the game ends.
+    # Per-player votes: {topic: choice}. A kickout choice is
+    # [target GamePlayer id, vote_time_ms]. Cleared when the game ends.
     votesJSON = models.JSONField(default=dict, null=True, blank=True)
 
     # Seconds of the 24h Flexi-Time bank this player has used. Replaces the

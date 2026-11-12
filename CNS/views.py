@@ -369,7 +369,7 @@ def _processCNSturn(request):
         # Voting layer: 3p+ games need a majority vote to kick, unless the
         # requester's own vote for this target is more than 2 days old.
         # If the vote is only recorded, return straight away without kicking.
-        kickout_vote_result = presenter.processKickoutVote(request.user.username, jsonData["kickedName"])
+        kickout_vote_result = presenter.processKickoutVote(request.user, jsonData["kickedName"])
         if kickout_vote_result["voteCast"]:
             currentGame.save()
             return JsonResponse(kickout_vote_result, safe=False)

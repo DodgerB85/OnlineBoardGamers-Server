@@ -361,7 +361,7 @@ def shared_cast_vote(request):
 
     result = currentGame.presenter().processVoteLogic(
         topic=jsonData["topic"],
-        username=request.user.username,
+        user=request.user,
         choice=jsonData.get("choice", True),
     )
 

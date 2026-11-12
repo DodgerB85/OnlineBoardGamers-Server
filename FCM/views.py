@@ -1470,7 +1470,7 @@ def _processTurn(request):
         # If the vote is only recorded, return straight away without kicking.
         # Only apply when the client signals it understands voteCast responses.
         if jsonData.get("supportsVoting"):
-            kickout_vote_result = presenter.processKickoutVote(request.user.username, jsonData["kickedName"])
+            kickout_vote_result = presenter.processKickoutVote(request.user, jsonData["kickedName"])
             if kickout_vote_result["voteCast"]:
                 currentGame.save()
                 return JsonResponse(kickout_vote_result, safe=False)
