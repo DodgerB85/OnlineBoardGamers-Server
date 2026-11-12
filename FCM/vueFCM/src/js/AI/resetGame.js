@@ -38,6 +38,7 @@ export async function resetGameForAI() {
 		displayNames: displayNames,
 		regenerateMap: true,
 		keepColours: true,
+		newMapVersion: store.mapData.newMapVersion,
 	})
 
 	// The bank needs rebuilding too - setupNewGame derives it from player count.

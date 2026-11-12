@@ -225,6 +225,7 @@ export function simpleExportWholeFCMmodel() {
 	if (store.startingOptions.mediaLine) temp.push(JSON.parse(JSON.stringify(store.mediaLine)))
 	if (store.seniorBusinessDeveloper.uniqueCards) temp.push(["sbdUnique", 1])
 
+	if (store.mapData.newMapVersion === rf.NEW_MAP_VERSION) temp.push(["newMapVersion", rf.NEW_MAP_VERSION])
 	return compressData(temp)
 }
 
@@ -720,6 +721,7 @@ export function exportFCMmodel(forGameOver, includeContext, historyCutoff) {
 	// Persist the rules even before SBD is selected in a module draft.
 	if (store.seniorBusinessDeveloper.uniqueCards) temp.push(["sbdUnique", 1])
 
+	if (store.mapData.newMapVersion === rf.NEW_MAP_VERSION) temp.push(["newMapVersion", rf.NEW_MAP_VERSION])
 	return compressData(temp)
 }
 
@@ -758,6 +760,9 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	let IMPORT_INDEX = 0
 	// Now set up internal options -- THIS JUST SETS UP THE TRUE?FALSE FLAGS
 	model.setInternalStartingOptions(window.initData.startingOptions)
+
+	// Read before rebuilding any coordinates; an absent marker is always legacy.
+	store.mapData.newMapVersion = savedNewMapVersion(inputArr)
 
 	// 0 - map
 	store.mapData.tiles = map.expandMapToFullGrid(window.initData.startingMap, window.initData.playerNames.length)
@@ -1565,12 +1570,17 @@ export function restoreLaborMarketState(inputArr, index = -1) {
 	store.availableEmployees[rf.UNION_ORGANIZER] = Math.max(0, playerCount - lm.unionHolders.length)
 }
 
+function savedNewMapVersion(slots) {
+	return slots.some((slot) => Array.isArray(slot) && slot[0] === "newMapVersion" && slot[1] === rf.NEW_MAP_VERSION) ? rf.NEW_MAP_VERSION : 0
+}
+
 export function simpleImportWholeFCMmodel(inputBase64) {
 	const store = useModelStore()
 
 	
 	let inputModel = decompressData(inputBase64)
 	store.seniorBusinessDeveloper.uniqueCards = inputModel.some((slot) => Array.isArray(slot) && slot[0] === "sbdUnique" && slot[1] === 1)
+	store.mapData.newMapVersion = savedNewMapVersion(inputModel)
 
 
 

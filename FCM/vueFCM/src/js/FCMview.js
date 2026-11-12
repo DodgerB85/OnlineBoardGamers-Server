@@ -86,6 +86,9 @@ export function phaseStr(phase) {
 }
 
 export function getImage(image) {
+	if (["map30", "map33", "map34", "map37"].includes(image) && useModelStore().mapData.newMapVersion === rf.NEW_MAP_VERSION) {
+		return new URL(`../../../static/FCM/images/${image}_v2.jpg`, import.meta.url).href
+	}
 	// Icons
 	if (image === "icon-house") return new URL(`../../../static/FCM/images/house.svg`, import.meta.url).href
 	else if (image === "icon-nextGame") return new URL(`../../../static/FCM/images/icon-nextGame.svg`, import.meta.url).href
