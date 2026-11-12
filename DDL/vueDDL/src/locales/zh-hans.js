@@ -276,6 +276,10 @@ export default {
 		exit: "退出回放",
 	},
 	map: {
+		chooseStart: "在地图上选择高亮的起始星球。",
+		choosePathways: "在地图上先选择入口，再选择出口。",
+		chooseExplore: "探索：在地图上选择高亮的消费者板块。",
+
 		routeDot: "路线 {route} 圆点 {dot}",
 		deepSpace: "深空",
 		mineTitle: "矿井：{good}",

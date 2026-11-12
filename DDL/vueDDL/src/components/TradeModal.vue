@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from "vue"
+import { computed } from "vue"
 import * as rf from "../js/DDLreference.js"
 import * as controller from "../js/DDLcontroller.js"
 import * as funcs from "../js/DDLfuncs.js"
@@ -8,7 +8,6 @@ import { usePersonalStore } from "../stores/DDLpersonal.js"
 
 const store = useModelStore()
 const personal = usePersonalStore()
-const target = ref(-1)
 
 const playerIndex = computed(() => (personal.trainingGame ? store.gameflow.turnOrder[0] : personal.pov))
 const me = computed(() => (playerIndex.value >= 0 ? store.players[playerIndex.value] : null))
@@ -17,7 +16,7 @@ const others = computed(() => {
 	if (!me.value || !me.value.ship.node) return []
 	return store.players.map((p, idx) => ({ p, idx })).filter((entry) => entry.idx !== playerIndex.value && entry.p.ship.node === me.value.ship.node && rf.planetByNode(entry.p.ship.node))
 })
-const targetPlayer = computed(() => (target.value >= 0 ? store.players[target.value] : null))
+const targetPlayer = computed(() => (store.context.selectedTradePlayer >= 0 ? store.players[store.context.selectedTradePlayer] : null))
 
 function goodsOf(player) {
 	const counts = {}
@@ -41,11 +40,11 @@ function close() {
 	store.context.selectedReceive.splice(0)
 }
 async function propose() {
-	if (target.value < 0) return
-	await controller.proposeTrade(target.value, [...store.context.selectedGive], [...store.context.selectedReceive])
+	if (store.context.selectedTradePlayer < 0) return
+	await controller.proposeTrade(store.context.selectedTradePlayer, [...store.context.selectedGive], [...store.context.selectedReceive])
 	store.context.selectedGive.splice(0)
 	store.context.selectedReceive.splice(0)
-	target.value = -1
+	store.context.selectedTradePlayer = -1
 }
 </script>
 
@@ -54,7 +53,7 @@ async function propose() {
 		<div class="modalBox">
 			<h2>{{ $t("trade.title") }}</h2>
 			<p>{{ $t("trade.intro") }}</p>
-			<select v-model.number="target">
+			<select v-model.number="store.context.selectedTradePlayer">
 				<option :value="-1">{{ $t("common.choosePlayer") }}</option>
 				<option v-for="entry in others" :key="entry.idx" :value="entry.idx">{{ entry.p.displayName }}</option>
 			</select>
@@ -78,7 +77,7 @@ async function propose() {
 				</div>
 			</div>
 			<div class="buttons">
-				<button class="actionsLineButton" :disabled="target < 0 || (store.context.selectedGive.length === 0 && store.context.selectedReceive.length === 0)" @click="propose">{{ $t("trade.sendOffer") }}</button>
+				<button class="actionsLineButton" :disabled="store.context.selectedTradePlayer < 0 || (store.context.selectedGive.length === 0 && store.context.selectedReceive.length === 0)" @click="propose">{{ $t("trade.sendOffer") }}</button>
 				<button class="actionsLineButton" @click="close">{{ $t("common.cancel") }}</button>
 			</div>
 		</div>

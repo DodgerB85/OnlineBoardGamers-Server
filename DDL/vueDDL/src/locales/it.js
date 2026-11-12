@@ -276,6 +276,10 @@ export default {
 		exit: "Esci dal replay",
 	},
 	map: {
+		chooseStart: "Scegli un pianeta iniziale evidenziato sulla mappa.",
+		choosePathways: "Scegli prima l’ingresso, poi l’uscita sulla mappa.",
+		chooseExplore: "Esplora: scegli una tessera consumatore evidenziata sulla mappa.",
+
 		routeDot: "Rotta {route} punto {dot}",
 		deepSpace: "Spazio profondo",
 		mineTitle: "Miniera: {good}",

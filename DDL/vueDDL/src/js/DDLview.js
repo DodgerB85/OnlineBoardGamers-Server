@@ -22,6 +22,7 @@ export function actionTitle(store) {
 	if (gameflow.phase === rf.PHASE_SETUP) return t("phase.setup")
 	if (gameflow.phase === rf.PHASE_GAME_OVER) return t("action.gameOver")
 	if (gameflow.turnType === rf.TURN_CHOOSE) return t("action.chooseTurn")
+	if (gameflow.pendingExplore) return t("explore.title")
 	if (gameflow.movement && gameflow.movement.remaining > 0) return t("action.move")
 	if (gameflow.freeHighwaysLeft > 0) return t("action.placeHighways")
 	if (store.context.action === rf.ACT_PLACE_HIGHWAYS) return t("action.placeHighways")
@@ -29,7 +30,6 @@ export function actionTitle(store) {
 	if (store.context.action === rf.ACT_BUILD) return t("action.build")
 	if (store.context.action === rf.ACT_TRADE) return t("action.trade")
 	if (store.context.action === rf.ACT_PATHWAY) return t("action.pathways")
-	if (gameflow.pendingExplore) return t("explore.title")
 	return t("action.title")
 }
 

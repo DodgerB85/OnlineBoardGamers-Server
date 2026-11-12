@@ -46,6 +46,7 @@ export function startPlayerTurn() {
 	const store = useModelStore()
 	personal.haltPlay = false
 	const previousAction = store.context.action
+	const highwayCostsEnergy = store.context.highwayCostsEnergy
 	store.resetContext()
 	if (personal.pov === -99 || personal.pov === -9) return
 	if (store.viewSettings.showReplay) return
@@ -56,8 +57,6 @@ export function startPlayerTurn() {
 			if (!personal.trainingGame) IO.getBids(1, []).then((data) => handleAuctionBids(data))
 		} else if (store.gameflow.setup.stage === rf.TURN_SETUP_GEAR) {
 			store.viewSettings.showGearPicker = true
-		} else if (store.gameflow.setup.stage === rf.TURN_SETUP_PLANET) {
-			store.viewSettings.showPlanetPicker = true
 		}
 		return
 	}
@@ -69,13 +68,13 @@ export function startPlayerTurn() {
 		return
 	}
 	if (store.gameflow.pendingExplore) {
-		store.viewSettings.showExplore = true
 		return
 	}
 	if (store.gameflow.turnType === rf.TURN_ACTION && store.gameflow.movement.remaining > 0) store.context.action = rf.ACT_MOVE
 	if (store.gameflow.turnType === rf.TURN_ACTION && store.gameflow.freeHighwaysLeft > 0) store.context.action = rf.ACT_PLACE_HIGHWAYS
-	if (store.gameflow.turnType === rf.TURN_ACTION && [rf.ACT_BUILD, rf.ACT_TRADE, rf.ACT_MOVE, rf.ACT_PLACE_HIGHWAYS, rf.ACT_PATHWAY].includes(previousAction)) {
+	if (store.gameflow.turnType === rf.TURN_ACTION && [rf.ACT_BUILD, rf.ACT_TRADE, rf.ACT_PLACE_HIGHWAYS, rf.ACT_PATHWAY].includes(previousAction)) {
 		store.context.action = previousAction
+		store.context.highwayCostsEnergy = highwayCostsEnergy
 	}
 	if (personal.myTradeOffers.length === 0) personal.myTradeOffers = store.board.trades.filter((t) => t.status === "pending" && t.to === personal.pov)
 }
@@ -142,7 +141,9 @@ export async function submitAuctionBid(bid) {
 export async function pollAuction() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	if (!personal.canBid()) return
+	if (personal.pov < 0 || store.viewSettings.showReplay) return
+	await IO.checkForLatestData()
+	if (store.gameflow.phase !== rf.PHASE_SETUP || store.gameflow.setup.auctionResolved) return
 	const round = store.gameflow.setup.stage === rf.TURN_SETUP_TIEBREAK ? 2 : 1
 	const tiedNames = (store.gameflow.setup.tiebreakPlayers || []).map((idx) => store.players[idx].name)
 	const data = await IO.getBids(round, tiedNames)
@@ -176,6 +177,8 @@ function handleAuctionBids(data, round = 1) {
 			store.viewSettings.showAuction = true
 			return
 		}
+		// One seat commits the shared result; every other client polls for that save.
+		if (!personal.trainingGame && personal.pov !== 0) return
 		model.resolveAuction(byIndex, order)
 		store.gameflow.setup.auctionResolved = true
 		store.viewSettings.showAuction = false
@@ -183,6 +186,8 @@ function handleAuctionBids(data, round = 1) {
 		IO.saveGame(true)
 		return
 	}
+
+	if (!personal.trainingGame && personal.pov !== 0) return
 
 	// Round 2: tied players' new bids determine their order only inside their
 	// original tie group; they do not jump past players who bid higher first.
@@ -205,13 +210,13 @@ function handleAuctionBids(data, round = 1) {
 
 export async function collectEnergy(colour) {
 	const store = useModelStore()
-	const personal = usePersonalStore()
-	const result = rules.collectEnergy(model.stateFromStore(), actingPlayerIndex(), colour)
+	const actor = actingPlayerIndex()
+	const result = rules.collectEnergy(model.stateFromStore(), actor, colour)
 	if (!result.ok) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_ENERGY, actingPlayerIndex(), [colour, result.produced, result.virtual, result.gains])
+	model.addHistory(rf.HIST_ENERGY, actor, [colour, result.produced, result.virtual, result.gains])
 	const energyKeys = ["movement", "build", "trade"]
 	const collected = result.gains.map((n, i) => (n ? n + " " + t("energy." + energyKeys[i]) : "")).filter(Boolean).join(", ")
 	store.gameMessages.successText = result.virtual ? result.message : t("energy.collectedGains", { gains: collected })
@@ -268,6 +273,14 @@ export async function startMovement() {
 	return true
 }
 
+export async function stopMovement() {
+	if (!isMyTurn()) return false
+	const store = useModelStore()
+	rules.stopMovement(model.stateFromStore())
+	store.context.action = rf.ACT_NONE
+	await IO.saveGame(true)
+}
+
 export async function moveTo(nodeId) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
@@ -278,7 +291,6 @@ export async function moveTo(nodeId) {
 	}
 	model.addHistory(rf.HIST_MOVE, actingPlayerIndex(), [nodeId, result.path])
 	store.context.highlightNodes.splice(0)
-	if (store.gameflow.pendingExplore) store.viewSettings.showExplore = true
 	await IO.saveGame(true)
 	if (store.gameflow.movement.remaining === 0) store.context.action = rf.ACT_NONE
 	return true
@@ -292,7 +304,6 @@ export async function explore(column) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	store.viewSettings.showExplore = false
 	store.gameMessages.successText = t("messages.planetExplored")
 	await IO.saveGame(true)
 	return true
@@ -321,7 +332,6 @@ export async function usePathway() {
 		return false
 	}
 	model.addHistory(rf.HIST_PATHWAY, actingPlayerIndex(), [result.planetId])
-	if (store.gameflow.pendingExplore) store.viewSettings.showExplore = true
 	await IO.saveGame(true)
 	return true
 }
@@ -482,13 +492,11 @@ export async function discardEnergy(colour) {
 export async function endActionTurn() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	const actor = actingPlayerIndex()
 	const endingTurn = store.gameflow.turn
 	const result = rules.finishActionTurn(model.stateFromStore())
 	if (!result.ok) {
-		if (result.needsExplore) {
-			store.viewSettings.showExplore = true
-			return false
-		}
+		if (result.needsExplore) return false
 		if (result.needsEnergyDiscard) {
 			store.viewSettings.showDiscardEnergy = true
 			return false
@@ -500,7 +508,7 @@ export async function endActionTurn() {
 		store.gameMessages.actionError = result.message
 		return false
 	}
-	model.addHistory(rf.HIST_END_TURN, actingPlayerIndex(), [endingTurn])
+	model.addHistory(rf.HIST_END_TURN, actor, [endingTurn])
 	store.viewSettings.showDiscardCargo = false
 	store.viewSettings.showDiscardEnergy = false
 	await IO.saveGame(!result.gameOver)

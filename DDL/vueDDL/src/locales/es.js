@@ -276,6 +276,10 @@ export default {
 		exit: "Salir de la repetición",
 	},
 	map: {
+		chooseStart: "Elige un planeta inicial resaltado en el mapa.",
+		choosePathways: "Elige la entrada y después la salida en el mapa.",
+		chooseExplore: "Explora: elige una loseta de consumidor resaltada en el mapa.",
+
 		routeDot: "Ruta {route} punto {dot}",
 		deepSpace: "Espacio profundo",
 		mineTitle: "Mina: {good}",

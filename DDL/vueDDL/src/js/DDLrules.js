@@ -585,7 +585,7 @@ export function placePathways(state, playerIndex, inPlanetId, outPlanetId) {
 export function canUsePathway(state, playerIndex) {
 	const planet = playerPlanet(state, playerIndex)
 	if (!planet) return false
-	return planet.pathways.some((p) => p.dir === "in")
+	return planetState(state, planet.id).pathways.some((p) => p.dir === "in")
 }
 
 export function usePathway(state, playerIndex) {
@@ -593,7 +593,7 @@ export function usePathway(state, playerIndex) {
 	if (blocked) return blocked
 	const planet = playerPlanet(state, playerIndex)
 	if (!planet) return { ok: false, message: t("errors.planetToUsePathway") }
-	const entrance = planet.pathways.find((p) => p.dir === "in")
+	const entrance = planetState(state, planet.id).pathways.find((p) => p.dir === "in")
 	if (!entrance) return { ok: false, message: t("errors.noPathwayEntrance") }
 	const owner = state.players[entrance.owner]
 	if (!owner || !owner.pathways.placed) return { ok: false, message: t("errors.pathwayNotActive") }
