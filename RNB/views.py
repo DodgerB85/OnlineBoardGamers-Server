@@ -258,8 +258,6 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
         }
     )
 
-    # returnData.strictMyMove = presenter.getStrictIsMyMove(username)
-
     ### NEW GAME
     if not currentGame.gameData or currentGame.gameData == "":
         displayNames = ""

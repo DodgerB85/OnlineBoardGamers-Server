@@ -623,41 +623,6 @@ class GamePresenter:
 
         return generalReturn
 
-    def getVoteResults(self, topic):
-        """
-        Returns a tally of choices.
-        Example: {0: 1, 1: 3} (1 person voted '0', 3 people voted '1')
-        """
-        if not self.gameObj.activeVotes or topic not in self.gameObj.activeVotes:
-            return {}
-
-        results = {}
-        for choice in self.gameObj.activeVotes[topic].values():
-            results[choice] = results.get(choice, 0) + 1
-        return results
-
-    def check_unanimous_choice_in_set(self, topic, allowed_choices, total_required):
-        """
-        Checks if EVERY player has voted and their choices are within the allowed set.
-        allowed_choices can be a single value (1) or a list ([1, 2]).
-        """
-        if not self.gameObj.activeVotes or topic not in self.gameObj.activeVotes:
-            return False
-
-        votes = self.gameObj.activeVotes.get(topic, {})
-
-        # 1. Ensure everyone has voted
-        if len(votes) < total_required:
-            return False
-
-        # 2. Ensure allowed_choices is a list for the 'in' check
-        if not isinstance(allowed_choices, (list, tuple, set)):
-            allowed_choices = [allowed_choices]
-
-        # 3. Check if all submitted votes are in the allowed list
-        # (e.g., if all values are 1 or 2)
-        return all(val in allowed_choices for val in votes.values())
-
     # End voting methods
 
 
@@ -949,13 +914,6 @@ class AQYpresenter(GamePresenter):
         if not gp:
             return False
         return bool(gp.currentMoveData != "" and gp.currentMoveTime != "MID_PHASE" and gp.currentMoveTime != "PRE_MOVE")
-
-    def hasMoveMidData(self, name):
-        seat = self.seatPosition(name)
-        gp = self.gameObj.players.filter(seat_order=seat).first()
-        if not gp:
-            return False
-        return bool(gp.currentMoveData != "" and gp.currentMoveTime == "MID_PHASE")
 
     def updateSingleMove(self, name, data, deleteMove=False):
         import time
@@ -1388,16 +1346,6 @@ class INDpresenter(GamePresenter):
             return ""
         return base64.b64encode(gzip.compress(json.dumps(playerMoveDataArr, separators=(",", ":")).encode("utf-8"))).decode("utf-8")
 
-    def deleteSinglePlayersPreMove(self, name):
-        playersPreMoveDataArr = self.getOrScaffoldAllPreMoveData()
-        arrIdx = next(
-            (i for i, sub_arr in enumerate(playersPreMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name),
-            -1,
-        )
-        playersPreMoveDataArr[arrIdx] = [name, [-1], "", []]
-        self.gameObj.playersPreMoveData = json.dumps(playersPreMoveDataArr)
-        self.gameObj.save()
-
     def clearAllPreMoveData(self):
         self.gameObj.playersPreMoveData = ""
         self.gameObj.save()
@@ -1534,20 +1482,6 @@ class BUSpresenter(GamePresenter):
 
 
 class RNBpresenter(GamePresenter):
-    def getStrictIsMyMove(self, loggedInPlayerUsername=None):
-        if loggedInPlayerUsername is None:
-            return False
-
-        currentPlayersList = self.gameObj.serverCurrentPlayerNamesInTurnOrder
-
-        if not currentPlayersList:
-            return False
-        # If you are front of the queue, it is your turn
-        if currentPlayersList[0] == loggedInPlayerUsername:
-            return True
-        # If it is a simul turn, and you are ANYWHERE in the list, it is your move
-        return self.gameObj.phase in rfRNB.ALL_PHASE_CONFLICT_DECISIONS
-
     def quickIsMyMove(self, loggedInPlayerUsername=None):
         # Return False if no username is provided
         if loggedInPlayerUsername is None:
