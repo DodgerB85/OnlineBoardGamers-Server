@@ -82,8 +82,7 @@
 	padding-top: 12px;
 	padding-bottom: 12px;
 	/*text-align: left;*/
-	/*background-color: #87C2C8;*/
-	background-color: #5875f8;
+	background-color: var(--color-accent);
 	color: white;
 	cursor: default;
 }
@@ -538,6 +537,60 @@
 
 .profile-top-grid > .card {
     margin: 0;
+}
+
+/* Account details: credentials stay as summary rows; each Change form folds out inline. */
+.profile-account-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.profile-account-row:last-child {
+    border-bottom: none;
+}
+
+.profile-account-row .form-label {
+    flex: 0 0 90px;
+    margin: 0;
+}
+
+.profile-account-value {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.profile-account-entry > summary {
+    cursor: pointer;
+    list-style: none;
+}
+
+.profile-account-entry > summary::-webkit-details-marker {
+    display: none;
+}
+
+.profile-account-entry > summary .when-open {
+    display: none;
+}
+
+.profile-account-entry[open] > summary .when-open {
+    display: inline;
+}
+
+.profile-account-entry[open] > summary .when-closed {
+    display: none;
+}
+
+.profile-account-note {
+    margin: 0 0 10px;
+    font-size: 14px;
+}
+
+.profile-account-note-danger {
+    color: var(--color-danger);
 }
 
 /* Profile sections share the lobby's .tabs / .tab strip; one panel at a time. */

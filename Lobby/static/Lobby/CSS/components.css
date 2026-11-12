@@ -379,13 +379,6 @@ button {
 .page-profile .field > .form-help {
     font-size: 14px;
 }
-.profile-game-preferences {
-    margin-top: 24px;
-    padding: 16px;
-    background: var(--color-surface-soft);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-}
 
 .form-row > input[type="text"],
 .form-row > input[type="email"],
@@ -785,7 +778,7 @@ button {
 
 .tab.active,
 .tab.tablinks.active {
-    color: #fff;
+    color: var(--color-accent-ink);
     background: var(--color-accent);
 }
 
@@ -2990,7 +2983,6 @@ iframe {
 	.help-pills .button { font-size: 16px; }
 	.page-header .page-subtitle { font-size: 16px; }
 	.hero-actions .button { font-size: 16px; }
-	.profile-game-preferences .form-label { font-size: 16px; }
 	.opts-section .check-label { font-size: 15px; }
 
 	/* Column width adjustments */

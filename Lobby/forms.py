@@ -81,23 +81,25 @@ class PasswordResetFormCustom(PasswordResetForm):
 class PasswordChangeCustomForm(PasswordChangeForm):
     def __init__(self, user, *args, **kwargs):
         super().__init__(user, *args, **kwargs)
+        # new-password on the old field stops browsers autofilling it; this is a
+        # change form, not a sign-in.
         self.fields["old_password"].widget.attrs.update(
-            {"class": "registerInput", "placeholder": gettext_lazy("Old Password")}
-        )
-        self.fields["new_password1"].widget.attrs.update(
-            {"class": "registerInput", "placeholder": gettext_lazy("New Password")}
-        )
-        self.fields["new_password2"].widget.attrs.update(
             {
                 "class": "registerInput",
-                "placeholder": gettext_lazy("Confirm New Password"),
+                "autocomplete": "new-password",
             }
+        )
+        self.fields["new_password1"].widget.attrs.update(
+            {"class": "registerInput", "autocomplete": "new-password"}
+        )
+        self.fields["new_password2"].widget.attrs.update(
+            {"class": "registerInput", "autocomplete": "new-password"}
         )
         self.fields["old_password"].widget.attrs.pop("autofocus", None)
 
-        self.fields["old_password"].label = ""
-        self.fields["new_password1"].label = ""
-        self.fields["new_password2"].label = ""
+        self.fields["old_password"].label = gettext_lazy("Old Password")
+        self.fields["new_password1"].label = gettext_lazy("New Password")
+        self.fields["new_password2"].label = gettext_lazy("Confirm New Password")
 
 
 class NewUserForm(UsernameValidationMixin, UserCreationForm):
