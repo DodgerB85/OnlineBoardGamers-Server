@@ -605,7 +605,7 @@ def _processHLCturn(request):
         currentGame.rewindData = "'SPLIT'".join(currentRewindDataArray)
         # if len(currentGame.rewindData) == 0:
         #    currentGame.rewindData = loadData
-        if currentGame.activeVotes and "rewind_consent" in currentGame.activeVotes:
+        if presenter.hasAnyVotes(rf.REWIND_CONSENT_VOTE_TOPIC):
             presenter.actionRewindAlterConsent()
         presenter.clearAllMoveData()
         presenter.clearKickoutVotes()

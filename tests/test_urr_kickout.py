@@ -88,8 +88,9 @@ class UrrKickoutTests(TestCase):
 
     @patch("Lobby.presenters.GamePresenter.kickoutRequired", return_value=2)
     def test_own_two_day_vote_allows_solo_kickout(self, kickout_required):
-        self.game.activeVotes = {KICKOUT_VOTE_TOPIC: {self.players[0].username: [self.players[2].username, int((time.time() - 2 * 86400 - 1) * 1000)]}}
-        self.game.save(update_fields=["activeVotes"])
+        voter = self.game.players.get(player=self.players[0])
+        voter.votesJSON = {KICKOUT_VOTE_TOPIC: [self.players[2].username, int((time.time() - 2 * 86400 - 1) * 1000)]}
+        voter.save(update_fields=["votesJSON"])
         self.assertIn("missingPlayers", self.kickout().json())
         self.assertTrue(self.game.players.get(player=self.players[2]).is_kicked)
 

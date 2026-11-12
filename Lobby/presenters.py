@@ -187,27 +187,33 @@ class GamePresenter:
     # END KICKOUT STUFF
 
     # KICKOUT VOTE STUFF
-    # Votes live in activeVotes[KICKOUT_VOTE_TOPIC] as {voter_username: [target_username, vote_time_ms]}.
-    # A kickout goes ahead when the votes for the target reach a majority of the
-    # remaining players (2p stays a single-player kickout), or when a voter's own
-    # vote for that target is more than 2 days old.
+    # Votes live on GamePlayer.votesJSON as {topic: choice}. A kickout vote is
+    # [target_username, vote_time_ms]. A kickout goes ahead when the votes for the
+    # target reach a majority of the remaining players (2p stays a single-player
+    # kickout), or when a voter's own vote for that target is more than 2 days old.
     def getKickoutVotesData(self):
-        if not self.gameObj.activeVotes:
-            return {}
-        return self.gameObj.activeVotes.get(rf.KICKOUT_VOTE_TOPIC, {}) or {}
+        votes_data = {}
+        for gp in self.gameObj.players.select_related("player"):
+            if not gp.player or not isinstance(gp.votesJSON, dict):
+                continue
+            vote = gp.votesJSON.get(rf.KICKOUT_VOTE_TOPIC)
+            if vote:
+                votes_data[gp.player.username] = vote
+        return votes_data
+
+    def hasAnyVotes(self, topic):
+        return any(isinstance(gp.votesJSON, dict) and topic in gp.votesJSON for gp in self.gameObj.players.all())
 
     def getKickoutVoteThreshold(self):
         remaining_players = self.gameObj.players.filter(is_missing=False, is_ai=False).count()
         return (remaining_players + 1) // 2
 
     def castKickoutVote(self, voter_username, target_username):
-        if not self.gameObj.activeVotes:
-            self.gameObj.activeVotes = {}
-        kickout_votes = self.gameObj.activeVotes.get(rf.KICKOUT_VOTE_TOPIC)
-        if kickout_votes is None:
-            kickout_votes = {}
-            self.gameObj.activeVotes[rf.KICKOUT_VOTE_TOPIC] = kickout_votes
-        existing_vote = kickout_votes.get(voter_username)
+        gp = self.gameObj.players.filter(player__username=voter_username).first()
+        if not gp:
+            return
+        votes = gp.votesJSON if isinstance(gp.votesJSON, dict) else {}
+        existing_vote = votes.get(rf.KICKOUT_VOTE_TOPIC)
         if (
             isinstance(existing_vote, (list, tuple))
             and len(existing_vote) >= 2
@@ -215,12 +221,18 @@ class GamePresenter:
         ):
             # Keep the original vote time so the 2-day solo-kickout counter is not reset
             return
-        kickout_votes[voter_username] = [target_username, int(time.time() * 1000)]
+        votes[rf.KICKOUT_VOTE_TOPIC] = [target_username, int(time.time() * 1000)]
+        gp.votesJSON = votes
+        gp.save(update_fields=["votesJSON"])
 
     def clearKickoutVotes(self):
-        if self.gameObj.activeVotes and rf.KICKOUT_VOTE_TOPIC in self.gameObj.activeVotes:
-            # Assign new dict to ensure JSONField change detection
-            self.gameObj.activeVotes = {k: v for k, v in self.gameObj.activeVotes.items() if k != rf.KICKOUT_VOTE_TOPIC}
+        for gp in self.gameObj.players.all():
+            if not isinstance(gp.votesJSON, dict) or rf.KICKOUT_VOTE_TOPIC not in gp.votesJSON:
+                continue
+            votes = dict(gp.votesJSON)
+            votes.pop(rf.KICKOUT_VOTE_TOPIC, None)
+            gp.votesJSON = votes
+            gp.save(update_fields=["votesJSON"])
 
     def canSoloKickout(self, voter_username, target_username):
         vote = self.getKickoutVotesData().get(voter_username)
@@ -444,7 +456,7 @@ class GamePresenter:
         # to hit the DB here. Leaving moveDataJSON behind is not harmless: the RNB
         # client's kickstart-recovery block replays allStackData on load, so stale
         # moves can be re-applied to an already-finished game.
-        self.gameObj.players.update(moveDataJSON=None, currentMoveTime="", currentMoveData="")
+        self.gameObj.players.update(moveDataJSON=None, currentMoveTime="", currentMoveData="", votesJSON={})
 
     def sendInviteNotifications(self, playerNames, _gameName, _maxPlayers, _gameCode):
         from django_q.tasks import async_task
@@ -516,37 +528,30 @@ class GamePresenter:
         """
         # Rewind consent and kickout votes only mean anything while the game is
         # live. Rejecting them here stops a late vote - a stale browser tab, or an
-        # AI bot still looping - from re-creating the activeVotes that endGame
-        # clears. Delete / stats-exclude votes are still legal once finished.
+        # AI bot still looping - from re-creating votes that endGame clears.
+        # Delete / stats-exclude votes are still legal once finished.
         if self.gameObj.gameStatus == "FINISHED" and topic in (rf.REWIND_CONSENT_VOTE_TOPIC, rf.KICKOUT_VOTE_TOPIC):
             return False
 
-        # Double check player is in the game - WAIT FOR ALL PLAYERS TO MOVE HERE
-        # if playerName not in [p.username for p in self.allPlayers.all()]:
-        #    return False  # Player not in the game
-        if not self.gameObj.activeVotes:
-            self.gameObj.activeVotes = {}
-
-        if topic not in self.gameObj.activeVotes:
-            self.gameObj.activeVotes[topic] = {}
-
-        # Store as {"username": choice}
-        self.gameObj.activeVotes[topic][username] = choice
+        gp = self.gameObj.players.filter(player__username=username).first()
+        if not gp:
+            return False
+        votes = dict(gp.votesJSON) if isinstance(gp.votesJSON, dict) else {}
+        votes[topic] = choice
+        gp.votesJSON = votes
+        gp.save(update_fields=["votesJSON"])
         return True
 
     def processVoteLogic(self, topic, username, choice):
         """
         Processes a vote and returns a dict ready for JsonResponse.
         """
-        # 1. Cast the vote
+        # 1. Cast the vote (castVote persists the GamePlayer row)
         success = self.castVote(topic, username, choice)
         if not success:
             return {"voteChanged": False}
 
-        # 2. Persist the vote
-        self.gameObj.save()
-
-        # 3. Check if all players have voted
+        # 2. Check if all players have voted
         # NB this "y" seat typo is everywhere! Leave for noe
         ordered_players = self.getAllPlayersOrderedySeatInArray(True)
         missing_players = self.getMissingPlayersNamesArray()
@@ -565,7 +570,7 @@ class GamePresenter:
         # Prepare base response data
         response_data = {"voteChanged": True, "votesData": json.dumps(votes_map)}
 
-        # 4. Handle Terminal Actions
+        # 3. Handle Terminal Actions
         if all_voted:
             if topic == rf.DELETE_VOTE_TOPIC:
                 self.gameObj.delete()
@@ -579,14 +584,26 @@ class GamePresenter:
         return response_data
 
     def setVoteResults(self, topic, votes):
-        if not self.gameObj.activeVotes:
-            self.gameObj.activeVotes = {}
-        # if the topic doesnt exist, then creat it
-        if topic not in self.gameObj.activeVotes:
-            self.gameObj.activeVotes[topic] = {}
-        self.gameObj.activeVotes[topic] = votes
+        # Do not let a post-endGame caller put rewind/kickout votes back.
+        if self.gameObj.gameStatus == "FINISHED" and topic in (rf.REWIND_CONSENT_VOTE_TOPIC, rf.KICKOUT_VOTE_TOPIC):
+            return
+        # This replaces the topic for every player, matching the old whole-topic write.
+        for gp in self.gameObj.players.all():
+            if isinstance(gp.votesJSON, dict) and topic in gp.votesJSON:
+                player_votes = dict(gp.votesJSON)
+                player_votes.pop(topic, None)
+                gp.votesJSON = player_votes
+                gp.save(update_fields=["votesJSON"])
+        for username, choice in votes.items():
+            gp = self.gameObj.players.filter(player__username=username).first()
+            if not gp:
+                continue
+            player_votes = dict(gp.votesJSON) if isinstance(gp.votesJSON, dict) else {}
+            player_votes[topic] = choice
+            gp.votesJSON = player_votes
+            gp.save(update_fields=["votesJSON"])
 
-    # The topic might not be in activeVotes, but sometimes we want a full return set of username: T/F
+    # The topic might not be present, but sometimes we want a full return set of username: T/F
     def getFullSetOfVoteResults(self, topic, usernames, default):
         # Initialize the return dictionary with default for every provided username
         generalReturn = {username: default for username in usernames}
@@ -606,23 +623,15 @@ class GamePresenter:
                     generalReturn[username] = 2
                 return generalReturn
 
-        # If game is finished or no votes exist at all, return the all-False set
-        if self.gameObj.gameStatus == "FINISHED" or not self.gameObj.activeVotes:
+        # If the game is finished, return the all-default set.
+        if self.gameObj.gameStatus == "FINISHED":
             return generalReturn
 
-        if not self.gameObj.activeVotes:
-            self.gameObj.activeVotes = {}
-
-        # If this specific topic hasn't been started, return the all-False set
-        if topic not in self.gameObj.activeVotes:
-            return generalReturn
-
-        currentVotes = self.gameObj.activeVotes[topic]
-
-        # Update the return set with actual votes where they exist
+        game_players = {gp.player.username: gp for gp in self.gameObj.players.select_related("player") if gp.player}
         for username in usernames:
-            if username in currentVotes:
-                generalReturn[username] = currentVotes[username]
+            gp = game_players.get(username)
+            if gp and isinstance(gp.votesJSON, dict) and topic in gp.votesJSON:
+                generalReturn[username] = gp.votesJSON[topic]
 
         return generalReturn
 
@@ -1456,8 +1465,7 @@ class BUSpresenter(GamePresenter):
                     gp.is_current = False
             GamePlayer.objects.bulk_update(game_players, ["is_current"])
 
-        # Initialize rewind consent in activeVotes
-
+        # Initialize rewind consent on each GamePlayer.
         rewind_votes = {}
         host_username = self.gameObj.host.username if self.gameObj.host else None
         for gp in game_players:
@@ -1473,9 +1481,7 @@ class BUSpresenter(GamePresenter):
             for username in rewind_votes:
                 rewind_votes[username] = 2
 
-        if not self.gameObj.activeVotes:
-            self.gameObj.activeVotes = {}
-        self.gameObj.activeVotes[rf.REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
+        self.setVoteResults(rf.REWIND_CONSENT_VOTE_TOPIC, rewind_votes)
 
         # required to send correct start player notification
         self.gameObj.save()
@@ -2644,7 +2650,7 @@ class HLCpresenter(GamePresenter):
 
         GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
 
-        # Initialize rewind consent in activeVotes
+        # Initialize rewind consent on each GamePlayer.
         rewind_votes = {}
         host_username = self.gameObj.host.username if self.gameObj.host else None
         for gp in game_players:
@@ -2655,9 +2661,7 @@ class HLCpresenter(GamePresenter):
                 else:
                     rewind_votes[username] = 0
 
-        if not self.gameObj.activeVotes:
-            self.gameObj.activeVotes = {}
-        self.gameObj.activeVotes[rf.REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
+        self.setVoteResults(rf.REWIND_CONSENT_VOTE_TOPIC, rewind_votes)
 
         self.gameObj.save()
 
@@ -2860,51 +2864,35 @@ class HLCpresenter(GamePresenter):
     def clearAllMoveData(self):
         self.gameObj.players.all().update(currentMoveTime="", currentMoveData="")
 
-    # Rewind methods using activeVotes
+    # Rewind methods using GamePlayer.votesJSON
     def getCurrentRewindConsent(self, _username):
-        seat = self.seatPosition(_username)
-        if seat < 0:
+        gp = self.gameObj.players.filter(player__username=_username).first()
+        if not gp or not isinstance(gp.votesJSON, dict):
             return 0
-        votes = self.gameObj.activeVotes.get(rf.REWIND_CONSENT_VOTE_TOPIC, {}) if self.gameObj.activeVotes else {}
-        return votes.get(_username, 0)
+        return gp.votesJSON.get(rf.REWIND_CONSENT_VOTE_TOPIC, 0)
 
     def setupRewindConsent(self):
-        if self.gameObj.activeVotes and rf.REWIND_CONSENT_VOTE_TOPIC in self.gameObj.activeVotes:
+        if self.hasAnyVotes(rf.REWIND_CONSENT_VOTE_TOPIC):
             return
         rewind_votes = {}
         all_players = self.getAllPlayersOrderedySeatInArray(True)
         host_username = self.gameObj.host.username if self.gameObj.host else None
         for player in all_players:
-            if player == host_username:
-                rewind_votes[player] = 2
-            else:
-                rewind_votes[player] = 0
-        if not self.gameObj.activeVotes:
-            self.gameObj.activeVotes = {}
-        self.gameObj.activeVotes[rf.REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
-        self.gameObj.save()
+            rewind_votes[player] = 2 if player == host_username else 0
+        self.setVoteResults(rf.REWIND_CONSENT_VOTE_TOPIC, rewind_votes)
 
     def getRewindHostPossible(self):
         if self.isTrainingGame():
             return True
         if self.gameObj.players.filter(is_missing=True).exists():
-            if not self.gameObj.activeVotes:
-                self.gameObj.activeVotes = {}
-            rewind_votes = {}
-            for gp in self.gameObj.players.select_related("player"):
-                if gp.player:
-                    rewind_votes[gp.player.username] = 2
-            self.gameObj.activeVotes[rf.REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
-            self.gameObj.save()
+            rewind_votes = {gp.player.username: 2 for gp in self.gameObj.players.select_related("player") if gp.player}
+            self.setVoteResults(rf.REWIND_CONSENT_VOTE_TOPIC, rewind_votes)
 
-        if not self.gameObj.activeVotes or rf.REWIND_CONSENT_VOTE_TOPIC not in self.gameObj.activeVotes:
-            return False
-
-        rewind_votes = self.gameObj.activeVotes.get(rf.REWIND_CONSENT_VOTE_TOPIC, {})
+        rewind_votes = self.getFullSetOfVoteResults(rf.REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
         return all(consent != 0 for consent in rewind_votes.values())
 
     def getRewindHostHTML(self):
-        if not self.gameObj.activeVotes or rf.REWIND_CONSENT_VOTE_TOPIC not in self.gameObj.activeVotes:
+        if not self.hasAnyVotes(rf.REWIND_CONSENT_VOTE_TOPIC):
             self.setupRewindConsent()
 
         rewindConsentVotes = self.getFullSetOfVoteResults(rf.REWIND_CONSENT_VOTE_TOPIC, self.getAllPlayersOrderedySeatInArray(True), 0)
@@ -2922,13 +2910,13 @@ class HLCpresenter(GamePresenter):
         return rewindHTML
 
     def actionRewindAlterConsent(self):
-        if not self.gameObj.activeVotes or rf.REWIND_CONSENT_VOTE_TOPIC not in self.gameObj.activeVotes:
-            return
-        rewind_votes = self.gameObj.activeVotes[rf.REWIND_CONSENT_VOTE_TOPIC]
-        for username in rewind_votes:
-            if rewind_votes[username] == 1:
-                rewind_votes[username] = 0
-        self.gameObj.activeVotes[rf.REWIND_CONSENT_VOTE_TOPIC] = rewind_votes
+        for gp in self.gameObj.players.all():
+            if not isinstance(gp.votesJSON, dict) or gp.votesJSON.get(rf.REWIND_CONSENT_VOTE_TOPIC) != 1:
+                continue
+            votes = dict(gp.votesJSON)
+            votes[rf.REWIND_CONSENT_VOTE_TOPIC] = 0
+            gp.votesJSON = votes
+            gp.save(update_fields=["votesJSON"])
 
 
 class KFWpresenter(GamePresenter):

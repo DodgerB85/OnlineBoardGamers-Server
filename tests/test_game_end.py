@@ -176,14 +176,14 @@ class GameEndCleanupTests(TestCase):
 
 class VotesClearedOnGameEndTests(TestCase):
     """
-    activeVotes must be empty on a finished game.
+    Votes must be empty on a finished game.
 
-    Two things used to resurrect it after endGame cleared it:
+    Two things used to resurrect them after endGame cleared them:
       1. FCM's saveNormal called removeSingleRewindPermission() unconditionally,
          including on the same save that called endGame() - so the votes were
          written straight back.
       2. castVote() had no gameStatus guard, so a late vote (stale tab, or the
-         FcmAI bot still looping) re-created activeVotes on a FINISHED game.
+         FcmAI bot still looping) re-created vote data on a FINISHED game.
     """
 
     def setUp(self):
@@ -201,35 +201,36 @@ class VotesClearedOnGameEndTests(TestCase):
         return game, playerA, playerB
 
     def test_rewind_and_kickout_votes_rejected_once_finished(self):
-        game, _a, _b = self._finished_game()
+        game, playerA, _b = self._finished_game()
 
         for topic in (self.rf.REWIND_CONSENT_VOTE_TOPIC, self.rf.KICKOUT_VOTE_TOPIC):
             with self.subTest(topic=topic):
-                self.assertFalse(game.presenter().castVote(topic, self.user.username, 0))
+                self.assertFalse(game.presenter().castVote(topic, playerA.username, 0))
 
         game.refresh_from_db()
         self.assertIsNone(game.activeVotes, "A late vote re-created activeVotes on a FINISHED game")
+        player_votes = [gp.votesJSON for gp in game.players.all() if isinstance(gp.votesJSON, dict)]
+        self.assertFalse(any(self.rf.REWIND_CONSENT_VOTE_TOPIC in votes for votes in player_votes))
+        self.assertFalse(any(self.rf.KICKOUT_VOTE_TOPIC in votes for votes in player_votes))
 
     def test_delete_and_stats_exclude_votes_still_allowed_once_finished(self):
         """Players must still be able to vote to delete / exclude stats after the game ends."""
-        game, _a, _b = self._finished_game()
+        game, playerA, _b = self._finished_game()
 
         for topic in (self.rf.DELETE_VOTE_TOPIC, self.rf.STATS_EXCLUDE_VOTE_TOPIC):
             with self.subTest(topic=topic):
-                self.assertTrue(game.presenter().castVote(topic, self.user.username, 1))
+                self.assertTrue(game.presenter().castVote(topic, playerA.username, 1))
 
-        # castVote only mutates in memory; processVoteLogic is what persists.
-        game.save()
-        game.refresh_from_db()
-        self.assertIsNotNone(game.activeVotes)
+        gp = game.players.get(player=playerA)
+        self.assertTrue(gp.votesJSON[self.rf.DELETE_VOTE_TOPIC])
+        self.assertTrue(gp.votesJSON[self.rf.STATS_EXCLUDE_VOTE_TOPIC])
 
     def test_rewind_vote_still_allowed_while_active(self):
-        game, _a, _b = _dirty_game_and_players("FCM")
+        game, playerA, _b = _dirty_game_and_players("FCM")
 
-        self.assertTrue(game.presenter().castVote(self.rf.REWIND_CONSENT_VOTE_TOPIC, self.user.username, 2))
-        game.save()
-        game.refresh_from_db()
-        self.assertEqual(game.activeVotes[self.rf.REWIND_CONSENT_VOTE_TOPIC][self.user.username], 2)
+        self.assertTrue(game.presenter().castVote(self.rf.REWIND_CONSENT_VOTE_TOPIC, playerA.username, 2))
+        gp = game.players.get(player=playerA)
+        self.assertEqual(gp.votesJSON[self.rf.REWIND_CONSENT_VOTE_TOPIC], 2)
 
     def test_fcm_save_that_finishes_game_does_not_rewrite_active_votes(self):
         """
@@ -249,7 +250,13 @@ class VotesClearedOnGameEndTests(TestCase):
             rewindData=json.dumps(["AAAA", "BBBB"], separators=(",", ":")),
         )
         for idx, player in enumerate([self.user, self.rival]):
-            GamePlayer.objects.create(game=game, player=player, seat_order=idx, is_current=idx == 0)
+            GamePlayer.objects.create(
+                game=game,
+                player=player,
+                seat_order=idx,
+                is_current=idx == 0,
+                votesJSON={self.rf.REWIND_CONSENT_VOTE_TOPIC: 1 if idx == 0 else 0},
+            )
 
         self.client.force_login(self.user)
         payload = {
@@ -279,6 +286,7 @@ class VotesClearedOnGameEndTests(TestCase):
             game.activeVotes,
             f"FCM rewrote vote data onto a finished game: {game.activeVotes}",
         )
+        self.assertFalse(any(isinstance(gp.votesJSON, dict) and gp.votesJSON for gp in game.players.all()))
         self.assertEqual(game.rewindData, "")
 
 

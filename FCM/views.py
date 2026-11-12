@@ -1201,7 +1201,7 @@ def _processTurn(request):
             )
         else:
             # A rewind downgrades any single-permission grants. This must NOT run
-            # after endGame: it re-creates the activeVotes that endGame just
+            # after endGame: it re-creates the rewind votes that endGame just
             # cleared, leaving a finished game with live-looking vote data.
             presenter.removeSingleRewindPermission()
 

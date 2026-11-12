@@ -547,6 +547,9 @@ class GamePlayer(models.Model):
 
     moveDataJSON = models.JSONField(default=list, null=True, blank=True)
 
+    # Per-player votes: {topic: choice}. Cleared when the game ends.
+    votesJSON = models.JSONField(default=dict, null=True, blank=True)
+
     # Simple per-player current-move scratch. AQY and HLC use these directly;
     # structured per-game state belongs in moveDataJSON instead.
     currentMoveTime = models.CharField(max_length=15, blank=True)
