@@ -52,7 +52,6 @@ export function setupNewGame(opts = {}) {
 	// Everything below is per-game state. On a fresh game these are all already
 	// empty; on a reset they hold the game being thrown away.
 	store.history.splice(0)
-	if (!opts.regenerateMap) store.seniorBusinessDeveloper.uniqueCards = true
 	store.needs.splice(0)
 	store.houses.splice(0)
 	store.gardens.splice(0)
@@ -555,7 +554,7 @@ export function setupKetchupExpansion(playerNumber) {
 	}
 	// Senior Business Developer mod
 	if (store.startingOptions.seniorBusinessDeveloper) {
-		store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER] = store.seniorBusinessDeveloper.uniqueCards ? max : 6
+		store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER] = max
 		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_SENIOR_BUSINESS_DEVELOPER_USED)
 	}
 }

@@ -108,8 +108,10 @@ def _fcm_roster_cards(game_data, starting_options):
     if not isinstance(data, list):
         return None
 
-    # The lobbyists module adds its map tiles at slot 0; players follow it.
-    players = data[1] if rfFCM.SO_LOBBYISTS in starting_options else data[0]
+    # The lobbyists module adds its map tiles at slot 0; players follow it. The
+    # SBD module writes the same slot for its tile-reward milestone.
+    tile_slot = rfFCM.SO_LOBBYISTS in starting_options or rfFCM.SO_SENIOR_BUSINESS_DEVELOPER in starting_options
+    players = data[1] if tile_slot else data[0]
     if not (isinstance(players, list) and players and isinstance(players[0], list) and players[0] and isinstance(players[0][0], list)):
         players = data[0]
     if not isinstance(players, list):

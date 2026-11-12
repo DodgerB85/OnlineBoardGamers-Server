@@ -1,7 +1,6 @@
 <script setup>
 import * as view from "../../js/FCMview"
 import * as rf from "../../js/FCMreference"
-import * as rules from "../../js/FCMrules"
 import { ref } from "vue"
 
 const props = defineProps({
@@ -25,7 +24,7 @@ const show = ref(false)
 				</h3>
 				<div class="employeeDescriptionDiv">{{ rf.EMPLOYEES_STR[employeeId].description }}</div>
 				<div class="employeeIconsDiv">
-					<img v-if="rules.isUniqueEmployee(employeeId)" :src="view.getImage('icon1x')" class="iconsImg" />
+					<img v-if="rf.UNIQUE_CARDS.indexOf(employeeId) > -1" :src="view.getImage('icon1x')" class="iconsImg" />
 					<img v-else-if="rf.HIREABLE_EMPLOYEES.indexOf(employeeId) > -1" :src="view.getImage('iconRecruit')" class="iconsImg" />
 					<span v-else class="blankIcon">&nbsp;</span>
 					<img v-if="rf.getRangeForEmployee(employeeId) === 8" :src="view.getImage('iconRangeInfinite')" class="iconsImg iconMiddle" />

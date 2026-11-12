@@ -186,7 +186,7 @@ for tournament in TOURNAMENT_SCHEDULE:
             message = f"New {tournament['boxName']} Tournament Opens for Signup in 7 days!\n[Click here to Play](https://www.OnlineBoardGamers.com/)"
             if settings.DEBUG:
                 requests.post(
-                    f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
+                    f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ALL_ADMIN_REPORTS')}",
                     data={"content": message},
                 )
             else:
@@ -233,7 +233,7 @@ for tournament in TOURNAMENT_SCHEDULE:
             message = f"New {box_name} Tournament!\n================================\nName: {tournament_name}\nPlayers per Game: {new_tournament.maxGamePlayers}\nFormat: {tournament_type_string}\n[Click here to Join](https://www.OnlineBoardGamers.com/MainTournament/{new_tournament.id}/)"
             if settings.DEBUG:
                 requests.post(
-                    f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
+                    f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ALL_ADMIN_REPORTS')}",
                     data={"content": message},
                 )
             else:

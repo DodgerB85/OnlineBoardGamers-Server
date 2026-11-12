@@ -189,7 +189,6 @@ export const useModelStore = defineStore("store", () => {
 	// history on load, so it does not need a save slot.
 	const seniorBusinessDeveloper = reactive({
 		outTokensUsed: 0, // tokens taken from the global pool (max 8)
-		uniqueCards: false, // markerless saves retain the original six-card rule
 	})
 
 	/*************************************** UNSAVED - TEMP VARS -- these do not need to be stored or saved */

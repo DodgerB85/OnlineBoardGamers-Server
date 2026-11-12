@@ -223,7 +223,6 @@ export function simpleExportWholeFCMmodel() {
 
 	// 24 - Media Line mod (only when chosen)
 	if (store.startingOptions.mediaLine) temp.push(JSON.parse(JSON.stringify(store.mediaLine)))
-	if (store.seniorBusinessDeveloper.uniqueCards) temp.push(["sbdUnique", 1])
 
 	if (store.mapData.newMapVersion === rf.NEW_MAP_VERSION) temp.push(["newMapVersion", rf.NEW_MAP_VERSION])
 	return compressData(temp)
@@ -718,8 +717,6 @@ export function exportFCMmodel(forGameOver, includeContext, historyCutoff) {
 	// Media Line mod (only when the module was chosen; shape-detected on load).
 	// Compact positional slot, tagged like the Labor Market one.
 	if (store.startingOptions.mediaLine) temp.push(exportMediaLineSlot())
-	// Persist the rules even before SBD is selected in a module draft.
-	if (store.seniorBusinessDeveloper.uniqueCards) temp.push(["sbdUnique", 1])
 
 	if (store.mapData.newMapVersion === rf.NEW_MAP_VERSION) temp.push(["newMapVersion", rf.NEW_MAP_VERSION])
 	return compressData(temp)
@@ -756,7 +753,6 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	const inputArr = step2
 
 	const store = useModelStore()
-	store.seniorBusinessDeveloper.uniqueCards = inputArr.some((slot) => Array.isArray(slot) && slot[0] === "sbdUnique" && slot[1] === 1)
 	let IMPORT_INDEX = 0
 	// Now set up internal options -- THIS JUST SETS UP THE TRUE?FALSE FLAGS
 	model.setInternalStartingOptions(window.initData.startingOptions)
@@ -1579,10 +1575,6 @@ export function simpleImportWholeFCMmodel(inputBase64) {
 
 	
 	let inputModel = decompressData(inputBase64)
-	store.seniorBusinessDeveloper.uniqueCards = inputModel.some((slot) => Array.isArray(slot) && slot[0] === "sbdUnique" && slot[1] === 1)
-	store.mapData.newMapVersion = savedNewMapVersion(inputModel)
-
-
 
 	// Now set up internal options
 	model.setInternalStartingOptions(store.externalStartingOptions)

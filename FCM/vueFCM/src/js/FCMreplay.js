@@ -144,7 +144,7 @@ export function replaySetupKetchupExpansion(playerNumber) {
 		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_TELEMARKETER_USED, rf.FIRST_TV_ANNOUNCER_USED)
 	}
 	if (store.startingOptions.seniorBusinessDeveloper) {
-		store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER] = store.seniorBusinessDeveloper.uniqueCards ? max : 6
+		store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER] = max
 		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_SENIOR_BUSINESS_DEVELOPER_USED)
 	}
 	if (store.startingOptions.laborMarket) model.setupLaborMarketExpansion()
