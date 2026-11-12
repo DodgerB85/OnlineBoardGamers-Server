@@ -9,6 +9,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendNextTurnNotification,
     SN_sendReminderEmail,
     SN_sendReminderExpiredEmail,
+    is_admin_message_noise,
     shouldSendEmail,
 )
 
@@ -156,3 +157,12 @@ class TestReminderContent(TestCase):
         message = mock_webhooks.call_args[0][1]
         self.assertIn("Build Factory is in progress", message)
         self.assertNotIn("Your turn at OnlineBoardGamers", message)
+
+
+class TestAdminMessageNoise(TestCase):
+    def test_silences_known_noise_and_keeps_real_errors(self):
+        self.assertTrue(is_admin_message_noise("FCM save error - Game 1 - User x: [TypeError] Failed to fetch | UA: y"))
+        self.assertTrue(is_admin_message_noise("Error during join: (1062, \"Duplicate entry '1-2' for key\")"))
+        self.assertFalse(is_admin_message_noise("❌ Main Email Failure for a@b.c: authentication failed"))
+        self.assertFalse(is_admin_message_noise("IND save error - Game 1: [Error] HTTP 500"))
+        self.assertFalse(is_admin_message_noise("BUG REPORT for game IND (ID: 1).\nBug Description: Failed to fetch"))
