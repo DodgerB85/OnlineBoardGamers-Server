@@ -128,7 +128,8 @@ for gameCode in GAME_CODES:
             game_url = f"https://www.onlineboardgamers.com/{gameCode}/{game.id}/show/"
             message = f"NO CP: {gameCode} - ID: {game.id}\n<{game_url}>"
             print(message)
-            if not DEBUG:
+            # report on the first day, then weekly, instead of every nightly run
+            if not DEBUG and days_since_update % 7 == 0:
                 SN_sendAdminErrorMessage(message)
 
     # BULK DELETE: One query for all old games in this model

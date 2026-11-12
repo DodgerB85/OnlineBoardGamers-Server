@@ -45,6 +45,7 @@ class GamePresenter:
         return loggedInPlayerUsername in current_usernames or any(username in rf.SHADOW_USERNAMES for username in current_usernames)
 
     def quickIsMyMove(self, loggedInPlayerUsername=None):
+        from Lobby.sharedFunctions.rateLimit import is_rate_limited
         from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
 
         if not loggedInPlayerUsername:
@@ -53,7 +54,9 @@ class GamePresenter:
         current_players = self.gameObj.players.filter(is_current=True).select_related("player")
 
         if not current_players.exists():
-            SN_sendAdminErrorMessage(f"* * * * * * * * quickIsMyMove: no current players - gameCode: {self.gameObj.gameCode} - GameID: {self.gameObj.id} - loggedInPlayerUsername: {loggedInPlayerUsername}")
+            # shortcut: per-process cache, so once a day per worker; fine for a stuck-game heads-up
+            if not is_rate_limited(f"quickIsMyMove_noCP:{self.gameObj.id}", 1, 86400):
+                SN_sendAdminErrorMessage(f"* * * * * * * * quickIsMyMove: no current players - gameCode: {self.gameObj.gameCode} - GameID: {self.gameObj.id} - loggedInPlayerUsername: {loggedInPlayerUsername}")
             return False
 
         current_usernames = [gp.player.username for gp in current_players if gp.player]

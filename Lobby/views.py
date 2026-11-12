@@ -794,8 +794,10 @@ def handler404(request, exception):
         return HttpResponsePermanentRedirect(request.path + "/")
     data = exception.args
     exceptionData = data[0]
-    if exceptionData == "Game does not exist":
-        messages.error(request, gettext(exceptionData))
+    # views raise the translated text, so match both the source and translated strings
+    game_missing = exceptionData in ("Game does not exist", gettext("Game does not exist"))
+    if game_missing:
+        messages.error(request, gettext("Game does not exist"))
     # if data:
     #    return HttpResponseNotFound(data[0])
     try:
@@ -824,7 +826,7 @@ def handler404(request, exception):
         if request.user.is_authenticated:
             message += "Email: " + request.user.email + "\n"
 
-        if request.user.is_authenticated and exceptionData != "Game does not exist":
+        if request.user.is_authenticated and not game_missing:
             requests.post(
                 f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
                 data={"content": message},

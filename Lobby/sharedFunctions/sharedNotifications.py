@@ -1851,7 +1851,35 @@ def SN_sendDiscordDM(discordID, message_text, urlText, urlRaw):
         SN_sendAdminErrorMessage(f"Discord DM failed for id: ({discordID}): {channel_resp.text}")
 
 
+# Known-harmless admin messages: each entry is a set of substrings that must all appear.
+ADMIN_MESSAGE_NOISE = (
+    ("Failed to fetch",),  # client lost connection (Chrome)
+    ("Load failed",),  # client lost connection (Safari)
+    ("NetworkError when attempting to fetch",),  # client lost connection (Firefox)
+    ("HTTP 520",),  # Cloudflare blip
+    ("SYNC ERROR IN:",),  # stale-write check rejected an out-of-date save, as designed
+    ("MAP TILES CONTENT OUT OF SYNC",),  # same guard, FCM map tiles
+    ("BAD MOVE DATA",),  # same guard, doubled/stale move submit
+    ("System busy",),  # mutex refused a concurrent request
+    ("Unexpected token '<'",),  # client parsed the 503/500 HTML page as JSON; 500s report themselves
+    ("Error during join:", "Duplicate entry"),  # double-click on Join, DB constraint blocked it
+    ("Main Email Failure", "timed out"),
+    ("Webhook failed (", "timed out"),
+    ("LOGIN ATTEMPT: Missing Fields", "bot"),  # crawlers POSTing to /login/
+)
+
+
+def is_admin_message_noise(message):
+    if message.startswith("BUG REPORT"):
+        return False
+    return any(all(part in message for part in parts) for parts in ADMIN_MESSAGE_NOISE)
+
+
 def SN_sendAdminErrorMessage(message, webhook_key="WEBHOOK_ADMIN_ERROR_MSG"):
+    if is_admin_message_noise(message):
+        print("Admin message silenced: " + message[:300])
+        return True
+
     # Never reach Discord from the test suite. Several error paths call this on
     # purpose - FCM's map-sync guard rejects saves that a test deliberately makes
     # mismatched, for one - and each one posts to the real admin webhook, so a
