@@ -257,13 +257,16 @@ def SF_serializeGame(game, user, player_context):
         # The flexi ledger belongs to the head of the factory queue, not seat order
         hlcCurrent = game.presenter().getArrayOfIsCurrentPlayers()
         current_username = hlcCurrent[0] if hlcCurrent else current_username
+    flexi_seconds_used = next(
+        (gp.flexiSecondsUsed for gp in all_game_players if gp.player and gp.player.username == current_username),
+        0,
+    )
     kickoutRequiredNum = SF_kickoutRequired(
         game.gameStatus,
         all_usernames,
         game.latestUpdate,
         game.kickoutDuration,
-        game.kickoutFlexiData,
-        current_username,
+        flexi_seconds_used,
     )
 
     return {
@@ -308,16 +311,16 @@ def SF_fastSerializeGame(game, user):
     # "remainingPlayers": remainingPlayers,
 
 
-def SF_updateFlexiTime(kickoutFlexiData, latestUpdate, now, currentUsername, kickoutDuration):
+def SF_updateFlexiTime(game, latestUpdate, now, currentUsername, kickoutDuration):
     secondsSinceUpdate = int((now - int(latestUpdate)) / 1000)
     ##### DEBUG #######
     # secondsSinceUpdate += 24*60*60
 
-    # If there is no flexi time used, just return the original data
+    # If there is no flexi time used, just return
     # Check Kickout in Mins
     flexUsed = 0
     if kickoutDuration < 50:
-        return kickoutFlexiData
+        return
     # Now check 12 hrs
     elif kickoutDuration == 50:
         flexUsed = secondsSinceUpdate - (12 * 60 * 60)
@@ -326,45 +329,18 @@ def SF_updateFlexiTime(kickoutFlexiData, latestUpdate, now, currentUsername, kic
         flexUsed = secondsSinceUpdate - (int(kickoutDuration / 100) * 60 * 60 * 24)
 
     if flexUsed <= 0:
-        # ("no update")
-        return kickoutFlexiData
+        return
 
-    # Now there must have been some flex used
-    KickoutFlexiDataArray = []
-    if kickoutFlexiData:
-        KickoutFlexiDataArray = json.loads(kickoutFlexiData)
-    # Find if currentUsername already exists in the array
-    found = False
-    for entry in KickoutFlexiDataArray:
-        if isinstance(entry, list) and len(entry) == 2 and entry[0] == currentUsername:
-            # If currentUsername is found, add 1000 to the number next to it
-            entry[1] += int(flexUsed)
-            found = True
-            break
-
-    if not found:
-        # If currentUsername is not found, add a new entry with currentUsername and 1000
-        newEntry = [currentUsername, int(flexUsed)]
-        KickoutFlexiDataArray.append(newEntry)
-
-    # Convert KickoutFlexiDataArray back to JSON string
-    updatedKickoutFlexiData = json.dumps(KickoutFlexiDataArray)
-    # ("Data Upated")
-    return updatedKickoutFlexiData
+    gp = game.players.filter(player__username=currentUsername).first()
+    if not gp:
+        return
+    gp.flexiSecondsUsed += int(flexUsed)
+    gp.save(update_fields=["flexiSecondsUsed"])
 
 
-def SF_getRemainingFlexiSeconds(kickoutFlexiData, username):
+def SF_getRemainingFlexiSeconds(flexiSecondsUsed):
     """Remaining Flexi-Time bank for one player in this game."""
-    usedSeconds = 0
-    if kickoutFlexiData:
-        try:
-            for entry in json.loads(kickoutFlexiData):
-                if isinstance(entry, list) and len(entry) == 2 and entry[0] == username:
-                    usedSeconds = int(entry[1])
-                    break
-        except (TypeError, ValueError):
-            pass
-    return max(0, (24 * 60 * 60) - usedSeconds)
+    return max(0, (24 * 60 * 60) - int(flexiSecondsUsed or 0))
 
 
 def SF_formatSecondsHHMM(seconds):
@@ -377,8 +353,7 @@ def SF_kickoutRequired(
     allPlayers,
     latestUpdate,
     kickoutDuration,
-    kickoutFlexiData,
-    currentUsername,
+    flexiSecondsUsed,
 ):
     FLEXI_SECONDS = 60 * 60 * 24
 
@@ -418,16 +393,8 @@ def SF_kickoutRequired(
         # Any extra 24hrs must be a kickout
         if kickoutDuration == 50 and secondsSinceUpdate > (12 * 60 * 60) + FLEXI_SECONDS or kickoutDuration >= 100 and secondsSinceUpdate > (int(kickoutDuration / 100) * 60 * 60 * 24) + FLEXI_SECONDS:
             return 2
-        # Otherwise, need to interrogate the array
-        KickoutFlexiDataArray = []
-        if kickoutFlexiData:
-            KickoutFlexiDataArray = json.loads(kickoutFlexiData)
-
-        usedSeconds = 0
-        for entry in KickoutFlexiDataArray:
-            if isinstance(entry, list) and len(entry) == 2 and entry[0] == currentUsername:
-                usedSeconds = entry[1]
-                break
+        # Otherwise, need to interrogate the player's flexi bank
+        usedSeconds = int(flexiSecondsUsed or 0)
         # So need to check whether used seconds + difference
         total_elasped_time = secondsSinceUpdate + usedSeconds
         if kickoutDuration == 50 and total_elasped_time > (12 * 60 * 60) + FLEXI_SECONDS or kickoutDuration >= 100 and total_elasped_time > (int(kickoutDuration / 100) * 60 * 60 * 24) + FLEXI_SECONDS:

@@ -186,16 +186,16 @@ def _processAQYturn(request):
         currentGame.phase = jsonData["phase"]
 
         if "checkName" in jsonData:
-            currentGame.kickoutFlexiData = SF_updateFlexiTime(
-                currentGame.kickoutFlexiData,
+            SF_updateFlexiTime(
+                currentGame,
                 currentGame.latestUpdate,
                 int(time.time()) * 1000,
                 jsonData["checkName"],
                 currentGame.kickoutDuration,
             )
         else:
-            currentGame.kickoutFlexiData = SF_updateFlexiTime(
-                currentGame.kickoutFlexiData,
+            SF_updateFlexiTime(
+                currentGame,
                 currentGame.latestUpdate,
                 int(time.time()) * 1000,
                 request.user.username,
@@ -711,15 +711,15 @@ def _processAQYturn(request):
 
         if is_game_admin(request.user):
             SF_updateFlexiTime(
-                currentGame.kickoutFlexiData,
+                currentGame,
                 currentGame.latestUpdate,
                 int(time.time()) * 1000,
                 jsonData["BKSN"],
                 currentGame.kickoutDuration,
             )
         else:
-            currentGame.kickoutFlexiData = SF_updateFlexiTime(
-                currentGame.kickoutFlexiData,
+            SF_updateFlexiTime(
+                currentGame,
                 currentGame.latestUpdate,
                 int(time.time()) * 1000,
                 request.user.username,

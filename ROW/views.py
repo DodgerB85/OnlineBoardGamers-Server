@@ -360,8 +360,8 @@ def performSaveROWGame(request, currentGame, jsonData):
     currentGame.turn = jsonData["turn"]
     currentGame.phase = jsonData["phase"]
 
-    currentGame.kickoutFlexiData = SF_updateFlexiTime(
-        currentGame.kickoutFlexiData,
+    SF_updateFlexiTime(
+        currentGame,
         db_latest_update,
         int(time.time()) * 1000,
         nameToUse,

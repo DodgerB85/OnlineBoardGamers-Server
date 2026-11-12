@@ -69,60 +69,58 @@ class TestSFgetRequiredExp(PrintSuccessTestCase):
 
 
 class TestSFupdateFlexiTime(PrintSuccessTestCase):
+    def setUp(self):
+        self.player = User.objects.create_user("player1", "p1@example.com", "pw")
+        self.game = Game.objects.create(gameCode="FCM", creator=self.player, host=self.player, gameStatus="ACTIVE")
+        self.gp = GamePlayer.objects.create(game=self.game, player=self.player, seat_order=0)
+
+    def _used(self):
+        self.gp.refresh_from_db()
+        return self.gp.flexiSecondsUsed
+
     def test_no_update_for_blitz_kickout(self):
-        result = SF_updateFlexiTime(None, "1700000000000", 1700000100000, "player1", 10)
-        self.assertIsNone(result)
+        SF_updateFlexiTime(self.game, "1700000000000", 1700000100000, "player1", 10)
+        self.assertEqual(self._used(), 0)
 
     def test_adds_new_entry_when_flex_used(self):
         now = 1700000000000
         # latestUpdate = 12 hours + 100 seconds ago (in ms)
         latest_update = str(now - (12 * 60 * 60 * 1000) - (100 * 1000))
-        result = SF_updateFlexiTime(None, latest_update, now, "player1", 50)
-        result_data = json.loads(result)
-        self.assertEqual(len(result_data), 1)
-        self.assertEqual(result_data[0][0], "player1")
-        self.assertEqual(result_data[0][1], 100)
+        SF_updateFlexiTime(self.game, latest_update, now, "player1", 50)
+        self.assertEqual(self._used(), 100)
 
     def test_updates_existing_entry(self):
         now = 1700000000000
         latest_update = str(now - (12 * 60 * 60 * 1000) - (200 * 1000))
-        existing_data = json.dumps([["player1", 50]])
-        result = SF_updateFlexiTime(existing_data, latest_update, now, "player1", 50)
-        result_data = json.loads(result)
-        self.assertEqual(result_data[0][0], "player1")
-        self.assertEqual(result_data[0][1], 250)
+        self.gp.flexiSecondsUsed = 50
+        self.gp.save(update_fields=["flexiSecondsUsed"])
+        SF_updateFlexiTime(self.game, latest_update, now, "player1", 50)
+        self.assertEqual(self._used(), 250)
 
     def test_no_update_when_within_time_limit(self):
         now = 1700000000000
         # Only 6 hours ago - within the 12h limit for kickout=50
         latest_update = str(now - (6 * 60 * 60 * 1000))
-        result = SF_updateFlexiTime(None, latest_update, now, "player1", 50)
-        self.assertIsNone(result)
+        SF_updateFlexiTime(self.game, latest_update, now, "player1", 50)
+        self.assertEqual(self._used(), 0)
 
     def test_days_kickout_flex_used(self):
         now = 1700000000000
         # 1 day + 300 seconds ago for kickout=100 (1 day)
         latest_update = str(now - (1 * 24 * 60 * 60 * 1000) - (300 * 1000))
-        result = SF_updateFlexiTime(None, latest_update, now, "player1", 100)
-        result_data = json.loads(result)
-        self.assertEqual(result_data[0][0], "player1")
-        self.assertEqual(result_data[0][1], 300)
+        SF_updateFlexiTime(self.game, latest_update, now, "player1", 100)
+        self.assertEqual(self._used(), 300)
 
 
 class TestSFRemainingFlexiTime(PrintSuccessTestCase):
     def test_no_used_flexi_returns_full_bank(self):
-        self.assertEqual(SF_getRemainingFlexiSeconds(None, "player1"), 24 * 60 * 60)
+        self.assertEqual(SF_getRemainingFlexiSeconds(None), 24 * 60 * 60)
 
-    def test_existing_entry_is_subtracted(self):
-        flexi_data = json.dumps([["player1", 3600]])
-        self.assertEqual(SF_getRemainingFlexiSeconds(flexi_data, "player1"), 23 * 60 * 60)
+    def test_used_flexi_is_subtracted(self):
+        self.assertEqual(SF_getRemainingFlexiSeconds(3600), 23 * 60 * 60)
 
-    def test_other_players_entry_is_ignored(self):
-        flexi_data = json.dumps([["player2", 3600]])
-        self.assertEqual(SF_getRemainingFlexiSeconds(flexi_data, "player1"), 24 * 60 * 60)
-
-    def test_malformed_flexi_data_returns_full_bank(self):
-        self.assertEqual(SF_getRemainingFlexiSeconds("not json", "player1"), 24 * 60 * 60)
+    def test_exhausted_bank_never_goes_negative(self):
+        self.assertEqual(SF_getRemainingFlexiSeconds(25 * 60 * 60), 0)
 
     def test_format_seconds_as_hhmm(self):
         self.assertEqual(SF_formatSecondsHHMM(24 * 60 * 60), "24:00")
@@ -132,15 +130,15 @@ class TestSFRemainingFlexiTime(PrintSuccessTestCase):
 
 class TestSFkickoutRequired(PrintSuccessTestCase):
     def test_not_active_returns_0(self):
-        result = SF_kickoutRequired("FINISHED", ["player1", "player2"], "1700000000000", 100, None, "player1")
+        result = SF_kickoutRequired("FINISHED", ["player1", "player2"], "1700000000000", 100, None)
         self.assertEqual(result, 0)
 
     def test_shadow_player_returns_0(self):
-        result = SF_kickoutRequired("ACTIVE", ["player1", "SHADOW"], "1700000000000", 100, None, "player1")
+        result = SF_kickoutRequired("ACTIVE", ["player1", "SHADOW"], "1700000000000", 100, None)
         self.assertEqual(result, 0)
 
     def test_fcmai_shadow_returns_0(self):
-        result = SF_kickoutRequired("ACTIVE", ["player1", "FcmAI"], "1700000000000", 100, None, "player1")
+        result = SF_kickoutRequired("ACTIVE", ["player1", "FcmAI"], "1700000000000", 100, None)
         self.assertEqual(result, 0)
 
     @patch("Lobby.sharedFunctions.sharedFunctions.time.time")
@@ -149,7 +147,7 @@ class TestSFkickoutRequired(PrintSuccessTestCase):
         now_seconds = 1700000360
         mock_time.return_value = now_seconds
         latest_update = str(1700000000 * 1000)  # 360 seconds ago
-        result = SF_kickoutRequired("ACTIVE", ["player1", "player2"], latest_update, 5, None, "player1")
+        result = SF_kickoutRequired("ACTIVE", ["player1", "player2"], latest_update, 5, None)
         self.assertEqual(result, 2)
 
     @patch("Lobby.sharedFunctions.sharedFunctions.time.time")
@@ -158,7 +156,7 @@ class TestSFkickoutRequired(PrintSuccessTestCase):
         now_seconds = 1700000120
         mock_time.return_value = now_seconds
         latest_update = str(1700000000 * 1000)
-        result = SF_kickoutRequired("ACTIVE", ["player1", "player2"], latest_update, 5, None, "player1")
+        result = SF_kickoutRequired("ACTIVE", ["player1", "player2"], latest_update, 5, None)
         self.assertEqual(result, 0)
 
     @patch("Lobby.sharedFunctions.sharedFunctions.time.time")
@@ -167,7 +165,7 @@ class TestSFkickoutRequired(PrintSuccessTestCase):
         now_seconds = 1700000000 + 13 * 3600
         mock_time.return_value = now_seconds
         latest_update = str(1700000000 * 1000)
-        result = SF_kickoutRequired("ACTIVE", ["player1", "player2"], latest_update, 50, None, "player1")
+        result = SF_kickoutRequired("ACTIVE", ["player1", "player2"], latest_update, 50, None)
         self.assertEqual(result, 1)
 
     @patch("Lobby.sharedFunctions.sharedFunctions.time.time")
@@ -176,7 +174,7 @@ class TestSFkickoutRequired(PrintSuccessTestCase):
         now_seconds = 1700000000 + 12 * 3600 + 86401
         mock_time.return_value = now_seconds
         latest_update = str(1700000000 * 1000)
-        result = SF_kickoutRequired("ACTIVE", ["player1", "player2"], latest_update, 50, None, "player1")
+        result = SF_kickoutRequired("ACTIVE", ["player1", "player2"], latest_update, 50, None)
         self.assertEqual(result, 2)
 
     @patch("Lobby.sharedFunctions.sharedFunctions.time.time")
@@ -185,7 +183,7 @@ class TestSFkickoutRequired(PrintSuccessTestCase):
         now_seconds = 1700000000 + 12 * 3600
         mock_time.return_value = now_seconds
         latest_update = str(1700000000 * 1000)
-        result = SF_kickoutRequired("ACTIVE", ["player1", "player2"], latest_update, 100, None, "player1")
+        result = SF_kickoutRequired("ACTIVE", ["player1", "player2"], latest_update, 100, None)
         self.assertEqual(result, 0)
 
     @patch("Lobby.sharedFunctions.sharedFunctions.time.time")
@@ -194,8 +192,7 @@ class TestSFkickoutRequired(PrintSuccessTestCase):
         now_seconds = 1700000000 + 26 * 3600
         mock_time.return_value = now_seconds
         latest_update = str(1700000000 * 1000)
-        flexi_data = json.dumps([["player1", 23 * 3600]])
-        result = SF_kickoutRequired("ACTIVE", ["player1", "player2"], latest_update, 100, flexi_data, "player1")
+        result = SF_kickoutRequired("ACTIVE", ["player1", "player2"], latest_update, 100, 23 * 3600)
         self.assertEqual(result, 2)
 
 

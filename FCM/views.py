@@ -765,8 +765,8 @@ def _processTurn(request):
 
         currentGame.gameData = jsonData["data"]
 
-        currentGame.kickoutFlexiData = SF_updateFlexiTime(
-            currentGame.kickoutFlexiData,
+        SF_updateFlexiTime(
+            currentGame,
             currentGame.latestUpdate,
             int(time.time()) * 1000,
             request.user.username,
@@ -840,8 +840,8 @@ def _processTurn(request):
         currentGame.gameData = jsonData["data"]
         currentGame.phase = jsonData["phase"]
 
-        currentGame.kickoutFlexiData = SF_updateFlexiTime(
-            currentGame.kickoutFlexiData,
+        SF_updateFlexiTime(
+            currentGame,
             currentGame.latestUpdate,
             int(time.time()) * 1000,
             request.user.username,
@@ -1112,8 +1112,8 @@ def _processTurn(request):
 
         # Use for rewind save check
         if nameToUse != "":
-            currentGame.kickoutFlexiData = SF_updateFlexiTime(
-                currentGame.kickoutFlexiData,
+            SF_updateFlexiTime(
+                currentGame,
                 currentGame.latestUpdate,
                 int(time.time()) * 1000,
                 nameToUse,
@@ -1302,16 +1302,16 @@ def _processTurn(request):
                 if flexName.startswith("FCMtourneyAdmin/"):
                     name_parts = flexName.split("/", 1)
                     flexName = name_parts[1] if len(name_parts) > 1 else flexName
-                currentGame.kickoutFlexiData = SF_updateFlexiTime(
-                    currentGame.kickoutFlexiData,
+                SF_updateFlexiTime(
+                    currentGame,
                     currentGame.latestUpdate,
                     int(time.time()) * 1000,
                     flexName,
                     currentGame.kickoutDuration,
                 )
             else:
-                currentGame.kickoutFlexiData = SF_updateFlexiTime(
-                    currentGame.kickoutFlexiData,
+                SF_updateFlexiTime(
+                    currentGame,
                     currentGame.latestUpdate,
                     int(time.time()) * 1000,
                     passKickoutTarget if passKickoutTarget else request.user.username,

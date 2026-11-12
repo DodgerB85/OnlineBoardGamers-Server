@@ -199,8 +199,8 @@ def _processWEBturn(request):
         currentGame.phase = jsonData["phase"]
 
         check_name = jsonData.get("checkName", request.user.username)
-        currentGame.kickoutFlexiData = SF_updateFlexiTime(
-            currentGame.kickoutFlexiData,
+        SF_updateFlexiTime(
+            currentGame,
             db_latest_update,
             int(time.time()) * 1000,
             check_name,

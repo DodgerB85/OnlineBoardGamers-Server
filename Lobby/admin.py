@@ -128,6 +128,7 @@ class GamePlayerInline(admin.TabularInline):
         "currentMoveTime",
         "currentMoveData",
         "votesJSON",
+        "flexiSecondsUsed",
     )
     autocomplete_fields = ["player"]
 

@@ -306,8 +306,8 @@ def performSaveURRGame(request, currentGame, jsonData):
     currentGame.turn = jsonData["turn"]
     currentGame.phase = jsonData["phase"]
 
-    currentGame.kickoutFlexiData = SF_updateFlexiTime(
-        currentGame.kickoutFlexiData,
+    SF_updateFlexiTime(
+        currentGame,
         db_latest_update,
         int(time.time()) * 1000,
         nameToUse,
@@ -471,7 +471,11 @@ def getKickoutData(presenter):
         "kickoutRequired": presenter.kickoutRequired(),
         "kickoutVotesData": presenter.getKickoutVotesData(),
         "kickoutVoteThreshold": presenter.getKickoutVoteThreshold(),
-        "KickoutFlexiDataArray": json.loads(presenter.gameObj.kickoutFlexiData or "[]"),
+        "KickoutFlexiDataArray": [
+            [gp.player.username, gp.flexiSecondsUsed]
+            for gp in presenter.gameObj.players.select_related("player")
+            if gp.player and gp.flexiSecondsUsed
+        ],
         "missingPlayers": presenter.getMissingPlayersNamesArray(),
         "secondsToNextKickout": presenter.getSecondsToNextKickout(),
     }

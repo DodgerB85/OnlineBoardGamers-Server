@@ -269,8 +269,8 @@ def save_lbr_state(
     current_game.gameData = game_data
     current_game.turn = turn
     current_game.phase = phase
-    current_game.kickoutFlexiData = SF_updateFlexiTime(
-        current_game.kickoutFlexiData,
+    SF_updateFlexiTime(
+        current_game,
         old_ver,
         int(time.time()) * 1000,
         check_name,

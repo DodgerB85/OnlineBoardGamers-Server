@@ -175,13 +175,13 @@ class GamePresenter:
 
         current_players = self.getArrayOfIsCurrentPlayers()
         current_username = current_players[0] if current_players else ""
+        current_gp = next((gp for gp in all_players if gp.player and gp.player.username == current_username), None)
         return SF_kickoutRequired(
             self.gameObj.gameStatus,
             all_player_usernames,
             self.gameObj.latestUpdate,
             self.gameObj.kickoutDuration,
-            self.gameObj.kickoutFlexiData,
-            current_username,
+            current_gp.flexiSecondsUsed if current_gp else 0,
         )
 
     # END KICKOUT STUFF
@@ -456,7 +456,7 @@ class GamePresenter:
         # to hit the DB here. Leaving moveDataJSON behind is not harmless: the RNB
         # client's kickstart-recovery block replays allStackData on load, so stale
         # moves can be re-applied to an already-finished game.
-        self.gameObj.players.update(moveDataJSON=None, currentMoveTime="", currentMoveData="", votesJSON={})
+        self.gameObj.players.update(moveDataJSON=None, currentMoveTime="", currentMoveData="", votesJSON={}, flexiSecondsUsed=0)
 
     def sendInviteNotifications(self, playerNames, _gameName, _maxPlayers, _gameCode):
         from django_q.tasks import async_task

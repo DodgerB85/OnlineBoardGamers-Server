@@ -550,6 +550,10 @@ class GamePlayer(models.Model):
     # Per-player votes: {topic: choice}. Cleared when the game ends.
     votesJSON = models.JSONField(default=dict, null=True, blank=True)
 
+    # Seconds of the 24h Flexi-Time bank this player has used. Replaces the
+    # username-keyed Game.kickoutFlexiData ledger for live games.
+    flexiSecondsUsed = models.PositiveIntegerField(default=0)
+
     # Simple per-player current-move scratch. AQY and HLC use these directly;
     # structured per-game state belongs in moveDataJSON instead.
     currentMoveTime = models.CharField(max_length=15, blank=True)

@@ -359,8 +359,8 @@ def _processRNBturn(request):
             nameToUse = check_name
 
         # Remove flex time
-        currentGame.kickoutFlexiData = SF_updateFlexiTime(
-            currentGame.kickoutFlexiData,
+        SF_updateFlexiTime(
+            currentGame,
             currentGame.latestUpdate,
             int(time.time()) * 1000,
             nameToUse,
@@ -634,8 +634,8 @@ def _processRNBturn(request):
             nameToUse = check_name
 
         # Remove flex time
-        currentGame.kickoutFlexiData = SF_updateFlexiTime(
-            currentGame.kickoutFlexiData,
+        SF_updateFlexiTime(
+            currentGame,
             currentGame.latestUpdate,
             int(time.time()) * 1000,
             nameToUse,
@@ -1654,8 +1654,8 @@ def performSaveGame(request, currentGame, jsonData):
     currentGame.phase = jsonData["phase"]
 
     check_name = jsonData.get("checkName", request.user.username)
-    currentGame.kickoutFlexiData = SF_updateFlexiTime(
-        currentGame.kickoutFlexiData,
+    SF_updateFlexiTime(
+        currentGame,
         db_latest_update,
         int(time.time()) * 1000,
         check_name,

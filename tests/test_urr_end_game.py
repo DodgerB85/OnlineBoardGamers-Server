@@ -51,6 +51,7 @@ class UrrEndGameTests(TestCase):
                 moveDataJSON={"x": 1},
                 currentMoveTime="x",
                 currentMoveData="y",
+                flexiSecondsUsed=300,
             )
         self.game.save()
 
@@ -81,6 +82,7 @@ class UrrEndGameTests(TestCase):
             self.assertIsNone(game_player.moveDataJSON)
             self.assertEqual(game_player.currentMoveTime, "")
             self.assertEqual(game_player.currentMoveData, "")
+            self.assertEqual(game_player.flexiSecondsUsed, 0)
 
         notification = async_task.call_args.args
         self.assertEqual(notification[0], "Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame")

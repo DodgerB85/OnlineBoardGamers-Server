@@ -82,6 +82,7 @@ def _dirty_game_and_players(game_code, with_moves=True):
             moveDataJSON=[dict(STALE_MOVE)] if with_moves else [],
             currentMoveTime="1700000000000" if with_moves else "",
             currentMoveData="dirty" if with_moves else "",
+            flexiSecondsUsed=300,
         )
 
     return game, playerA, playerB
@@ -104,6 +105,7 @@ class GameEndCleanupTests(TestCase):
                 for gp in game.players.all():
                     self.assertTrue(gp.moveDataJSON, f"{game_code}: moveDataJSON fixture is not dirty")
                     self.assertNotEqual(gp.currentMoveData, "", f"{game_code}: currentMoveData fixture is not dirty")
+                    self.assertGreater(gp.flexiSecondsUsed, 0, f"{game_code}: flexiSecondsUsed fixture is not dirty")
 
                 game.presenter().clearGeneralDataOnGameEndWithoutSave()
                 game.save()
@@ -112,6 +114,7 @@ class GameEndCleanupTests(TestCase):
                     self.assertIsNone(gp.moveDataJSON, f"{game_code}: moveDataJSON survived game end")
                     self.assertEqual(gp.currentMoveTime, "", f"{game_code}: currentMoveTime survived game end")
                     self.assertEqual(gp.currentMoveData, "", f"{game_code}: currentMoveData survived game end")
+                    self.assertEqual(gp.flexiSecondsUsed, 0, f"{game_code}: flexiSecondsUsed survived game end")
 
     def test_writes_are_persisted_not_just_in_memory(self):
         """
@@ -128,6 +131,7 @@ class GameEndCleanupTests(TestCase):
             self.assertIsNone(gp.moveDataJSON)
             self.assertEqual(gp.currentMoveTime, "")
             self.assertEqual(gp.currentMoveData, "")
+            self.assertEqual(gp.flexiSecondsUsed, 0)
 
     def test_still_clears_game_level_fields_and_marks_finished(self):
         """Guard against regressing the part the method already did correctly."""
@@ -172,6 +176,7 @@ class GameEndCleanupTests(TestCase):
             self.assertIsNone(gp.moveDataJSON)
             self.assertEqual(gp.currentMoveTime, "")
             self.assertEqual(gp.currentMoveData, "")
+            self.assertEqual(gp.flexiSecondsUsed, 0)
 
 
 class VotesClearedOnGameEndTests(TestCase):

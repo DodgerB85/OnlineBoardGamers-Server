@@ -364,8 +364,8 @@ def _processHLCturn(request):
         #    )
         #    SN_sendAdminErrorMessage(message)
 
-        currentGame.kickoutFlexiData = SF_updateFlexiTime(
-            currentGame.kickoutFlexiData,
+        SF_updateFlexiTime(
+            currentGame,
             currentGame.latestUpdate,
             int(time.time()) * 1000,
             request.user.username,
@@ -437,8 +437,8 @@ def _processHLCturn(request):
         # Use for rewind save check
         # elapsedTotalSeconds = int(time.time()) - int(currentGame.latestUpdate)//1000
 
-        currentGame.kickoutFlexiData = SF_updateFlexiTime(
-            currentGame.kickoutFlexiData,
+        SF_updateFlexiTime(
+            currentGame,
             currentGame.latestUpdate,
             int(time.time()) * 1000,
             request.user.username,

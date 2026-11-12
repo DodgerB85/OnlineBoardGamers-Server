@@ -56,7 +56,7 @@ def build_show_game_data(
     gameID = currentGame.id
     gameName = presenter.getGameName()
     gameCreationTimestamp = currentGame.created
-    KickoutFlexiDataArray = json.loads(currentGame.kickoutFlexiData) if currentGame.kickoutFlexiData else []
+    KickoutFlexiDataArray = [[gp.player.username, gp.flexiSecondsUsed] for gp in all_players if gp.player and gp.flexiSecondsUsed]
     startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
     settings_debug = config(settings_debug_key, default=False, cast=bool) if settings_debug_key else False
 

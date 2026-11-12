@@ -73,9 +73,11 @@ class FcmPassKickoutTest(TestCase):
         return self.game.presenter().getOrScaffoldAllMoveData()
 
     def _flexi_entries(self):
-        if not self.game.kickoutFlexiData:
-            return []
-        return json.loads(self.game.kickoutFlexiData)
+        return [
+            [gp.player.username, gp.flexiSecondsUsed]
+            for gp in self.game.players.select_related("player")
+            if gp.player and gp.flexiSecondsUsed
+        ]
 
     def test_valid_target_gets_the_move(self):
         body = self._post(

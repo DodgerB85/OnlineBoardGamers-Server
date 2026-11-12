@@ -238,8 +238,7 @@ class StartGameKickoutTimerTests(TestCase):
                 ["creator", "joiner"],
                 game.latestUpdate,
                 game.kickoutDuration,
-                game.kickoutFlexiData,
-                "joiner",
+                0,
             ),
             0,
         )

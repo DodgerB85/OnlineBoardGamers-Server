@@ -68,7 +68,8 @@ remaining_finish_time_expired = 0  # Now
 def get_flexi_info(game, playerName):
     if game.kickoutDuration < 50:
         return None, None
-    flexiRemainingSeconds = SF_getRemainingFlexiSeconds(game.kickoutFlexiData, playerName)
+    gp = game.players.filter(player__username=playerName).first()
+    flexiRemainingSeconds = SF_getRemainingFlexiSeconds(gp.flexiSecondsUsed if gp else 0)
     return flexiRemainingSeconds, SF_formatSecondsHHMM(flexiRemainingSeconds)
 
 
