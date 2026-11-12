@@ -1283,36 +1283,48 @@ class INDpresenter(GamePresenter):
     #
     #########################################################
 
+    def _get_game_player(self, name):
+        return self.gameObj.players.select_related("player").filter(player__username=name).first()
+
     def getOrScaffoldAllPreMoveData(self):
-        """This always ensures you get a valid array return
-        any bots are set to phase -99 here, so you know nothing is expected, ie they can't move"""
-        try:
-            data = json.loads(self.gameObj.playersPreMoveData)
-            if len(data) != self.gameObj.maxPlayers:
-                raise ValueError("Invalid number of players")
-            # Validate structure further if needed
-            return data
-        except (json.JSONDecodeError, ValueError):
-            # Scaffold default structure
-            allPlayers = self.getAllPlayersOrderedySeatInArray(True)
-            return [[playerName, [-1], "", []] for playerName in allPlayers]
+        """Rows are [name, phases, timestamp, moveData]; storage is per GamePlayer."""
+        game_players = list(self.gameObj.players.select_related("player").order_by("seat_order"))
+        old_rows = []
+        if self.gameObj.playersPreMoveData:
+            try:
+                old_rows = json.loads(self.gameObj.playersPreMoveData)
+                if not isinstance(old_rows, list):
+                    old_rows = []
+            except (TypeError, ValueError):
+                old_rows = []
+
+        rows = []
+        for index, gp in enumerate(game_players):
+            old_row = old_rows[index] if index < len(old_rows) and isinstance(old_rows[index], list) else None
+            display_name = gp.player.username if gp.player else (old_row[0] if old_row else f"Seat {gp.seat_order}")
+            state = gp.moveDataJSON if isinstance(gp.moveDataJSON, dict) else None
+            if state and "phases" in state and "data" in state:
+                phases = state["phases"]
+                time_value = gp.currentMoveTime
+                move_data = state.get("data", [])
+            elif old_row and len(old_row) >= 4:
+                phases = old_row[1]
+                time_value = str(old_row[2]) if old_row[2] else ""
+                move_data = old_row[3]
+            else:
+                phases = [-1]
+                time_value = ""
+                move_data = []
+            rows.append([display_name, phases, time_value, move_data])
+        return rows
 
     def insertPlayerPreMoveData(self, name, phasesArr, moveArr):
-        playersPreMoveDataArr = self.getOrScaffoldAllPreMoveData()
-        arrIdx = next(
-            (i for i, sub_arr in enumerate(playersPreMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name),
-            -1,
-        )
-
-        playersPreMoveDataArr[arrIdx] = [
-            name,
-            phasesArr,
-            str(int(time.time()) * 1000),
-            moveArr,
-        ]
-
-        self.gameObj.playersPreMoveData = json.dumps(playersPreMoveDataArr)
-        self.gameObj.save()
+        gp = self._get_game_player(name)
+        if not gp:
+            return
+        gp.currentMoveTime = str(int(time.time()) * 1000)
+        gp.moveDataJSON = {"phases": phasesArr, "data": moveArr}
+        gp.save(update_fields=["currentMoveTime", "moveDataJSON"])
 
     def getAllPreMoveDataCompressed(self):
         import base64
@@ -1330,15 +1342,9 @@ class INDpresenter(GamePresenter):
         import base64
         import gzip
 
-        playersPreMoveDataArr = self.getOrScaffoldAllPreMoveData()
-        arrIdx = next(
-            (i for i, sub_arr in enumerate(playersPreMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name),
-            -1,
-        )
-        # Only return the move if it is valid for current phase OR has a preset-cleanup
-        playerMoveDataArr = playersPreMoveDataArr[arrIdx]
+        playerMoveDataArr = next((row for row in self.getOrScaffoldAllPreMoveData() if row[0] == name), None)
         # Check for invalid moves, and return ""
-        if len(playerMoveDataArr) != 4:
+        if playerMoveDataArr is None or len(playerMoveDataArr) != 4:
             return ""
         if len(playerMoveDataArr[3]) == 0:
             return ""
@@ -1350,16 +1356,13 @@ class INDpresenter(GamePresenter):
         return base64.b64encode(gzip.compress(json.dumps(playerMoveDataArr, separators=(",", ":")).encode("utf-8"))).decode("utf-8")
 
     def clearAllPreMoveData(self):
+        self.gameObj.players.update(moveDataJSON=None, currentMoveTime="")
         self.gameObj.playersPreMoveData = ""
-        self.gameObj.save()
+        self.gameObj.save(update_fields=["playersPreMoveData"])
 
     def doesPlayerHavePreMove(self, name):
-        playersPreMoveDataArr = self.getOrScaffoldAllPreMoveData()
-        arrIdx = next(
-            (i for i, sub_arr in enumerate(playersPreMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name),
-            -1,
-        )
-        return len(playersPreMoveDataArr[arrIdx][3]) > 0
+        playerMoveDataArr = next((row for row in self.getOrScaffoldAllPreMoveData() if row[0] == name), None)
+        return bool(playerMoveDataArr and len(playerMoveDataArr[3]) > 0)
 
 
 class BUSpresenter(GamePresenter):
