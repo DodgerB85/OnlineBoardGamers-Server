@@ -2148,54 +2148,55 @@ class FCMpresenter(GamePresenter):
     #
     #########################################################
 
-    # This always ensures you get a valid array return
-    # any bots are set to phase -99 here, so you know nothing is expcected, ie they can't move
+    def _get_game_player(self, name):
+        return self.gameObj.players.select_related("player").filter(player__username=name).first()
+
+    # This always ensures you get a valid array return.
+    # The row shape is kept for the client: [name, phases, timestamp, moveData].
     def getOrScaffoldAllMoveData(self):
         from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
 
-        missing_players = set(self.gameObj.players.filter(is_missing=True).values_list("player__username", flat=True))
-        try:
-            data = json.loads(self.gameObj.FCMplayersMoveData)
-            # For some reason we need to check both here. A kickout can apparently result in missing data
-            if len(data) != self.gameObj.maxPlayers:  # and len(data) != self.gameObj.maxPlayers - len(missing_players):
-                SN_sendAdminErrorMessage(f"Invalid number of players - getOrScaffoldAllMoveData - FCM pres {self.gameObj.id}")
+        game_players = list(self.gameObj.players.select_related("player").order_by("seat_order"))
+        old_rows = []
+        if self.gameObj.FCMplayersMoveData:
+            try:
+                old_rows = json.loads(self.gameObj.FCMplayersMoveData)
+                if not isinstance(old_rows, list):
+                    old_rows = []
+            except (TypeError, ValueError):
+                old_rows = []
+        if old_rows and len(old_rows) != len(game_players):
+            SN_sendAdminErrorMessage(f"Invalid number of players - getOrScaffoldAllMoveData - FCM pres {self.gameObj.id}")
 
-                raise ValueError("Invalid number of players")
-            return data
-        except (json.JSONDecodeError, ValueError):
-            # Scaffold default structure
-            allPlayers = self.getAllPlayersOrderedySeatInArray(True, False)
-            missing_players = set(self.gameObj.players.filter(is_missing=True).values_list("player__username", flat=True))
-            # In a tournament, don't remove missing players, as FCMtA plays for them
-            return [
-                [
-                    playerName,
-                    [-1] if playerName not in missing_players else [-99],
-                    "",
-                    [],
-                ]
-                for playerName in allPlayers
-            ]
+        rows = []
+        for index, gp in enumerate(game_players):
+            old_row = old_rows[index] if index < len(old_rows) and isinstance(old_rows[index], list) else None
+            display_name = gp.player.username if gp.player else (old_row[0] if old_row else f"Seat {gp.seat_order}")
+            state = gp.moveDataJSON if isinstance(gp.moveDataJSON, dict) else None
+            if state and "phases" in state and "data" in state:
+                phases = state["phases"]
+                time_value = gp.currentMoveTime
+                move_data = state.get("data", [])
+            else:
+                if old_row and len(old_row) >= 4:
+                    phases = old_row[1]
+                    time_value = str(old_row[2]) if old_row[2] else ""
+                    move_data = old_row[3]
+                else:
+                    phases = [-99] if gp.is_missing else [-1]
+                    time_value = ""
+                    move_data = []
+            rows.append([display_name, phases, time_value, move_data])
+        return rows
 
     def hasAnyPlayerMovedThisPhase(self, phase):
         playersMoveDataArr = self.getOrScaffoldAllMoveData()
         return any(self.isThisValidActualMoveArrForPhase(self.gameObj.phase, playerMoveArr) for playerMoveArr in playersMoveDataArr)
 
     def hasValidActualMoveData(self, name):
-        if not self.gameObj.FCMplayersMoveData:
-            return False
-        seat = self.seatPosition(name)
-        if seat < 0:
-            return False
-        playersMoveDataArr = self.getOrScaffoldAllMoveData()
-        arrIdx = next(
-            (i for i, sub_arr in enumerate(playersMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name),
-            -1,
-        )
-        if arrIdx == -1:
+        playerMoveArr = next((row for row in self.getOrScaffoldAllMoveData() if row[0] == name), None)
+        if playerMoveArr is None:
             return False  # Player's move data not found
-
-        playerMoveArr = playersMoveDataArr[arrIdx]
 
         # If no phase is set, then there's no move Data
         if playerMoveArr[1] == [-1]:
@@ -2205,19 +2206,9 @@ class FCMpresenter(GamePresenter):
         return self.isThisValidActualMoveArrForPhase(self.gameObj.phase, playerMoveArr)
 
     def hasValidActualCleanupPreset(self, name):
-        if not self.gameObj.FCMplayersMoveData:
-            return False
-        seat = self.seatPosition(name)
-        if seat < 0:
-            return False
-        playersMoveDataArr = self.getOrScaffoldAllMoveData()
-        arrIdx = next(
-            (i for i, sub_arr in enumerate(playersMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name),
-            -1,
-        )
-        if arrIdx == -1:
+        playerMoveArr = next((row for row in self.getOrScaffoldAllMoveData() if row[0] == name), None)
+        if playerMoveArr is None:
             return False  # Player's move data not found
-        playerMoveArr = playersMoveDataArr[arrIdx]
         # If no phase/wrong phase / empty data is set, then there's no move Data
         if playerMoveArr[1] == [-1] or 9 not in playerMoveArr[1] or playerMoveArr[3] == []:
             return False
@@ -2335,45 +2326,33 @@ class FCMpresenter(GamePresenter):
             return not (phase == rfFCM.PHASE_CLEAN_UP and moveData[1][0] == -9)
 
     def insertPlayerMoveData(self, name, phasesArr, moveArr):
-        playersMoveDataArr = self.getOrScaffoldAllMoveData()
-        arrIdx = next(
-            (i for i, sub_arr in enumerate(playersMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name),
-            -1,
-        )
-        playersMoveDataArr[arrIdx] = [
-            name,
-            phasesArr,
-            str(int(time.time()) * 1000),
-            moveArr,
-        ]
-
-        self.gameObj.FCMplayersMoveData = json.dumps(playersMoveDataArr)
-
-        self.gameObj.save()
+        gp = self._get_game_player(name)
+        if not gp:
+            return
+        gp.currentMoveTime = str(int(time.time()) * 1000)
+        gp.moveDataJSON = {"phases": phasesArr, "data": moveArr}
+        gp.save(update_fields=["currentMoveTime", "moveDataJSON"])
 
     def getCompressedMoveArr(self, name, forceReturnForPresetCleanup=False):
-        playersMoveDataArr = self.getOrScaffoldAllMoveData()
-        arrIdx = next(
-            (i for i, sub_arr in enumerate(playersMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name),
-            -1,
-        )
-        # Only return the move if it is valid for current phase OR has a preset-clenaup
-        if self.isThisValidActualMoveArrForPhase(self.gameObj.phase, playersMoveDataArr[arrIdx]) or forceReturnForPresetCleanup:
-            return base64.b64encode(gzip.compress(json.dumps(playersMoveDataArr[arrIdx], separators=(",", ":")).encode("utf-8"))).decode("utf-8")
+        playerMoveArr = next((row for row in self.getOrScaffoldAllMoveData() if row[0] == name), None)
+        if playerMoveArr is None:
+            return None
+        # Only return the move if it is valid for current phase OR has a preset-cleanup
+        if self.isThisValidActualMoveArrForPhase(self.gameObj.phase, playerMoveArr) or forceReturnForPresetCleanup:
+            return base64.b64encode(gzip.compress(json.dumps(playerMoveArr, separators=(",", ":")).encode("utf-8"))).decode("utf-8")
 
     def deleteSinglePlayersMove(self, name):
-        playersMoveDataArr = self.getOrScaffoldAllMoveData()
-        arrIdx = next(
-            (i for i, sub_arr in enumerate(playersMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name),
-            -1,
-        )
-        playersMoveDataArr[arrIdx] = [name, [-1], "", []]
-        self.gameObj.FCMplayersMoveData = json.dumps(playersMoveDataArr)
-        self.gameObj.save()
+        gp = self._get_game_player(name)
+        if not gp:
+            return
+        gp.moveDataJSON = {"phases": [-1], "data": []}
+        gp.currentMoveTime = ""
+        gp.save(update_fields=["currentMoveTime", "moveDataJSON"])
 
     def clearAllMoveDataV2(self):
+        self.gameObj.players.update(moveDataJSON=None, currentMoveTime="")
         self.gameObj.FCMplayersMoveData = ""
-        self.gameObj.save()
+        self.gameObj.save(update_fields=["FCMplayersMoveData"])
 
     def getJsonMoveResponseV2(self, notRequiedPlayerNames):
         playersMoveDataArr = self.getOrScaffoldAllMoveData()
@@ -2549,20 +2528,9 @@ class FCMpresenter(GamePresenter):
             )
 
     def getOOBpreference(self, name):
-        if not self.gameObj.FCMplayersMoveData:
-            return 0
-        seat = self.seatPosition(name)
-        if seat < 0:
-            return 0
-        playersMoveDataArr = self.getOrScaffoldAllMoveData()
-        arrIdx = next(
-            (i for i, sub_arr in enumerate(playersMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name),
-            -1,
-        )
-        if arrIdx == -1:
+        playerMoveArr = next((row for row in self.getOrScaffoldAllMoveData() if row[0] == name), None)
+        if playerMoveArr is None:
             return 0  # Player's move data not found
-
-        playerMoveArr = playersMoveDataArr[arrIdx]
 
         # An OOB preference can be stored before the structure move: keep it
         # readable without pretending the row is a completed restructuring.
@@ -2576,44 +2544,36 @@ class FCMpresenter(GamePresenter):
         return 0
 
     def setOOBpreference(self, name, OOBpreference):
-        if not self.gameObj.FCMplayersMoveData:
-            self.gameObj.FCMplayersMoveData = json.dumps(self.getOrScaffoldAllMoveData())
-        seat = self.seatPosition(name)
-        if seat < 0:
+        gp = self._get_game_player(name)
+        if not gp:
             return False
-        playersMoveDataArr = self.getOrScaffoldAllMoveData()
-        arrIdx = next(
-            (i for i, sub_arr in enumerate(playersMoveDataArr) if len(sub_arr) > 0 and sub_arr[0] == name),
-            -1,
-        )
-        if arrIdx == -1:
-            return False  # Player's move data not found
-
-        playerMoveArr = playersMoveDataArr[arrIdx]
+        state = gp.moveDataJSON if isinstance(gp.moveDataJSON, dict) else {}
+        phases = state.get("phases", [-1])
+        move_data = state.get("data", [])
 
         # During restructuring the preference is not a structure move. Store it
         # in the scaffold content but leave the row as a non-move, otherwise
         # selecting auto-early/auto-late by itself completes restructuring with
         # an empty beach and empty structure (which then wiped the roster).
-        if playerMoveArr[1] == [-1]:
+        if phases == [-1]:
             if self.gameObj.phase == rfFCM.PHASE_RESTRUCTURING:
-                while len(playerMoveArr[3]) < 3:
-                    playerMoveArr[3].append([] if len(playerMoveArr[3]) < 2 else 0)
-                playerMoveArr[3][2] = OOBpreference
-                self.gameObj.FCMplayersMoveData = json.dumps(playersMoveDataArr)
-                self.gameObj.save()
+                while len(move_data) < 3:
+                    move_data.append([] if len(move_data) < 2 else 0)
+                move_data[2] = OOBpreference
+                gp.moveDataJSON = {"phases": phases, "data": move_data}
+                gp.save(update_fields=["moveDataJSON"])
                 return True
-            playerMoveArr[1] = [3, 4]
+            phases = [3, 4]
 
         # Finally, check it is valid
         if self.gameObj.phase in (rfFCM.PHASE_TURN_ORDER, rfFCM.PHASE_RESTRUCTURING):
-            while len(playerMoveArr[3]) < 2:
-                playerMoveArr[3].append([])
-            if len(playerMoveArr[3]) < 3:
-                playerMoveArr[3].append(0)
-            playerMoveArr[3][2] = OOBpreference
-            self.gameObj.FCMplayersMoveData = json.dumps(playersMoveDataArr)
-            self.gameObj.save()
+            while len(move_data) < 2:
+                move_data.append([])
+            if len(move_data) < 3:
+                move_data.append(0)
+            move_data[2] = OOBpreference
+            gp.moveDataJSON = {"phases": phases, "data": move_data}
+            gp.save(update_fields=["moveDataJSON"])
             return True
 
         return False

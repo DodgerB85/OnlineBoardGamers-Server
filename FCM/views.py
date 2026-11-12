@@ -1926,7 +1926,7 @@ def gameAdminGetMoveData(request):
 
     # names = presenter.getAllPlayersOrderedySeatInArray(True)
 
-    playersMoveDataArr = json.loads(currentGame.FCMplayersMoveData) if currentGame.FCMplayersMoveData else []
+    playersMoveDataArr = currentGame.presenter().getOrScaffoldAllMoveData()
 
     allMoveData = []
     for row in playersMoveDataArr:

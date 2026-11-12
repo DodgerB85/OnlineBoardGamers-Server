@@ -56,9 +56,9 @@ All in `Lobby/models.py`:
 - **`User`** (`AbstractUser`) with a one-to-one **`Profile`**: email/notification preferences (per notification type), webhooks (Discord/Slack/Telegram), per-game display preferences (colours etc.), availability tracking arrays. Admin rights are explicit `Profile.is_site_admin` / `is_game_admin` flags only — Django superusers get neither by default, and grant themselves the flags the same way anyone else does (Django admin); views never authorize by username.
 - **`Game`**: `gameCode` (3-char choice), `gameName`, `creator`, `host`, `maxPlayers`, `gameStatus` (`AVAILABLE` / `WAITING` / `PRIVATE` / `ACTIVE` / `FINISHED`), `turn`/`phase`, `gameData` (opaque per-game state the client produced, often gzip+base64), `latestUpdate` (monotonic ms timestamp), `startingOptions` (JSON array of option ints), `kickoutDuration`, `zoomLevels`, plus per-game blob fields (`XXXplayersMoveData`, rewind data, ...).
 - **`GamePlayer`**: row per (game, human/bot) seat — `seat_order`, `is_current`, `is_kicked`, `is_missing`, `winner`, private `notes`. Unique on (game, player).
-  - `currentMoveTime` / `currentMoveData`: the simple per-player current-move scratch pair. AQY and HLC use it directly.
-  - `moveDataJSON`: structured per-player state for games that need more than one current move (RNB move stacks, DDL bids). It is not a generic replacement for the scratch pair.
-  - Legacy game-level arrays (`FCMplayersMoveData`, `playersPreMoveData`, `KFWplayersMoveData`) predate these fields; move them onto `GamePlayer` when touching that game.
+  - `currentMoveTime` / `currentMoveData`: the simple per-player current-move scratch pair. AQY and HLC use it directly; FCM uses `currentMoveTime` plus `moveDataJSON` for its phase list and payload.
+  - `moveDataJSON`: structured per-player state for games that need more than one current move (RNB move stacks, DDL bids, FCM `{"phases": [...], "data": [...]}`). It is not a generic replacement for the scratch pair.
+  - Legacy game-level arrays (`playersPreMoveData`, `KFWplayersMoveData`) predate these fields; move them onto `GamePlayer` when touching that game. `FCMplayersMoveData` is now a fallback for games that predate the FCM migration.
 - **`Tournament`**: rounds of `Game`s per game code (`Main`/`Mini` categories, `RR`/`PL`/`TL`/`MG` types), `tournamentProgressionData`/`PointsData`/`SideData` JSON, `nextRoundPlayers` M2M.
 - **`Lock`**: row backing `db_mutex` (see below).
 

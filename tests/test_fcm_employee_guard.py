@@ -313,7 +313,7 @@ class FcmOobPreferenceTest(TestCase):
         self.assertTrue(body["OOBsaved"], body)
 
         self.game.refresh_from_db()
-        row = next(row for row in json.loads(self.game.FCMplayersMoveData) if row[0] == "alice")
+        row = next(row for row in self.game.presenter().getOrScaffoldAllMoveData() if row[0] == "alice")
         self.assertEqual(row[1], [-1], "the preference must not turn the scaffold into a move")
         self.assertEqual(row[3][2], 2)
         self.assertFalse(self.game.presenter().hasValidActualMoveData("alice"))

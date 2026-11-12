@@ -11,7 +11,6 @@ import gzip
 import json
 import time
 
-from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
@@ -71,9 +70,7 @@ class FcmPassKickoutTest(TestCase):
         return json.loads(response.content)
 
     def _players_move_data(self):
-        if not self.game.FCMplayersMoveData:
-            return []
-        return json.loads(self.game.FCMplayersMoveData)
+        return self.game.presenter().getOrScaffoldAllMoveData()
 
     def _flexi_entries(self):
         if not self.game.kickoutFlexiData:
