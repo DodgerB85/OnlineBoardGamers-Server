@@ -82,7 +82,8 @@ const capacity = computed(() => (player.value ? rules.cargoCapacity(player.value
 
 <style scoped>
 #shipPanel {
-	width: 250px;
+	width: 100%;
+	box-sizing: border-box;
 	background: #f7fbff;
 	border: 2px solid #3d5a80;
 	border-radius: 6px;

@@ -416,6 +416,7 @@ GAME_NAMES_MODELS = {
     "RNB": "RNB",
     "ROW": "ROW",
     "URR": "URR",
+    "DDL": "DDL",
     "LBR": "LBR",
     "NTR": "NTR",
 }

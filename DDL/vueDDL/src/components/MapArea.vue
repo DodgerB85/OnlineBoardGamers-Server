@@ -130,10 +130,16 @@ const consumerCards = computed(() => {
 
 const activePlayerIndex = computed(() => (personal.trainingGame ? store.gameflow.turnOrder[0] : personal.pov))
 
+const canAct = computed(() => personal.canPlay() && activePlayerIndex.value === store.gameflow.turnOrder[0])
+const choosingStart = computed(() => canAct.value && store.gameflow.phase === rf.PHASE_SETUP && store.gameflow.setup.stage === rf.TURN_SETUP_PLANET)
+const choosingPathways = computed(() => canAct.value && store.gameflow.phase === rf.PHASE_MAIN && store.gameflow.turnType === rf.TURN_ACTION && store.context.action === rf.ACT_PATHWAY && !store.gameflow.pendingExplore && !store.players[activePlayerIndex.value].pathways.placed)
+const choosingExplore = computed(() => canAct.value && store.gameflow.pendingExplore?.player === activePlayerIndex.value)
+
 const highlighted = computed(() => {
-	if (store.context.highlightNodes.length > 0) return new Set(store.context.highlightNodes)
-	if (activePlayerIndex.value >= 0 && store.context.action === rf.ACT_MOVE && store.gameflow.movement.remaining > 0 && store.players[activePlayerIndex.value].ship.node) {
-		return new Set(map.reachableNodes(store, activePlayerIndex.value, store.players[activePlayerIndex.value].ship.node, store.gameflow.movement.remaining))
+	if (!canAct.value || store.gameflow.phase !== rf.PHASE_MAIN || store.gameflow.turnType !== rf.TURN_ACTION || choosingExplore.value) return new Set()
+	if (store.context.action === rf.ACT_MOVE && store.gameflow.movement.remaining > 0) {
+		const node = store.players[activePlayerIndex.value].ship.node
+		return new Set(map.reachableNodes(store, activePlayerIndex.value, node, store.gameflow.movement.remaining).filter((id) => id !== node))
 	}
 	if (store.context.action === rf.ACT_PLACE_HIGHWAYS) {
 		return new Set(map.ROAD_NODES.filter((id) => store.board.highways[id] === undefined && map.shipsOnNode(store, id).length === 0))
@@ -141,17 +147,19 @@ const highlighted = computed(() => {
 	return new Set()
 })
 
-// Only highways need dot targets; movement is played by clicking a highlighted
-// planet, which walks the graph for you.
-const highwayTargets = computed(() => (store.context.action === rf.ACT_PLACE_HIGHWAYS ? Array.from(highlighted.value) : []))
+const roadTargets = computed(() => Array.from(highlighted.value).filter((id) => map.isRoadNode(id)))
 
 const highlightedPlanets = computed(() => {
-	if (activePlayerIndex.value >= 0 && store.context.action === rf.ACT_MOVE && store.gameflow.movement.remaining > 0 && store.players[activePlayerIndex.value].ship.node) {
-		const nodes = map.reachableNodes(store, activePlayerIndex.value, store.players[activePlayerIndex.value].ship.node, store.gameflow.movement.remaining)
-		return new Set(nodes.filter((n) => rf.planetByNode(n)).map((n) => rf.planetByNode(n).id))
-	}
-	return new Set()
+	if (choosingStart.value) return new Set(rf.PLANETS.filter((p) => p.start && !store.players.some((player) => player.ship.node === "P" + p.id)).map((p) => p.id))
+	if (choosingPathways.value) return new Set(planetItems.value.filter((item) => item.pathways.length === 0 && item.planet.id !== store.context.selectedPathwayIn).map((item) => item.planet.id))
+	return new Set(Array.from(highlighted.value).filter((id) => rf.planetByNode(id)).map((id) => rf.planetByNode(id).id))
 })
+
+function selectPathway(planetId) {
+	if (!highlightedPlanets.value.has(planetId)) return
+	if (store.context.selectedPathwayIn < 0) store.context.selectedPathwayIn = planetId
+	else store.context.selectedPathwayOut = planetId
+}
 
 const highwayItems = computed(() =>
 	Object.entries(store.board.highways).map(([node, owner]) => ({
@@ -214,12 +222,29 @@ const pathwayItems = computed(() => {
 })
 
 function onPlanetClick(planet) {
+	if (choosingStart.value && highlightedPlanets.value.has(planet.id)) {
+		controller.submitStartingPlanet(planet.id)
+		return
+	}
+	if (choosingPathways.value) {
+		selectPathway(planet.id)
+		return
+	}
 	if (store.context.action === rf.ACT_MOVE && highlightedPlanets.value.has(planet.id)) {
 		controller.moveTo("P" + planet.id)
 		return
 	}
 	if (store.context.action === rf.ACT_PLACE_HIGHWAYS) return
 	store.context.selectedPlanet = store.context.selectedPlanet === planet.id ? -1 : planet.id
+}
+
+function canTradeHere(planetId) {
+	return canAct.value && store.gameflow.phase === rf.PHASE_MAIN && store.gameflow.turnType === rf.TURN_ACTION && !choosingExplore.value && store.players[activePlayerIndex.value].ship.node === "P" + planetId
+}
+
+function openSite(item) {
+	store.context.selectedPlanet = item.planet.id
+	store.context.action = item.site.built ? rf.ACT_TRADE : rf.ACT_BUILD
 }
 
 function onNodeClick(node) {
@@ -265,18 +290,19 @@ function privilegeColour(owner) {
 	<div class="boardWrap" ref="wrapEl" :style="{ maxHeight: wrapMaxHeight + 'px' }">
 		<div class="boardScaler" :style="{ width: boardWidth + 'px', height: boardHeight + 'px' }">
 		<div class="board" :style="[boardStyle, { transform: `scale(${scale})` }]">
-			<div v-for="item in planetItems" :key="item.planet.id" class="planet" :class="{ startPlanet: item.planet.start, highlighted: highlightedPlanets.has(item.planet.id), selected: store.context.selectedPlanet === item.planet.id }" :style="item.style" @click="onPlanetClick(item.planet)">
-				<div class="planetDisc" :class="{ start: item.planet.start }" :title="item.planet.name"></div>
+			<div v-for="item in planetItems" :key="item.planet.id" class="planet" :class="{ startPlanet: item.planet.start, highlighted: highlightedPlanets.has(item.planet.id), selected: store.context.selectedPlanet === item.planet.id || (choosingPathways && [store.context.selectedPathwayIn, store.context.selectedPathwayOut].includes(item.planet.id)) }" :style="item.style">
+				<button type="button" class="planetDisc" :data-planet="item.planet.id" :class="{ start: item.planet.start }" :title="item.planet.name" :aria-label="item.planet.name" @click="onPlanetClick(item.planet)"></button>
 				<div class="planetStatus">
-					<img v-if="item.mine !== null" class="mineIcon" :src="funcs.goodImage(item.mine)" :title="$t('map.mineTitle', { good: rf.goodName(item.mine) })" />
-					<span v-if="item.site" class="siteChip" :class="{ built: item.site.built, unbuilt: !item.site.built }" :title="siteLabel(item.site)">
+					<button v-if="item.mine !== null" type="button" class="mapTile mineTile" :disabled="!canTradeHere(item.planet.id)" :title="$t('action.takeGood', { good: rf.goodName(item.mine) })" :aria-label="$t('action.takeGood', { good: rf.goodName(item.mine) })" @click="controller.tradeMine">
+						<img class="mineIcon" :src="funcs.goodImage(item.mine)" alt="" />
+					</button>
+					<button v-if="item.site" type="button" class="mapTile siteChip" :disabled="!canTradeHere(item.planet.id)" :aria-label="siteLabel(item.site)" @click="openSite(item)" :class="{ built: item.site.built, unbuilt: !item.site.built }" :title="siteLabel(item.site)">
 						<img v-if="siteGood(item.site) !== null" :src="funcs.goodImage(siteGood(item.site))" />
-						<span v-else>{{ siteLabel(item.site) }}</span>
-					</span>
-					<span v-if="item.factory" class="factoryChip" :title="$t('action.factory')">
-						<img :src="funcs.goodImage(factoryGood(item.factory))" />
-					</span>
-					<span v-if="item.pathways.length > 0" class="pathwayChip">{{ item.pathways.map((p) => p.dir === "in" ? $t("map.in") : $t("map.out")).join("/") }}</span>
+						<span v-else aria-hidden="true">⚙</span>
+					</button>
+					<button v-if="item.factory" type="button" class="mapTile factoryChip" :disabled="!canTradeHere(item.planet.id)" :title="$t('action.produceGood', { good: rf.goodName(factoryGood(item.factory)) })" :aria-label="$t('action.produceGood', { good: rf.goodName(factoryGood(item.factory)) })" @click="controller.tradeFactory">
+						<img :src="funcs.goodImage(factoryGood(item.factory))" alt="" />
+					</button>
 				</div>
 				<div class="privilegeRow">
 					<span v-if="item.state && item.state.privileges.mine >= 0" class="privDot" :style="{ backgroundColor: privilegeColour(item.state.privileges.mine) }" :title="$t('map.minePrivilege')"></span>
@@ -293,13 +319,14 @@ function privilegeColour(owner) {
 
 			<div v-for="cube in turnCubeItems" :key="cube.turn" class="turnCube" :style="{ ...cube.style, backgroundColor: cube.colour }" :title="$t('map.turnCube', { turn: cube.turn })"></div>
 
-			<div v-for="item in pathwayItems" :key="item.planetId + item.dir + item.owner" class="pathwayMarker" :class="item.dir" :style="{ ...item.style, borderColor: item.colour, color: item.colour }">{{ item.dir === "in" ? $t("map.in") : $t("map.out") }}</div>
+			<button v-for="item in pathwayItems" :key="item.planetId + item.dir + item.owner" type="button" class="pathwayMarker" :disabled="item.dir !== 'in' || !canTradeHere(item.planetId)" :title="item.dir === 'in' ? $t('action.usePathway') : $t('action.exitPlanet')" :aria-label="item.dir === 'in' ? $t('action.usePathway') : $t('action.exitPlanet')" :class="item.dir" :style="{ ...item.style, borderColor: item.colour, color: item.colour }" @click="controller.usePathway">{{ item.dir === "in" ? "↘" : "↗" }}</button>
 
 			<svg class="overlaySvg" viewBox="0 0 1800 1200" preserveAspectRatio="none">
-				<polygon v-for="node in highwayTargets" :key="node" class="dotTarget" :data-node="node" :points="map.roadPolygon(node)" @click="onNodeClick(node)"><title>{{ map.nodeLabel(node) }}</title></polygon>
+				<polygon v-for="node in roadTargets" :key="node" class="dotTarget" :data-node="node" :points="map.roadPolygon(node)" role="button" tabindex="0" :aria-label="map.nodeLabel(node)" @keydown.enter.prevent="onNodeClick(node)" @keydown.space.prevent="onNodeClick(node)" @click="onNodeClick(node)"><title>{{ map.nodeLabel(node) }}</title></polygon>
 			</svg>
 
-			<div v-for="card in consumerCards" :key="card.col + '-' + card.row" class="consumerCard" :class="{ empty: card.tileId === null, top: card.top }" :style="card.style">
+			<div v-for="card in consumerCards" :key="card.col + '-' + card.row" class="consumerCard" :class="{ empty: card.tileId === null, top: card.top, selectable: choosingExplore && card.top }" :style="card.style">
+				<button v-if="choosingExplore && card.top" type="button" class="cardTarget" :data-column="card.col" :aria-label="$t('map.cardTitle', { good: rf.goodName(card.tileId), value: card.value })" @click="controller.explore(card.col)"></button>
 				<img v-if="card.tileId !== null" :src="funcs.goodImage(card.tileId)" :title="$t('map.cardTitle', { good: rf.goodName(card.tileId), value: card.value })" />
 				<span v-else class="emptySlot">{{ $t("map.emptySlotValue", { points: card.value }) }}</span>
 				<span class="vpBadge">{{ card.value }}</span>
@@ -401,7 +428,6 @@ function privilegeColour(owner) {
 .siteChip img { width: 18px; height: 18px; }
 .factoryChip { display: inline-flex; background: #7c5eb0; border: 1px solid #3c2b5e; border-radius: 3px; padding: 1px; }
 .factoryChip img { width: 20px; height: 20px; }
-.pathwayChip { font-size: 9px; font-weight: bold; color: #111; background: #ff8c42; border-radius: 3px; padding: 1px 3px; }
 .privilegeRow {
 	position: absolute;
 	left: 50%;
@@ -429,6 +455,7 @@ function privilegeColour(owner) {
 }
 .ship.currentShip .shipBody { box-shadow: 0 0 0 3px #ffe600, 0 0 10px #ffe600; }
 .highwayCube {
+	pointer-events: none;
 	position: absolute;
 	width: 12px;
 	height: 12px;
@@ -438,6 +465,7 @@ function privilegeColour(owner) {
 	box-shadow: 0 0 3px #000;
 }
 .turnCube {
+	pointer-events: none;
 	position: absolute;
 	width: 11px;
 	height: 11px;
@@ -457,6 +485,8 @@ function privilegeColour(owner) {
 	padding: 1px 3px;
 	z-index: 10;
 }
+.pathwayMarker:disabled { pointer-events: none; }
+.pathwayMarker:enabled { outline: 2px solid #00ff88; cursor: pointer; }
 .dotTarget {
 	fill: rgba(255, 230, 0, 0.45);
 	stroke: #ffe600;
@@ -493,4 +523,12 @@ function privilegeColour(owner) {
 	border-radius: 2px;
 }
 .emptySlot { font-size: 8px; color: #ddd; }
+.mapTile { pointer-events: auto; padding: 0; cursor: pointer; }
+.mapTile:disabled { cursor: default; }
+.mapTile:enabled { outline: 2px solid #00ff88; }
+.mineTile { background: transparent; border: 0; display: inline-flex; }
+.planetDisc:focus-visible, .dotTarget:focus-visible { outline: 4px solid white; }
+.cardTarget { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; background: transparent; border: 0; z-index: 1; }
+.consumerCard.selectable { outline: 3px solid #00ff88; outline-offset: 2px; }
+.cardTarget:focus-visible { outline: 4px solid white; }
 </style>

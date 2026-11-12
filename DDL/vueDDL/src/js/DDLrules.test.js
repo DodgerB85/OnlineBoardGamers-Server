@@ -358,3 +358,21 @@ describe("auction and game end", () => {
 		expect(state.gameflow.finalPositions[0].sort()).toEqual([0, 1])
 	})
 })
+
+describe("pathways", () => {
+	it("reads entrances from the board and travels to their paired exit", () => {
+		const state = game()
+		state.gameflow.turnType = rf.TURN_ACTION
+		expect(rules.canUsePathway(state, 0)).toBe(false)
+		expect(rules.usePathway(state, 0).ok).toBe(false)
+		expect(rules.placePathways(state, 0, 8, 0).ok).toBe(true)
+		expect(rules.canUsePathway(state, 0)).toBe(true)
+		state.players[0].energy[rf.RED_ENERGY] = 1
+		const result = rules.usePathway(state, 0)
+		expect(result.ok).toBe(true)
+		expect(state.players[0].ship.node).toBe("P0")
+		expect(state.players[0].energy[rf.RED_ENERGY]).toBe(0)
+		expect(state.gameflow.pendingExplore).toEqual({ player: 0, planetId: 0 })
+		expect(rules.canUsePathway(state, 0)).toBe(false)
+	})
+})

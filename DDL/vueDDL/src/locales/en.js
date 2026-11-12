@@ -275,6 +275,10 @@ export default {
 		exit: "Exit replay",
 	},
 	map: {
+		chooseStart: "Choose a highlighted starting planet on the map.",
+		choosePathways: "Choose the entrance, then the exit on the map.",
+		chooseExplore: "Explore: choose a highlighted consumer tile on the map.",
+
 		routeDot: "Route {route} dot {dot}",
 		deepSpace: "Deep space",
 		mineTitle: "Mine: {good}",
