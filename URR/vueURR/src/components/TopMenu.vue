@@ -191,7 +191,7 @@ function getKickoutTimerText() {
 
 		<div id="topRight">
 			<div id="loggedInDiv" v-if="personal.name">
-				<span v-if="personal.pov >= 0">{{ personal.name }}</span><span v-else :title="personal.name">{{ $t("topMenu.spectator") }}</span>
+				<span>{{ personal.name }}</span>
 				<div id="WSstatus" v-if="personal.pov >= 0" :class="personal.WSstatus"></div>
 				<br alt="" />
 				<template v-if="personal.pov >= 0 && !personal.trainingGame && personal.secondsToNextKickout <= 1200 && store.gameflow.phase !== rf.PHASE_GAME_OVER">

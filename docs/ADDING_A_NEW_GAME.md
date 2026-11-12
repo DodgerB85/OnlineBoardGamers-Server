@@ -78,7 +78,7 @@ The [show-page shell contract](add-new-game/SKILL.md#reuse-the-show-page-shell) 
 Shell corrections already made in the donors, required for a new game:
 
 - The top bar must never show a scrollbar. No `overflow-x` and no fixed `min-width` on `#top`; the centred `#topInfos` takes the remaining width (`flex: 1 1 auto; min-width: 0`) and ellipsizes long game/player text so menu items, viewer name and zoom controls stay visible at 1366–1400px.
-- Show the viewer's name as text beside the connection dot (`#WSstatus`); spectators show "Spectator". Do not replace the name with only a player marker.
+- Show the viewer's username as text beside the connection dot (`#WSstatus`), including for spectators who are not part of the game. Never replace the name with "Spectator" or only a player marker.
 - Zoom controls run whole-map/fit, zoom in, zoom out, left to right. Keep menu labels short enough to fit (e.g. "Prices", not "Land prices"). The turn-order line shows each player's marker followed by the display name.
 - Place the shared turn status bar directly below the header (`Lobby/static/Lobby/common/GameStatusBanner.vue`, wired like `BUS/vueBUS/src/App.vue`): a "YOUR TURN" badge plus the current action on your turn, otherwise the acting player's colour chip, name and action; use it for "Game over" and "Replay" too. Drive the action text from the same helper as the action panel so both agree.
 - Page background (`#wholeMiddleArea`): light blue (`#d4eafd`) on your turn and for spectators, grey while a seated player waits for another player's turn and while replaying, with the 1s fade. Practice games stay blue.
