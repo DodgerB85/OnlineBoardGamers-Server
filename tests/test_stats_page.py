@@ -31,3 +31,11 @@ class StatsPageTests(TestCase):
 
         self.assertContains(response, 'id="URR"')
         self.assertContains(response, 'id="playerStatsDiv11"')
+
+    def test_player_profile_always_has_current_and_finished_game_tabs(self):
+        response = self.client.get(reverse("playerInfo", args=[self.user.username]))
+
+        self.assertContains(response, 'id="playerInfoTabCurrent"')
+        self.assertContains(response, 'id="playerInfoTabFinished"')
+        self.assertNotContains(response, 'id="playerInfoTabJointCurrent"')
+        self.assertNotContains(response, 'id="playerInfoTabJointFinished"')

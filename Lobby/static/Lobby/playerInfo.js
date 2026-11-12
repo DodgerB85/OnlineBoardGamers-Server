@@ -15,6 +15,20 @@ document.addEventListener("DOMContentLoaded", function () {
 	document.querySelector("#RNB").addEventListener("click", () => show_playerStatsTab("RNB"))
 	document.querySelector("#URR").addEventListener("click", () => show_playerStatsTab("URR"))
 
+	// Game list tabs: one list visible at a time, reusing the lobby tab strip.
+	var gamesTabs = document.querySelectorAll("#playerInfoGamesTabs [role='tab']")
+	var gamesPanels = document.querySelectorAll(".player-games-panel")
+	gamesTabs.forEach((tab) => {
+		tab.addEventListener("click", () => {
+			gamesTabs.forEach((other) => {
+				const active = other === tab
+				other.classList.toggle("active", active)
+				other.setAttribute("aria-selected", active)
+			})
+			gamesPanels.forEach((panel) => panel.classList.toggle("active", panel.id === tab.getAttribute("aria-controls")))
+		})
+	})
+
 	var gameRows = document.querySelectorAll(".gameRow")
 
 	// Add Delete to training games
@@ -115,7 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function show_playerStatsTab(game) {
 	// Remove all blue tabs and visible divs
-	var tablinks = document.getElementsByClassName("tablinks")
+	var tablinks = document.querySelectorAll("#playerStatsTabs .tablinks")
 	for (let i = 0; i < tablinks.length; i++) {
 		tablinks[i].className = tablinks[i].className.replace(" active", "")
 	}

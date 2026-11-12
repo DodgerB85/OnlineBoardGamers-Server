@@ -888,6 +888,14 @@
 	}
 }
 
+/* Game list tabs on the player profile: one list visible at a time. */
+.player-games-panel {
+	display: none;
+}
+.player-games-panel.active {
+	display: block;
+}
+
 /* Sub-section labels inside the Joint Games card. */
 .player-sub {
 	font-size: 13px;

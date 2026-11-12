@@ -24,7 +24,7 @@
                 <div class="card-header">
                     <h2 class="card-title">{% translate "Player Stats" %}</h2>
                 </div>
-                <div class="tab tabs">{% include "Lobby/game_tabs.html" %}</div>
+                <div class="tab tabs" id="playerStatsTabs">{% include "Lobby/game_tabs.html" %}</div>
                 <div class="player-stats">
                     {% for game in allGamesArr %}
                         <div id="playerStatsDiv{{ forloop.counter0 }}" class="playerStatsDiv">
@@ -93,43 +93,62 @@
                 </div>
             </div>
             {% include "Lobby/map_editor_forms.html" %}
-            {# ── Joint Games ── #}
-            {% if activeJointGames or finishedJointGames %}
-                <div class="card" style="margin-bottom: 16px;">
-                    <div class="card-header">
-                        <h2 class="card-title">{% translate "Joint Games" %}</h2>
-                    </div>
-                    {% if activeJointGames %}
-                        <div class="player-sub">{% translate "Joint Current Games" %} ({{ activeJointGames|length }})</div>
+            {# ── Games ── #}
+            <div class="tabs" id="playerInfoGamesTabs" role="tablist" aria-label="{% translate 'Games' %}">
+                {% if activeJointGames %}
+                    <button type="button" class="tab tablinks active" id="playerInfoTabJointCurrent" role="tab" aria-selected="true" aria-controls="playerInfoJointCurrentGames">
+                        <span class="tab-label">{% translate "Joint Current Games" %}</span>
+                        <span class="tab-count">({{ activeJointGames|length }})</span>
+                    </button>
+                {% endif %}
+                {% if finishedJointGames %}
+                    <button type="button" class="tab tablinks{% if not activeJointGames %} active{% endif %}" id="playerInfoTabJointFinished" role="tab" aria-selected="{% if activeJointGames %}false{% else %}true{% endif %}" aria-controls="playerInfoJointFinishedGames">
+                        <span class="tab-label">{% translate "Joint Finished Games" %}</span>
+                        <span class="tab-count">({{ finishedJointGames|length }})</span>
+                    </button>
+                {% endif %}
+                <button type="button" class="tab tablinks{% if not activeJointGames and not finishedJointGames %} active{% endif %}" id="playerInfoTabCurrent" role="tab" aria-selected="{% if activeJointGames or finishedJointGames %}false{% else %}true{% endif %}" aria-controls="playerInfoCurrentGames">
+                    <span class="tab-label">{% translate "Current Games" %}</span>
+                    <span class="tab-count">({{ activeOtherGames|length }})</span>
+                </button>
+                <button type="button" class="tab tablinks" id="playerInfoTabFinished" role="tab" aria-selected="false" aria-controls="playerInfoFinishedGames">
+                    <span class="tab-label">{% translate "Finished Games" %}</span>
+                    <span class="tab-count">({{ finishedOtherGames|length }})</span>
+                </button>
+            </div>
+            {% if activeJointGames %}
+                <div id="playerInfoJointCurrentGames" class="player-games-panel active" role="tabpanel" aria-labelledby="playerInfoTabJointCurrent">
+                    <div class="card" style="margin-bottom: 16px;">
                         <div class="game-list">
                             <div class="table-wrap">
                                 <table class="table gamesTable lobby-games-table current-games-table">
                                     <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th>{% translate "Name" %}</th>
-                                        <th>{% translate "Current Player" %}</th>
-                                        <th>{% translate "Current Turn" %}</th>
-                                        <th>{% translate "Players" %}</th>
-                                        <th>{% translate "Options" %}</th>
-                                        <th>{% translate "Last Move" %}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for game in activeJointGames %}
-                                        {% include "Lobby/gameDisplay/currentGameRow.html" with game=game showCurrentTurnColumn=True %}
+                                        <tr>
+                                            <th></th>
+                                            <th>{% translate "Name" %}</th>
+                                            <th>{% translate "Current Player" %}</th>
+                                            <th>{% translate "Current Turn" %}</th>
+                                            <th>{% translate "Players" %}</th>
+                                            <th>{% translate "Options" %}</th>
+                                            <th>{% translate "Last Move" %}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for game in activeJointGames %}
+                                            {% include "Lobby/gameDisplay/currentGameRow.html" with game=game showCurrentTurnColumn=True %}
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                    {% else %}
-                        <p class="empty">{% translate "No Joint Current Games" %}</p>
-                    {% endif %}
-                    {% if finishedJointGames %}
+                    </div>
+                </div>
+            {% endif %}
+            {% if finishedJointGames %}
+                <div id="playerInfoJointFinishedGames" class="player-games-panel{% if not activeJointGames %} active{% endif %}" role="tabpanel" aria-labelledby="playerInfoTabJointFinished">
+                    <div class="card" style="margin-bottom: 16px;">
                         <div class="player-sub">
-                            <br />
-                            {% translate "Joint Finished Games" %} ({{ finishedJointGames|length }}) - {% translate "Wins" %}: {{ jointWinTotal }}/{{ finishedJointGames|length }} ({{ jointWinPercentage }}%)
+                            {% translate "Wins" %}: {{ jointWinTotal }}/{{ finishedJointGames|length }} ({{ jointWinPercentage }}%)
                         </div>
                         <div class="joint-summary">
                             {% for gameRow in jointGameStats %}
@@ -160,53 +179,46 @@
                                 </table>
                             </div>
                         </div>
+                    </div>
+                </div>
+            {% endif %}
+            <div id="playerInfoCurrentGames" class="player-games-panel{% if not activeJointGames and not finishedJointGames %} active{% endif %}" role="tabpanel" aria-labelledby="playerInfoTabCurrent">
+                <div class="card" style="margin-bottom: 16px;">
+                    {% if activeOtherGames %}
+                        <div class="game-list">
+                            <div class="table-wrap">
+                                <table class="table gamesTable lobby-games-table current-games-table">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>{% translate "Name" %}</th>
+                                            <th>{% translate "Current Player" %}</th>
+                                            <th>{% translate "Current Turn" %}</th>
+                                            <th>{% translate "Players" %}</th>
+                                            <th>{% translate "Options" %}</th>
+                                            <th>{% translate "Last Move" %}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for game in activeOtherGames %}
+                                            {% include "Lobby/gameDisplay/currentGameRow.html" with game=game showCurrentTurnColumn=True %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     {% else %}
-                        <p class="empty">{% translate "No Joint Finished Games" %}</p>
+                        <p class="empty">{% translate "No Current Games" %}</p>
                     {% endif %}
                 </div>
-            {% endif %}
-            {# ── Current Games ── #}
-            {% if activeOtherGames %}
+            </div>
+            <div id="playerInfoFinishedGames" class="player-games-panel" role="tabpanel" aria-labelledby="playerInfoTabFinished">
                 <div class="card" style="margin-bottom: 16px;">
-                    <div class="card-header">
-                        <h2 class="card-title">{% translate "Current Games" %} ({{ activeOtherGames|length }})</h2>
-                    </div>
-                    <div class="game-list">
-                        <div class="table-wrap">
-                            <table class="table gamesTable lobby-games-table current-games-table">
-                                <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th>{% translate "Name" %}</th>
-                                        <th>{% translate "Current Player" %}</th>
-                                        <th>{% translate "Current Turn" %}</th>
-                                        <th>{% translate "Players" %}</th>
-                                        <th>{% translate "Options" %}</th>
-                                        <th>{% translate "Last Move" %}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for game in activeOtherGames %}
-                                        {% include "Lobby/gameDisplay/currentGameRow.html" with game=game showCurrentTurnColumn=True %}
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            {% else %}
-                <p class="empty">{% translate "No Current Games" %}</p>
-            {% endif %}
-            {# ── Finished Games ── #}
-            {% if finishedOtherGames %}
-                <div class="card" style="margin-bottom: 16px;">
-                    <div class="card-header">
-                        <h2 class="card-title">{% translate "Finished Games" %} ({{ finishedOtherGames|length }})</h2>
-                    </div>
-                    <div class="game-list">
-                        <div class="table-wrap">
-                            <table class="table gamesTable lobby-games-table finished-games-table">
-                                <thead>
+                    {% if finishedOtherGames %}
+                        <div class="game-list">
+                            <div class="table-wrap">
+                                <table class="table gamesTable lobby-games-table finished-games-table">
+                                    <thead>
                                         <tr>
                                             <th></th>
                                             <th>{% translate "Name" %}</th>
@@ -218,16 +230,17 @@
                                     </thead>
                                     <tbody>
                                         {% for game in finishedOtherGames %}
-                                        {% include "Lobby/gameDisplay/finishedGameRow.html" with game=game %}
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                                            {% include "Lobby/gameDisplay/finishedGameRow.html" with game=game %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
+                    {% else %}
+                        <p class="empty">{% translate "No Finished Games" %}</p>
+                    {% endif %}
                 </div>
-            {% else %}
-                <p class="empty">{% translate "No Finished Games" %}</p>
-            {% endif %}
+            </div>
         </div>
     
 {% endblock body %}
