@@ -748,7 +748,7 @@ const sortedCampaigns = computed(() => {
 										<div class="employeeDescriptionDiv">{{ rf.EMPLOYEES_STR[emp].description }}</div>
 
 										<div class="employeeIconsDiv">
-											<img v-if="rules.isUniqueEmployee(emp)" :src="view.getImage('icon1x')" class="iconsImg" />
+											<img v-if="rf.UNIQUE_CARDS.indexOf(emp) > -1" :src="view.getImage('icon1x')" class="iconsImg" />
 											<img v-else-if="rf.HIREABLE_EMPLOYEES.indexOf(emp) > -1" :src="view.getImage('iconRecruit')" class="iconsImg" />
 											<span v-else class="blankIcon">&nbsp;</span>
 											<img v-if="emp === rf.TELEMARKETER" :src="view.getImage('iconWaveRange1')" class="iconsImg iconMiddle" />

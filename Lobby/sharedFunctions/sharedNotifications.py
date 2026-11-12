@@ -1384,7 +1384,7 @@ def SN_sendBugReportEmail(reporterUsername, reporterEmail, gameCode, gameID, gam
         f"Bug Description: {bugDescription}\n"
         f"URL: <{the_url}>"
     )
-    SN_sendAdminErrorMessage(bug_message, webhook_key="WEBHOOK_DISCORD_FEEDBACK")
+    SN_sendAdminErrorMessage(bug_message, webhook_key="WEBHOOK_BUG_REPORTS")
     try:
         adminUser.email_user(subject, message)
     except Exception as e:
@@ -1875,7 +1875,7 @@ def is_admin_message_noise(message):
     return any(all(part in message for part in parts) for parts in ADMIN_MESSAGE_NOISE)
 
 
-def SN_sendAdminErrorMessage(message, webhook_key="WEBHOOK_ADMIN_ERROR_MSG"):
+def SN_sendAdminErrorMessage(message, webhook_key="WEBHOOK_ALL_ADMIN_REPORTS"):
     if is_admin_message_noise(message):
         print("Admin message silenced: " + message[:300])
         return True
