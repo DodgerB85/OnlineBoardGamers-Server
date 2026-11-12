@@ -1425,10 +1425,8 @@ msgstr ""
 "令牌池中的令牌，请省着用。"
 
 #: .\FCM\templates\FCM\fanExpansionsHelp.html
-msgid ""
-"Training chain: New Business Developer → Senior Business Developer (level "
-"2). Six of each in the talent market."
-msgstr "训练链：新业务拓展经理 → 资深业务拓展经理（等级 2）。人才市场各 6 张。"
+msgid "Training chain: New Business Developer → Senior Business Developer. In new games, Senior Business Developer is a ×1 employee: each player may own at most one, including working employees and those on the beach. Public supply: 1 card for 2–3 players, 2 for 4 players, 3 for 5–6 players. Existing games retain the original six-card supply and may own multiple Senior Business Developers."
+msgstr "训练链：新业务拓展经理 → 资深业务拓展经理。仅在新局中，资深业务拓展经理是 ×1 员工：每位玩家在岗与沙滩合计最多拥有一张。公共库存：2–3 人游戏 1 张，4 人游戏 2 张，5–6 人游戏 3 张。旧局保留原有的六张公共库存，每位玩家仍可拥有多张资深业务拓展经理。"
 
 #: .\FCM\templates\FCM\fanExpansionsHelp.html
 msgid ""

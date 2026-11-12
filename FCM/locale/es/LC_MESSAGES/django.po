@@ -1830,12 +1830,8 @@ msgstr ""
 "que úsalas con moderación."
 
 #: .\FCM\templates\FCM\fanExpansionsHelp.html
-msgid ""
-"Training chain: New Business Developer → Senior Business Developer (level "
-"2). Six of each in the talent market."
-msgstr ""
-"Cadena de formación: New Business Developer → Desarrollador de Negocios "
-"Senior (nivel 2). Seis de cada uno en el mercado laboral."
+msgid "Training chain: New Business Developer → Senior Business Developer. In new games, Senior Business Developer is a ×1 employee: each player may own at most one, including working employees and those on the beach. Public supply: 1 card for 2–3 players, 2 for 4 players, 3 for 5–6 players. Existing games retain the original six-card supply and may own multiple Senior Business Developers."
+msgstr "Cadena de formación: New Business Developer → Desarrollador de Negocios Senior. En las partidas nuevas, el Desarrollador de Negocios Senior es un empleado ×1: cada jugador puede tener como máximo uno en total, contando los que trabajan y los que están en la playa. Reserva común: 1 carta para 2–3 jugadores, 2 para 4 jugadores y 3 para 5–6 jugadores. Las partidas existentes conservan la reserva original de seis cartas y permiten tener varios Desarrolladores de Negocios Senior."
 
 #: .\FCM\templates\FCM\fanExpansionsHelp.html
 msgid ""

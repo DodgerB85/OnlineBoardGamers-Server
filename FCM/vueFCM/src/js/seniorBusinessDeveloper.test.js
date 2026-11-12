@@ -43,16 +43,17 @@ const STARTING_MAP = [17, 0, 4, 0, 19, 3, 18, 0, 12, 2, 24, 2, 9, 0, 0, 2, 13, 2
 // SO_SENIOR_BUSINESS_DEVELOPER = 53 (rf is imported in beforeAll)
 const SBD_ONLY = [53]
 
-function freshGame(opts = SBD_ONLY) {
+function freshGame(opts = SBD_ONLY, playerNumber = 2) {
 	setActivePinia(createPinia())
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	personal.pov = 0
 	model.setInternalStartingOptions(opts)
+	model.setupNewGame({ playerNames: ["P0", "P1"], startingMap: STARTING_MAP })
 	store.mapData.tiles = mapMod.expandMapToFullGrid(STARTING_MAP, 2)
 	mapMod.initCoords()
 	store.players.splice(0)
-	for (let i = 0; i < 2; i++) {
+	for (let i = 0; i < playerNumber; i++) {
 		store.players.push({
 			name: "P" + i,
 			displayName: "P" + i,
@@ -73,7 +74,7 @@ function freshGame(opts = SBD_ONLY) {
 			OOBpreference: 0,
 		})
 	}
-	model.setupKetchupExpansion(2)
+	model.setupKetchupExpansion(playerNumber)
 	store.gameflow.turn = 5
 	store.gameflow.phase = rf.PHASE_WORKING_DAY
 	store.gameflow.subphase = rf.SUBPHASE_SBD_HOUSES
@@ -98,6 +99,204 @@ function decodeExport(b64) {
 function encodeArr(arr) {
 	return btoa(String.fromCharCode(...new Uint8Array(pako.gzip(JSON.stringify(arr)))))
 }
+
+describe("Senior Business Developer — legacy compatibility", () => {
+	it.each([false, true])("keeps version %s through finished-game loading, generated replay and every replay step", async (uniqueCards) => {
+		const store = freshGame()
+		store.externalStartingOptions.push(...SBD_ONLY)
+		store.seniorBusinessDeveloper.uniqueCards = uniqueCards
+		const owners = uniqueCards ? [0] : [0, 1, 0]
+		for (const owner of owners) {
+			model.addHistory(rf.HIST_TRAIN, [-1, rf.NEW_BUSINESS_DEVELOPER], owner, 0)
+			model.addHistory(rf.HIST_TRAIN, [rf.NEW_BUSINESS_DEVELOPER, rf.SENIOR_BUSINESS_DEVELOPER], owner, 0)
+		}
+		model.addHistory(rf.HIST_END_GAME, [0], -1, 0)
+		const save = funcs.exportFCMmodel(true, false)
+		store.seniorBusinessDeveloper.uniqueCards = !uniqueCards
+		funcs.importFCMmodel(save, true, false)
+		expect(store.seniorBusinessDeveloper.uniqueCards).toBe(uniqueCards)
+		globalThis.document = { querySelector: () => null, getElementById: () => null }
+		const replay = await import("./FCMreplay.js")
+		await replay.generateReplayData()
+		expect(store.replayData).toHaveLength(store.computedHistory.length)
+		expect(store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER]).toBe(uniqueCards ? 0 : 3)
+		for (let step = 0; step < store.replayData.length; step++) {
+			store.seniorBusinessDeveloper.uniqueCards = !uniqueCards
+			replay.goToReplayStep(step)
+			expect(store.seniorBusinessDeveloper.uniqueCards).toBe(uniqueCards)
+			expect(store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER]).toBeGreaterThanOrEqual(0)
+		}
+	})
+
+	it.each([true, false])("retains version %s when a saved module draft later selects SBD", (uniqueCards) => {
+		const store = freshGame([])
+		store.seniorBusinessDeveloper.uniqueCards = uniqueCards
+		const save = funcs.exportFCMmodel(false, false)
+		store.seniorBusinessDeveloper.uniqueCards = !uniqueCards
+		funcs.importFCMmodel(save, false, false)
+		model.setInternalStartingOptions(SBD_ONLY)
+		model.setupKetchupExpansion(2)
+		expect(store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER]).toBe(uniqueCards ? 1 : 6)
+	})
+
+	it("does not upgrade an existing legacy game during Reset AI", () => {
+		const store = freshGame()
+		store.seniorBusinessDeveloper.uniqueCards = false
+		model.setupNewGame({ playerNames: ["P0", "P1"], regenerateMap: true })
+		expect(store.seniorBusinessDeveloper.uniqueCards).toBe(false)
+		expect(store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER]).toBe(6)
+	})
+
+	it.each([[false, [0, 1], 4], [false, [0, 0], 4], [true, [0], 0]])("replays version %s training for players %j with %i cards left", async (uniqueCards, owners, remaining) => {
+		const store = freshGame()
+		store.externalStartingOptions.push(...SBD_ONLY)
+		store.seniorBusinessDeveloper.uniqueCards = uniqueCards
+		const replay = await import("./FCMreplay.js")
+		replay.resetDataForReplay()
+		expect(store.seniorBusinessDeveloper.uniqueCards).toBe(uniqueCards)
+		for (const owner of owners) {
+			store.players[owner].beach.push(rf.NEW_BUSINESS_DEVELOPER)
+			replay.replayTrain(0, store.players[owner], [rf.NEW_BUSINESS_DEVELOPER, rf.SENIOR_BUSINESS_DEVELOPER])
+			const step = funcs.simpleExportWholeFCMmodel()
+			store.seniorBusinessDeveloper.uniqueCards = !uniqueCards
+			funcs.simpleImportWholeFCMmodel(step)
+			expect(store.seniorBusinessDeveloper.uniqueCards).toBe(uniqueCards)
+		}
+		expect(store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER]).toBe(remaining)
+		expect(store.players.flatMap((p) => p.beach).filter((emp) => emp === rf.SENIOR_BUSINESS_DEVELOPER)).toHaveLength(owners.length)
+	})
+
+	it.each(["employees", "beach"])("keeps legacy multiple SBDs on %s and permits further training and headhunting", (location) => {
+		const store = freshGame()
+		store.players[0][location].push(rf.SENIOR_BUSINESS_DEVELOPER, rf.SENIOR_BUSINESS_DEVELOPER)
+		const oldSave = encodeArr(decodeExport(funcs.exportFCMmodel(false, false)).filter((slot) => slot?.[0] !== "sbdUnique"))
+		funcs.importFCMmodel(oldSave, false, false)
+		expect(store.players[0][location].filter((emp) => emp === rf.SENIOR_BUSINESS_DEVELOPER)).toHaveLength(2)
+		expect(store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER]).toBe(4)
+		expect(rules.possibleUpgrades(store.availableEmployees, 0, rf.NEW_BUSINESS_DEVELOPER)).toEqual([[rf.SENIOR_BUSINESS_DEVELOPER]])
+		store.startingOptions.laborMarket = true
+		store.players[1].beach.push(rf.SENIOR_BUSINESS_DEVELOPER)
+		expect(rules.canHeadhunt(0, 1, 0)).toBe(true)
+	})
+
+	it("keeps base-game unique ownership restrictions in legacy games", () => {
+		const store = freshGame()
+		store.seniorBusinessDeveloper.uniqueCards = false
+		store.players[0].beach.push(rf.GURU)
+		store.availableEmployees[rf.GURU] = 2
+		expect(rules.possibleUpgrades(store.availableEmployees, 0, rf.COACH)).toEqual([[]])
+		store.startingOptions.laborMarket = true
+		store.players[1].beach.push(rf.GURU)
+		expect(rules.canHeadhunt(0, 1, 0)).toBe(false)
+	})
+
+	it("prevents a second new-game SBD training when one was just trained this turn", () => {
+		const store = freshGame(SBD_ONLY, 5)
+		expect(rules.possibleUpgrades(store.availableEmployees, 0, rf.NEW_BUSINESS_DEVELOPER, 1, 0, 0, false, [rf.SENIOR_BUSINESS_DEVELOPER])).toEqual([[]])
+	})
+
+	it("starts only newly created games with the unique-card version", () => {
+		const store = freshGame()
+		expect(store.seniorBusinessDeveloper.uniqueCards).toBe(true)
+		expect(decodeExport(funcs.exportFCMmodel(false, false))).toContainEqual(["sbdUnique", 1])
+	})
+
+	it.each([[false, false], [false, true], [true, false]])("preserves both rule versions through export/import (gameover=%s context=%s)", (gameOver, includeContext) => {
+		const store = freshGame()
+		model.addHistory(rf.HIST_END_GAME, [0], -1, 0)
+		const newSave = funcs.exportFCMmodel(gameOver, includeContext)
+		const oldSave = encodeArr(decodeExport(newSave).filter((slot) => slot?.[0] !== "sbdUnique"))
+		funcs.importFCMmodel(oldSave, gameOver, includeContext)
+		expect(store.seniorBusinessDeveloper.uniqueCards).toBe(false)
+		expect(store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER]).toBe(6)
+		expect(decodeExport(funcs.exportFCMmodel(gameOver, includeContext))).not.toContainEqual(["sbdUnique", 1])
+		funcs.importFCMmodel(newSave, gameOver, includeContext)
+		expect(store.seniorBusinessDeveloper.uniqueCards).toBe(true)
+		expect(store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER]).toBe(1)
+	})
+
+	it.each([true, false])("restores version %s in whole-model reset and replay-step snapshots", (uniqueCards) => {
+		const store = freshGame()
+		store.seniorBusinessDeveloper.uniqueCards = uniqueCards
+		const snapshot = funcs.simpleExportWholeFCMmodel()
+		store.seniorBusinessDeveloper.uniqueCards = !uniqueCards
+		funcs.simpleImportWholeFCMmodel(snapshot)
+		expect(store.seniorBusinessDeveloper.uniqueCards).toBe(uniqueCards)
+	})
+
+	it("loads a markerless two-player game with one SBD each from the six-card pool", () => {
+		const store = freshGame()
+		store.players[0].employees.push(rf.SENIOR_BUSINESS_DEVELOPER)
+		store.players[1].beach.push(rf.SENIOR_BUSINESS_DEVELOPER)
+		const wire = decodeExport(funcs.exportFCMmodel(false, false)).filter((slot) => slot?.[0] !== "sbdUnique")
+		funcs.importFCMmodel(encodeArr(wire), false, false)
+		expect(useModelStore().availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER]).toBe(4)
+		expect(useModelStore().players[0].employees).toContain(rf.SENIOR_BUSINESS_DEVELOPER)
+		expect(useModelStore().players[1].beach).toContain(rf.SENIOR_BUSINESS_DEVELOPER)
+	})
+})
+
+describe("Senior Business Developer — unique stock", () => {
+	it.each([[2, 1], [3, 1], [4, 2], [5, 3], [6, 3]])("supplies %i players with %i cards at setup", (players, expected) => {
+		const store = freshGame(SBD_ONLY, players)
+		expect(store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER]).toBe(expected)
+	})
+	it.each([[2, 1], [3, 1], [4, 2], [5, 3], [6, 3]])("supplies %i players with %i cards in replay", async (players, expected) => {
+		const store = freshGame(SBD_ONLY, players)
+		store.availableEmployees.splice(0)
+		store.availableEmployees.push(...rf.ORIGINAL_AVAILABLE_EMPLOYEES)
+		const replay = await import("./FCMreplay.js")
+		replay.replaySetupKetchupExpansion(players)
+		expect(store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER]).toBe(expected)
+	})
+})
+
+describe("Senior Business Developer — unique ownership", () => {
+	it.each(["employees", "beach"])("forbids a second SBD when one is on %s without blocking other training", (location) => {
+		const store = freshGame()
+		store.players[0][location].push(rf.SENIOR_BUSINESS_DEVELOPER)
+		store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER] = 1
+		store.availableEmployees[rf.BURGER_COOK] = 6
+		const upgrades = rules.possibleUpgrades(store.availableEmployees, 0, [rf.NEW_BUSINESS_DEVELOPER, rf.KITCHEN_TRAINEE])
+		expect(upgrades[0]).toContain(rf.BURGER_COOK)
+		expect(upgrades[0]).not.toContain(rf.SENIOR_BUSINESS_DEVELOPER)
+	})
+
+	it.each(["employees", "beach"])("forbids headhunting a second SBD when one is on %s", (location) => {
+		const store = freshGame()
+		store.startingOptions.laborMarket = true
+		store.players[1].beach.push(rf.SENIOR_BUSINESS_DEVELOPER, rf.KITCHEN_TRAINEE)
+		expect(rules.canHeadhunt(0, 1, 0)).toBe(true)
+		store.players[0][location].push(rf.SENIOR_BUSINESS_DEVELOPER)
+		expect(rules.canHeadhunt(0, 1, 1)).toBe(true)
+		expect(rules.canHeadhunt(0, 1, 0)).toBe(false)
+	})
+
+	it("uses the shared unique-card marker without becoming a base-game card", () => {
+		expect(rf.BASE_UNIQUE_CARDS).not.toContain(rf.SENIOR_BUSINESS_DEVELOPER)
+		expect(rf.UNIQUE_CARDS).toContain(rf.SENIOR_BUSINESS_DEVELOPER)
+	})
+
+	it("allows the first SBD training while stock remains", () => {
+		const store = freshGame()
+		expect(rules.possibleUpgrades(store.availableEmployees, 0, rf.NEW_BUSINESS_DEVELOPER)).toEqual([[rf.SENIOR_BUSINESS_DEVELOPER]])
+	})
+
+	it("does not train an SBD when its public stock is exhausted", () => {
+		const store = freshGame()
+		store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER] = 0
+		expect(rules.possibleUpgrades(store.availableEmployees, 0, rf.NEW_BUSINESS_DEVELOPER)).toEqual([[]])
+	})
+
+	it.each([2, 3, 4, 5, 6])("keeps SBD stock absent with the module disabled for %i players", async (players) => {
+		const store = freshGame([], players)
+		expect(store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER] || 0).toBeLessThanOrEqual(0)
+		const replay = await import("./FCMreplay.js")
+		replay.replaySetupKetchupExpansion(players)
+		expect(store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER] || 0).toBeLessThanOrEqual(0)
+		expect(rules.possibleUpgrades(store.availableEmployees, 0, rf.NEW_BUSINESS_DEVELOPER)).toEqual([[]])
+	})
+})
 
 describe("Senior Business Developer — map and stock", () => {
 	it("places apartments as a 3x3 block and removes them from the stock", () => {
