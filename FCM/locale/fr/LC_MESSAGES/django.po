@@ -1842,8 +1842,8 @@ msgstr ""
 " donc utilisez-les avec parcimonie."
 
 #: .\FCM\templates\FCM\fanExpansionsHelp.html
-msgid "Training chain: New Business Developer → Senior Business Developer. In new games, Senior Business Developer is a ×1 employee: each player may own at most one, including working employees and those on the beach. Public supply: 1 card for 2–3 players, 2 for 4 players, 3 for 5–6 players. Existing games retain the original six-card supply and may own multiple Senior Business Developers."
-msgstr "Chaîne de formation : New Business Developer → Développeur d'Affaires Senior. Dans les nouvelles parties, le Développeur d'Affaires Senior est un employé ×1 : chaque joueur peut en posséder au maximum un au total, qu'il travaille ou soit à la plage. Réserve commune : 1 carte pour 2–3 joueurs, 2 pour 4 joueurs, 3 pour 5–6 joueurs. Les parties existantes conservent la réserve initiale de six cartes et permettent de posséder plusieurs Développeurs d'Affaires Senior."
+msgid "Training chain: New Business Developer → Senior Business Developer. Senior Business Developer is a ×1 employee: each player may own at most one, including working employees and those on the beach. Public supply: 1 card for 2–3 players, 2 for 4 players, 3 for 5–6 players."
+msgstr "Chaîne de formation : New Business Developer → Développeur d'Affaires Senior. Le Développeur d'Affaires Senior est un employé ×1 : chaque joueur peut en posséder au maximum un au total, qu'il travaille ou soit à la plage. Réserve commune : 1 carte pour 2–3 joueurs, 2 pour 4 joueurs, 3 pour 5–6 joueurs."
 
 #: .\FCM\templates\FCM\fanExpansionsHelp.html
 msgid ""
