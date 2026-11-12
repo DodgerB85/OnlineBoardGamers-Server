@@ -819,22 +819,22 @@ export const TILES = [
 	[1, 1, 1, 1, 1, 10.1, 10.1, 10.1, 10.1, 1, 10.1, 10.1, 10.1, 10.1, 1, 10.1, 10.1, 10.1, 10.1, 1, 1, 1, 1, 1, 1], //28
 	// New Map mod - 15 custom tiles (indices 29-43), enabled by SO_NEW_MAP.
 	// Houses encoded as house number + HOUSE (10); parks = 7; drinks = 2 (beer) / 3 (coke) / 4 (lemonade).
-	// 29: compact cross (TBLR) + 4 corner houses 28/29/30/31
-	[38, 38, 1, 39, 39, 38, 38, 1, 39, 39, 1, 1, 1, 1, 1, 40, 40, 1, 41, 41, 40, 40, 1, 41, 41],
+	// 29: two offset road stubs + 4 corner houses 28/29/30/31
+	[38, 38, 1, 1, 1, 38, 38, 0, 39, 39, 40, 40, 0, 39, 39, 40, 40, 0, 41, 41, 1, 1, 1, 41, 41],
 	// 30: L-turn (L+B) + diagonal houses 26 (top) / 27 (right)
 	[0, 36, 36, 0, 0, 0, 36, 36, 0, 0, 1, 1, 1, 37, 37, 0, 0, 1, 37, 37, 0, 0, 1, 0, 0],
 	// 31: L-turn (T+R) + two 2x2 parks
 	[0, 0, 1, 0, 0, 7, 7, 1, 0, 0, 7, 7, 1, 1, 1, 0, 0, 7, 7, 0, 0, 0, 7, 7, 0],
-	// 32: L-turn (L+B) + 3 houses 32 (top-left) / 34 (right) / 33 (bottom-left)
-	[42, 42, 0, 0, 0, 42, 42, 0, 0, 0, 1, 1, 1, 44, 44, 43, 43, 1, 44, 44, 43, 43, 1, 0, 0],
-	// 33: straight T+B, single column
-	[0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+	// 32: L-turn (L+B) + 2 houses 32 (top-left) / 33 (bottom-left)
+	[42, 42, 0, 0, 0, 42, 42, 0, 0, 0, 1, 1, 1, 0, 0, 43, 43, 1, 0, 0, 43, 43, 1, 0, 0],
+	// 33: straight T+B, single column + lemonade pickup
+	[0, 0, 1, 0, 0, 0, 4, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
 	// 34: T-junction (T+R+B) + right houses 23 / 24
 	[0, 0, 1, 33, 33, 0, 0, 1, 33, 33, 0, 0, 1, 1, 1, 0, 0, 1, 34, 34, 0, 0, 1, 34, 34],
 	// 35: L-turn (L+B) + single house 20
 	[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 30, 30, 0, 0, 1, 30, 30, 0, 0, 1, 1, 1, 1, 1],
-	// 36: T+R with vertical arm + one 2x2 park
-	[1, 1, 1, 1, 1, 0, 0, 7, 7, 1, 0, 0, 7, 7, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+	// 36: T+R with vertical arm + one 2x2 park + house 34
+	[1, 1, 1, 1, 1, 0, 0, 7, 7, 1, 0, 0, 7, 7, 1, 44, 44, 0, 0, 1, 44, 44, 0, 0, 1],
 	// 37: windmill cross (TBLR) + diagonal houses 35 / 36
 	[1, 1, 1, 45, 45, 1, 0, 0, 45, 45, 1, 0, 0, 0, 1, 46, 46, 0, 0, 1, 46, 46, 1, 1, 1],
 	// 38: outer ring (TBLR) + empty center 3x3
@@ -850,18 +850,6 @@ export const TILES = [
 	// 43: 4 corner isolated road blocks, no exits
 	[1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1],
 ]
-
-// Keep the original tiles for unversioned saves; only new games opt in.
-export const NEW_MAP_VERSION = 2
-const NEW_MAP_TILES_V2 = {
-	29: [38, 38, 1, 1, 1, 38, 38, 0, 39, 39, 40, 40, 0, 39, 39, 40, 40, 0, 41, 41, 1, 1, 1, 41, 41],
-	32: [42, 42, 0, 0, 0, 42, 42, 0, 0, 0, 1, 1, 1, 0, 0, 43, 43, 1, 0, 0, 43, 43, 1, 0, 0],
-	33: [0, 0, 1, 0, 0, 0, 4, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
-	36: [1, 1, 1, 1, 1, 0, 0, 7, 7, 1, 0, 0, 7, 7, 1, 44, 44, 0, 0, 1, 44, 44, 0, 0, 1],
-}
-export function tileData(tile, version) {
-	return version === NEW_MAP_VERSION && NEW_MAP_TILES_V2[tile] ? NEW_MAP_TILES_V2[tile] : TILES[tile]
-}
 
 export const HOUSE_SQS = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47]
 

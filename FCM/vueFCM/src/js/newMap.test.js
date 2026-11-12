@@ -59,6 +59,13 @@ describe("New Map mod — static data", () => {
 		}
 	})
 
+	it("matches the tuned 2026 art on tiles 29/32/33/36", () => {
+		expect(rf.TILES[29].filter((c) => c === rf.ROAD)).toHaveLength(6)
+		expect(rf.TILES[32]).not.toContain(34 + rf.HOUSE)
+		expect(rf.TILES[33][6]).toBe(rf.DRINK_LEMONADE)
+		expect(rf.TILES[36][15]).toBe(34 + rf.HOUSE)
+	})
+
 	it("keeps the 5 drink pickups on tiles 39/40/41 (beer/lemonade/coke)", () => {
 		const counts = (t) => {
 			const c = { beer: 0, coke: 0, lemonade: 0 }

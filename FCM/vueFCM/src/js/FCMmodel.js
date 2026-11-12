@@ -28,7 +28,6 @@ import i18n from "../i18n"
  * @param {number[]} [opts.startingMap] compact tile/rotation list
  * @param {boolean} [opts.regenerateMap] roll a brand new random map, ignoring startingMap
  * @param {boolean} [opts.keepColours] give each seat its current colour back, so a reset doesn't reshuffle seats
- * @param {number} [opts.newMapVersion] preserve the loaded game's tile revision on Reset AI
  */
 export function setupNewGame(opts = {}) {
 	const store = useModelStore()
@@ -36,8 +35,6 @@ export function setupNewGame(opts = {}) {
 	const playerNames = opts.playerNames || init.playerNames || []
 	const displayNamesArr = opts.displayNames || init.displayNames || ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
 	const startingMap = opts.startingMap || init.startingMap || []
-
-	store.mapData.newMapVersion = opts.newMapVersion ?? rf.NEW_MAP_VERSION
 
 	/************************* SETUP GAME *************************/
 	if (!opts.regenerateMap && startingMap.length > 0) {

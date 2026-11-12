@@ -224,7 +224,6 @@ export function simpleExportWholeFCMmodel() {
 	// 24 - Media Line mod (only when chosen)
 	if (store.startingOptions.mediaLine) temp.push(JSON.parse(JSON.stringify(store.mediaLine)))
 
-	if (store.mapData.newMapVersion === rf.NEW_MAP_VERSION) temp.push(["newMapVersion", rf.NEW_MAP_VERSION])
 	return compressData(temp)
 }
 
@@ -718,7 +717,6 @@ export function exportFCMmodel(forGameOver, includeContext, historyCutoff) {
 	// Compact positional slot, tagged like the Labor Market one.
 	if (store.startingOptions.mediaLine) temp.push(exportMediaLineSlot())
 
-	if (store.mapData.newMapVersion === rf.NEW_MAP_VERSION) temp.push(["newMapVersion", rf.NEW_MAP_VERSION])
 	return compressData(temp)
 }
 
@@ -756,9 +754,6 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	let IMPORT_INDEX = 0
 	// Now set up internal options -- THIS JUST SETS UP THE TRUE?FALSE FLAGS
 	model.setInternalStartingOptions(window.initData.startingOptions)
-
-	// Read before rebuilding any coordinates; an absent marker is always legacy.
-	store.mapData.newMapVersion = savedNewMapVersion(inputArr)
 
 	// 0 - map
 	store.mapData.tiles = map.expandMapToFullGrid(window.initData.startingMap, window.initData.playerNames.length)
@@ -1564,10 +1559,6 @@ export function restoreLaborMarketState(inputArr, index = -1) {
 		return entries
 	})
 	store.availableEmployees[rf.UNION_ORGANIZER] = Math.max(0, playerCount - lm.unionHolders.length)
-}
-
-function savedNewMapVersion(slots) {
-	return slots.some((slot) => Array.isArray(slot) && slot[0] === "newMapVersion" && slot[1] === rf.NEW_MAP_VERSION) ? rf.NEW_MAP_VERSION : 0
 }
 
 export function simpleImportWholeFCMmodel(inputBase64) {

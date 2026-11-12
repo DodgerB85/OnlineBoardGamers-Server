@@ -1293,7 +1293,7 @@ export function gatherFromTiles(tiles, range) {
 	// 1. Iterate through provided tiles
 	for (const t of tiles) {
 		const tileNumber = map.giveTileAtPosition(t)
-		const contents = rf.tileData(tileNumber, useModelStore().mapData.newMapVersion) || []
+		const contents = rf.TILES[tileNumber] || []
 
 		// 2. Filter and map drinks in one pass
 		for (const type of contents) {
