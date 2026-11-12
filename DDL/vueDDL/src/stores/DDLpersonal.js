@@ -48,7 +48,7 @@ export const usePersonalStore = defineStore("personal", () => {
 		if (this.pov < 0 || this.finishedGame) return false
 		if (store.gameflow.phase !== rf.PHASE_SETUP) return false
 		if (!store.gameflow.setup.auction) return false
-		return store.gameflow.setup.stage === rf.TURN_SETUP_AUCTION
+		return store.gameflow.setup.stage === rf.TURN_SETUP_AUCTION || (store.gameflow.setup.stage === rf.TURN_SETUP_TIEBREAK && store.gameflow.setup.tiebreakPlayers.includes(this.pov))
 	}
 
 	function canResign() {

@@ -105,9 +105,7 @@ export const useModelStore = defineStore("store", () => {
 		showTrade: false,
 		showDiscardCargo: false,
 		showDiscardEnergy: false,
-		showExplore: false,
 		showGearPicker: false,
-		showPlanetPicker: false,
 		zoomPct: 100,
 		zoomFitToken: 0,
 	})

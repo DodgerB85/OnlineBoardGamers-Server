@@ -21,10 +21,8 @@ import HistoryTab from "./components/HistoryTab.vue"
 import ReplayArea from "./components/ReplayArea.vue"
 import AuctionModal from "./components/AuctionModal.vue"
 import TradeModal from "./components/TradeModal.vue"
-import ExploreModal from "./components/ExploreModal.vue"
 import DiscardModal from "./components/DiscardModal.vue"
 import GearPickerModal from "./components/GearPickerModal.vue"
-import PlanetPickerModal from "./components/PlanetPickerModal.vue"
 
 import { useModelStore } from "./stores/DDLstore.js"
 import { usePersonalStore } from "./stores/DDLpersonal.js"
@@ -96,9 +94,11 @@ const statusBanner = computed(() => {
 		<div id="mainAreaLessHistory">
 			<PlayerTable />
 			<div class="gameArea">
-				<ActionPanel />
 				<div class="boardRow">
-					<ShipPanel />
+					<div class="turnColumn">
+						<ShipPanel />
+						<ActionPanel />
+					</div>
 					<div class="boardColumn">
 						<MapArea />
 					</div>
@@ -111,10 +111,8 @@ const statusBanner = computed(() => {
 
 	<AuctionModal />
 	<TradeModal />
-	<ExploreModal />
 	<DiscardModal />
 	<GearPickerModal />
-	<PlanetPickerModal />
 
 	<div id="loaderOverlay" v-if="store.viewSettings.showLoader">
 		<div id="loadingText">{{ $t("app.loading") }}</div>
@@ -158,6 +156,7 @@ body {
 	align-items: flex-start;
 	min-width: 0;
 }
+.turnColumn { width: 264px; flex: 0 0 264px; display: flex; flex-direction: column; gap: 8px; }
 .boardColumn { flex: 1 1 auto; min-width: 0; }
 #loaderOverlay {
 	position: fixed;

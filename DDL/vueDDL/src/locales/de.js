@@ -276,6 +276,10 @@ export default {
 		exit: "Wiederholung verlassen",
 	},
 	map: {
+		chooseStart: "Wähle einen hervorgehobenen Startplaneten auf der Karte.",
+		choosePathways: "Wähle auf der Karte zuerst den Eingang, dann den Ausgang.",
+		chooseExplore: "Erkunden: Wähle ein hervorgehobenes Konsumentenplättchen auf der Karte.",
+
 		routeDot: "Route {route} Punkt {dot}",
 		deepSpace: "Tiefer Weltraum",
 		mineTitle: "Mine: {good}",

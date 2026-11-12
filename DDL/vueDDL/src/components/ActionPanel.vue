@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { computed, ref } from "vue"
 import * as rf from "../js/DDLreference.js"
 import * as rules from "../js/DDLrules.js"
@@ -36,9 +36,6 @@ const randomGood = ref(-1)
 const siteGearSlot = ref(-1)
 const gearSlot = ref(-1)
 const gearRandomGood = ref(-1)
-const pathwayIn = ref(-1)
-const pathwayOut = ref(-1)
-const tradeTarget = ref(-1)
 
 const myIndex = computed(() => {
 	if (personal.trainingGame) return store.gameflow.turnOrder[0]
@@ -52,7 +49,6 @@ const isMyTurn = computed(() => personal.canPlay() && currentIndex.value === myI
 const yellowAvailable = computed(() => (me.value ? me.value.energy[rf.YELLOW_ENERGY] + me.value.virtual[rf.YELLOW_ENERGY] : 0))
 const blueAvailable = computed(() => (me.value ? me.value.energy[rf.BLUE_ENERGY] + me.value.virtual[rf.BLUE_ENERGY] : 0))
 const redAvailable = computed(() => (me.value ? me.value.energy[rf.RED_ENERGY] + me.value.virtual[rf.RED_ENERGY] : 0))
-const canUsePathway = computed(() => me.value && rules.canUsePathway(store, myIndex.value))
 const planet = computed(() => (me.value ? rules.playerPlanet(store, myIndex.value) : null))
 const planetState = computed(() => (planet.value ? rules.planetState(store, planet.value.id) : null))
 const incomingTrades = computed(() => store.board.trades.filter((t) => t.status === "pending" && t.to === myIndex.value))
@@ -117,8 +113,7 @@ const canClaim = (kind) => {
 	if (kind === "factory" && !planetState.value.factory) return false
 	return planetState.value.privileges[kind] === -1 && me.value && me.value.privileges > 0 && yellowAvailable.value >= 3
 }
-const pathwayPlanets = computed(() => rf.PLANETS)
-const canPlacePathways = computed(() => me.value && !me.value.pathways.placed && store.gameflow.turnType === rf.TURN_ACTION && pathwayIn.value >= 0 && pathwayOut.value >= 0 && pathwayIn.value !== pathwayOut.value)
+const canPlacePathways = computed(() => me.value && !me.value.pathways.placed && store.gameflow.turnType === rf.TURN_ACTION && store.context.selectedPathwayIn >= 0 && store.context.selectedPathwayOut >= 0 && store.context.selectedPathwayIn !== store.context.selectedPathwayOut)
 const hasIncoming = computed(() => incomingTrades.value.length > 0)
 const currentPlanetShips = computed(() => {
 	if (!planet.value) return []
@@ -135,25 +130,22 @@ function gainText(colour) {
 function takeAction() {
 	controller.chooseAction()
 }
-function startMove() {
-	controller.startMovement()
-}
 function stopMove() {
-	rules.stopMovement(store)
-	store.context.action = rf.ACT_NONE
+	controller.stopMovement()
 }
 function openHighways(costEnergy) {
 	store.context.action = rf.ACT_PLACE_HIGHWAYS
 	store.context.highwayCostsEnergy = costEnergy
 }
 function openMove() {
-	store.context.action = rf.ACT_MOVE
 	controller.startMovement()
 }
 function openBuild() {
+	store.context.selectedPlanet = planet.value ? planet.value.id : -1
 	store.context.action = rf.ACT_BUILD
 }
 function openTrade() {
+	store.context.selectedPlanet = planet.value ? planet.value.id : -1
 	store.context.action = rf.ACT_TRADE
 }
 function openPathways() {
@@ -183,37 +175,13 @@ async function buyGearNow() {
 	}
 }
 function placePathwaysNow() {
-	controller.placePathways(pathwayIn.value, pathwayOut.value)
-}
-function propose() {
-	if (tradeTarget.value < 0) return
-	const give = store.context.selectedGive
-	const receive = store.context.selectedReceive
-	controller.proposeTrade(tradeTarget.value, give, receive)
-}
-function toggleGive(goodId) {
-	const idx = store.context.selectedGive.indexOf(goodId)
-	if (idx === -1) store.context.selectedGive.push(goodId)
-	else store.context.selectedGive.splice(idx, 1)
-}
-function toggleReceive(goodId) {
-	const idx = store.context.selectedReceive.indexOf(goodId)
-	if (idx === -1) store.context.selectedReceive.push(goodId)
-	else store.context.selectedReceive.splice(idx, 1)
-}
-function goodsOf(player) {
-	const counts = {}
-	for (const good of player.goods) counts[good] = (counts[good] || 0) + 1
-	return rf.GOODS.filter((g) => counts[g.id] > 0).map((g) => ({ ...g, count: counts[g.id] }))
+	controller.placePathways(store.context.selectedPathwayIn, store.context.selectedPathwayOut)
 }
 function skipMissing() {
 	controller.skipMissingPlayerTurn()
 }
 function respond(tradeId, accept) {
 	controller.respondTrade(tradeId, accept)
-}
-function isPendingExplore() {
-	return store.gameflow.pendingExplore && store.gameflow.pendingExplore.player === myIndex.value
 }
 function openTradeModal() {
 	store.viewSettings.showTrade = true
@@ -222,7 +190,6 @@ function openTradeModal() {
 
 <template>
 	<div id="actionPanel">
-		<div class="actionTitle">{{ view.actionTitle(store) }}</div>
 		<div v-if="store.gameMessages.errorText" class="errorText">{{ store.gameMessages.errorText }}</div>
 		<div v-if="store.gameMessages.actionError" class="errorText">{{ store.gameMessages.actionError }}</div>
 		<div v-if="store.gameMessages.successText" class="successText">{{ store.gameMessages.successText }}</div>
@@ -243,20 +210,14 @@ function openTradeModal() {
 		</div>
 
 		<template v-else>
-			<div class="turnLine">
-				<span v-if="store.gameflow.phase === rf.PHASE_SETUP">{{ $t("phase.setup") }}: <b>{{ current ? current.displayName : "?" }}</b></span>
-				<span v-else>{{ $t("action.actionTurnLabel", { turn: store.gameflow.turn }) }} · {{ $t("action.current") }} <b>{{ current ? current.displayName : "?" }}</b></span>
-			</div>
-
 			<div v-if="store.gameflow.phase === rf.PHASE_SETUP" class="waitBox">
 				<p v-if="store.gameflow.setup.auction && !store.gameflow.setup.auctionResolved">{{ $t("action.auctionInProgress") }}</p>
 				<p v-else-if="store.gameflow.setup.stage === rf.TURN_SETUP_GEAR">{{ $t("action.placingGear") }}</p>
-				<p v-else>{{ $t("action.choosingPlanet") }}</p>
+				<p v-else>{{ $t("map.chooseStart") }}</p>
 			</div>
 
 			<template v-else-if="isMyTurn">
 				<template v-if="store.gameflow.turnType === rf.TURN_CHOOSE">
-					<p class="hint">{{ $t("action.collectHint") }}</p>
 					<div class="buttonGrid">
 						<button v-for="c in 3" :key="c" class="actionsLineButton energyButton" :style="{ backgroundColor: rf.ENERGY_HEX[c - 1], color: '#fff' }" @click="collect(c - 1)">
 							{{ $t("energy.collect", { colour: view.energyLabel(c - 1) }) }}<br />
@@ -267,14 +228,11 @@ function openTradeModal() {
 				</template>
 
 				<template v-else-if="store.gameflow.turnType === rf.TURN_ACTION">
-					<div class="actionInfo">
-						{{ $t("action.actionInfo", { turn: store.gameflow.turn, highways: store.gameflow.freeHighwaysLeft, movement: store.gameflow.movement.remaining }) }}
-					</div>
-					<div class="buttonGrid">
-						<button class="actionsLineButton" :disabled="store.gameflow.freeHighwaysLeft <= 0" @click="openHighways(false)">{{ $t("action.placeFreeHighway", { count: store.gameflow.freeHighwaysLeft }) }}</button>
+					<p v-if="store.gameflow.pendingExplore" class="hint">{{ $t("map.chooseExplore") }}</p>
+					<div v-else class="buttonGrid">
+						<button class="actionsLineButton" v-if="store.gameflow.freeHighwaysLeft > 0" @click="openHighways(false)">{{ $t("action.placeFreeHighway", { count: store.gameflow.freeHighwaysLeft }) }}</button>
 						<button class="actionsLineButton" :disabled="yellowAvailable <= 0" @click="openHighways(true)">{{ $t("action.buildHighway") }}</button>
 						<button class="actionsLineButton" :disabled="store.gameflow.movement.remaining > 0 ? false : redAvailable <= 0" @click="openMove">{{ $t("action.move") }}</button>
-						<button v-if="canUsePathway" class="actionsLineButton" :disabled="redAvailable <= 0" @click="controller.usePathway">{{ $t("action.usePathway") }}</button>
 						<button class="actionsLineButton" @click="openBuild">{{ $t("action.build") }}</button>
 						<button class="actionsLineButton" @click="openTrade">{{ $t("action.trade") }}</button>
 						<button class="actionsLineButton" @click="openPathways">{{ $t("action.pathways") }}</button>
@@ -300,7 +258,11 @@ function openTradeModal() {
 								<div v-if="planetState.factory" class="smallNote">{{ $t("action.factoryLine", { factory: rf.factoryName(planetState.factory.typeId) }) }}</div>
 								<div v-else class="factoryList">
 									<div v-for="factory in buildableFactories" :key="factory.id" class="factoryOption">
-										<span>{{ $t("action.factoryOption", { factory: rf.factoryName(factory.id), points: factory.points, count: factory.count }) }}</span>
+										<span class="recipe" :title="rf.factoryName(factory.id)">
+											<img v-for="(good, index) in factory.input" :key="index" :src="funcs.goodImage(good)" :alt="rf.goodName(good)" />
+											<span>→</span><img :src="funcs.goodImage(factory.output)" :alt="rf.goodName(factory.output)" />
+											<span>{{ factory.points }} {{ $t("common.vp") }} · ×{{ factory.count }}</span>
+										</span>
 										<button class="actionsLineButton" :disabled="!factory.affordable" @click="controller.buildFactory(factory.id)">{{ $t("action.build") }}</button>
 									</div>
 									<div v-if="buildableFactories.length === 0" class="smallNote">{{ $t("action.noFactories") }}</div>
@@ -372,11 +334,11 @@ function openTradeModal() {
 								<b>{{ $t("action.tradeWithPlayers") }}</b>
 								<div v-if="otherPlayersHere.length === 0" class="smallNote">{{ $t("action.noOtherPlayer") }}</div>
 								<div v-else>
-									<select v-model.number="tradeTarget">
+									<select v-model.number="store.context.selectedTradePlayer">
 										<option :value="-1">{{ $t("common.choosePlayer") }}</option>
 										<option v-for="entry in otherPlayersHere" :key="entry.idx" :value="entry.idx">{{ entry.p.displayName }}</option>
 									</select>
-									<button class="actionsLineButton" :disabled="tradeTarget < 0" @click="openTradeModal">{{ $t("action.proposeTrade") }}</button>
+									<button class="actionsLineButton" :disabled="store.context.selectedTradePlayer < 0" @click="openTradeModal">{{ $t("action.proposeTrade") }}</button>
 								</div>
 							</div>
 						</template>
@@ -385,15 +347,12 @@ function openTradeModal() {
 					<div v-if="store.context.action === rf.ACT_PATHWAY" class="subPanel">
 						<div v-if="me.pathways.placed" class="smallNote">{{ $t("action.pathwaysAlready") }}</div>
 						<template v-else>
-							<div>{{ $t("action.pathwaysHint") }}</div>
-							<select v-model.number="pathwayIn">
-								<option :value="-1">{{ $t("action.entrancePlanet") }}</option>
-								<option v-for="p in pathwayPlanets" :key="p.id" :value="p.id">{{ p.name }}</option>
-							</select>
-							<select v-model.number="pathwayOut">
-								<option :value="-1">{{ $t("action.exitPlanet") }}</option>
-								<option v-for="p in pathwayPlanets" :key="p.id" :value="p.id">{{ p.name }}</option>
-							</select>
+							<div>{{ $t("map.choosePathways") }}</div>
+							<div class="pathwaySelection">
+								<span>{{ $t("action.entrancePlanet") }}: {{ store.context.selectedPathwayIn >= 0 ? rf.PLANETS[store.context.selectedPathwayIn].name : "…" }}</span>
+								<span>→ {{ $t("action.exitPlanet") }}: {{ store.context.selectedPathwayOut >= 0 ? rf.PLANETS[store.context.selectedPathwayOut].name : "…" }}</span>
+								<button class="actionsLineButton" @click="store.context.selectedPathwayIn = -1; store.context.selectedPathwayOut = -1">{{ $t("common.clear") }}</button>
+							</div>
 							<button class="actionsLineButton" :disabled="!canPlacePathways" @click="placePathwaysNow">{{ $t("action.placePathways") }}</button>
 						</template>
 					</div>
@@ -435,11 +394,10 @@ function openTradeModal() {
 #actionPanel {
 	width: 100%;
 	box-sizing: border-box;
-	min-height: 132px;
 	overflow: visible;
 	position: relative;
-	background: #fffdf3;
-	border: 2px solid #7a5b19;
+	background: #f7fbff;
+	border: 1px solid #888;
 	border-radius: 6px;
 	padding: 6px 10px;
 	text-align: left;
@@ -450,38 +408,32 @@ function openTradeModal() {
 	align-content: flex-start;
 	gap: 6px 18px;
 }
-.actionTitle { font-weight: bold; font-size: 16px; border-right: 2px solid #7a5b19; padding-right: 12px; margin: 0; }
-.turnLine { margin: 0; }
 .hint { color: #444; font-size: 12px; }
 .buttonGrid { display: flex; flex-wrap: wrap; gap: 3px; }
 .energyButton { min-width: 84px; padding: 4px; font-size: 12px; }
 .energyButton small { font-size: 10px; font-weight: normal; }
 .bigAction { margin-top: 0; font-size: 14px; }
-.actionInfo { font-weight: bold; background: #f2e4b8; padding: 3px 6px; border-radius: 3px; margin: 0; }
 .endTurnButton { border-color: #a33; color: #800; }
 .subPanel {
-	position: absolute;
-	top: 100%;
-	left: 0;
-	right: 0;
-	z-index: 30;
+	width: 100%;
+	box-sizing: border-box;
 	border: 1px solid #b49a54;
 	border-radius: 4px;
 	padding: 4px 6px;
 	background: #fffbe8;
-	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-	max-height: 40vh;
-	overflow-y: auto;
 }
-.subPanel .actionsLineButton { margin: 2px; padding: 4px 8px; }
+#actionPanel .actionsLineButton { margin: 2px; padding: 4px 8px; }
 .planetHeader { font-weight: bold; font-size: 14px; margin-bottom: 4px; }
 .subSection { border-top: 1px solid #d8c58f; padding-top: 4px; margin-top: 4px; }
 /* Cap the offers list so a pile of trade offers scrolls instead of growing the panel and shifting the board. */
 .subSection.offers { max-height: 40vh; overflow-y: auto; }
 .smallNote { color: #666; font-size: 11px; }
+.recipe { display: inline-flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+.recipe img { width: 22px; height: 22px; object-fit: contain; }
 .factoryList { display: flex; flex-direction: column; gap: 2px; }
 .factoryOption { display: flex; justify-content: space-between; align-items: center; gap: 4px; font-size: 11px; }
 .factoryOption .actionsLineButton { margin: 0; padding: 2px 5px; font-size: 11px; }
+.pathwaySelection { display: flex; flex-direction: column; gap: 4px; }
 select { max-width: 100%; font-size: 11px; margin: 2px; }
 .tradeOffer { border: 1px solid #c9b06a; border-radius: 3px; padding: 3px; margin-top: 3px; background: #fff; }
 .tradeOffer.out { background: #eef3ff; color: #445; }

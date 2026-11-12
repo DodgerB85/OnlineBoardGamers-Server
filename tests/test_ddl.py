@@ -141,6 +141,28 @@ class DDLTests(TestCase):
         self.assertTrue(GamePlayer.objects.get(game=self.game, player=self.users[1]).winner)
         self.assertFalse(GamePlayer.objects.get(game=self.game, player=self.users[2]).winner)
 
+    @patch("django_q.tasks.async_task")
+    @patch("django_q.tasks.schedule")
+    def test_players_can_join_and_start_a_normal_game(self, schedule, async_task):
+        self.game.players.exclude(player=self.users[0]).delete()
+        self.game.gameStatus = "AVAILABLE"
+        self.game.save()
+        for user in self.users[1:]:
+            self.client.force_login(user)
+            response = self.client.get(reverse("joinGameLink", args=[f"DDL{self.game.id}"]))
+            self.assertEqual(response.status_code, 200)
+            response = self.client.post(
+                reverse("joinGame", args=["DDL"]),
+                data=json.dumps({"gameID": self.game.id, "action": "join", "source": "ajax", "confirmed": True}),
+                content_type="application/json",
+            )
+            self.assertEqual(response.status_code, 200)
+        self.game.refresh_from_db()
+        self.assertEqual(self.game.gameStatus, "ACTIVE")
+        self.assertEqual(self.game.players.count(), 3)
+        self.assertEqual(self.game.players.filter(is_current=True).count(), 1)
+        self.assertCountEqual(self.game.serverCurrentPlayerNamesInTurnOrder, [user.username for user in self.users])
+
     def test_create_page_uses_shared_pieces(self):
         self.client.force_login(self.users[0])
         response = self.client.get(reverse("createDDLpage"))

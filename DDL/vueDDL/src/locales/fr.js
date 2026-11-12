@@ -276,6 +276,10 @@ export default {
 		exit: "Quitter le replay",
 	},
 	map: {
+		chooseStart: "Choisissez une planète de départ en surbrillance sur la carte.",
+		choosePathways: "Choisissez l’entrée, puis la sortie sur la carte.",
+		chooseExplore: "Explorez : choisissez une tuile consommateur en surbrillance sur la carte.",
+
 		routeDot: "Route {route} point {dot}",
 		deepSpace: "Espace lointain",
 		mineTitle: "Mine : {good}",
