@@ -208,8 +208,8 @@ export function initCoords() {
 		let usedTiles = [] // Holds tiles only. Should be length 272
 		for (let i = 0; i < store.mapData.tiles.length / 2; i++) {
 			if (store.mapData.tiles[i * 2] != -1) {
-				usedTiles.push(rotateTile(rf.TILES[store.mapData.tiles[i * 2]], store.mapData.tiles[i * 2 + 1]))
-			} else usedTiles.push(rotateTile(rf.TILES[26], 0))
+				usedTiles.push(rotateTile(rf.tileData(store.mapData.tiles[i * 2], store.mapData.newMapVersion), store.mapData.tiles[i * 2 + 1]))
+			} else usedTiles.push(rotateTile(rf.tileData(26, store.mapData.newMapVersion), 0))
 		}
 
 		for (let i = 0; i < rf.ssH; i++) {
@@ -264,7 +264,7 @@ export function addTileToMap(tile, index, rotation) {
 	let remainder = index % store.mapData.dimensions[0] // how many extra tiles accross
 	index = wholeRows * store.mapData.dimensions[0] * 5 * 5
 	index = index + remainder * 5
-	let newCoords = rf.TILES[tile] // NEED TO ROTATE
+	let newCoords = rf.tileData(tile, store.mapData.newMapVersion) // NEED TO ROTATE
 	if (rotation != 0) newCoords = rotateTile(newCoords, rotation)
 	for (let y = 0; y < 5; y++) {
 		for (let x = 0; x < 5; x++) {
