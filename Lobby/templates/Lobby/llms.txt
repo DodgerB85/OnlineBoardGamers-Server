@@ -1,0 +1,30 @@
+# Online Board Gamers
+
+> Online Board Gamers is a free, browser-based platform for playing turn-based strategy board games online with friends or solo. Games update live, run asynchronously, keep replays and stats, and support tournaments and solo practice games.
+
+## Game rules and help
+
+- [Food Chain Magnate](https://www.onlineboardgamers.com/FCM/help/): Rules, interface help and common questions for playing Food Chain Magnate online.
+- [Food Chain Magnate coffee rules](https://www.onlineboardgamers.com/FCM/coffeeHelp/): How coffee tokens, pricing and reserves work.
+- [Food Chain Magnate China expansion](https://www.onlineboardgamers.com/FCM/chinaHelp/): Rules for the China expansion.
+- [Food Chain Magnate fan expansions](https://www.onlineboardgamers.com/FCM/fanExpansionsHelp/): Fan expansion rules.
+- [Horseless Carriage](https://www.onlineboardgamers.com/HLC/help/): Rules and gameplay help for Horseless Carriage.
+- [The Great Zimbabwe](https://www.onlineboardgamers.com/TGZ/help/): Rules and gameplay help for The Great Zimbabwe.
+- [Cannes](https://www.onlineboardgamers.com/CNS/help/): Rules and gameplay help for Cannes.
+- [Antiquity](https://www.onlineboardgamers.com/AQY/help/): Rules and gameplay help for Antiquity.
+- [Indonesia](https://www.onlineboardgamers.com/IND/help/): Rules and gameplay help for Indonesia.
+- [Keyflower](https://www.onlineboardgamers.com/KFW/help/): Rules and gameplay help for Keyflower.
+- [Web](https://www.onlineboardgamers.com/WEB/help/): Rules and gameplay help for Web.
+- [Bus](https://www.onlineboardgamers.com/BUS/help/): Rules and gameplay help for Bus.
+- [Roads & Boats](https://www.onlineboardgamers.com/RNB/help/): Rules and gameplay help for Roads & Boats.
+- [UR: 1830 BC](https://www.onlineboardgamers.com/URR/help/): Rules and gameplay help for UR: 1830 BC.
+
+## Site information
+
+- [All game help](https://www.onlineboardgamers.com/help/): Index of rules and help pages for every game.
+- [Tournament help](https://www.onlineboardgamers.com/helpTournaments/): How online board game tournaments work.
+- [Mini tournament help](https://www.onlineboardgamers.com/helpTournamentsMini/): How community-run mini tournaments work.
+- [About Online Board Gamers](https://www.onlineboardgamers.com/about/): What the site is and which games it supports.
+- [Contact](https://www.onlineboardgamers.com/contact/): Support, bug reports and feedback.
+- [Privacy policy](https://www.onlineboardgamers.com/privacy/)
+- [Terms of service](https://www.onlineboardgamers.com/terms/)

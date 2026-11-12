@@ -959,6 +959,18 @@ button {
     background-size: contain;
 }
 
+.game-card-img.game-fcm { background-image: url("../../FCM/images/fcm-box.jpg"); }
+.game-card-img.game-hlc { background-image: url("../../HLC/images/hlc-box.jpg"); }
+.game-card-img.game-tgz { background-image: url("../../TGZ/images/TGZ_box.jpg"); }
+.game-card-img.game-aqy { background-image: url("../../AQY/images/AQYbox.jpg"); }
+.game-card-img.game-urr { background-image: url("../../URR/images/ur-box.jpg"); }
+.game-card-img.game-ind { background-image: url("../../IND/images/INDbox.jpg"); }
+.game-card-img.game-bus { background-image: url("../../BUS/images/bus-box.jpg"); }
+.game-card-img.game-cns { background-image: url("../../CNS/images/CNSbox.jpg"); }
+.game-card-img.game-web { background-image: url("../../WEB/images/WEBbox.jpg"); }
+.game-card-img.game-rnb { background-image: url("../../RNB/images/RNBbox.jpg"); }
+.game-card-img.game-kfw { background-image: url("../../KFW/images/KFWbox.jpg"); }
+
 .game-card-img img {
     /* Hide the visual image — background-image above paints it. Kept in the
        DOM so right-click and the Game Icons template can read src/title. */

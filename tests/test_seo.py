@@ -15,6 +15,13 @@ class SeoTests(TestCase):
         for path in ("/FCM/help/", "/HLC/help/", "/RNB/help/", "/URR/help/"):
             self.assertIn(path, body)
 
+    def test_llms_txt_is_served(self):
+        response = self.client.get("/llms.txt")
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTrue(response["content-type"].startswith("text/plain"))
+        self.assertContains(response, "https://www.onlineboardgamers.com/FCM/help/")
+
     def test_help_page_canonical_is_its_own_url(self):
         response = self.client.get("/FCM/help/")
 

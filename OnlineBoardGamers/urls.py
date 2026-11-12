@@ -76,6 +76,10 @@ urlpatterns = [
         "robots.txt",
         TemplateView.as_view(template_name="Lobby/robots.txt", content_type="text/plain"),
     ),  # add the robots.txt file
+    path(
+        "llms.txt",
+        TemplateView.as_view(template_name="Lobby/llms.txt", content_type="text/plain; charset=utf-8"),
+    ),  # guidance for LLM crawlers
     path("HC/<int:game_id>/show/", redirect_hc_to_hlc, name="redirect_hc_to_hlc"),
     path("", include("Lobby.urls")),
     path("FCM/", include("FCM.urls")),

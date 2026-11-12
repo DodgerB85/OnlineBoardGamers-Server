@@ -1,6 +1,6 @@
 {% load static i18n %}
 <button type="button" class="card game-card game-card-btn" data-game-card="{{ full_id|default:'' }}" aria-expanded="false">
-  <div class="game-card-img" style="background-image:url('{% static img %}');">
+  <div class="game-card-img {{ full_id|default:'' }}">
     <img src="{% static img %}" alt="{{ title }}">
   </div>
   <div class="game-card-body">
