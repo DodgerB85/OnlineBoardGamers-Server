@@ -1,18 +1,17 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Italian translation for OnlineBoardGamers.
+# Copyright (C) 2026 OnlineBoardGamers
+# This file is distributed under the same license as the project.
+# GC_GiulioC, 2026.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: OnlineBoardGamers\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-23 00:59+0800\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2026-11-11 23:47+0800\n"
+"PO-Revision-Date: 2026-11-11 23:47+0800\n"
+"Last-Translator: GC_GiulioC\n"
+"Language-Team: Italian\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -22,15 +21,21 @@ msgstr ""
 msgid "Your Practice game has started"
 msgstr "Il tuo gioco di allenamento è iniziato"
 
-#: .\BUS\templates\BUS\BUShelp.html:5
+#: .\BUS\templates\BUS\BUShelp.html:4 .\BUS\templates\BUS\BUShelp.html:10
 msgid "Bus Help"
 msgstr "Aiuto di Bus"
 
-#: .\BUS\templates\BUS\BUShelp.html:9
+#: .\BUS\templates\BUS\BUShelp.html:7
+msgid ""
+"Rules and gameplay help for Bus, the classic route-building pickup-and-"
+"deliver board game by Splotter. Play online for free."
+msgstr ""
+
+#: .\BUS\templates\BUS\BUShelp.html:14
 msgid "Rules"
 msgstr "Regole"
 
-#: .\BUS\templates\BUS\BUShelp.html:13
+#: .\BUS\templates\BUS\BUShelp.html:18
 #, python-format
 msgid ""
 "Bus rules available <a href=\"%(bus_rules_url)s\" target=\"_blank\">here</a>"
@@ -38,7 +43,7 @@ msgstr ""
 "Regole di Bus disponibili <a href=\"%(bus_rules_url)s\" "
 "target=\"_blank\">qui</a>"
 
-#: .\BUS\templates\BUS\BUShelp.html:19
+#: .\BUS\templates\BUS\BUShelp.html:24
 #, python-format
 msgid ""
 "Pittsburgh rules available <a class=\"linkOther\" "
@@ -47,7 +52,7 @@ msgstr ""
 "Regole di Pittsburgh disponibili <a class=\"linkOther\" "
 "href=\"%(pitts_rules_url)s\" target=\"_blank\">qui</a>"
 
-#: .\BUS\templates\BUS\BUShelp.html:24
+#: .\BUS\templates\BUS\BUShelp.html:29
 msgid ""
 "How to play guide example <a href=\"https://www.youtube.com/watch?"
 "v=CKW0tYoIU_k\" target=\"_blank\">here</a>"
@@ -55,16 +60,40 @@ msgstr ""
 "Esempio di guida al gioco <a href=\"https://www.youtube.com/watch?"
 "v=CKW0tYoIU_k\" target=\"_blank\">qui</a>"
 
-#: .\BUS\templates\BUS\BUShelp.html:31
+#: .\BUS\templates\BUS\BUShelp.html:36
 msgid "Playing the Game"
 msgstr "Come si gioca"
 
-#: .\BUS\templates\BUS\BUShelp.html:35
-#, python-format
+#: .\BUS\templates\BUS\BUShelp.html:40
+#, fuzzy, python-format
+#| msgid ""
+#| "<li> Check your connection to the live update server by looking at the "
+#| "circle next to your name in the upper right. <br /> Orange = Connecting, "
+#| "Green = Connected, Red = Disconncedted </li> <li>The active player has a "
+#| "green background in the Players table</li> <li> In addition, after "
+#| "actions have been chosen, the current move is highlighted in green in the "
+#| "action selection area </li> <li>During the \"Choose Actions\" phase, any "
+#| "player that has passed will have an orange background</li> <li> Place "
+#| "buildings, lines, and passengers directly on the board. Vrrooomm by "
+#| "selecting passengers and destinations on the board </li> <li>Choose your "
+#| "actions in the upper right area or next to the board</li> <li> The "
+#| "Players table is in order of the \"Choose Actions\" phase. So top player "
+#| "picks first <br /> If no one chooses the \"Starting Player\" choice, then "
+#| "the player on the 2nd line will become the new start player. </li> <li> "
+#| "To view another player's actions, open the \"History\" tab and select a "
+#| "\"board\" action to highlight that move </li> <li>Score is calculated as "
+#| "you play - Time Stone deductions happen immediately, not at the end</li> "
+#| "<li>Any player can rewind at any time. Please be courteous. Misuse will "
+#| "result in alteration of this feature</li> <li> You can change which board "
+#| "you are playing on from the menu. Select a preference in your <a "
+#| "class=\"linkOther\" href=\"%(profile_url)s\">Profile</a> <br /> <b>NOTE: "
+#| "THE CHANGE IS COSMETIC ONLY. BOTH BOARDS HAVE THE SAME CONNECTIONS <br /> "
+#| "THE ORIGINAL BOARD IS ROTATED 90 DEGREES FROM THE 20TH ANNIVERSARY BOARD "
+#| "</b> </li>"
 msgid ""
 "<li> Check your connection to the live update server by looking at the "
 "circle next to your name in the upper right. <br /> Orange = Connecting, "
-"Green = Connected, Red = Disconncedted </li> <li>The active player has a "
+"Green = Connected, Red = Disconnected </li> <li>The active player has a "
 "green background in the Players table</li> <li> In addition, after actions "
 "have been chosen, the current move is highlighted in green in the action "
 "selection area </li> <li>During the \"Choose Actions\" phase, any player "
@@ -109,11 +138,11 @@ msgstr ""
 "<br /> IL TABELLONE ORIGINALE È RUOTATO DI 90 GRADI RISPETTO A QUELLO DEL "
 "20° ANNIVERSARIO </b> </li>"
 
-#: .\BUS\templates\BUS\BUShelp.html:77
+#: .\BUS\templates\BUS\BUShelp.html:82
 msgid "How can I find other players' moves?"
 msgstr "Come trovo le mosse degli altri giocatori?"
 
-#: .\BUS\templates\BUS\BUShelp.html:80
+#: .\BUS\templates\BUS\BUShelp.html:85
 msgid ""
 "Click on History from the top menu to open the history, and then click on an "
 "entry to highlight where it happened on the board. You can click entries to "
@@ -124,11 +153,11 @@ msgstr ""
 "il punto sul tabellone. Vedrai dove sono stati aggiunti edifici o linee e da "
 "dove a dove sono stati portati i passeggeri con VRROOOMM."
 
-#: .\BUS\templates\BUS\BUShelp.html:88
+#: .\BUS\templates\BUS\BUShelp.html:93
 msgid "Why did I miss my turn?"
 msgstr "Perché ho saltato il mio turno?"
 
-#: .\BUS\templates\BUS\BUShelp.html:91
+#: .\BUS\templates\BUS\BUShelp.html:96
 msgid ""
 "Turns where you cannot do anything are skipped. For example, during VRROOOMM "
 "if you either have no possible destination buildings, or no available "
@@ -144,19 +173,19 @@ msgstr ""
 "massimo di autobus è troppo basso perché abbiano azioni. Controlla la "
 "cronologia per il motivo."
 
-#: .\BUS\templates\BUS\BUShelp.html:101
+#: .\BUS\templates\BUS\BUShelp.html:106
 msgid "When can I resign?"
 msgstr "Quando posso abbandonare?"
 
-#: .\BUS\templates\BUS\BUShelp.html:103
+#: .\BUS\templates\BUS\BUShelp.html:108
 msgid "You can resign during your \"Choose Actions\" phase."
 msgstr "Puoi abbandonare durante la tua fase «Scegli azioni»."
 
-#: .\BUS\templates\BUS\BUShelp.html:107
+#: .\BUS\templates\BUS\BUShelp.html:112
 msgid "Further Help"
 msgstr "Ulteriore aiuto"
 
-#: .\BUS\templates\BUS\BUShelp.html:109
+#: .\BUS\templates\BUS\BUShelp.html:114
 msgid "For any questions / comments / suggestions, please contact"
 msgstr "Per domande, commenti o suggerimenti, contatta"
 
@@ -203,17 +232,16 @@ msgid "Action Statistics"
 msgstr "Statistiche delle azioni"
 
 #: .\BUS\templates\BUS\BUSstats.html:45
-#| msgid ""
-#| "Every player starts with 20 action points, and each chosen action costs "
-#| "one. 'Everyone else' is every losing player. Compare 'Win %% when used' "
-#| "against a fair share of wins (100%% divided by the player count) to see "
-#| "how the action is linked to winning."
 msgid ""
 "Every player starts with 20 action points, and each chosen action costs one. "
 "'Everyone else' is every losing player. Compare 'Win &#37; when used' "
 "against a fair share of wins (100&#37; divided by the player count) to see "
 "how the action is linked to winning."
-msgstr "Ogni giocatore inizia con 20 punti azione e ogni azione scelta ne costa uno. «Tutti gli altri» sono i giocatori perdenti. Confronta «Vittorie &#37; quando usata» con una quota equa di vittorie (100&#37; diviso per il numero di giocatori) per vedere il legame tra l'azione e la vittoria."
+msgstr ""
+"Ogni giocatore inizia con 20 punti azione e ogni azione scelta ne costa uno. "
+"«Tutti gli altri» sono i giocatori perdenti. Confronta «Vittorie &#37; "
+"quando usata» con una quota equa di vittorie (100&#37; diviso per il numero "
+"di giocatori) per vedere il legame tra l'azione e la vittoria."
 
 #: .\BUS\templates\BUS\BUSstats.html:49
 msgid "3 Player"
@@ -266,7 +294,6 @@ msgid "Others average"
 msgstr "Media degli altri"
 
 #: .\BUS\templates\BUS\BUSstats.html:118
-#| msgid "Win %% when used"
 msgid "Win &#37; when used"
 msgstr "Vittorie % quando usata"
 
@@ -351,26 +378,30 @@ msgstr "Vittorie"
 msgid "Win &#37;"
 msgstr "Vittoria %"
 
-#: .\BUS\views.py:148 .\BUS\views.py:197 .\BUS\views.py:250 .\BUS\views.py:542
-#: .\BUS\views.py:595
+#: .\BUS\views.py:166 .\BUS\views.py:215 .\BUS\views.py:273 .\BUS\views.py:585
+#: .\BUS\views.py:638
 msgid "Game does not exist"
 msgstr "La partita non esiste"
 
-#: .\BUS\views.py:213
+#: .\BUS\views.py:236
 msgid "Invalid chat entry"
 msgstr "Voce chat non valida"
 
-#: .\BUS\views.py:255
+#: .\BUS\views.py:278
 msgid "You are not a player in this game"
 msgstr "Non sei un giocatore in questa partita"
 
-#: .\BUS\views.py:401
+#: .\BUS\views.py:424
 msgid ""
 "No rewind data. Rewind limit reached. Please play on to generate more rewind "
 "data"
 msgstr ""
 "Nessun dato di riavvolgimento. Limite di riavvolgimento raggiunto. Continua "
 "a giocare per generare più dati"
+
+#: .\BUS\views.py:521
+msgid "This player is not eligible for kickout."
+msgstr ""
 
 #, python-format
 #~ msgid "Win %%"
