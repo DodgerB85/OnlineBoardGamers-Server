@@ -240,7 +240,7 @@ export function canHeadhunt(playerIndex, targetPlayerIndex, beachIndex) {
 	if (rf.NON_TRANSFERABLE_EMPLOYEES.includes(employee)) return false
 	const level = getEmployeeLevel(employee)
 	if (level < 1) return false
-	if ((rf.UNIQUE_CARDS.includes(employee) || employee === rf.DELIVERY_DRIVER) && plyr.hasEmployee(playerIndex, employee)) return false
+	if ((isUniqueEmployee(employee) || employee === rf.DELIVERY_DRIVER) && plyr.hasEmployee(playerIndex, employee)) return false
 	return true
 }
 
@@ -1474,10 +1474,16 @@ export function getSubSlotsForEmployee(employee) {
 	return 0
 }
 
+export function isUniqueEmployee(employee) {
+	const store = useModelStore()
+	if (employee === rf.SENIOR_BUSINESS_DEVELOPER) return store.startingOptions.seniorBusinessDeveloper && store.seniorBusinessDeveloper.uniqueCards
+	return rf.UNIQUE_CARDS.includes(employee)
+}
+
 export function forbiddenEmployeesDuringHire(playerIndex, justHired) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
-	const UNIQUE_SET = new Set(rf.UNIQUE_CARDS)
+	const UNIQUE_SET = new Set(rf.UNIQUE_CARDS.filter(isUniqueEmployee))
 
 	// 1. Use a Set to automatically handle uniqueness and fast lookups
 	const forbidden = new Set()

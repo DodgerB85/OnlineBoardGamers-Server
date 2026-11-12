@@ -1839,12 +1839,8 @@ msgstr ""
 "Markern – sparsam einsetzen."
 
 #: .\FCM\templates\FCM\fanExpansionsHelp.html
-msgid ""
-"Training chain: New Business Developer → Senior Business Developer (level "
-"2). Six of each in the talent market."
-msgstr ""
-"Ausbildungskette: New Business Developer → Senior Business Developer (Stufe "
-"2). Je sechs im Arbeitsmarkt."
+msgid "Training chain: New Business Developer → Senior Business Developer. In new games, Senior Business Developer is a ×1 employee: each player may own at most one, including working employees and those on the beach. Public supply: 1 card for 2–3 players, 2 for 4 players, 3 for 5–6 players. Existing games retain the original six-card supply and may own multiple Senior Business Developers."
+msgstr "Ausbildungskette: New Business Developer → Senior Business Developer. In neuen Partien ist der Senior Business Developer ein ×1-Mitarbeiter: Jeder Spieler darf insgesamt höchstens einen besitzen, ob im Einsatz oder am Strand. Gemeinsamer Vorrat: 1 Karte bei 2–3 Spielern, 2 bei 4 Spielern, 3 bei 5–6 Spielern. Bestehende Partien behalten den ursprünglichen Vorrat von sechs Karten; Spieler dürfen dort mehrere Senior Business Developer besitzen."
 
 #: .\FCM\templates\FCM\fanExpansionsHelp.html
 msgid ""
