@@ -13,7 +13,7 @@ from decouple import config
 from django.db import connection
 
 # import time
-from django.db.models import Avg, Prefetch, Q
+from django.db.models import Prefetch, Q
 
 DEBUG = config("DEBUG", default=False, cast=bool)
 PRINT_TIME = True
@@ -191,15 +191,6 @@ def has_new_ms(starting_options_str, new_ms_value):
 def filter_by_starting_options(rows, new_ms_value, include):
     """Same filter as before, but over the pre-fetched (id, startingOptions) rows (0 DB hits)."""
     return [row for row in rows if has_option(row[1] or "", new_ms_value) == include]
-
-
-def calculate_average_turn(queryset):
-    """Calculates the average turn for a given queryset, excluding null and zero values."""
-    return (
-        queryset.exclude(turn__isnull=True)
-        .exclude(turn=0)
-        .aggregate(avg_turn=Avg("turn"))["avg_turn"]
-    )
 
 
 # --- Filter by NEW_MS ---

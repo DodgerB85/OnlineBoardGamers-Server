@@ -15,8 +15,6 @@ from Lobby.sharedFunctions.sharedRefs import (
     SR_getTimeNow,
     SR_getTournamentTypeDisplay,
     SR_getTournamentWinnerHTML,
-    SR_isThisMultiiWinnersGame,
-    SR_latestUpdateElapsedTimeStringFromTotalSeconds,
     getCleanedAndSortedRoundData,
 )
 
@@ -37,23 +35,6 @@ class TestSRgetTimeNow(TestCase):
     def test_specific_timestamp(self, mock_time):
         result = SR_getTimeNow()
         self.assertEqual(result, "1700000000000")
-
-
-class TestSRisThisMultiiWinnersGame(TestCase):
-    def test_kfw_is_multi_winner(self):
-        self.assertTrue(SR_isThisMultiiWinnersGame("KFW"))
-
-    def test_aqy_is_multi_winner(self):
-        self.assertTrue(SR_isThisMultiiWinnersGame("AQY"))
-
-    def test_fcm_is_not_multi_winner(self):
-        self.assertFalse(SR_isThisMultiiWinnersGame("FCM"))
-
-    def test_tgz_is_not_multi_winner(self):
-        self.assertFalse(SR_isThisMultiiWinnersGame("TGZ"))
-
-    def test_empty_string(self):
-        self.assertFalse(SR_isThisMultiiWinnersGame(""))
 
 
 class TestSRgetFCMstartingOptionsHTML(TestCase):
@@ -206,33 +187,6 @@ class TestSRgetTournamentWinnerHTML(TestCase):
         self.assertIn("PlayerA", result)
         self.assertIn("PlayerB", result)
         self.assertIn(", ", result)
-
-
-class TestSRlatestUpdateElapsedTimeString(TestCase):
-    def test_zero_seconds(self):
-        result = SR_latestUpdateElapsedTimeStringFromTotalSeconds(0)
-        self.assertEqual(result, " 0s")
-
-    def test_seconds_only(self):
-        result = SR_latestUpdateElapsedTimeStringFromTotalSeconds(45)
-        self.assertEqual(result, " 45s")
-
-    def test_minutes_and_seconds(self):
-        result = SR_latestUpdateElapsedTimeStringFromTotalSeconds(125)
-        self.assertEqual(result, " 2min 5s")
-
-    def test_hours_minutes_seconds(self):
-        result = SR_latestUpdateElapsedTimeStringFromTotalSeconds(3661)
-        self.assertEqual(result, " 1h 1min 1s")
-
-    def test_days_hours_minutes_seconds(self):
-        total = 2 * 86400 + 3 * 3600 + 15 * 60 + 30
-        result = SR_latestUpdateElapsedTimeStringFromTotalSeconds(total)
-        self.assertEqual(result, "2d 3h 15min 30s")
-
-    def test_exactly_one_day(self):
-        result = SR_latestUpdateElapsedTimeStringFromTotalSeconds(86400)
-        self.assertEqual(result, "1d 0s")
 
 
 class TestSRgamePaceString(TestCase):

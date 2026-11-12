@@ -2,18 +2,12 @@ import base64
 import gzip
 import json
 import time
-import uuid
-from datetime import timedelta
 from typing import TYPE_CHECKING, cast
-
-from decouple import config
 
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
-from django.utils import timezone
 from django.utils.translation import gettext
-from django_q.tasks import schedule
 
 import Lobby.sharedFunctions.constants as rf
 from Lobby.gameViewHelpers import (

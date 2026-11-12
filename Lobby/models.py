@@ -261,10 +261,6 @@ class Tournament(models.Model):
     def isInvitedPlayer(self, loggedInUser):
         return loggedInUser in self.invitedPlayers.all()
 
-    def getByedPlayersList(self):
-        TPDA = json.loads(self.tournamentProgressionData)
-        return [player for round in TPDA for row in round if row[0] == "BYEPLAYERS" for player in row[1:]]
-
     def get_tournamentType_display(self):
         return dict(SR_TOURNAMENT_TYPE_CHOICES)[self.tournamentType]
 

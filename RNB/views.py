@@ -75,6 +75,10 @@ def RNBhelp(request):
     return render(request, "RNB/RNBhelp.html")
 
 
+def RNBnotBugs(request):
+    return render(request, "RNB/RNBnotBugs.html")
+
+
 def RNBmapHelp(request):
     return render(request, "RNB/RNBmapHelp.html")
 
@@ -2279,22 +2283,6 @@ def setPlayerStackToCurrent(currentGame, playerName):
             gp.moveDataJSON = gp_moveData
             gp.save()
             break
-
-
-##################### THIS IS NOT USED - Leave in case things change
-def getAllCurrentStackPhaseMoves(currentGame):
-    currentStackMoves = []
-    for gp in currentGame.players.all():
-        gp_moveData = gp.moveDataJSON
-        # Find an entry matching the turn and phase
-        for entry in gp_moveData:
-            if entry["turn"] == currentGame.turn and entry["phase"] == currentGame.phase:
-                entryToAdd = entry
-                entryToAdd["username"] = gp.player.username
-                currentStackMoves.append(entryToAdd)
-                break
-
-    return currentStackMoves
 
 
 def getAllCurrentStackMoves(currentGame):

@@ -9,7 +9,7 @@ from pathlib import Path
 
 import django
 from decouple import config
-from django.db.models import Count, Q
+from django.db.models import Q
 
 # from django.contrib.auth.models import User
 
@@ -105,40 +105,6 @@ three_months_ago = int((datetime.now() - timedelta(days=90)).timestamp() * 1000)
 one_year_ago = int((datetime.now() - timedelta(days=365)).timestamp() * 1000)
 
 start_calc_time = time.perf_counter()
-
-
-def get_finished_games(game_code, time_limit=None, player_count=None):
-    """Get all finished games based on the provided game model and filters."""
-    query = Q(game__gameCode=game_code, game__gameStatus="FINISHED") & ~Q(game__statsExcludedGame=True)
-
-    if player_count:
-        query &= Q(game__maxPlayers=player_count)
-    elif game_code == "RNB":
-        query &= Q(game__maxPlayers__gt=1)
-    if time_limit:
-        query &= Q(game__latestUpdate__gte=time_limit)
-
-    return GamePlayer.objects.filter(query).exclude(player__username__in=EXCLUDE_USERS).select_related("player").values("player__id", "player__username").annotate(total_games=Count("id"))
-
-
-def get_won_games(game_code, time_limit=None, player_count=None):
-    """
-    Counts total wins per user by querying GamePlayer entries where winner=True.
-    """
-    query = Q(
-        game__gameCode=game_code,
-        game__gameStatus="FINISHED",
-        winner=True,  # BooleanField on GamePlayer
-    ) & ~Q(game__statsExcludedGame=True)
-
-    if player_count:
-        query &= Q(game__maxPlayers=player_count)
-    elif game_code == "RNB":
-        query &= Q(game__maxPlayers__gt=1)
-    if time_limit:
-        query &= Q(game__latestUpdate__gte=time_limit)
-
-    return GamePlayer.objects.filter(query).exclude(player__username__in=EXCLUDE_USERS).select_related("player").values("player__id", "player__username").annotate(total_wins=Count("id"))
 
 
 # First, calculate each game serperately, and save the data

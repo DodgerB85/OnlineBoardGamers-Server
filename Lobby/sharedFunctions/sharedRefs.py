@@ -4,7 +4,6 @@ import copy
 import json
 import math
 import time
-from collections import Counter
 from urllib.parse import urlparse
 
 from django.utils.translation import gettext, gettext_lazy
@@ -122,10 +121,6 @@ SR_GAME_STATUS_CHOICES = [
 
 def SR_getTimeNow():
     return str(int(time.time()) * 1000)
-
-
-def SR_isThisMultiiWinnersGame(_gameCode):
-    return bool(_gameCode == "KFW" or _gameCode == "AQY")
 
 
 def SR_getTournamentWinnerHTML(tournamentStatus, winnersData):
@@ -308,110 +303,6 @@ def SR_getAnyTournamentRoundsData(tournament):
 
 
 ######################################################
-
-
-def SR_getTournamentRoundsHTML(
-    tournamentType,
-    maxGamePlayers,
-    tournamentProgressionData,
-    tournamentPointsData,
-    gameTypeString,
-    tournamentObj,
-):
-    TPDA = json.loads(tournamentProgressionData)
-
-    roundsHTML = '<div id="tournamentRoundsContainerDiv">'
-    pointsList = sorted(json.loads(tournamentPointsData), key=lambda x: -x[1]) if tournamentPointsData != "" else []
-    TL_sideData = []
-    if tournamentType == "TL":
-        sideData = json.loads(tournamentObj.tournamentSideData)
-        TL_sideData = Counter(sideData)
-
-    if len(pointsList) > 0:
-        roundsHTML += '<div class="playerInfoStatsContainer tournyRoundDiv">'
-        if tournamentType == "RR":
-            roundsHTML += "<h2>" + gettext("Points") + "</h2>"
-        elif tournamentType == "TL":
-            roundsHTML += "<h2>" + gettext("Points (Lives)") + "</h2>"
-        roundsHTML += '<div class="playerStatsDiv">'
-        roundsHTML += '<table class="generalTable">'
-        for i in range(len(pointsList)):
-            roundsHTML += "<tr>"
-            if tournamentType == "RR":
-                roundsHTML += "<th>" + pointsList[i][0] + "</th>"
-            elif tournamentType == "TL":
-                lives = TL_sideData.get(pointsList[i][0], 0)
-                roundsHTML += "<th>" + pointsList[i][0] + " (" + str(lives) + ")</th>"
-            roundsHTML += "<th>" + str(pointsList[i][1]) + "</th>"
-            roundsHTML += "</tr>"
-
-        roundsHTML += "</table>"
-        roundsHTML += "</div>"
-        roundsHTML += "</div>"
-
-    for i in range(len(TPDA)):
-        roundsTitle = str(i + 1)
-        if tournamentType == "RR" and i >= 4:
-            roundsTitle += " (KO)"
-        roundsHTML += '<div class="playerInfoStatsContainer tournyRoundDiv">'
-        roundsHTML += "<h2>" + gettext("Round") + " " + roundsTitle + "</h2>"
-        roundsHTML += '<div class="playerStatsDiv">'
-        roundsHTML += '<table class="generalTable">'
-        roundsHTML += "<tr>"
-        roundsHTML += "<th>" + gettext("Game") + "</th>"
-        roundsHTML += "<th>" + gettext("Winner") + "</th>"
-        roundsHTML += "</tr>"
-
-        for row in TPDA[i]:
-            if row[0] != "BYEPLAYERS":
-                roundsHTML += '<tr class="clickableGameRow ' + gameTypeString + '" id="gamesRow' + str(row[maxGamePlayers]) + '">'
-                j = 0
-                for j in range(len(row)):
-                    # Only add lives if 2L AND it is the latest round
-                    if tournamentType == "TL" and i == len(TPDA) - 1:
-                        lives = TL_sideData.get(row[j], 0)
-                        if j == 0:
-                            roundsHTML += '<td><a href="/profile/' + row[j] + '">' + row[j] + " (" + str(lives) + ")</a>"
-                        elif j < maxGamePlayers:
-                            roundsHTML += ' VS <a href="/profile/' + row[j] + '">' + row[j] + " (" + str(lives) + ")</a>"
-                    # Else just add the names
-                    else:
-                        if j == 0:
-                            roundsHTML += '<td><a href="/profile/' + row[j] + '">' + row[j] + "</a>"
-                        elif j < maxGamePlayers:
-                            roundsHTML += ' VS <a href="/profile/' + row[j] + '">' + row[j] + "</a>"
-
-                roundsHTML += "</td>"
-                roundsHTML += "<td>"
-                if len(row) == (maxGamePlayers + 2) and j < len(row):
-                    roundsHTML += row[j]
-                roundsHTML += "</td>"
-
-                roundsHTML += "</tr>"
-        # Add byes to end of rounds HTML
-        for row in TPDA[i]:
-            if row[0] == "BYEPLAYERS":
-                roundsHTML += "<tr>"
-                for j in range(len(row)):
-                    # Only add lives if 2L AND it is the latest round
-                    if tournamentType == "TL" and i == len(TPDA) - 1:
-                        lives = TL_sideData.get(row[j], 0)
-                        if j == 1:
-                            roundsHTML += "<td>" + gettext("BYES:") + '<a href="/profile/' + row[j] + '">' + row[j] + " (" + str(lives) + ")</a>"
-                        elif j > 1:
-                            roundsHTML += ', <a href="/profile/' + row[j] + '">' + row[j] + " (" + str(lives) + ")</a>"
-                    else:
-                        if j == 1:
-                            roundsHTML += "<td>" + gettext("BYES:") + ' <a href="/profile/' + row[j] + '">' + row[j] + "</a>"
-                        elif j > 1:
-                            roundsHTML += ', <a href="/profile/' + row[j] + '">' + row[j] + "</a>"
-
-        roundsHTML += "</table>"
-        roundsHTML += "</div>"
-        roundsHTML += "</div>"
-    roundsHTML += "</div>"
-
-    return roundsHTML
 
 
 def SR_currentTurnString(gameCode, turn, phase):
@@ -782,29 +673,6 @@ def SR_gamePaceString(gamePace, kickoutDuration=None):
 #            + "'/>"
 #        )
 #    return HTML
-
-
-def SR_latestUpdateElapsedTimeStringFromTotalSeconds(elapsedTotalSeconds):
-    elapsedDays = elapsedTotalSeconds // (60 * 60 * 24)
-    elapsedTotalSeconds = elapsedTotalSeconds % (60 * 60 * 24)
-    elapsedHours = elapsedTotalSeconds // (60 * 60)
-    elapsedTotalSeconds = elapsedTotalSeconds % (60 * 60)
-    elapsedmins = elapsedTotalSeconds // (60)
-    elapsedTotalSeconds = elapsedTotalSeconds % (60)
-
-    latestUpdateElapsedTimeString = ""
-    if elapsedDays > 0:
-        latestUpdateElapsedTimeString += str(elapsedDays) + "d"
-        # if (elapsedDays > 1): latestUpdateElapsedTimeString += "s"
-
-    if elapsedHours > 0:
-        latestUpdateElapsedTimeString += " " + str(elapsedHours) + "h"
-        # if (elapsedHours > 1): latestUpdateElapsedTimeString += "s"
-    if elapsedmins > 0:
-        # "min", not "m": in Italian "m" reads as metres.
-        latestUpdateElapsedTimeString += " " + str(elapsedmins) + "min"
-    latestUpdateElapsedTimeString += " " + str(elapsedTotalSeconds) + "s"
-    return latestUpdateElapsedTimeString
 
 
 def SR_getFCMstartingOptionsHTML(startingOptionsArr):

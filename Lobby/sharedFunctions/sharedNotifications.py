@@ -1384,7 +1384,7 @@ def SN_sendBugReportEmail(reporterUsername, reporterEmail, gameCode, gameID, gam
         f"Bug Description: {bugDescription}\n"
         f"URL: <{the_url}>"
     )
-    SN_sendAdminErrorMessage(bug_message)
+    SN_sendAdminErrorMessage(bug_message, webhook_key="WEBHOOK_DISCORD_FEEDBACK")
     try:
         adminUser.email_user(subject, message)
     except Exception as e:
@@ -1866,9 +1866,12 @@ def SN_sendAdminErrorMessage(message, webhook_key="WEBHOOK_ADMIN_ERROR_MSG"):
     except Exception:
         pass
 
+    webhook = config(webhook_key, default="")
+    if not webhook:
+        return False
     try:
         response = requests.post(
-            f"https://discord.com/api/webhooks/{config(webhook_key)}",
+            f"https://discord.com/api/webhooks/{webhook}",
             data={"content": message},
             timeout=5,
         )

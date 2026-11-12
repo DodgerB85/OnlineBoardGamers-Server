@@ -779,11 +779,7 @@ def feedback(request):
 
 
         # Send to the feedback Discord webhook (configured in .env)
-        requests.post(
-            f"https://discord.com/api/webhooks/{config('WEBHOOK_DISCORD_FEEDBACK')}",
-            data={"content": discord_message},
-            timeout=5,
-        )
+        SN_sendAdminErrorMessage(discord_message, webhook_key="WEBHOOK_DISCORD_FEEDBACK")
 
         messages.success(request, gettext("Thank you for your feedback!"))
         return redirect("/")
@@ -6218,45 +6214,6 @@ def reloadMainTchatData(request):
         {"chatData": currentTournament.chatData},
         safe=True,
     )
-
-
-def createTGZmainTournament(request):
-    if request.method != "POST":
-        return render(
-            request,
-            "Lobby/createTGZ.html",
-            {
-                "experienced": False,
-                "MainT_Creation": True,
-            },
-        )
-
-    # Now it is a POST response
-    startingOptions = json.dumps(SF_TGZadvancedOptions(request) if "enableAdvancedOptions" in request.POST else [])
-
-    with transaction.atomic():
-        newTournament = Tournament.objects.create(
-            tournamentCategory="Main",
-            gameCode="TGZ",
-            tournamentName=request.POST["tournamentName"],
-            tournamentDescription=request.POST["tournamentDescription"],
-            tournamentStatus=PENDING,
-            tournamentType=request.POST["tournamentFormat"],
-            startingOptions=startingOptions,
-            maxTournamentPlayers=request.POST["totalPlayersMT"],
-            maxGamePlayers=request.POST["playersPerGameMT"],
-            roundsBeforeKnockout=4,
-        )
-        newTournament.startingPlayers.add(request.user)
-        if "privateTournament" in request.POST:
-            newTournament.tournamentStatus = PRIVATE
-        else:
-            newTournament.tournamentStatus = OPEN
-
-        newTournament.save()
-
-    messages.success(request, "Your Tournament has been created")
-    return HttpResponseRedirect(reverse("indexListType", kwargs={"listType": "waiting"}))
 
 
 @login_required

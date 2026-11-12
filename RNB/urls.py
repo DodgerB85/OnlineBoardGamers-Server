@@ -13,6 +13,7 @@ urlpatterns = [
     path("RNBmapEditor/", views.RNBmapEditor, name="RNBmapEditor"),
     path("RNBmapHelp/", views.RNBmapHelp, name="RNBmapHelp"),
     path("help/", views.RNBhelp, name="RNBhelp"),
+    path("help/notbugs/", views.RNBnotBugs, name="RNBnotBugs"),
     ## API routes
     path("createRNBgame/", views.createRNBgame, name="createRNBgame"),
     path("bugEntry/", views.bugEntryRNB, name="bugEntryRNB"),

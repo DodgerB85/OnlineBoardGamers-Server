@@ -15,7 +15,6 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_getRemainingFlexiSeconds,
     SF_getRequiredExp,
     SF_getSecondsToNextKickout,
-    SF_getTimeNow,
     SF_kickoutRequired,
     SF_serializeGame,
     SF_setupTrainingGameShadows,
@@ -35,17 +34,6 @@ class PrintSuccessTestCase(TestCase):
         failures = [test for test, _ in getattr(outcome, 'failures', [])]
         if self not in errors and self not in failures:
             print(f"  PASS: {self.__class__.__name__}.{self._testMethodName}")
-
-
-class TestSFgetTimeNow(PrintSuccessTestCase):
-    def test_returns_string(self):
-        result = SF_getTimeNow()
-        self.assertIsInstance(result, str)
-
-    @patch("Lobby.sharedFunctions.sharedFunctions.time.time", return_value=1700000000.0)
-    def test_specific_timestamp(self, mock_time):
-        result = SF_getTimeNow()
-        self.assertEqual(result, "1700000000000")
 
 
 class TestSFgetRequiredExp(PrintSuccessTestCase):

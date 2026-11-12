@@ -171,11 +171,6 @@ ROOT_URLCONF = "OnlineBoardGamers.urls"
 USE_L10N = True
 
 
-# Enable Django's built-in translation caching
-def gettext_noop(x):
-    return x
-
-
 TEMPLATES = [
     {
         # --- STANDARD DJANGO (With RAM Caching) ---
@@ -488,11 +483,6 @@ LOGGING = {
             "handlers": ["general_log_file", "console"],
             "level": "DEBUG",
             "propagate": False,  # Prevent propagation to root logger
-        },
-        "Lobby.utils": {
-            "handlers": ["general_log_file", "console"],
-            "level": "DEBUG",
-            "propagate": False,
         },
         "FCM.views": {
             "handlers": ["fcm_file", "console"],

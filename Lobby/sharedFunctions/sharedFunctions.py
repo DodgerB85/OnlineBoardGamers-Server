@@ -60,10 +60,6 @@ from Lobby.sharedFunctions.hotStreaks import get_hot_streak
 NAMES_NOT_TO_ADD_TO_NEXT_TOURNAMENT_ROUND = ["FCMtourneyAdmin", "TGZtourneyAdmin"]
 
 
-def SF_getTimeNow():
-    return str(int(time.time()) * 1000)
-
-
 def SF_getRequiredExp(gameCode):
     if gameCode == "FCM":
         return 2
