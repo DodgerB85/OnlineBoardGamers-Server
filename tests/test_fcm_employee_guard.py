@@ -9,9 +9,11 @@ import base64
 import gzip
 import json
 
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 
+from FCM import FCMconstants as rfFCM
+from FCM.views import _fcm_roster_cards
 from Lobby.models import Game, GamePlayer, User
 
 PHASE_RESTRUCTURING = 3
@@ -29,6 +31,19 @@ def player(name, employees, beach, marketers=None):
 
 def game_data(players):
     return compress([players, 0, [[0], PHASE_RESTRUCTURING, [0]], [], [], [], 3, [], [0, []], []])
+
+
+def game_data_with_tile_slot(players):
+    """The client writes the added-tiles slot for Lobbyists or the SBD milestone."""
+    return compress([[], players, 0, [[0], PHASE_RESTRUCTURING, [0]], [], [], [], 3, [], [0, []], []])
+
+
+class FcmRosterCardsSlotTest(SimpleTestCase):
+    def test_tile_slot_does_not_hide_player_cards(self):
+        data = game_data_with_tile_slot([player("alice", [1], [2]), player("bob", [4], [])])
+        for options in ([rfFCM.SO_SENIOR_BUSINESS_DEVELOPER], [rfFCM.SO_LOBBYISTS], [rfFCM.SO_LOBBYISTS, rfFCM.SO_SENIOR_BUSINESS_DEVELOPER]):
+            with self.subTest(options=options):
+                self.assertEqual(_fcm_roster_cards(data, options), {"alice": [1, 2], "bob": [4]})
 
 
 class FcmEmployeeLossGuardTest(TestCase):

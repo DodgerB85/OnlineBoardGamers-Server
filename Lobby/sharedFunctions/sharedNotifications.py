@@ -1384,7 +1384,7 @@ def SN_sendBugReportEmail(reporterUsername, reporterEmail, gameCode, gameID, gam
         f"Bug Description: {bugDescription}\n"
         f"URL: <{the_url}>"
     )
-    SN_sendAdminErrorMessage(bug_message, webhook_key="WEBHOOK_DISCORD_FEEDBACK")
+    SN_sendAdminErrorMessage(bug_message, webhook_key="WEBHOOK_BUG_REPORTS")
     try:
         adminUser.email_user(subject, message)
     except Exception as e:
@@ -1851,7 +1851,7 @@ def SN_sendDiscordDM(discordID, message_text, urlText, urlRaw):
         SN_sendAdminErrorMessage(f"Discord DM failed for id: ({discordID}): {channel_resp.text}")
 
 
-def SN_sendAdminErrorMessage(message, webhook_key="WEBHOOK_ADMIN_ERROR_MSG"):
+def SN_sendAdminErrorMessage(message, webhook_key="WEBHOOK_ALL_ADMIN_REPORTS"):
     # Never reach Discord from the test suite. Several error paths call this on
     # purpose - FCM's map-sync guard rejects saves that a test deliberately makes
     # mismatched, for one - and each one posts to the real admin webhook, so a

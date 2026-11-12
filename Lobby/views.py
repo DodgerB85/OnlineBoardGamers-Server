@@ -668,7 +668,7 @@ def log_unauthorized_attempt(request):
     message = f"=== DELETE GAME HACK ATTEMPT ===\nUser: {request.user.username}\nPath: {request.path}\nEmail: {request.user.email}\n"
     try:
         requests.post(
-            f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
+            f"https://discord.com/api/webhooks/{config('WEBHOOK_ALL_ADMIN_REPORTS')}",
             data={"content": message},
             timeout=5,
         )
@@ -780,7 +780,7 @@ def feedback(request):
 
 
         # Send to the feedback Discord webhook (configured in .env)
-        SN_sendAdminErrorMessage(discord_message, webhook_key="WEBHOOK_DISCORD_FEEDBACK")
+        SN_sendAdminErrorMessage(discord_message, webhook_key="WEBHOOK_BUG_REPORTS")
 
         messages.success(request, gettext("Thank you for your feedback!"))
         return redirect("/")
@@ -826,7 +826,7 @@ def handler404(request, exception):
 
         if request.user.is_authenticated and exceptionData != "Game does not exist":
             requests.post(
-                f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
+                f"https://discord.com/api/webhooks/{config('WEBHOOK_ALL_ADMIN_REPORTS')}",
                 data={"content": message},
                 timeout=5,
             )
@@ -879,7 +879,7 @@ def handler500(request, exception=None, *_, **_k):
 
     # 3. GUARANTEED DISCORD ATTEMPT (Isolated from Email)
     try:
-        webhook_url = f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}"
+        webhook_url = f"https://discord.com/api/webhooks/{config('WEBHOOK_ALL_ADMIN_REPORTS')}"
         # Discord has a 2000 character limit per message. Let's slice it so it doesn't drop the payload.
         discord_payload = message if len(message) <= 1950 else f"{message[:1900]}\n...[TRUNCATED DUE TO LENGTH]..."
 
@@ -3687,7 +3687,7 @@ def checkJoinGame(request, gameType, gameID):
                 message += "User: " + request.user.username + "\n"
 
                 requests.post(
-                    f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
+                    f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ALL_ADMIN_REPORTS')}",
                     data={"content": message},
                     timeout=5,
                 )
@@ -3743,7 +3743,7 @@ def checkJoinGame(request, gameType, gameID):
                 message += "User: " + request.user.username + "\n"
 
                 requests.post(
-                    f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
+                    f"https://discordapp.com/api/webhooks/{config('WEBHOOK_ALL_ADMIN_REPORTS')}",
                     data={"content": message},
                     timeout=5,
                 )
@@ -3875,7 +3875,7 @@ def deleteGame(request, gameCode):
                     message += "Email: " + request.user.email + "\n"
 
                 requests.post(
-                    f"https://discord.com/api/webhooks/{config('WEBHOOK_ADMIN_ERROR_MSG')}",
+                    f"https://discord.com/api/webhooks/{config('WEBHOOK_ALL_ADMIN_REPORTS')}",
                     data={"content": message},
                     timeout=5,
                 )

@@ -63,6 +63,7 @@ KETCHUP_MS = 20
 NEW_RESERVE_CARDS = 23
 NEW_DISTRICTS = 18
 LOBBYISTS = 22
+SENIOR_BUSINESS_DEVELOPER = 53
 COFFEE = 19
 KIMCHI = 10
 SUSHI = 11
@@ -304,7 +305,8 @@ def analyze_ms_usage(queryset, is_old_ms, is_old_code):
             options_int = (
                 json.loads(game.startingOptions) if game.startingOptions else []
             )
-            if LOBBYISTS in options_int:
+            # SBD games also write the added-tiles slot, without the Lobbyists module
+            if LOBBYISTS in options_int or SENIOR_BUSINESS_DEVELOPER in options_int:
                 raw_player_index = 1
         if len(raw_data) > 0:
             playerData = raw_data[raw_player_index]
