@@ -1,3 +1,4 @@
+import json
 from datetime import timedelta
 
 from django.contrib.messages import get_messages
@@ -76,7 +77,7 @@ class ChangeUsernameTests(TestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.username, "newname")
 
-    def test_unfinished_tournament_blocks_change(self):
+    def test_in_progress_tournament_is_updated_on_change(self):
         tournament = Tournament.objects.create(
             tournamentName="Test Tournament",
             maxTournamentPlayers=4,
@@ -84,12 +85,23 @@ class ChangeUsernameTests(TestCase):
             tournamentStatus="IP",
         )
         tournament.startingPlayers.add(self.user)
+        tournament.tournamentPointsData = json.dumps([["oldname", 3], ["other", 1]])
+        tournament.tournamentSideData = json.dumps([["oldname", 2]])
+        tournament.tournamentProgressionData = json.dumps([[[["oldname", "other"], 99, ["oldname"], "Round 1"]]])
+        tournament.winnersData = json.dumps([["oldname"], [], []])
+        tournament.save()
 
-        response = self._change("newname")
+        self._change("newname")
 
         self.user.refresh_from_db()
-        self.assertEqual(self.user.username, "oldname")
-        self.assertIn("unfinished tournament", self._messages(response)[0])
+        self.assertEqual(self.user.username, "newname")
+        tournament.refresh_from_db()
+        self.assertEqual(json.loads(tournament.tournamentPointsData)[0][0], "newname")
+        self.assertEqual(json.loads(tournament.tournamentSideData)[0][0], "newname")
+        progression = json.loads(tournament.tournamentProgressionData)
+        self.assertEqual(progression[0][0][0][0], "newname")
+        self.assertEqual(progression[0][0][2][0], "newname")
+        self.assertEqual(json.loads(tournament.winnersData)[0][0], "newname")
 
     def test_finished_tournament_does_not_block_change(self):
         tournament = Tournament.objects.create(
@@ -99,11 +111,15 @@ class ChangeUsernameTests(TestCase):
             tournamentStatus="FN",
         )
         tournament.startingPlayers.add(self.user)
+        tournament.tournamentPointsData = json.dumps([["oldname", 3]])
+        tournament.save()
 
         self._change("newname")
 
         self.user.refresh_from_db()
         self.assertEqual(self.user.username, "newname")
+        tournament.refresh_from_db()
+        self.assertEqual(json.loads(tournament.tournamentPointsData)[0][0], "oldname")
 
     def test_duplicate_username_is_rejected(self):
         User.objects.create_user(username="taken", password="pw")

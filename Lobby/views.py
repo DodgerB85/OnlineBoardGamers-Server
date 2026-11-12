@@ -85,6 +85,7 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_getMiniTournamentCreationJsonReturn,
     SF_getRequiredExp,
     SF_hasRequiredExperience,
+    SF_renameTournamentPlayer,
     SF_serializeGame,
     SF_startAnyTournament,
     SF_TGZadvancedOptions,
@@ -1843,12 +1844,6 @@ def _username_change_block_reason(user):
         .exists()
     ):
         return gettext("You cannot change your username while you are in an unfinished game.")
-    if (
-        Tournament.objects.filter(Q(creator=user) | Q(startingPlayers=user) | Q(nextRoundPlayers=user))
-        .exclude(tournamentStatus="FN")
-        .exists()
-    ):
-        return gettext("You cannot change your username while you are in an unfinished tournament.")
     return None
 
 
@@ -1885,6 +1880,7 @@ def profile(request):
                         messages.info(request, gettext("That is already your username."))
                     else:
                         form.save()
+                        SF_renameTournamentPlayer(old_username, form.cleaned_data["username"])
                         profile.usernameLastChanged = timezone.now()
                         profile.username_change_allowed = False
                         profile.save(update_fields=["usernameLastChanged", "username_change_allowed"])

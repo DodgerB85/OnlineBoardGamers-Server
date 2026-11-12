@@ -10,7 +10,7 @@ import Lobby.sharedFunctions.constants as rf
 
 # from django.urls import reverse
 # from django.http import HttpResponseRedirect
-from Lobby.models import GamePlayer, Profile, User
+from Lobby.models import GamePlayer, Profile, Tournament, User
 
 # from django.contrib import messages
 # from django.core.mail import get_connection, EmailMessage
@@ -623,6 +623,90 @@ def SF_TGZadvancedOptions(request):
 #   MAIN/MINI TOURNAMENTS COMMON FUNCTIONS
 #
 ######################################
+
+
+def SF_renameTournamentPlayer(old_username, new_username):
+    """Replace a renamed player in in-progress tournament JSON.
+
+    Finished tournaments keep the names used at the time. This runs inside the
+    username-change transaction, so a failure rolls the username change back.
+    """
+    for tournament in Tournament.objects.filter(tournamentStatus="IP").iterator():
+        update_fields = []
+
+        if tournament.tournamentPointsData:
+            points = json.loads(tournament.tournamentPointsData)
+            points_changed = False
+            if tournament.tournamentType == "MG":
+                for round_data in points:
+                    for row in round_data:
+                        if row and row[0] == old_username:
+                            row[0] = new_username
+                            points_changed = True
+            else:
+                for row in points:
+                    if row and row[0] == old_username:
+                        row[0] = new_username
+                        points_changed = True
+            if points_changed:
+                tournament.tournamentPointsData = json.dumps(points)
+                update_fields.append("tournamentPointsData")
+
+        if tournament.tournamentSideData:
+            side_data = json.loads(tournament.tournamentSideData)
+            side_changed = False
+            for row in side_data:
+                if row and row[0] == old_username:
+                    row[0] = new_username
+                    side_changed = True
+            if side_changed:
+                tournament.tournamentSideData = json.dumps(side_data)
+                update_fields.append("tournamentSideData")
+
+        if tournament.tournamentProgressionData:
+            progression = json.loads(tournament.tournamentProgressionData)
+            progression_changed = False
+            for round_data in progression:
+                for row in round_data:
+                    if not row:
+                        continue
+                    if row[0] == "BYEPLAYERS":
+                        for index in range(1, len(row)):
+                            if row[index] == old_username:
+                                row[index] = new_username
+                                progression_changed = True
+                        continue
+                    if isinstance(row[0], list):
+                        for index, player in enumerate(row[0]):
+                            if player == old_username:
+                                row[0][index] = new_username
+                                progression_changed = True
+                    if len(row) > 2 and isinstance(row[2], list):
+                        for index, winner in enumerate(row[2]):
+                            if winner == old_username:
+                                row[2][index] = new_username
+                                progression_changed = True
+            if progression_changed:
+                tournament.tournamentProgressionData = json.dumps(progression)
+                update_fields.append("tournamentProgressionData")
+
+        if tournament.winnersData:
+            winners = json.loads(tournament.winnersData)
+            winners_changed = False
+            for group in winners:
+                if isinstance(group, list):
+                    for index, player in enumerate(group):
+                        if player == old_username:
+                            group[index] = new_username
+                            winners_changed = True
+            if winners_changed:
+                tournament.winnersData = json.dumps(winners)
+                update_fields.append("winnersData")
+
+        if update_fields:
+            tournament.save(update_fields=update_fields)
+
+
 def SF_startAnyTournament(request, tournamentObj):
     if tournamentObj.tournamentCategory == "Mini":
         tournamentObj.invitedPlayers.clear()

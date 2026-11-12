@@ -59,7 +59,7 @@ All in `Lobby/models.py`:
   - `currentMoveTime` / `currentMoveData`: the simple per-player current-move scratch pair. AQY and HLC use it directly; FCM and IND use `currentMoveTime` plus `moveDataJSON` for their phase list and payload; KFW uses `currentMoveTime` and `currentMoveData`.
   - `moveDataJSON`: structured per-player state for games that need more than one current move (RNB move stacks, DDL bids, FCM/IND `{"phases": [...], "data": [...]}`, KFW `{"hidden": [...]}`). It is not a generic replacement for the scratch pair.
   - `FCMplayersMoveData`, `playersPreMoveData`, `KFWplayersMoveData` and `KFWplayersHiddenData` are read fallbacks for games that predate their migrations. New per-player data belongs on `GamePlayer`.
-- **`Tournament`**: rounds of `Game`s per game code (`Main`/`Mini` categories, `RR`/`PL`/`TL`/`MG` types), `tournamentProgressionData`/`PointsData`/`SideData` JSON, `nextRoundPlayers` M2M.
+- **`Tournament`**: rounds of `Game`s per game code (`Main`/`Mini` categories, `RR`/`PL`/`TL`/`MG` types), `tournamentProgressionData`/`PointsData`/`SideData` JSON, `nextRoundPlayers` M2M. In-progress tournament JSON stores usernames; `SF_renameTournamentPlayer` rewrites them on a username change. Finished tournaments keep the names used at the time as a snapshot.
 - **`Lock`**: row backing `db_mutex` (see below).
 
 `Game` has a `PRESENTER_MAP` …→ per-game presenter class (see next section).
