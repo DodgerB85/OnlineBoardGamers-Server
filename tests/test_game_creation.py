@@ -87,6 +87,24 @@ class RNBGameCreationTests(TestCase):
         players = list(game.players.select_related("player"))
         self.assertEqual([gp.player.username for gp in players], ["creator"])
 
+    def test_six_player_game_invites_player_six(self):
+        usernames = [f"player{i}" for i in range(2, 7)]
+        for username in usernames:
+            User.objects.create_user(username=username, password="pw")
+
+        response = self.client.post(
+            self.url,
+            {
+                "playerNumber": 6,
+                "gameName": "Six players",
+                **{f"player{i}": username for i, username in zip(range(2, 7), usernames)},
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        game = Game.objects.get(gameCode="RNB")
+        self.assertEqual(set(game.invitedPlayers.values_list("username", flat=True)), set(usernames))
+
     def test_get_request_rejected(self):
         response = self.client.get(self.url)
 

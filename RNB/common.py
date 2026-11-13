@@ -121,7 +121,7 @@ def create_rnb_game(
         starting_map = request.POST.get("mapData", "")
         game_pace = request.POST.get("pace", 40)
         kickout_duration = request.POST.get("kickoutDuration", 100)
-        invited_usernames = [request.POST.get(f"player{i}") for i in range(2, 6) if request.POST.get(f"player{i}")]
+        invited_usernames = [request.POST.get(f"player{i}") for i in range(2, 7) if request.POST.get(f"player{i}")]
 
         isTrainingGame = False
         if "trainingGame" in request.POST:
