@@ -6,7 +6,7 @@ config==0.5.1
 Django==6.0.10
 django-user-visit==2.3
 idna==3.20
-mysqlclient==2.3.0
+mysqlclient==2.3.1
 python-decouple==3.8
 requests==2.34.2
 six==1.17.0

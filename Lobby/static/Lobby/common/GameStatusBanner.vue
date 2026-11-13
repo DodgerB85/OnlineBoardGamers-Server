@@ -17,7 +17,8 @@ defineProps({
 	<div id="statusBanner" :class="{ myTurn: isMyTurn && !isReplay && !isGameOver, gameOver: isGameOver }" role="status" aria-live="polite">
 		<span class="statusMeta">
 			<span v-if="labels.turn">{{ labels.turn }}</span>
-			<span v-if="phase" class="statusPhase"><template v-if="labels.turn"> · </template>{{ phase }}</span>
+			<!-- The game-over state already shows the game-over label once. -->
+			<span v-if="phase && !isGameOver" class="statusPhase"><template v-if="labels.turn"> · </template>{{ phase }}</span>
 		</span>
 		<span class="statusState">
 			<template v-if="isReplay">{{ labels.replay }}</template>

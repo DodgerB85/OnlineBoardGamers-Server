@@ -533,7 +533,6 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 		<KickoutDialog />
 		<div v-if="game.gameflow.endReason && game.gameflow.phase !== rf.PHASE_GAME_OVER" class="endNotice" role="status"><b>{{ $t("actions.finalRound") }}</b> {{ game.gameflow.endReason === 'invasion' ? $t("actions.invasionEnd") : $t("actions.revolutionEnd") }}</div>
 		<template v-if="game.gameflow.phase === rf.PHASE_GAME_OVER">
-			<h2 class="gameOverHeading">{{ $t("actions.gameOver") }}</h2>
 			<p class="gameOverReason">{{ endReasonText }}</p>
 			<p v-if="viewerWon" class="congratulations">{{ $t("actions.congratulations") }}</p>
 			<ol class="finalStandings">
@@ -698,7 +697,7 @@ fieldset.plain { border: 0; padding: 0; }fieldset { border: 1px solid #c4b894; b
 .consentIncome b, .crewContribution b { flex-shrink: 0; white-space: nowrap; }.crewContribution small { display: block; margin-top: 3px; font-size: 16px; font-weight: 400; }
 .endNotice { margin-bottom: 8px; padding: 7px 8px; background: #f6e3cf; border-left: 3px solid #a75a24; color: #663716; font-size: 16px; font-weight: 400; }
 .finalStandings { padding-left: 24px; }.finalStandings li { padding: 4px 0; }.finalStandings button { display: flex; align-items: center; gap: 6px; width: 100%; margin: 0; text-align: left; }.finalStandings button > span { min-width: 0; overflow-wrap: anywhere; }.finalStandings img { width: 28px; height: 28px; }.finalStandings b { margin-left: auto; white-space: nowrap; }.finalStandings [aria-pressed=true] { background: #e3eddb; border-color: #547751; }
-.gameOverHeading { margin: 0 0 4px; font-size: 20px; }.gameOverReason { margin: 0 0 8px; }.congratulations { margin: 0 0 8px; font-weight: bold; color: #42653b; }.finalStandings .winnerTag { color: #42653b; }.assetBreakdown { display: block; margin: 2px 0 0 34px; font-weight: normal; }
+.gameOverReason { margin: 0 0 8px; }.congratulations { margin: 0 0 8px; font-weight: bold; color: #42653b; }.finalStandings .winnerTag { color: #42653b; }.assetBreakdown { display: block; margin: 2px 0 0 34px; font-weight: normal; }
 .offerHeading, .offeredWork { display: flex; align-items: center; gap: 8px; margin: 8px 0; }.offerHeading img, .offeredWork img { width: 38px; height: 38px; }.offerHeading { padding-bottom: 8px; border-bottom: 1px solid #c4b894; font-size: 15px; }
 .nationOfferPreview { display: grid; grid-template-columns: minmax(0, 42%) minmax(0, 1fr); align-items: start; gap: 10px; margin-top: 8px; }.nationOfferPreview > :first-child { width: 100%; }.nationPurchaseRecipient, .nationPurchaseButton { grid-column: 1 / -1; }.nationPurchaseRecipient { margin: 0; }.nationOfferPreview > div { min-width: 0; overflow-wrap: anywhere; }.nationOffer select { max-width: 100%; }
 .turnPlan { margin: 4px 0 8px; padding-left: 22px; }.turnPlan li { margin: 5px 0; }.turnPlan li .planButtons { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }.turnPlan li button { min-height: 30px; padding: 0 9px; }

@@ -27,6 +27,13 @@ class ROWGameFlowTests(TestCase):
         User.objects.create_user(username="SHADOW", password="pw")
         self.client.force_login(self.creator)
 
+    def test_create_page_wires_username_autocomplete(self):
+        response = self.client.get(reverse("createROWpage"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "createGamePage")
+        self.assertContains(response, "autocomplete(input)")
+
     def _create_training_game(self):
         response = self.client.post(
             reverse("ROW:createROWgame"),

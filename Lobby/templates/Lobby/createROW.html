@@ -1,6 +1,9 @@
 {% extends "Lobby/layout.html" %}
 {% load static i18n compress %}
 {% block head %}
+    {% compress js %}
+        <script src="{% static 'Lobby/createGamePage.js' %}"></script>
+    {% endcompress %}
 {% endblock %}
 {% block body %}
     {{ request.user.id|json_script:"user_id" }}
@@ -216,6 +219,7 @@
     </div>
 
     <script>
+    var global = {};
     function selectPlayers() {
         var maxPlayers = parseInt(document.getElementById("playerNumber").value);
         var practice = document.getElementById("trainingGame").checked;
@@ -243,6 +247,10 @@
     }
     document.addEventListener("DOMContentLoaded", function () {
         selectPlayers();
+        for (var i = 2; i <= 4; i++) {
+            var input = document.getElementById("player" + i);
+            if (input) autocomplete(input);
+        }
         toggleSimmental();
         toggleRowAI();
         var form = document.getElementById("gameCreationForm");
