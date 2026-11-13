@@ -11,6 +11,10 @@ export default defineConfig(({ command }) => ({
 		host: "0.0.0.0",
 		port: 3060,
 		open: false,
+		watch: {
+			usePolling: true,
+			interval: 1000,
+		},
 		fs: {
 			allow: [resolve(".."), resolve("../.."), resolve("../../")],
 		},
