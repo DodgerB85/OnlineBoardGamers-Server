@@ -93,18 +93,6 @@ document.addEventListener("keyup", function (event) {
 </script>
 
 <template>
-  <svg id="patternsSVG">
-    <defs>
-      <!-- TERRAIN PATTERNS (solid colors - no external images needed) -->
-      <pattern v-for="(terrain, idx) in rf.ALL_TERRAINS" :key="idx" :id="'pattern_terrain_' + terrain.id" width="100%" height="100%" patternContentUnits="objectBoundingBox">
-        <rect x="0" y="0" width="1" height="1" :fill="view.getTerrainColor(terrain.id)" />
-      </pattern>
-      <!-- APPROACH PATTERNS -->
-      <pattern v-for="(approach, idx) in rf.ALL_APPROACH_TYPES" :key="idx" :id="'pattern_approach_' + approach.id" width="100%" height="100%" patternContentUnits="objectBoundingBox">
-        <image :xlink:href="view.getImage('approach_' + approach.id)" preserveAspectRatio="none" x="0" y="0" width="1" height="1" />
-      </pattern>
-    </defs>
-  </svg>
   <TopMenu />
   <GameStatusBanner v-bind="statusBanner" />
   <div
@@ -251,13 +239,6 @@ body {
 }
 .actionsLineButton:hover { background-color: lightgrey; }
 .actionsLineButton:active { background-color: darkgrey; }
-
-#patternsSVG {
-  height: 0px;
-  margin: 0px;
-  padding: 0px;
-  position: absolute;
-}
 
 .mapAndControlPanelContainer {
   display: flex;

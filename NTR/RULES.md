@@ -486,12 +486,12 @@ Losses = (# attacker lead cav/inf) + (FR if FR > 0) - (1 per defender lead artil
 | File | Path |
 |------|------|
 | **This Rules File** | `/NTR/RULES.md` |
-| **Annotated Rules PDF** | `/NTR/NT_Annotated_Rules_v1.4.pdf` |
-| **Quick Reference 1** | `/NTR/QuickReferencepage1.jpg` |
-| **Quick Reference 2** | `/NTR/QuickReferencepage2.jpg` |
-| **Quick Reference 3** | `/NTR/QuickReferencepage3.jpg` |
-| **Scenario Config** | `/NTR/ntr_engine/scenarios.py` |
-| **Map Topology** | `/NTR/ntr_engine/map_topology.py` |
+| **Annotated Rules PDF** | `/NTR/static/NTR/rules/NT_Annotated_Rules_v1.4.pdf` |
+| **Quick Reference 1** | `/NTR/static/NTR/rules/QuickReferencepage1.jpg` |
+| **Quick Reference 2** | `/NTR/static/NTR/rules/QuickReferencepage2.jpg` |
+| **Quick Reference 3** | `/NTR/static/NTR/rules/QuickReferencepage3.jpg` |
+| **Board Image** | `/NTR/static/NTR/images/map.jpg` |
+| **Map Topology** | `/NTR/vueNTR/src/js/NTRboard.json` (read by `NTRmap.js`) |
 | **Game Constants** | `/NTR/NTRconstants.py` |
 
 ---

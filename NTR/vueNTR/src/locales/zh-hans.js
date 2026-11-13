@@ -8,7 +8,7 @@ export const zhHans = {
   footer: { chat: '聊天', chatPlaceholder: '输入消息...', send: '发送', version: '版本', players: '玩家', kickoutWarning: '踢出警告!' },
   player: { you: ' (你)', missing: ' (缺席)', kicked: ' (被踢)', alliedMorale: '联军士气', frenchMorale: '法军士气', alliedTeam: '联军队伍', frenchTeam: '法军队伍' },
   action: { bgStats: '发布到 BG Stats', bgStatsCopy: '复制链接', bgStatsCopied: '链接已复制', bgStatsQr: '二维码', title: '行动', commandPoints: '指挥点数', selectUnits: '点击地图上的单位选择', selectedUnits: '已选单位', targetLocale: '目标地点', clickLocale: '点击地图上的地点', clear: '清除', executeMove: '执行移动', executeAttack: '执行攻击', executeReveal: '揭示单位', passTurn: '结束回合', confirmPass: '确定结束回合？这将结束你的阶段。', move: '移动', attack: '攻击', reveal: '揭示', special: '特殊行动', reorganize: '重组', forcedMarch: '强制行军', artillery: '炮兵轰击', alliedTurn: '联军回合', frenchTurn: '法军回合', waiting: '等待对手...', gameOver: '游戏结束' },
-  map: { allied: '联军', french: '法军', objective: '目标', fogged: '战争迷雾' },
+  map: { locale: '区域', capacity: '容量', resetView: '重置视图', allied: '联军', french: '法军', objective: '目标', fogged: '战争迷雾' },
   debug: { title: '调试面板', state: '状态', logs: '日志', console: '控制台', actions: '动作', gameState: '游戏状态', filter: '筛选日志...', clear: '清除', customCommand: '自定义命令', commandPlaceholder: '输入JS代码...', execute: '执行', quickActions: '快速操作', exportState: '导出状态', forceSync: '强制同步', toggleFog: '切换迷雾', toggleReplay: '切换回放', nextTurn: '下一回合', nextPhase: '下一阶段', damageAllied: '伤害联军', damageFrench: '伤害法军' },
   units: { COMMANDER: '指挥官', INFANTRY: '步兵', GUARD_INFANTRY: '卫队步兵', CAVALRY: '骑兵', ARTILLERY: '炮兵' },
   terrain: { clear: '平地', rough: '崎岖', wooded: '树林', hill: '山丘', town: '城镇', fort: '要塞' },
