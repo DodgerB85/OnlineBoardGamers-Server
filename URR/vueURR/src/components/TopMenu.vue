@@ -91,6 +91,12 @@ function loadRewind() {
 	else IO.loadRewind()
 }
 
+function clickedLoggedInDiv() {
+	if (!rf.SUPER_USERS.includes(personal.name) || !store.players.length) return
+	personal.pov = personal.pov < 0 ? 0 : (personal.pov + 1) % store.players.length
+	store.gameName = String(personal.pov) + "  :  " + store.players[personal.pov].name
+}
+
 function nextGame() {
 	window.location.href = window.initData.nextURL
 }
@@ -190,7 +196,7 @@ function getKickoutTimerText() {
 		</div>
 
 		<div id="topRight">
-			<div id="loggedInDiv" v-if="personal.name">
+			<div id="loggedInDiv" v-if="personal.name" @click="clickedLoggedInDiv()">
 				<span>{{ personal.name }}</span>
 				<div id="WSstatus" v-if="personal.pov >= 0" :class="personal.WSstatus"></div>
 				<br alt="" />
