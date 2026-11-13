@@ -47,6 +47,8 @@ Python edits reload automatically; Vue edits hot-reload from `<GAME>/vue<GAME>/s
 
 `initial_users.json` ships placeholder password hashes, so it is safe to load in production; the setup copies the admin hash onto those users in the local database.
 
+LBR AI seats on Windows need WSL: set `LBR_AI_BIN` to `LBR/ai-service/bin/lbr-policy.cmd` in `.env` (see [LBR/ai/README.md](LBR/ai/README.md)). Everything else works without it.
+
 ## Quick setup (Linux / Ubuntu)
 
 Install [process-compose](https://github.com/F1bonacc1/process-compose/releases) (single binary) and, on Ubuntu/Debian, the build headers `mysqlclient` needs:
