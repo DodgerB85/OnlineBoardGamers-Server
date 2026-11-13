@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-import { createGame, applyAction, restoreDevelopmentChoices } from "./URRgame.js"
+import { createGame, applyAction, restoreDevelopmentChoices, finishGame } from "./URRgame.js"
 import * as rf from "./URRreference.js"
 import { canExchangeBarahshum, getAutomaticAction, remainingWaterworkTokens } from "./URRrules.js"
 import { crewRemovalIndices, groupedDraftSteps, actionSummary, actionPanelGame, defaultEndAction, endsDecision, turnCost } from "./URRturnDraft.js"
@@ -281,6 +281,20 @@ test("a tied final harvest groups the joint winners", () => {
 	assert.equal(finished.gameflow.phase, rf.PHASE_GAME_OVER)
 	assert.deepEqual(finished.gameflow.turnOrder, [])
 	assert.deepEqual(finished.gameflow.finalPositions, [[0, 1], [2]])
+})
+
+test("a resignation that leaves one player decides the game and never ranks the quitters", () => {
+	const game = createGame(["A", "B", "C"])
+	game.players[0].money = 50
+	game.players[1].money = 500
+	game.players[2].money = 500
+	game.players[1].isMissing = true
+	game.players[2].isMissing = true
+
+	finishGame(game)
+	assert.equal(game.gameflow.phase, rf.PHASE_GAME_OVER)
+	assert.deepEqual(game.gameflow.turnOrder, [])
+	assert.deepEqual(game.gameflow.finalPositions, [[0]])
 })
 
 test("Declined development restores editable purchases and blocks only the refused site", () => {

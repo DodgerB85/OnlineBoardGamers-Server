@@ -209,3 +209,33 @@ test("finished replay preserves a modified opening", () => {
 	const imported = funcs.importURRmodel(funcs.exportURRmodel(true))
 	assert.equal(historyStorage.openingState(["A", "B", "C"], imported.history[0][3]).players[0].displayName, "Shadow name")
 })
+
+test("one remaining player finishes the game; two players keep it going", () => {
+	storeGame(createGame(["A", "B", "C"]))
+	assert.equal(model.finishGameIfOnePlayerLeft(), false)
+	store.players[1].isMissing = true
+	store.players[2].isMissing = true
+	assert.equal(model.finishGameIfOnePlayerLeft(), true)
+	assert.equal(store.gameflow.phase, rf.PHASE_GAME_OVER)
+	assert.deepEqual(store.gameflow.finalPositions, [[0]])
+})
+
+test("a missing seat plays under the bot name but keeps its own name in history", () => {
+	storeGame(createGame(["A", "B", "C"]))
+	model.setMissingPlayers(["B"])
+	assert.equal(store.players[1].displayName, rf.BOT_NAME)
+	assert.equal(personal.getHistoryName(1), "B")
+})
+
+test("a kickout entry names the kicked player and keeps the kicker private", () => {
+	storeGame(createGame(["A", "B", "C"]), [[rf.HIST_NEW_GAME, -1, null], [rf.HIST_RESIGN, 2, 0]])
+	model.setMissingPlayers(["B"])
+	model.addHistory(rf.HIST_KICKOUT, 1, null, 0)
+	const entry = store.history.at(-1)
+	assert.equal(entry[0], rf.HIST_KICKOUT)
+	assert.equal(entry[1], 1)
+	assert.equal(entry[4], 0)
+	const kicked = store.historySnapshotAt(store.history.length - 1).players[1]
+	assert.equal(kicked.isMissing, true)
+	assert.equal(kicked.displayName, rf.BOT_NAME)
+})

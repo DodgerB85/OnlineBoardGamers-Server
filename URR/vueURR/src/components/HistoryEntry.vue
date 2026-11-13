@@ -72,7 +72,7 @@ function saleLabels(batches = []) { return batches.flat().map(landLabel).join(",
 const eventText = computed(() => {
 	const event = props.entry[0]
 	if (event === rf.HIST_NEW_GAME) return t("history.welcome")
-	if (event === rf.HIST_KICKOUT) return t("history.kickedOut", { name: personal.getHistoryName(props.entry[3][0]) })
+	if (event === rf.HIST_KICKOUT) return t("history.kickedOut", { name: personal.getHistoryName(props.entry[1]) })
 	if (event === rf.HIST_RESIGN) return t("history.resigned", { name: personal.getHistoryName(props.entry[1]) })
 	const move = action.value
 	if (!move) return t("history.playedMove")

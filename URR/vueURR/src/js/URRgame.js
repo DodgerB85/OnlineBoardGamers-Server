@@ -651,21 +651,27 @@ function setHarvestTurn(game) {
 	for (const area of game.board.areas) area.irrigatedBy = null
 	game.rain.step = "complete"
 	if (game.gameflow.endReason) {
-		for (let player = 0; player < game.players.length; player++) game.players[player].score = rules.playerAssets(game, player)
-		game.gameflow.phase = rf.PHASE_GAME_OVER
-		game.gameflow.turnOrder = []
-		// Tied scores share a finishing position, so the server can mark every winner.
-		const finalPositions = []
-		for (const index of Array.from(game.players.keys()).filter((index) => !game.players[index].isMissing).sort((a, b) => game.players[b].score - game.players[a].score)) {
-			const group = finalPositions.at(-1)
-			if (group && game.players[group[0]].score === game.players[index].score) group.push(index)
-			else finalPositions.push([index])
-		}
-		game.gameflow.finalPositions = finalPositions
+		finishGame(game)
 	} else {
 		game.gameflow.turn++
 		beginSettlement(game)
 	}
+}
+
+// Final scoring. Resigned seats never finish; when nobody is left the result is empty,
+// because a quitter must not be recorded as the winner.
+export function finishGame(game) {
+	for (let player = 0; player < game.players.length; player++) game.players[player].score = rules.playerAssets(game, player)
+	game.gameflow.phase = rf.PHASE_GAME_OVER
+	game.gameflow.turnOrder = []
+	// Tied scores share a finishing position, so the server can mark every winner.
+	const finalPositions = []
+	for (const index of Array.from(game.players.keys()).filter((index) => !game.players[index].isMissing).sort((a, b) => game.players[b].score - game.players[a].score)) {
+		const group = finalPositions.at(-1)
+		if (group && game.players[group[0]].score === game.players[index].score) group.push(index)
+		else finalPositions.push([index])
+	}
+	game.gameflow.finalPositions = finalPositions
 }
 
 function harvestAction(game, action) {

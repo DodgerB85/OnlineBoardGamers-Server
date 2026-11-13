@@ -100,6 +100,8 @@ onMounted(() => {
 	for (const panel of mainArea.value.querySelectorAll(":scope > aside")) boardObserver.observe(panel)
 	window.addEventListener("resize", resizeBoard)
 	if (personal.gameID === undefined || personal.pov < -9) return
+	// A game left with fewer than two players before this rule existed finishes on load, so persist it once.
+	if (!personal.haltPlay && personal.pov >= 0 && store.gameflow.phase === rf.PHASE_GAME_OVER && !personal.finishedGame) IO.saveGame(false)
 	WS.StartWebSocket()
 	kickoutTimer = window.setInterval(() => {
 		if (personal.secondsToNextKickout > 0) personal.secondsToNextKickout--

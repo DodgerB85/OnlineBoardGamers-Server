@@ -65,6 +65,8 @@ export function initGame() {
 
 	setMissingPlayers(initData.missingPlayers || [])
 	applyShadowDisplayNames(initData.displayNames)
+	// A game left on one player by resignations before this rule existed ends on load.
+	if (!personal.haltPlay) finishGameIfOnePlayerLeft()
 }
 
 // The server hands over the creator's chosen names for the practice-game shadows
@@ -118,7 +120,7 @@ export function playMissingSeats() {
 	}
 }
 
-export function addHistory(event, playerIndex, action = null) {
+export function addHistory(event, playerIndex, action = null, privateParams = null) {
 	const store = useModelStore()
 	const entry = [event, playerIndex, null]
 	if (event !== rf.HIST_NEW_GAME) {
@@ -138,6 +140,11 @@ export function addHistory(event, playerIndex, action = null) {
 			const changes = historyStorage.changesBetween(previous, snapshotState())
 			if (changes.length) entry.push(changes)
 		}
+	}
+	if (!action && privateParams !== null) {
+		// Private event data sits after the state patch; the history UI never reads it.
+		entry[3] = entry[3] || []
+		entry[4] = privateParams
 	}
 	store.history.push(entry)
 	store.refreshHistory()
@@ -168,7 +175,19 @@ export function setMissingPlayers(names) {
 		// Only missing seats carry the flag, so saves and replays stay free of `isMissing: false`.
 		if (!names.includes(player.name)) continue
 		player.isMissing = true
-		player.displayName = `${player.name} (Bot)`
+		player.displayName = rf.BOT_NAME
 	}
 	captureOpening()
+}
+
+// A resignation or kickout that leaves fewer than two players decides the game;
+// replaying the missing seats' turns would only delay a result nobody can change.
+export function finishGameIfOnePlayerLeft() {
+	const store = useModelStore()
+	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return true
+	if (store.players.filter((player) => !player.isMissing).length > 1) return false
+	const state = snapshotState()
+	game.finishGame(state)
+	restoreState(state)
+	return true
 }

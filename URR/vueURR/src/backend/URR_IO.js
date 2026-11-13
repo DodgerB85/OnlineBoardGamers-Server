@@ -59,7 +59,8 @@ export async function saveGame(saveRewind = true) {
 	store.viewSettings.isSaving = true
 
 	try {
-		model.playMissingSeats()
+		// A resignation or kickout down to the last player ends the game before any bot replay.
+		if (!model.finishGameIfOnePlayerLeft()) model.playMissingSeats()
 	} catch (error) {
 		// The App.vue fallback retries the abandoned seat on the next load.
 		console.error("Unable to pass for a missing seat:", error)
@@ -259,6 +260,8 @@ export async function resign() {
 		const data = await response.json()
 		if (!response.ok) throw new Error(data.error || "Network response was not ok")
 		model.setMissingPlayers(data.missingPlayers)
+		// Finish before the resign entry so its state patch carries the final result.
+		model.finishGameIfOnePlayerLeft()
 		model.addHistory(rf.HIST_RESIGN, personal.pov)
 		// No rewind point: rewinding cannot undo a resignation on the server.
 		return await saveGame(false)
@@ -312,7 +315,9 @@ export async function kickout() {
 		window.initData.latestUpdate = data.latestUpdate
 		personal.secondsToNextKickout = data.secondsToNextKickout
 		model.setMissingPlayers(data.missingPlayers)
-		model.addHistory(rf.HIST_KICKOUT, model.getPlayerIndexByName(kickedPlayerObj.name))
+		// Finish before the kickout entry so its state patch carries the final result.
+		model.finishGameIfOnePlayerLeft()
+		model.addHistory(rf.HIST_KICKOUT, model.getPlayerIndexByName(kickedPlayerObj.name), null, personal.pov)
 		// Save the abandoned seat without creating a rewind across the kickout.
 		if (!await saveGame(false)) return
 		return data
