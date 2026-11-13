@@ -56,7 +56,7 @@ function toggleChat() {
 			var cs = getComputedStyle(el)
 			var b = document.getElementById("footer").getBoundingClientRect().top
 			var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
-			el.style["max-height"] = String(parseInt(b - a)) + "px"
+			el.style["max-height"] = String(Math.max(0, Math.min(b, window.innerHeight) - a)) + "px"
 		}, 50)
 	}
 }
@@ -76,7 +76,7 @@ function toggleHistory() {
 			var cs = getComputedStyle(el)
 			var b = document.getElementById("footer").getBoundingClientRect().top
 			var a = el.getBoundingClientRect().top + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
-			el.style["max-height"] = String(parseInt(b - a)) + "px"
+			el.style["max-height"] = String(Math.max(0, Math.min(b, window.innerHeight) - a)) + "px"
 		}, 50)
 	}
 }

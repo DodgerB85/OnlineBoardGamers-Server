@@ -79,7 +79,7 @@ async function findReplayPosition() {
 </template>
 
 <style scoped>
-#history { position: absolute; padding-top: 5px; left: 2px; top: var(--urr-menu-height, 60px); width: 450px; max-height: calc(100vh - var(--urr-menu-height, 60px) - 12px); box-sizing: border-box; z-index: 9999; border: 2px solid black; background-color: #d4eafd; overflow-y: scroll; text-align: center; outline: none; }
+#history { position: fixed; padding-top: 5px; left: 2px; top: var(--urr-menu-height, 60px); width: 450px; max-width: calc(100vw - 4px); max-height: calc(100vh - var(--urr-menu-height, 60px) - 12px); box-sizing: border-box; z-index: 9999; border: 2px solid black; background-color: #d4eafd; overflow-y: scroll; text-align: center; outline: none; }
 #history { scroll-padding-bottom: 8px; }
 .historyControls { background: #d4eafd; }
 #historyToggleDiv { display: flex; align-items: center; justify-content: center; padding: 5px; background: #d4eafd; font-size: 16px; font-weight: 400; }
