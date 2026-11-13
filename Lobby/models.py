@@ -545,6 +545,10 @@ class GamePlayer(models.Model):
 
     seat_order = models.PositiveSmallIntegerField(null=True, blank=True)
 
+    # Position in the current turn-order queue (1..N), or null when the player is
+    # not in that queue. Kept on GamePlayer so renames do not touch turn order.
+    remainingTurnOrder = models.PositiveSmallIntegerField(null=True, blank=True, default=None)
+
     moveDataJSON = models.JSONField(default=list, null=True, blank=True)
 
     # Per-player votes: {topic: choice}. A kickout choice is

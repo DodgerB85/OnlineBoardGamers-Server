@@ -58,6 +58,7 @@ All in `Lobby/models.py`:
 - **`GamePlayer`**: row per (game, human/bot) seat — `seat_order`, `is_current`, `is_kicked`, `is_missing`, `winner`, private `notes`. Unique on (game, player).
   - `currentMoveTime` / `currentMoveData`: the simple per-player current-move scratch pair. AQY and HLC use it directly; FCM and IND use `currentMoveTime` plus `moveDataJSON` for their phase list and payload; KFW uses `currentMoveTime` and `currentMoveData`.
   - `moveDataJSON`: structured per-player state for games that need more than one current move (RNB move stacks, DDL bids, FCM/IND `{"phases": [...], "data": [...]}`, KFW `{"hidden": [...]}`). It is not a generic replacement for the scratch pair.
+  - `remainingTurnOrder`: 1-based position in the current turn-order queue, or null when not in it. Replaces the username-keyed `Game.currentPlayersInTurnOrder` / `Game.serverCurrentPlayerNamesInTurnOrder` behaviour.
   - `votesJSON`: per-player votes as `{topic: choice}` (rewind consent, delete/stats-exclude, kickout). A kickout choice is `[target GamePlayer id, vote_time_ms]`; the client still receives usernames. Cleared when the game ends.
   - `flexiSecondsUsed`: seconds of the 24h Flexi-Time bank used. Replaces the username-keyed `Game.kickoutFlexiData` ledger for live games; that field remains for finished TGZ tournament tie-break data.
   - `FCMplayersMoveData`, `playersPreMoveData`, `KFWplayersMoveData` and `KFWplayersHiddenData` are read fallbacks for games that predate their migrations. New per-player data belongs on `GamePlayer`.

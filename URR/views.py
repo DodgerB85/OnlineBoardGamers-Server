@@ -75,7 +75,7 @@ def showURRgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     currentPlayersArr = []
     if currentGame.phase in rfURR.MAIN_PHASES:
-        currentPlayersArr = json.dumps(presenter.getFullTurnOrderNames())
+        currentPlayersArr = json.dumps(presenter.getRemainingTurnOrderNames())
     elif currentGame.phase == rfURR.PHASE_GAME_OVER:
         currentPlayersArr = json.dumps(presenter.getArrayOfIsCurrentPlayers())
 

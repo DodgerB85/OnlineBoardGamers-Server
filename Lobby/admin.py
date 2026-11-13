@@ -120,6 +120,7 @@ class GamePlayerInline(admin.TabularInline):
     fields = (
         "player",
         "seat_order",
+        "remainingTurnOrder",
         "winner",
         "is_current",
         "is_missing",
@@ -456,6 +457,7 @@ class GamePlayerAdmin(admin.ModelAdmin):
         "game",
         "player",
         "seat_order",
+        "remainingTurnOrder",
         "winner",
         "is_current",
         "is_missing",

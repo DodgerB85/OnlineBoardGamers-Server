@@ -78,7 +78,7 @@ def showDDLgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     currentPlayersArr = []
     if currentGame.phase in rfDDL.MAIN_PHASES:
-        currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else [])
+        currentPlayersArr = json.dumps(presenter.getRemainingTurnOrderNames())
     elif currentGame.phase == rfDDL.PHASE_GAME_OVER:
         currentPlayersArr = json.dumps(presenter.getArrayOfIsCurrentPlayers())
 

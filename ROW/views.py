@@ -88,7 +88,7 @@ def showROWgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     currentPlayersArr = []
     if currentGame.phase in rfROW.MAIN_PHASES:
-        currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder or [])
+        currentPlayersArr = json.dumps(presenter.getRemainingTurnOrderNames())
     elif currentGame.phase == rfROW.PHASE_GAME_OVER:
         currentPlayersArr = json.dumps(presenter.getArrayOfIsCurrentPlayers())
 
@@ -131,9 +131,9 @@ def _promoteNextCurrentPlayer(currentGame, presenter):
     game with no current player and every client refuses to act.
     """
     missing = set(presenter.getMissingPlayersNamesArray())
-    names = [name for name in (currentGame.serverCurrentPlayerNamesInTurnOrder or []) if name not in missing]
+    names = [name for name in presenter.getRemainingTurnOrderNames() if name not in missing]
     if not names:
-        currentGame.players.update(is_current=False)
+        currentGame.players.update(is_current=False, remainingTurnOrder=None)
         currentGame.serverCurrentPlayerNamesInTurnOrder = []
         currentGame.save()
         return
@@ -538,7 +538,7 @@ def ROWdata(request, dataType=1):
                 "latestUpdate": currentGame.latestUpdate,
                 "turn": currentGame.turn,
                 "missingPlayers": presenter.getMissingPlayersNamesArray(),
-                "currentPlayerNames": currentGame.serverCurrentPlayerNamesInTurnOrder or [],
+                "currentPlayerNames": presenter.getRemainingTurnOrderNames(),
                 "kickoutVotesData": presenter.getKickoutVotesData(),
                 "kickoutVoteThreshold": presenter.getKickoutVoteThreshold(),
                 "kickoutRequired": presenter.kickoutRequired(),
@@ -576,7 +576,7 @@ def ROWdata(request, dataType=1):
                 "latestUpdate": currentGame.latestUpdate,
                 "turn": currentGame.turn,
                 "missingPlayers": presenter.getMissingPlayersNamesArray(),
-                "currentPlayerNames": currentGame.serverCurrentPlayerNamesInTurnOrder or [],
+                "currentPlayerNames": presenter.getRemainingTurnOrderNames(),
                 "kickoutVotesData": presenter.getKickoutVotesData(),
                 "kickoutVoteThreshold": presenter.getKickoutVoteThreshold(),
                 "kickoutRequired": presenter.kickoutRequired(),

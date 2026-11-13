@@ -164,7 +164,7 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     currentPlayersArr = []
     if currentGame.phase in rfRNB.MAIN_PHASES:
         #currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else [presenter.getAllPlayersOrderedySeatInArray(False, True)[0]])
-        currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else [])
+        currentPlayersArr = json.dumps(presenter.getRemainingTurnOrderNames())
 
 
         # The below is meant to handle the case where the turn order is empty during a main phase but gameData exists
@@ -393,7 +393,8 @@ def _processRNBturn(request):
 
         # If the client and server both agree that this person is first, then the browser will only allow valid moves
         # So it must be a valid move. So update the game with the ALREADY PROCESSED game data, and move on
-        if jsonData["isCurrent"] and (currentGame.serverCurrentPlayerNamesInTurnOrder is not None and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 and currentGame.serverCurrentPlayerNamesInTurnOrder[0] == nameToUse and int(currentGame.latestUpdate) == int(jsonData["latestUpdate"])):
+        current_players = presenter.getRemainingTurnOrderNames()
+        if jsonData["isCurrent"] and (current_players and current_players[0] == nameToUse and int(currentGame.latestUpdate) == int(jsonData["latestUpdate"])):
             # Perform most of a normal save
             db_latest_update = currentGame.latestUpdate
             latest_update = jsonData.get("latestUpdate", 0)
@@ -414,7 +415,7 @@ def _processRNBturn(request):
             # NO! This sets ALL POSSIBLE player to is_current, which triggers emails.
             presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], acting_username=nameToUse, old_latest_update=oldVer)
             _validateTurnOrderTransition(
-                currentGame.serverCurrentPlayerNamesInTurnOrder,
+                presenter.getRemainingTurnOrderNames(),
                 jsonData["allRemainingPlayersInTurnOrder"],
                 nameToUse,
                 currentGame.id,
@@ -424,6 +425,7 @@ def _processRNBturn(request):
                 "saveStackMove",
             )
             presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
+            remaining_players = presenter.getRemainingTurnOrderNames()
 
             # Set transaction lock for client-side recovery
             transaction_id = uuid.uuid4().hex
@@ -431,7 +433,7 @@ def _processRNBturn(request):
 
             ################ REWIND EVERY SAVE #######################
             # Don't save rewind if all players have moved - wait for client to process phase
-            if jsonData["saveRewind"] and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
+            if jsonData["saveRewind"] and len(remaining_players) > 0:
                 doSaveRewind(currentGame, jsonData)
 
             ################ END REWIND EVERY SAVE #######################
@@ -457,8 +459,8 @@ def _processRNBturn(request):
             # print(f"servNames: {currentGame.serverCurrentPlayerNamesInTurnOrder} len: {len(currentGame.serverCurrentPlayerNamesInTurnOrder)}")
 
             # Now get the NEXT set of moves -- and set the next player's stack to current
-            if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
-                setPlayerStackToCurrent(currentGame, currentGame.serverCurrentPlayerNamesInTurnOrder[0])
+            if len(remaining_players) > 0:
+                setPlayerStackToCurrent(currentGame, remaining_players[0])
 
             # Notify the next current player(s) NOW, in case the submitting client disconnects before
             # completing saveAndUpdateNotifictionsAfterStack. The notification is a 2-minute validated
@@ -485,7 +487,7 @@ def _processRNBturn(request):
                 "savingFromStackMove": True,
                 "allStackData": getAllCurrentStackMoves(currentGame),
                 # "nextPhase": len(currentGame.serverCurrentPlayerNamesInTurnOrder) == 0,
-                "stackCurrentPlayers": currentGame.serverCurrentPlayerNamesInTurnOrder,
+                "stackCurrentPlayers": remaining_players,
                 "currentMoveData": presenter.getCurrentMoveDataForPlayer(request.user.username),
                 "allMyMoveData": presenter.getAllMyMoveDataForPlayer(request.user.username),
                 "gameDataB64": currentGame.gameData,
@@ -498,7 +500,7 @@ def _processRNBturn(request):
         # But if you are the current player on the SERVER, thenn proceed for immediate processing
         # If you are current player on SERVER, the client must have missed an update
         # So return the mvoe for immediate client-side verification
-        if currentGame.serverCurrentPlayerNamesInTurnOrder is not None and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 and currentGame.serverCurrentPlayerNamesInTurnOrder[0] == nameToUse and int(currentGame.latestUpdate) == int(jsonData["latestUpdate"]):
+        if current_players and current_players[0] == nameToUse and int(currentGame.latestUpdate) == int(jsonData["latestUpdate"]):
             # First save the move in case the return somehow fails
             newMoveEntry = {
                 "turn": jsonData["turn"],
@@ -703,7 +705,7 @@ def _processRNBturn(request):
 
             presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]], acting_username=nameToUse, old_latest_update=oldVer)
             _validateTurnOrderTransition(
-                currentGame.serverCurrentPlayerNamesInTurnOrder,
+                presenter.getRemainingTurnOrderNames(),
                 jsonData["allRemainingPlayersInTurnOrder"],
                 nameToUse,
                 currentGame.id,
@@ -718,7 +720,7 @@ def _processRNBturn(request):
 
             ################ REWIND EVERY SAVE #######################
             # Don't save rewind if all players have moved - wait for client to process phase
-            if jsonData["saveRewind"]:  # and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
+            if jsonData["saveRewind"]:  # and len(presenter.getRemainingTurnOrderNames()) > 0:
                 doSaveRewind(currentGame, jsonData)
 
             ################ END REWIND EVERY SAVE #######################
@@ -787,7 +789,7 @@ def _processRNBturn(request):
 
         presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]], acting_username=nameToUse, old_latest_update=oldVer)
         _validateTurnOrderTransition(
-            currentGame.serverCurrentPlayerNamesInTurnOrder,
+            presenter.getRemainingTurnOrderNames(),
             jsonData["allRemainingPlayersInTurnOrder"],
             nameToUse,
             currentGame.id,
@@ -802,7 +804,7 @@ def _processRNBturn(request):
 
         ################ REWIND EVERY SAVE #######################
         # Don't save rewind if all players have moved - wait for client to process phase
-        if jsonData["saveRewind"]:  # and len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0:
+        if jsonData["saveRewind"]:  # and len(presenter.getRemainingTurnOrderNames()) > 0:
             doSaveRewind(currentGame, jsonData)
 
         ################ END REWIND EVERY SAVE #######################
@@ -2247,6 +2249,7 @@ def PclearPastMoveData(currentGame):
     phase = currentGame.phase
     # .all() is needed after .only() to iterate
     all_gp = currentGame.players.only("moveDataJSON")
+    current_players = currentGame.presenter().getRemainingTurnOrderNames()
 
     print(phase)
 
@@ -2257,7 +2260,7 @@ def PclearPastMoveData(currentGame):
         gp.moveDataJSON = [
             m
             for m in moves
-            if m.get("turn", 0) > turn or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT) or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT and m.get("username") in currentGame.serverCurrentPlayerNamesInTurnOrder)
+            if m.get("turn", 0) > turn or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT) or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT and m.get("username") in current_players)
         ]
 
         gp.save(update_fields=["moveDataJSON"])

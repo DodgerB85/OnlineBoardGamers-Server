@@ -346,6 +346,10 @@ class GamePresenter:
         # is_current is cleared above, so the turn-order copy must lose this name too;
         # otherwise the lobby lights up everyone's move and kickout charges flexi time
         # to a player nobody can name.
+        gp = self.gameObj.players.filter(player__username=username).first()
+        if gp and gp.remainingTurnOrder is not None:
+            gp.remainingTurnOrder = None
+            gp.save(update_fields=["remainingTurnOrder"])
         current = self.gameObj.serverCurrentPlayerNamesInTurnOrder or []
         if username in current:
             self.gameObj.serverCurrentPlayerNamesInTurnOrder = [name for name in current if name != username]
@@ -364,13 +368,54 @@ class GamePresenter:
     def getAiPlayerUsernames(self):
         return set(self.gameObj.players.filter(is_ai=True, player__isnull=False).values_list("player__username", flat=True))
 
+    def _setRemainingTurnOrder(self, names):
+        """Set each player's 1-based position in the current turn order; clear the rest."""
+        from Lobby.models import GamePlayer
+
+        names = names or []
+        players = list(self.gameObj.players.select_related("player"))
+        by_username = {gp.player.username: gp for gp in players if gp.player}
+        positions = {}
+        for position, name in enumerate(names, start=1):
+            gp = by_username.get(name)
+            if gp:
+                positions[gp.pk] = position
+
+        to_update = []
+        for gp in players:
+            value = positions.get(gp.pk)
+            if gp.remainingTurnOrder != value:
+                gp.remainingTurnOrder = value
+                to_update.append(gp)
+        if to_update:
+            GamePlayer.objects.bulk_update(to_update, ["remainingTurnOrder"])
+
+    def getRemainingTurnOrderNames(self):
+        """Turn-order queue as usernames, ordered by GamePlayer.remainingTurnOrder."""
+        rows = self.gameObj.players.filter(remainingTurnOrder__isnull=False).select_related("player").order_by("remainingTurnOrder")
+        names = [gp.player.username for gp in rows if gp.player]
+        if names:
+            return names
+
+        # Fallback for pre-migration rows and tests that seed the legacy Game fields.
+        if self.gameObj.gameCode == "HLC" and self.gameObj.currentPlayersInTurnOrder:
+            try:
+                legacy = json.loads(self.gameObj.currentPlayersInTurnOrder)
+            except (TypeError, ValueError):
+                legacy = []
+            if isinstance(legacy, list):
+                return legacy
+        return self.gameObj.serverCurrentPlayerNamesInTurnOrder or []
+
     def setServerCurrentPlayerNamesInTurnOrder(self, playersInTurnOrderArray):
         if self.gameObj.maxPlayers == 1:
             solo_gp = self.gameObj.players.first()
             if solo_gp and solo_gp.player:
+                self._setRemainingTurnOrder([solo_gp.player.username])
                 self.gameObj.serverCurrentPlayerNamesInTurnOrder = [solo_gp.player.username]
                 self.gameObj.save()
                 return
+        self._setRemainingTurnOrder(playersInTurnOrderArray)
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = playersInTurnOrderArray
         self.gameObj.save()
 
@@ -378,32 +423,39 @@ class GamePresenter:
         """Set current players by updating is_current on GamePlayer instances"""
         record_player_availability_for_turn_change(self.gameObj, acting_username, old_latest_update)
         record_hot_streak(self.gameObj, acting_username)
-        if self.gameObj.gameCode == "HLC":
-            # Keep HLC's own queue in step with the authoritative server queue even
-            # when it drains - a stale copy of the last names masks the empty state
-            # on the show page, so its factory-phase kickstart never runs.
-            self.gameObj.currentPlayersInTurnOrder = json.dumps(current_players_array)
         if not current_players_array or len(current_players_array) == 0:
             # SOLO GAME FAILSAFE: If maxPlayers==1, the only player must ALWAYS be isCurrent
             if self.gameObj.maxPlayers == 1:
                 solo_gp = self.gameObj.players.first()
                 if solo_gp and solo_gp.player:
                     solo_gp.is_current = True
-                    solo_gp.save()
+                    solo_gp.remainingTurnOrder = 1
+                    solo_gp.save(update_fields=["is_current", "remainingTurnOrder"])
                     self.gameObj.serverCurrentPlayerNamesInTurnOrder = [solo_gp.player.username]
+                    if self.gameObj.gameCode == "HLC":
+                        self.gameObj.currentPlayersInTurnOrder = json.dumps([solo_gp.player.username])
                     self.gameObj.save()
                     return
             # Clear all current players
-            self.gameObj.players.all().update(is_current=False)
+            self.gameObj.players.update(is_current=False, remainingTurnOrder=None)
             self.gameObj.serverCurrentPlayerNamesInTurnOrder = []
+            if self.gameObj.gameCode == "HLC":
+                self.gameObj.currentPlayersInTurnOrder = json.dumps([])
             self.gameObj.save()
             return
 
         # The client saves before it drops a just-kicked player from its own turn order,
-        # so a kicked name can arrive here - keeping it would leave serverCurrentPlayerNamesInTurnOrder
+        # so a kicked name can arrive here - keeping it would leave the turn-order copy
         # claiming a turn that no is_current flag backs.
         kicked_usernames = set(self.gameObj.players.filter(is_kicked=True).values_list("player__username", flat=True))
-        self.gameObj.serverCurrentPlayerNamesInTurnOrder = [name for name in current_players_array if name not in kicked_usernames]
+        cleaned_players_array = [name for name in current_players_array if name not in kicked_usernames]
+        self._setRemainingTurnOrder(cleaned_players_array)
+        self.gameObj.serverCurrentPlayerNamesInTurnOrder = cleaned_players_array
+        if self.gameObj.gameCode == "HLC":
+            # Keep HLC's own queue in step with the authoritative server queue even
+            # when it drains - a stale copy of the last names masks the empty state
+            # on the show page, so its factory-phase kickstart never runs.
+            self.gameObj.currentPlayersInTurnOrder = json.dumps(cleaned_players_array)
         self.gameObj.save()
 
         to_update = []
@@ -412,7 +464,7 @@ class GamePresenter:
         for gp in game_players:
             if gp.player:
                 was_current = gp.is_current
-                gp.is_current = gp.player.username in current_players_array
+                gp.is_current = gp.player.username in cleaned_players_array
                 # SOLO GAME FAILSAFE: If maxPlayers==1, the only player must ALWAYS be isCurrent
                 if self.gameObj.maxPlayers == 1:
                     gp.is_current = True
@@ -493,7 +545,7 @@ class GamePresenter:
         # to hit the DB here. Leaving moveDataJSON behind is not harmless: the RNB
         # client's kickstart-recovery block replays allStackData on load, so stale
         # moves can be re-applied to an already-finished game.
-        self.gameObj.players.update(moveDataJSON=None, currentMoveTime="", currentMoveData="", votesJSON={}, flexiSecondsUsed=0)
+        self.gameObj.players.update(moveDataJSON=None, currentMoveTime="", currentMoveData="", votesJSON={}, flexiSecondsUsed=0, remainingTurnOrder=None)
 
     def sendInviteNotifications(self, playerNames, _gameName, _maxPlayers, _gameCode):
         from django_q.tasks import async_task
@@ -750,9 +802,10 @@ class CNSpresenter(GamePresenter):
 
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
+            gp.remainingTurnOrder = idx + 1
             gp.is_current = idx == 0
 
-        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current", "remainingTurnOrder"])
 
         self.gameObj.save()
 
@@ -839,9 +892,10 @@ class WEBpresenter(GamePresenter):
 
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
+            gp.remainingTurnOrder = idx + 1
             gp.is_current = idx == 0
 
-        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current", "remainingTurnOrder"])
 
         self.gameObj.save()
 
@@ -934,9 +988,10 @@ class AQYpresenter(GamePresenter):
 
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
+            gp.remainingTurnOrder = idx + 1
             gp.is_current = idx == 0
 
-        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current", "remainingTurnOrder"])
 
         self.gameObj.save()
 
@@ -1188,9 +1243,10 @@ class TGZpresenter(GamePresenter):
 
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
+            gp.remainingTurnOrder = idx + 1
             gp.is_current = idx == 0
 
-        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current", "remainingTurnOrder"])
 
         allPlayersL = self.getAllPlayersOrderedySeatInArray()
 
@@ -1299,8 +1355,9 @@ class INDpresenter(GamePresenter):
 
             for idx, gp in enumerate(game_players):
                 gp.seat_order = idx
+                gp.remainingTurnOrder = idx + 1
                 gp.is_current = gp.player and idx == 0
-            GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+            GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current", "remainingTurnOrder"])
 
             self.gameObj.save()
 
@@ -1489,9 +1546,10 @@ class BUSpresenter(GamePresenter):
 
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
+            gp.remainingTurnOrder = idx + 1
             gp.is_current = idx == 0
 
-        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current", "remainingTurnOrder"])
 
         if self.isTrainingGame():
             # Set the first player by seat as current
@@ -1536,7 +1594,7 @@ class RNBpresenter(GamePresenter):
         if loggedInPlayerUsername is None:
             return False
 
-        currentPlayersList = self.gameObj.serverCurrentPlayerNamesInTurnOrder
+        currentPlayersList = self.getRemainingTurnOrderNames()
 
         if not currentPlayersList:
             return True
@@ -1656,11 +1714,12 @@ class RNBpresenter(GamePresenter):
 
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
+            gp.remainingTurnOrder = idx + 1
             gp.is_current = idx == 0
 
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = [gp.player.username for gp in game_players]
 
-        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current", "remainingTurnOrder"])
 
         self.gameObj.save()
 
@@ -1748,11 +1807,12 @@ class URRpresenter(GamePresenter):
 
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
+            gp.remainingTurnOrder = idx + 1
             gp.is_current = idx == 0
 
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = [gp.player.username for gp in game_players if gp.player]
 
-        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current", "remainingTurnOrder"])
         self.gameObj.save()
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists():
@@ -1841,11 +1901,12 @@ class DDLpresenter(GamePresenter):
 
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
+            gp.remainingTurnOrder = idx + 1
             gp.is_current = idx == 0
 
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = [gp.player.username for gp in game_players if gp.player]
 
-        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current", "remainingTurnOrder"])
         self.gameObj.save()
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists():
@@ -1923,11 +1984,12 @@ class ROWpresenter(GamePresenter):
 
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
+            gp.remainingTurnOrder = idx + 1
             gp.is_current = idx == 0
 
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = [gp.player.username for gp in game_players if gp.player]
 
-        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current", "remainingTurnOrder"])
         self.gameObj.save()
 
         if not self.gameObj.players.filter(player__username="SHADOW").exists():
@@ -2164,13 +2226,14 @@ class FCMpresenter(GamePresenter):
         _currentPlayers = ""
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
+            gp.remainingTurnOrder = idx + 1
             if idx == 0:
                 gp.is_current = True
                 _currentPlayers = gp.player.username
             else:
                 gp.is_current = False
 
-        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current", "remainingTurnOrder"])
 
         playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
 
@@ -2633,8 +2696,7 @@ class HLCpresenter(GamePresenter):
 
     def getCurrentPlayersInOrderArrHLC(self):
         """Get current players as an array"""
-        current_players_arr = json.loads(self.gameObj.currentPlayersInTurnOrder) if self.gameObj.currentPlayersInTurnOrder and self.gameObj.currentPlayersInTurnOrder is not None and self.gameObj.currentPlayersInTurnOrder != "" else []
-        return current_players_arr
+        return self.getRemainingTurnOrderNames()
 
     def getArrayOfIsCurrentPlayers(self):
         if self.gameObj.phase == 3:
@@ -2679,13 +2741,16 @@ class HLCpresenter(GamePresenter):
             offset = self.gameObj.playerOrderSeed % len(game_players) if game_players else 0
             game_players = game_players[offset:] + game_players[:offset]
 
-        self.gameObj.currentPlayersInTurnOrder = json.dumps([gp.player.username for gp in game_players if gp.player])
+        turn_order_names = [gp.player.username for gp in game_players if gp.player]
+        self.gameObj.currentPlayersInTurnOrder = json.dumps(turn_order_names)
+        self.gameObj.serverCurrentPlayerNamesInTurnOrder = turn_order_names
 
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
+            gp.remainingTurnOrder = idx + 1
             gp.is_current = True  # HLC starts with all players as current
 
-        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current", "remainingTurnOrder"])
 
         # Initialize rewind consent on each GamePlayer.
         rewind_votes = {}
@@ -3048,6 +3113,7 @@ class KFWpresenter(GamePresenter):
         # Set seat_order
         for idx, gp in enumerate(all_players_gp_sorted):
             gp.seat_order = idx
+            gp.remainingTurnOrder = idx + 1
         GamePlayer.objects.bulk_update(all_players_gp_sorted, ["seat_order"])
 
         allPlayersL = [gp.player.username for gp in all_players_gp_sorted if gp.player]
@@ -3607,9 +3673,10 @@ class NTRpresenter(GamePresenter):
 
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
+            gp.remainingTurnOrder = idx + 1
             gp.is_current = idx == 0
 
-        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current", "remainingTurnOrder"])
 
         self.gameObj.save()
 
@@ -3716,9 +3783,10 @@ class LBRpresenter(GamePresenter):
 
         for idx, gp in enumerate(game_players):
             gp.seat_order = idx
+            gp.remainingTurnOrder = idx + 1
             gp.is_current = idx == 0
 
-        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current"])
+        GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current", "remainingTurnOrder"])
 
         self.gameObj.save()
 

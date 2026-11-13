@@ -24,7 +24,7 @@ RESERVED_USERNAMES = {
     "RowBot",
     "TGZtourneyAdmin",
     "TgzBot",
-    "UrrBot",
+    "UrBot",
     "WebBot",
     "admin",
 }

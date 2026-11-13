@@ -216,6 +216,8 @@ for game in finished_games:
             field_check_issues.append(f"GP {gp.id} currentMoveTime='{gp.currentMoveTime}'")
         if gp.currentMoveData != "":
             field_check_issues.append(f"GP {gp.id} currentMoveData='{gp.currentMoveData[:50]}...'")
+        if gp.remainingTurnOrder is not None:
+            field_check_issues.append(f"GP {gp.id} remainingTurnOrder={gp.remainingTurnOrder}")
 
     if field_check_issues:
         game_url = f"https://www.onlineboardgamers.com/{game.gameCode}/{game.id}/show/"
@@ -247,6 +249,8 @@ for game in finished_games:
                     gp.currentMoveTime = ""
                 if gp.currentMoveData != "":
                     gp.currentMoveData = ""
+                if gp.remainingTurnOrder is not None:
+                    gp.remainingTurnOrder = None
                 gp.save()
 
             print(f"FIXED: {game.gameCode} - ID: {game.id}")
