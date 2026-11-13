@@ -10,26 +10,14 @@
     "test": "node --test"
   },
   "dependencies": {
-    "doctrine": "^3.0.0",
-    "fast-copy": "^3.0.2",
     "pinia": "^2.1.7",
-    "prettier-eslint": "^16.3.0",
     "vue": "^3.4.21",
-    "vue-eslint-parser": "^9.4.2",
     "vue-i18n": "^11.4.16"
   },
   "devDependencies": {
-    "@eslint/js": "^9.1.1",
-    "@rushstack/eslint-patch": "^1.10.2",
     "@vitejs/plugin-vue": "^6.0.3",
-    "eslint": "^9.1.1",
-    "eslint-plugin-vue": "^9.25.0",
-    "globals": "^15.1.0",
     "prettier": "^3.2.5",
     "terser": "^5.44.1",
     "vite": "^7.3.0"
-  },
-  "overrides": {
-    "minimatch": "^9.0.5"
   }
 }

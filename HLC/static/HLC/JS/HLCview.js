@@ -3990,10 +3990,11 @@ var View = function (model) {
 		var replayLabel = labels.data("replay") || "Replay"
 		var gameOverLabel = labels.data("gameOver") || "Game over"
 		var phase = PHASES_STR[this.model.gameFlow.phase] || ""
-		var meta = turnLabel + " " + this.model.gameFlow.turn + (phase ? " · " + phase : "")
+		var gameOver = this.model.gameEnded > 0
+		// The game-over state already shows the game-over label once.
+		var meta = turnLabel + " " + this.model.gameFlow.turn + (phase && !gameOver ? " · " + phase : "")
 		var state = $("#statusBannerState").empty()
 		var myTurn = Rules.canPlay()
-		var gameOver = this.model.gameEnded > 0
 		var showingReplay = replay.showingReplay
 		var currentPlayer = getHeaderCurrentPlayer()
 
