@@ -115,14 +115,21 @@ if not exist ".env" (
         echo Warning: .env.docker not found, creating basic .env...
         echo DEBUG=True > .env
         echo LOCAL_USER=True >> .env
+        echo LOCAL_USER_SQLITE3=True >> .env
     )
 ) else (
     echo .env already exists, leaving it alone.
 )
 
-REM Set SQLite3 flag for local development
-echo Setting SQLite3 configuration...
-python -c "import fileinput; import sys; [print(line.replace('LOCAL_USER_SQLITE3=False', 'LOCAL_USER_SQLITE3=True'), end='') for line in fileinput.input('.env', inplace=True)]"
+REM Quick setup uses SQLite. Only switch an .env copied from .env.docker;
+REM leave a custom MySQL .env alone.
+findstr /C:"LOCAL_DB_HOST=\"db\"" ".env" >nul
+if not errorlevel 1 (
+    echo Setting SQLite3 configuration...
+    python -c "import fileinput; import sys; [print(line.replace('LOCAL_USER_SQLITE3=False', 'LOCAL_USER_SQLITE3=True'), end='') for line in fileinput.input('.env', inplace=True)]"
+) else (
+    echo Existing .env is not the .env.docker template; leaving its database settings alone.
+)
 
 REM Install Vue dependencies for every game that has a vue<CODE> workspace.
 REM Derived from the folder name rather than globbed, so node_modules is never matched.

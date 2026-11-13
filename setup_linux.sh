@@ -24,12 +24,16 @@ if [ ! -f ".env" ]; then
         cp .env.docker .env
     else
         echo "Warning: .env.docker not found, creating basic .env..."
-        echo -e "DEBUG=True\nLOCAL_USER=True" > .env
+        echo -e "DEBUG=True\nLOCAL_USER=True\nLOCAL_USER_SQLITE3=True" > .env
     fi
 fi
 
-echo "Setting SQLite3 configuration..."
-sed -i 's/LOCAL_USER_SQLITE3=False/LOCAL_USER_SQLITE3=True/' .env
+# Quick setup uses SQLite. Only switch an .env copied from .env.docker;
+# leave a custom MySQL .env alone.
+if grep -q '^LOCAL_DB_HOST="db"' .env; then
+    echo "Setting SQLite3 configuration..."
+    sed -i 's/LOCAL_USER_SQLITE3=False/LOCAL_USER_SQLITE3=True/' .env
+fi
 
 # Vue dependencies
 for game in AQY/vueAQY BUS/vueBUS CNS/vueCNS DDL/vueDDL FCM/vueFCM IND/vueIND KFW/vueKFW LBR/vueLBR NTR/vueNTR RNB/vueRNB ROW/vueROW TGZ/vueTGZ URR/vueURR WEB/vueWEB; do

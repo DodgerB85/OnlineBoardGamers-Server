@@ -26,6 +26,13 @@ services:
       DJANGO_SUPERUSER_USERNAME: admin
       DJANGO_SUPERUSER_EMAIL: admin@example.com
       DJANGO_SUPERUSER_PASSWORD: password
+      # The Docker stack always uses the db service, even if .env was switched
+      # to SQLite by the quick setup route.
+      LOCAL_USER_SQLITE3: "False"
+      LOCAL_DB_HOST: db
+      LOCAL_DB_NAME: obs
+      LOCAL_DB_USER: user
+      LOCAL_DB_PWD: pass
     env_file:
       - .env
 
@@ -37,6 +44,12 @@ services:
       - .:/app
     links:
       - db
+    environment:
+      LOCAL_USER_SQLITE3: "False"
+      LOCAL_DB_HOST: db
+      LOCAL_DB_NAME: obs
+      LOCAL_DB_USER: user
+      LOCAL_DB_PWD: pass
     env_file:
       - .env
     command: python manage.py qcluster
