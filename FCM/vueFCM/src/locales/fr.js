@@ -952,7 +952,7 @@ export default {
 		"chooseHouseForGarden": "Choisissez une maison pour ajouter un jardin",
 		"apartment": "Immeuble",
 		"moveOut": "Déménagement",
-		"chooseHouseToMoveOut": "Choisissez une maison à faire déménager (sans demande active)"
+		"chooseHouseToMoveOut": "Choisissez une maison ou un appartement à faire déménager (sans demande active)"
 	},
 	"playerDetails": {
 		"noMilestones": "Aucun jalon",

@@ -1,5 +1,5 @@
 import { defineConfig } from "vitest/config"
-import { parse, compileScript } from "@vue/compiler-sfc"
+import { parse, compileScript } from "vue/compiler-sfc"
 
 export default defineConfig({
 	cacheDir: ".vite-test",

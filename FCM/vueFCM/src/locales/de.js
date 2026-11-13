@@ -952,7 +952,7 @@ export default {
 		"chooseHouseForGarden": "Wählen Sie ein Haus, um einen Garten hinzuzufügen",
 		"apartment": "Wohnhaus",
 		"moveOut": "Ausziehen",
-		"chooseHouseToMoveOut": "Wählen Sie ein Haus zum Ausziehen (keine aktive Nachfrage)"
+		"chooseHouseToMoveOut": "Wählen Sie ein Haus oder eine Wohnung zum Ausziehen (keine aktive Nachfrage)"
 	},
 	"playerDetails": {
 		"noMilestones": "Keine Meilensteine",

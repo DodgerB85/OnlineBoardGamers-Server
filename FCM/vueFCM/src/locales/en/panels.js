@@ -114,7 +114,7 @@
     chooseHouseForGarden: "Choose a house to add a garden",
     apartment: "Apartment",
     moveOut: "Move Out",
-    chooseHouseToMoveOut: "Choose a house to move out (no active demand)",
+    chooseHouseToMoveOut: "Choose a house or apartment to move out (no active demand)",
   },
 
   playerDetails: {

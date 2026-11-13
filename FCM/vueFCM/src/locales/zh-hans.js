@@ -1000,7 +1000,7 @@ export default {
 		"chooseEdgeForGarden": "为花园选择一条边",
 		"apartment": "公寓",
 		"moveOut": "搬离",
-		"chooseHouseToMoveOut": "选择一所房子搬离（不能有未满足需求）"
+		"chooseHouseToMoveOut": "选择一所房子或公寓搬离（不能有未满足需求）"
 	},
 	"playerDetails": {
 		"noMilestones": "不使用里程碑",

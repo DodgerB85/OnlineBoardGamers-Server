@@ -29,6 +29,7 @@ media
 local_settings.py
 docker-compose.override.yml
 node_modules
+FCM/vueFCM/.vite-test/
 emailCounter.txt
 a.bat
 a.py

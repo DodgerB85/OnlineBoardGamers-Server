@@ -455,7 +455,10 @@ export function replaySbdMoveOut(historyIndex, playerIndex, param) {
 
 	model.evictHouse(houseNumber)
 	store.seniorBusinessDeveloper.outTokensUsed++
-	if (index >= 0) for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) store.context.highlightHistorySquares.push(index + i + j * rf.ssW)
+	if (index >= 0) {
+		const size = rf.APARTMENTS.includes(houseNumber) ? 3 : 2
+		store.context.highlightHistorySquares.push(...map.giveAllSpaceForAToken(index, size, size))
+	}
 }
 
 export function replayNewTile(historyIndex, playerIndex, param) {
