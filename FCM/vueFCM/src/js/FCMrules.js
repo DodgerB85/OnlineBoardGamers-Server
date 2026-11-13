@@ -1700,17 +1700,15 @@ export function availableApartments() {
 }
 
 // Houses on the map eligible for the SBD move-out action. A house is blocked when
-// it currently has any active demand token. Apartments and already moved-out
-// houses are never eligible.
+// it currently has any active demand token or is already moved-out/pending.
 export function moveOutCandidateHouses() {
 	const store = useModelStore()
 	if (!store.startingOptions.seniorBusinessDeveloper) return []
 	const built = new Set(store.houses.map((h) => h.number))
 	const res = []
 	for (const house of map.findAllHouses()) {
-		if (rf.APARTMENTS.includes(house)) continue
 		if (house === rf.STADIUM) continue
-		if (!built.has(house) && !rf.isBoardHouse(house, store.startingOptions)) continue
+		if (!built.has(house) && !rf.isBoardHouse(house, store.startingOptions) && !rf.APARTMENTS.includes(house)) continue
 		const need = store.needs.find((n) => n.number === house)
 		if (need && (need.movedOut || need.pendingMoveOut)) continue
 		if (need && need.needs && need.needs.length > 0) continue

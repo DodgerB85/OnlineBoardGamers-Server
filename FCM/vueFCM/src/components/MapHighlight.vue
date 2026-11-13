@@ -24,8 +24,15 @@ const ghostRoadworkIndexes = ref([])
 // changeGhost early-returns when hovering the same square, so a rotation
 // change while the mouse is still would leave a stale ghost — re-show it
 watch(() => store.context.rotation, () => {
-	if (rf.isHousesSubphase(store.gameflow.subphase) && store.context.selectedBuilding !== -1 && store.context.selectedBuilding !== -2 && !rf.APARTMENTS.includes(store.context.selectedBuilding) && store.viewSettings.currentGhostIndex != null) {
-		showHouseGhost(store.viewSettings.currentGhostIndex)
+	const index = store.viewSettings.currentGhostIndex
+	if (!Number.isInteger(index) || index < 0 || !store.highlights.indexesToHighlightYellow.includes(index)) {
+		changeGhost(index, false)
+		return
+	}
+	if (store.context.lobbyistMilestoneActive) {
+		showLobbyistMSTileGhost(index)
+	} else if (rf.isHousesSubphase(store.gameflow.subphase) && store.context.selectedBuilding !== -1 && store.context.selectedBuilding !== -2 && !rf.APARTMENTS.includes(store.context.selectedBuilding)) {
+		showHouseGhost(index)
 	}
 })
 
@@ -285,10 +292,11 @@ function showApartmentGhost(index) {
 	ghostHouseNumberRef.value.style.display = "none"
 }
 
-// Ghost preview of a Senior Business Developer move-out (2x2 house block)
+// Ghost preview of a Senior Business Developer move-out, anchored to its building
 function showMoveOutGhost(index) {
 	const sqSize = store.refSize / 5
-	const [x, y] = view.getXYforSmallSquare(index)
+	const houseNumber = store.mapData.coords[index] - rf.HOUSE
+	const [x, y] = view.getXYforSmallSquare(map.findIndexForHouse(houseNumber))
 
 	const img = ghostImgRef.value
 	img.src = view.getImage("movedOut")

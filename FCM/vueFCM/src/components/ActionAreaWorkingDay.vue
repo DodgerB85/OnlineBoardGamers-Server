@@ -237,6 +237,10 @@ const computedRemainingManagers = computed(() => {
 watch(
 	() => store.context.rotation,
 	() => {
+		if (store.context.lobbyistMilestoneActive) {
+			controller.updateLobbyistMSHighlights()
+			return
+		}
 		if (store.gameflow.subphase === rf.SUBPHASE_NEW_RESTAURANTS && store.context.newRestaurantAction === "create") {
 			controller.setNewRestaurantPlacementHighlights()
 		}
