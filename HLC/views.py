@@ -798,6 +798,12 @@ def showHLCgame(request, game_id):
     rewindHostPossible = False
     currentRewindConsent = 0  # NB needed in template for rewind panel
     currentPlayers = presenter.getCurrentPlayersInOrderArrHLC()
+    # The HLC queue can outlive the turn it described: the last factory submit
+    # clears is_current on the server, then the submitter's next-phase save may
+    # never arrive. A stale queue here hides the empty state and stops main.js
+    # from kicking the phase on. Trust is_current over the stale queue.
+    if currentGame.gameStatus != "FINISHED" and not currentGame.players.filter(is_current=True).exists():
+        currentPlayers = []
     # This is an emergency check - also to serve end games where server turn order is null
     # In game, it SHOULD be switching the CP to the winner.
     # But if the game is NOT finished, need to be able to supply 0 players to kickstart factory hang ups

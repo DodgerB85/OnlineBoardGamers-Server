@@ -378,6 +378,11 @@ class GamePresenter:
         """Set current players by updating is_current on GamePlayer instances"""
         record_player_availability_for_turn_change(self.gameObj, acting_username, old_latest_update)
         record_hot_streak(self.gameObj, acting_username)
+        if self.gameObj.gameCode == "HLC":
+            # Keep HLC's own queue in step with the authoritative server queue even
+            # when it drains - a stale copy of the last names masks the empty state
+            # on the show page, so its factory-phase kickstart never runs.
+            self.gameObj.currentPlayersInTurnOrder = json.dumps(current_players_array)
         if not current_players_array or len(current_players_array) == 0:
             # SOLO GAME FAILSAFE: If maxPlayers==1, the only player must ALWAYS be isCurrent
             if self.gameObj.maxPlayers == 1:
@@ -402,13 +407,6 @@ class GamePresenter:
         self.gameObj.save()
 
         to_update = []
-        # if self.gameObj.gameCode == "RNB":
-        #    self.gameObj.serverCurrentPlayerNamesInTurnOrder = current_players_array
-        # el
-        if self.gameObj.gameCode == "HLC":
-            self.gameObj.currentPlayersInTurnOrder = json.dumps(current_players_array)
-        self.gameObj.save()
-
         game_players = self.gameObj.players.exclude(is_kicked=True, is_ai=False).select_related("player")
 
         for gp in game_players:

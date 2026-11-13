@@ -2,6 +2,7 @@ import json
 import time
 
 from django.test import TestCase
+from django.urls import reverse
 
 from Lobby.models import Game, GamePlayer, User
 from Lobby.sharedFunctions.sharedFunctions import (
@@ -95,3 +96,25 @@ class HLCFactoryQueueTests(TestCase):
 
         self.assertEqual(self.presenter.getArrayOfIsCurrentPlayers(), ["alice"])
         self.assertIn("alice", self.presenter.getCurrentPlayersHLC())
+
+    def test_draining_the_queue_clears_the_hlc_turn_order(self):
+        # When the last factory is processed the server queue empties. The HLC
+        # copy must empty with it, or the show page sees stale names and never
+        # runs its factory-phase kickstart.
+        self.presenter.setCurrentPlayersFromArrInTurnOrder([])
+        self.game.refresh_from_db()
+
+        self.assertEqual(self.presenter.getCurrentPlayersInOrderArrHLC(), [])
+        self.assertFalse(self.game.players.filter(is_current=True).exists())
+
+    def test_show_page_reports_no_current_player_when_queue_is_stale(self):
+        # The bad row left by a lost next-phase save: server queue empty,
+        # currentPlayersInTurnOrder still naming the old queue.
+        self.game.players.update(is_current=False)
+        self.game.save()
+        self.client.force_login(self.users[0])
+
+        response = self.client.get(reverse("HLC:showHLCgame", args=[self.game.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "global.currentPlayers = [];")
