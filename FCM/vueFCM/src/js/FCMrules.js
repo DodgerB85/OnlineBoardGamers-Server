@@ -1347,7 +1347,10 @@ export function giveTurnOrderFromFreeSlots() {
 
 export function getRemainingRecruitingPoints(playerIndex) {
 	const store = useModelStore()
-	return getTotalRecruitingPoints(playerIndex) + temporaryWorkerRemainingActions(playerIndex, rf.RECRUITING_GIRL) - store.context.justHired.length
+	// justHired is client-only; the saved hire log must also block a spend if a
+	// restore clears the ledger while the hired card stays on the beach.
+	const used = Math.max(store.context.justHired.length, controller.recordedHiresThisTurn(playerIndex).length)
+	return getTotalRecruitingPoints(playerIndex) + temporaryWorkerRemainingActions(playerIndex, rf.RECRUITING_GIRL) - used
 }
 
 export function getTotalRecruitingPoints(playerIndex) {

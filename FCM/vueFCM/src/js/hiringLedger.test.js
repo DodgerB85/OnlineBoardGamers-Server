@@ -72,6 +72,20 @@ describe("hiring ledger", () => {
 
 		expect(store.context.justHired).toEqual([rf.TRAINER])
 		expect(store.context.endOfDaySummaryData.hire.hired).toEqual([rf.TRAINER])
+		expect(store.context.endOfDaySummaryData.hire.total).toBe(1)
+		expect(rules.getRemainingRecruitingPoints(0)).toBe(0)
+		expect(controller.hireEmployee(rf.TRAINER)).toBe(false)
+		expect(store.players[0].beach).toEqual([rf.TRAINER])
+	})
+
+	it("a cleared ledger cannot spend the same point again while the hire log remains", () => {
+		const store = useModelStore()
+		expect(controller.hireEmployee(rf.TRAINER)).toBe(true)
+
+		// A restore can clear the client-only ledger while the saved log and beach stay.
+		store.context.justHired.length = 0
+		store.context.endOfDaySummaryData.hire.hired.length = 0
+
 		expect(rules.getRemainingRecruitingPoints(0)).toBe(0)
 		expect(controller.hireEmployee(rf.TRAINER)).toBe(false)
 		expect(store.players[0].beach).toEqual([rf.TRAINER])

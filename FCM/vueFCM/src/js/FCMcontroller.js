@@ -2768,7 +2768,7 @@ function syncHireEntry(playerIndex) {
 	return entry
 }
 
-function recordedHiresThisTurn(playerIndex) {
+export function recordedHiresThisTurn(playerIndex) {
 	const entry = hireEntryThisTurn(playerIndex)
 	if (!entry) return []
 	return [
@@ -2785,7 +2785,8 @@ function setupHiringSubphase() {
 	const playerObj = currentPlayerObj()
 	const summary = store.context.endOfDaySummaryData
 	store.context.justHired.length = 0
-	summary.hire.total = rules.getRemainingRecruitingPoints(playerIndex)
+	// Full allowance for the turn; getRemainingRecruitingPoints is log-aware now.
+	summary.hire.total = rules.getTotalRecruitingPoints(playerIndex) + rules.temporaryWorkerRemainingActions(playerIndex, rf.RECRUITING_GIRL)
 	summary.hire.hired.length = 0
 	const recordedHires = recordedHiresThisTurn(playerIndex)
 	if (recordedHires.length > 0) {
