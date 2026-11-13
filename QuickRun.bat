@@ -71,6 +71,15 @@ echo FCM server started.
 start "Vue URR" /D "%OBG_HOME%\URR\vueURR" cmd /c "call npm run dev"
 echo URR server started.
 
+start "Vue NTR" /D "%OBG_HOME%\NTR\vueNTR" cmd /c "call npm run dev"
+echo NTR server started.
+
+start "Vue ROW" /D "%OBG_HOME%\ROW\vueROW" cmd /c "call npm run dev"
+echo ROW server started.
+
+start "Vue LBR" /D "%OBG_HOME%\LBR\vueLBR" cmd /c "call npm run dev"
+echo LBR server started.
+
 echo.
 echo ==================================================
 echo Batch script finished starting all processes.

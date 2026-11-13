@@ -7,8 +7,9 @@ echo ==================================================
 
 REM --- REQUIREMENTS CONFIGURATION ---
 set "MIN_PY_MAJOR=3"
-set "MIN_PY_MINOR=10"
-set "MIN_NODE_MAJOR=20"
+set "MIN_PY_MINOR=12"
+set "MIN_NODE_MAJOR=22"
+set "MIN_NODE_MINOR=12"
 
 REM --- DETECT AND PARSE PYTHON VERSION ---
 set "PY_VERSION=Unknown"
@@ -33,8 +34,12 @@ if "%NODE_VERSION%"=="Unknown" (
     set "NEED_NODE_WARN=1"
 ) else (
     set "CLEAN_NODE=!NODE_VERSION:v=!"
-    for /f "tokens=1 delims=." %%a in ("!CLEAN_NODE!") do set "NODE_MAJOR=%%a"
+    for /f "tokens=1,2 delims=." %%a in ("!CLEAN_NODE!") do (
+        set "NODE_MAJOR=%%a"
+        set "NODE_MINOR=%%b"
+    )
     if !NODE_MAJOR! lss %MIN_NODE_MAJOR% set "NEED_NODE_WARN=1"
+    if !NODE_MAJOR! equ %MIN_NODE_MAJOR% if !NODE_MINOR! lss %MIN_NODE_MINOR% set "NEED_NODE_WARN=1"
 )
 
 REM --- DISPLAY CAUTION SCREEN IF REQ NOT MET ---
@@ -53,8 +58,8 @@ echo.
 if "%NEED_PY_WARN%"=="1" (
 echo  [-] PYTHON VERSION CHECK: FAILED
 echo      Detected: %PY_VERSION% ^| Required: %MIN_PY_MAJOR%.%MIN_PY_MINOR%.x or higher
-echo      * WHY: Django 5.2+ requires Python 3.10+. Older versions will block 'pip install'.
-echo      * FIX: Download Python 3.11+ from https://python.org
+echo      * WHY: Django 6 requires Python 3.12+. Older versions will block 'pip install'.
+echo      * FIX: Download Python 3.12+ from https://python.org
 echo             Ensure "Add python.exe to PATH" is checked during installation.
 echo             Delete the '.venv_local' folder before running this script again.
 echo.
@@ -64,9 +69,9 @@ echo.
 )
 if "%NEED_NODE_WARN%"=="1" (
 echo  [-] NODE.JS VERSION CHECK: FAILED
-echo      Detected: %NODE_VERSION% ^| Required: v%MIN_NODE_MAJOR%.x or higher
-echo      * WHY: Modern Vue components and Vite 6/7 will fail to compile on Node v12.
-echo      * FIX: Download the latest LTS version (v22+) from https://nodejs.org
+echo      Detected: %NODE_VERSION% ^| Required: v%MIN_NODE_MAJOR%.%MIN_NODE_MINOR%.x or higher
+echo      * WHY: Vite 7/8 needs Node 22.12+ (or 20.19+) to run the Vue dev servers.
+echo      * FIX: Download the latest LTS version (v24+) from https://nodejs.org
 echo.
 ) else (
 echo  [+] NODE.JS VERSION CHECK: PASSED ^(%NODE_VERSION%^)
@@ -148,13 +153,13 @@ echo Setting admin password...
 set DJANGO_SETTINGS_MODULE=OnlineBoardGamers.settings
 python -c "import os; os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'OnlineBoardGamers.settings'); import django; django.setup(); from Lobby.models import User; admin = User.objects.get(username='admin'); admin.set_password('password'); admin.save()"
 
-REM Update initial users with admin password hash
-echo Updating initial users password...
-python quick_setup_update_user_passwords.py
-
 REM Load initial users
 echo Loading initial users...
 python manage.py loaddata initial_users.json
+
+REM Give the fixture users the admin password hash (in the database only)
+echo Updating initial users' passwords...
+python quick_setup_update_user_passwords.py
 
 echo.
 echo ==================================================

@@ -2156,7 +2156,7 @@ def profile(request):
                 "tournamentOpenEmail": tournamentOpenEmail,
                 "blacklistedPlayers": blacklisted_players,
                 "stop_emails_until": stop_emails_until,  # -1 if not set
-                "discord_client_id": config("DISCORD_CLIENT_ID"),
+                "discord_client_id": config("DISCORD_CLIENT_ID", default=""),
                 "discord_redirect_uri": DISCORD_REDIRECT_URI,
                 "discord_oauth_state": request.session.setdefault("discord_oauth_state", secrets.token_urlsafe(32)),
                 "discord_id": profile.discord_id,

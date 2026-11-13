@@ -21,7 +21,7 @@ export default defineConfig(({ command }) => ({
       // Static images are served by Django (:8000); the Vue app's new URL(...)
       // image references resolve to the Vite dev origin (:3048) otherwise.
       '/static/FCM': {
-        target: 'http://localhost:8000',
+        target: process.env.VITE_DJANGO_URL || 'http://localhost:8000',
         changeOrigin: true,
       },
     },

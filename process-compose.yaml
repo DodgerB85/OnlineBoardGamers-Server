@@ -46,6 +46,10 @@ processes:
     command: "npm run dev"
     working_dir: "RNB/vueRNB"
 
+  ntr:
+    command: "npm run dev"
+    working_dir: "NTR/vueNTR"
+
   ddl:
     command: "npm run dev"
     working_dir: "DDL/vueDDL"

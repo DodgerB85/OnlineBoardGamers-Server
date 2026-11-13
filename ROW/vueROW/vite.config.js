@@ -17,7 +17,7 @@ export default defineConfig(({ command }) => ({
 		// Serve the real game art from Django while developing the client on :3060.
 		proxy: {
 			"/static/ROW": {
-				target: "http://localhost:8000",
+				target: process.env.VITE_DJANGO_URL || "http://localhost:8000",
 				changeOrigin: true,
 			},
 		},

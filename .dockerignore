@@ -3,6 +3,8 @@
 .gitignore
 .github
 .venv
+.venv_local
+**/node_modules
 __pycache__
 *.pyc
 *.log

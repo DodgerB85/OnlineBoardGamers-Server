@@ -10,6 +10,8 @@ if [ ! -d ".venv_local" ]; then
 fi
 
 echo "Installing Python requirements..."
+# mysqlclient builds from source on Linux:
+#   sudo apt install python3-dev pkg-config default-libmysqlclient-dev
 .venv_local/bin/pip install -r requirements.txt
 if [ -f "requirements-dev.txt" ]; then
     .venv_local/bin/pip install -r requirements-dev.txt
@@ -30,7 +32,7 @@ echo "Setting SQLite3 configuration..."
 sed -i 's/LOCAL_USER_SQLITE3=False/LOCAL_USER_SQLITE3=True/' .env
 
 # Vue dependencies
-for game in AQY/vueAQY BUS/vueBUS CNS/vueCNS DDL/vueDDL FCM/vueFCM IND/vueIND KFW/vueKFW RNB/vueRNB TGZ/vueTGZ URR/vueURR WEB/vueWEB; do
+for game in AQY/vueAQY BUS/vueBUS CNS/vueCNS DDL/vueDDL FCM/vueFCM IND/vueIND KFW/vueKFW LBR/vueLBR NTR/vueNTR RNB/vueRNB ROW/vueROW TGZ/vueTGZ URR/vueURR WEB/vueWEB; do
     if [ -f "$game/package.json" ]; then
         echo "Installing npm dependencies for $game..."
         (cd "$game" && npm install) || echo "Warning: npm install failed for $game"
@@ -58,11 +60,11 @@ admin.set_password('password')
 admin.save()
 "
 
-echo "Updating initial users password hashes..."
-.venv_local/bin/python quick_setup_update_user_passwords.py
-
 echo "Loading initial users..."
 .venv_local/bin/python manage.py loaddata initial_users.json
+
+echo "Updating initial users password hashes..."
+.venv_local/bin/python quick_setup_update_user_passwords.py
 
 echo ""
 echo "=================================================="

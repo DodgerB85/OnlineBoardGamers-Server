@@ -17,9 +17,9 @@ WORKDIR /app
 # Install dependencies
 COPY requirements.txt /app/
 RUN pip install -r requirements.txt
-# Install development dependencies - remove this line for production builds
-COPY requirements-dev.txt /app/
-RUN pip install -r requirements-dev.txt
+# DEBUG=True imports these; requirements-dev also has rulebook tooling
+# (onnxruntime, pymupdf) that has no musl wheels on Alpine.
+RUN pip install django-debug-toolbar django-debug-toolbar-template-profiler pyinstrument
 
 # Copy the project code into the container
 COPY . /app/

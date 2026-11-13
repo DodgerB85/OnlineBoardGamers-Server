@@ -17,7 +17,7 @@ export default defineConfig(({ command }) => ({
 			// Static images are served by Django (:8000); the Vue app's absolute
 			// /static/URR image references resolve to the Vite dev origin (:3054) otherwise.
 			"/static/URR": {
-				target: "http://localhost:8000",
+				target: process.env.VITE_DJANGO_URL || "http://localhost:8000",
 				changeOrigin: true,
 			},
 		},

@@ -25,23 +25,184 @@ services:
     environment:
       DJANGO_SUPERUSER_USERNAME: admin
       DJANGO_SUPERUSER_EMAIL: admin@example.com
-      DJANGO_SUPERUSER_PASSWORD: password 
-
+      DJANGO_SUPERUSER_PASSWORD: password
     env_file:
       - .env
+
+  worker:
+    build:
+      context: .
+    working_dir: /app
+    volumes:
+      - .:/app
+    links:
+      - db
+    env_file:
+      - .env
+    command: python manage.py qcluster
+    restart: on-failure
+
+  aqy:
+    build:
+      context: ./AQY/vueAQY
+      dockerfile: ../../vue.Dockerfile
+    working_dir: /app
+    volumes:
+      - ./AQY/vueAQY/src:/app/src
+      - ./AQY/static/AQY:/static/AQY
+    ports:
+      - "3018:3018"
+
+  bus:
+    build:
+      context: ./BUS/vueBUS
+      dockerfile: ../../vue.Dockerfile
+    working_dir: /app
+    volumes:
+      - ./BUS/vueBUS/src:/app/src
+      - ./BUS/static/BUS:/static/BUS
+    ports:
+      - "3000:3000"
 
   cns:
     build:
       context: ./CNS/vueCNS
+      dockerfile: ../../vue.Dockerfile
     working_dir: /app
     volumes:
-      # Mount the vue source code here
       - ./CNS/vueCNS/src:/app/src
-      # Mount static images at /static/CNS to match production path structure
       - ./CNS/static/CNS:/static/CNS
     ports:
-      # Expose the Vite dev server port
       - "3012:3012"
+
+  ddl:
+    build:
+      context: ./DDL/vueDDL
+      dockerfile: ../../vue.Dockerfile
+    working_dir: /app
+    volumes:
+      - ./DDL/vueDDL/src:/app/src
+      - ./DDL/static/DDL:/static/DDL
+    ports:
+      - "3044:3044"
+
+  fcm:
+    build:
+      context: ./FCM/vueFCM
+      dockerfile: ../../vue.Dockerfile
+    working_dir: /app
+    volumes:
+      - ./FCM/vueFCM/src:/app/src
+      - ./FCM/static/FCM:/static/FCM
+    environment:
+      VITE_DJANGO_URL: http://obs:8000
+    ports:
+      - "3048:3048"
+
+  ind:
+    build:
+      context: ./IND/vueIND
+      dockerfile: ../../vue.Dockerfile
+    working_dir: /app
+    volumes:
+      - ./IND/vueIND/src:/app/src
+      - ./IND/static/IND:/static/IND
+    ports:
+      - "3024:3024"
+
+  kfw:
+    build:
+      context: ./KFW/vueKFW
+      dockerfile: ../../vue.Dockerfile
+    working_dir: /app
+    volumes:
+      - ./KFW/vueKFW/src:/app/src
+      - ./KFW/static/KFW:/static/KFW
+    ports:
+      - "3030:3030"
+
+  lbr:
+    build:
+      context: ./LBR/vueLBR
+      dockerfile: ../../vue.Dockerfile
+    working_dir: /app
+    volumes:
+      - ./LBR/vueLBR/src:/app/src
+      - ./LBR/static/LBR:/static/LBR
+    environment:
+      VITE_DJANGO_URL: http://obs:8000
+    ports:
+      - "3069:3069"
+
+  ntr:
+    build:
+      context: ./NTR/vueNTR
+      dockerfile: ../../vue.Dockerfile
+    working_dir: /app
+    volumes:
+      - ./NTR/vueNTR/src:/app/src
+      - ./NTR/static/NTR:/static/NTR
+    ports:
+      - "3066:3066"
+
+  rnb:
+    build:
+      context: ./RNB/vueRNB
+      dockerfile: ../../vue.Dockerfile
+    working_dir: /app
+    volumes:
+      - ./RNB/vueRNB/src:/app/src
+      - ./RNB/static/RNB:/static/RNB
+    ports:
+      - "3042:3042"
+
+  row:
+    build:
+      context: ./ROW/vueROW
+      dockerfile: ../../vue.Dockerfile
+    working_dir: /app
+    volumes:
+      - ./ROW/vueROW/src:/app/src
+      - ./ROW/static/ROW:/static/ROW
+    environment:
+      VITE_DJANGO_URL: http://obs:8000
+    ports:
+      - "3060:3060"
+
+  tgz:
+    build:
+      context: ./TGZ/vueTGZ
+      dockerfile: ../../vue.Dockerfile
+    working_dir: /app
+    volumes:
+      - ./TGZ/vueTGZ/src:/app/src
+      - ./TGZ/static/TGZ:/static/TGZ
+    ports:
+      - "3006:3006"
+
+  urr:
+    build:
+      context: ./URR/vueURR
+      dockerfile: ../../vue.Dockerfile
+    working_dir: /app
+    volumes:
+      - ./URR/vueURR/src:/app/src
+      - ./URR/static/URR:/static/URR
+    environment:
+      VITE_DJANGO_URL: http://obs:8000
+    ports:
+      - "3054:3054"
+
+  web:
+    build:
+      context: ./WEB/vueWEB
+      dockerfile: ../../vue.Dockerfile
+    working_dir: /app
+    volumes:
+      - ./WEB/vueWEB/src:/app/src
+      - ./WEB/static/WEB:/static/WEB
+    ports:
+      - "3036:3036"
 
 volumes:
   data:

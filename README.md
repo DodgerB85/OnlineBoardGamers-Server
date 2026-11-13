@@ -11,7 +11,7 @@
 
 ## Short term goals
 - Improve design/readability of the site; try to replace some text with icons
-- Add unit testing
+- Improve test coverage
 - Improve layout/design of the lobby / game lists / etc
 
 ## Long term goals
@@ -21,60 +21,45 @@
 
 # Setup & Install
 
-## Quick setup (Windows) - see below for full dockerised setup, or quick setup Linux
-This will allow you to easily setup and run a home server. You can login with `admin` (super-user) or `user1` (normal user) and `password`. The easiest way to create a new user is in the Django admin panel - copy the hashed password from the `admin` user.
-- Get the source code `git clone https://github.com/DodgerB85/OnlineBoardGamers-Server`
-- Run `QuickSetup.bat` from the root of the repo (it uses relative paths, so double-click it from a terminal in the repo root rather than from Explorer)
-- After this is done, and for future runs just run `QuickRun.bat`, also from the root of the repo
+Pick one of the routes below; both quick routes run Django plus every game's Vite server on your machine, and Docker runs the same stack in containers.
 
-`QuickSetup.bat` creates a Python virtual environment in `.venv_local`, installs the Python and Vue (npm) dependencies for every game that has a `vue<CODE>` workspace, copies `.env.docker` to `.env` if you don't already have one, runs the database migrations, and loads the `admin` and util users.
+Requirements:
+- Git.
+- Python 3.12+ (Django 6) and Node.js 22.12+ (Vite) on your PATH for the non-Docker routes.
+- Docker Desktop (Windows/macOS) or Docker Engine + Compose (Linux) for the Docker route.
 
-## Full dockerised setup
-I find it quite frustrating when I want to try out a project, only to find out it requires an obfuscated ton of setup, including setting up weird paid AWS services and pushing to remote server.
-On the plus side, this project is totally free, and WILL run fine on your home computer.
-On the down side, it does involve multiple steps, but each is quite small and easy, and should be easy to do if you are familiar with these tools.
-If you get stuck, paste the error into AI and it should help you on to the next step.
+The quick routes use SQLite, so you don't need a MySQL server. The Docker route runs MySQL 9 in a container.
 
-1) Make sure you have a working Docker installation.
-2) Pull the code from github. `git clone https://github.com/DodgerB85/OnlineBoardGamers-Server`
-3) Copy .env.docker and rename it to just .env 
-4) IMPORTANT: Ensure all docker files have "LF" line endings, not CRLF. Open in eg vs code and change the option at the bottom. (Docker, .yml, .sh files)
-5) Navigate to the root of the repo and run `docker compose up --build` (MySQL port is mapped to 3307 so as not to conflict if you're running your own MySQL server)
+## Quick setup (Windows)
 
-Now browse `http://localhost:8000/` and check there are no errors
-You should be able to browse around the logged-out pages, eg about, help, etc.
-(Or you might get some sort of database error). 
+1. Clone the repo and open a terminal in its root:
 
-6) Exit back to the command prompt. Confirm containers are running using: `docker compose up -d`
-7) Run this intial DB setup inside the container using `./setup_db.bat` or `docker-compose exec obs sh ./setup_db_script.sh`
-8) To fix migrate errors saying a table doesn't exist, try migrating that specific table, eg `docker-compose exec obs python manage.py migrate WEB`
+   ```bat
+   git clone https://github.com/DodgerB85/OnlineBoardGamers-Server
+   cd OnlineBoardGamers-Server
+   ```
 
-The compose has also created a superuser for the server - "admin" - "password" along with all required util users (eg SHADOW). The `admin` login works as soon as setup finishes. The other pre-built users (SHADOW through to SHADOW_5, the bots, and `user1`) are only usable if setup was able to rewrite their password hashes - the `initial_users.json` fixture ships placeholder hashes, so if any of them is rejected at the login prompt, set a password for it in the admin panel. In practice you won't ever really need to login as any of these users anyway.
+2. Run `QuickSetup.bat` from the repo root (double-click it, or run it in cmd/PowerShell). It creates `.venv_local`, installs the Python and npm dependencies for every game, writes `.env` from `.env.docker` (switched to SQLite), runs the migrations, creates the `admin` superuser, and loads the development users.
+3. Run `QuickRun.bat` from the repo root. It starts Django, the Django-Q worker, and all 14 game Vite servers in separate windows.
+4. Open http://127.0.0.1:8000/ and log in as `admin` / `password` (or `user1` / `password`).
 
-9) Go back to the website, and create a normal user for yourself (Eg "DodgerB") using the "Register New Account" link
-10) Now test your admin access; go to `http://localhost:8000/admin/` and login with the superuser. Find the user you made and tick them active in the User DB. Also tick Email Confirmed in their profile.
-11) Back on the website, login with your new user to check it is working.
-12) Before creating a game, check the admin panel to maker sure all the util users (EG "SHADOW" through to "SHADOW_5") are there.
-13) On the website, create a 2-player Cannes game. It should display in the lobby. Join the game as another user.
-14) Now try opening the game of Cannes - if everything works, you've made it! :)
+Python edits reload automatically; Vue edits hot-reload from `<GAME>/vue<GAME>/src`. If Windows Firewall prompts for the Vite processes, allow them on private networks. Re-run `QuickSetup.bat` after pulling changes that touch `requirements*.txt` or a `package.json`. If you already have a `.env`, it is left alone; copy any new keys across from `.env.docker`.
 
-For subsequent starts, use
+`initial_users.json` ships placeholder password hashes, so it is safe to load in production; the setup copies the admin hash onto those users in the local database.
 
-`docker compose up -d`
+## Quick setup (Linux / Ubuntu)
 
-NOTE: If you see errors involving a colon : or quotes " try opening start.sh in VS code or similar and deleting and pasting back in the bottom line. 
-The issue might be to do with line end characters in linux vs windows. 
-Make sure your docker files have LF and not CRLF
+Install [process-compose](https://github.com/F1bonacc1/process-compose/releases) (single binary) and, on Ubuntu/Debian, the build headers `mysqlclient` needs:
 
-NOTE: You aren't required to use docker; especially if it is slow on Windows. As an alternatice, you can create a venv and install the requirements.txt files. Then run the python server and django servers inside the venv. 
+```bash
+sudo apt install python3-venv python3-dev pkg-config default-libmysqlclient-dev
+```
 
-## Linux / Ubuntu setup (alternative to bat files)
-
-Install [process-compose](https://github.com/F1bonacc1/process-compose/releases) (single binary). Then:
+Then:
 
 ```bash
 ./setup_linux.sh    # one-time setup (mirrors QuickSetup.bat)
-process-compose up  # starts all services with a live TUI
+process-compose up  # starts Django, the worker, and every Vite server with a live TUI
 ```
 
 Useful commands (or use the TUI directly):
@@ -82,8 +67,41 @@ Useful commands (or use the TUI directly):
 - `process-compose process start web` — restart it
 - `process-compose down` — stop everything
 
+## Docker
+
+1. Install Docker Desktop (Windows/macOS) or Docker Engine + Compose (Linux).
+2. Clone the repo and open a terminal in its root.
+3. Copy `.env.docker` to `.env` (`copy .env.docker .env` in cmd, `cp .env.docker .env` elsewhere). If you already have a `.env`, copy the new keys across instead of overwriting it.
+4. Start everything:
+
+   ```bash
+   docker compose up --build -d
+   ```
+
+   The first build installs the Python dependencies and all 14 games' npm dependencies, so give it a few minutes.
+5. First run only, after the containers are up, run the DB setup inside the web container:
+
+   ```bash
+   docker compose exec obs sh ./setup_db_script.sh
+   ```
+
+   This runs the migrations, creates `admin`, and loads the development users.
+6. Open http://localhost:8000/ and log in as `admin` / `password` (or `user1` / `password`).
+
+Everyday use:
+- `docker compose up -d` — start the stack
+- `docker compose down` — stop it (the MySQL volume is kept)
+- `docker compose down -v` — stop it and delete the MySQL volume
+
+Everything runs in source-code mode: the game pages load their JS from the matching Vite container (ports 3000-3069), and `obs` serves Django on 8000. Vue edits hot-reload. After changing a game's `package.json` or `vite.config.js`, rebuild just that service, e.g. `docker compose up -d --build fcm`.
+
+MySQL is published on 3307 if you want to connect a client.
+
+## Tests
+Backend tests use Django's unittest runner: `python manage.py test tests.test_<name>`. The Vue clients for FCM, IND, ROW and KFW have vitest tests: run `npm test` in the game's `vue<GAME>` folder. See [docs/UNIT_TESTS.md](docs/UNIT_TESTS.md) for details.
+
 ## Deployment
-There is currently no automated testing (please help with this if you can!), and deployments are done manually by running a batch script to do a git pull / collectstatic / etc.
+Deployments are done manually by running a batch script to do a git pull / collectstatic / etc.
 
 ## Production
 PA runs the Django server; there's a qcluster for async tasks (not currently used due technical limitations on PA that I'm in the process of working around), and the scripts in ./siteUtils generally run once a day to perform upkeep / notification emails.

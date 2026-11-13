@@ -1,38 +1,35 @@
 #!/usr/bin/env python
+"""Give the initial_users.json users the admin's password hash.
+
+Run after loaddata. The fixture ships placeholder hashes so a production
+fixture load cannot create login-able users; this only touches the local
+development database. The JSON file is never modified.
+"""
 import json
 import os
 
 import django
 
 # Set up Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'OnlineBoardGamers.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "OnlineBoardGamers.settings")
 django.setup()
 
 from Lobby.models import User
 
 
 def update_initial_users_password():
-    """Extract admin password hash and update all users in initial_users.json"""
-
     try:
-        # Get the admin user's hashed password
-        admin = User.objects.get(username='admin')
-        admin_password_hash = admin.password
-        print(f"Admin password hash extracted: {admin_password_hash[:50]}...")
+        admin = User.objects.get(username="admin")
 
-        # Read the initial_users.json file
-        with open('initial_users.json', encoding='utf-8') as f:
-            users_data = json.load(f)
+        with open("initial_users.json", encoding="utf-8") as f:
+            usernames = [user["fields"]["username"] for user in json.load(f)]
 
-        # Update all users' passwords to match admin's password hash
-        for user in users_data:
-            user['fields']['password'] = admin_password_hash
-
-        # Write the updated data back to the file
-        with open('initial_users.json', 'w', encoding='utf-8') as f:
-            json.dump(users_data, f, indent=2, ensure_ascii=False)
-
-        print(f"Updated {len(users_data)} users with admin password hash")
+        updated = (
+            User.objects.filter(username__in=usernames)
+            .exclude(pk=admin.pk)
+            .update(password=admin.password)
+        )
+        print(f"Set {updated} initial users' passwords to the admin hash")
         return True
 
     except User.DoesNotExist:
@@ -41,6 +38,7 @@ def update_initial_users_password():
     except Exception as e:
         print(f"Error updating passwords: {e}")
         return False
+
 
 if __name__ == "__main__":
     update_initial_users_password()

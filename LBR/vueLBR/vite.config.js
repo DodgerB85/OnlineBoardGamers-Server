@@ -12,7 +12,7 @@ export default defineConfig(({ command }) => ({
 		proxy: {
 			// The board images are absolute /static/LBR paths; serve them from Django.
 			"/static/LBR": {
-				target: "http://localhost:8000",
+				target: process.env.VITE_DJANGO_URL || "http://localhost:8000",
 				changeOrigin: true,
 			},
 		},

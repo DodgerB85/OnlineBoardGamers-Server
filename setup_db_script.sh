@@ -1,4 +1,3 @@
-
 #!/bin/bash
 # Define a function to wait for the database
 wait_for_db() {
@@ -39,10 +38,12 @@ else
 
     # Load default users
     echo "Adding default users via data migration..."
-    # initial_users.json ships placeholder password hashes, so rewrite them from
-    # the admin hash first. Must run before loaddata, or the bad hashes get loaded.
-    python quick_setup_update_user_passwords.py
     python manage.py loaddata initial_users.json
+
+    # initial_users.json ships placeholder password hashes so a production
+    # fixture load cannot create login-able users. Give the local dev users the
+    # admin's hash (database only; the fixture stays untouched).
+    python quick_setup_update_user_passwords.py
 
     echo "Initial setup commands complete."
 fi
