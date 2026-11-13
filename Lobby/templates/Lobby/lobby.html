@@ -2,25 +2,6 @@
 {% load static i18n compress %}
 {% block head %}
     <link href="{% static 'Lobby/CSS/lobby_new.css' %}?v=20" rel="stylesheet" />
-    <style>
-        /* UR: 1830 BC release banner */
-        .new-game-teaser { text-align: center; margin-bottom: 14px; }
-        .new-game-teaser-box { position: relative; display: inline-block; line-height: 0; }
-        .new-game-teaser-box img { height: 300px; display: block; border-radius: 8px; }
-        .new-game-teaser-label {
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 24px;
-            font-weight: 700;
-            line-height: 1;
-            text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000;
-        }
-    </style>
 {% endblock head %}
 {% block body %}
     {% compress js %}
@@ -94,13 +75,6 @@
         </div>
         <!-- hidden map editor forms (required by Lobby.js) -->
         {% include 'Lobby/map_editor_forms.html' %}
-        <!-- UR: 1830 BC release banner -->
-        <div class="new-game-teaser">
-            <a class="new-game-teaser-box" href="{% url 'createURRpage' %}">
-                <img src="{% static 'URR/images/ur-box.jpg' %}" alt="UR: 1830 BC" />
-                <span class="new-game-teaser-label">{% translate "Click Here to Play!" %}</span>
-            </a>
-        </div>
         <!-- TABS -->
         <div class="tabs">
             <button class="tab tablinks" id="available" data-tab="available">
