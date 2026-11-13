@@ -99,6 +99,8 @@ export function getImage(image) {
 	else if (image === "map15") return new URL(`../../../static/TGZ/images/map15.jpg`, import.meta.url).href
 	else if (image === "map16") return new URL(`../../../static/TGZ/images/map16.jpg`, import.meta.url).href
 	else if (image === "map17") return new URL(`../../../static/TGZ/images/map17.jpg`, import.meta.url).href
+	else if (image === "map18") return new URL(`../../../static/TGZ/images/map18.jpg`, import.meta.url).href
+	else if (image === "map19") return new URL(`../../../static/TGZ/images/map19.jpg`, import.meta.url).href
 	else if (image === "res" + String(rf.WOOD_TILE)) return new URL(`../../../static/TGZ/images/res_wood.jpg`, import.meta.url).href
 	else if (image === "res" + String(rf.CLAY_TILE)) return new URL(`../../../static/TGZ/images/res_clay.jpg`, import.meta.url).href
 	else if (image === "res" + String(rf.IVORY_TILE)) return new URL(`../../../static/TGZ/images/res_ivory.jpg`, import.meta.url).href

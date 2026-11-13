@@ -4,7 +4,7 @@ var playerCount = 2
 
 function init() {
 	availableTiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-	if (window.initData.isSchismUser) availableTiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17]
+	if (window.initData.isSchismUser) availableTiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 19]
 
 	if (boardTiles == undefined) {
 		boardTiles = [0, 0, -1, 0, -1, 0, -1, 0]
@@ -17,7 +17,7 @@ function init() {
 
 		for (let i = 0; i < boardTiles.length; i += 2) {
 			let index = availableTiles.indexOf(boardTiles[i])
-			availableTiles.splice(index, 1)
+			if (index > -1) availableTiles.splice(index, 1)
 		}
 	}
 	renderAvailableTiles()
@@ -512,7 +512,7 @@ function changePlayerNumberGraphics(playerNumber) {
 function changePlayerNumber() {
 	playerCount = parseInt(this.id.slice(0, 1))
 	availableTiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-	if (window.initData.isSchismUser) availableTiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17]
+	if (window.initData.isSchismUser) availableTiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 19]
 	switch (playerCount) {
 		case 2:
 			document.querySelectorAll(".playerCount").forEach((element) => (element.src = "/static/Lobby/images/playerOutline.svg"))
@@ -595,7 +595,7 @@ function clearMap() {
 		}
 	}
 	availableTiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-	if (window.initData.isSchismUser) availableTiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17]
+	if (window.initData.isSchismUser) availableTiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 18, 19]
 
 	renderAvailableTiles()
 	renderBoard(playerCount)
