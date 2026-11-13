@@ -444,6 +444,8 @@ export async function loadRewind() {
 			return
 		}
 		model.importGameData(data.gameData)
+		// Forced moves would replay and save at once, so the next rewind could never go further back.
+		store.turnDraft.pauseAutomatic = true
 		personal.latestUpdate = data.latestUpdate
 		window.initData.latestUpdate = data.latestUpdate
 		if (await updateDataFromLoadRewind()) {
