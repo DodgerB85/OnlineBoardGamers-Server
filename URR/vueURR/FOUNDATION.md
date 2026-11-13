@@ -114,7 +114,7 @@ Remaining component checks from the retired audit: confirm the full land-price t
 
 ## Replay storage — 2026-10-24
 
-`store.history` holds only compact replay records `[actionCode, player, secondsSincePreviousEntry, ...params]`; parameterless actions store no payload, so a pass is `[10, 0, delta]`. Event entries (`new game`, `kickout`, `resign`, debug) keep their event number and optional state-change patch. `URRhistoryStorage.js` replays those records on demand into a non-persisted cache (`syncHistoryReplay`), so history presentation, replay stepping and individual rewind behaviour are unchanged. Saves copy the records directly: no position is stored per entry and no rules run during save. Appended moves replay only the new entry; undo truncates the cache and import rebuilds it. The later draft-turn layer below commits these positions on End Turn.
+`store.history` holds only compact replay records `[actionCode, player, secondsSincePreviousEntry, ...params]`; parameterless actions store no payload, so a pass is `[10, 0, delta]`. Event entries (`new game`, `kickout`, `resign`, rewind, debug) keep their event number and optional state-change patch. `URRhistoryStorage.js` replays those records on demand into a non-persisted cache (`syncHistoryReplay`), so history presentation, replay stepping and individual rewind behaviour are unchanged. Saves copy the records directly: no position is stored per entry and no rules run during save. Appended moves replay only the new entry; undo truncates the cache and import rebuilds it. The later draft-turn layer below commits these positions on End Turn.
 
 
 ## Draft turns and action interface — 2026-10-05

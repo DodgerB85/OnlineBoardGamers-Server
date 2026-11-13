@@ -372,7 +372,7 @@ export function exportURRmodel(forGameOver = false) {
 	// Excludes HIST_ACTION (3) summaries which are display-only.
 	function isReplayEntry(e) {
 		const code = e[0]
-		return code === rf.HIST_KICKOUT || code === rf.HIST_RESIGN || (code >= 10 && code <= 28) || code === 99
+		return code === rf.HIST_KICKOUT || code === rf.HIST_RESIGN || code === rf.HIST_REWIND || (code >= 10 && code <= 28) || code === 99
 	}
 
 	const entry = [

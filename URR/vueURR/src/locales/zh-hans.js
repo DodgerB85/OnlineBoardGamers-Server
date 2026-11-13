@@ -733,6 +733,8 @@ export default {
 		kickedOut: "{name} 被踢出。其剩余回合将自动跳过",
 		resigned: "{name} 已认输。其剩余回合将自动跳过",
 		gameEnded: "游戏结束",
+		admin: "admin",
+		rewindBy: "游戏被 {name} 回退到此处",
 		playedMove: "进行了一步行动",
 		stateFallback: "城邦",
 		anOffer: "一项提议",

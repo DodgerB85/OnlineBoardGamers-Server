@@ -72,6 +72,7 @@ function saleLabels(batches = []) { return batches.flat().map(landLabel).join(",
 const eventText = computed(() => {
 	const event = props.entry[0]
 	if (event === rf.HIST_NEW_GAME) return t("history.welcome")
+	if (event === rf.HIST_REWIND) return t("history.rewindBy", { name: props.entry[1] >= 0 ? personal.getHistoryName(props.entry[1]) : t("history.admin") })
 	if (event === rf.HIST_KICKOUT) return t("history.kickedOut", { name: personal.getHistoryName(props.entry[1]) })
 	if (event === rf.HIST_RESIGN) return t("history.resigned", { name: personal.getHistoryName(props.entry[1]) })
 	const move = action.value
@@ -221,6 +222,7 @@ function jumpToEntry() {
 				</div>
 			</template>
 			<div v-else-if="entry[0] === rf.HIST_NEW_GAME" class="new_turn"><CurrencyText :text="eventText" /></div>
+			<div v-else-if="entry[0] === rf.HIST_REWIND" class="rewind">{{ eventText }}</div>
 			<template v-else>
 				<div class="container"><span class="header" v-if="player"><PlayerMarker :index="entry[1]" :name="personal.getHistoryName(entry[1])" /><span class="historyPlayerName" :style="{ backgroundColor: playerColour(entry[1]), color: playerTextColour(entry[1]) }">{{ personal.getHistoryName(entry[1]) }}</span></span><img v-if="eventArtwork" :src="eventArtwork.src" :alt="eventArtwork.alt" :title="eventArtwork.alt" /><span><CurrencyText :text="eventText" :inline-icons="eventInlineIcons" /><img v-for="(asset, idx) in actionInlineImages" :key="idx" class="inlineActionImage" :src="asset.src" :alt="asset.alt" :title="asset.alt" /></span></div>
 				<div v-for="award in nationAwards" :key="award.id" class="nationAwardNotice"><PlayerMarker :index="award.owner" :name="personal.getHistoryName(award.owner)" /><span class="historyPlayerName" :style="{ backgroundColor: playerColour(award.owner), color: playerTextColour(award.owner) }">{{ personal.getHistoryName(award.owner) }}</span><span><CurrencyText :text="$t('history.acquiredNation', { nation: rf.NATION_NAMES[award.id], amount: award.price })" /></span></div>
@@ -241,7 +243,7 @@ function jumpToEntry() {
 .historyTimestamp { font-size: 0.8em; }.administrationHeading { padding: 6px; background: #303030; color: white; text-align: center; font-weight: bold; }.administrationExplanation { margin: 8px 3px; }.administrationDetails { display: grid; gap: 5px; }.administrationDetails > div { display: flex; align-items: center; gap: 6px; padding: 4px; background: #edf6fd; }.administrationDetails img { width: 30px; height: 30px; flex-shrink: 0; }.administrationDetails span { min-width: 0; overflow-wrap: anywhere; }.administrationDetails button { flex-shrink: 0; min-height: 32px; padding: 4px 6px; border: 1px solid #177daf; border-radius: 3px; background: #fffdf4; font: inherit; cursor: pointer; }
 .header { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; }.header b { min-width: 0; overflow-wrap: anywhere; }.header img { width: 23px; height: 23px; }
 .historyPlayerName { display: inline-block; flex-shrink: 0; white-space: nowrap; margin-right: 2px; color: white; border: 1px solid black; padding: 1px 6px; font-size: 0.9em; line-height: 1.4; }
-.new_turn { background: black; color: white; text-align: center; font-weight: bold; font-size: 1.2em; padding: 8px; }.phaseHeading { background: black; color: white; text-align: center; font-weight: bold; font-size: 1.2em; padding: 8px; margin: 5px; }
+.new_turn { background: black; color: white; text-align: center; font-weight: bold; font-size: 1.2em; padding: 8px; }.rewind { background-color: #d4eafd; text-align: center; color: #000; font-weight: bold; font-size: 1.2em; padding: 8px; }.phaseHeading { background: black; color: white; text-align: center; font-weight: bold; font-size: 1.2em; padding: 8px; margin: 5px; }
 .selectableHistory { cursor: pointer; }.selectableHistory:hover { border: 1px solid yellow; }.selectableHistory:focus-visible { outline: 2px solid yellow; outline-offset: -2px; }
 .log.currentReplay { box-shadow: inset 3px 0 #177daf; background: #e5f3ff; }.replayPosition { display: block; color: #12628c; font-size: 16px; font-weight: bold; }
 .actionImages { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }.historyCard { width: 185px; max-width: 100%; }

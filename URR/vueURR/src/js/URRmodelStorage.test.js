@@ -235,6 +235,19 @@ test("a missing seat hands the turn to the next live player", () => {
 	assert.equal(store.players[2].isMissing, undefined)
 })
 
+test("a rewind entry survives the save and replays without changing the position", () => {
+	const game = createGame(["A", "B", "C"])
+	storeGame(game)
+	model.addHistory(rf.HIST_REWIND, 1, null, 0)
+	const entry = store.history.at(-1)
+	assert.equal(entry[0], rf.HIST_REWIND)
+	assert.deepEqual(entry[3], [])
+	const imported = funcs.importURRmodel(funcs.exportURRmodel())
+	assert.deepEqual(imported.history.at(-1).slice(0, 3), [rf.HIST_REWIND, 1, entry[2]])
+	assert.deepEqual(imported.history.at(-1)[3], [])
+	assert.deepEqual(imported.state, game)
+})
+
 test("a kickout entry names the kicked player and keeps the kicker private", () => {
 	storeGame(createGame(["A", "B", "C"]), [[rf.HIST_NEW_GAME, -1, null], [rf.HIST_RESIGN, 2, 0]])
 	model.setMissingPlayers(["B"])

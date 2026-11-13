@@ -733,6 +733,8 @@ export default {
 		kickedOut: "{name} a été exclu. Ses tours restants sont passés automatiquement",
 		resigned: "{name} a démissionné. Ses tours restants sont passés automatiquement",
 		gameEnded: "Partie terminée",
+		admin: "administrateur",
+		rewindBy: "Jeu rembobiné ici par {name}",
 		playedMove: "A joué un coup",
 		stateFallback: "État",
 		anOffer: "une offre",

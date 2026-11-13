@@ -733,6 +733,8 @@ export default {
 		kickedOut: "{name} wurde rausgeworfen. Die verbleibenden Züge werden automatisch weitergegeben",
 		resigned: "{name} hat aufgegeben. Die verbleibenden Züge werden automatisch weitergegeben",
 		gameEnded: "Spiel beendet",
+		admin: "Administrator",
+		rewindBy: "Das Spiel wurde von {name} hierher zurückgespult",
 		playedMove: "Hat einen Zug gemacht",
 		stateFallback: "Staat",
 		anOffer: "ein Angebot",

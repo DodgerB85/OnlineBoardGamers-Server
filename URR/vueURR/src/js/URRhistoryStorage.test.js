@@ -159,3 +159,8 @@ test("replay finds the previous own move and skips the opening", () => {
 	assert.equal(previousOwnStep(history, 2, 4), null)
 	assert.equal(previousOwnStep(history, 1, 0), null)
 })
+
+test("replay skips rewind entries when finding the previous own move", () => {
+	const history = [[rf.HIST_NEW_GAME, -1, null], [10, 0, 1], [rf.HIST_REWIND, 0, 1, []], [10, 2, 1]]
+	assert.equal(previousOwnStep(history, 0, 3), 1)
+})

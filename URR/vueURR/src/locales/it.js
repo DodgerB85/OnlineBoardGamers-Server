@@ -733,6 +733,8 @@ export default {
 		kickedOut: "{name} è stato espulso. I suoi turni rimanenti vengono passati automaticamente",
 		resigned: "{name} ha abbandonato. I suoi turni rimanenti vengono passati automaticamente",
 		gameEnded: "Partita terminata",
+		admin: "amministratore",
+		rewindBy: "Il gioco è stato riavvolto fino a qui da {name}",
 		playedMove: "Ha giocato una mossa",
 		stateFallback: "Stato",
 		anOffer: "un'offerta",

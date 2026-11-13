@@ -444,6 +444,7 @@ export async function loadRewind() {
 			return
 		}
 		model.importGameData(data.gameData)
+		model.addHistory(rf.HIST_REWIND, rf.SUPER_USERS.includes(personal.name) ? -1 : personal.pov, null, 0)
 		// Forced moves would replay and save at once, so the next rewind could never go further back.
 		store.turnDraft.pauseAutomatic = true
 		personal.latestUpdate = data.latestUpdate

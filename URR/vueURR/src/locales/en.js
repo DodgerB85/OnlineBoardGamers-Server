@@ -731,6 +731,8 @@ export default {
 		kickedOut: "{name} was kicked out. Their remaining turns are passed automatically",
 		resigned: "{name} resigned. Their remaining turns are passed automatically",
 		gameEnded: "Game ended",
+		admin: "admin",
+		rewindBy: "Game rewound to here by {name}",
 		playedMove: "Played a move",
 		stateFallback: "State",
 		anOffer: "an offer",

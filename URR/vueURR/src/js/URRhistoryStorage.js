@@ -181,10 +181,10 @@ export function syncHistoryReplay(cache, history, playerNames, creationTimestamp
 	return cache
 }
 
-// Replay jumps need the previous entry made by this player, skipping the opening.
+// Replay jumps need the previous move made by this player, skipping the opening and event rows.
 export function previousOwnStep(history, playerIndex, beforeStep) {
 	for (let index = beforeStep - 1; index > 0; index--) {
-		if (history[index]?.[1] === playerIndex) return index
+		if (history[index]?.[1] === playerIndex && history[index][0] >= 10) return index
 	}
 	return null
 }
