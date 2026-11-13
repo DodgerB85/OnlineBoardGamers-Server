@@ -75,7 +75,7 @@ def showURRgame(request, game_id=1, spoilerFree=False, replayStep=1):
 
     currentPlayersArr = []
     if currentGame.phase in rfURR.MAIN_PHASES:
-        currentPlayersArr = json.dumps(currentGame.serverCurrentPlayerNamesInTurnOrder if len(currentGame.serverCurrentPlayerNamesInTurnOrder) > 0 else [])
+        currentPlayersArr = json.dumps(presenter.getFullTurnOrderNames())
     elif currentGame.phase == rfURR.PHASE_GAME_OVER:
         currentPlayersArr = json.dumps(presenter.getArrayOfIsCurrentPlayers())
 
@@ -338,7 +338,7 @@ def performSaveURRGame(request, currentGame, jsonData):
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         allIsCurrentPlayers = jsonData["allIsCurrentPlayers"]
         if len(allIsCurrentPlayers) > 0 and rf.SO_TRAINING_GAME not in loadedStartingOptions:
-            playerListToNotify = [p.strip() for p in allIsCurrentPlayers if p.strip() not in {request.user.username, "UrrBot"}]
+            playerListToNotify = [p.strip() for p in allIsCurrentPlayers if p.strip() not in {request.user.username, "UrBot"}]
             if len(playerListToNotify) > 0:
                 presenter.sendYourTurnNotification("URR", playerListToNotify, currentGame.id, presenter.getGameName(), currentGame, oldVer)
 

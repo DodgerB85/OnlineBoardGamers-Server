@@ -52,6 +52,7 @@ class UrrEndGameTests(TestCase):
                 currentMoveTime="x",
                 currentMoveData="y",
                 flexiSecondsUsed=300,
+                remainingTurnOrder=2,
             )
         self.game.save()
 
@@ -83,6 +84,7 @@ class UrrEndGameTests(TestCase):
             self.assertEqual(game_player.currentMoveTime, "")
             self.assertEqual(game_player.currentMoveData, "")
             self.assertEqual(game_player.flexiSecondsUsed, 0)
+            self.assertIsNone(game_player.remainingTurnOrder)
 
         notification = async_task.call_args.args
         self.assertEqual(notification[0], "Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame")

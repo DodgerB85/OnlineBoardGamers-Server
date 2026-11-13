@@ -11,7 +11,7 @@ const t = i18n.global.t
 
 export const SUPER_USERS = ["BotKickStarter"]
 export const DEBUG_USERS = []
-export const BOT_NAME = "UrrBot"
+export const BOT_NAME = "UrBot"
 export const KICKOUT_SOLO_DELAY_MS = 2 * 24 * 60 * 60 * 1000
 
 // Mirrors Lobby/sharedFunctions/constants.py SHADOW_PLAYER_NAMES. Practice-game

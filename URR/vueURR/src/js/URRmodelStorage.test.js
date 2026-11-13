@@ -227,6 +227,14 @@ test("a missing seat plays under the bot name but keeps its own name in history"
 	assert.equal(personal.getHistoryName(1), "B")
 })
 
+test("a missing seat hands the turn to the next live player", () => {
+	storeGame(createGame(["A", "B", "C"]))
+	model.setMissingPlayers(["A", "B"])
+	model.playMissingSeats()
+	assert.equal(store.gameflow.turnOrder[0], 2)
+	assert.equal(store.players[2].isMissing, undefined)
+})
+
 test("a kickout entry names the kicked player and keeps the kicker private", () => {
 	storeGame(createGame(["A", "B", "C"]), [[rf.HIST_NEW_GAME, -1, null], [rf.HIST_RESIGN, 2, 0]])
 	model.setMissingPlayers(["B"])
