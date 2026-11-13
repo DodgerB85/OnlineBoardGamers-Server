@@ -40,7 +40,8 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 		// Compact payload is [houseNumber]; accept the earlier [index, houseNumber] too.
 		const houseNumber = entry3.length > 1 ? entry3[1] : entry3[0]
 		const index = entry3.length > 1 ? funcs.importIndex(entry3[0]) : map.findIndexForHouse(houseNumber)
-		if (index >= 0) for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) squares.push(index + i + j * rf.ssW)
+		const size = rf.APARTMENTS.includes(houseNumber) ? 3 : 2
+		if (index >= 0) for (let i = 0; i < size; i++) for (let j = 0; j < size; j++) squares.push(index + i + j * rf.ssW)
 	} else if (action === rf.HIST_ADD_FREEWAY) {
 		const index = funcs.importIndex(entry3[0])
 		const rotated = entry3[1] === 1

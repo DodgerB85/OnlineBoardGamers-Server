@@ -585,11 +585,12 @@ export function updateHousesHighlights() {
 		}
 		store.highlights.indexesToHighlightYellow = squares
 	} else if (store.context.selectedBuilding === -2) {
-		// SBD move-out: highlight the 2x2 block of every candidate house
+		// SBD move-out: apartments occupy 3x3, ordinary houses 2x2.
 		const squares = []
 		for (const houseNum of rules.moveOutCandidateHouses()) {
 			const idx = map.findIndexForHouse(houseNum)
-			if (idx > -1) squares.push(idx, idx + 1, idx + rf.ssW, idx + rf.ssW + 1)
+			const size = rf.APARTMENTS.includes(houseNum) ? 3 : 2
+			if (idx > -1) squares.push(...map.giveAllSpaceForAToken(idx, size, size))
 		}
 		store.highlights.indexesToHighlightYellow = squares
 	} else if (rf.APARTMENTS.includes(store.context.selectedBuilding)) {
@@ -751,8 +752,9 @@ export function chooseMoveOutHouse(index) {
 	const store = useModelStore()
 	const playerIndex = currentPlayerIndex()
 
-	const houseNumber = store.mapData.coords[index] - rf.HOUSE
-	if (!rules.moveOutCandidateHouses().includes(houseNumber)) return
+	// Match the encoded cell directly to retain fractional apartment numbers.
+	const houseNumber = rules.moveOutCandidateHouses().find((house) => store.mapData.coords[index] === rf.HOUSE + house)
+	if (houseNumber === undefined) return
 
 	model.evictHouse(houseNumber)
 
@@ -1008,7 +1010,7 @@ export function selectLobbyistMSTile(tile) {
 // Rotate the milestone tile (0-3, always 4 rotations)
 
 // Update highlights for valid tile placement positions
-function updateLobbyistMSHighlights() {
+export function updateLobbyistMSHighlights() {
 	const store = useModelStore()
 	context.clearAllHighlights()
 	store.highlights.indexesToHighlightYellow = rules.givePossibilitiesForNewTile()
