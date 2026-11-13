@@ -116,7 +116,7 @@ export const en = {
     gameOver: 'Game Over',
   },
 
-  map: {
+  map: { locale: 'Locale', capacity: 'Capacity', resetView: 'Reset view',
     allied: 'Allied',
     french: 'French',
     objective: 'Objective',

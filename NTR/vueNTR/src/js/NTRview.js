@@ -16,19 +16,8 @@ const IMAGES = {
   french_unit_guard_infantry: new URL('../../../static/NTR/images/french_unit_guard_infantry.jpg', import.meta.url).href,
   french_unit_cavalry: new URL('../../../static/NTR/images/french_unit_cavalry.jpg', import.meta.url).href,
   french_unit_artillery: new URL('../../../static/NTR/images/french_unit_artillery.jpg', import.meta.url).href,
-  // Approaches - JPG
-  approach_wide_clear: new URL('../../../static/NTR/images/approach_wide_clear.jpg', import.meta.url).href,
-  approach_wide_rough: new URL('../../../static/NTR/images/approach_wide_rough.jpg', import.meta.url).href,
-  approach_wide_wooded: new URL('../../../static/NTR/images/approach_wide_wooded.jpg', import.meta.url).href,
-  approach_wide_stream: new URL('../../../static/NTR/images/approach_wide_stream.jpg', import.meta.url).href,
-  approach_wide_river: new URL('../../../static/NTR/images/approach_wide_river.jpg', import.meta.url).href,
-  approach_wide_road: new URL('../../../static/NTR/images/approach_wide_road.jpg', import.meta.url).href,
-  approach_narrow_clear: new URL('../../../static/NTR/images/approach_narrow_clear.jpg', import.meta.url).href,
-  approach_narrow_rough: new URL('../../../static/NTR/images/approach_narrow_rough.jpg', import.meta.url).href,
-  approach_narrow_wooded: new URL('../../../static/NTR/images/approach_narrow_wooded.jpg', import.meta.url).href,
-  approach_narrow_stream: new URL('../../../static/NTR/images/approach_narrow_stream.jpg', import.meta.url).href,
-  approach_narrow_river: new URL('../../../static/NTR/images/approach_narrow_river.jpg', import.meta.url).href,
-  approach_narrow_road: new URL('../../../static/NTR/images/approach_narrow_road.jpg', import.meta.url).href,
+  // Board - JPG (5100x6600, NTRboard.json coordinates)
+  map: new URL('../../../static/NTR/images/map.jpg', import.meta.url).href,
   // UI icons - SVG (need transparency)
   ntr_icon: new URL('../../../static/NTR/images/ntr_icon.png', import.meta.url).href,
   so_frenchReinforcements: new URL('../../../static/NTR/images/so_frenchReinforcements.svg', import.meta.url).href,
@@ -54,58 +43,6 @@ export function getUnitDisplayName(unit) {
   const strength = unit.strength > 0 ? ` (${unit.strength})` : ''
   const revealed = unit.revealed ? '' : ' (?)'
   return `${baseName}${strength}${revealed}`
-}
-
-export function getTerrainPattern(terrain) {
-  return `url(#pattern_terrain_${terrain})`
-}
-
-export function getApproachColor(approach) {
-  const colors = {
-    clear: '#95a5a6',
-    rough: '#7f8c8d',
-    wooded: '#27ae60',
-    stream: '#3498db',
-    river: '#2980b9',
-    road: '#f39c12',
-  }
-  return colors[approach.terrain] || '#95a5a6'
-}
-
-export function getTerrainColor(terrainId) {
-  const colors = {
-    clear: '#95a5a6',   // gray
-    rough: '#7f8c8d',   // darker gray
-    wooded: '#27ae60',  // green
-    hill: '#8e44ad',    // purple
-    town: '#e67e22',    // orange/brown
-    fort: '#c0392b',    // red
-  }
-  return colors[terrainId] || '#95a5a6'
-}
-
-export function getApproachPath(approach, localePositions) {
-  const from = localePositions[approach.from]
-  const to = localePositions[approach.to]
-  if (!from || !to) return ''
-
-  const dx = to.x - from.x
-  const dy = to.y - from.y
-  const dist = Math.sqrt(dx * dx + dy * dy)
-
-  // Curve the path slightly for parallel approaches
-  const curveOffset = approach.curveOffset || 0
-  if (curveOffset !== 0) {
-    const mx = (from.x + to.x) / 2 - dy / dist * curveOffset
-    const my = (from.y + to.y) / 2 + dx / dist * curveOffset
-    return `M ${from.x} ${from.y} Q ${mx} ${my} ${to.x} ${to.y}`
-  }
-
-  return `M ${from.x} ${from.y} L ${to.x} ${to.y}`
-}
-
-export function getApproachWidth(approach) {
-  return approach.type === rf.APPROACH_WIDE ? 8 : 4
 }
 
 export function getUnitIcon(unit, size = 32) {

@@ -101,7 +101,8 @@ export function parseGameData(data) {
     const parsed = typeof data === 'string' ? JSON.parse(data) : data
 
     if (parsed.board) {
-      store.board = { ...store.board, ...parsed.board }
+      // Topology is static map data; old saves may carry an outdated one
+      store.board = { ...store.board, ...parsed.board, ...NTRmap.buildBoardTopology() }
     }
     if (parsed.turn !== undefined) store.turn = parsed.turn
     if (parsed.phase !== undefined) store.phase = parsed.phase

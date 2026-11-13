@@ -1,263 +1,43 @@
 // NTRmap.js - Map topology and scenario definitions (client-side)
 // Napoleon's Triumph - Battle of Austerlitz
-// Based on NT_Annotated_Rules_v1.4.pdf
+// Topology comes from NTRboard.json, extracted from images/map.jpg (coordinates are map pixels).
 
-import * as rf from './NTRreference'
+import board from './NTRboard.json'
 
-// =============================================================================
-// LOCALE DEFINITIONS
-// =============================================================================
-
-export const LOCALES = {
-  // Pratzen Heights - Central high ground
-  PRATZEN: {
-    id: "PRATZEN",
-    name: "Pratzen Heights",
-    terrain: rf.TERRAIN_HILL,
-    position: { x: 700, y: 450 },
-    objective: true,
-    fort: false,
-  },
-
-  // Santon Hill - Key defensive position
-  SANTON: {
-    id: "SANTON",
-    name: "Santon Hill",
-    terrain: rf.TERRAIN_HILL,
-    position: { x: 850, y: 350 },
-    objective: true,
-    fort: true,
-  },
-
-  // Southern towns
-  TELNITZ: {
-    id: "TELNITZ",
-    name: "Telnitz",
-    terrain: rf.TERRAIN_TOWN,
-    position: { x: 550, y: 600 },
-    objective: false,
-    fort: false,
-  },
-  SOKOLNITZ: {
-    id: "SOKOLNITZ",
-    name: "Sokolnitz",
-    terrain: rf.TERRAIN_TOWN,
-    position: { x: 650, y: 650 },
-    objective: false,
-    fort: false,
-  },
-
-  // Pratzen area
-  BLASWITZ: {
-    id: "BLASWITZ",
-    name: "Blaswitz",
-    terrain: rf.TERRAIN_CLEAR,
-    position: { x: 750, y: 550 },
-    objective: false,
-    fort: false,
-  },
-  KOBLITZ: {
-    id: "KOBLITZ",
-    name: "Koblitz",
-    terrain: rf.TERRAIN_CLEAR,
-    position: { x: 800, y: 600 },
-    objective: false,
-    fort: false,
-  },
-
-  // Austerlitz town - French objective
-  AUSTERLITZ: {
-    id: "AUSTERLITZ",
-    name: "Austerlitz",
-    terrain: rf.TERRAIN_TOWN,
-    position: { x: 900, y: 700 },
-    objective: true,
-    fort: false,
-  },
-
-  // Eastern sector
-  ZURLAN: {
-    id: "ZURLAN",
-    name: "Zurlan",
-    terrain: rf.TERRAIN_CLEAR,
-    position: { x: 950, y: 500 },
-    objective: false,
-    fort: false,
-  },
-
-  // Northern wooded area
-  HOLUBITZ: {
-    id: "HOLUBITZ",
-    name: "Holubitz",
-    terrain: rf.TERRAIN_WOODED,
-    position: { x: 600, y: 400 },
-    objective: false,
-    fort: false,
-  },
-
-  // Pratzen wings
-  PRATZEN_WEST: {
-    id: "PRATZEN_WEST",
-    name: "West Pratzen",
-    terrain: rf.TERRAIN_HILL,
-    position: { x: 600, y: 450 },
-    objective: false,
-    fort: false,
-  },
-  PRATZEN_EAST: {
-    id: "PRATZEN_EAST",
-    name: "East Pratzen",
-    terrain: rf.TERRAIN_HILL,
-    position: { x: 800, y: 450 },
-    objective: false,
-    fort: false,
-  },
-
-  // Northern deployment areas
-  BOSSENITZ: {
-    id: "BOSSENITZ",
-    name: "Bosenitz",
-    terrain: rf.TERRAIN_CLEAR,
-    position: { x: 500, y: 500 },
-    objective: false,
-    fort: false,
-  },
-  RAKOVNICE: {
-    id: "RAKOVNICE",
-    name: "Rakovnice",
-    terrain: rf.TERRAIN_CLEAR,
-    position: { x: 450, y: 400 },
-    objective: false,
-    fort: false,
-  },
-  KRENOWITZ: {
-    id: "KRENOWITZ",
-    name: "Krenowitz",
-    terrain: rf.TERRAIN_CLEAR,
-    position: { x: 400, y: 300 },
-    objective: false,
-    fort: false,
-  },
-
-  // Allied deployment zones (off-map entry areas)
-  ALLIED_DEPLOY_N: {
-    id: "ALLIED_DEPLOY_N",
-    name: "Allied Deployment North",
-    terrain: rf.TERRAIN_CLEAR,
-    position: { x: 500, y: 150 },
-    objective: false,
-    fort: false,
-    deployment_zone: "allied_north",
-  },
-  ALLIED_DEPLOY_C: {
-    id: "ALLIED_DEPLOY_C",
-    name: "Allied Deployment Center",
-    terrain: rf.TERRAIN_CLEAR,
-    position: { x: 700, y: 150 },
-    objective: false,
-    fort: false,
-    deployment_zone: "allied_center",
-  },
-  ALLIED_DEPLOY_S: {
-    id: "ALLIED_DEPLOY_S",
-    name: "Allied Deployment South",
-    terrain: rf.TERRAIN_CLEAR,
-    position: { x: 900, y: 150 },
-    objective: false,
-    fort: false,
-    deployment_zone: "allied_south",
-  },
-
-  // French deployment zones
-  FRENCH_DEPLOY_W: {
-    id: "FRENCH_DEPLOY_W",
-    name: "French Deployment West",
-    terrain: rf.TERRAIN_CLEAR,
-    position: { x: 200, y: 450 },
-    objective: false,
-    fort: false,
-    deployment_zone: "french_west",
-  },
-  FRENCH_DEPLOY_C: {
-    id: "FRENCH_DEPLOY_C",
-    name: "French Deployment Center",
-    terrain: rf.TERRAIN_CLEAR,
-    position: { x: 200, y: 600 },
-    objective: false,
-    fort: false,
-    deployment_zone: "french_center",
-  },
-  FRENCH_DEPLOY_E: {
-    id: "FRENCH_DEPLOY_E",
-    name: "French Deployment East",
-    terrain: rf.TERRAIN_CLEAR,
-    position: { x: 200, y: 750 },
-    objective: false,
-    fort: false,
-    deployment_zone: "french_east",
-  },
-}
+export const BOARD_SIZE = { width: board.size[0], height: board.size[1] }
+export const VOIDS = board.voids
 
 // =============================================================================
-// APPROACH DEFINITIONS
+// LOCALES (ids are the numbers printed on the reference map)
 // =============================================================================
 
-function createApproach(id, from_loc, to_loc, type, terrain) {
-  const capacity = type === "wide" ? 3 : 1
-  return {
-    id,
-    from_locale: from_loc,
-    to_locale: to_loc,
-    type,        // "wide" or "narrow"
-    terrain,     // clear, rough, wooded, stream, river, road
-    capacity,
-  }
-}
+export const LOCALES = Object.fromEntries(Object.entries(board.locales).map(([id, l]) => [id, {
+  id,
+  name: id,
+  polygon: l.polygon,
+  position: { x: l.reserve[0], y: l.reserve[1] },
+  capacity: l.capacity,
+  objectives: l.objectives,
+  objective: l.objectives.length > 0,
+  setup: l.setup,
+  entry: l.entry,
+  road_links: board.road_links[id] || [],
+}]))
 
-export const APPROACHES = {
-  // Pratzen Heights connections
-  A_PRATZEN_SANTON: createApproach("A_PRATZEN_SANTON", "PRATZEN", "SANTON", "wide", "clear"),
-  A_PRATZEN_BLASWITZ: createApproach("A_PRATZEN_BLASWITZ", "PRATZEN", "BLASWITZ", "wide", "clear"),
-  A_PRATZEN_PRATZEN_WEST: createApproach("A_PRATZEN_PRATZEN_WEST", "PRATZEN", "PRATZEN_WEST", "wide", "clear"),
-  A_PRATZEN_PRATZEN_EAST: createApproach("A_PRATZEN_PRATZEN_EAST", "PRATZEN", "PRATZEN_EAST", "wide", "clear"),
-  A_PRATZEN_HOLUBITZ: createApproach("A_PRATZEN_HOLUBITZ", "PRATZEN", "HOLUBITZ", "narrow", "wooded"),
-  A_PRATZEN_KOBLITZ: createApproach("A_PRATZEN_KOBLITZ", "PRATZEN", "KOBLITZ", "narrow", "rough"),
+// =============================================================================
+// APPROACHES (id "a-b"; penalties keyed by the locale being attacked into)
+// =============================================================================
 
-  // Santon Hill
-  A_SANTON_ZURLAN: createApproach("A_SANTON_ZURLAN", "SANTON", "ZURLAN", "wide", "clear"),
-  A_SANTON_KOBLITZ: createApproach("A_SANTON_KOBLITZ", "SANTON", "KOBLITZ", "narrow", "rough"),
-  A_SANTON_AUSTERLITZ: createApproach("A_SANTON_AUSTERLITZ", "SANTON", "AUSTERLITZ", "narrow", "road"),
-
-  // Telnitz/Sokolnitz
-  A_TELNITZ_SOKOLNITZ: createApproach("A_TELNITZ_SOKOLNITZ", "TELNITZ", "SOKOLNITZ", "wide", "clear"),
-  A_TELNITZ_BOSSENITZ: createApproach("A_TELNITZ_BOSSENITZ", "TELNITZ", "BOSSENITZ", "narrow", "stream"),
-  A_SOKOLNITZ_BLASWITZ: createApproach("A_SOKOLNITZ_BLASWITZ", "SOKOLNITZ", "BLASWITZ", "wide", "clear"),
-  A_SOKOLNITZ_PRATZEN_WEST: createApproach("A_SOKOLNITZ_PRATZEN_WEST", "SOKOLNITZ", "PRATZEN_WEST", "narrow", "rough"),
-
-  // Blaswitz/Koblitz
-  A_BLASWITZ_KOBLITZ: createApproach("A_BLASWITZ_KOBLITZ", "BLASWITZ", "KOBLITZ", "wide", "clear"),
-  A_KOBLITZ_ZURLAN: createApproach("A_KOBLITZ_ZURLAN", "KOBLITZ", "ZURLAN", "narrow", "clear"),
-
-  // Austerlitz
-  A_AUSTERLITZ_ZURLAN: createApproach("A_AUSTERLITZ_ZURLAN", "AUSTERLITZ", "ZURLAN", "wide", "road"),
-  A_AUSTERLITZ_KOBLITZ: createApproach("A_AUSTERLITZ_KOBLITZ", "AUSTERLITZ", "KOBLITZ", "narrow", "rough"),
-
-  // Northern deployment connections
-  A_ALLIED_DEPLOY_N_RAKOVNICE: createApproach("A_ALLIED_DEPLOY_N_RAKOVNICE", "ALLIED_DEPLOY_N", "RAKOVNICE", "wide", "road"),
-  A_ALLIED_DEPLOY_C_KRENOWITZ: createApproach("A_ALLIED_DEPLOY_C_KRENOWITZ", "ALLIED_DEPLOY_C", "KRENOWITZ", "wide", "road"),
-  A_ALLIED_DEPLOY_S_PRATZEN_EAST: createApproach("A_ALLIED_DEPLOY_S_PRATZEN_EAST", "ALLIED_DEPLOY_S", "PRATZEN_EAST", "wide", "road"),
-
-  // French deployment connections
-  A_FRENCH_DEPLOY_W_TELNITZ: createApproach("A_FRENCH_DEPLOY_W_TELNITZ", "FRENCH_DEPLOY_W", "TELNITZ", "wide", "road"),
-  A_FRENCH_DEPLOY_C_SOKOLNITZ: createApproach("A_FRENCH_DEPLOY_C_SOKOLNITZ", "FRENCH_DEPLOY_C", "SOKOLNITZ", "wide", "road"),
-  A_FRENCH_DEPLOY_E_AUSTERLITZ: createApproach("A_FRENCH_DEPLOY_E_AUSTERLITZ", "FRENCH_DEPLOY_E", "AUSTERLITZ", "wide", "road"),
-
-  // Cross connections
-  A_RAKOVNICE_KRENOWITZ: createApproach("A_RAKOVNICE_KRENOWITZ", "RAKOVNICE", "KRENOWITZ", "wide", "clear"),
-  A_KRENOWITZ_HOLUBITZ: createApproach("A_KRENOWITZ_HOLUBITZ", "KRENOWITZ", "HOLUBITZ", "narrow", "wooded"),
-  A_HOLUBITZ_PRATZEN_WEST: createApproach("A_HOLUBITZ_PRATZEN_WEST", "HOLUBITZ", "PRATZEN_WEST", "narrow", "wooded"),
-  A_BOSSENITZ_RAKOVNICE: createApproach("A_BOSSENITZ_RAKOVNICE", "BOSSENITZ", "RAKOVNICE", "narrow", "clear"),
-}
+export const APPROACHES = Object.fromEntries(Object.entries(board.approaches).map(([id, a]) => [id, {
+  id,
+  from_locale: a.locales[0],
+  to_locale: a.locales[1],
+  type: a.width,
+  capacity: a.width === "wide" ? 3 : 1,
+  penalties: a.penalties,
+  road: a.road,
+  line: a.line,
+}]))
 
 // =============================================================================
 // HELPER FUNCTIONS
@@ -284,6 +64,24 @@ export function getApproachBetween(localeA, localeB) {
 
 export function getApproachesFrom(localeId) {
   return Object.values(APPROACHES).filter(a => a.from_locale === localeId || a.to_locale === localeId)
+}
+
+// Board topology in the shape stored on store.board; never taken from saves
+export function buildBoardTopology() {
+  return {
+    locales: Object.values(LOCALES),
+    approaches: Object.values(APPROACHES).map(a => ({
+      id: a.id,
+      from: a.from_locale,
+      to: a.to_locale,
+      type: a.type,
+      capacity: a.capacity,
+      penalties: a.penalties,
+      road: a.road,
+      line: a.line,
+    })),
+    objectives: OBJECTIVE_LOCALES,
+  }
 }
 
 // =============================================================================
@@ -319,6 +117,17 @@ const UT_INFANTRY = "INFANTRY"
 const UT_GUARD = "GUARD_INFANTRY"
 const UT_CAVALRY = "CAVALRY"
 const UT_ARTILLERY = "ARTILLERY"
+
+// ponytail: scenario unit lists are still the old placeholder corps; each placeholder zone is
+// pinned to a real printed set-up locale. Replace with the printed order of battle per commander.
+const DEPLOY_LOCALES = {
+  ALLIED_DEPLOY_N: "67",  // Bagration
+  ALLIED_DEPLOY_C: "106", // Langeron
+  ALLIED_DEPLOY_S: "143", // Kienmayer
+  FRENCH_DEPLOY_W: "133", // Legrand
+  FRENCH_DEPLOY_C: "53",  // Bessières
+  FRENCH_DEPLOY_E: "64",  // Lannes
+}
 
 // =============================================================================
 // SCENARIO: 1 DECEMBER (Evening Positions - Pre-Battle)
@@ -470,7 +279,7 @@ export function buildInitialGameState(scenarioSlug, options) {
           id: `${sidePrefix}${unitIdCounter++}`,
           type: unit.type,
           side: unit.side,
-          locale: unit.locale,
+          locale: DEPLOY_LOCALES[unit.locale],
           strength: unit.strength,
           corps: unit.corps,
           revealed: unit.revealed,
@@ -490,7 +299,7 @@ export function buildInitialGameState(scenarioSlug, options) {
           id: `F${unitIdCounter++}`,
           type: unit.type,
           side: unit.side,
-          locale: unit.locale,
+          locale: DEPLOY_LOCALES[unit.locale],
           strength: unit.strength,
           corps: unit.corps,
           revealed: unit.revealed,
@@ -506,26 +315,9 @@ export function buildInitialGameState(scenarioSlug, options) {
     turn: 1,
     phase: 0, // 0 = Allied turn, 1 = French turn
     board: {
-      locales: Object.values(LOCALES).map(l => ({
-        id: l.id,
-        name: l.name,
-        terrain: l.terrain,
-        position: l.position,
-        objective: l.objective,
-        fort: l.fort,
-        deployment_zone: l.deployment_zone,
-      })),
-      approaches: Object.values(APPROACHES).map(a => ({
-        id: a.id,
-        from: a.from_locale,
-        to: a.to_locale,
-        type: a.type,
-        terrain: a.terrain,
-        capacity: a.capacity,
-      })),
+      ...buildBoardTopology(),
       units: allUnits,
       morale: { allied: scenario.starting_morale.ALLIED, french: scenario.starting_morale.FRENCH },
-      objectives: ["PRATZEN", "SANTON", "AUSTERLITZ", "TELNITZ"],
       round: 1,
     },
     fog_of_war: { allied_hidden: [], french_hidden: [] },
@@ -536,7 +328,7 @@ export function buildInitialGameState(scenarioSlug, options) {
 // OBJECTIVE LOCALES
 // =============================================================================
 
-export const OBJECTIVE_LOCALES = ["PRATZEN", "SANTON", "AUSTERLITZ", "TELNITZ"]
+export const OBJECTIVE_LOCALES = Object.values(LOCALES).filter(l => l.objective).map(l => l.id)
 
 // =============================================================================
 // MAP TOPOLOGY EXPORT
