@@ -71,9 +71,11 @@ const MIN_BOARD_WIDTH = 460
 const MAX_BOARD_WIDTH = 1800
 let boardObserver = null
 
-// Side panels stay in view while the page scrolls; a panel taller than the window pins its bottom edge instead of its top.
+// Side panels stay in view while the page scrolls, below the sticky replay bar; a panel taller than the window pins its bottom edge instead.
 function stickPanels() {
-	for (const panel of mainArea.value.querySelectorAll(":scope > aside")) panel.style.top = `${Math.min(12, window.innerHeight - panel.offsetHeight - 12)}px`
+	const replayBar = document.getElementById("replayArea")
+	const top = replayBar ? replayBar.offsetHeight + 12 : 12
+	for (const panel of mainArea.value.querySelectorAll(":scope > aside")) panel.style.top = `${Math.min(top, window.innerHeight - panel.offsetHeight - 12)}px`
 }
 
 function resizeBoard() {
@@ -89,6 +91,7 @@ function resizeBoard() {
 	const fit = Math.round(Math.max(MIN_BOARD_WIDTH, Math.min(MAX_BOARD_WIDTH, availableWidth, window.innerHeight * (MAP_WIDTH / MAP_HEIGHT))))
 	if (fit !== boardBaseWidth.value) boardBaseWidth.value = fit
 }
+watch(() => store.viewSettings.showReplay, stickPanels, { flush: "post" })
 
 model.initGame()
 controller.startPlayerTurn()
