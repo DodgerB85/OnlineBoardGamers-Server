@@ -4178,8 +4178,8 @@ var View = function (model) {
 		closeChat.call(this)
 		$("body").addClass("history")
 		var b = $("#footer").position().top
-		var a = 69
-		$("#history").css("max-height", parseInt(b - a) + "px")
+		var a = $("#statusBanner").offset().top + $("#statusBanner").outerHeight()
+		$("#history").css({ top: a + "px", "max-height": parseInt(b - a) + "px" })
 		$("#history").fadeIn(400)
 	}
 
@@ -4189,8 +4189,8 @@ var View = function (model) {
 		closeHistory.call(this)
 
 		var b = $("#footer").position().top
-		var a = 69
-		$("#wholeChat").css("max-height", parseInt(b - a) + "px")
+		var a = $("#statusBanner").offset().top + $("#statusBanner").outerHeight()
+		$("#wholeChat").css({ top: a + "px", "max-height": parseInt(b - a) + "px" })
 
 		$("#wholeChat").fadeIn(400)
 
