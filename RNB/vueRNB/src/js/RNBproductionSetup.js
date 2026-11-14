@@ -1,21 +1,23 @@
 /**
- * Production setup pre-phase
+ * Production setup phase (PHASE_PRODUCTION_SETUP_TO)
  *
- * At the start of the production phase, in turn order, each player announces:
+ * After the production turn order is set and before anyone produces, in turn order,
+ * each player with a choice announces:
  *  - whether managers carried by their transporters activate on a tile
  *  - which of their transporters (if any) burns wood to fire a power plant
  *
- * The announcement is recorded as the first action in the player's production
- * stack, so pre-set moves carry it and it is re-verified when loaded.
+ * Players with nothing to choose are skipped, and the phase is skipped when nobody can choose.
+ * The announcement is the player's only action in the phase (STACK_PRODUCTION_SETUP).
+ * A production preset carries the choice too; it is saved as a separate setup-phase move.
+ * The choices are made on the map (transporters carrying them, the managers / wood and the plant are clickable).
+ * The preset preview also asks for the choice before primaries produce.
  *
- * shortcut: the choice is applied when that player's turn starts, so an earlier
- * player can take a primary before a later player fires its connected plant; the
- * later player's extra output is still added then. Upgrade by collecting every
- * pre-set choice at phase start if strict simultaneity is needed.
+ * Mines are pulled before conflict, so a plant fired here adds the missing second
+ * mine output. Other primaries produce after this phase and are doubled normally.
+ * Legacy games recorded the setup inside production, after all primaries produced.
  */
 
 import { useModelStore } from "../stores/RNBstore.js"
-import { usePersonalStore } from "../stores/RNBpersonal.js"
 
 import * as rf from "./RNBreference.js"
 import * as model from "./RNBmodel.js"
@@ -23,6 +25,8 @@ import * as loc from "./RNBlocation.js"
 import * as stack from "./RNBstack.js"
 import * as produce from "./RNBproduce.js"
 import * as electricity from "./RNBelectricity.js"
+import * as controller from "./RNBcontroller.js"
+import * as context from "./RNBcontext.js"
 
 export function getDecisionsForPlayer(playerIndex) {
 	const store = useModelStore()
@@ -84,46 +88,119 @@ export function getPlantChoices(playerIndex) {
 	return choices
 }
 
-function hasSetupActionInStack() {
-	const store = useModelStore()
-	return store.actionStack.some((a) => a.action === rf.STACK_PRODUCTION_SETUP)
-}
-
-export function isSetupPending() {
-	const store = useModelStore()
-	const personal = usePersonalStore()
-	if (!rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase)) return false
-	if (!store.gameOptions.useManagement && !store.gameOptions.useElectricity) return false
-	if (!personal.canPlay()) return false
-	if (hasSetupActionInStack()) return false
-	const playerIndex = personal.pov
-	if (playerIndex < 0) return false
-	const isPrePhase = rf.ALL_PRE_PHASE_MAIN_PHASES.includes(store.gameflow.phase)
-	if (!isPrePhase && !personal.trainingGame && !personal.soloGame && !store.gameflow.turnOrder.includes(playerIndex)) return false
+export function hasChoices(playerIndex) {
 	return getManagerChoices(playerIndex).length > 0 || getPlantChoices(playerIndex).length > 0
 }
 
-function wasMarbleQuarryProduction(bldgID) {
+// Players drop out of the setup turn order once they have nothing left to choose
+// (eg an earlier player fired the only plant they could fire).
+export function dropPlayersWithoutChoices() {
 	const store = useModelStore()
-	for (let i = store.history.length - 1; i >= 0; i--) {
-		if (store.history[i][0] !== rf.HIST_PRE_PRODUCTION) continue
-		const entry = (store.history[i][3]?.[0] || []).find((e) => e[0] === bldgID)
-		return !!entry && entry.includes(-4)
-	}
-	return false
+	if (store.gameflow.phase !== rf.PHASE_PRODUCTION_SETUP_TO) return
+	store.gameflow.turnOrder = store.gameflow.turnOrder.filter((idx) => hasChoices(idx))
 }
 
-function addExtraPrimaryOutput(bldg) {
-	if (bldg.type === rf.BLDG_MINE) {
-		const result = produce.addBuildingOutputResourcesToGame_core(bldg.id, -1, 9, false, true)
-		return result.length > 0 ? result[0][1] : -1
+// A second pull from a mine on a newly powered tile
+function addExtraMineOutput(mine) {
+	const result = produce.addBuildingOutputResourcesToGame_core(mine.id, -1, 9, false, true)
+	return result.length > 0 ? result[0][1] : -1
+}
+
+// MAP INTERACTION: in the setup phase (and a production preset before primaries run),
+// carried managers and wood are clickable. Click a manager to switch it on / off; click
+// wood on a transporter, or the plant itself, to fire the plant.
+export function isSetupMode() {
+	const store = useModelStore()
+	if (store.gameflow.phase === rf.PHASE_PRODUCTION_SETUP_TO) return true
+	return store.gameflow.phase === rf.PRE_PHASE_PRODUCTION && store.context.productionSetupPending
+}
+
+export function updateSetupHighlights() {
+	const store = useModelStore()
+	const playerIndex = controller.currentPlayerIndex()
+	context.resetContextAndHighlights()
+	const managerHexIDs = getManagerChoices(playerIndex).map((c) => c.hexID)
+	for (const transporterObj of model.getTransportersByPlayerIndex(playerIndex)) {
+		if (!loc.isAnyHexLocation(transporterObj.location) || !managerHexIDs.includes(transporterObj.location[1])) continue
+		const manager = model.resourcesOnTransport(transporterObj.id).find((r) => r.type === rf.RES_MANAGER)
+		if (!manager) continue
+		store.context.resourceIDsToHighlight.push(manager.id)
+		store.context.transporterIDsToHighlight.push(transporterObj.id)
 	}
-	const bldgStats = model.getBuildingStatsFromBuildingID(bldg.id)
-	let outputRes = bldgStats.outputRes[0]
-	// The extra output matches the first one: its pre-production entry carries -4 for marble.
-	if (bldg.type === rf.BLDG_QUARRY && wasMarbleQuarryProduction(bldg.id)) outputRes = rf.RES_MARBLE
-	model.addResourceToGame_core(outputRes, bldg.location, 9)
-	return outputRes
+	for (const choice of getPlantChoices(playerIndex)) {
+		store.context.buildingIDsToHighlight.push(choice.bldgID)
+		for (const transporter of choice.transporters) {
+			store.context.resourceIDsToHighlight.push(electricity.findFuelOnTransporterOnTile(transporter.id, choice.hexID).id)
+			store.context.transporterIDsToHighlight.push(transporter.id)
+		}
+	}
+}
+
+// Dims a power plant during setup until it is fired
+export function isUnfiredPlant(bldgID) {
+	if (!isSetupMode()) return false
+	const bldg = model.getBuildingByID(bldgID)
+	return electricity.isPowerPlant(bldg) && bldg.powerActive !== true
+}
+
+// One line for the action area, so declining is visible too
+export function setupSummary() {
+	const playerIndex = controller.currentPlayerIndex()
+	const managers = getManagerChoices(playerIndex)
+	const plants = getPlantChoices(playerIndex).length
+	const fired = Object.keys(getDecisionsForPlayer(playerIndex).plants ?? {}).length
+	const managersOff = managers.filter((c) => !model.getManagerActivation(playerIndex, c.hexID)).length
+	return { plants, fired, managersOn: managers.length - managersOff, managersOff }
+}
+
+// Clicking the transporter: fire the plant with its wood, else switch its manager
+export function clickedSetupTransporter(transporterID) {
+	const store = useModelStore()
+	if (!store.context.transporterIDsToHighlight.includes(transporterID)) return
+	const hexID = model.getTransporterByID(transporterID).location[1]
+	const wood = electricity.findFuelOnTransporterOnTile(transporterID, hexID)
+	const manager = model.resourcesOnTransport(transporterID).find((r) => r.type === rf.RES_MANAGER)
+	const res = wood && store.context.resourceIDsToHighlight.includes(wood.id) ? wood : manager
+	if (res) clickedSetupResource(transporterID, res.id)
+}
+
+function recordSetupAction(playerIndex, managerChoices, plantChoices) {
+	const historyEntry = applyProductionSetup(playerIndex, managerChoices, plantChoices)
+	stack.addItemToStack({ action: rf.STACK_PRODUCTION_SETUP, historyEntry, playerIndex })
+	context.createUndoPoint()
+	updateSetupHighlights()
+}
+
+export function clickedSetupResource(transporterID, resID) {
+	const store = useModelStore()
+	if (!store.context.resourceIDsToHighlight.includes(resID)) return
+	const playerIndex = controller.currentPlayerIndex()
+	const transporterObj = model.getTransporterByID(transporterID)
+	const hexID = transporterObj.location[1]
+	if (model.getResByID(resID).type === rf.RES_MANAGER) {
+		recordSetupAction(playerIndex, [{ hexID, active: !model.getManagerActivation(playerIndex, hexID) }], [])
+		return
+	}
+	const choice = getPlantChoices(playerIndex).find((c) => c.hexID === hexID && c.transporters.some((t) => t.id === transporterID))
+	if (choice) recordSetupAction(playerIndex, [], [{ bldgID: choice.bldgID, transporterID }])
+}
+
+// Clicking the plant burns wood from the first of your transporters that carries some
+export function clickedSetupBuilding(bldgID) {
+	const playerIndex = controller.currentPlayerIndex()
+	const choice = getPlantChoices(playerIndex).find((c) => c.bldgID === bldgID)
+	if (choice) recordSetupAction(playerIndex, [], [{ bldgID, transporterID: choice.transporters[0].id }])
+}
+
+// Production preset: primaries waited for the setup choices (IO.simulateProductionStart)
+export function finishPresetSetup() {
+	const store = useModelStore()
+	store.context.productionSetupPending = false
+	controller.performAllPreProductionExceptMines()
+	store.context.researchHexIDpossibilities = produce.findAllResearchHexIDpossibilities(controller.currentPlayerIndex())
+	context.resetContextAndHighlights()
+	store.context.action = rf.ACT_TM_SELECT_TRANSPORTER
+	context.createUndoPoint()
 }
 
 // Apply the live choice. Returns the stack history entry to store as the first
@@ -156,12 +233,12 @@ export function applyProductionSetup(playerIndex, managerChoices, plantChoices) 
 		const plantID = stack.getBldgIDtoUse(bldg)
 		plantEntries.push([plantID, stack.getTransIDtoUse(model.getTransporterByID(choice.transporterID))])
 		fuelEntries.push(fuelEntry)
-		// A plant fired during setup was not working when primaries produced, so add
-		// the missing second output now (and record which plant caused it).
+		// Mines already produced (before conflict): add their missing second output (and record which plant caused it).
+		// Other primaries produce after the setup and are doubled then.
 		for (const hexID of store.context.poweredHexIDs || []) {
 			if (poweredBefore.includes(hexID)) continue
-			for (const primary of model.getAllInGameBuildings().filter((b) => b.location[1] === hexID && model.isPrimaryProducer(b))) {
-				const outputRes = addExtraPrimaryOutput(primary)
+			for (const primary of model.getAllInGameBuildings().filter((b) => b.location[1] === hexID && b.type === rf.BLDG_MINE)) {
+				const outputRes = addExtraMineOutput(primary)
 				if (outputRes !== -1) extraOutputs.push([plantID, stack.getBldgIDtoUse(primary), stack.compressLocation(primary.location), outputRes])
 			}
 		}

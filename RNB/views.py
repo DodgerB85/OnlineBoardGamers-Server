@@ -41,6 +41,8 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendAdminErrorMessage,
 )
 
+from Lobby.presenters import rnbPhaseOrder
+
 from . import RNBconstants as rfRNB
 from .common import create_rnb_game
 from .models import RNBmap, RNBMapScore
@@ -344,7 +346,7 @@ def _processRNBturn(request):
         # But we can reject earlier moves that are prior to the game's current state
         savingTurn = jsonData["turn"]
         savingPhase = jsonData["phase"]
-        if savingTurn < currentGame.turn or (savingTurn == currentGame.turn and savingPhase < currentGame.phase):
+        if savingTurn < currentGame.turn or (savingTurn == currentGame.turn and rnbPhaseOrder(savingPhase) < rnbPhaseOrder(currentGame.phase)):
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = f"RNB saveStackMove turn/phase Error: DB turn: {currentGame.turn}/{currentGame.phase} >> later than >> {savingTurn}/{savingPhase} Game: RNB id: {currentGame.id}, save -- user: {request.user.username}"
@@ -558,7 +560,7 @@ def _processRNBturn(request):
         # But we can reject earlier moves that are prior to the game's current state
         savingTurn = jsonData["turn"]
         savingPhase = jsonData["phase"]
-        if savingTurn < currentGame.turn or (savingTurn == currentGame.turn and savingPhase < currentGame.phase):
+        if savingTurn < currentGame.turn or (savingTurn == currentGame.turn and rnbPhaseOrder(savingPhase) < rnbPhaseOrder(currentGame.phase)):
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = f"RNB saveStackMove turn/phase Error: DB turn: {currentGame.turn}/{currentGame.phase} >> later than >> {savingTurn}/{savingPhase} Game: RNB id: {currentGame.id}, save -- user: {request.user.username}"
@@ -606,6 +608,10 @@ def _processRNBturn(request):
         }
         PaddMoveToPlayer(currentGame, nameToUse, newMoveEntry)
 
+        # A production preset carries its production setup choices as a separate move for the setup phase
+        if jsonData.get("setupActionStack", ""):
+            PaddMoveToPlayer(currentGame, nameToUse, {**newMoveEntry, "phase": rfRNB.PHASE_PRODUCTION_SETUP_TO, "actionStack": jsonData["setupActionStack"]})
+
         response_data = {
             "latestUpdate": currentGame.latestUpdate,
             "secondsToNextKickout": presenter.getSecondsToNextKickout(),
@@ -623,7 +629,7 @@ def _processRNBturn(request):
         # But we can reject earlier moves that are prior to the game's current state
         savingTurn = jsonData["turn"]
         savingPhase = jsonData["phase"]
-        if savingTurn < currentGame.turn or (savingTurn == currentGame.turn and savingPhase < currentGame.phase):
+        if savingTurn < currentGame.turn or (savingTurn == currentGame.turn and rnbPhaseOrder(savingPhase) < rnbPhaseOrder(currentGame.phase)):
             message = f"RNB saveConflictMove turn/phase Error: DB turn: {currentGame.turn}/{currentGame.phase} >> later than >> {savingTurn}/{savingPhase} Game: RNB id: {currentGame.id}, save -- user: {request.user.username}"
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -842,7 +848,7 @@ def _processRNBturn(request):
         # But we can reject earlier moves that are prior to the game's current state
         savingTurn = jsonData["turn"]
         savingPhase = jsonData["phase"]
-        if savingTurn < currentGame.turn or (savingTurn == currentGame.turn and savingPhase < currentGame.phase):
+        if savingTurn < currentGame.turn or (savingTurn == currentGame.turn and rnbPhaseOrder(savingPhase) < rnbPhaseOrder(currentGame.phase)):
             message = f"RNB saveConflictMove turn/phase Error: DB turn: {currentGame.turn}/{currentGame.phase} >> later than >> {savingTurn}/{savingPhase} Game: RNB id: {currentGame.id}, save -- user: {request.user.username}"
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -1011,7 +1017,7 @@ def _processRNBturn(request):
         # But we can reject earlier moves that are prior to the game's current state
         savingTurn = jsonData["turn"]
         savingPhase = jsonData["phase"]
-        if savingTurn < currentGame.turn or (savingTurn == currentGame.turn and savingPhase < currentGame.phase):
+        if savingTurn < currentGame.turn or (savingTurn == currentGame.turn and rnbPhaseOrder(savingPhase) < rnbPhaseOrder(currentGame.phase)):
             message = f"RNB saveConflictMove turn/phase Error: DB turn: {currentGame.turn}/{currentGame.phase} >> later than >> {savingTurn}/{savingPhase} Game: RNB id: {currentGame.id}, save -- user: {request.user.username}"
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
@@ -2260,7 +2266,7 @@ def PclearPastMoveData(currentGame):
         gp.moveDataJSON = [
             m
             for m in moves
-            if m.get("turn", 0) > turn or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT) or (m.get("turn") == turn and m.get("phase", 0) >= phase - rfRNB.PHASE_LOOKBACK_AMOUNT and m.get("username") in current_players)
+            if m.get("turn", 0) > turn or (m.get("turn") == turn and rnbPhaseOrder(m.get("phase", 0)) >= rnbPhaseOrder(phase) - rfRNB.PHASE_LOOKBACK_AMOUNT) or (m.get("turn") == turn and rnbPhaseOrder(m.get("phase", 0)) >= rnbPhaseOrder(phase) - rfRNB.PHASE_LOOKBACK_AMOUNT and m.get("username") in current_players)
         ]
 
         gp.save(update_fields=["moveDataJSON"])

@@ -23,6 +23,7 @@ export function phaseStr(phase) {
 	if (phase === rf.PHASE_CONFLICT_PRODUCTION_DECISION) return t("phases.conflictProductionDecision")
 	if (phase === rf.PHASE_CONFLICT_PRODUCTION_PRAYING) return t("phases.conflictProductionPraying")
 	if (phase === rf.PHASE_CONFLICT_PRODUCTION_TURN_ORDER) return t("phases.conflictProductionTurnOrder")
+	if (phase === rf.PHASE_PRODUCTION_SETUP_TO) return t("phases.productionSetup")
 	if (phase === rf.PHASE_PRODUCTION_TO) return t("phases.production")
 	if (phase === rf.PHASE_CONFLICT_MOVEMENT_DECISION) return t("phases.conflictMovementDecision")
 	if (phase === rf.PHASE_CONFLICT_MOVEMENT_PRAYING) return t("phases.conflictMovementPraying")

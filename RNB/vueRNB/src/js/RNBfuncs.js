@@ -20,6 +20,7 @@ import * as stack from "./RNBstack"
 import * as context from "./RNBcontext"
 import i18n from "../i18n"
 import * as wonder from "./RNBwonder"
+import * as electricity from "./RNBelectricity"
 
 import { useModelStore } from "../stores/RNBstore.js"
 import { usePersonalStore } from "../stores/RNBpersonal.js"
@@ -795,6 +796,8 @@ export function exportRNBmodel(forGameOver) {
 		tempGameflow.push(JSON.parse(JSON.stringify(store.gameflow.newWonderTurnOrder))) // 5
 		tempGameflow.push(JSON.parse(JSON.stringify(store.gameflow.newWonderPrayingOrder))) // 6
 		tempGameflow.push(JSON.parse(JSON.stringify(store.gameflow.productionDecisions || {}))) // 7 - &c production setup choices
+		// 8 - power plants working this turn (fuelled at wonder end / production setup, used at production start)
+		tempGameflow.push([store.context.powerPlantsFueledTurn, electricity.getAllPowerPlants().filter((b) => b.powerActive === true).map((b) => [b.id, b.powerFuelType])])
 		temp.push(JSON.parse(JSON.stringify(tempGameflow)))
 
 		// 7 - ongoingVars
@@ -1205,6 +1208,19 @@ export function importRNBmodel(input, forGameOver) {
 			}
 			histIdx--
 		}
+	}
+
+	// Power plants working this turn (buildings exist only now)
+	if (!forGameOver && inputModel[6]?.length > 8) {
+		const [fueledTurn, workingPlants] = inputModel[6][8]
+		for (const [bldgID, fuelType] of workingPlants) {
+			const bldg = model.getBuildingByID(bldgID)
+			if (!bldg) continue
+			bldg.powerActive = true
+			bldg.powerFuelType = fuelType
+		}
+		store.context.powerPlantsFueledTurn = fueledTurn
+		electricity.computePoweredStateFromActivePlants()
 	}
 
 	// Finally, check if deserts need to be converted

@@ -27,6 +27,7 @@ import * as produce from "./RNBproduce"
 import * as wonder from "./RNBwonder"
 import * as stack from "./RNBstack"
 import * as train from "./RNBtrain"
+import * as productionSetup from "./RNBproductionSetup.js"
 
 export function deselectTransporter() {
 	const store = useModelStore()
@@ -108,6 +109,10 @@ export function updateAllHighlightsForTransporterMode() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	if (!personal.canPlay()) return
+	if (productionSetup.isSetupMode()) {
+		productionSetup.updateSetupHighlights()
+		return
+	}
 
 	// If you have illegal geese, return
 	if (store.context.errorUnableToDropGeeseAtSea === true) {
