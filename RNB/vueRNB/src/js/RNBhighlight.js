@@ -705,7 +705,8 @@ export function getEligibleTransportersForRemoval(playerIndex, isTotalProblem, i
 	// Find the bucket locations of all eligible buildings
 	const factoryBucketLocations = model
 		.getAllInGameBuildings()
-		.filter((building) => rf.ALL_TRANSPORTER_FACTORIES.includes(building.type))
+		// Art: the atelier makes caravans, so it counts as a transporter factory here
+		.filter((building) => rf.ALL_TRANSPORTER_FACTORIES.includes(building.type) || building.type === rf.BLDG_ATELIER)
 		.map((building) => building.location)
 
 	const playerTransporters = model.getAllInGameTransporters().filter((transporter) => {

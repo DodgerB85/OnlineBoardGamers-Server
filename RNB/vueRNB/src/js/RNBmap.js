@@ -2318,6 +2318,8 @@ function completeManualProduction(building, transporterID, inputResources) {
 	// Art & The Atelier: clear the per-production recipe output
 	store.context.atelierRecipeOutput = -1
 	building.remainingConversions--
+	// A transporter swapped in place (donkey -> caravan) skipped the limit check; run it now the output exists
+	if (buildingProductionRetRemovedTransporterID !== -1) model.startExcessTransporterRemovalIfNeeded(controller.currentPlayerIndex())
 	if (![rf.ACT_REMOVE_EXCESS_TRANSPORTERS, rf.ACT_REMOVE_EXCESS_TRANSPORTERS_FOR_DONKEY].includes(store.context.action)) {
 		context.resetContextAndHighlights()
 		highlight.updateAllHighlightsForTransporterMode()

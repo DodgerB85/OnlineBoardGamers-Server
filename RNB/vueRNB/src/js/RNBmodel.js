@@ -868,17 +868,20 @@ export function addTransporterToGame(playerIndex, transporterType, bucketLocatio
 		store.ALL_TRANSPORTERS[nextID].rawTransporterXY = initialPos
 	}
 
-	if (!ignoreAnyExcessTransporters) {
-		// Now check for transporter violations
-		const problemRet = excessTransporterCheck(playerIndex)
-		if (problemRet[0] || problemRet[1] || problemRet[2] || problemRet[3] || problemRet[4]) {
-			context.resetContextAndHighlights()
-			store.context.action = rf.ACT_REMOVE_EXCESS_TRANSPORTERS
-			highlight.highlightEligibleTransportersForRemoval(playerIndex, problemRet[0], problemRet[1], problemRet[2], problemRet[3], problemRet[4])
-		}
-	}
+	if (!ignoreAnyExcessTransporters) startExcessTransporterRemovalIfNeeded(playerIndex)
 
 	return finalLocation
+}
+
+// Over a transporter limit? Switch to the "remove excess transporters" action.
+export function startExcessTransporterRemovalIfNeeded(playerIndex) {
+	const store = useModelStore()
+	const problemRet = excessTransporterCheck(playerIndex)
+	if (problemRet[0] || problemRet[1] || problemRet[2] || problemRet[3] || problemRet[4]) {
+		context.resetContextAndHighlights()
+		store.context.action = rf.ACT_REMOVE_EXCESS_TRANSPORTERS
+		highlight.highlightEligibleTransportersForRemoval(playerIndex, problemRet[0], problemRet[1], problemRet[2], problemRet[3], problemRet[4])
+	}
 }
 
 export function excessTransporterCheck(playerIndex) {
@@ -1180,6 +1183,7 @@ export function removeAndAddTransporterFromGameUsingID(transporterID, newTranspo
 	// Remove the old one
 
 	transporterObj.location = loc.setOOBlocation()
+
 }
 
 export function removeTransporterIDfromGame(transporterID) {
