@@ -25,10 +25,42 @@ export const computedToXY = computed(() => {
 	}
 })
 
+// Round each interior joint of a polyline with a quadratic Bezier (control point = the joint).
+// Bends use as much of each straight piece as possible (an edge-centre-edge crossing becomes one
+// arc); ends and junctions keep their exact positions.
+// Copied in Lobby/static/Lobby/createRNB2.js (map preview) - keep both in sync.
+function smoothPolylinePath(points, fmt, free) {
+	// No river or city on the tile: one smooth arc edge-to-edge, leaving the centre anchor alone
+	if (free && points.length > 2) {
+		const [p0, p1, q1, q0] = [points[0], points[1], points[points.length - 2], points[points.length - 1]]
+		const k = 0.5 * Math.hypot(q0[0] - p0[0], q0[1] - p0[1])
+		const toward = (p, q) => {
+			const l = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1
+			return [p[0] + ((q[0] - p[0]) * k) / l, p[1] + ((q[1] - p[1]) * k) / l]
+		}
+		return "M" + fmt(p0) + " C" + fmt(toward(p0, p1)) + " " + fmt(toward(q0, q1)) + " " + fmt(q0)
+	}
+	let d = "M" + fmt(points[0])
+	for (let i = 1; i < points.length - 1; i++) {
+		const [p, a, b] = [points[i], points[i - 1], points[i + 1]]
+		const la = Math.hypot(a[0] - p[0], a[1] - p[1]),
+			lb = Math.hypot(b[0] - p[0], b[1] - p[1])
+		// A segment shared by two bends gives each half; one ending at a track end can be used whole
+		const cut = Math.min(la * (i === 1 ? 1 : 0.5), lb * (i === points.length - 2 ? 1 : 0.5))
+		if (!cut) continue
+		const at = (q, l) => [p[0] + ((q[0] - p[0]) * cut) / l, p[1] + ((q[1] - p[1]) * cut) / l]
+		d += " L" + fmt(at(a, la)) + " Q" + fmt(p) + " " + fmt(at(b, lb))
+	}
+	return d + " L" + fmt(points[points.length - 1])
+}
+
 // Turn unordered track segments into continuous polylines so rails have no
 // caps/gaps at internal joints. Chains end at junctions and hex edges.
-function trainTrackSegmentsToPath(segments, scale) {
-	if (!segments.length) return ""
+// Returns [{ d, dashes }]: each chain gets a whole number of dash periods (white 100 + gap 100,
+// unscaled) so, drawn with pathLength = 2 * dashes and a half-dash offset, it starts and ends
+// on half a white dash and dashes join up across hex edges.
+function trainTrackSegmentsToPath(segments, scale, free) {
+	if (!segments.length) return []
 	const key = (p) => `${p[0].toFixed(2)},${p[1].toFixed(2)}`
 	const nodeSegments = new Map()
 	for (let i = 0; i < segments.length; i++) {
@@ -43,7 +75,7 @@ function trainTrackSegmentsToPath(segments, scale) {
 		return key(seg[0]) === pointKey ? seg[1] : seg[0]
 	}
 	const used = new Array(segments.length).fill(false)
-	let path = ""
+	const chains = []
 	for (let i = 0; i < segments.length; i++) {
 		if (used[i]) continue
 		used[i] = true
@@ -70,9 +102,11 @@ function trainTrackSegmentsToPath(segments, scale) {
 			points.push(otherPoint(next, endKey))
 		}
 
-		path += (path ? " " : "") + "M" + points.map((p) => `${p[0] * scale} ${p[1] * scale}`).join(" L")
+		let length = 0
+		for (let j = 1; j < points.length; j++) length += Math.hypot(points[j][0] - points[j - 1][0], points[j][1] - points[j - 1][1])
+		chains.push({ d: smoothPolylinePath(points, (p) => `${p[0] * scale} ${p[1] * scale}`, free), dashes: Math.max(1, Math.round(length / 200)) })
 	}
-	return path
+	return chains
 }
 
 export const computedHexes = computed(() => {
@@ -407,8 +441,8 @@ export const computedHexes = computed(() => {
 				return `M${seg[0][0] * 1} ${seg[0][1] * 1} L${seg[1][0] * 1} ${seg[1][1] * 1}`
 			})
 			.join(" ")
-		hex.fullTrainTrackPath = trainTrackSegmentsToPath(hex.trainTrackSegments, store.RATIO)
-		hex.fullTrainTrackPathZP = trainTrackSegmentsToPath(hex.trainTrackSegments, 1)
+		hex.fullTrainTrackPath = trainTrackSegmentsToPath(hex.trainTrackSegments, store.RATIO, hex.hexTerrainID > rf.CITY)
+		hex.fullTrainTrackPathZP = trainTrackSegmentsToPath(hex.trainTrackSegments, 1, hex.hexTerrainID > rf.CITY)
 	}
 
 	return computedHexes

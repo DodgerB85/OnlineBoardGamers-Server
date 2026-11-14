@@ -701,10 +701,6 @@ const computedMaxNeutralBricks = computed(() => {
 								<feFuncA type="linear" slope="4" intercept="-1" />
 							</feComponentTransfer>
 						</filter>
-						<mask id="zoomTrainTrackMask" maskUnits="userSpaceOnUse" x="-1000" y="-1000" width="2000" height="2000">
-							<rect x="-1000" y="-1000" width="2000" height="2000" fill="white" />
-							<path :d="computedZoomData.fullTrainTrackPathZP" stroke="black" stroke-width="84" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-						</mask>
 					</defs>
 					<!-- MAP LAYER 0 - THE BIG HEX, ROTATED AS REQUIRED-->
 					<!-- IN THE ZOOM PANEL, THIS SHOULD BE JUST THE TERRAIN IMAGE -->
@@ -790,8 +786,10 @@ const computedMaxNeutralBricks = computed(() => {
 						<path :d="computedZoomData.fullRoadPathZP" stroke="#1C2526" stroke-width="60" stroke-linejoin="round" stroke-linecap="round" />
 						<path :d="computedZoomData.fullRoadPathZP" stroke="#F5F5F5" stroke-width="7" stroke-dasharray="25 20" fill="none" />
 						<!-- TRAIN TRACKS -->
-						<g v-if="store.gameOptions.useTrains && computedZoomData.fullTrainTrackPathZP">
-							<path :d="computedZoomData.fullTrainTrackPathZP" stroke="#1A237E" stroke-width="124" stroke-linejoin="round" stroke-linecap="butt" fill="none" mask="url(#zoomTrainTrackMask)" />
+						<g v-if="store.gameOptions.useTrains && computedZoomData.fullTrainTrackPathZP?.length">
+							<!-- Black track with white dashed centre, like the printed &cetera maps -->
+							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathZP" :key="'trackBlack' + i" :d="chain.d" stroke="black" stroke-width="124" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathZP" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" stroke-width="64" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 						</g>
 						<g v-if="store.gameOptions.useElectricity && computedZoomData.fullPowerLinePathZP">
 							<path :d="computedZoomData.fullPowerLinePathZP" stroke="#333333" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" fill="none" />

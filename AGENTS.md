@@ -1,8 +1,5 @@
 # AGENTS.md
 
-## Git — NEVER COMMIT
-Do not run `git commit`, `git commit --amend`, `git rebase`, `git reset`, `git cherry-pick`, or any other command that creates or rewrites a commit. Do not stage files with `git add` unless the user explicitly asks. Leave every change in the working tree so the user can review and commit it themselves. This applies even when the user asks you to "commit" a specific file: stop and let the user do it.
-
 ## Taste — the Zen of Python (PEP 20)
 Beautiful is better than ugly. Explicit is better than implicit.
 Simple is better than complex. Complex is better than complicated.

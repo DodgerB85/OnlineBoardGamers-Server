@@ -18,6 +18,7 @@ import * as model from "../../js/RNBmodel.js"
 import * as map from "../../js/RNBmap.js"
 import * as stack from "../../js/RNBstack.js"
 import * as funcs from "../../js/RNBfuncs.js"
+import { computedHexes } from "../../js/RNBcomputes.js"
 import i18n from "../../i18n"
 
 export function clickedHighlight(entry) {
@@ -182,6 +183,11 @@ export function compressMapForDB() {
 	const trainTracks = map.compressTrainTracksForMap()
 	if (trainTracks.length > 0) {
 		additionalData.TN = trainTracks
+		// The editor's drawn track geometry, so map previews can draw it 1:1 without the routing code.
+		// Per hex: [q, r, [x1, y1, x2, y2, ...]] in hex-local pointy units, circumradius = 1.
+		const R = store.VERTICES_POINTY_EXT[0][1] * -1
+		const r2 = (n) => Math.round((n / R) * 100) / 100
+		additionalData.TP = computedHexes.value.filter((h) => h.trainTrackSegments.length).map((h) => [h.coord[0], h.coord[1], h.trainTrackSegments.flat(2).map(r2)])
 	}
 
 	res.push(additionalData)

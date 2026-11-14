@@ -2846,7 +2846,7 @@ export const ALL_HEX_DATA = UNIFORM_HEX_DATA.concat([
 		],
 		sideRiverVertexIds: [-1, 0, 6, -1, 7, 13],
 
-		nodeBucketIds: [0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 2, 2, 2],
+		nodeBucketIds: [0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 2, 2, 2, 1],
 		nodeVertexDefinitions: [
 			[5, 1 - RSA, 0.2],
 			[0, 0.5, 0.2],
@@ -2857,10 +2857,11 @@ export const ALL_HEX_DATA = UNIFORM_HEX_DATA.concat([
 			[3, 0.5, 0.3],
 			[1, 1 - RSA, 0.2],
 			[2, 0.4, 0.6],
-			[3, RSA, 0.2],
+			[2, 1 - RSA, 0.2], // mirrors 0
 			[4, 1 - RSA, 0.1],
 			[5, RSA, 0.1],
 			[5, 0.2, 0.6],
+			[2, RSA, 0.1], // mirrors 11
 		].map(coord.relative),
 		nodeEdges: [
 			[0, 3],
@@ -2870,16 +2871,17 @@ export const ALL_HEX_DATA = UNIFORM_HEX_DATA.concat([
 			[4, 6],
 			[5, 6],
 			[7, 8],
-			[8, 9],
+			[6, 9],
 			[10, 12],
 			[11, 12],
+			[8, 13],
 		],
 		cornerBucketIds: [0, 0, 1, 0, 0, 2],
 		sideNodeIds: [1, -1, -1, 4, -1, -1],
 		cornerNodeIds: [
 			[-1, -1],
 			[2, 7],
-			[7, 9],
+			[13, 9],
 			[-1, -1],
 			[5, 10],
 			[11, 0],
