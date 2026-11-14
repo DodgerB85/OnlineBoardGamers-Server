@@ -2215,7 +2215,7 @@ export function clickedBuilding(buildingID, forcedInputGoods = []) {
 	if (building.type === rf.BLDG_ATELIER) {
 		const feasibleRecipes = atelier.findFeasibleRecipeIndices(transporterID)
 		if (feasibleRecipes.length === 0) {
-			rf.doAdminAlrt("Atelier: no feasible recipe (all recipe inputs must be on the transporter)")
+			rf.doAdminAlrt("Atelier: no feasible recipe")
 			return
 		}
 		if (feasibleRecipes.length === 1) {
