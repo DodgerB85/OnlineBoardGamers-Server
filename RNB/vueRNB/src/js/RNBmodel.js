@@ -1373,9 +1373,9 @@ export function hexNodeBucketIdsCurrent(hexId) {
 }
 
 export function getCorrectTurnForPhasePreseet(actualCurrentTurn, actualCurrentPhase, furturePhase) {
-	if (actualCurrentPhase > 15) rf.doAdminAlrt("Actual current phase is greater than 15")
+	if (actualCurrentPhase > 15 && actualCurrentPhase !== rf.PHASE_PRODUCTION_SETUP_TO) rf.doAdminAlrt("Actual current phase is greater than 15")
 	// If the future phase is GREATER than the current phase, it must be in the same turn
-	if (furturePhase > actualCurrentPhase) {
+	if (rf.phaseOrder(furturePhase) > rf.phaseOrder(actualCurrentPhase)) {
 		return actualCurrentTurn
 	}
 	// If the FUTURE phase is the SAME or LOWER than the currentPhase, it must be NEXT turn

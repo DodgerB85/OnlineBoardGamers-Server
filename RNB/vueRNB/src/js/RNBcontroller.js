@@ -117,6 +117,7 @@ export function isMainPhaseAndPseudoSimul() {
 	const personal = usePersonalStore()
 	if (personal.trainingGame) return false
 	if (personal.soloGame) return false
+	if (store.gameflow.phase === rf.PHASE_PRODUCTION_SETUP_TO) return true
 	if (rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase)) return true
 	if (rf.PHASE_MOVEMENTS.includes(store.gameflow.phase)) return true
 	if (rf.PHASE_BUILDINGS.includes(store.gameflow.phase)) return true
@@ -166,10 +167,13 @@ export function startPlayerTurn(loadedPreMove = false) {
 	store.context.productionSetupPending = false
 	if (store.gameflow.phase === rf.PHASE_CHOOSE_HOME_TILE) {
 		highlight.higlightTilesForStartTile()
+	} else if (store.gameflow.phase === rf.PHASE_PRODUCTION_SETUP_TO) {
+		// Choices are made on the map (RNBproductionSetup.js)
+		store.context.productionSetupPending = true
+		store.context.action = rf.ACT_NONE
+		highlight.updateAllHighlightsForTransporterMode()
 	} else if (rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase)) {
-		store.context.productionSetupPending = productionSetup.isSetupPending()
-		if (store.context.productionSetupPending) store.context.action = rf.ACT_NONE
-		else store.context.action = rf.ACT_TM_SELECT_TRANSPORTER
+		store.context.action = rf.ACT_TM_SELECT_TRANSPORTER
 		highlight.updateAllHighlightsForTransporterMode()
 	} else if (rf.PHASE_MOVEMENTS.includes(store.gameflow.phase)) {
 		store.context.researchHexIDpossibilities.splice(0)
@@ -216,11 +220,10 @@ export function startPlayerMainPhasePreTurn() {
 	}
 
 	context.resetContextAndHighlights()
-	store.context.productionSetupPending = false
 	if (rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase)) {
-		store.context.productionSetupPending = productionSetup.isSetupPending()
+		// Set by IO.simulateProductionStart when primaries wait for the setup choices
 		if (store.context.productionSetupPending) {
-			// &c: announce managers / power plant fuel before any production action
+			// &c: announce managers / power plant fuel (on the map) before any production action
 			store.context.action = rf.ACT_NONE
 			highlight.updateAllHighlightsForTransporterMode()
 		} else {
@@ -253,6 +256,9 @@ export function endCurrentPhase(endingConflictDecisionWithConflict = false) {
 	if (store.gameflow.phase === rf.PHASE_CHOOSE_HOME_TILE) {
 		store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
 		store.gameflow.phase = rf.PHASE_MOVEMENT_TO
+	} else if (store.gameflow.phase === rf.PHASE_PRODUCTION_SETUP_TO) {
+		store.gameflow.phase = rf.PHASE_PRODUCTION_TO
+		store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
 	} else if (rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase)) {
 		store.context.historyObj.splice(0)
 		store.context.historyObj.push([])
@@ -331,11 +337,11 @@ export function endCurrentPhase(endingConflictDecisionWithConflict = false) {
 		model.addHistory(rf.HIST_NEW_TURN, -1, 0, [store.gameflow.turn])
 
 		// Solo mode no conflict
-		if (personal.soloGame) store.gameflow.phase = rf.PHASE_PRODUCTION_TO
+		if (personal.soloGame) store.gameflow.phase = rf.PHASE_PRODUCTION_SETUP_TO
 		// training game conflict check
 		else if (personal.trainingGame) {
 			if (store.trainingGameSkipConflictPhase || personal.soloGame) {
-				store.gameflow.phase = rf.PHASE_PRODUCTION_TO
+				store.gameflow.phase = rf.PHASE_PRODUCTION_SETUP_TO
 				store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
 			} else {
 				store.gameflow.phase = rf.PHASE_CONFLICT_PRODUCTION_PRAYING
@@ -382,6 +388,15 @@ export function performAllPreProductionExceptMines() {
 export function startPhase() {
 	const store = useModelStore()
 	let phase = store.gameflow.phase
+	if (phase === rf.PHASE_PRODUCTION_SETUP_TO) {
+		productionSetup.pruneProductionDecisions()
+		// Only players with a manager / power plant choice take part; skip the phase if there are none
+		store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
+		productionSetup.dropPlayersWithoutChoices()
+		if (store.gameflow.turnOrder.length > 0) return
+		store.gameflow.phase = phase = rf.PHASE_PRODUCTION_TO
+		store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
+	}
 	if (rf.PHASE_PRODUCTIONS.includes(phase)) {
 		productionSetup.pruneProductionDecisions()
 		// Reset remaining production capacity here, BEFORE pre-production runs,
@@ -503,6 +518,7 @@ export async function endPlayerTurn(overridePlayerName = null, overridePlayerInd
 	// If solo or practice, work in strict turn order.
 	else if (personal.trainingGame || personal.soloGame) {
 		store.gameflow.turnOrder.shift()
+		productionSetup.dropPlayersWithoutChoices()
 		// If in conflict phase, AND there is no turn order, AND there is no NEW turn order
 		// Then move from praying/cashing to selecting TO
 		if (rf.ALL_PHASE_CONFLICTS.includes(store.gameflow.phase) && store.gameflow.turnOrder.length === 1) {

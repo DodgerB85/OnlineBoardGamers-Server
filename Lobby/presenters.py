@@ -1588,6 +1588,11 @@ class BUSpresenter(GamePresenter):
             self._sendStartGameNotification(request, playerListToNotify)
 
 
+def rnbPhaseOrder(phase):
+    # Production setup is numbered 17 but runs between the production turn-order conflict (2) and production (3)
+    return rfRNB.PHASE_CONFLICT_PRODUCTION_TURN_ORDER + 0.5 if phase == rfRNB.PHASE_PRODUCTION_SETUP_TO else phase
+
+
 class RNBpresenter(GamePresenter):
     def quickIsMyMove(self, loggedInPlayerUsername=None):
         # Return False if no username is provided
@@ -1787,7 +1792,10 @@ class RNBpresenter(GamePresenter):
 
         # Filter the list: Keep entries that are BEFORE the specified turn/phase
         # This effectively "deletes" any entry that is >= the target turn/phase
-        updated_move_data = [entry for entry in gp_move_data if entry["turn"] < turn or (entry["turn"] == turn and entry["phase"] < phase)]
+        # Cancelling production also cancels its production setup choices
+        if phase == rfRNB.PHASE_PRODUCTION_TO:
+            phase = rfRNB.PHASE_PRODUCTION_SETUP_TO
+        updated_move_data = [entry for entry in gp_move_data if entry["turn"] < turn or (entry["turn"] == turn and rnbPhaseOrder(entry["phase"]) < rnbPhaseOrder(phase))]
 
         # Only save to the database if changes were actually made
         if len(updated_move_data) != len(gp_move_data):

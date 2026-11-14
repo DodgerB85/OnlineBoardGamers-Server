@@ -12,7 +12,6 @@ import * as controller from "../js/RNBcontroller"
 import * as stack from "../js/RNBstack"
 import * as model from "../js/RNBmodel"
 import * as produce from "../js/RNBproduce"
-import * as wonder from "../js/RNBwonder"
 
 import { useModelStore } from "../stores/RNBstore.js"
 const store = useModelStore()
@@ -59,6 +58,14 @@ const setDisplayAreas = computed(() => {
 			loadedStackMove: false,
 			prePhasePanel: false,
 			prePhaseConflictPanel: true,
+		}
+	}
+	// Production setup: only offer cancelling a loaded preset (production cannot be preset from here)
+	if (store.gameflow.phase === rf.PHASE_PRODUCTION_SETUP_TO) {
+		return {
+			loadedStackMove: store.gameflow.turnOrder.includes(personal.pov) && store.stackControl.loadedPreMove,
+			prePhasePanel: false,
+			prePhaseConflictPanel: false,
 		}
 	}
 	// If it is a main phase, and you are not in turn order, then JUST offer pre phases
@@ -243,14 +250,7 @@ function presetMainPhase(futureUnboundedMainPhaseNum, event = null) {
 	let moveFound = true
 	while (moveFound && processingPhase !== futureMainPhaseNum) {
 		if (rf.PHASE_PRODUCTIONS.includes(processingPhase)) {
-			// At end of wonder phase, add a neutral brick
-			wonder.addBrickToWonder_core(8, [])
-			store.gameflow.turn++
-			//let prevKnownLength = store.ALL_RESOURCES.length
-			produce.doMineProduction(false, [], true)
-			model.resetBuildingsAfterProduction()
-			controller.performAllPreProductionExceptMines()
-			store.context.researchHexIDpossibilities = produce.findAllResearchHexIDpossibilities(personal.pov)
+			IO.simulateProductionStart()
 		}
 
 		moveFound = false
@@ -278,13 +278,7 @@ function presetMainPhase(futureUnboundedMainPhaseNum, event = null) {
 
 	// If at the START of prod pre phase, do pre prod now
 	if (rf.PHASE_PRODUCTIONS.includes(futureMainPhaseNum)) {
-		// At end of wonder phase, add a neutral brick
-		wonder.addBrickToWonder_core(8, [])
-		store.gameflow.turn++
-		produce.doMineProduction(false, [], true)
-		model.resetBuildingsAfterProduction()
-		controller.performAllPreProductionExceptMines()
-		store.context.researchHexIDpossibilities = produce.findAllResearchHexIDpossibilities(personal.pov)
+		IO.simulateProductionStart(true)
 	}
 	controller.startPlayerMainPhasePreTurn()
 }
@@ -312,12 +306,7 @@ function previewPresetPhase(futureUnboundedMainPhaseNum, event = null) {
 	let moveFound = true
 	while (moveFound && processingPhase !== futureMainPhaseNum) {
 		if (rf.PHASE_PRODUCTIONS.includes(processingPhase)) {
-			wonder.addBrickToWonder_core(8, [])
-			store.gameflow.turn++
-			produce.doMineProduction(false, [], true)
-			model.resetBuildingsAfterProduction()
-			controller.performAllPreProductionExceptMines()
-			store.context.researchHexIDpossibilities = produce.findAllResearchHexIDpossibilities(personal.pov)
+			IO.simulateProductionStart()
 		}
 
 		moveFound = false
@@ -341,12 +330,7 @@ function previewPresetPhase(futureUnboundedMainPhaseNum, event = null) {
 	}
 
 	if (rf.PHASE_PRODUCTIONS.includes(futureMainPhaseNum)) {
-		wonder.addBrickToWonder_core(8, [])
-		store.gameflow.turn++
-		produce.doMineProduction(false, [], true)
-		model.resetBuildingsAfterProduction()
-		controller.performAllPreProductionExceptMines()
-		store.context.researchHexIDpossibilities = produce.findAllResearchHexIDpossibilities(personal.pov)
+		IO.simulateProductionStart()
 	}
 	let turnRequired = store.gameflow.turn
 	const prePhaseData = personal.allMyMoveData.find((entry) => entry.phase === futureMainPhaseNum && entry.turn === turnRequired)

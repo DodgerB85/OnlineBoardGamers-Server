@@ -6,6 +6,7 @@ import * as map from "../js/RNBmap"
 //import * as vec from "../js/RNBvector"
 //import * as util from "../js/RNButil"
 import * as model from "../js/RNBmodel"
+import * as loc from "../js/RNBlocation"
 //import * as loc from "../js/RNBlocation"
 //import * as controller from "../js/RNBcontroller"
 
@@ -205,6 +206,14 @@ const getComputedTransporterResources = computed(() => {
 	return model.resourcesOnTransport(props.transporterObjProp.id)
 })
 
+// MANAGEMENT: a carried manager switched off for this production
+const isManagerSwitchedOff = computed(() => {
+	const t = props.transporterObjProp
+	if (store.gameflow.phase !== rf.PHASE_PRODUCTION_SETUP_TO && !rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase)) return false
+	if (!loc.isAnyHexLocation(t.location)) return false
+	return model.getManagerActivation(t.ownerIndex, t.location[1]) === false
+})
+
 // Computed property for transporter resOnTransporters
 const getComputedTransporterFollowerResources = computed(() => {
 	return model.resourcesFollowingTransporter(props.transporterObjProp.id)
@@ -296,6 +305,11 @@ updateToFinalPosition("RAW")
 					:width="resOnTransporterWidth"
 					:height="resOnTransporterHeight"
 					:fill="`url(#pattern_${computedResObj.gfx})`" />
+				<!-- Manager switched off: red cross -->
+				<g v-if="computedResObj.type === rf.RES_MANAGER && isManagerSwitchedOff" stroke="red" :stroke-width="12 * store.RATIO" stroke-linecap="round" style="pointer-events: none">
+					<line :x1="0" :y1="0" :x2="resOnTransporterWidth" :y2="resOnTransporterHeight" />
+					<line :x1="resOnTransporterWidth" :y1="0" :x2="0" :y2="resOnTransporterHeight" />
+				</g>
 				<!-- The Triangle Indicator (Top-Left) -->
 				<polygon v-if="computedResObj.movedTransporterID >= 0" :points="view.getCornerTrianglePoints([resOnTransporterWidth / 2, resOnTransporterHeight / 2], resOnTransporterWidth, resOnTransporterHeight, 0, 0.75)" fill="red" stroke="#000" :stroke-width="10 * store.RATIO" />
 				<polygon v-if="computedResObj.movedTransporterID >= 0" :points="view.getCornerTrianglePoints([resOnTransporterWidth / 2, resOnTransporterHeight / 2], resOnTransporterWidth, resOnTransporterHeight, 1, 0.75)" fill="red" stroke="#000" :stroke-width="10 * store.RATIO" />

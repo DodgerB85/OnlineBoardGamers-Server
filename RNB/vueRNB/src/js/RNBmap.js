@@ -42,6 +42,7 @@ import * as stack from "./RNBstack"
 import * as produce from "./RNBproduce"
 import * as atelier from "./RNBatelier"
 import * as train from "./RNBtrain"
+import * as productionSetup from "./RNBproductionSetup.js"
 import i18n from "../i18n"
 
 import { useModelStore } from "../stores/RNBstore.js"
@@ -2144,7 +2145,10 @@ export function clickedBuilding(buildingID, forcedInputGoods = []) {
 	// Exit if building is not highlighted
 	if (!store.context.buildingIDsToHighlight.includes(buildingID) && forcedInputGoods.length === 0) return
 	if (store.context.action === rf.ACT_CONFIRM_END_TURN) return
-	if (rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase) && store.context.productionSetupPending) return
+	if (productionSetup.isSetupMode()) {
+		productionSetup.clickedSetupBuilding(buildingID)
+		return
+	}
 
 	// Handle bomb pseudo-building
 	if (store.context.eligibleBuildingsToBomb.includes(buildingID)) {
@@ -2468,6 +2472,10 @@ export function getPossibleDropBucketsForResourceOnTransporter(resID) {
 export function clickedResOnTransporter(transporterID, resourceID) {
 	const store = useModelStore()
 	if (store.context.action === rf.ACT_CONFIRM_END_TURN) return
+	if (productionSetup.isSetupMode()) {
+		productionSetup.clickedSetupResource(transporterID, resourceID)
+		return
+	}
 
 	// Trains: a good carried aboard may pay too
 	if (store.context.action === rf.ACT_TM_SELECT_TRAIN_FARE) {
@@ -2643,7 +2651,11 @@ export function clickedTransporter(transporterID) {
 
 	if (!personal.canPlay()) return
 	if (store.context.action === rf.ACT_CONFIRM_END_TURN) return
-	if (rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase) && store.context.productionSetupPending) return
+	// Production setup: transporters carrying a choice are clickable
+	if (productionSetup.isSetupMode()) {
+		productionSetup.clickedSetupTransporter(transporterID)
+		return
+	}
 
 	// If you are placing a new water transporter, ignore clicks on other transporters
 	if (store.context.action === rf.ACT_SELECT_WATER_FOR_NEW_TRANSPORTER) return

@@ -504,6 +504,7 @@ export default {
 		conflictProductionDecision: "Décision de conflit : Production",
 		conflictProductionPraying: "Prière de conflit : Production",
 		conflictProductionTurnOrder: "Ordre de jeu du conflit : Production",
+		productionSetup: "Préparation de la production",
 		production: "Production",
 		conflictMovementDecision: "Décision de conflit : Déplacement",
 		conflictMovementPraying: "Prière de conflit : Déplacement",

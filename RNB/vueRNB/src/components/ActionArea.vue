@@ -61,7 +61,6 @@ function copyBgStatsLink() {
 import FailedStackEntry from "./Utils/FailedStackEntry.vue"
 import ActionAreaPrePhase from "./ActionAreaPrePhase.vue"
 import ConflictDecisionPanel from "./ConflictDecisionPanel.vue"
-import ProductionSetupPanel from "./ProductionSetupPanel.vue"
 
 function chosenStartTileIsPolder() {
 	const homeLoc = model.getPlayersHomeMarkerLocation(controller.currentPlayerIndex())
@@ -963,12 +962,21 @@ const getGameOverReason = computed(() => {
 				</template>
 			</div>
 
-			<!-- PRODUCTIONS -->
-			<div v-if="rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase) && productionSetup.isSetupPending()">
-				<ProductionSetupPanel />
+			<!-- PRODUCTION SETUP: the setup phase, or a production preset before primaries produce. Choices are made on the map -->
+			<div v-if="productionSetup.isSetupMode() && store.context.action !== rf.ACT_CONFIRM_END_TURN && store.context.action !== rf.ACT_CONFIRM_RESIGN">
+				{{ $t("productionSetup.hint") }}
+				<br />
+				{{ $t("productionSetup.summary", productionSetup.setupSummary()) }}
+				<br />
+				<br />
 				<button class="actionsLineButton" @click="IO.resetGameStateToLoadedPreMove()" v-if="rf.ALL_PRE_PHASE_MAIN_PHASES.includes(store.gameflow.phase)">{{ $t("common.cancel") }}</button>
 				<button @click="resetWholeTurn" class="actionsLineButton">{{ $t("action.resetWholeTurn") }}</button>
+				<button @click="context.undoLastAction()" class="actionsLineButton" :disabled="store.undoPoints.length <= 1">{{ $t("action.undoLastAction") }}</button>
+				<button v-if="store.gameflow.phase === rf.PRE_PHASE_PRODUCTION" @click="productionSetup.finishPresetSetup()" class="actionsLineButton">{{ $t("productionSetup.done") }}</button>
+				<button v-else-if="personal.trainingGame || personal.soloGame" @click="finishActionsAndEndTurn($event)" class="actionsLineButton">{{ $t("action.finishActionsEndTurn") }}</button>
+				<button v-else @click="finishActions(false, $event)" class="actionsLineButton">{{ $t("action.finishActions") }}</button>
 			</div>
+			<!-- PRODUCTIONS -->
 			<div v-else-if="rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase) && store.context.action !== rf.ACT_CONFIRM_END_TURN && store.context.action !== rf.ACT_CONFIRM_RESIGN">
 				<template v-if="store.context.action === rf.ACT_CHOOSE_BUILDING_TO_UPGRADE">
 					{{ $t("action.productionSelectUpgrade") }}

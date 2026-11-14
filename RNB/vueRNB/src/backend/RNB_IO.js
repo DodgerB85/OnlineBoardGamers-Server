@@ -10,6 +10,7 @@ import * as wonder from "../js/RNBwonder.js"
 import * as produce from "../js/RNBproduce.js"
 import * as highlight from "../js/RNBhighlight.js"
 import * as view from "../js/RNBview.js"
+import * as productionSetup from "../js/RNBproductionSetup.js"
 import i18n from "../i18n"
 
 const t = (key, named) => i18n.global.t(key, named)
@@ -254,8 +255,8 @@ export async function saveStackMove(saveRewind = true, overrideBKSN = null, over
 	stack.resetStackControlData()
 	let conflictPresetData = ""
 	let mainPhaseSkipsData = []
-	// Only save conflict at the end of a MAIN phase -- IE EVERY TIME, as this only hapens for main phases
-	if (rf.MAIN_PHASES.includes(store.gameflow.phase)) {
+	// Only save conflict at the end of a MAIN phase -- production setup is followed directly by production
+	if (rf.MAIN_PHASES.includes(store.gameflow.phase) && store.gameflow.phase !== rf.PHASE_PRODUCTION_SETUP_TO) {
 		let conflictPresetMoves = []
 		// Add the directly upcoming conflict
 		let conflictPresetMove = {
@@ -299,7 +300,8 @@ export async function saveStackMove(saveRewind = true, overrideBKSN = null, over
 		// Add any preset-conflicts
 		if (rf.PHASE_BUILDINGS.includes(store.gameflow.phase) || rf.PHASE_WONDERS.includes(store.gameflow.phase)) {
 			if (store.conflictPreset.skipProductionPhaseDecision === rf.CONFLICT_SKIP_PRODUCTION_PHASE_SKIP_ALL || store.conflictPreset.skipProductionPhaseDecision === rf.CONFLICT_SKIP_PRODUCTION_PHASE_SKIP_PRODUCTION_ONLY) {
-				// Skip proudction phase
+				// Skip proudction phase, and its setup
+				mainPhaseSkipsData.push([store.gameflow.turn + 1, rf.PHASE_PRODUCTION_SETUP_TO])
 				mainPhaseSkipsData.push([store.gameflow.turn + 1, rf.PHASE_PRODUCTION_TO])
 			}
 		}
@@ -320,6 +322,7 @@ export async function saveStackMove(saveRewind = true, overrideBKSN = null, over
 	while (store.gameflow.turnOrder.length > 0 && store.players[store.gameflow.turnOrder[0]].displayName === rf.BOT_NAME) {
 		store.gameflow.turnOrder.shift()
 	}
+	productionSetup.dropPlayersWithoutChoices()
 
 	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, pendingPlayersArr } = getNextCurrentPlayers()
 
@@ -867,7 +870,8 @@ export async function savePrePhaseMain() {
 	// Add any preset-conflicts
 	if (rf.PHASE_BUILDINGS.includes(store.gameflow.phase) || rf.PHASE_WONDERS.includes(store.gameflow.phase)) {
 		if (store.conflictPreset.skipProductionPhaseDecision === rf.CONFLICT_SKIP_PRODUCTION_PHASE_SKIP_ALL || store.conflictPreset.skipProductionPhaseDecision === rf.CONFLICT_SKIP_PRODUCTION_PHASE_SKIP_PRODUCTION_ONLY) {
-			// Skip proudction phase
+			// Skip proudction phase, and its setup
+			mainPhaseSkipsData.push([store.gameflow.turn + 1, rf.PHASE_PRODUCTION_SETUP_TO])
 			mainPhaseSkipsData.push([store.gameflow.turn + 1, rf.PHASE_PRODUCTION_TO])
 		}
 	}
@@ -891,12 +895,21 @@ export async function savePrePhaseMain() {
 		rf.doAdminAlrt("SEND TO ADMIN: ERROR CODE 1 - IO stack error found")
 	}
 
-	actionStack = store.actionStack.length === 0 ? "SKIP" : funcs.compressData64(store.actionStack)
+	// A production preset's setup choice is saved as its own move for the setup phase
+	let mainStack = store.actionStack
+	let setupActionStack = ""
+	if (store.gameflow.phase === rf.PRE_PHASE_PRODUCTION) {
+		const setupItems = mainStack.filter((a) => a.action === rf.STACK_PRODUCTION_SETUP)
+		mainStack = mainStack.filter((a) => a.action !== rf.STACK_PRODUCTION_SETUP)
+		if (setupItems.length > 0) setupActionStack = funcs.compressData64(setupItems)
+	}
+	actionStack = mainStack.length === 0 ? "SKIP" : funcs.compressData64(mainStack)
 
 	let BKSN = personal.pov >= 0 ? store.players[personal.pov].name : personal.name
 
 	let postData = {
 		action: "savePrePhaseMain",
+		setupActionStack: setupActionStack,
 		latestUpdate: personal.latestUpdate,
 		turn: store.gameflow.turn,
 		phase: store.gameflow.phase,
@@ -1421,7 +1434,7 @@ export async function reloadGameData(updatingFromWSAndCanPlay = false) {
 		if (oldTurn > store.gameflow.turn) {
 			loadingFromRewind = true
 		} else if (oldTurn === store.gameflow.turn) {
-			if (oldPhase > store.gameflow.phase) {
+			if (rf.phaseOrder(oldPhase) > rf.phaseOrder(store.gameflow.phase)) {
 				loadingFromRewind = true
 			} else if (oldPhase === store.gameflow.phase && store.gameflow.turnOrder.length > oldTurnOrder.length) {
 				loadingFromRewind = true
@@ -1805,6 +1818,7 @@ export function processStacks(allStackData) {
 			while (store.gameflow.turnOrder.length > 0 && store.players[store.gameflow.turnOrder[0]].displayName === rf.BOT_NAME) {
 				store.gameflow.turnOrder.shift()
 			}
+			productionSetup.dropPlayersWithoutChoices()
 
 			let errorFree = processMainMoveStacks(allStackData)
 			// If there WAS an error, exit, save, send notification
@@ -1993,6 +2007,7 @@ export function processMainMoveStacks(allStackData) {
 			allStackData.splice(nextDataIndex, 1)
 			store.allStackData = allStackData
 			store.gameflow.turnOrder.shift()
+			productionSetup.dropPlayersWithoutChoices()
 			if (store.gameflow.turnOrder.length > 0) nextDataIndex = allStackData.findIndex((data) => data.turn === store.gameflow.turn && data.phase === store.gameflow.phase && data.username === store.players[store.gameflow.turnOrder[0]].name)
 			else nextDataIndex = -1
 			continue
@@ -2023,6 +2038,7 @@ export function processMainMoveStacks(allStackData) {
 			allStackData.splice(nextDataIndex, 1)
 			store.allStackData = allStackData
 			store.gameflow.turnOrder.shift()
+			productionSetup.dropPlayersWithoutChoices()
 			if (store.gameflow.turnOrder.length > 0) nextDataIndex = allStackData.findIndex((data) => data.turn === store.gameflow.turn && data.phase === store.gameflow.phase && data.username === store.players[store.gameflow.turnOrder[0]].name)
 			else nextDataIndex = -1
 		}
@@ -2086,7 +2102,7 @@ export function processConflictMoveStacks(allStackData) {
 		// If every entry is 1, then there is no conflict
 		if (conflictResult.every((c) => c === 1)) {
 			// Go to the next phase - DECISION > PRAYING
-			if (rf.PHASE_CONFLICT_PRODUCTIONS.includes(store.gameflow.phase)) store.gameflow.phase = rf.PHASE_PRODUCTION_TO
+			if (rf.PHASE_CONFLICT_PRODUCTIONS.includes(store.gameflow.phase)) store.gameflow.phase = rf.PHASE_PRODUCTION_SETUP_TO
 			else if (rf.PHASE_CONFLICT_MOVEMENTS.includes(store.gameflow.phase)) store.gameflow.phase = rf.PHASE_MOVEMENT_TO
 			else if (rf.PHASE_CONFLICT_BUILDINGS.includes(store.gameflow.phase)) store.gameflow.phase = rf.PHASE_BUILDING_TO
 			else if (rf.PHASE_CONFLICT_WONDERS.includes(store.gameflow.phase)) store.gameflow.phase = rf.PHASE_WONDER_TO
@@ -2297,6 +2313,29 @@ export function saveActualGameState() {
 	store.stackControl.previewingPhase = futureUnboundedMainPhaseNum
 }
 */
+// Pre-phase previews: run the start of the next turn's production, including this player's preset setup choice.
+// deferForSetup: when presetting production with a setup choice still to make, stop before primaries produce
+// (as in the real setup phase); productionSetup.finishPresetSetup runs them once the choices are made.
+export function simulateProductionStart(deferForSetup = false) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	// At end of wonder phase, add a neutral brick
+	wonder.addBrickToWonder_core(8, [])
+	store.gameflow.turn++
+	produce.doMineProduction(false, [], true)
+	model.resetBuildingsAfterProduction()
+	const turnRequired = store.gameflow.turn
+	const setupData = personal.allMyMoveData.find((entry) => entry.phase === rf.PHASE_PRODUCTION_SETUP_TO && entry.turn === turnRequired)
+	store.context.productionSetupPending = false
+	if (setupData) stack.attemptToLoadWholeCurrentMoveStack(setupData, rf.PHASE_PRODUCTION_SETUP_TO)
+	else if (deferForSetup && (store.gameOptions.useManagement || store.gameOptions.useElectricity) && productionSetup.hasChoices(personal.pov)) {
+		store.context.productionSetupPending = true
+		return
+	}
+	controller.performAllPreProductionExceptMines()
+	store.context.researchHexIDpossibilities = produce.findAllResearchHexIDpossibilities(personal.pov)
+}
+
 export function backFromPreview() {
 	const store = useModelStore()
 	resetGameStateToLoadedPreMove()
@@ -2331,12 +2370,7 @@ export async function cancelPreviewAndRedo() {
 	let moveFound = true
 	while (moveFound && processingPhase !== futureMainPhaseNum) {
 		if (rf.PHASE_PRODUCTIONS.includes(processingPhase)) {
-			wonder.addBrickToWonder_core(8, [])
-			store.gameflow.turn++
-			produce.doMineProduction(false, [], true)
-			model.resetBuildingsAfterProduction()
-			controller.performAllPreProductionExceptMines()
-			store.context.researchHexIDpossibilities = produce.findAllResearchHexIDpossibilities(personal.pov)
+			simulateProductionStart()
 		}
 
 		moveFound = false
@@ -2360,12 +2394,7 @@ export async function cancelPreviewAndRedo() {
 	}
 
 	if (rf.PHASE_PRODUCTIONS.includes(futureMainPhaseNum)) {
-		wonder.addBrickToWonder_core(8, [])
-		store.gameflow.turn++
-		produce.doMineProduction(false, [], true)
-		model.resetBuildingsAfterProduction()
-		controller.performAllPreProductionExceptMines()
-		store.context.researchHexIDpossibilities = produce.findAllResearchHexIDpossibilities(personal.pov)
+		simulateProductionStart(true)
 	}
 	// Save remainingMoves so the intermediate phase processing above is not undone
 	// This may fix allowing too many moves?

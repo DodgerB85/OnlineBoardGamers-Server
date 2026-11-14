@@ -504,6 +504,7 @@ export default {
 		conflictProductionDecision: "冲突决定：生产",
 		conflictProductionPraying: "冲突祈祷：生产",
 		conflictProductionTurnOrder: "冲突行动顺序：生产",
+		productionSetup: "生产准备",
 		production: "生产",
 		conflictMovementDecision: "冲突决定：移动",
 		conflictMovementPraying: "冲突祈祷：移动",

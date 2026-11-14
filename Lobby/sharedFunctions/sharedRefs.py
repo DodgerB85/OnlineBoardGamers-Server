@@ -511,6 +511,8 @@ def SR_currentTurnString(gameCode, turn, phase):
             currentTurnString += gettext("Conflict Praying: Production")
         elif phase == rfRNB.PHASE_CONFLICT_PRODUCTION_TURN_ORDER:
             currentTurnString += gettext("Conflict Turn Order: Production")
+        elif phase == rfRNB.PHASE_PRODUCTION_SETUP_TO:
+            currentTurnString += gettext("Production Setup")
         elif phase == rfRNB.PHASE_PRODUCTION_TO:
             currentTurnString += gettext("Production")
         elif phase == rfRNB.PHASE_CONFLICT_MOVEMENT_DECISION:
