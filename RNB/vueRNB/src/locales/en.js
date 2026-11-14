@@ -329,6 +329,7 @@ export default {
 		buildingOptions: "Building Options",
 	},
 	playerTable: {
+		shows: "Shows:",
 		player: "Player",
 		wealthPoints: "Wealth Points",
 		transports: "Transports",
@@ -487,6 +488,7 @@ export default {
 		addsBricks: "Adds {count} brick:",
 		addsBricksPlural: "Adds {count} bricks:",
 		stagedExhibition: "{name} staged an exhibition of {beauty} works at {target}'s tile",
+		showAtTile: "{name}: show with {beauty} artworks",
 		emptyMine: "is empty",
 		poweredDoubled: "Powered by electricity - doubled output",
 		total: "Total: {score}",

@@ -186,6 +186,34 @@ export function checkExhibitionOnMove(transporterObj) {
 	return true
 }
 
+// Every show staged at targetPlayerIndex's starting tile, as [stagerPlayerIndex, beauty].
+export function showsAtTarget(targetPlayerIndex) {
+	const store = useModelStore()
+	return store.players.map((p, i) => [i, p.artShownAt?.[targetPlayerIndex] || 0]).filter(([, beauty]) => beauty > 0)
+}
+
+// Live play: let the arrival animation finish before the caravan vanishes. The show
+// itself is unchanged; flushPendingExhibition() runs it early if the turn ends first.
+let pendingShow = null
+export function scheduleExhibitionAfterAnimation(transporterObj, onShown) {
+	flushPendingExhibition()
+	const ms = (transporterObj.animationWaypoints || []).reduce((sum, w) => sum + (w[2] || 0), 0)
+	const transporterID = transporterObj.id
+	const run = () => {
+		pendingShow = null
+		// Look the caravan up again: an undo in the meantime replaces the objects
+		const fresh = model.getTransporterByID(transporterID)
+		if (fresh && checkExhibitionOnMove(fresh)) onShown()
+	}
+	pendingShow = { run, timer: setTimeout(run, ms + 100) }
+}
+
+export function flushPendingExhibition() {
+	if (!pendingShow) return
+	clearTimeout(pendingShow.timer)
+	pendingShow.run()
+}
+
 // Re-applies a recorded STACK_EXHIBITION action (replay / rewind).
 export function performExhibitionStackAction(stackAction) {
 	// [STACK_EXHIBITION, caravanTransID, stagerIdx, targetIdx, beauty]

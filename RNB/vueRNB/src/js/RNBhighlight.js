@@ -567,6 +567,8 @@ export function highlightEligibleTransportersForTransporterPickup(transporterID)
 
 	// Planes & Aeroports: a plane may never carry another transporter
 	if (transporterObj.type === rf.PLANE) return
+	// Art: exhibition caravans cannot carry anything except artwork
+	if (transporterObj.type === rf.EXHIBITION_TRANSPORTER) return
 	if (model.transporterCarriesAnything(transporterID)) return
 
 	const otherEmptyTransporters = model.getTransportersByPlayerIndex(controller.currentPlayerIndex()).filter((t) => t.id !== transporterObj.id && !model.transporterCarriesAnything(t.id) && !model.anythingFollowingTransporter(t.id))

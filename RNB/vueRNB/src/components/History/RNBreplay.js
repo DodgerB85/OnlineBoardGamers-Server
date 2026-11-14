@@ -710,7 +710,11 @@ function replayStackTakeTrain(stackAction) {
 	const toLocationBucket = stack.decompressLocation(stackAction[3])
 	const fareRes = model.getResByID(stackAction[5])
 	// shortcut: no pathfind needed - the whole network is reachable in one ride
+	const transporterObj = model.getTransporterByID(movingTransporterID)
+	const fromHexID = stack.decompressLocation(stackAction[2])[1]
+	const startXY = [...transporterObj.rawTransporterXY]
 	train.performTrainRide_core(movingTransporterID, toLocationBucket, fareRes)
+	train.animateTrainRide(transporterObj, fromHexID, toLocationBucket[1], startXY)
 }
 
 function replayStackMoveWater(stackAction, playerIndex) {

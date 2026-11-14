@@ -318,6 +318,7 @@ export default {
 		buildingOptions: "Opzioni edificio",
 	},
 	playerTable: {
+		shows: "Mostre:",
 		player: "Giocatore",
 		wealthPoints: "Punti ricchezza",
 		transports: "Trasporti",
@@ -475,6 +476,7 @@ export default {
 		addsBricks: "Aggiunge {count} mattone:",
 		addsBricksPlural: "Aggiunge {count} mattoni:",
 		stagedExhibition: "{name} ha organizzato una mostra di {beauty} opere sulla casella di {target}",
+		showAtTile: "{name}: mostra con {beauty} opere",
 		emptyMine: "è vuota",
 		poweredDoubled: "Alimentato dall'elettricità – produzione raddoppiata",
 		total: "Totale: {score}",
