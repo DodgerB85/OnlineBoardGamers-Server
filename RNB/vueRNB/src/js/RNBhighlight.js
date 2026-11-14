@@ -567,6 +567,8 @@ export function highlightEligibleTransportersForTransporterPickup(transporterID)
 
 	// Planes & Aeroports: a plane may never carry another transporter
 	if (transporterObj.type === rf.PLANE) return
+	// Art: exhibition caravans cannot carry anything except artwork
+	if (transporterObj.type === rf.EXHIBITION_TRANSPORTER) return
 	if (model.transporterCarriesAnything(transporterID)) return
 
 	const otherEmptyTransporters = model.getTransportersByPlayerIndex(controller.currentPlayerIndex()).filter((t) => t.id !== transporterObj.id && !model.transporterCarriesAnything(t.id) && !model.anythingFollowingTransporter(t.id))
@@ -703,7 +705,8 @@ export function getEligibleTransportersForRemoval(playerIndex, isTotalProblem, i
 	// Find the bucket locations of all eligible buildings
 	const factoryBucketLocations = model
 		.getAllInGameBuildings()
-		.filter((building) => rf.ALL_TRANSPORTER_FACTORIES.includes(building.type))
+		// Art: the atelier makes caravans, so it counts as a transporter factory here
+		.filter((building) => rf.ALL_TRANSPORTER_FACTORIES.includes(building.type) || building.type === rf.BLDG_ATELIER)
 		.map((building) => building.location)
 
 	const playerTransporters = model.getAllInGameTransporters().filter((transporter) => {

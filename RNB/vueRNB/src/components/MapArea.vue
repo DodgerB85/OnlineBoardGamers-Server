@@ -552,10 +552,6 @@ function getAtelierRecipeGfx(recipeIdx) {
 							<feMergeNode in="SourceGraphic" />
 						</feMerge>
 					</filter>
-					<mask v-for="hex in hexesForDisplay" :key="'trainTrackMask' + hex.hexID" :id="`mapAreaTrainTrackMask${hex.hexID}`" maskUnits="userSpaceOnUse" x="-20000" y="-20000" width="40000" height="40000">
-						<rect x="-20000" y="-20000" width="40000" height="40000" fill="white" />
-						<path :d="hex.fullTrainTrackPath" stroke="black" :stroke-width="(84 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-					</mask>
 				</defs>
 				<!-- MAKE UP AN INDIVIDUAL HEX HERE WITH ALL ITEMS ON TOP OF IT. IT CAN THEN BE ROATED TO FLAT TOP IF NEEDED BEFORE BEING MOVED TO THE CORRECT LOCATION -->
 				<!-- LAYER 1 -- JUST THE HEX ART AND OUTLINES-->
@@ -609,8 +605,10 @@ function getAtelierRecipeGfx(recipeIdx) {
 							</g>
 						</g>
 						<!-- TRAIN TRACKS - same paths/anchors as roads -->
-						<g v-if="store.gameOptions.useTrains && hex.fullTrainTrackPath">
-							<path class="noClick" :d="hex.fullTrainTrackPath" stroke="#1A237E" :stroke-width="(124 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" :mask="`url(#mapAreaTrainTrackMask${hex.hexID})`" />
+						<g v-if="store.gameOptions.useTrains && hex.fullTrainTrackPath?.length">
+							<!-- Black track with white dashed centre, like the printed &cetera maps -->
+							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackBlack' + i" :d="chain.d" stroke="black" :stroke-width="(124 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" :stroke-width="(64 * store.RATIO).toFixed(0)" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 						</g>
 						<!-- POWER LINES - dotted blocks: red when unpowered, yellow when powered -->
 						<g v-if="store.gameOptions.useElectricity && hex.fullPowerLinePath">

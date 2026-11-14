@@ -41,13 +41,13 @@ export function getAtelierStats() {
 // ATELIER PRODUCTION
 // ============================================================================
 
-// Returns the indices of every recipe whose inputs are fully available on the given
-// transporter (or, for the donkey recipe, where the transporter itself is a donkey).
+// Returns the indices of every recipe whose inputs the given transporter can reach (carried
+// or on its tile, like other secondary producers), or, for the donkey recipe, where the transporter is a donkey.
 export function findFeasibleRecipeIndices(transporterID) {
 	const transporterObj = model.getTransporterByID(transporterID)
 	const stats = getAtelierStats()
 	if (!stats || !stats.recipes) return []
-	const resourcesOnTrans = model.resourcesOnTransport(transporterID).map((r) => r.type)
+	const resourcesOnTrans = loc.getAllResourcesAccessibleToTransporter(transporterID, true).map((r) => r.type)
 	const feasible = []
 	for (let i = 0; i < stats.recipes.length; i++) {
 		const inputs = stats.recipes[i].inputs
@@ -184,6 +184,34 @@ export function checkExhibitionOnMove(transporterObj) {
 		playerIndex: stagerPlayerIndex,
 	})
 	return true
+}
+
+// Every show staged at targetPlayerIndex's starting tile, as [stagerPlayerIndex, beauty].
+export function showsAtTarget(targetPlayerIndex) {
+	const store = useModelStore()
+	return store.players.map((p, i) => [i, p.artShownAt?.[targetPlayerIndex] || 0]).filter(([, beauty]) => beauty > 0)
+}
+
+// Live play: let the arrival animation finish before the caravan vanishes. The show
+// itself is unchanged; flushPendingExhibition() runs it early if the turn ends first.
+let pendingShow = null
+export function scheduleExhibitionAfterAnimation(transporterObj, onShown) {
+	flushPendingExhibition()
+	const ms = (transporterObj.animationWaypoints || []).reduce((sum, w) => sum + (w[2] || 0), 0)
+	const transporterID = transporterObj.id
+	const run = () => {
+		pendingShow = null
+		// Look the caravan up again: an undo in the meantime replaces the objects
+		const fresh = model.getTransporterByID(transporterID)
+		if (fresh && checkExhibitionOnMove(fresh)) onShown()
+	}
+	pendingShow = { run, timer: setTimeout(run, ms + 100) }
+}
+
+export function flushPendingExhibition() {
+	if (!pendingShow) return
+	clearTimeout(pendingShow.timer)
+	pendingShow.run()
 }
 
 // Re-applies a recorded STACK_EXHIBITION action (replay / rewind).

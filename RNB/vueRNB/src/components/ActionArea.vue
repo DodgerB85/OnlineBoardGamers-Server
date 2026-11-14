@@ -9,6 +9,7 @@ import TurnNudge from "./Utils/TurnNudge.vue"
 import * as rf from "../js/RNBreference"
 import * as controller from "../js/RNBcontroller"
 import * as funcs from "../js/RNBfuncs"
+import * as atelier from "../js/RNBatelier"
 import * as model from "../js/RNBmodel"
 import * as map from "../js/RNBmap"
 import * as context from "../js/RNBcontext"
@@ -120,6 +121,8 @@ const startSpotRegionsText = computed(() => {
 })
 
 function finishActions(stopActionChange = false, event = null) {
+	// Art: a caravan show still waiting on its arrival animation must land before the turn ends
+	atelier.flushPendingExhibition()
 	// Save the "Go Back" stats
 	store.goBackResetData = funcs.simpleExportWholeRNBmodel()
 	// If in movement phase, check all geese are dropped

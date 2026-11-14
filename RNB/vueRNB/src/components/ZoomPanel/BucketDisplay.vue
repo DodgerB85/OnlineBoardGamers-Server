@@ -1,5 +1,6 @@
 <script setup>
 import * as rf from "../../js/RNBreference"
+import * as atelier from "../../js/RNBatelier.js"
 import * as view from "../../js/RNBview"
 import * as map from "../../js/RNBmap"
 import * as hd from "../../js/RNBhex"
@@ -270,6 +271,12 @@ function shouldShowUnableToDropGeeseText(transporterID) {
 			<template v-if="type === 'bucket' && homeMarkers.length > 0">
 				<template v-for="marker in homeMarkers" :key="marker.id">
 					<img class="homeMarkerSummaryImg" :src="view.getImage(`home_${personal.getCorrectedColour(store.players[marker.ownerIndex].colour)}`)" />
+					<template v-if="store.gameOptions.useArt">
+						<div v-for="[stagerIndex, beauty] in atelier.showsAtTarget(marker.ownerIndex)" :key="'show' + stagerIndex" class="showBadge" :title="$t('history.showAtTile', { name: store.players[stagerIndex].displayName, beauty })">
+							<img class="showBadgeImg" :src="view.getImage('transporter_' + rf.EXHIBITION_TRANSPORTER + '_' + personal.getCorrectedColour(store.players[stagerIndex].colour))" />
+							<span class="showBadgeNum">{{ beauty }}</span>
+						</div>
+					</template>
 					<br/>
 				</template>
 			</template>
@@ -477,8 +484,37 @@ function shouldShowUnableToDropGeeseText(transporterID) {
 	margin-right: 2px;
 	border: 2px solid black;
 	box-sizing: border-box;
+	vertical-align: middle;
 }
 
+.showBadge {
+	position: relative;
+	display: inline-block;
+	vertical-align: middle;
+	width: 40px;
+	height: 40px;
+	margin: 2px;
+	box-sizing: border-box;
+}
+.showBadgeImg {
+	width: 100%;
+	height: 100%;
+}
+.showBadgeNum {
+	position: absolute;
+	right: -6px;
+	bottom: -6px;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background-color: #a0006e;
+	color: white;
+	font-size: 12px;
+	font-weight: bold;
+	line-height: 18px;
+	text-align: center;
+	border: 1px solid white;
+}
 .resOnHexSummaryDiv {
 	position: relative;
 	display: inline-block;

@@ -477,8 +477,8 @@ function galleryPlayerIconClicked(e) {
 // Weld unordered [[x1,y1],[x2,y2]] segments into continuous polylines so a run of
 // track tiles draws as one line with no gap at shared corners. Port of the editor's
 // trainTrackSegmentsToPath.
-function trackSegmentsToPath(segments) {
-	if (!segments.length) return ""
+function trackSegmentsToPath(segments, free) {
+	if (!segments.length) return []
 	const key = (p) => `${p[0].toFixed(2)},${p[1].toFixed(2)}`
 	const nodeSegments = new Map()
 	for (let i = 0; i < segments.length; i++)
@@ -493,7 +493,7 @@ function trackSegmentsToPath(segments) {
 	}
 	const used = new Array(segments.length).fill(false)
 	const r = (n) => Math.round(n * 100) / 100
-	let path = ""
+	const chains = []
 	for (let i = 0; i < segments.length; i++) {
 		if (used[i]) continue
 		used[i] = true
@@ -511,9 +511,44 @@ function trackSegmentsToPath(segments) {
 				else points.push(p)
 			}
 		}
-		path += (path ? " " : "") + "M" + points.map((p) => `${r(p[0])} ${r(p[1])}`).join(" L")
+		let length = 0
+		for (let j = 1; j < points.length; j++) length += Math.hypot(points[j][0] - points[j - 1][0], points[j][1] - points[j - 1][1])
+		// Whole dash periods (editor: 200 per 463 hex radius) so dashes join up across hex edges, like RNBcomputes
+		chains.push({ d: smoothPolylinePath(points, (p) => `${r(p[0])} ${r(p[1])}`, free), dashes: Math.max(1, Math.round(length / 43.2)) })
 	}
-	return `<path d="${path}" stroke="#1A237E" stroke-width="34" stroke-linejoin="round" stroke-linecap="round" fill="none"/>`
+	return chains
+}
+
+// Copy of the editor's smoothPolylinePath (RNB/vueRNB/src/js/RNBcomputes.js) - keep both in sync.
+function smoothPolylinePath(points, fmt, free) {
+	// No river or city on the tile: one smooth arc edge-to-edge, leaving the centre anchor alone
+	if (free && points.length > 2) {
+		const [p0, p1, q1, q0] = [points[0], points[1], points[points.length - 2], points[points.length - 1]]
+		const k = 0.5 * Math.hypot(q0[0] - p0[0], q0[1] - p0[1])
+		const toward = (p, q) => {
+			const l = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1
+			return [p[0] + ((q[0] - p[0]) * k) / l, p[1] + ((q[1] - p[1]) * k) / l]
+		}
+		return "M" + fmt(p0) + " C" + fmt(toward(p0, p1)) + " " + fmt(toward(q0, q1)) + " " + fmt(q0)
+	}
+	let d = "M" + fmt(points[0])
+	for (let i = 1; i < points.length - 1; i++) {
+		const [p, a, b] = [points[i], points[i - 1], points[i + 1]]
+		const la = Math.hypot(a[0] - p[0], a[1] - p[1]),
+			lb = Math.hypot(b[0] - p[0], b[1] - p[1])
+		// A segment shared by two bends gives each half; one ending at a track end can be used whole
+		const cut = Math.min(la * (i === 1 ? 1 : 0.5), lb * (i === points.length - 2 ? 1 : 0.5))
+		if (!cut) continue
+		const at = (q, l) => [p[0] + ((q[0] - p[0]) * cut) / l, p[1] + ((q[1] - p[1]) * cut) / l]
+		d += " L" + fmt(at(a, la)) + " Q" + fmt(p) + " " + fmt(at(b, lb))
+	}
+	return d + " L" + fmt(points[points.length - 1])
+}
+
+function railsSVG(chains) {
+	const line = (d, attrs) => `<path d="${d}" ${attrs} stroke-linejoin="round" stroke-linecap="butt" fill="none"/>`
+	// Same as the editor/game (MapEditor.vue): black track with white dashed centre, scaled from editor hex radius 463 to S = 100
+	return chains.map((c) => line(c.d, 'stroke="black" stroke-width="26.8"')).join("") + chains.map((c) => line(c.d, `pathLength="${2 * c.dashes}" stroke="white" stroke-width="13.8" stroke-dasharray="1 1" stroke-dashoffset="0.5"`)).join("")
 }
 
 function buildMapThumbnailSVG(hexData) {
@@ -572,13 +607,9 @@ function buildMapThumbnailSVG(hexData) {
 		const c = centres[id]
 		body += `<image href="/static/RNB/images/hometiles/homered.jpg" x="${c[0] - homeSize / 2}" y="${c[1] - homeSize / 2}" width="${homeSize}" height="${homeSize}"/>`
 	})
-	// Train tracks (TN = [[x1, y1, x2, y2, lane], ...]). Simplified routing: a track between two
-	// plain tiles runs straight centre-to-centre. When either tile is a river (terrains 0-22) the
-	// river sits at the tile centre and exits at the edge midpoints, so the track crosses the
-	// shared edge at the 1/4 point (halfway between the midpoint and a corner); a river tile then
-	// joins each lane's entry/exit points with a direct chord, skirting the river, never the centre.
-	const RIVER_TERRAINS = new Set()
-	for (let id = 0; id <= 22; id++) RIVER_TERRAINS.add(id)
+	// Train tracks. TP = the editor's drawn geometry per hex ([q, r, [x1, y1, x2, y2, ...]], hex-local
+	// pointy units, circumradius 1), drawn 1:1. Maps saved before TP existed only have TN
+	// ([[x1, y1, x2, y2, lane], ...]): draw those centre-to-centre until the map is re-saved in the editor.
 	const centreByCoord = {}
 	const terrByCoord = {}
 	hexes.forEach((e, i) => {
@@ -586,71 +617,29 @@ function buildMapThumbnailSVG(hexData) {
 		terrByCoord[e[0] + "," + e[1]] = e[2]
 	})
 	const segments = []
-	const crossByCoord = {}
-	const seenTracks = {}
-	const tn = setup && Array.isArray(setup.TN) ? setup.TN : []
-	tn.forEach((t) => {
-		if (!Array.isArray(t) || t.length < 4) return
-		const lane = t.length > 4 ? t[4] : 0
-		const key = t[0] + "," + t[1] + "," + t[2] + "," + t[3] + "," + lane
-		if (seenTracks[key]) return
-		seenTracks[key] = true
-		const aK = t[0] + "," + t[1],
-			bK = t[2] + "," + t[3]
-		const aC = centreByCoord[aK],
-			bC = centreByCoord[bK]
-		if (!aC || !bC) return
-		if (!RIVER_TERRAINS.has(terrByCoord[aK]) && !RIVER_TERRAINS.has(terrByCoord[bK])) {
-			segments.push([aC, bC]) // no river on either tile: straight through both centres
-			return
-		}
-		// A river tile is crossed at its entry/exit points, not its centre. Cross the shared edge
-		// a quarter-edge off its midpoint (the river exits there) onto this lane's bank. TN stores
-		// [edgeHexIDs0, edgeHexIDs1, lane]; the editor maps lane 0 to vertex[side] and lane 1 to
-		// vertex[side+1] of the side facing B, so offset off the A->B perpendicular accordingly.
-		const mid = [(aC[0] + bC[0]) / 2, (aC[1] + bC[1]) / 2]
-		const dx = bC[0] - aC[0],
-			dy = bC[1] - aC[1]
-		const len = Math.hypot(dx, dy) || 1
-		const off = (lane === 1 ? 1 : -1) * (S / 4) // edge length == hex side S
-		const X = [mid[0] - (dy / len) * off, mid[1] + (dx / len) * off]
-		// A tile's track continuity runs bank-to-bank: the editor's node chains always join a
-		// bank-0 entry to a bank-1 exit on a different edge. TN's `lane` is edge-relative (it
-		// flips meaning between the two hexes of an edge), so pair on the tile-local bank index
-		// b instead: b = lane on edgeHexIDs0, lane^1 on edgeHexIDs1.
-		;(crossByCoord[aK] ||= []).push({ X, b: lane & 1, nk: bK })
-		;(crossByCoord[bK] ||= []).push({ X, b: lane ^ 1, nk: aK })
-	})
-	// Join each river-adjacent tile's crossings: a plain tile runs them through its centre; a river
-	// tile links a bank-0 crossing to a bank-1 crossing on another edge (a chord), never the centre.
-	Object.keys(crossByCoord).forEach((k) => {
-		const xs = crossByCoord[k]
-		const c = centreByCoord[k]
-		if (!RIVER_TERRAINS.has(terrByCoord[k])) {
-			xs.forEach((o) => segments.push([o.X, c]))
-			return
-		}
-		const ones = xs.filter((o) => o.b === 1)
-		const used = new Set()
-		xs.forEach((z) => {
-			if (z.b !== 0) return
-			let best = -1
-			let bestD = Infinity
-			ones.forEach((o, i) => {
-				if (used.has(i) || o.nk === z.nk) return // pair only across different edges
-				const d = (o.X[0] - z.X[0]) ** 2 + (o.X[1] - z.X[1]) ** 2
-				if (d < bestD) {
-					bestD = d
-					best = i
-				}
-			})
-			if (best >= 0) {
-				used.add(best)
-				segments.push([z.X, ones[best].X])
-			}
+	let tpChains = []
+	const tp = setup && Array.isArray(setup.TP) ? setup.TP : null
+	if (tp) {
+		const cos = Math.cos(flat ? Math.PI / 6 : 0),
+			sin = Math.sin(flat ? Math.PI / 6 : 0)
+		tp.forEach(([q, r, pts]) => {
+			const c = centreByCoord[q + "," + r]
+			if (!c || !Array.isArray(pts)) return
+			const at = (i) => [c[0] + S * (pts[i] * cos - pts[i + 1] * sin), c[1] + S * (pts[i] * sin + pts[i + 1] * cos)]
+			const hexSegments = []
+			for (let i = 0; i + 3 < pts.length; i += 4) hexSegments.push([at(i), at(i + 2)])
+			// Per hex, like the editor: polylines end at hex edges, so curves match it exactly
+			const hexChains = trackSegmentsToPath(hexSegments, terrByCoord[q + "," + r] > 22) // > CITY: no river on the tile
+			tpChains = tpChains.concat(hexChains)
 		})
-	})
-	const tracks = trackSegmentsToPath(segments)
+	} else if (setup && Array.isArray(setup.TN)) {
+		setup.TN.forEach((t) => {
+			const a = centreByCoord[t[0] + "," + t[1]],
+				b = centreByCoord[t[2] + "," + t[3]]
+			if (a && b) segments.push([a, b])
+		})
+	}
+	const tracks = railsSVG(tp ? tpChains : trackSegmentsToPath(segments))
 	return `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="${vbX} ${vbY} ${vbW} ${vbH}" preserveAspectRatio="xMidYMid meet"><rect x="${vbX}" y="${vbY}" width="${vbW}" height="${vbH}" fill="#f9f9f9"/><defs>${defs}</defs>${body}${tracks}</svg>`
 }
 

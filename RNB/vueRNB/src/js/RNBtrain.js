@@ -16,6 +16,8 @@ import * as stack from "./RNBstack.js"
 import * as controller from "./RNBcontroller.js"
 import * as context from "./RNBcontext.js"
 import * as highlight from "./RNBhighlight.js"
+import * as atelier from "./RNBatelier.js"
+import * as view from "./RNBview.js"
 
 export function isTrainsEnabled() {
 	const store = useModelStore()
@@ -143,7 +145,8 @@ export function canTransporterUseTrain(transporterID) {
 	const store = useModelStore()
 	if (!rf.PHASE_MOVEMENTS.includes(store.gameflow.phase)) return false
 	const transporterObj = model.getTransporterByID(transporterID)
-	if (!transporterObj || !rf.LAND_TRANSPORTERS.includes(transporterObj.type)) return false
+	// Art: caravans walk on land but sit outside LAND_TRANSPORTERS (land cap), so allow them explicitly
+	if (!transporterObj || !(rf.LAND_TRANSPORTERS.includes(transporterObj.type) || transporterObj.type === rf.EXHIBITION_TRANSPORTER)) return false
 	if (transporterObj.remainingMoves <= 0) return false
 	if (transporterObj.movedThisTurn) return false
 	// No preliminary movement: the fare must already be aboard or on the tile
@@ -231,7 +234,9 @@ export function takeTrain(transporterID, toHexID, toBucketID, fareRes) {
 	currentStack.push(stack.getResIDtoUse(fare))
 	if (geese.length > 0) currentStack.push([geese.length, 1])
 
+	const startXY = [...transporterObj.rawTransporterXY]
 	performTrainRide_core(transporterID, toBucketLocation, fare)
+	animateTrainRide(transporterObj, fromBucketLocation[1], toHexID, startXY)
 
 	stack.addItemToStack({
 		action: rf.STACK_TAKE_TRAIN,
@@ -240,7 +245,51 @@ export function takeTrain(transporterID, toHexID, toBucketID, fareRes) {
 	})
 
 	context.resetContextAndHighlights()
+	store.mapData.zoomData.hexID = toHexID
+	// Art: a caravan arriving by train at another player's start tile may stage a show and vanish
+	atelier.scheduleExhibitionAfterAnimation(transporterObj, onExhibitionShown)
 	store.context.selectedTransporterIDforTM = transporterID
 	highlight.updateAllHighlightsForTransporterMode()
-	store.mapData.zoomData.hexID = toHexID
+}
+
+function onExhibitionShown() {
+	context.resetContextAndHighlights()
+	highlight.updateAllHighlightsForTransporterMode()
+	context.createUndoPoint()
+}
+
+// Shortest hex route along the track, start and end included.
+export function getTrackRoute(fromHexID, toHexID) {
+	const adj = getTrackAdjacencies()
+	const prev = { [fromHexID]: null }
+	const queue = [fromHexID]
+	while (queue.length > 0 && !(toHexID in prev)) {
+		const cur = queue.shift()
+		for (const next of adj[cur] || []) {
+			if (next in prev) continue
+			prev[next] = cur
+			queue.push(next)
+		}
+	}
+	if (!(toHexID in prev)) return [fromHexID, toHexID]
+	const route = []
+	for (let h = toHexID; h !== null; h = prev[h]) route.unshift(h)
+	return route
+}
+
+// Live play and replay: slide the transporter through the hex centres along the track,
+// using the same waypoint animation as a normal move.
+export function animateTrainRide(transporterObj, fromHexID, toHexID, startXY) {
+	const store = useModelStore()
+	const stats = rf.getTransporterStats(transporterObj.type)
+	const offset = [stats.width * store.RATIO * 0.5, stats.height * store.RATIO * 0.5]
+	const waypoints = getTrackRoute(fromHexID, toHexID)
+		.slice(1, -1)
+		.map((hexID) => {
+			const xy = model.getHexByID(hexID).rawXY
+			return [xy[0] - offset[0], xy[1] - offset[1]]
+		})
+	waypoints.push([...transporterObj.rawTransporterXY])
+	view.addTimingsToWaypoints(startXY, waypoints)
+	transporterObj.animationWaypoints = waypoints
 }

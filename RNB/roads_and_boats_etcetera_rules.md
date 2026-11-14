@@ -67,6 +67,13 @@ Randomly determine who starts the bidding. The players then take turns, going cl
 As soon as all players have a donkey on a pile, the bidding stops. Write down the bid prices. Each player then takes his pile, and the game starts.
 At the end of the game, each player subtracts the amount bid from his final score.
 
+#### Adding Jumpstart to Scenarios
+The &cetera rulebook outlines how to conduct the bidding phase for the provided Jumpstart scenarios; however, it does not provide rules for creating scenarios with Jumpstart mechanics or for adding Jumpstart conditions to an existing scenario. The following is the author's Jeroen-approved variant of the Jumpstart rules to allow for such cases in games with at least three players.
+
+Create a number of empty Goods piles equal to the number of players, assigning each pile a different order-of-play number for the placement of Home markers. In clockwise order around the table, starting with the player who suggested playing Roads & Boats, each player selects one Good and adds it to any of the Goods piles until each player has added five Goods. Goods piles may have an unequal number of Goods. Once all selected Goods have been placed in the piles, proceed with standard Jumpstart bidding and subsequent Home token placement.
+
+You may allow players to add more than five Goods each if you choose. If doing so, consider limiting the game to twenty Turns and filling the first four rows of the Wonder.
+
 ### Fundamental research
 Researching Fundamental Research (represented by a lightbulb) makes all further research cheaper. Once you have researched it, all further research costs only 1 goose+1 paper instead of 2 geese+1 paper. Researching fundamental research costs 2 geese+1 paper.
 

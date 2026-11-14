@@ -318,6 +318,7 @@ export default {
 		buildingOptions: "建筑选项",
 	},
 	playerTable: {
+		shows: "展览:",
 		player: "玩家",
 		wealthPoints: "财富点",
 		transports: "运输工具",
@@ -475,6 +476,7 @@ export default {
 		addsBricks: "添加 {count} 块砖：",
 		addsBricksPlural: "添加 {count} 块砖：",
 		stagedExhibition: "{name} 在 {target} 的板块上举办了 {beauty} 件作品的展览",
+		showAtTile: "{name}：{beauty} 件作品的展览",
 		emptyMine: "是空的",
 		poweredDoubled: "由电力驱动——产量翻倍",
 		total: "总计：{score}",

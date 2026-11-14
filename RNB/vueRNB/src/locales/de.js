@@ -318,6 +318,7 @@ export default {
 		buildingOptions: "Gebäudeoptionen",
 	},
 	playerTable: {
+		shows: "Ausstellungen:",
 		player: "Spieler",
 		wealthPoints: "Wohlstandspunkte",
 		transports: "Transporte",
@@ -475,6 +476,7 @@ export default {
 		addsBricks: "Fügt {count} Ziegel hinzu:",
 		addsBricksPlural: "Fügt {count} Ziegel hinzu:",
 		stagedExhibition: "{name} veranstaltete eine Ausstellung mit {beauty} Werken auf dem Feld von {target}",
+		showAtTile: "{name}: Ausstellung mit {beauty} Kunstwerken",
 		emptyMine: "ist leer",
 		poweredDoubled: "Mit Strom versorgt – doppelte Ausbeute",
 		total: "Gesamt: {score}",

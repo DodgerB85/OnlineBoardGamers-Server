@@ -58,6 +58,12 @@ function getPlayerNameClass(playerIndex) {
 	return ""
 }
 
+// Art: hover text for the ×N multiplier - where this player staged shows and how big
+function artShowsTooltip(playerIndex) {
+	const shown = store.players[playerIndex].artShownAt || {}
+	return Object.entries(shown).map(([target, beauty]) => `${store.players[target].displayName}: ${beauty}`).join(", ")
+}
+
 const playerResources = computed(() => {
 	const allTransporters = model.getAllInGameTransporters()
 	const allResources = model.getAllInGameResources()
@@ -160,7 +166,12 @@ const getFullTurnOrderArray = computed(() => {
 							<!-- Wealth Points -->
 							<td>{{ wonder.getHeldResourcesScore(playerIndex) }}</td>
 							<td>{{ wonder.getPlayerWonderPoints(playerIndex) }}</td>
-							<td v-if="store.gameOptions.useArt">{{ atelier.scoreArtwork(playerIndex) }}</td>
+							<td v-if="store.gameOptions.useArt">
+								<div class="researchOptionDivHeader" @mouseenter="onResearchMouseEnter('art' + playerIndex)" @mouseleave="onResearchMouseLeave" @touchstart="onResearchTouchStart('art' + playerIndex)" @touchend="onResearchTouchEnd" @touchcancel="onResearchTouchEnd">
+									<!-- base points, then the show multiplier; Total holds the product -->{{ atelier.scoreArtwork(playerIndex) / (1 + atelier.countDistinctShows(playerIndex)) }}<span v-if="atelier.countDistinctShows(playerIndex) > 0"> ×{{ 1 + atelier.countDistinctShows(playerIndex) }}</span>
+									<div v-if="atelier.countDistinctShows(playerIndex) > 0 && (hoveredResearch === 'art' + playerIndex || longPressedResearch === 'art' + playerIndex)" class="researchTooltip"><b>{{ $t("playerTable.shows") }}</b> {{ artShowsTooltip(playerIndex) }}</div>
+								</div>
+							</td>
 							<td>{{ wonder.getPlayerTotalScore(playerIndex) }}</td>
 
 							<!-- TRANSPORTERS-->
