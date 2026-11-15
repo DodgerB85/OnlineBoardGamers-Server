@@ -249,6 +249,7 @@ export default {
 		copyThisGame: "Copia questa partita",
 		toNewGame: "A nuova partita",
 		gameCreated: "Partita creata:",
+		hiddenDataNote: "Nota: i dati nascosti sono stati rimescolati in questa copia.",
 		copyGameError: "Impossibile creare la partita di pratica.",
 		backToMyLastMove: "Torna alla mia ultima mossa",
 		moveUi: "Sposta interfaccia",

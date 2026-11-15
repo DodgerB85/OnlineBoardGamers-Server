@@ -148,6 +148,7 @@ export default {
 		copyThisGame: "Copiar esta partida",
 		toNewGame: "A un nuevo juego",
 		gameCreated: "Partida creada:",
+		hiddenDataNote: "Nota: los datos ocultos se han vuelto a aleatorizar en esta copia.",
 		copyGameError: "No se pudo crear la partida de práctica.",
 		backToMyLastMove: "Volver a mi última jugada",
 		useArrows: "Usa las flechas para avanzar por la partida. Esto no alterará la partida actual de ninguna manera",

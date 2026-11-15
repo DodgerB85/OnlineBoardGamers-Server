@@ -4,7 +4,8 @@
  */
 import * as model from "./ROWmodel"
 import { deserializeGame, serializeGame } from "./ROWfuncs"
-import { JavaRandom } from "./ROWcore"
+import { JavaRandom, isCattleCard, isObjectiveCard, shuffle as shuffleArray } from "./ROWcore"
+import { OBJECTIVE_CARD_TYPES } from "./ROWdata"
 import { PHASE_GAME_OVER, PHASE_MAIN } from "./ROWreference"
 import i18n from "../i18n"
 import { useModelStore } from "../stores/ROWstore"
@@ -12,6 +13,154 @@ import { usePersonalStore } from "../stores/ROWpersonal"
 
 function clone(value) {
 	return JSON.parse(JSON.stringify(value))
+}
+
+/**
+ * A copy becomes a training game, so replace every hidden card belonging to
+ * another seat and every hidden deck. The copier's own hand and objectives are
+ * kept; the total card multiset is preserved.
+ */
+export function sanitizeCopyFrame(frame, playerName, rng = new JavaRandom(Math.floor(Math.random() * 2 ** 48))) {
+	const copy = clone(frame)
+	const playerStates = copy?.playerStates
+	if (!playerStates) return copy
+
+	const names = Object.keys(playerStates)
+	const keepName = names.includes(playerName) ? playerName : null
+	const isCattle = (card) => !!card && typeof card === "object" && isCattleCard(card)
+	const isObjective = (card) => !!card && (typeof card === "string" || (typeof card === "object" && isObjectiveCard(card)))
+	const cattlePool = []
+	const objectiveIds = []
+	const objectiveCards = new Map()
+	const addObjective = (card) => {
+		const id = typeof card === "string" ? card : card?.id
+		if (!id) return
+		objectiveIds.push(id)
+		if (card && typeof card === "object") objectiveCards.set(id, clone(card))
+		else if (!objectiveCards.has(id) && OBJECTIVE_CARD_TYPES[id]) objectiveCards.set(id, clone(OBJECTIVE_CARD_TYPES[id]))
+	}
+	const cardForId = (id) => {
+		const card = objectiveCards.get(id) ?? OBJECTIVE_CARD_TYPES[id]
+		return card ? clone(card) : { id }
+	}
+
+	const slots = []
+	for (const name of names) {
+		const ps = playerStates[name]
+		if (name === keepName) {
+			if (ps.drawStack?.length > 1) shuffleArray(ps.drawStack, rng)
+			continue
+		}
+		const cattleHand = []
+		const objectiveHand = []
+		ps.hand = (ps.hand ?? []).map((card, index) => {
+			if (isCattle(card)) {
+				cattlePool.push(card)
+				cattleHand.push(index)
+				return null
+			}
+			if (isObjective(card)) {
+				addObjective(card)
+				objectiveHand.push(index)
+				return null
+			}
+			return card
+		})
+		let cattleDraw = 0
+		let objectiveDraw = 0
+		for (const card of ps.drawStack ?? []) {
+			if (isCattle(card)) {
+				cattlePool.push(card)
+				cattleDraw++
+			} else if (isObjective(card)) {
+				addObjective(card)
+				objectiveDraw++
+			}
+		}
+		ps.drawStack = []
+		const objectiveCount = (ps.objectives ?? []).length
+		for (const id of ps.objectives ?? []) addObjective(id)
+		ps.objectives = []
+		slots.push({ ps, cattleHand, objectiveHand, cattleDraw, objectiveDraw, objectiveCount })
+	}
+
+	let cattleMarketDraw = 0
+	for (const card of copy.cattleMarket?.drawStack ?? []) {
+		if (isCattle(card)) {
+			cattlePool.push(card)
+			cattleMarketDraw++
+		}
+	}
+	if (copy.cattleMarket) copy.cattleMarket.drawStack = []
+
+	let objectiveDrawCount = 0
+	for (const card of copy.objectiveCards?.drawStack ?? []) {
+		addObjective(card)
+		objectiveDrawCount++
+	}
+	if (copy.objectiveCards) copy.objectiveCards.drawStack = []
+
+	let startingObjectiveCount = 0
+	for (const card of copy.startingObjectiveCards ?? []) {
+		addObjective(card)
+		startingObjectiveCount++
+	}
+	if (copy.startingObjectiveCards) copy.startingObjectiveCards = []
+
+	shuffleArray(cattlePool, rng)
+	shuffleArray(objectiveIds, rng)
+	const takeCattle = () => cattlePool.pop()
+	const takeObjectiveId = () => objectiveIds.pop()
+
+	for (const slot of slots) {
+		for (const index of slot.cattleHand) {
+			const card = takeCattle()
+			if (card) slot.ps.hand[index] = card
+		}
+		for (const index of slot.objectiveHand) {
+			const id = takeObjectiveId()
+			if (id) slot.ps.hand[index] = cardForId(id)
+		}
+		for (let i = 0; i < slot.cattleDraw; i++) {
+			const card = takeCattle()
+			if (card) slot.ps.drawStack.push(card)
+		}
+		for (let i = 0; i < slot.objectiveDraw; i++) {
+			const id = takeObjectiveId()
+			if (id) slot.ps.drawStack.push(cardForId(id))
+		}
+		if (slot.ps.drawStack.length > 1) shuffleArray(slot.ps.drawStack, rng)
+		for (let i = 0; i < slot.objectiveCount; i++) {
+			const id = takeObjectiveId()
+			if (id) slot.ps.objectives.push(id)
+		}
+	}
+
+	if (copy.cattleMarket) {
+		for (let i = 0; i < cattleMarketDraw; i++) {
+			const card = takeCattle()
+			if (card) copy.cattleMarket.drawStack.push(card)
+		}
+		if (copy.cattleMarket.drawStack.length > 1) shuffleArray(copy.cattleMarket.drawStack, rng)
+	}
+	if (copy.objectiveCards) {
+		for (let i = 0; i < objectiveDrawCount; i++) {
+			const id = takeObjectiveId()
+			if (id) copy.objectiveCards.drawStack.push(cardForId(id))
+		}
+		if (copy.objectiveCards.drawStack.length > 1) shuffleArray(copy.objectiveCards.drawStack, rng)
+	}
+	if (copy.startingObjectiveCards) {
+		for (let i = 0; i < startingObjectiveCount; i++) {
+			const id = takeObjectiveId()
+			if (id) copy.startingObjectiveCards.push(id)
+		}
+		if (copy.startingObjectiveCards.length > 1) shuffleArray(copy.startingObjectiveCards, rng)
+	}
+	for (const pile of copy.kcSupply?.piles ?? []) if (pile.length > 1) shuffleArray(pile, rng)
+
+	copy.rngState = rng.getState()
+	return copy
 }
 
 /**
@@ -110,7 +259,10 @@ export async function copyGameToNewPracticeGame() {
 	if (!frame) return null
 
 	// Start the copy at the visible frame, with no earlier history to replay.
-	const snapshot = clone(frame)
+	// Finished games are already public; mid-game copies keep only the copier's
+	// own private cards and re-randomise every other hidden zone.
+	const playerName = personal.name || store.state?.players?.[personal.pov]?.name || ""
+	const snapshot = store.game?.isEnded() ? clone(frame) : sanitizeCopyFrame(frame, playerName)
 	const data = { ...snapshot, history: [], replayInitial: snapshot, turn: store.turn }
 	let csrftoken = ""
 	for (const cookie of document.cookie.split(";")) {

@@ -329,6 +329,7 @@ export default {
 		stepAria: "Replay step",
 		backToMyLastMove: "Back to my last move",
 		gameCreated: "Game created:",
+		cannotCopyHidden: "You cannot copy a game with hidden information until it has finished.",
 		copyGameError: "Unable to create the practice game.",
 		copyThisGame: "Copy This Game<br />To New Game",
 		moveUi: "Move UI",

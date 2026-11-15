@@ -1,6 +1,7 @@
 <script setup>
 import * as replay from '../js/KFWreplay'
 import * as IO from '../backend/KFW_IO'
+import * as rf from '../js/KFWreference'
 import i18n from '../i18n'
 
 import HistoryEntry from './HistoryEntry.vue'
@@ -43,6 +44,10 @@ function backToMyLastMove() {
 async function localCopyGameToPracticeGame2() {
 	spinoffSuccessText.value = ''
 	spinoffErrorText.value = ''
+	if (store.gameflow.phase !== rf.PHASE_GAME_OVER) {
+		spinoffErrorText.value = i18n.global.t('replay.cannotCopyHidden')
+		return
+	}
 	const result = await IO.copyGameToNewPracticeGame(store.replayStep)
 	if (result?.newID) {
 		const url = `${window.location.origin}/KFW/${result.newID}/show/`

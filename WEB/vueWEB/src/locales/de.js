@@ -148,6 +148,7 @@ export default {
 		copyThisGame: "Dieses Spiel kopieren",
 		toNewGame: "Zu neuem Spiel",
 		gameCreated: "Spiel erstellt:",
+		hiddenDataNote: "Hinweis: Versteckte Daten wurden in dieser Kopie neu zufällig verteilt.",
 		copyGameError: "Das Übungsspiel konnte nicht erstellt werden.",
 		backToMyLastMove: "Zurück zu meinem letzten Zug",
 		useArrows: "Mit den Pfeilen kannst du durch die Partie gehen. Das verändert die aktuelle Partie in keiner Weise",

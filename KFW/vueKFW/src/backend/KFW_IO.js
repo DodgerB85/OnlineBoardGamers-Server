@@ -626,6 +626,10 @@ export async function copyGameToNewPracticeGame(step) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 
+	// The hidden workers/skills/contracts live in server-only data and are not
+	// part of the replay, so a mid-game copy cannot be both playable and safe.
+	if (store.gameflow.phase !== rf.PHASE_GAME_OVER) return null
+
 	const historyCopy = [...store.history]
 	let data
 	try {

@@ -27,6 +27,7 @@ export default {
 		copyThisGame: "复制本局游戏",
 		toNewGame: "到新游戏",
 		gameCreated: "游戏已创建：",
+		hiddenDataNote: "注意：副本中的隐藏信息已重新随机化。",
 		copyGameError: "无法创建练习游戏。",
 		confirmResign: "确定要认输吗？你将无法继续游戏。",
 		footerAttribution: "Great Western Trail 是 Alexander Pfister 设计的桌游。已移植到 Online Board Gamers。",

@@ -27,6 +27,7 @@ export default {
 		copyThisGame: "Dit spel kopiëren",
 		toNewGame: "Naar nieuw spel",
 		gameCreated: "Spel aangemaakt:",
+		hiddenDataNote: "Let op: verborgen gegevens zijn in deze kopie opnieuw willekeurig verdeeld.",
 		copyGameError: "Kan het oefenspel niet aanmaken.",
 		confirmResign: "Weet je zeker dat je wilt opgeven? Je kunt niet verder spelen.",
 		footerAttribution: "Great Western Trail is een bordspel van Alexander Pfister. Geport naar Online Board Gamers.",

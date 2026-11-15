@@ -27,6 +27,7 @@ export default {
 		copyThisGame: "Copiar esta partida",
 		toNewGame: "Para novo jogo",
 		gameCreated: "Partida criada:",
+		hiddenDataNote: "Nota: os dados ocultos foram reembaralhados nesta cópia.",
 		copyGameError: "Não foi possível criar a partida de prática.",
 		confirmResign: "Tem certeza de que quer desistir? Você não poderá continuar.",
 		footerAttribution: "Great Western Trail é um jogo de tabuleiro de Alexander Pfister. Portado para o Online Board Gamers.",

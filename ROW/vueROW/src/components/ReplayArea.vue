@@ -20,7 +20,8 @@ async function copyGameToNewPracticeGame() {
 	const result = await replay.copyGameToNewPracticeGame()
 	if (result?.newID) {
 		const url = `${window.location.origin}/ROW/${result.newID}/show/`
-		spinoffSuccessText.value = `${t("app.gameCreated")} <a href="${url}" target="_blank" rel="noopener">${url}</a>`
+		const note = store.game?.isEnded() ? "" : ` ${t("app.hiddenDataNote")}`
+		spinoffSuccessText.value = `${t("app.gameCreated")} <a href="${url}" target="_blank" rel="noopener">${url}</a>${note}`
 	} else {
 		spinoffErrorText.value = t("app.copyGameError")
 	}

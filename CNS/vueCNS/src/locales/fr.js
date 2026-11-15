@@ -249,6 +249,7 @@ export default {
 		copyThisGame: "Copier cette partie",
 		toNewGame: "Vers un nouveau jeu",
 		gameCreated: "Partie créée :",
+		hiddenDataNote: "Remarque : les données cachées ont été re-randomisées dans cette copie.",
 		copyGameError: "Impossible de créer la partie d'entraînement.",
 		backToMyLastMove: "Retour à mon dernier coup",
 		moveUi: "Déplacer l'interface",

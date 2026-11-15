@@ -148,6 +148,7 @@ export default {
 		copyThisGame: "复制本局游戏",
 		toNewGame: "到新游戏",
 		gameCreated: "游戏已创建：",
+		hiddenDataNote: "注意：副本中的隐藏信息已重新随机化。",
 		copyGameError: "无法创建练习游戏。",
 		backToMyLastMove: "回到我的上一步",
 		useArrows: "使用箭头逐步浏览游戏。这不会以任何方式改变当前游戏",

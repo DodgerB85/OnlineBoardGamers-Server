@@ -11,12 +11,14 @@
  */
 
 import * as map from "./CNSmap"
+import * as rf from "./CNSreference"
 import i18n from "../i18n"
 
 import seedrandom from "seedrandom"
 import hexlib from "./hexlib"
 
 import { useModelStore } from "../stores/CNSstore.js"
+import { usePersonalStore } from "../stores/CNSpersonal.js"
 
 export const shuffle = (array) => {
 	for (let i = array.length - 1; i > 0; i--) {
@@ -145,7 +147,27 @@ export function decompressChatData(data) {
 	return chatArray
 }
 
-export function exportModel(includeContext, raw = false) {
+// The copy endpoint always creates a training game, so anything the replay
+// obscures must be replaced before the copy is saved.
+function sanitizeForCopy(tempFinal) {
+	const personal = usePersonalStore()
+	if (tempFinal[6][1] === rf.PHASE_GAME_OVER) return
+	const pov = personal.pov
+	const currentPlayer = tempFinal[6][2][0]
+	const drawnCount = tempFinal[8].length
+	if (drawnCount > 0 && pov !== currentPlayer) {
+		// The copier never saw these options; put them back and deal new ones.
+		tempFinal[3] = shuffleSeeded(tempFinal[3].concat(tempFinal[8])).shuffled
+		tempFinal[8] = tempFinal[3].splice(-drawnCount)
+	} else {
+		tempFinal[3] = shuffleSeeded(tempFinal[3]).shuffled
+	}
+	for (let i = 0; i < tempFinal[1].length; i++) if (i !== pov) tempFinal[1][i][5] = []
+	// The old history carries the original shuffle seeds and can rebuild the future.
+	tempFinal[7] = [[rf.HIST_NEW_GAME, -1, 0, []]]
+}
+
+export function exportModel(includeContext, raw = false, forCopy = false) {
 	const store = useModelStore()
 	let tempFinal = []
 
@@ -225,6 +247,8 @@ export function exportModel(includeContext, raw = false) {
 
 	//12
 	if (includeContext) tempFinal.push(JSON.parse(JSON.stringify(store.context)))
+
+	if (forCopy) sanitizeForCopy(tempFinal)
 
 	let step1 = JSON.stringify(tempFinal)
 	//let step2 = LZString.compressToEncodedURIComponent(step1)

@@ -319,6 +319,7 @@ export default {
 		stepAria: "Wiedergabeschritt",
 		backToMyLastMove: "Zurück zu meinem letzten Zug",
 		gameCreated: "Spiel erstellt:",
+		cannotCopyHidden: "Du kannst ein Spiel mit versteckten Informationen erst nach dem Ende kopieren.",
 		copyGameError: "Das Übungsspiel konnte nicht erstellt werden.",
 		copyThisGame: "Dieses Spiel in ein neues Spiel kopieren",
 		moveUi: "UI nach",

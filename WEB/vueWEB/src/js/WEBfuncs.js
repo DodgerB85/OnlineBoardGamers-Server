@@ -415,7 +415,54 @@ export function simpleImportWholeWEBmodelNoCompression(input, keepHistory = fals
   map.initCoords()
 }
 
-export function exportWEBmodel(includeContext, forGameOver) {
+// The shared copy endpoint creates a training game, so the hidden action
+// counts on opponents' tiles and the face-down pile order must be replaced.
+function sanitizeForCopy(temp) {
+  const pov = usePersonalStore().pov
+  const players = temp[1]
+  const pileIndexes = [2, 3, 4, 5, 6, 7]
+  const used = new Set()
+  for (const tile of temp[9] ?? []) used.add(tile[0])
+  for (let i = 0; i < players.length; i++) {
+    for (const tileIDarr of players[i][4] ?? []) used.add(tileIDarr[0])
+  }
+  for (const idx of pileIndexes) for (const tileID of temp[idx] ?? []) used.add(tileID)
+
+  const byGfx = {}
+  for (const tile of rf.ALL_TILES) {
+    if (!byGfx[tile.gfx]) byGfx[tile.gfx] = []
+    byGfx[tile.gfx].push(tile.tileID)
+  }
+  const replacement = (tileID) => {
+    const tile = rf.ALL_TILES.find((candidate) => candidate.tileID === tileID)
+    if (!tile) return tileID
+    const variants = byGfx[tile.gfx] ?? [tileID]
+    const unused = variants.filter((id) => !used.has(id))
+    const picked = (unused.length ? unused : variants)[Math.floor(Math.random() * (unused.length ? unused.length : variants.length))]
+    used.add(picked)
+    return picked
+  }
+
+  for (let i = 0; i < players.length; i++) {
+    if (i === pov) continue
+    for (const tileIDarr of players[i][4] ?? []) tileIDarr[0] = replacement(tileIDarr[0])
+  }
+  for (const idx of pileIndexes) {
+    const pile = temp[idx]
+    if (!Array.isArray(pile)) continue
+    for (let i = 0; i < pile.length; i++) pile[i] = replacement(pile[i])
+    if (pile.length > 1) {
+      const top = pile[0]
+      const rest = pile.slice(1)
+      shuffle(rest)
+      pile.splice(0, pile.length, top, ...rest)
+    }
+  }
+  // The seed entry would rebuild the original deal during a replay.
+  temp[11] = []
+}
+
+export function exportWEBmodel(includeContext, forGameOver, forCopy = false) {
   const store = useModelStore()
   //const personal = usePersonalStore()
   let temp = []
@@ -509,6 +556,9 @@ export function exportWEBmodel(includeContext, forGameOver) {
 
   // 12 - context
   if (includeContext) temp.push(JSON.parse(JSON.stringify(store.context)))
+
+  if (forCopy && !forGameOver && temp[0][3] !== rf.PHASE_GAME_OVER) sanitizeForCopy(temp)
+
   let step1 = JSON.stringify(temp)
 
   //if (personal.name === "admin") console.log(JSON.stringify(temp, null, 2))

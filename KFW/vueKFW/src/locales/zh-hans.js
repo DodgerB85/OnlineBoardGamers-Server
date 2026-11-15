@@ -319,6 +319,7 @@ export default {
 		stepAria: "回放步骤",
 		backToMyLastMove: "返回我的上一步",
 		gameCreated: "游戏已创建：",
+		cannotCopyHidden: "游戏结束前无法复制含有隐藏信息的对局。",
 		copyGameError: "无法创建练习游戏。",
 		copyThisGame: "将此游戏复制到新游戏",
 		moveUi: "移动界面",

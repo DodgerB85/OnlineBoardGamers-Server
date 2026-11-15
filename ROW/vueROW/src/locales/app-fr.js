@@ -27,6 +27,7 @@ export default {
 		copyThisGame: "Copier cette partie",
 		toNewGame: "Vers un nouveau jeu",
 		gameCreated: "Partie créée :",
+		hiddenDataNote: "Remarque : les données cachées ont été re-randomisées dans cette copie.",
 		copyGameError: "Impossible de créer la partie d'entraînement.",
 		confirmResign: "Es-tu sûr de vouloir abandonner ? Tu ne pourras pas continuer.",
 		footerAttribution: "Great Western Trail est un jeu de société d'Alexander Pfister. Porté sur Online Board Gamers.",

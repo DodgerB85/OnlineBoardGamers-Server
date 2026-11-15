@@ -319,6 +319,7 @@ export default {
 		stepAria: "Étape de relecture",
 		backToMyLastMove: "Revenir à mon dernier coup",
 		gameCreated: "Partie créée :",
+		cannotCopyHidden: "Vous ne pouvez pas copier une partie contenant des informations cachées avant qu'elle ne soit terminée.",
 		copyGameError: "Impossible de créer la partie d'entraînement.",
 		copyThisGame: "Copier cette partie vers une nouvelle partie",
 		moveUi: "Déplacer l'interface",

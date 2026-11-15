@@ -477,7 +477,7 @@ export async function copyGameToNewPracticeGame() {
 	let data
 	try {
 		store.history = store.history.slice(0, Math.max(0, store.replayStep))
-		data = funcs.exportWEBmodel(false, false)
+		data = funcs.exportWEBmodel(false, false, true)
 	} finally {
 		store.history = historyCopy
 	}

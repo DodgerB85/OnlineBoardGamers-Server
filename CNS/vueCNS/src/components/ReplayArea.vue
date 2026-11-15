@@ -29,7 +29,8 @@ async function localCopyGameToPracticeGame() {
     const result = await IO.copyGameToNewPracticeGame()
     if (result?.newID) {
         const url = `${window.location.origin}/CNS/${result.newID}/show/`
-        spinoffSuccessText.value = `${t("replay.gameCreated")} <a href="${url}" target="_blank" rel="noopener">${t("topMenuViews.here")}</a>`
+        const note = store.gameflow.phase === rf.PHASE_GAME_OVER ? "" : ` ${t("replay.hiddenDataNote")}`
+        spinoffSuccessText.value = `${t("replay.gameCreated")} <a href="${url}" target="_blank" rel="noopener">${t("topMenuViews.here")}</a>${note}`
     } else {
         spinoffErrorText.value = t("replay.copyGameError")
     }

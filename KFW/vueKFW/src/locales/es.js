@@ -319,6 +319,7 @@ export default {
 		stepAria: "Paso de repetición",
 		backToMyLastMove: "Volver a mi último movimiento",
 		gameCreated: "Partida creada:",
+		cannotCopyHidden: "No puedes copiar una partida con información oculta hasta que haya terminado.",
 		copyGameError: "No se pudo crear la partida de práctica.",
 		copyThisGame: "Copiar esta partida a una nueva partida",
 		moveUi: "Mover interfaz",

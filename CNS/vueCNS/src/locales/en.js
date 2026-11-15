@@ -249,6 +249,7 @@ export default {
 		copyThisGame: "Copy This Game",
 		toNewGame: "To New Game",
 		gameCreated: "Game created:",
+		hiddenDataNote: "Note: hidden data has been re-randomised in this copy.",
 		copyGameError: "Unable to create the practice game.",
 		backToMyLastMove: "Back to my last move",
 		moveUi: "Move UI",
