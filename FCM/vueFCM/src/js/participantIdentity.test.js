@@ -4,7 +4,7 @@ import { createPinia, setActivePinia } from "pinia"
 let funcs, useModelStore, usePersonalStore
 
 beforeAll(async () => {
-	globalThis.window = { initData: {}, performance }
+	globalThis.window = { initData: {} }
 	funcs = await import("./FCMfuncs.js")
 	;({ useModelStore } = await import("../stores/FCMstore.js"))
 	;({ usePersonalStore } = await import("../stores/FCMpersonal.js"))

@@ -256,7 +256,6 @@ export function simpleExportWholeFCMmodel(raw = false) {
 	// 24 - Media Line mod (only when chosen)
 	if (store.startingOptions.mediaLine) temp.push(JSON.parse(JSON.stringify(store.mediaLine)))
 
-	if (store.mapData.newMapVersion === rf.NEW_MAP_VERSION) temp.push(["newMapVersion", rf.NEW_MAP_VERSION])
 	if (raw) return temp
 	return compressData(temp)
 }
@@ -750,7 +749,6 @@ export function exportFCMmodel(forGameOver, includeContext, historyCutoff) {
 	// Media Line mod (only when the module was chosen; shape-detected on load).
 	// Compact positional slot, tagged like the Labor Market one.
 	if (store.startingOptions.mediaLine) temp.push(exportMediaLineSlot())
-	if (store.mapData.newMapVersion === rf.NEW_MAP_VERSION) temp.push(["newMapVersion", rf.NEW_MAP_VERSION])
 
 	return compressData(temp)
 }
@@ -784,10 +782,8 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	}
 
 	const inputArr = step2
-	const newMapVersion = savedNewMapVersion(inputArr)
 
 	const store = useModelStore()
-	store.mapData.newMapVersion = newMapVersion
 	let IMPORT_INDEX = 0
 	// Now set up internal options -- THIS JUST SETS UP THE TRUE?FALSE FLAGS
 	model.setInternalStartingOptions(window.initData.startingOptions)
@@ -1599,24 +1595,11 @@ export function restoreLaborMarketState(inputArr, index = -1) {
 	store.availableEmployees[rf.UNION_ORGANIZER] = Math.max(0, playerCount - lm.unionHolders.length)
 }
 
-// No marker and the historical v2 marker both mean today's main baseline.
-// Reject unknown revisions before mutating the model, rather than silently upgrading.
-function savedNewMapVersion(slots) {
-  const markers = slots.filter((slot) => Array.isArray(slot) && slot[0] === "newMapVersion")
-  if (markers.length > 1) throw new Error("Conflicting New Map revision markers")
-  if (!markers.length) return 0
-  const version = markers[0][1]
-  if (version === 0 || version === 2) return 0
-  if (version === rf.NEW_MAP_VERSION) return version
-  throw new Error(`Unsupported New Map revision: ${version}`)
-}
-
 export function simpleImportWholeFCMmodel(inputBase64, raw = false) {
 	const store = useModelStore()
 
 	
 	let inputModel = raw ? inputBase64 : decompressData(inputBase64)
-	store.mapData.newMapVersion = savedNewMapVersion(inputModel)
 
 	// Now set up internal options
 	model.setInternalStartingOptions(store.externalStartingOptions)

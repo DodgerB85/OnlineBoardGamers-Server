@@ -823,8 +823,8 @@ export const TILES = [
 	[38, 38, 1, 1, 1, 38, 38, 0, 39, 39, 40, 40, 0, 39, 39, 40, 40, 0, 41, 41, 1, 1, 1, 41, 41],
 	// 30: L-turn (L+B) + diagonal houses 26 (top) / 27 (right)
 	[0, 36, 36, 0, 0, 0, 36, 36, 0, 0, 1, 1, 1, 37, 37, 0, 0, 1, 37, 37, 0, 0, 1, 0, 0],
-	// 31: L-turn (T+R) + two 2x2 parks
-	[0, 0, 1, 0, 0, 7, 7, 1, 0, 0, 7, 7, 1, 1, 1, 0, 0, 7, 7, 0, 0, 0, 7, 7, 0],
+	// 31: L-turn (T+R) + two 2x2 parks + lemonade pickup
+	[0, 0, 1, 0, 0, 7, 7, 1, 4, 0, 7, 7, 1, 1, 1, 0, 0, 7, 7, 0, 0, 0, 7, 7, 0],
 	// 32: L-turn (L+B) + 2 houses 32 (top-left) / 33 (bottom-left)
 	[42, 42, 0, 0, 0, 42, 42, 0, 0, 0, 1, 1, 1, 0, 0, 43, 43, 1, 0, 0, 43, 43, 1, 0, 0],
 	// 33: straight T+B, single column + lemonade pickup
@@ -834,7 +834,7 @@ export const TILES = [
 	// 35: L-turn (L+B) + single house 20
 	[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 30, 30, 0, 0, 1, 30, 30, 0, 0, 1, 1, 1, 1, 1],
 	// 36: T+R with vertical arm + one 2x2 park + house 34
-	[1, 1, 1, 1, 1, 0, 0, 7, 7, 1, 0, 0, 7, 7, 1, 44, 44, 0, 0, 1, 44, 44, 0, 0, 1],
+	[1, 1, 1, 1, 1, 0, 0, 44, 44, 1, 0, 0, 44, 44, 1, 7, 7, 0, 0, 1, 7, 7, 0, 0, 1],
 	// 37: windmill cross (TBLR) + diagonal houses 35 / 36
 	[1, 1, 1, 45, 45, 1, 0, 0, 45, 45, 1, 0, 0, 0, 1, 46, 46, 0, 0, 1, 46, 46, 1, 1, 1],
 	// 38: outer ring (TBLR) + empty center 3x3
@@ -847,20 +847,9 @@ export const TILES = [
 	[0, 0, 0, 1, 0, 0, 0, 0, 1, 3, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
 	// 42: outer ring (TBLR) + house 37 top-right
 	[1, 1, 1, 47, 47, 1, 0, 0, 47, 47, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1],
-	// 43: 4 corner isolated road blocks, no exits
-	[1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1],
+	// 43: two L-runs + coke pickup (top-left) and beer pickup (bottom-right)
+	[3, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 2],
 ]
-
-// Current main/PR202 terrain remains the legacy baseline. Only revision 3 opts in.
-export const NEW_MAP_VERSION = 3
-const NEW_MAP_TILES_V3 = {
-  31: [0, 0, 1, 0, 0, 7, 7, 1, 4, 0, 7, 7, 1, 1, 1, 0, 0, 7, 7, 0, 0, 0, 7, 7, 0],
-  36: [1, 1, 1, 1, 1, 0, 0, 44, 44, 1, 0, 0, 44, 44, 1, 7, 7, 0, 0, 1, 7, 7, 0, 0, 1],
-  43: [3, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 2],
-}
-export function tileData(tile, version) {
-  return version === NEW_MAP_VERSION && NEW_MAP_TILES_V3[tile] ? NEW_MAP_TILES_V3[tile] : TILES[tile]
-}
 
 export const HOUSE_SQS = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47]
 

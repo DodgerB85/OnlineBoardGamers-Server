@@ -90,8 +90,7 @@ describe("Second Bailout whole-model snapshot regression", () => {
 		const expected = savedState(store)
 		const snapshot = funcs.simpleExportWholeFCMmodel()
 		const wire = funcs.decompressData(snapshot)
-		expect(wire.find((slot) => slot && !Array.isArray(slot) && Object.hasOwn(slot, "pending"))).toEqual(expected.bailout)
-		expect(wire.at(-1)).toEqual(["newMapVersion", 3])
+		expect(wire.at(-1)).toEqual(expected.bailout)
 		corrupt(store)
 		funcs.simpleImportWholeFCMmodel(snapshot)
 		expect(store.bailout).toEqual(expected.bailout)
@@ -119,6 +118,15 @@ describe("Second Bailout whole-model snapshot regression", () => {
 		corrupt(store)
 		controller.resetSubphase()
 		expect(savedState(store)).toEqual(expected)
+	})
+
+	it("keeps a raw snapshot's history when the live history is cleared", () => {
+		const store = seed()
+		store.history.push([rf.HIST_NEW_TILE, [0, 31, 0, 107], 0, 1])
+		const snapshot = funcs.simpleExportWholeFCMmodel(true)
+		const saved = clone(snapshot[13])
+		store.history.splice(0)
+		expect(snapshot[13]).toEqual(saved)
 	})
 
 	it("accepts a compact bailout slot in a whole-model snapshot", () => {

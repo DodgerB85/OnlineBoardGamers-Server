@@ -59,11 +59,15 @@ describe("New Map mod — static data", () => {
 		}
 	})
 
-	it("matches the tuned 2026 art on tiles 29/32/33/36", () => {
+	it("matches the tuned art on tiles 29/31/32/33/36/43", () => {
 		expect(rf.TILES[29].filter((c) => c === rf.ROAD)).toHaveLength(6)
+		expect(rf.TILES[31][8]).toBe(rf.DRINK_LEMONADE)
 		expect(rf.TILES[32]).not.toContain(34 + rf.HOUSE)
 		expect(rf.TILES[33][6]).toBe(rf.DRINK_LEMONADE)
-		expect(rf.TILES[36][15]).toBe(34 + rf.HOUSE)
+		expect(rf.TILES[36][7]).toBe(34 + rf.HOUSE)
+		expect(rf.TILES[36][15]).toBe(rf.PARK)
+		expect(rf.TILES[43][0]).toBe(rf.DRINK_COKE)
+		expect(rf.TILES[43][24]).toBe(rf.DRINK_BEER)
 	})
 
 	it("keeps the 5 drink pickups on tiles 39/40/41 (beer/lemonade/coke)", () => {

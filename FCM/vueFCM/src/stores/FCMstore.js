@@ -99,7 +99,6 @@ export const useModelStore = defineStore("store", () => {
 	const players = reactive([])
 
 	const mapData = reactive({
-		newMapVersion: 0,
 		tiles: [],
 		displayTiles: [],
 		coords: [],

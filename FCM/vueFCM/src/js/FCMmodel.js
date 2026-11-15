@@ -35,8 +35,6 @@ export function setupNewGame(opts = {}) {
 	const playerNames = opts.playerNames || init.playerNames || []
 	const displayNamesArr = opts.displayNames || init.displayNames || ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
 	const startingMap = opts.startingMap || init.startingMap || []
-	// Fixed per game, including games that draft New Map later.
-	store.mapData.newMapVersion = opts.newMapVersion ?? rf.NEW_MAP_VERSION
 
 	/************************* SETUP GAME *************************/
 	if (!opts.regenerateMap && startingMap.length > 0) {
