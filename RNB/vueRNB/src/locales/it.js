@@ -483,6 +483,7 @@ export default {
 	},
 	replay: {
 		step: "Passo: {current} / {total}",
+		stepAria: "Passo replay",
 		backToMyLastMove: "Torna alla mia ultima mossa",
 		copyGame: "Copia questa partita",
 		toNewGame: "In una nuova partita",

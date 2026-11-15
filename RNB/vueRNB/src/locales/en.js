@@ -495,6 +495,7 @@ export default {
 	},
 	replay: {
 		step: "Step: {current} / {total}",
+		stepAria: "Replay step",
 		backToMyLastMove: "Back to my last move",
 		copyGame: "Copy This Game",
 		toNewGame: "To New Game",

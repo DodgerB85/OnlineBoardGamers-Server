@@ -218,6 +218,7 @@ export async function generateReplayData(spoilerFree = false) {
   maxStack
   stackTitle
   */
+	// Each point stores the model as a raw array (no base64/msgpack) so the replay slider reloads one per drag quickly.
 	let replayData = []
 	let progressBarCounter = 0
 	let totalLength = store.computedHistory.length
