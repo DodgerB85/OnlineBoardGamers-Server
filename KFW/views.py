@@ -94,6 +94,15 @@ def showKFWgame(request, game_id=1, spoilerFree=False, replayStep=1):
     returnData.update(result["auth_data"])
     returnData["pov"] = -9
 
+    # Spoiler-free replay links are spectators: never load the viewer's move,
+    # hidden hand or server secret data.
+    if spoilerFree:
+        returnData["pov"] = -99
+        returnData["move"] = ""
+        returnData["gameData1"] = ""
+        returnData["gameData3"] = ""
+        return render(request, "KFW/showKFWgame.html", returnData)
+
     # KFW uses presenter.removeChatNotification instead of direct save
     # Re-check for kicked players (KFW excludes kicked from involvement)
     user_id = request.user.id

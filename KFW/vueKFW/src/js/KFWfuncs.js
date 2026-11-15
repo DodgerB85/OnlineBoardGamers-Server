@@ -706,7 +706,7 @@ export function exportKFWmodel(includeContext = false, raw = false) {
 	return base64Data
 }
 
-export async function importKFWmodel(input, includeContext, raw = false) {
+export async function importKFWmodel(input, includeContext, raw = false, skipServerData = false) {
 	const store = useModelStore()
 
 	if (input === "" || input == undefined) return
@@ -938,7 +938,8 @@ export async function importKFWmodel(input, includeContext, raw = false) {
 		Object.assign(store.availableAnimals, inputModel[supplyImportIdx + 1])
 	}
 
-	importCompressedGameData13(window.initData.gameData1, window.initData.gameData3)
+	// Replay frames must not pull the current server secret data into an old frame.
+	if (!skipServerData) importCompressedGameData13(window.initData.gameData1, window.initData.gameData3)
 }
 
 // Assume store.history is updated with hidden info, and all players scoring is complete and in the model

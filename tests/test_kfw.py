@@ -9,6 +9,43 @@ from django.urls import reverse
 from Lobby.models import Game, GamePlayer
 
 
+class KFWReplayRouteTests(TestCase):
+    """The copied replay link opens on the requested step and never leaks a seat view."""
+
+    def setUp(self):
+        user_model = get_user_model()
+        self.player_one = user_model.objects.create_user(username="kfw_replay_a", password="pw")
+        self.player_two = user_model.objects.create_user(username="kfw_replay_b", password="pw")
+        self.game = Game.objects.create(
+            gameCode="KFW",
+            creator=self.player_one,
+            host=self.player_one,
+            gameStatus="ACTIVE",
+            maxPlayers=2,
+            turn=0,
+            phase=0,
+            startingOptions="[]",
+        )
+        GamePlayer.objects.create(game=self.game, player=self.player_one, seat_order=0)
+        GamePlayer.objects.create(game=self.game, player=self.player_two, seat_order=1)
+
+    def test_replay_url_sets_the_exact_step_and_is_spoiler_free(self):
+        response = self.client.get(reverse("KFW:showKFWreplayStep", args=[self.game.id, 40]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "initData.spoilerFree = true;")
+        # The URL is 1-based; the template converts it to the 0-based frame index.
+        self.assertContains(response, "initData.replayStep = 40-1;")
+        self.assertContains(response, "initData.pov = -99;")
+
+    def test_involved_player_gets_a_spectator_view_on_a_replay_url(self):
+        self.client.force_login(self.player_one)
+        response = self.client.get(reverse("KFW:showKFWreplayStep", args=[self.game.id, 3]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "initData.replayStep = 3-1;")
+        self.assertContains(response, "initData.pov = -99;")
+        self.assertNotContains(response, "initData.statsExcludedGame")
+
+
 class KFWIssue53Tests(TestCase):
     def setUp(self):
         user_model = get_user_model()

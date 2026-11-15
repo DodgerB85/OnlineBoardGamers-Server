@@ -22,6 +22,7 @@ export default {
 		notes: "Notas",
 		reserve: "Reserva",
 		history: "Historial",
+		replay: "Repetición",
 		rewind: "Rebobinar",
 		timeToNextKickout: "Tiempo hasta la próxima expulsión:",
 		turnOrder: "Orden de turno:",

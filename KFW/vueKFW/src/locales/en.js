@@ -22,6 +22,7 @@ export default {
 		notes: "Notes",
 		reserve: "Reserve",
 		history: "History",
+		replay: "Replay",
 		rewind: "Rewind",
 		timeToNextKickout: "Time to next kickout:",
 		turnOrder: "Turn Order:",

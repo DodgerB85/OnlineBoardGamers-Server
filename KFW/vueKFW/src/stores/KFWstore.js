@@ -286,6 +286,8 @@ export const useModelStore = defineStore("store", () => {
 		performingRewind: false,
 
 		showReplay: false,
+		generatingReplay: false,
+		replayAtBottom: false,
 
 		showIntroInfo: true,
 		showFullExtensions: false,

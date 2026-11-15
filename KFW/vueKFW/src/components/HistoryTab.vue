@@ -1,8 +1,19 @@
 <script setup>
 import HistoryEntry from "./HistoryEntry.vue"
+import * as rf from "../js/KFWreference"
 
 import { useModelStore } from "../stores/KFWstore.js"
 const store = useModelStore()
+
+// computedHistory adds NEW_GAME (and GAME_END) and may be cropped by the
+// hidden-information setting. Map a displayed entry back to store.history.
+function historyIndexForEntry(index1) {
+	if (index1 === 0) return 0
+	const hasGameEnd = store.gameflow.phase === rf.PHASE_GAME_OVER ? 1 : 0
+	if (hasGameEnd && index1 === store.computedHistory.length - 1) return store.history.length - 1
+	const visibleHistoryLength = store.computedHistory.length - 1 - hasGameEnd
+	return store.history.length - visibleHistoryLength + index1 - 1
+}
 
 function historyToggle() {
 	setTimeout(function () {
@@ -34,7 +45,7 @@ function historyToggle() {
 			<div v-if="store.viewSettings.showReplay"><b>{{ $t("history.replayMode") }}</b></div>
 			<div id="historyMainDiv" class="reverseHistory">
 				<template v-for="(entry, index1) in store.computedHistory" :key="index1">
-					<HistoryEntry :entry="entry" :entry_-i-d="index1" />
+					<HistoryEntry :entry="entry" :entry_ID="historyIndexForEntry(index1)" />
 				</template>
 			</div>
 

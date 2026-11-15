@@ -118,7 +118,7 @@ function copyToClipboard() {
 		<div v-if="spinoffSuccessText !== ''" class="spinoffSuccessText" v-html="spinoffSuccessText"></div>
 		<div v-if="spinoffErrorText !== ''" class="spinoffErrorText">{{ spinoffErrorText }}</div>
 		<div v-if="!store.viewSettings.generatingReplay" class="replayHistoryEntry">
-			<HistoryEntry :entry="store.history[store.replayStep]" :entry_-i-d=-1 />
+			<HistoryEntry v-if="store.history[store.replayStep]" :entry="store.history[store.replayStep]" :entry_ID="-1" />
 		</div>
 	</template>
 

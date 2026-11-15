@@ -38,7 +38,7 @@ The rewind happened after seeing hidden information revealed by using:
  */
 import TopMenu from "./components/TopMenu.vue"
 import TopMenuViews from "./components/TopMenuViews.vue"
-//import ReplayArea from "./components/ReplayArea.vue"
+import ReplayArea from "./components/ReplayArea.vue"
 import TileInfoPopup from "./components/TileInfoPopup.vue"
 import MeeplePopup from "./components/MeeplePopup.vue"
 
@@ -104,7 +104,9 @@ if (window.initData.startingOptions.includes(8)) store.hiddenInformationKnowledg
 if (window.initData.startingOptions.includes(5)) store.hiddenInformationKnowledge = 7
 if (window.initData.startingOptions.includes(6)) store.hiddenInformationKnowledge = 8
 if (window.initData.startingOptions.includes(9)) store.hiddenInformationKnowledge = 9
-model.initGame()
+model.initGame().then(() => {
+	if (window.initData.spoilerFree) replay.generateReplayData(true).catch((error) => console.error("KFW replay generation failed", error))
+})
 
 
 /*
@@ -206,7 +208,7 @@ function removeTileInfoPopup() {
 					<TopMenuViews />
 					<HistoryTab />
 
-					<!--<ReplayArea v-if="store.viewSettings.generatingReplay || !store.viewSettings.replayAtBottom" />-->
+					<ReplayArea v-if="store.viewSettings.generatingReplay || !store.viewSettings.replayAtBottom" />
 					<template v-if="!store.viewSettings.generatingReplay">
 						<MainArea />
 					</template>

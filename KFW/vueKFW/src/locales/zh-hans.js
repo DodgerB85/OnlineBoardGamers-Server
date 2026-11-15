@@ -22,6 +22,7 @@ export default {
 		notes: "笔记",
 		reserve: "预留",
 		history: "历史",
+		replay: "回放",
 		rewind: "回退",
 		timeToNextKickout: "距离下次踢出：",
 		turnOrder: "回合顺序：",

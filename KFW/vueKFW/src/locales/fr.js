@@ -22,6 +22,7 @@ export default {
 		notes: "Notes",
 		reserve: "Réserve",
 		history: "Historique",
+		replay: "Rejouer",
 		rewind: "Rembobiner",
 		timeToNextKickout: "Temps avant la prochaine exclusion :",
 		turnOrder: "Ordre de tour :",

@@ -22,6 +22,7 @@ export default {
 		notes: "Notizen",
 		reserve: "Reserve",
 		history: "Verlauf",
+		replay: "Wiederholung",
 		rewind: "Zurück",
 		timeToNextKickout: "Zeit bis zum nächsten Kickout:",
 		turnOrder: "Zugreihenfolge:",

@@ -3,7 +3,7 @@ import * as rf from "../js/KFWreference"
 import * as view from "../js/KFWview"
 import * as history from "../js/KFWhistory"
 import i18n from "../i18n.js"
-//import * as replay from "../js/KFWreplay"
+import * as replay from "../js/KFWreplay"
 
 import HistoryHex from "./HistoryHex.vue"
 
@@ -21,7 +21,8 @@ function clickedHistoryEntry(action, entry3, entry_id) {
 	// If not replay, or if clicking on the replay entry, just do highlights
 	if (!store.viewSettings.showReplay || entry_id === -1) history.setupHistoryHighlight(action, entry3, entry_id)
 	// Otherwise, you are clicking in history during replay
-	//else replay.goToReplayStep(entry_id)
+	else if (action === rf.HIST_GAME_END) replay.goToReplayStep(store.replayData.length - 1)
+	else replay.goToReplayStep(entry_id)
 }
 
 function getTimeString(entry2) {

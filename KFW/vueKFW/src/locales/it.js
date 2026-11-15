@@ -22,6 +22,7 @@ export default {
 		notes: "Note",
 		reserve: "Riserva",
 		history: "Cronologia",
+		replay: "Riproduzione",
 		rewind: "Riavvolgi",
 		timeToNextKickout: "Tempo alla prossima esclusione:",
 		turnOrder: "Ordine di turno:",

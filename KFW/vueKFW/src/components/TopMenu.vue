@@ -4,7 +4,7 @@ import * as view from "../js/KFWview"
 import * as rf from "../js/KFWreference"
 import * as controller from "../js/KFWcontroller"
 import * as model from "../js/KFWmodel"
-//import * as replay from "../js/KFWreplay"
+import * as replay from "../js/KFWreplay"
 import * as funcs from "../js/KFWfuncs"
 import * as map from "../js/KFWmap"
 //import * as village from "../js/KFWvillage"
@@ -14,6 +14,10 @@ const store = useModelStore()
 
 import { usePersonalStore } from "../stores/KFWpersonal.js"
 const personal = usePersonalStore()
+
+// A spoiler-free replay link is already in replay mode; there is no live board
+// to return to on this page.
+const spoilerFree = window.initData.spoilerFree === true
 
 function doZoom(dir) {
 	for (let i = 0; i < store.players.length; i++) {
@@ -52,25 +56,30 @@ function toggleBug() {
 	store.viewSettings.showBug = !store.viewSettings.showBug
 }
 
-/*async function toggleReplay() {
+async function toggleReplay() {
+	if (store.viewSettings.generatingReplay) return
 	if (!store.viewSettings.showReplay) {
-		if (store.hiddenMoney) {
-			store.gameMessages.errorText = "You cannot view a replay during a hidden money game"
-			return
-		}
 		store.replayResetData = funcs.exportKFWmodel(true)
 		store.viewSettings.showReplay = true
 
-		// TURM ON
-		await replay.generateReplayData()
+		try {
+			await replay.generateReplayData()
+		} catch (error) {
+			console.error("KFW replay generation failed", error)
+			store.viewSettings.showReplay = false
+			funcs.importKFWmodel(store.replayResetData, true)
+		}
 	} else {
 		// TURN OFF
 		store.clearHistoryHelpers()
-		store.clearVars()
+		store.clearMessages()
 		store.viewSettings.showReplay = false
+		store.viewSettings.generatingReplay = false
 		funcs.importKFWmodel(store.replayResetData, true)
+		store.replayData.splice(0)
+		store.replayStep = 0
 	}
-}*/
+}
 
 function toggleNotes() {
 	store.viewSettings.showBug = false
@@ -509,10 +518,10 @@ function getMapBubblePosition(bubble) {
 				<span>{{ $t("topMenu.history") }}</span>
 			</span>
 
-			<!--<span class="topMenuItem" @click="toggleReplay()">
+			<span v-if="!spoilerFree" class="topMenuItem" @click="toggleReplay()">
 				<img src="@static/KFW/images/icon-replay.svg" />
 				<span>{{ $t("topMenu.replay") }}</span>
-			</span>-->
+			</span>
 
 			<div class="menuDivider"></div>
 
