@@ -149,10 +149,11 @@ test("train track builds, compresses to TN and reloads", { skip: skip }, () => {
 
 	const renderedHex0 = computes.computedHexes.value.find((h) => h.hexID === 0)
 	const renderedHex1 = computes.computedHexes.value.find((h) => h.hexID === 1)
-	assert.match(renderedHex0.fullTrainTrackPath, /^M/, "hex 0 draws its half of the track")
-	assert.match(renderedHex1.fullTrainTrackPath, /^M/, "hex 1 draws its half of the track")
-	assert.equal(renderedHex0.fullTrainTrackPath.split("M").length - 1, 1, "hex 0 track is one continuous polyline")
-	assert.equal(renderedHex1.fullTrainTrackPath.split("M").length - 1, 1, "hex 1 track is one continuous polyline")
+	for (const hex of [renderedHex0, renderedHex1]) {
+		assert.ok(Array.isArray(hex.fullTrainTrackPath) && hex.fullTrainTrackPath.length === 1, `hex ${hex.hexID} draws one track chain`)
+		assert.match(hex.fullTrainTrackPath[0].d, /^M/, `hex ${hex.hexID} chain has an SVG path`)
+		assert.ok(Number.isInteger(hex.fullTrainTrackPath[0].dashes) && hex.fullTrainTrackPath[0].dashes >= 1, `hex ${hex.hexID} chain has a whole number of dash periods`)
+	}
 
 	const tn = map.compressTrainTracksForMap()
 	assert.deepEqual(tn, [[0, 0, 0, 1, 0]], "TN stores both tile coords and the lane")

@@ -1,14 +1,9 @@
 /**
- * The createRNBpage map thumbnails (map selection preview and gallery) draw the map's
- * train tracks (TN = [[x1, y1, x2, y2, lane], ...]) with a simplified routing model: a track
- * between two plain tiles runs straight centre-to-centre. When either tile is a river (terrains
- * 0-22) the river sits at the tile centre and exits at the edge midpoints, so the track crosses
- * the shared edge at the 1/4 point (halfway between the midpoint and a corner) and a river tile
- * joins each lane's entry/exit points with a direct chord — skirting the river, never through
- * the centre. Segments weld at the shared tile centres / crossing points into one continuous
- * line — rendered as a single thick dark-blue stroke (#1A237E, the editor's rail colour) rather
- * than the editor's two masked rails. Both page scripts carry their own copy of the builder, so
- * both are checked.
+ * The createRNBpage map thumbnails (map selection preview and gallery) draw the map's train
+ * tracks. The old createRNB page still uses its simplified TN routing (centre-to-centre for plain
+ * tiles, a bank chord across a river) and a single dark-blue rail. createRNB2 draws the editor's
+ * saved TP geometry 1:1 when present; maps saved before TP existed fall back to TN and are drawn
+ * centre-to-centre. Both page scripts carry their own copy of the builder, so both are checked.
  *
  * Run with:
  *     node --test tests/map-thumbnail-tracks.test.js
@@ -62,7 +57,8 @@ const distPointToSeg = (p, a, b) => {
 	return Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy))
 }
 
-for (const file of ["createRNB.js", "createRNB2.js"]) {
+// Legacy createRNB page: its builder still uses the TN routing and the single dark-blue rail.
+for (const file of ["createRNB.js"]) {
 	const buildMapThumbnailSVG = await loadBuilder(file)
 
 	test(file + ": a track between plain tiles runs straight centre to centre", () => {
@@ -169,3 +165,55 @@ for (const file of ["createRNB.js", "createRNB2.js"]) {
 		assert.equal(trackPath(buildMapThumbnailSVG([[0, 0, 1], [0, 1, 1], { TN: [[7, 7, 8, 8, 0]] }])), null, "unknown tile coords are ignored")
 	})
 }
+
+// createRNB2 page: black rail with a white dashed centre; TP is drawn 1:1, TN is the fallback.
+const buildRNB2 = await loadBuilder("createRNB2.js")
+
+function blackRails(svg) {
+	return [...svg.matchAll(/<path d="([^"]+)"[^>]*stroke="black"[^>]*\/>/g)].map((m) => ({
+		d: m[1],
+		nums: (m[1].match(/-?\d+(?:\.\d+)?/g) || []).map(Number),
+		tag: m[0],
+	}))
+}
+
+test("createRNB2.js: TN fallback draws a black centre-to-centre rail", () => {
+	const svg = buildRNB2([[0, 0, 55], [0, 1, 55], { TN: [[0, 0, 0, 1, 0]] }])
+	const rails = blackRails(svg)
+	assert.equal(rails.length, 1, "one edge draws one black rail")
+	assert.equal(rails[0].d, "M0 0 L86.6 150", "the rail runs centre to centre")
+	assert.match(rails[0].tag, /stroke-width="26\.8"/, "the rail is the new thick width")
+	assert.match(rails[0].tag, /stroke-linecap="butt"/, "the rail meets the edge without caps")
+	assert.match(svg, /stroke="white"[^>]*stroke-width="13\.8"/, "the white dashed centre is drawn too")
+})
+
+test("createRNB2.js: old maps without TP use the TN centre-to-centre fallback", () => {
+	// Maps saved before TP existed still have TN; they intentionally fall back to straight
+	// centre-to-centre lines rather than the old river chord approximation.
+	const rails = blackRails(buildRNB2([[0, 0, 55], [0, 1, 1], [0, 2, 55], { TN: [[0, 0, 0, 1, 0], [0, 1, 0, 2, 0]] }]))
+	assert.equal(rails.length, 1, "the run is one continuous rail")
+	const n = rails[0].nums
+	assert.ok(near(n[0], 0) && near(n[1], 0), "starts at the first plain tile centre")
+	assert.ok(near(n[n.length - 2], 173.21) && near(n[n.length - 1], 300), "ends at the last plain tile centre")
+})
+
+test("createRNB2.js: TN lanes still draw when there is no TP", () => {
+	const rails = blackRails(buildRNB2([[0, 0, 55], [0, 1, 1], [0, 2, 55], { TN: [[0, 0, 0, 1, 0], [0, 1, 0, 2, 0], [0, 0, 0, 1, 1], [0, 1, 0, 2, 1]] }]))
+	assert.ok(rails.length >= 1, "multi-lane TN data still renders")
+})
+
+test("createRNB2.js: TP geometry is drawn 1:1", () => {
+	const rails = blackRails(buildRNB2([[0, 0, 55], [0, 1, 55], { TP: [[0, 0, [0, 0.5, -0.866, 0.5]]] }]))
+	assert.equal(rails.length, 1)
+	assert.equal(rails[0].d, "M0 50 L-86.6 50", "hex-local TP points are scaled by the 100px thumbnail radius")
+})
+
+test("createRNB2.js: flat style and maps without tracks", () => {
+	const flatRails = blackRails(buildRNB2([[0, 0, 55], [0, 1, 55], { ST: 1, TN: [[0, 0, 0, 1, 0]] }]))
+	assert.equal(flatRails.length, 1)
+	assert.equal(flatRails[0].d, "M0 0 L0 173.21", "flat-style tracks end at the two tile centres")
+
+	assert.equal(blackRails(buildRNB2([[0, 0, 1], [0, 1, 1], {}])).length, 0, "no TN, no track")
+	assert.equal(blackRails(buildRNB2([[0, 0, 1], [0, 1, 1], undefined])).length, 0, "no setup object, no track")
+	assert.equal(blackRails(buildRNB2([[0, 0, 1], [0, 1, 1], { TN: [[7, 7, 8, 8, 0]] }])).length, 0, "unknown tile coords are ignored")
+})
