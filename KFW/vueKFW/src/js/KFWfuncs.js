@@ -551,7 +551,7 @@ export async function simpleImportWholeKFWmodel(input, importContext) {
 	}
 }
 
-export function exportKFWmodel(includeContext = false, raw = false, omitHistory = false) {
+export function exportKFWmodel(includeContext = false, raw = false) {
 	const store = useModelStore()
 	let temp = []
 
@@ -664,7 +664,7 @@ export function exportKFWmodel(includeContext = false, raw = false, omitHistory 
 	temp.push(JSON.parse(JSON.stringify(tempAvailableTiles)))
 
 	// 5 history
-	temp.push(omitHistory ? [] : JSON.parse(JSON.stringify(store.history)))
+	temp.push(JSON.parse(JSON.stringify(store.history)))
 
 	// 6 availableResources
 	temp.push(JSON.parse(JSON.stringify(store.availableResources)))
@@ -706,7 +706,7 @@ export function exportKFWmodel(includeContext = false, raw = false, omitHistory 
 	return base64Data
 }
 
-export async function importKFWmodel(input, includeContext, raw = false, keepHistory = false) {
+export async function importKFWmodel(input, includeContext, raw = false) {
 	const store = useModelStore()
 
 	if (input === "" || input == undefined) return
@@ -898,10 +898,8 @@ export async function importKFWmodel(input, includeContext, raw = false, keepHis
 	}
 
 	// 3 history
-	if (!keepHistory) {
-		store.history.splice(0)
-		Object.assign(store.history, inputModel[5])
-	}
+	store.history.splice(0)
+	Object.assign(store.history, inputModel[5])
 
 	// 6 availableResources
 	store.availableResources.splice(0)

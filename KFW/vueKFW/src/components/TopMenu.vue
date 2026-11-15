@@ -4,7 +4,7 @@ import * as view from "../js/KFWview"
 import * as rf from "../js/KFWreference"
 import * as controller from "../js/KFWcontroller"
 import * as model from "../js/KFWmodel"
-import * as replay from "../js/KFWreplay"
+//import * as replay from "../js/KFWreplay"
 import * as funcs from "../js/KFWfuncs"
 import * as map from "../js/KFWmap"
 //import * as village from "../js/KFWvillage"
@@ -52,7 +52,7 @@ function toggleBug() {
 	store.viewSettings.showBug = !store.viewSettings.showBug
 }
 
-async function toggleReplay() {
+/*async function toggleReplay() {
 	if (!store.viewSettings.showReplay) {
 		if (store.hiddenMoney) {
 			store.gameMessages.errorText = "You cannot view a replay during a hidden money game"
@@ -70,7 +70,7 @@ async function toggleReplay() {
 		store.viewSettings.showReplay = false
 		funcs.importKFWmodel(store.replayResetData, true)
 	}
-}
+}*/
 
 function toggleNotes() {
 	store.viewSettings.showBug = false
@@ -509,10 +509,10 @@ function getMapBubblePosition(bubble) {
 				<span>{{ $t("topMenu.history") }}</span>
 			</span>
 
-			<span class="topMenuItem" @click="toggleReplay()">
+			<!--<span class="topMenuItem" @click="toggleReplay()">
 				<img src="@static/KFW/images/icon-replay.svg" />
 				<span>{{ $t("topMenu.replay") }}</span>
-			</span>
+			</span>-->
 
 			<div class="menuDivider"></div>
 

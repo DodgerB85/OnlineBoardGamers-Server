@@ -4,7 +4,6 @@ import * as map from "./KFWmap"
 import * as model from "./KFWmodel"
 import * as history from "./KFWhistory"
 import * as controller from "./KFWcontroller"
-import i18n from "../i18n"
 
 import { useModelStore } from "../stores/KFWstore.js"
 
@@ -12,7 +11,7 @@ export function goToReplayStep(step) {
 	const store = useModelStore()
 
 	store.replayStep = step
-	funcs.importKFWmodel(store.replayData[store.replayStep], false, true, true)
+	funcs.importKFWmodel(store.replayData[store.replayStep], false, true)
 	//map.calculateCanvasSize()
 
 	history.setupHistoryHighlight(store.history[store.replayStep][0], store.history[store.replayStep][3], store.replayStep) // ADD STEP???
@@ -34,7 +33,7 @@ export function performStep(amount) {
 	if (store.replayStep < 0) store.replayStep = 0
 	if (store.replayStep > store.replayData.length - 1) store.replayStep = store.replayData.length - 1
 
-	funcs.importKFWmodel(store.replayData[store.replayStep], false, true, true)
+	funcs.importKFWmodel(store.replayData[store.replayStep], false, true)
 
 	history.setupHistoryHighlight(store.history[store.replayStep][0], store.history[store.replayStep][3], store.replayStep) // ADD STEP??
 	if (store.viewSettings.showingPlayerIndex !== -1) store.viewSettings.showingPlayerIndex = store.history[store.replayStep][1]
@@ -70,23 +69,42 @@ export async function generateReplayData(spoilerFree = false) {
 	const store = useModelStore()
 	store.viewSettings.generatingReplay = true
 
-	// KFW history stores a raw model snapshot after every recorded action.
-	// Older saves have no snapshots, so they cannot be replayed.
-	const snapshots = store.history.map((entry) => (Array.isArray(entry?.[4]) ? entry[4] : null))
-	if (snapshots.length === 0 || snapshots.some((snapshot) => !snapshot)) {
-		store.gameMessages.errorText = i18n.global.t("replay.noReplayData")
-		store.viewSettings.generatingReplay = false
-		return
-	}
+	let replayData = []
 
-	store.replayData = snapshots
-	store.replayStep = snapshots.length - 1
+	// Reset the data
+	await resetDataForReplay()
+	let pBarEl = document.querySelector(".progress-bar div")
+	const pBarTextEl = document.querySelector(".progress-bar span")
+
+	for (let i = 0; i < store.history.length; i++) {
+		if (i !== 0) checkAndPerformTurnEnd(i)
+
+		/** THESE HAVE NO REPLAY YET -- BUT NOT ALL WILL NEED A REPLAY */
+		/*// Non-player Actions
+		/*
+		if (store.history[i][0] === rf.HIST_NEW_TURN) replayNewTurn(i, store.history[i][1], store.history[i][3])
+		else if (store.history[i][0] === rf.HIST_ADD_CITY) replayAddCity(i, store.history[i][1], store.history[i][3])
+		*/
+
+		// Context is not restored by replay steps (they import with includeContext=false).
+		replayData.push(funcs.exportKFWmodel(false))
+
+		if (i % 5 === 0 && pBarEl != null) {
+			let percent = (i / store.history.length) * 100
+			pBarEl.style.width = percent + "%"
+			pBarTextEl.innerText = Math.round(percent) + "%"
+			await funcs.sleep(0)
+		}
+	} // END generating replay
+
+	store.replayData = replayData
+	store.replayStep = replayData.length - 1
 	if (spoilerFree) {
 		if (window.initData.replayStep <= 0) store.replayStep = 0
 		else if (window.initData.replayStep >= store.replayData.length - 1) store.replayStep = store.replayData.length - 1
 		else store.replayStep = window.initData.replayStep
 	}
-	store.viewSettings.showReplay = true
+	if (store.replayData.length > 0) store.viewSettings.showReplay = true
 	goToReplayStep(store.replayStep)
 	store.viewSettings.generatingReplay = false
 }
@@ -138,7 +156,7 @@ function checkAndPerformTurnEnd(historyIndex) {
 
 		/*// Instead of shift, use this to allow for simul turns
 		const indexToRemove = store.gameflow.turnOrder.indexOf(currentPlayerIndex)
-		// Check if the integer is present in the array before removing
+		// Check if the integer is present in the array before removing it
 		if (indexToRemove !== -1) {
 			// Remove the integer from the array
 			store.gameflow.turnOrder.splice(indexToRemove, 1)

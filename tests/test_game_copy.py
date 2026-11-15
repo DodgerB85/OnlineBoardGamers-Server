@@ -85,7 +85,6 @@ class GameCopyTest(TestCase):
 
         for name in (
             "DDL:showDDLreplayStep",
-            "KFW:showKFWreplayStep",
             "RNB:showRNBreplayStep",
             "ROW:showROWreplayStep",
             "URR:showURRreplayStep",

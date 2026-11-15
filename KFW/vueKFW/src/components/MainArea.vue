@@ -11,7 +11,7 @@ import PlayerItems from "./PlayerItems.vue"
 import ActionArea from "./ActionArea.vue"
 import PlayerVillage from "./PlayerVillage.vue"
 import VillagesArea from "./VillagesArea.vue"
-import ReplayArea from "./ReplayArea.vue"
+//import ReplayArea from "./ReplayArea.vue"
 import DebugArea from "./DebugArea.vue"
 import AvailableTile from "./AvailableTile.vue"
 import FinalScoreTable from "./FinalScoreTable.vue"
@@ -275,7 +275,7 @@ function getOrdinalForIdx1(idx1) {
 
 				<!-- VILLAGES -->
 				<VillagesArea v-if="store.gameflow.phase !== rf.PHASE_GAME_OVER" />
-				<ReplayArea v-if="store.viewSettings.replayAtBottom" />
+				<!--<ReplayArea v-if="store.viewSettings.replayAtBottom" />-->
 				<template v-if="IO.DEBUG_USERS.includes(personal.name)">
 					<DebugArea />
 				</template>
