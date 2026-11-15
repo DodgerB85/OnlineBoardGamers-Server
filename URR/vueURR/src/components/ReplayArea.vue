@@ -43,10 +43,20 @@ function applyStep() {
 	}
 }
 
+function jump(amount) {
+	step.value = Math.max(0, Math.min(Math.max(0, maxStep()), step.value + amount))
+}
+
+function first() {
+	step.value = 0
+}
+
+function last() {
+	step.value = Math.max(0, maxStep())
+}
+
 function prev() {
-	if (step.value > 0) {
-		step.value--
-	}
+	jump(-1)
 }
 
 function backToMyLastMove() {
@@ -55,13 +65,7 @@ function backToMyLastMove() {
 }
 
 function next() {
-	if (step.value < maxStep()) {
-		step.value++
-	}
-}
-
-function exitReplay() {
-	store.viewSettings.showReplay = false
+	jump(1)
 }
 
 async function copyGameToNewPracticeGame() {
@@ -117,14 +121,17 @@ function copyToClipboard() {
 	<div id="replayArea" :aria-label="$t('replay.aria')">
 		<b>{{ $t("replay.title") }}</b>
 		<button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="step === 0" @click="backToMyLastMove">{{ $t("replay.backToMyLastMove") }}</button>
+		<button class="actionsLineButton" :disabled="step === 0" :aria-label="$t('replay.first')" @click="first">|&lt;</button>
+		<button class="actionsLineButton" :disabled="step === 0" :aria-label="$t('replay.prev5')" @click="jump(-5)">&lt;&lt;</button>
 		<button class="actionsLineButton" :disabled="step === 0" @click="prev">&lt; {{ $t("replay.prev") }}</button>
 		<input :aria-label="$t('replay.stepAria')" type="range" min="0" :max="Math.max(0, maxStep())" v-model.number="step" />
 		<span>{{ $t("replay.step", { step: step + 1, total: maxStep() + 1 }) }}</span>
 		<button class="actionsLineButton" :disabled="step >= maxStep()" @click="next">{{ $t("replay.next") }} &gt;</button>
+		<button class="actionsLineButton" :disabled="step >= maxStep()" :aria-label="$t('replay.next5')" @click="jump(5)">&gt;&gt;</button>
+		<button class="actionsLineButton" :disabled="step >= maxStep()" :aria-label="$t('replay.last')" @click="last">&gt;|</button>
 		<button class="actionsLineButton" @click="store.viewSettings.showHistory = !store.viewSettings.showHistory">{{ $t("replay.history") }}</button>
 		<button v-if="personal.pov >= 0" class="actionsLineButton" @click="copyGameToNewPracticeGame">{{ $t("replay.copyThisGame") }}<br />{{ $t("replay.toNewGame") }}</button>
 		<button id="copyURLbutton" class="actionsLineButton" @click="copyToClipboard">{{ $t("replay.copyUrl") }}</button>
-		<button class="actionsLineButton" @click="exitReplay">{{ $t("replay.exit") }}</button>
 		<div id="popup" class="popup">{{ copyMessage }}</div>
 		<div v-if="spinoffSuccessText !== ''" class="spinoffSuccessText" v-html="spinoffSuccessText"></div>
 		<div v-if="spinoffErrorText !== ''" class="spinoffErrorText">{{ spinoffErrorText }}</div>
