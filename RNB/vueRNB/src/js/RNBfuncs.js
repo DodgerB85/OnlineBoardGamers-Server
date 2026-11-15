@@ -1,3 +1,4 @@
+import * as atelier from "./RNBatelier.js"
 /**
  * shuffle
  * removeItemAll
@@ -79,7 +80,7 @@ export function sleep(ms) {
 export function compressData64(data) {
 	let step1 = JSON.stringify(data)
 	// eslint-disable-next-line no-undef
-	let step2 = pako.gzip(step1)
+	let step2 = pako.gzip(step1, { level: 9 })
 	let base64Data = btoa(String.fromCharCode(...new Uint8Array(step2)))
 
 	return base64Data
@@ -156,6 +157,7 @@ export function htmlUnescape(value) {
 /*** MAP */
 // Wipe everything to reset map building
 export function clearMap(keepHistory) {
+	atelier.cancelPendingExhibition()
 	const store = useModelStore()
 	if (!keepHistory) store.history.splice(0)
 
@@ -714,6 +716,7 @@ export async function simpleImportWholeRNBmodel(inputBase64, keepHistory = false
 }
 
 export function exportRNBmodel(forGameOver) {
+	atelier.flushPendingExhibition()
 	const store = useModelStore()
 	let temp = []
 
@@ -726,9 +729,8 @@ export function exportRNBmodel(forGameOver) {
 		else tempPlayer.push([store.players[i].name, store.players[i].displayName])
 		// 1 - colour
 		tempPlayer.push(store.players[i].colour)
-		// 2 - Art & The Atelier: shows staged per target, best beauty shown at this tile
+		// 2 - Art & The Atelier: shows staged per target
 		if (store.gameOptions.useArt) tempPlayer.push(store.players[i].artShownAt || {})
-		if (store.gameOptions.useArt) tempPlayer.push(store.players[i].artBestShownHere || 0)
 
 		tempPlayers.push(tempPlayer)
 	}
@@ -810,7 +812,7 @@ export function exportRNBmodel(forGameOver) {
 	let step1 = JSON.stringify(temp)
 
 	// eslint-disable-next-line no-undef
-	let step2 = pako.gzip(step1)
+	let step2 = pako.gzip(step1, { level: 9 })
 	let base64Data = btoa(String.fromCharCode(...new Uint8Array(step2)))
 
 	return base64Data
@@ -890,7 +892,6 @@ export function importRNBmodel(input, forGameOver) {
 			RnD: [...RnD],
 			// Art & The Atelier: restored for old saves that lack these fields
 			artShownAt: entry[2] || {},
-			artBestShownHere: entry[3] || 0,
 		})
 	}
 

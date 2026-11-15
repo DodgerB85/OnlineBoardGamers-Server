@@ -1064,6 +1064,16 @@ export function verifySingleStackAction(stackActionData) {
 		return 0
 	}
 
+	if (action === rf.STACK_EXHIBITION) {
+		const caravan = model.getTransporterByID(stackAction[1])
+		if (!atelier.isArtEnabled() || !caravan || caravan.type !== rf.EXHIBITION_TRANSPORTER || loc.isOOBlocation(caravan.location)) return 1
+		if (caravan.ownerIndex !== playerIndex || stackAction[2] !== playerIndex || stackAction[3] === playerIndex) return 2
+		if (!model.homeMarkersOnHex(caravan.location[1]).some((marker) => marker.ownerIndex === stackAction[3])) return 3
+		const beauty = new Set(model.resourcesOnTransport(caravan.id).map((r) => r.type)).size
+		const isShow = !atelier.hasShownAt(playerIndex, stackAction[3]) && beauty >= 3 && beauty <= 5 && beauty > atelier.bestShownAtTarget(stackAction[3])
+		return stackAction[4] === (isShow ? beauty : 0) ? 0 : 4
+	}
+
 	if (action === rf.STACK_TAKE_TRAIN) {
 		const movingTransporterID = stackAction[1]
 		const fromBucketLocation = decompressLocation(stackAction[2])
@@ -1082,7 +1092,7 @@ export function verifySingleStackAction(stackActionData) {
 			rf.doAdminAlrt(`1 - Transporter not found for train ride`)
 			return 1
 		}
-		if (!rf.LAND_TRANSPORTERS.includes(transporterObj.type)) return 2
+		if (!rf.LAND_TRANSPORTERS.includes(transporterObj.type) && transporterObj.type !== rf.EXHIBITION_TRANSPORTER) return 2
 
 		const fromHexID = fromBucketLocation[1]
 		const fromBucketID = fromBucketLocation[2]

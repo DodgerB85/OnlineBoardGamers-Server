@@ -696,7 +696,7 @@ export function getEligibleTransportersForRemoval(playerIndex, isTotalProblem, i
 	// Planes & Aeroports: if you have too many planes, you MUST remove a plane
 	else if (isPlaneProblem) typesForRemoval.push(rf.AIR_TYPE)
 	// When the only problem is total, allow removing any type
-	else if (isTotalProblem) typesForRemoval = [rf.LAND_TYPE, rf.WATER_TYPE, rf.AIR_TYPE]
+	else if (isTotalProblem) typesForRemoval = [rf.LAND_TYPE, rf.WATER_TYPE, rf.AIR_TYPE, rf.EXHIBITION_TRANSPORTER]
 
 	// Planes & Aeroports: the global 8-transporter total always applies. When total is
 	// exceeded alongside a type-specific cap, all types contributing to that total should

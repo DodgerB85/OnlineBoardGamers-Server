@@ -84,11 +84,11 @@ export function getEligibleTrainFares(transporterID) {
 	const transporterObj = model.getTransporterByID(transporterID)
 	const fromHexID = transporterObj.location[1]
 	const carried = model.resourcesOnTransport(transporterID)
-		.filter(isFareResource)
+		.filter((r) => isFareAccessible(r, transporterObj))
 		.sort((a, b) => a.id - b.id)
 	const onTile = model
 		.getAllInGameResources()
-		.filter((r) => isFareResource(r) && !loc.isOnAnyTransporter(r.location) && loc.isSpecificHexLocation(r.location, fromHexID))
+		.filter((r) => isFareAccessible(r, transporterObj) && !loc.isOnAnyTransporter(r.location) && loc.isSpecificHexLocation(r.location, fromHexID))
 		.sort((a, b) => a.id - b.id)
 	return carried.concat(onTile)
 }
@@ -98,10 +98,10 @@ export function findTrainFare(transporterID) {
 	return getEligibleTrainFares(transporterID)[0] ?? null
 }
 
-// shortcut: the fare must be lying on the departure tile or already aboard,
-// not on another transporter waiting there
+// Goods brought by another transporter during this movement phase cannot pay.
 export function isFareAccessible(fareRes, transporterObj) {
 	if (!isFareResource(fareRes)) return false
+	if (fareRes.movedTransporterID !== -1 && fareRes.movedTransporterID !== transporterObj.id) return false
 	if (loc.isOnSpecificTransporter(fareRes.location, transporterObj.id)) return true
 	return !loc.isOnAnyTransporter(fareRes.location) && loc.isSpecificHexLocation(fareRes.location, transporterObj.location[1])
 }

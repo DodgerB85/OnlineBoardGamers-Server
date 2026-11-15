@@ -6,8 +6,7 @@
  *
  * State:
  *  - `players[i].artShownAt`         { targetIdx: beauty } - one show per target tile per stager
- *  - `players[i].artBestShownHere`   best beauty ever shown at THIS player's starting tile
- *  Both live on the player objects, so they are persisted/serialised with the players.
+ *  Show records live on the player objects and are persisted with the players.
  */
 
 import { useModelStore } from "../stores/RNBstore.js"
@@ -46,6 +45,7 @@ export function getAtelierStats() {
 export function findFeasibleRecipeIndices(transporterID) {
 	const transporterObj = model.getTransporterByID(transporterID)
 	const stats = getAtelierStats()
+	if (!transporterObj) return []
 	if (!stats || !stats.recipes) return []
 	const resourcesOnTrans = loc.getAllResourcesAccessibleToTransporter(transporterID, true).map((r) => r.type)
 	const feasible = []
@@ -114,14 +114,12 @@ function playerArtState(playerIndex) {
 	const store = useModelStore()
 	const p = store.players[playerIndex]
 	if (!p.artShownAt) p.artShownAt = {}
-	if (p.artBestShownHere === undefined) p.artBestShownHere = 0
 	return p
 }
 
 export function bestShownAtTarget(targetPlayerIndex) {
 	const store = useModelStore()
-	const p = store.players[targetPlayerIndex]
-	return p && p.artBestShownHere ? p.artBestShownHere : 0
+	return Math.max(0, ...store.players.map((player) => player.artShownAt?.[targetPlayerIndex] || 0))
 }
 
 export function hasShownAt(stagerPlayerIndex, targetPlayerIndex) {
@@ -142,8 +140,7 @@ export function countDistinctShows(playerIndex) {
 // ============================================================================
 
 // Called after an exhibition caravan completes a move (live play). If the caravan
-// stands on another player's starting tile and the show is valid, the caravan and
-// its artwork vanish and the show is recorded.
+// stands on another player's starting tile, it and its artwork vanish; valid shows score.
 export function checkExhibitionOnMove(transporterObj) {
 	const store = useModelStore()
 	if (!isArtEnabled()) return false
@@ -157,26 +154,15 @@ export function checkExhibitionOnMove(transporterObj) {
 
 	const stagerPlayerIndex = transporterObj.ownerIndex
 	const targetPlayerIndex = homeMarker.ownerIndex
-	if (hasShownAt(stagerPlayerIndex, targetPlayerIndex)) return false
 
 	// Beauty = number of DIFFERENT works of art carried
-	const beauty = new Set(model.resourcesOnTransport(transporterObj.id).map((r) => r.type)).size
-	if (beauty < 3) return false
+	let beauty = new Set(model.resourcesOnTransport(transporterObj.id).map((r) => r.type)).size
 
 	// Strictly more beautiful than the best show already staged at this tile (cap 5)
 	const best = bestShownAtTarget(targetPlayerIndex)
-	if (beauty <= best || beauty > 5) return false
+	if (hasShownAt(stagerPlayerIndex, targetPlayerIndex) || beauty < 3 || beauty <= best || beauty > 5) beauty = 0
 
-	// The caravan and everything it carries vanish (artwork is discarded, not dropped)
-	if (store.context.selectedTransporterIDforTM === transporterObj.id) store.context.selectedTransporterIDforTM = -1
-	for (const res of model.resourcesOnTransport(transporterObj.id)) {
-		res.location = loc.setOOBlocation()
-	}
-	transporterObj.location = loc.setOOBlocation()
-
-	// Record the show
-	playerArtState(stagerPlayerIndex).artShownAt[targetPlayerIndex] = beauty
-	playerArtState(targetPlayerIndex).artBestShownHere = beauty
+	performExhibitionStackAction([rf.STACK_EXHIBITION, transporterObj.id, stagerPlayerIndex, targetPlayerIndex, beauty])
 
 	stack.addItemToStack({
 		action: rf.STACK_EXHIBITION,
@@ -208,6 +194,12 @@ export function scheduleExhibitionAfterAnimation(transporterObj, onShown) {
 	pendingShow = { run, timer: setTimeout(run, ms + 100) }
 }
 
+export function cancelPendingExhibition() {
+	if (!pendingShow) return
+	clearTimeout(pendingShow.timer)
+	pendingShow = null
+}
+
 export function flushPendingExhibition() {
 	if (!pendingShow) return
 	clearTimeout(pendingShow.timer)
@@ -223,13 +215,15 @@ export function performExhibitionStackAction(stackAction) {
 	const beauty = stackAction[4]
 	const transObj = model.getTransporterByID(caravanTransID)
 	if (transObj) {
+		const store = useModelStore()
+		if (store.context.selectedTransporterIDforTM === transObj.id) store.context.selectedTransporterIDforTM = -1
+		for (const goose of model.resourcesFollowingTransporter(transObj.id)) goose.location = [...loc.convertLocationToBucket(transObj.location)]
 		for (const res of model.resourcesOnTransport(transObj.id)) {
 			res.location = loc.setOOBlocation()
 		}
 		transObj.location = loc.setOOBlocation()
 	}
-	playerArtState(stagerPlayerIndex).artShownAt[targetPlayerIndex] = beauty
-	playerArtState(targetPlayerIndex).artBestShownHere = beauty
+	if (beauty > 0) playerArtState(stagerPlayerIndex).artShownAt[targetPlayerIndex] = beauty
 }
 
 // ============================================================================
