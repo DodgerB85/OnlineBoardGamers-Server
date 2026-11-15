@@ -103,6 +103,7 @@ def showBUSgame(request, game_id, spoilerFree=False, replayStep=1):
     user_gp = result["user_gp"]
 
     returnData = {**result["base_data"]}
+    returnData["seatPlayerNames"] = json.dumps(presenter.getSeatPlayerNames())
     # Bus uses settingsDEBUG (uppercase) as template key
     returnData["settingsDEBUG"] = returnData.pop("settingsDebug")
     returnData.update(
@@ -180,6 +181,8 @@ def busData(request, dataType):
                 "finishedGame": currentGame.gameStatus == "FINISHED",
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
+                "seatPlayerNames": presenter.getSeatPlayerNames(),
+                "myName": request.user.username if request.user.is_authenticated else "",
             }
         )
     if dataType == 3:
@@ -332,6 +335,8 @@ def _processBUSturn(request):
                 jsonData["finalPositions"],
                 (jsonData.get("tournamentData") if jsonData.get("tournamentData") else []),  # NB THIS DOES NOT EXIST
                 jsonData["gameID"],
+                winnerSeat=jsonData.get("winnerSeat"),
+                finalPositionsSeats=jsonData.get("finalPositionsSeats"),
             )
             # presenter.endGame(
             #    request,
@@ -516,25 +521,29 @@ def _processBUSturn(request):
         live_current_usernames = set(
             currentGame.players.filter(is_current=True, is_missing=False, is_kicked=False).values_list("player__username", flat=True)
         )
-        target_on_turn = not live_current_usernames or jsonData["kickedName"] in live_current_usernames
+        target_user = presenter.resolveKickoutUser(seat=jsonData.get("kickedSeat"), username=jsonData.get("kickedName"))
+        if target_user is None:
+            return JsonResponse({"error": gettext("This player is not eligible for kickout.")}, status=400)
+        target_username = target_user.username
+        target_on_turn = not live_current_usernames or target_username in live_current_usernames
         if not target_on_turn or presenter.kickoutRequired() != 2:
             return JsonResponse({"error": gettext("This player is not eligible for kickout.")}, status=400)
 
         # Voting layer: 3p+ games need a majority vote to kick, unless the
         # requester's own vote for this target is more than 2 days old.
         # If the vote is only recorded, return straight away without kicking.
-        kickout_vote_result = presenter.processKickoutVote(request.user, jsonData["kickedName"])
+        kickout_vote_result = presenter.processKickoutVote(request.user, target_username)
         if kickout_vote_result["voteCast"]:
             currentGame.save()
             return JsonResponse(kickout_vote_result, safe=False)
 
-        _missingPlayer = User.objects.get(username=jsonData["kickedName"])
+        _missingPlayer = target_user
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
         # addMissingPlayer/addKickedPlayer no-op when the flags are already set, so a
         # legacy row can still claim the turn; clear it explicitly.
-        currentGame.players.filter(player__username=jsonData["kickedName"]).update(is_current=False)
+        currentGame.players.filter(player=_missingPlayer).update(is_current=False)
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)

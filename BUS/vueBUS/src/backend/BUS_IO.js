@@ -68,9 +68,12 @@ export async function saveGame(saveRewind) {
 	if (store.gameflow.gameEnded > 0) {
 		postData.status = "FINISHED" // USED
 		const finalRanking = model.getFinalRanking()
+		const finalRankingIndices = model.getFinalRankingIndices()
 		postData.winner = finalRanking.length > 0 ? finalRanking[0].name : undefined // server expects a username
+		postData.winnerSeat = finalRankingIndices.length > 0 ? finalRankingIndices[0] : undefined
 		postData.saveRewind = false
 		postData.finalPositions = finalRanking.map((player) => player.name)
+		postData.finalPositionsSeats = finalRankingIndices
 		postData.data = funcs.exportBUSmodel(true)
 	}
 	if (personal.removeCurrentFlexTime) {
@@ -195,6 +198,8 @@ export async function reloadGameData() {
 		}
 		const data = await response.json()
 		if (data.finishedGame) personal.finishedGame = true
+		if (data.seatPlayerNames) window.initData.seatPlayerNames = data.seatPlayerNames
+		if (data.myName) window.initData.name = data.myName
 		funcs.importBUSmodel(data.gameData, personal.finishedGame, false)
 		personal.secondsToNextKickout = data.secondsToNextKickout
 		personal.latestUpdate = data.latestUpdate
@@ -445,6 +450,7 @@ export async function saveGameDataAfterKickout() {
 		action: "saveGameDataAfterKickout",
 		gameID: personal.gameID,
 		kickedName: store.players[store.gameflow.turnOrder[0]].name,
+		kickedSeat: store.gameflow.turnOrder[0],
 		latestUpdate: personal.latestUpdate,
 	}
 

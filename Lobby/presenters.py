@@ -100,6 +100,39 @@ class GamePresenter:
             print(f"NO PLAYER FOUND-2: {_username} gameCode: {self.gameObj.gameCode} playerList: {playerList} id: {self.gameObj.id}")
             return -1
 
+    def getSeatPlayerNames(self):
+        """Current usernames in seat order; empty strings keep the list aligned."""
+        return [gp.player.username if gp.player else "" for gp in self.gameObj.players.select_related("player").order_by("seat_order")]
+
+    def getSeatNameMap(self):
+        return {gp.seat_order: gp.player.username for gp in self.gameObj.players.select_related("player") if gp.player}
+
+    def namesForSeats(self, seats, fallback=None):
+        """Map seat indexes to current usernames, with positional fallback names."""
+        if not isinstance(seats, list):
+            return fallback or []
+        names_by_seat = self.getSeatNameMap()
+        return [names_by_seat.get(seat) or (fallback[pos] if fallback and pos < len(fallback) else "") for pos, seat in enumerate(seats)]
+
+    def resolveGamePlayer(self, seat=None, username=None):
+        """Resolve a GamePlayer by stable seat first, then legacy username."""
+        if isinstance(seat, int):
+            gp = self.gameObj.players.filter(seat_order=seat).select_related("player").first()
+            if gp and gp.player:
+                return gp
+        if username:
+            return self.gameObj.players.filter(player__username=username).select_related("player").first()
+        return None
+
+    def resolveKickoutUser(self, seat=None, username=None):
+        gp = self.resolveGamePlayer(seat, username)
+        return gp.player if gp and gp.player else None
+
+    def buildFinalPositions(self, usernames):
+        """Convert an ordered list of usernames to the notification/replay shape."""
+        ordinals = ["1st - Congratulations!", "2nd", "3rd", "4th", "5th", "6th"]
+        return [[username, ordinals[pos] if pos < len(ordinals) else "Last", pos] for pos, username in enumerate(usernames)]
+
     def getAllPlayersOrderedySeatInArray(
         self,
         keepOriginalNamesForMissingPlayers=False,
@@ -728,10 +761,9 @@ class GamePresenter:
 
 
 class CNSpresenter(GamePresenter):
-    def endGame(self, request, _winner, _finalPositions, _gameID):
+    def endGame(self, request, _winner, _finalPositions, _gameID, winnerSeat=None, finalPositionsSeats=None):
         from django_q.tasks import async_task
 
-        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
@@ -741,34 +773,17 @@ class CNSpresenter(GamePresenter):
         self.gameObj.kickoutFlexiData = ""
         self.gameObj.gameStatus = "FINISHED"
 
-        winner_user = User.objects.get(username=_winner)
-        winner_gp = self.gameObj.players.filter(player=winner_user).first()
+        winner_gp = self.resolveGamePlayer(winnerSeat, _winner)
         if winner_gp:
             winner_gp.winner = True
             winner_gp.save()
+        winner_username = winner_gp.player.username if winner_gp and winner_gp.player else _winner
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
 
-        # Convert _finalPositions from simple list to list of lists format
-        convertedFinalPositions = []
-        for pos, username in enumerate(_finalPositions):
-            if pos == 0:
-                posText = "1st - Congratulations!"
-            elif pos == 1:
-                posText = "2nd"
-            elif pos == 2:
-                posText = "3rd"
-            elif pos == 3:
-                posText = "4th"
-            elif pos == 4:
-                posText = "5th"
-            elif pos == 5:
-                posText = "6th"
-            else:
-                posText = "Last"
-
-            convertedFinalPositions.append([username, posText, pos])
+        final_positions = self.namesForSeats(finalPositionsSeats, _finalPositions) if isinstance(finalPositionsSeats, list) else _finalPositions
+        convertedFinalPositions = self.buildFinalPositions(final_positions)
 
         async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "CNS", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 
@@ -778,7 +793,7 @@ class CNSpresenter(GamePresenter):
                 request,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
-                [_winner],
+                [winner_username],
                 convertedFinalPositions,
             )
 
@@ -787,7 +802,7 @@ class CNSpresenter(GamePresenter):
                 request,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
-                [_winner],
+                [winner_username],
                 convertedFinalPositions,
             )
 
@@ -1469,10 +1484,9 @@ class INDpresenter(GamePresenter):
 
 
 class BUSpresenter(GamePresenter):
-    def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
+    def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID, winnerSeat=None, finalPositionsSeats=None):
         from django_q.tasks import async_task
 
-        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import (
             SF_M_ProcessAnyTournamentEndGame,
         )
@@ -1484,35 +1498,18 @@ class BUSpresenter(GamePresenter):
         self.gameObj.kickoutFlexiData = ""
         self.gameObj.gameStatus = "FINISHED"
 
-        winner_user = User.objects.get(username=_winnerUsername)
-        winner_gp = self.gameObj.players.filter(player=winner_user).first()
+        winner_gp = self.resolveGamePlayer(winnerSeat, _winnerUsername)
         if winner_gp:
             winner_gp.winner = True
             winner_gp.save()
+        winner_username = winner_gp.player.username if winner_gp and winner_gp.player else _winnerUsername
 
         # Need to save here, so it is FN for tournament
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
 
-        # Convert _finalPositions from simple list to list of lists format
-        convertedFinalPositions = []
-        for pos, username in enumerate(_finalPositions):
-            if pos == 0:
-                posText = "1st - Congratulations!"
-            elif pos == 1:
-                posText = "2nd"
-            elif pos == 2:
-                posText = "3rd"
-            elif pos == 3:
-                posText = "4th"
-            elif pos == 4:
-                posText = "5th"
-            elif pos == 5:
-                posText = "6th"
-            else:
-                posText = "Last"
-
-            convertedFinalPositions.append([username, posText, pos])
+        final_positions = self.namesForSeats(finalPositionsSeats, _finalPositions) if isinstance(finalPositionsSeats, list) else _finalPositions
+        convertedFinalPositions = self.buildFinalPositions(final_positions)
 
         # Now send winning notification
         async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "BUS", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
@@ -1522,7 +1519,7 @@ class BUSpresenter(GamePresenter):
                 request,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
-                [_winnerUsername],
+                [winner_username],
                 _tournamentData,
             )
         if self.gameObj.relatedMiniTournament:
@@ -1530,7 +1527,7 @@ class BUSpresenter(GamePresenter):
                 request,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
-                [_winnerUsername],
+                [winner_username],
                 _tournamentData,
             )
 
@@ -2612,12 +2609,7 @@ class FCMpresenter(GamePresenter):
         self.gameObj.activeVotes = None
         self.gameObj.gameStatus = "FINISHED"
 
-        players = list(self.gameObj.players.select_related("player"))
-        winner_gp = None
-        if isinstance(winnerSeat, int):
-            winner_gp = next((gp for gp in players if gp.seat_order == winnerSeat and gp.player), None)
-        if not winner_gp:
-            winner_gp = next((gp for gp in players if gp.player and gp.player.username == _winnerUsername), None)
+        winner_gp = self.resolveGamePlayer(winnerSeat, _winnerUsername)
         if winner_gp:
             winner_gp.winner = True
             winner_gp.save()
@@ -2629,18 +2621,14 @@ class FCMpresenter(GamePresenter):
 
         final_scores = _finalScores
         if isinstance(finalScoresSeats, list) and len(finalScoresSeats) == len(_finalScores):
-            names_by_seat = {gp.seat_order: gp.player.username for gp in players if gp.player}
-            final_scores = [
-                [names_by_seat.get(seat) or (_finalScores[pos][0] if pos < len(_finalScores) else ""), score]
-                for pos, (seat, score) in enumerate(finalScoresSeats)
-            ]
+            position_names = self.namesForSeats(
+                [seat for seat, _ in finalScoresSeats],
+                [name for name, _ in _finalScores],
+            )
+            final_scores = [[position_names[pos], score] for pos, (_, score) in enumerate(finalScoresSeats)]
 
         # Winner first; each entry becomes [username, posText, pos] for the notification
-        ordinals = ["1st - Congratulations!", "2nd", "3rd", "4th", "5th", "6th"]
-        convertedFinalPositions = []
-        for pos in range(len(final_scores)):
-            posText = ordinals[pos] if pos < len(ordinals) else "Last"
-            convertedFinalPositions.append([final_scores[pos][0], posText, pos])
+        convertedFinalPositions = self.buildFinalPositions([score[0] for score in final_scores])
 
         async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "FCM", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 

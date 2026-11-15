@@ -28,6 +28,24 @@ export const shuffle = (array) => {
 	return array
 }
 
+/** Keep seat names aligned with the seat-ordered server list. */
+export function syncSeatPlayerNames(seatPlayerNames, myName) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	if (Array.isArray(seatPlayerNames) && seatPlayerNames.length === store.players.length) {
+		for (let i = 0; i < store.players.length; i++) {
+			const newName = seatPlayerNames[i]
+			if (!newName) continue
+			const player = store.players[i]
+			const oldName = player.name
+			if (!oldName || oldName === newName) continue
+			player.name = newName
+			if (!player.displayName || player.displayName === oldName) player.displayName = newName
+		}
+	}
+	if (myName) personal.name = myName
+}
+
 export function shuffleSeeded(array, seed = null) {
 	let rng
 	let generatedSeed
@@ -326,6 +344,10 @@ export function importModel(input, includeContext, raw = false) {
 				links: JSON.parse(JSON.stringify(tempLinks)),
 			})
 		}
+	}
+
+	if (!window.initData.finishedGame && !window.initData.spoilerFree) {
+		syncSeatPlayerNames(window.initData.seatPlayerNames || window.initData.playerNames, window.initData.name)
 	}
 
 	// 2 oldBoysNetwork

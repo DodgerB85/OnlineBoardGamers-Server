@@ -785,8 +785,8 @@ const computedMaxNeutralBricks = computed(() => {
 						<!-- TRAIN TRACKS - roads draw over them -->
 						<g v-if="store.gameOptions.useTrains && computedZoomData.fullTrainTrackPathZP?.length">
 							<!-- Black track with white dashed centre, like the printed &cetera maps -->
-							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathZP" :key="'trackBlack' + i" :d="chain.d" stroke="black" stroke-width="160" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathZP" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" stroke-width="100" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathZP" :key="'trackBlack' + i" :d="chain.d" stroke="black" stroke-width="100" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathZP" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" stroke-width="76" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 						</g>
 						<!-- ROADS - drawn after the tracks so they sit on top -->
 						<path :d="computedZoomData.fullRoadPathZP" stroke="#1C2526" stroke-width="60" stroke-linejoin="round" stroke-linecap="round" />

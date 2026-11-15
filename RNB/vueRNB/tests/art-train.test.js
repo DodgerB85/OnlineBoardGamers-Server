@@ -39,11 +39,12 @@ test('invalid exhibitions consume caravan and artwork, drop geese, and replay id
 test('fare brought by another transporter cannot pay', () => {
  const c = run(load('RNBtrain', {
   rf: { RES_GOOSE: 99 },
-  loc: { isOnSpecificTransporter: (l, id) => l[0] === 2 && l[1] === id, isOnAnyTransporter: l => l[0] === 2, isSpecificHexLocation: (l, id) => l[1] === id }
+  loc: { isOnSpecificTransporter: (l, id) => l[0] === 2 && l[1] === id, isFollowingTransporter: (l, id) => l[0] === 6 && l[1] === id, isOnAnyTransporter: l => l[0] === 2, isSpecificHexLocation: (l, id) => l[1] === id }
  }))
  const transporter = { id: 1, location: [1, 7] }
  assert.equal(c.isFareAccessible({ type: 0, movedTransporterID: -1, location: [1, 7] }, transporter), true)
  assert.equal(c.isFareAccessible({ type: 0, movedTransporterID: 1, location: [2, 1] }, transporter), true)
+ assert.equal(c.isFareAccessible({ type: 0, movedTransporterID: -1, location: [6, 1] }, transporter), true, "a following goose can pay")
  assert.equal(c.isFareAccessible({ type: 0, movedTransporterID: -1, location: [1, 8] }, transporter), false)
  assert.equal(c.isFareAccessible({ type: 0, movedTransporterID: 2, location: [1, 7] }, transporter), false)
 })

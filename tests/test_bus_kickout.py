@@ -41,6 +41,7 @@ class BusKickoutTests(TestCase):
                     "action": "saveGameDataAfterKickout",
                     "gameID": self.game.id,
                     "kickedName": target.username,
+                    "kickedSeat": self.game.players.get(player=target).seat_order,
                     "latestUpdate": latest_update or self.game.latestUpdate,
                 }
             ),

@@ -80,6 +80,8 @@ def showCNSgame(request, game_id, spoilerFree=False, replayStep=1):
         **result["base_data"],
         "spoilerFree": spoilerFree,
         "replayStep": replayStep,
+        "seatPlayerNames": json.dumps(presenter.getSeatPlayerNames()),
+        "finishedGame": currentGame.gameStatus == "FINISHED",
     }
 
     if not result["is_authenticated"]:
@@ -188,6 +190,8 @@ def _processCNSturn(request):
                 jsonData["winner"],
                 jsonData["finalPositions"],
                 jsonData["gameID"],
+                winnerSeat=jsonData.get("winnerSeat"),
+                finalPositionsSeats=jsonData.get("finalPositionsSeats"),
             )
 
         # Don't notify if auto-passing
@@ -366,15 +370,19 @@ def _processCNSturn(request):
         if latest_update != "9999999999999" and latest_update != str(currentGame.latestUpdate):  # and not jsonData["ignoreSync"]:
             return JsonResponse({"syncError": True}, safe=False)
 
+        target_user = presenter.resolveKickoutUser(seat=jsonData.get("kickedSeat"), username=jsonData.get("kickedName"))
+        if target_user is None:
+            return JsonResponse({"error": gettext("This player is not eligible for kickout.")}, status=400)
+
         # Voting layer: 3p+ games need a majority vote to kick, unless the
         # requester's own vote for this target is more than 2 days old.
         # If the vote is only recorded, return straight away without kicking.
-        kickout_vote_result = presenter.processKickoutVote(request.user, jsonData["kickedName"])
+        kickout_vote_result = presenter.processKickoutVote(request.user, target_user.username)
         if kickout_vote_result["voteCast"]:
             currentGame.save()
             return JsonResponse(kickout_vote_result, safe=False)
 
-        _missingPlayer = User.objects.get(username=jsonData["kickedName"])
+        _missingPlayer = target_user
         missing_gp = currentGame.players.filter(player=_missingPlayer).first()
         if missing_gp:
             missing_gp.is_missing = True
@@ -491,6 +499,9 @@ def CNSdata(request, dataType):
                 "gameData": currentGame.gameData,
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
+                "seatPlayerNames": presenter.getSeatPlayerNames(),
+                "myName": request.user.username if request.user.is_authenticated else "",
+                "finishedGame": currentGame.gameStatus == "FINISHED",
             }
         )
     elif dataType == 2:
@@ -516,6 +527,8 @@ def CNSdata(request, dataType):
                 "gameData": currentGame.gameData,
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 "latestUpdate": currentGame.latestUpdate,
+                "seatPlayerNames": presenter.getSeatPlayerNames(),
+                "myName": request.user.username if request.user.is_authenticated else "",
             }
         )
 

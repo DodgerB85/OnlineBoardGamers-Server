@@ -2583,6 +2583,12 @@ export function clickedResFollowingTransporter(resourceID) {
 
 	if (!store.context.resourceIDsToHighlight.includes(resourceID)) return
 
+	// Trains: a following goose may pay the fare as a shortcut
+	if (store.context.action === rf.ACT_TM_SELECT_TRAIN_FARE) {
+		train.selectTrainFare(resourceID)
+		return
+	}
+
 	// CHECK THIS
 	const transporterID = store.context.selectedTransporterIDforTM
 

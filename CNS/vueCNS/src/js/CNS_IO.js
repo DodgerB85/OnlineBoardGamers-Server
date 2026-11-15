@@ -87,11 +87,17 @@ export async function saveGame(saveRewind, saveContext) {
 		postData.status = "FINISHED" // USED
 		let finalRes = model.endGame_core()
 		postData.winner = store.players[finalRes[0][0]].name // USED
+		postData.winnerSeat = finalRes[0][0]
 		postData.saveRewind = false
 
 		let finalPositionsNames = []
-		for (let i = 0; i < finalRes.length; i++) finalPositionsNames.push(store.players[finalRes[i][0]].name)
+		let finalPositionsSeats = []
+		for (let i = 0; i < finalRes.length; i++) {
+			finalPositionsSeats.push(finalRes[i][0])
+			finalPositionsNames.push(store.players[finalRes[i][0]].name)
+		}
 		postData.finalPositions = finalPositionsNames
+		postData.finalPositionsSeats = finalPositionsSeats
 	}
 
 	if (personal.removeCurrentFlexTime) {
@@ -185,6 +191,9 @@ export async function reloadGameData() {
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
+		if (data.finishedGame) window.initData.finishedGame = true
+		if (data.seatPlayerNames) window.initData.seatPlayerNames = data.seatPlayerNames
+		if (data.myName) window.initData.name = data.myName
 		funcs.importModel(data.gameData, false)
 		personal.secondsToNextKickout = data.secondsToNextKickout
 		personal.latestUpdate = data.latestUpdate
@@ -414,6 +423,7 @@ export async function kickout() {
 		action: "kickout",
 		gameID: personal.gameID,
 		kickedName: controller.currentPlayerObj().name,
+		kickedSeat: controller.currentPlayerIndex(),
 		latestUpdate: personal.latestUpdate,
 	}
 
@@ -539,6 +549,8 @@ export async function checkForLatestData() {
 		if (data.gameDoesNotExist === true) location.reload()
 		if (data.latest === true) return
 		else {
+			if (data.seatPlayerNames) window.initData.seatPlayerNames = data.seatPlayerNames
+			if (data.myName) window.initData.name = data.myName
 			funcs.importModel(data.gameData, false)
 			personal.secondsToNextKickout = data.secondsToNextKickout
 			personal.latestUpdate = data.latestUpdate

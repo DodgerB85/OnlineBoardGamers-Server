@@ -8,6 +8,24 @@ import { usePersonalStore } from "../stores/BUSpersonal.js"
 
 import i18n from "../i18n"
 
+/** Keep seat names aligned with the seat-ordered server list. */
+export function syncSeatPlayerNames(seatPlayerNames, myName) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	if (Array.isArray(seatPlayerNames) && seatPlayerNames.length === store.players.length) {
+		for (let i = 0; i < store.players.length; i++) {
+			const newName = seatPlayerNames[i]
+			if (!newName) continue
+			const player = store.players[i]
+			const oldName = player.name
+			if (!oldName || oldName === newName) continue
+			player.name = newName
+			if (!player.displayName || player.displayName === oldName) player.displayName = newName
+		}
+	}
+	if (myName) personal.name = myName
+}
+
 export function removeItemAll(arr, value) {
 	var arrCopy = [...arr]
 	var i = 0
@@ -593,6 +611,8 @@ export function importBUSmodel(inputBase64, forGameOver, restoreContext, history
 			buses: 1,
 		})
 	}
+
+	if (!forGameOver) syncSeatPlayerNames(window.initData.seatPlayerNames || window.initData.playerNames, window.initData.name)
 
 	// 1 junctions
 	store.junctions = decompressJunctions(inputModel[1])

@@ -71,26 +71,29 @@ function getTransporterTrackBucket(transporterObj) {
 	return [bucketLocation[1], bucketLocation[2]]
 }
 
-// shortcut: geese are not goods, and pseudo mine goods (28) are not tokens to spend
+// shortcut: pseudo mine goods (28) are not tokens to spend
 export function isFareResource(res) {
-	if (res.type === rf.RES_GOOSE) return false
 	if (typeof res.uniqueID === "string" && res.uniqueID.substring(1, 3) === "28") return false
 	return true
 }
 
 // Every good that may pay: carried first (the transporter carries its own fare),
-// then goods lying on the departure tile, lowest id wins in each group.
+// then following geese, then goods lying on the departure tile.
 export function getEligibleTrainFares(transporterID) {
 	const transporterObj = model.getTransporterByID(transporterID)
 	const fromHexID = transporterObj.location[1]
 	const carried = model.resourcesOnTransport(transporterID)
 		.filter((r) => isFareAccessible(r, transporterObj))
 		.sort((a, b) => a.id - b.id)
+	const following = model
+		.resourcesFollowingTransporter(transporterID)
+		.filter((r) => isFareAccessible(r, transporterObj))
+		.sort((a, b) => a.id - b.id)
 	const onTile = model
 		.getAllInGameResources()
 		.filter((r) => isFareAccessible(r, transporterObj) && !loc.isOnAnyTransporter(r.location) && loc.isSpecificHexLocation(r.location, fromHexID))
 		.sort((a, b) => a.id - b.id)
-	return carried.concat(onTile)
+	return carried.concat(following, onTile)
 }
 
 // shortcut: eligibility only - the player picks which one actually pays
@@ -99,10 +102,12 @@ export function findTrainFare(transporterID) {
 }
 
 // Goods brought by another transporter during this movement phase cannot pay.
+// A goose following this transporter may pay as a shortcut: it is dropped and spent.
 export function isFareAccessible(fareRes, transporterObj) {
 	if (!isFareResource(fareRes)) return false
 	if (fareRes.movedTransporterID !== -1 && fareRes.movedTransporterID !== transporterObj.id) return false
 	if (loc.isOnSpecificTransporter(fareRes.location, transporterObj.id)) return true
+	if (loc.isFollowingTransporter(fareRes.location, transporterObj.id)) return true
 	return !loc.isOnAnyTransporter(fareRes.location) && loc.isSpecificHexLocation(fareRes.location, transporterObj.location[1])
 }
 
@@ -170,7 +175,7 @@ export function selectTrainFare(resID) {
 	highlight.updateAllHighlightsForTransporterMode()
 }
 
-export function performTrainRide_core(transporterID, toBucketLocation, fareRes) {
+export function performTrainRide_core(transporterID, toBucketLocation, fareRes, deferFollowingGeese = false) {
 	const transporterObj = model.getTransporterByID(transporterID)
 	const stats = rf.getTransporterStats(transporterObj.type)
 	const toHexID = toBucketLocation[1]
@@ -189,11 +194,14 @@ export function performTrainRide_core(transporterID, toBucketLocation, fareRes) 
 	}
 	for (const res of model.resourcesOnTransport(transporterID)) res.movedTransporterID = transporterID
 
-	// Geese get off the train with the transporter they follow
+	// Geese get off the train with the transporter they follow. In live play they keep
+	// following through the ride animation and are dropped by TransporterSVGimg when it
+	// finishes; replay/pre-move apply the final position immediately.
 	const geeseDropLocation = [rf.LOCATION_BUCKET, toHexID, toBucket]
 	for (const res of model.resourcesFollowingTransporter(transporterID)) {
 		res.movedTransporterID = transporterID
-		res.location = [...geeseDropLocation]
+		if (deferFollowingGeese) res.autoDropLocationAfterFollowingTransporter = [...geeseDropLocation]
+		else res.location = [...geeseDropLocation]
 	}
 }
 
@@ -235,7 +243,7 @@ export function takeTrain(transporterID, toHexID, toBucketID, fareRes) {
 	if (geese.length > 0) currentStack.push([geese.length, 1])
 
 	const startXY = [...transporterObj.rawTransporterXY]
-	performTrainRide_core(transporterID, toBucketLocation, fare)
+	performTrainRide_core(transporterID, toBucketLocation, fare, true)
 	animateTrainRide(transporterObj, fromBucketLocation[1], toHexID, startXY)
 
 	stack.addItemToStack({

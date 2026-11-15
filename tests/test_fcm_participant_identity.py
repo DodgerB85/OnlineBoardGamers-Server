@@ -43,5 +43,5 @@ class FCMParticipantIdentityTests(TestCase):
         self.assertEqual(final_positions[1][0], self.bob.username)
 
     def test_kickout_target_resolves_by_seat(self):
-        target = _resolve_kickout_user(self.game, {"kickedSeat": 1, "kickedName": "old-bob-name"})
+        target = _resolve_kickout_user(self.game.presenter(), {"kickedSeat": 1, "kickedName": "old-bob-name"})
         self.assertEqual(target, self.bob)

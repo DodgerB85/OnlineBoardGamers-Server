@@ -72,11 +72,6 @@ def _canActInGame(request, currentGame):
     return is_game_admin(request.user) or currentGame.players.filter(player=request.user).exists()
 
 
-def _seat_player_names(currentGame):
-    """Usernames in seat order; empty strings keep GamePlayer/playerNames aligned."""
-    return [gp.player.username if gp.player else "" for gp in currentGame.players.select_related("player").order_by("seat_order")]
-
-
 def _resolvePassKickoutTarget(request, currentGame, presenter, jsonData):
     """Validate a normal player's "keep the timed-out player in the game" skip.
 
@@ -102,14 +97,12 @@ def _resolvePassKickoutTarget(request, currentGame, presenter, jsonData):
     return target, False
 
 
-def _resolve_kickout_user(currentGame, jsonData):
+def _resolve_kickout_user(presenter, jsonData):
     """Prefer the seat index from the client; fall back to the legacy username."""
-    seat = jsonData.get("kickedSeat")
-    if isinstance(seat, int):
-        gp = currentGame.players.filter(seat_order=seat).select_related("player").first()
-        if gp and gp.player:
-            return gp.player
-    return User.objects.get(username=jsonData["kickedName"])
+    user = presenter.resolveKickoutUser(seat=jsonData.get("kickedSeat"), username=jsonData.get("kickedName"))
+    if user is None:
+        raise Http404(gettext("Player not found"))
+    return user
 
 
 # Permanent roster cards lost by accident. Temporary workers and the union
@@ -607,7 +600,7 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
             "chatNotification": chatNotification,
             "moveData": moveData,
             "allPlayerListBySeat": allPlayerListBySeat,
-            "seatPlayerNames": json.dumps(_seat_player_names(currentGame)),
+            "seatPlayerNames": json.dumps(presenter.getSeatPlayerNames()),
             "currentNotes": currentNotes,
             "kickoutRequired": kickoutRequired,
             "involvedPlayer": involvedPlayer,
@@ -712,7 +705,7 @@ def _processTurn(request):
                 "latestUpdate": currentGame.latestUpdate,
                 "startingMap": currentGame.startingMap if currentGame.startingMap else [],
                 "OOBpreference": OOBpreference,
-                "seatPlayerNames": _seat_player_names(currentGame),
+                "seatPlayerNames": presenter.getSeatPlayerNames(),
                 "myName": request.user.username,
             },
             safe=False,
@@ -1431,7 +1424,7 @@ def _processTurn(request):
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
 
-        _missingPlayer = _resolve_kickout_user(currentGame, jsonData)
+        _missingPlayer = _resolve_kickout_user(presenter, jsonData)
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
@@ -1495,7 +1488,7 @@ def _processTurn(request):
         # requester's own vote for this target is more than 2 days old.
         # If the vote is only recorded, return straight away without kicking.
         # Only apply when the client signals it understands voteCast responses.
-        _missingPlayer = _resolve_kickout_user(currentGame, jsonData)
+        _missingPlayer = _resolve_kickout_user(presenter, jsonData)
         if jsonData.get("supportsVoting"):
             kickout_vote_result = presenter.processKickoutVote(request.user, _missingPlayer.username)
             if kickout_vote_result["voteCast"]:
@@ -1683,7 +1676,7 @@ def _processTurn(request):
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             return _syncErrorResponse("FCM adminKickout - gameID:", request, currentGame, presenter, jsonData)
 
-        _missingPlayer = _resolve_kickout_user(currentGame, jsonData)
+        _missingPlayer = _resolve_kickout_user(presenter, jsonData)
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
 
@@ -2016,7 +2009,7 @@ def FCMdata(request, dataType):
                     "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                     "specialData": specialData,
                     "latestUpdate": currentGame.latestUpdate,
-                    "seatPlayerNames": _seat_player_names(currentGame),
+                    "seatPlayerNames": presenter.getSeatPlayerNames(),
                     "myName": request.user.username if request.user.is_authenticated else "",
                 },
                 safe=False,
@@ -2039,7 +2032,7 @@ def FCMdata(request, dataType):
                 "specialData": specialData,
                 "latestUpdate": currentGame.latestUpdate,
                 "startingMap": currentGame.startingMap if currentGame.startingMap else [],
-                "seatPlayerNames": _seat_player_names(currentGame),
+                "seatPlayerNames": presenter.getSeatPlayerNames(),
                 "myName": request.user.username if request.user.is_authenticated else "",
             },
             safe=False,

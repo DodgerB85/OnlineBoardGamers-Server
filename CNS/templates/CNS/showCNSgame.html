@@ -211,6 +211,9 @@
     initData.spoilerFree = true;
     initData.replayStep = {{replayStep}}-1;
     {% endif %}
+    {% if finishedGame %}
+    initData.finishedGame = true;
+    {% endif %}
 
     ///////////////////////
     {% if user.is_authenticated %}
@@ -242,6 +245,7 @@
     initData.yourTurnAudioType = {{ yourTurnAudioType }};
 
     /////////////////////
+    initData.seatPlayerNames = {{ seatPlayerNames|safe|default:"[]" }};
     {% if not gameData %}
     {% if displayNames %}
     initData.displayNames = JSON.parse('{{ displayNames|escapejs }}');

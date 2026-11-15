@@ -253,6 +253,48 @@ test("track network, destinations and fare", { skip: skip }, () => {
 	assert.equal(train.canTransporterUseTrain(0), false, "without a fare the ride is unavailable")
 })
 
+test("a goose on the tile can pay the train fare", { skip: skip }, () => {
+	const { startBucket } = setupTrainRideMap()
+	model.addResourceToGame_core(rf.RES_GOOSE, [rf.LOCATION_BUCKET, 0, startBucket], 9)
+	const goose = model.getAllInGameResources().find((r) => r.type === rf.RES_GOOSE)
+	const fares = train.getEligibleTrainFares(0)
+	assert.ok(fares.some((f) => f.id === goose.id), "the goose is offered as a fare")
+})
+
+test("a following goose can pay the fare", { skip: skip }, () => {
+	const { store, startBucket } = setupTrainRideMap()
+	const donkey = model.getTransporterByID(0)
+	model.addResourceToGame_core(rf.RES_GOOSE, [rf.LOCATION_BUCKET, 0, startBucket], 9)
+	const goose = model.getAllInGameResources().find((r) => r.type === rf.RES_GOOSE)
+	goose.location = loc.setFollowerLocation(donkey.id)
+
+	assert.ok(
+		train.getEligibleTrainFares(0).some((f) => f.id === goose.id),
+		"the following goose is offered as a fare"
+	)
+	store.context.selectedTransporterIDforTM = donkey.id
+	train.selectTrainFare(goose.id)
+	assert.equal(store.context.selectedTrainFareResID, goose.id, "the following goose can be selected")
+
+	train.takeTrain(0, 2, train.getTrackBucketsInHex(2)[0], goose)
+	assert.equal(goose.location[0], rf.LOCATION_OOB, "the following goose is spent")
+})
+
+test("following geese ride the animation and are dropped at the destination", { skip: skip }, () => {
+	const { startBucket } = setupTrainRideMap()
+	const donkey = model.getTransporterByID(0)
+	model.addResourceToGame_core(rf.RES_GOOSE, [rf.LOCATION_BUCKET, 0, startBucket], 9)
+	const goose = model.getAllInGameResources().find((r) => r.type === rf.RES_GOOSE)
+	goose.location = loc.setFollowerLocation(donkey.id)
+	const boards = model.getAllInGameResources().find((r) => r.type === rf.RES_BOARDS)
+	const toBucket = train.getTrackBucketsInHex(2)[0]
+
+	train.takeTrain(0, 2, toBucket, boards)
+
+	assert.equal(goose.location[0], rf.LOCATION_FOLLOWER, "the goose stays with the transporter during the ride")
+	assert.deepEqual(goose.autoDropLocationAfterFollowingTransporter, [rf.LOCATION_BUCKET, 2, toBucket], "it is queued to drop at the destination when the animation finishes")
+})
+
 test("takeTrain moves the transporter, spends the fare and pushes a stack action", { skip: skip }, () => {
 	const { store, startBucket } = setupTrainRideMap()
 	const donkey = model.getTransporterByID(0)

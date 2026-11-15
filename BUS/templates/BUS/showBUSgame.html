@@ -146,6 +146,7 @@
     {% endif %}
 
     initData.yourTurnAudioType = {{yourTurnAudioType}};
+    initData.seatPlayerNames = {{ seatPlayerNames|safe|default:"[]" }};
 
     /////////////////////
     {% if not gameData %}
