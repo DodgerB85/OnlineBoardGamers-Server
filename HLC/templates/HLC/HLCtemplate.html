@@ -313,7 +313,7 @@
 
     {% if user.is_authenticated %}
 
-    global.liveWS = true;
+    {% if not openReplay %}global.liveWS = true;{% endif %}
     global.name = '{{ name }}';
     global.nextURL = '{{ nextURL|safe }}';
     global.bgStatsEnabled = {{ bgStatsEnabled|default:0 }};
@@ -326,6 +326,9 @@
     global.gameName = '{{ gameName }}';
 
     global.gameID = {{ gameID }};
+    global.openReplay = {{ openReplay|yesno:"true,false" }};
+    global.replayStep = {{ replayStep|default:0 }};
+    global.spoilerFree = {{ spoilerFree|yesno:"true,false" }};
 
     {% if preferredHLCcolour >= 0 %}global.preferredColour = {{ preferredHLCcolour }};{% endif %}
     

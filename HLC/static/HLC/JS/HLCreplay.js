@@ -57,6 +57,15 @@ var replay = {
 
 			await this.generateReplayData()
 
+			if (this.replayData.length === 0) {
+				this.showingReplay = false
+				this.generatingData = false
+				$("body").removeClass("greyBackground")
+				$("body").addClass("blueBackground")
+				$("#replayArea").empty()
+				return
+			}
+
 			// The walk leaves the view showing whatever resetDataForReplay rendered at the start, so
 			// load the final step to actually display it
 			this.goToReplayStep(this.replayStep)
@@ -97,7 +106,11 @@ var replay = {
 		this.setupDone = []
 		this.desyncCount = 0
 		this.originalLogs = M.logs
-		if (this.originalLogs.length === 0) return
+		if (this.originalLogs.length === 0) {
+			delete global.replayStep
+			delete global.openReplay
+			return
+		}
 
 		this.resetDataForReplay()
 
@@ -127,7 +140,11 @@ var replay = {
 			}
 		}
 
-		this.replayStep = this.replayData.length - 1
+		var requested = global.openReplay && global.replayStep != undefined ? parseInt(global.replayStep) - 1 : NaN
+		this.replayStep = isNaN(requested) ? this.replayData.length - 1 : Math.max(0, Math.min(this.replayData.length - 1, requested))
+		// A direct replay link only applies to the first load; later Replay clicks start at the end.
+		delete global.replayStep
+		delete global.openReplay
 		this.integrityCheck()
 	},
 
@@ -601,7 +618,7 @@ var replay = {
 		if (this.replayData.length === 0) return
 
 		var div = $('<div class="replayButtonsDiv">')
-		div.append(gettext("Use the arrows to step through the game. Click an entry in the history tab to jump to that point in time."))
+		div.append('<div class="replayHelpText">' + gettext("Use the arrows to step through the game. Click an entry in the history tab to jump to that point in time.") + "</div>")
 		if (this.replayError !== "") div.append("<BR/><B class='replayWarning'>" + this.replayError + "</B>")
 		div.append("<BR/>")
 
@@ -636,6 +653,19 @@ var replay = {
 			div.append(b2)
 		}
 
+		var slider = $('<input type="range" min="0" max="' + String(this.replayData.length - 1) + '" value="' + String(this.replayStep) + '" aria-label="' + gettext("Replay step") + '">')
+		slider.on("change", function () {
+			replay.goToReplayStep(parseInt(this.value))
+		})
+		div.append(slider)
+
+		var copyButton = $('<button class="actionsLineButton">' + gettext("Copy URL to this move to clipboard") + "</button>")
+		copyButton.on("click", function () {
+			replay.copyUrl()
+		})
+		div.append(copyButton)
+		div.append('<span id="replayCopyMessage" class="replayCopyMessage"></span>')
+
 		var exitReplayButtonDiv = $('<div class="exitReplayButtonDiv">')
 		var exitButton = $('<button class="actionsLineButton">' + gettext("Exit Replay Mode") + "</button>")
 		exitButton.on("click", function () {
@@ -652,6 +682,25 @@ var replay = {
 		var entryName = getLogPlayerName(entry.player)
 		entryDiv.append(Log.giveFullText(entryName, entry.action, entry.param))
 		$("#replayArea").append(entryDiv)
+	},
+
+	copyUrl: function () {
+		var url = window.location.origin + "/HLC/" + String(global.gameID) + "/replay/" + String(this.replayStep + 1) + "/"
+		var textarea = document.createElement("textarea")
+		textarea.value = url
+		document.body.appendChild(textarea)
+		textarea.select()
+		document.execCommand("copy")
+		document.body.removeChild(textarea)
+		var message = $("#replayCopyMessage")
+		message.text(gettext("Copied to clipboard"))
+		clearTimeout(message.data("fadeTimeout"))
+		message.data(
+			"fadeTimeout",
+			setTimeout(function () {
+				message.text("")
+			}, 2000)
+		)
 	},
 
 	// The replay must land on exactly the same game as the live one. If it does not, the history was

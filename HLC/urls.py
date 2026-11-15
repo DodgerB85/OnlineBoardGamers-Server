@@ -22,6 +22,7 @@ urlpatterns = [
     path("", views.index),
     path("help/", views.HLChelp, name="HLChelp"),
     path("<int:game_id>/show/", views.showHLCgame, name="showHLCgame"),
+    path("<int:game_id>/replay/<int:replayStep>/", views.showHLCgame, {"spoilerFree": True}, name="showHLCreplayStep"),
     path("<int:original_id>/", redirect_old_url, name="redirect_old_url"),
     path("HLCgameSummary/<int:game_id>/", views.HLCgameSummary, name="HLCgameSummary"),
     # API Routes

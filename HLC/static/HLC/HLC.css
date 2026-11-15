@@ -1361,6 +1361,38 @@ body.noassistance #assistancePlayers {
 	text-align: center;
 }
 
+#replayArea:not(:empty) {
+	position: sticky;
+	top: 0;
+	z-index: 9998;
+	background-color: #d4eafd;
+	border: 1px solid black;
+	padding: 8px;
+	margin: 10px 12px 0;
+}
+
+#replayArea .replayButtonsDiv {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 8px;
+}
+
+#replayArea .replayHelpText {
+	width: 100%;
+}
+
+#replayArea input[type="range"] {
+	width: min(300px, 35vw);
+}
+
+#replayArea .replayCopyMessage {
+	min-width: 120px;
+	color: darkgreen;
+	font-weight: bold;
+}
+
 #replayArea .progress-bar {
 	height: 20px;
 	width: 300px;

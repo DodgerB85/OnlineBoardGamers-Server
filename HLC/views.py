@@ -759,7 +759,7 @@ def _processHLCturn(request):
 
 
 @login_required
-def showHLCgame(request, game_id):
+def showHLCgame(request, game_id, spoilerFree=False, replayStep=1):
     result = build_show_game_data(
         request,
         game_id,
@@ -827,6 +827,11 @@ def showHLCgame(request, game_id):
     nextURL = f"/nextGame?current_id={game_id}&current_code={presenter.getGameCode()}"
 
     involvedPlayer = result["is_involved"]
+
+    # A replay link is a spectator view: never load the seat's pending move or
+    # its vote/rewind controls.
+    if spoilerFree:
+        involvedPlayer = False
 
     if involvedPlayer:
         rewindPanelType = 1
@@ -896,6 +901,9 @@ def showHLCgame(request, game_id):
             "gameName": presenter.getGameName(),
             "startingOptionsLiteral": (json.loads(currentGame.startingOptions) if currentGame.startingOptions else []),
             "gameID": currentGame.id,
+            "openReplay": spoilerFree,
+            "replayStep": replayStep,
+            "spoilerFree": spoilerFree,
             "currentPlayers": currentPlayers,
             "latestUpdateLiteral": currentGame.latestUpdate,
             "myMove": myMove,

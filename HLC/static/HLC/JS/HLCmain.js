@@ -257,7 +257,7 @@ function init() {
 	}
 
 	// Check for no current player here
-	if (global.currentPlayers === undefined || global.currentPlayers.length === 0) {
+	if (!global.openReplay && (global.currentPlayers === undefined || global.currentPlayers.length === 0)) {
 		// If it is factory build phase, with no one to move, it means the last player disconnected
 		// So run the code in IO again here. This should save it and move the game on
 		if (M.gameFlow.phase === PHASE_BUILD_FACTORY) {
@@ -271,10 +271,10 @@ function init() {
 		}
 	}
 
-	if (M.gameFlow.turn === 0 && global.move != undefined) {
+	if (M.gameFlow.turn === 0 && global.move != undefined && global.pov >= 0) {
 		M.players[global.pov].factory = Factory.import(decompressObjectFromDB(global.move.content))
 	}
-	if (M.gameFlow.phase === PHASE_BUILD_FACTORY && global.move != undefined) {
+	if (M.gameFlow.phase === PHASE_BUILD_FACTORY && global.move != undefined && global.pov >= 0) {
 		var moveData = decompressObjectFromDB(global.move.content)
 		var FDBE = moveData[0]
 		var FCIATT = moveData[1]
@@ -291,7 +291,7 @@ function init() {
 
 		global.fullreset = compressObjectToDB(M.export())
 	}
-	if (M.gameFlow.phase === PHASE_BUILD_FACTORY && global.temporaryMove != undefined) {
+	if (M.gameFlow.phase === PHASE_BUILD_FACTORY && global.temporaryMove != undefined && global.pov >= 0) {
 		if (global.temporaryMove.type === "NODATASFWET") {
 			var temporaryMoveData = decompressObjectFromDB(global.temporaryMove.content)
 			M.players[global.pov].factory = Factory.import(temporaryMoveData)
@@ -462,6 +462,8 @@ function init() {
 			M.availableComponents[ENGINE]++
 		})
 	}
+
+	if (global.openReplay) replay.toggleReplayMode()
 }
 
 $(window).on("load", init)
