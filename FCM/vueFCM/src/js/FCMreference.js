@@ -851,6 +851,17 @@ export const TILES = [
 	[1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1],
 ]
 
+// Current main/PR202 terrain remains the legacy baseline. Only revision 3 opts in.
+export const NEW_MAP_VERSION = 3
+const NEW_MAP_TILES_V3 = {
+  31: [0, 0, 1, 0, 0, 7, 7, 1, 4, 0, 7, 7, 1, 1, 1, 0, 0, 7, 7, 0, 0, 0, 7, 7, 0],
+  36: [1, 1, 1, 1, 1, 0, 0, 44, 44, 1, 0, 0, 44, 44, 1, 7, 7, 0, 0, 1, 7, 7, 0, 0, 1],
+  43: [3, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 2],
+}
+export function tileData(tile, version) {
+  return version === NEW_MAP_VERSION && NEW_MAP_TILES_V3[tile] ? NEW_MAP_TILES_V3[tile] : TILES[tile]
+}
+
 export const HOUSE_SQS = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47]
 
 // QWERT

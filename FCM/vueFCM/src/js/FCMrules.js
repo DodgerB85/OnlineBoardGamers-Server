@@ -1288,12 +1288,13 @@ export function nextAirPossibilitiesForZeppelin(index, path) {
 }
 
 export function gatherFromTiles(tiles, range) {
+	const store = useModelStore()
 	const inventory = []
 
 	// 1. Iterate through provided tiles
 	for (const t of tiles) {
 		const tileNumber = map.giveTileAtPosition(t)
-		const contents = rf.TILES[tileNumber] || []
+		const contents = rf.tileData(tileNumber, store.mapData.newMapVersion) || []
 
 		// 2. Filter and map drinks in one pass
 		for (const type of contents) {
