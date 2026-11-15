@@ -973,6 +973,7 @@ export default {
 		"moveUiToTop": "Verschieben Sie UI<br />nach oben <b>▲</b>",
 		"copyThisGame": "Kopieren Sie dieses Spiel in ein neues Spiel",
 		"arrowsHint": "Benutze die Pfeile, um durch das Spiel zu navigieren. Das aktuelle Spiel wird dadurch in keiner Weise verändert",
+		"stepAria": "Wiedergabeschritt",
 		"copyUrlToClipboard": "Kopieren Sie die URL dazu und verschieben Sie sie in die Zwischenablage",
 		"copiedToClipboard": "{url} In die Zwischenablage kopiert"
 	},

@@ -1756,6 +1756,42 @@ async function simulateServer(flag) {
 	store.viewSettings.showLoader = false
 }
 
+export async function copyGameToNewPracticeGame() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+
+	const historyCopy = [...store.history]
+	let data
+	try {
+		const cutoff = Math.max(0, Math.min(store.history.length, store.replayStep.computedHistoryIndex))
+		store.history = store.history.slice(0, cutoff)
+		data = funcs.exportRNBmodel(false)
+	} finally {
+		store.history = historyCopy
+	}
+
+	var csrftoken = funcs.getCookie("csrftoken")
+	try {
+		const response = await fetch("/createGameCopy/", {
+			method: "POST",
+			body: JSON.stringify({
+				action: "copyGame",
+				gameID: personal.gameID,
+				pov: personal.pov,
+				turn: store.gameflow.turn,
+				phase: store.gameflow.phase,
+				data,
+			}),
+			headers: { "X-CSRFToken": csrftoken },
+		})
+		if (!response.ok) throw new Error("Network response was not ok")
+		return await response.json()
+	} catch (error) {
+		console.error("Error copying RNB game:", error)
+		return null
+	}
+}
+
 export async function submitBug(bugContent) {
 	const store = useModelStore()
 	const personal = usePersonalStore()

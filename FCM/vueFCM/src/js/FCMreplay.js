@@ -17,7 +17,7 @@ export function goToReplayStep(step) {
 	const store = useModelStore()
 
 	store.replayStep = step
-	funcs.simpleImportWholeFCMmodel(store.replayData[store.replayStep])
+	funcs.simpleImportWholeFCMmodel(store.replayData[store.replayStep], true)
 	history.setupHistoryHighlight(store.computedHistory[store.replayStep][0], store.computedHistory[store.replayStep][3], store.replayStep)
 	if (store.viewSettings.showingPlayerIndex !== -1) store.viewSettings.showingPlayerIndex = controller.currentPlayerIndex()
 }
@@ -323,7 +323,7 @@ export async function generateReplayData(spoilerFree = false) {
 	else if (action === rf.HIST_SBD_BUILD_APARTMENT) replaySbdBuildApartment(i, playerIdx, param)
 	else if (action === rf.HIST_SBD_MOVE_OUT) replaySbdMoveOut(i, playerIdx, param)
 
-		store.replayData.push(funcs.simpleExportWholeFCMmodel())
+		store.replayData.push(funcs.simpleExportWholeFCMmodel(true))
 
 		if (i % 5 === 0 && pBarEl != null) {
 			let percent = (i / store.computedHistory.length) * 100

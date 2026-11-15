@@ -325,6 +325,10 @@ export default {
 	},
 	replay: {
 		notImplemented: "Not implemented yet",
+		stepAria: "Replay step",
+		backToMyLastMove: "Back to my last move",
+		gameCreated: "Game created:",
+		copyGameError: "Unable to create the practice game.",
 		copyThisGame: "Copy This Game<br />To New Game",
 		moveUi: "Move UI",
 		toBottom: "to Bottom",

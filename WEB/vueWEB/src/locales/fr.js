@@ -143,6 +143,12 @@ export default {
 		unknown: "Inconnu",
 	},
 	replay: {
+		stepAria: "Étape de relecture",
+		moveUi: "Déplacer l'interface",
+		copyThisGame: "Copier cette partie",
+		toNewGame: "Vers un nouveau jeu",
+		gameCreated: "Partie créée :",
+		copyGameError: "Impossible de créer la partie d'entraînement.",
 		backToMyLastMove: "Revenir à mon dernier coup",
 		useArrows: "Utilisez les flèches pour parcourir la partie. Cela ne modifiera en rien la partie en cours",
 		copyUrl: "Copier l'URL de ce coup dans le presse-papiers",

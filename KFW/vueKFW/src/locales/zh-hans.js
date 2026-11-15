@@ -315,6 +315,10 @@ export default {
 	},
 	replay: {
 		notImplemented: "尚未实现",
+		stepAria: "回放步骤",
+		backToMyLastMove: "返回我的上一步",
+		gameCreated: "游戏已创建：",
+		copyGameError: "无法创建练习游戏。",
 		copyThisGame: "将此游戏复制到新游戏",
 		moveUi: "移动界面",
 		toBottom: "到底部",

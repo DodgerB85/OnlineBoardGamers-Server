@@ -487,6 +487,8 @@ export default {
 		backToMyLastMove: "Zurück zu meinem letzten Zug",
 		copyGame: "Dieses Spiel kopieren",
 		toNewGame: "In neues Spiel",
+		gameCreated: "Spiel erstellt:",
+		copyGameError: "Das Übungsspiel konnte nicht erstellt werden.",
 		notImplemented: "Noch nicht implementiert",
 		moveUi: "UI verschieben",
 		toBottom: "nach unten",

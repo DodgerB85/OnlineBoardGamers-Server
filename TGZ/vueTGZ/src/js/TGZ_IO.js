@@ -681,7 +681,7 @@ export async function copyGameToNewPracticeGame(_replayStep) {
 	}
 
 	let histotyCopy = [...store.history]
-	if (_replayStep < store.spinoffReplayData.length) funcs.importModel(store.spinoffReplayData[_replayStep])
+	if (_replayStep < store.spinoffReplayData.length) funcs.importModel(store.spinoffReplayData[_replayStep], false, true)
 	else funcs.importModel(store.replayResetData, true)
 	store.history.splice(_replayStep)
 

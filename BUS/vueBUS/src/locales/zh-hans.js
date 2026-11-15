@@ -248,6 +248,13 @@ export default {
 		error: "错误：{error}",
 	},
 	replay: {
+		stepAria: "回放步骤",
+		copyThisGame: "复制本局游戏",
+		toNewGame: "到新游戏",
+		copyUrl: "将此步骤的 URL 复制到剪贴板",
+		copiedToClipboard: "{url} 已复制到剪贴板",
+		gameCreated: "游戏已创建：",
+		copyGameError: "无法创建练习游戏。",
 		backToMyLastMove: "回到我的最后一步",
 		exitReplayMode: "退出回放模式",
 	},

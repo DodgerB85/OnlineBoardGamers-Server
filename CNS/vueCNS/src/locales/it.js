@@ -245,6 +245,11 @@ export default {
 		hideTileInfo: "Nascondi informazioni tessera",
 	},
 	replay: {
+		stepAria: "Passo replay",
+		copyThisGame: "Copia questa partita",
+		toNewGame: "A nuova partita",
+		gameCreated: "Partita creata:",
+		copyGameError: "Impossibile creare la partita di pratica.",
 		backToMyLastMove: "Torna alla mia ultima mossa",
 		moveUi: "Sposta interfaccia",
 		toBottom: "in basso",

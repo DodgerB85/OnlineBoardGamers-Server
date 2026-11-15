@@ -5,6 +5,7 @@
 import * as model from "./ROWmodel"
 import { deserializeGame, serializeGame } from "./ROWfuncs"
 import { JavaRandom } from "./ROWcore"
+import { PHASE_GAME_OVER, PHASE_MAIN } from "./ROWreference"
 import i18n from "../i18n"
 import { useModelStore } from "../stores/ROWstore"
 import { usePersonalStore } from "../stores/ROWpersonal"
@@ -67,7 +68,17 @@ export function enterReplay() {
 		return
 	}
 	store.viewSettings.showReplay = true
-	store.replayIndex = store.replayFrames.length - 1
+	const requested = window.initData?.spoilerFree ? Number(window.initData.replayStep) : NaN
+	store.replayIndex = Number.isInteger(requested) && requested >= 0 ? Math.min(requested, store.replayFrames.length - 1) : store.replayFrames.length - 1
+	viewFrame()
+}
+
+/** Jump to a frame (used by the replay slider). */
+export function goToReplayStep(step) {
+	const store = useModelStore()
+	if (!store.viewSettings.showReplay) return
+	const next = Math.max(0, Math.min(Number(step), store.replayFrames.length - 1))
+	store.replayIndex = next
 	viewFrame()
 }
 
@@ -89,6 +100,43 @@ function viewFrame() {
 		store.setGame(deserializeGame(clone(frame)))
 	}
 	store.touch()
+}
+
+/** Copy the visible replay frame into a new practice game. */
+export async function copyGameToNewPracticeGame() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	const frame = store.replayFrames[store.replayIndex]
+	if (!frame) return null
+
+	// Start the copy at the visible frame, with no earlier history to replay.
+	const snapshot = clone(frame)
+	const data = { ...snapshot, history: [], replayInitial: snapshot, turn: store.turn }
+	let csrftoken = ""
+	for (const cookie of document.cookie.split(";")) {
+		const [key, ...rest] = cookie.trim().split("=")
+		if (key === "csrftoken") csrftoken = decodeURIComponent(rest.join("="))
+	}
+
+	try {
+		const response = await fetch("/createGameCopy/", {
+			method: "POST",
+			body: JSON.stringify({
+				action: "copyGame",
+				gameID: personal.gameID,
+				pov: personal.pov,
+				turn: store.turn,
+				phase: store.game?.isEnded() ? PHASE_GAME_OVER : PHASE_MAIN,
+				data: JSON.stringify(data),
+			}),
+			headers: { "X-CSRFToken": csrftoken },
+		})
+		if (!response.ok) throw new Error("Network response was not ok")
+		return await response.json()
+	} catch (error) {
+		console.error("Error copying ROW game:", error)
+		return null
+	}
 }
 
 /** Leave replay and restore the live position. */

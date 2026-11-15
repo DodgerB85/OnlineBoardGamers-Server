@@ -273,6 +273,13 @@ export default {
 	},
 	replay: {
 		title: "Wiederholung",
+		stepAria: "Wiedergabeschritt",
+		copyThisGame: "Dieses Spiel kopieren",
+		toNewGame: "Zu neuem Spiel",
+		copyUrl: "URL zu diesem Zug in die Zwischenablage kopieren",
+		copiedToClipboard: "{url} in die Zwischenablage kopiert",
+		gameCreated: "Spiel erstellt:",
+		copyGameError: "Das Übungsspiel konnte nicht erstellt werden.",
 		exit: "Wiederholung verlassen",
 	},
 	map: {

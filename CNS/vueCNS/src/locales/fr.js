@@ -245,6 +245,11 @@ export default {
 		hideTileInfo: "Masquer les infos de tuile",
 	},
 	replay: {
+		stepAria: "Étape de relecture",
+		copyThisGame: "Copier cette partie",
+		toNewGame: "Vers un nouveau jeu",
+		gameCreated: "Partie créée :",
+		copyGameError: "Impossible de créer la partie d'entraînement.",
 		backToMyLastMove: "Retour à mon dernier coup",
 		moveUi: "Déplacer l'interface",
 		toBottom: "vers le bas",

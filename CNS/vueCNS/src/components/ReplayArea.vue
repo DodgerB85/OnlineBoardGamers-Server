@@ -15,11 +15,32 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/CNSpersonal.js";
 const personal = usePersonalStore()
 
-import { ref } from 'vue';
+import { nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 const copyMessage = ref('');
+const spinoffSuccessText = ref('')
+const spinoffErrorText = ref('')
+
+async function localCopyGameToPracticeGame() {
+    spinoffErrorText.value = ''
+    spinoffSuccessText.value = ''
+    const result = await IO.copyGameToNewPracticeGame()
+    if (result?.newID) {
+        const url = `${window.location.origin}/CNS/${result.newID}/show/`
+        spinoffSuccessText.value = `${t("replay.gameCreated")} <a href="${url}" target="_blank" rel="noopener">${t("topMenuViews.here")}</a>`
+    } else {
+        spinoffErrorText.value = t("replay.copyGameError")
+    }
+}
+
+function setReplayStep(event) {
+    const step = Number(event.target.value)
+    if (step === store.replayStep) return
+    store.clearHistoryHelpers()
+    replay.goToReplayStep(step)
+}
 
 function copyToClipboard() {
     const textToCopy =
@@ -39,66 +60,78 @@ function copyToClipboard() {
 
     copyMessage.value = t("replay.copiedToClipboard", { url: textToCopy })
 
-    const button = document.getElementById("copyURLbutton");
-    const popup = document.getElementById("popup");
+    // Position after the new text renders, so the popup is centred and on-screen.
+    nextTick(() => {
+        const button = document.getElementById("copyURLbutton");
+        const popup = document.getElementById("popup");
 
-    // Hide any existing popup and reset the timer
-    clearTimeout(popup.fadeTimeout);
+        // Hide any existing popup and reset the timer
+        clearTimeout(popup.fadeTimeout);
 
-    popup.style.opacity = "1";
-    popup.style.display = "block";
+        popup.style.opacity = "1";
+        popup.style.display = "block";
 
-    const buttonRect = button.getBoundingClientRect();
-    const popupRect = popup.getBoundingClientRect();
-    const offsetTop = buttonRect.top + buttonRect.height + 10; // Adjust the offset as needed
-    const offsetLeft = buttonRect.left + (buttonRect.width - popupRect.width) / 2;
+        const buttonRect = button.getBoundingClientRect();
+        const popupRect = popup.getBoundingClientRect();
+        const below = buttonRect.bottom + 10;
+        const offsetTop = below + popupRect.height <= window.innerHeight ? below : buttonRect.top - popupRect.height - 10;
+        const offsetLeft = Math.max(10, Math.min(window.innerWidth - popupRect.width - 10, buttonRect.left + (buttonRect.width - popupRect.width) / 2));
 
-    popup.style.top = offsetTop + "px";
-    popup.style.left = offsetLeft + "px";
+        popup.style.top = offsetTop + "px";
+        popup.style.left = offsetLeft + "px";
 
-    // Fade out the popup after 2 seconds
-    popup.fadeTimeout = setTimeout(() => {
-        popup.style.opacity = "0";
+        // Fade out the popup after 2 seconds
+        popup.fadeTimeout = setTimeout(() => {
+            popup.style.opacity = "0";
 
-        // Hide the popup after the fade-out animation completes
-        setTimeout(() => {
-            popup.style.display = "none";
-        }, 300);
-    }, 2000);
+            // Hide the popup after the fade-out animation completes
+            setTimeout(() => {
+                popup.style.display = "none";
+            }, 300);
+        }, 2000);
+    });
 }
 
 </script>
 
 <template>
     <template v-if="store.topMenuViews.showReplay">
-        <button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="store.replayStep === 0"
-            @click="replay.performStep(-999)">{{ $t("replay.backToMyLastMove") }}</button>
-        <button class="actionsLineButton" :disabled="store.replayStep === 0"
-            @click="replay.performStep(-99)">|&lt;</button>
-        <button class="actionsLineButton" :disabled="store.replayStep === 0"
-            @click="replay.performStep(-9)">&lt;&lt;</button>
-        <button class="actionsLineButton" :disabled="store.replayStep === 0"
-            @click="replay.performStep(-1)">&lt;</button>
-        {{ store.replayStep + 1 }} / {{ store.replayData.length }}
-        <button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
-            @click="replay.performStep(1)">&gt;</button>
-        <button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
-            @click="replay.performStep(9)">&gt;&gt;</button>
-        <button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
-            @click="replay.performStep(99)">&gt;|</button>
+        <div id="replayArea" :class="{ replayAtBottom: store.topMenuViews.replayAtBottom }">
+            <button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="store.replayStep === 0"
+                @click="replay.performStep(-999)">{{ $t("replay.backToMyLastMove") }}</button>
+            <button class="actionsLineButton" :disabled="store.replayStep === 0"
+                @click="replay.performStep(-99)">|&lt;</button>
+            <button class="actionsLineButton" :disabled="store.replayStep === 0"
+                @click="replay.performStep(-9)">&lt;&lt;</button>
+            <button class="actionsLineButton" :disabled="store.replayStep === 0"
+                @click="replay.performStep(-1)">&lt;</button>
+            <input type="range" min="0" :max="Math.max(0, store.replayData.length - 1)" :value="store.replayStep"
+                :aria-label="$t('replay.stepAria')" @input="setReplayStep" />
+            <span class="replayStepSpan">{{ store.replayStep + 1 }} / {{ store.replayData.length }}</span>
+            <button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
+                @click="replay.performStep(1)">&gt;</button>
+            <button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
+                @click="replay.performStep(9)">&gt;&gt;</button>
+            <button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
+                @click="replay.performStep(99)">&gt;|</button>
 
-        <div class="copyGameButtonDiv" v-if="personal.name != undefined">
-            <button @click="store.topMenuViews.replayAtBottom = !store.topMenuViews.replayAtBottom"
-                class="actionsLineButton">
-                <template v-if="!store.topMenuViews.replayAtBottom">{{ $t("replay.moveUi") }}<br />{{ $t("replay.toBottom") }} <b>▼</b></template>
-                <template v-if="store.topMenuViews.replayAtBottom">{{ $t("replay.moveUi") }}<br />{{ $t("replay.toTop") }} <b>▲</b></template>
-            </button>
+            <template v-if="personal.name != undefined">
+                <button @click="localCopyGameToPracticeGame()" class="actionsLineButton">
+                    {{ $t("replay.copyThisGame") }}<br />{{ $t("replay.toNewGame") }}
+                </button>
+                <button @click="store.topMenuViews.replayAtBottom = !store.topMenuViews.replayAtBottom"
+                    class="actionsLineButton">
+                    <template v-if="!store.topMenuViews.replayAtBottom">{{ $t("replay.moveUi") }}<br />{{ $t("replay.toBottom") }} <b>▼</b></template>
+                    <template v-if="store.topMenuViews.replayAtBottom">{{ $t("replay.moveUi") }}<br />{{ $t("replay.toTop") }} <b>▲</b></template>
+                </button>
+            </template>
+
+            <button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">{{ $t("replay.copyUrl") }}</button>
+            <div id="popup" class="popup">{{ copyMessage }}</div>
         </div>
 
-        <br />{{ $t("replay.useArrows") }}
-        <br /><button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">{{ $t("replay.copyUrl") }}</button>
-        <div id="popup" class="popup">{{ copyMessage }}</div>
-
+        <div v-if="spinoffSuccessText !== ''" class="spinoffSuccessText" v-html="spinoffSuccessText"></div>
+        <div v-if="spinoffErrorText !== ''" class="spinoffErrorText">{{ spinoffErrorText }}</div>
         <div v-if="!store.topMenuViews.generatingReplay" class="replayHistoryEntry">
             <HistoryEntry :entry="store.history[store.replayStep]" :entry_-i-d=-1 />
         </div>
@@ -144,6 +177,55 @@ function copyToClipboard() {
     vertical-align: middle;
 }
 
+#replayArea {
+    position: sticky;
+    top: 0;
+    z-index: 9998;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    background: #d4eafd;
+    border: 1px solid black;
+    padding: 8px;
+    margin: 10px 12px 0;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+#replayArea.replayAtBottom {
+    top: auto;
+    bottom: 0;
+}
+
+#replayArea input[type="range"] {
+    width: min(300px, 35vw);
+}
+
+.replayStepSpan {
+    min-width: 100px;
+}
+
+.spinoffSuccessText,
+.spinoffErrorText {
+    font-size: 20px;
+    margin: 10px;
+    padding: 10px;
+    font-weight: bold;
+}
+
+.spinoffSuccessText {
+    color: darkgreen;
+    background-color: lightblue;
+}
+
+.spinoffErrorText {
+    color: darkred;
+    background-color: lightblue;
+}
+
 .replayHistoryEntry {
     width: fit-content;
     margin: auto;
@@ -151,7 +233,7 @@ function copyToClipboard() {
 }
 
 .actionsLineButton {
-    margin: 10px;
+    margin: 0;
     width: fit-content;
     border: 2px solid green;
     border-radius: 5px;
@@ -167,7 +249,8 @@ function copyToClipboard() {
 }
 
 .popup {
-    position: absolute;
+    position: fixed;
+    z-index: 10000;
     background-color: #f7f7f7;
     padding: 10px;
     border-radius: 4px;

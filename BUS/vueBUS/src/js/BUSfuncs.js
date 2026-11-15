@@ -415,7 +415,7 @@ export function decompressActionArea(compressed) {
 	})
 }
 
-export function exportBUSmodel(forGameOver, saveContext) {
+export function exportBUSmodel(forGameOver, saveContext, raw = false) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	let temp = []
@@ -498,6 +498,7 @@ export function exportBUSmodel(forGameOver, saveContext) {
 	}
 
 	// Usage with your second method:
+	if (raw) return temp
 	// eslint-disable-next-line no-undef
 	const msgpacked = msgpack.encode(temp)
 	// eslint-disable-next-line no-undef
@@ -507,35 +508,39 @@ export function exportBUSmodel(forGameOver, saveContext) {
 	return exportDataB64
 }
 
-export function importBUSmodel(inputBase64, forGameOver, restoreContext, historyScanCount) {
+export function importBUSmodel(inputBase64, forGameOver, restoreContext, historyScanCount, raw = false) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 
 	let inputModel = null
 
-	try {
-		// 1. Base64 to Binary String
-		const binaryString = window.atob(inputBase64)
-		const bytes = new Uint8Array(binaryString.length)
-		for (let i = 0; i < binaryString.length; i++) {
-			bytes[i] = binaryString.charCodeAt(i)
-		}
-
-		// 2. Un-GZIP (pako handles the decompression)
-		// eslint-disable-next-line no-undef
-		const ungzipped = pako.ungzip(bytes)
-
-		// 3. MessagePack Decode (Works directly on Uint8Array)
-		// eslint-disable-next-line no-undef
-		inputModel = msgpack.decode(ungzipped)
-	} catch (err) {
-		console.error("Decompression failed:", err)
+	if (raw) {
+		inputModel = inputBase64
+	} else {
 		try {
-			importModel(inputBase64, restoreContext)
-			return
-		} catch (err2) {
-			console.error("Decompression failed:", err2)
-			return null
+			// 1. Base64 to Binary String
+			const binaryString = window.atob(inputBase64)
+			const bytes = new Uint8Array(binaryString.length)
+			for (let i = 0; i < binaryString.length; i++) {
+				bytes[i] = binaryString.charCodeAt(i)
+			}
+
+			// 2. Un-GZIP (pako handles the decompression)
+			// eslint-disable-next-line no-undef
+			const ungzipped = pako.ungzip(bytes)
+
+			// 3. MessagePack Decode (Works directly on Uint8Array)
+			// eslint-disable-next-line no-undef
+			inputModel = msgpack.decode(ungzipped)
+		} catch (err) {
+			console.error("Decompression failed:", err)
+			try {
+				importModel(inputBase64, restoreContext)
+				return
+			} catch (err2) {
+				console.error("Decompression failed:", err2)
+				return null
+			}
 		}
 	}
 

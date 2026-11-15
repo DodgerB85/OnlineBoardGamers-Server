@@ -973,6 +973,7 @@ export default {
 		"moveUiToTop": "Sposta UI<br />in alto <b>▲</b>",
 		"copyThisGame": "Copia questo gioco in un nuovo gioco",
 		"arrowsHint": "Usa le frecce per avanzare nel gioco. Ciò non modificherà in alcun modo il gioco corrente",
+		"stepAria": "Passo replay",
 		"copyUrlToClipboard": "Copia l'URL di questo spostamento negli appunti",
 		"copiedToClipboard": "{url} Copiato negli appunti"
 	},

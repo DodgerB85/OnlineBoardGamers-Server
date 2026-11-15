@@ -178,7 +178,7 @@ export function timestampToString(timestamp) {
 	return res
 }
 
-export function simpleExportWholeFCMmodel() {
+export function simpleExportWholeFCMmodel(raw = false) {
 	const store = useModelStore()
 	let temp = []
 
@@ -255,6 +255,7 @@ export function simpleExportWholeFCMmodel() {
 	// 24 - Media Line mod (only when chosen)
 	if (store.startingOptions.mediaLine) temp.push(JSON.parse(JSON.stringify(store.mediaLine)))
 
+	if (raw) return temp
 	return compressData(temp)
 }
 
@@ -1593,11 +1594,11 @@ export function restoreLaborMarketState(inputArr, index = -1) {
 	store.availableEmployees[rf.UNION_ORGANIZER] = Math.max(0, playerCount - lm.unionHolders.length)
 }
 
-export function simpleImportWholeFCMmodel(inputBase64) {
+export function simpleImportWholeFCMmodel(inputBase64, raw = false) {
 	const store = useModelStore()
 
 	
-	let inputModel = decompressData(inputBase64)
+	let inputModel = raw ? inputBase64 : decompressData(inputBase64)
 
 	// Now set up internal options
 	model.setInternalStartingOptions(store.externalStartingOptions)

@@ -487,6 +487,8 @@ export default {
 		backToMyLastMove: "Revenir à mon dernier coup",
 		copyGame: "Copier cette partie",
 		toNewGame: "Vers une nouvelle partie",
+		gameCreated: "Partie créée :",
+		copyGameError: "Impossible de créer la partie d'entraînement.",
 		notImplemented: "Pas encore implémenté",
 		moveUi: "Déplacer l'interface",
 		toBottom: "en bas",

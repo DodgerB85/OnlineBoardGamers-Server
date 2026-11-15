@@ -47,7 +47,7 @@ export function performStep(amount) {
 
 	// replayStep+1: snapshot k is the state after history[0..k], so only count
 	// that prefix when rebuilding buses/timeStones/etc from the embedded history
-	funcs.importBUSmodel(store.replayData[store.replayStep], false, false, store.replayStep + 1)
+	funcs.importBUSmodel(store.replayData[store.replayStep], false, false, store.replayStep + 1, true)
 
 	let requireHighlights = [rf.HIST_ADD_BLDG, rf.HIST_ADD_LINE, rf.HIST_VROM]
 	if (requireHighlights.includes(store.history[store.replayStep][0])) setupReplayHighlights(store.history[store.replayStep][3])
@@ -493,7 +493,7 @@ export async function generateReplayData(spoilerFree = false) {
 		else if (store.history[i][0] === rf.HIST_RESIGN) replayMissingPlayer(i, store.history[i][1], store.history[i][3])
 		else if (store.history[i][0] === rf.HIST_GAME_END) replayGameEnd(i, store.history[i][1], store.history[i][3])
 
-		store.replayData.push(funcs.exportBUSmodel(false))
+		store.replayData.push(funcs.exportBUSmodel(false, undefined, true))
 
 		if (i % 5 === 0 && pBarEl != null) {
 			let percent = (i / store.history.length) * 100

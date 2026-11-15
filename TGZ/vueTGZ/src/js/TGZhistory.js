@@ -43,7 +43,7 @@ export function performStep(amount) {
 		}
 	}
 
-	funcs.importModel(store.replayData[store.replayStep])
+	funcs.importModel(store.replayData[store.replayStep], false, true)
 
 	setupHistoryHighlightSquares(store.history[store.replayStep][0], store.history[store.replayStep][3])
 	if (store.topMenuViews.showingPlayerIndex !== -1) store.topMenuViews.showingPlayerIndex = controller.currentPlayerIndex()
@@ -53,7 +53,7 @@ export function goToReplayStep(step) {
 	const store = useModelStore()
 
 	store.replayStep = step
-	funcs.importModel(store.replayData[store.replayStep])
+	funcs.importModel(store.replayData[store.replayStep], false, true)
 
 	setupHistoryHighlightSquares(store.history[store.replayStep][0], store.history[store.replayStep][3])
 }

@@ -315,6 +315,10 @@ export default {
 	},
 	replay: {
 		notImplemented: "Pas encore implémenté",
+		stepAria: "Étape de relecture",
+		backToMyLastMove: "Revenir à mon dernier coup",
+		gameCreated: "Partie créée :",
+		copyGameError: "Impossible de créer la partie d'entraînement.",
 		copyThisGame: "Copier cette partie vers une nouvelle partie",
 		moveUi: "Déplacer l'interface",
 		toBottom: "vers le bas",

@@ -94,6 +94,7 @@ function resizeBoard() {
 watch(() => store.viewSettings.showReplay, stickPanels, { flush: "post" })
 
 model.initGame()
+if (window.initData?.spoilerFree) store.viewSettings.showReplay = true
 controller.startPlayerTurn()
 let updateTimer = null
 let kickoutTimer = null

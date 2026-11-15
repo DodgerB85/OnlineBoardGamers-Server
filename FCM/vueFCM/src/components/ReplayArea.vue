@@ -12,7 +12,7 @@ const store = useModelStore()
 import { usePersonalStore } from "../stores/FCMpersonal.js";
 const personal = usePersonalStore()
 
-import { ref } from 'vue';
+import { nextTick, ref } from 'vue';
 
 const spinoffSuccessText = ref('')
 const spinoffErrorText = ref('')
@@ -24,6 +24,14 @@ function performStep(amount) {
     spinoffSuccessText.value = ''
     spinoffErrorText.value = ''
     replay.performStep(amount)
+}
+
+function setReplayStep(event) {
+    const step = Number(event.target.value)
+    if (step === store.replayStep) return
+    store.clearHistoryHelpers()
+    store.clearMessages()
+    replay.goToReplayStep(step)
 }
 
 async function localCopyGameToPracticeGame2() {
@@ -53,61 +61,68 @@ function copyToClipboard() {
 
     copyMessage.value = i18n.global.t("replay.copiedToClipboard", { url: textToCopy })
 
-    const button = document.getElementById("copyURLbutton");
-    const popup = document.getElementById("popup");
+    // Position after the new text renders, so the popup is centred and on-screen.
+    nextTick(() => {
+        const button = document.getElementById("copyURLbutton");
+        const popup = document.getElementById("popup");
 
-    // Hide any existing popup and reset the timer
-    clearTimeout(popup.fadeTimeout);
+        // Hide any existing popup and reset the timer
+        clearTimeout(popup.fadeTimeout);
 
-    popup.style.opacity = "1";
-    popup.style.display = "block";
+        popup.style.opacity = "1";
+        popup.style.display = "block";
 
-    const buttonRect = button.getBoundingClientRect();
-    const popupRect = popup.getBoundingClientRect();
-    const offsetTop = buttonRect.top + buttonRect.height + 10; // Adjust the offset as needed
-    const offsetLeft = buttonRect.left + (buttonRect.width - popupRect.width) / 2;
+        const buttonRect = button.getBoundingClientRect();
+        const popupRect = popup.getBoundingClientRect();
+        const below = buttonRect.bottom + 10;
+        const offsetTop = below + popupRect.height <= window.innerHeight ? below : buttonRect.top - popupRect.height - 10;
+        const offsetLeft = Math.max(10, Math.min(window.innerWidth - popupRect.width - 10, buttonRect.left + (buttonRect.width - popupRect.width) / 2));
 
-    popup.style.top = offsetTop + "px";
-    popup.style.left = offsetLeft + "px";
+        popup.style.top = offsetTop + "px";
+        popup.style.left = offsetLeft + "px";
 
-    // Fade out the popup after 2 seconds
-    popup.fadeTimeout = setTimeout(() => {
-        popup.style.opacity = "0";
+        // Fade out the popup after 2 seconds
+        popup.fadeTimeout = setTimeout(() => {
+            popup.style.opacity = "0";
 
-        // Hide the popup after the fade-out animation completes
-        setTimeout(() => {
-            popup.style.display = "none";
-        }, 300);
-    }, 2000);
+            // Hide the popup after the fade-out animation completes
+            setTimeout(() => {
+                popup.style.display = "none";
+            }, 300);
+        }, 2000);
+    });
 }
 
 </script>
 
 <template>
     <template v-if="store.viewSettings.showReplay">
-        <button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="store.replayStep === 0"
-            @click="performStep(-999)">{{ $t("replay.backToMyLastMove") }}</button>
-        <button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-99)">|&lt;</button>
-        <button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-9)">&lt;&lt;</button>
-        <button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-1)">&lt;</button>
-        {{ store.replayStep + 1 }} / {{ store.replayData.length }}
-        <button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
-            @click="performStep(1)">&gt;</button>
-        <button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
-            @click="performStep(9)">&gt;&gt;</button>
-        <button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
-            @click="performStep(99)">&gt;|</button>
+        <div id="replayArea" :class="{ replayAtBottom: store.viewSettings.replayAtBottom }">
+            <button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="store.replayStep === 0"
+                @click="performStep(-999)">{{ $t("replay.backToMyLastMove") }}</button>
+            <button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-99)">|&lt;</button>
+            <button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-9)">&lt;&lt;</button>
+            <button class="actionsLineButton" :disabled="store.replayStep === 0" @click="performStep(-1)">&lt;</button>
+            <input type="range" min="0" :max="Math.max(0, store.replayData.length - 1)" :value="store.replayStep"
+                :aria-label="$t('replay.stepAria')" @input="setReplayStep" />
+            <span class="replayStepSpan">{{ store.replayStep + 1 }} / {{ store.replayData.length }}</span>
+            <button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
+                @click="performStep(1)">&gt;</button>
+            <button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
+                @click="performStep(9)">&gt;&gt;</button>
+            <button class="actionsLineButton" :disabled="store.replayStep === store.replayData.length - 1"
+                @click="performStep(99)">&gt;|</button>
 
-        <div class="copyGameButtonDiv" v-if="personal.pov >= 0">
-            <button @click="localCopyGameToPracticeGame2()" class="actionsLineButton"
-                v-html="$t('replay.copyThisGame')"></button>
-            <button @click="store.viewSettings.replayAtBottom = !store.viewSettings.replayAtBottom"
-                class="actionsLineButton"
-                v-html="store.viewSettings.replayAtBottom ? $t('replay.moveUiToTop') : $t('replay.moveUiToBottom')"></button>
+            <template v-if="personal.pov >= 0">
+                <button @click="localCopyGameToPracticeGame2()" class="actionsLineButton"
+                    v-html="$t('replay.copyThisGame')"></button>
+                <button @click="store.viewSettings.replayAtBottom = !store.viewSettings.replayAtBottom"
+                    class="actionsLineButton"
+                    v-html="store.viewSettings.replayAtBottom ? $t('replay.moveUiToTop') : $t('replay.moveUiToBottom')"></button>
+            </template>
+            <button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">{{ $t("replay.copyUrlToClipboard") }}</button>
+            <div id="popup" class="popup">{{ copyMessage }}</div>
         </div>
-        <br />{{ $t("replay.arrowsHint") }}
-        <br /><button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">{{ $t("replay.copyUrlToClipboard") }}</button>
-        <div id="popup" class="popup">{{ copyMessage }}</div>
 
         <div v-if="spinoffSuccessText !== ''" class="spinoffSuccessText" v-html="spinoffSuccessText"></div>
         <div v-if="spinoffErrorText !== ''" class="spinoffErrorText">{{ spinoffErrorText }}</div>
@@ -174,6 +189,37 @@ function copyToClipboard() {
     vertical-align: middle;
 }
 
+#replayArea {
+    position: sticky;
+    top: 0;
+    z-index: 9998;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    background: #d4eafd;
+    border: 1px solid black;
+    padding: 8px;
+    margin: 10px 12px 0;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+#replayArea.replayAtBottom {
+    top: auto;
+    bottom: 0;
+}
+
+#replayArea input[type="range"] {
+    width: min(300px, 35vw);
+}
+
+.replayStepSpan {
+    min-width: 100px;
+}
+
 .replayHistoryEntry {
     width: fit-content;
     margin: auto;
@@ -181,7 +227,7 @@ function copyToClipboard() {
 }
 
 .actionsLineButton {
-    margin: 10px;
+    margin: 0;
     /*width: 100px;*/
     width: fit-content;
     border: 2px solid green;
@@ -198,7 +244,8 @@ function copyToClipboard() {
 }
 
 .popup {
-    position: absolute;
+    position: fixed;
+    z-index: 10000;
     background-color: #f7f7f7;
     padding: 10px;
     border-radius: 4px;

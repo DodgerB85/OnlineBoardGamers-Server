@@ -7,6 +7,7 @@ app_name = "DDL"
 urlpatterns = [
     path("", views.index, name="index"),
     path("<int:game_id>/show/", views.showDDLgame, name="showDDLgame"),
+    path("<int:game_id>/replay/<int:replayStep>/", views.showDDLgame, {"spoilerFree": True}, name="showDDLreplayStep"),
     path("help/", views.DDLhelp, name="DDLhelp"),
     ## API routes
     path("createDDLgame/", views.createDDLgame, name="createDDLgame"),

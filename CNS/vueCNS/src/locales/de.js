@@ -245,6 +245,11 @@ export default {
 		hideTileInfo: "Kachelinfo ausblenden",
 	},
 	replay: {
+		stepAria: "Wiedergabeschritt",
+		copyThisGame: "Dieses Spiel kopieren",
+		toNewGame: "Zu neuem Spiel",
+		gameCreated: "Spiel erstellt:",
+		copyGameError: "Das Übungsspiel konnte nicht erstellt werden.",
 		backToMyLastMove: "Zurück zu meinem letzten Zug",
 		moveUi: "UI nach",
 		toBottom: "unten verschieben",

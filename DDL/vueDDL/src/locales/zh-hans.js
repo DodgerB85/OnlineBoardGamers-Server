@@ -273,6 +273,13 @@ export default {
 	},
 	replay: {
 		title: "回放",
+		stepAria: "回放步骤",
+		copyThisGame: "复制本局游戏",
+		toNewGame: "到新游戏",
+		copyUrl: "复制此步骤的链接到剪贴板",
+		copiedToClipboard: "{url} 已复制到剪贴板",
+		gameCreated: "游戏已创建：",
+		copyGameError: "无法创建练习游戏。",
 		exit: "退出回放",
 	},
 	map: {

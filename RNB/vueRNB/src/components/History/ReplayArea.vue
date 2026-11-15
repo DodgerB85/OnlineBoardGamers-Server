@@ -5,6 +5,7 @@ import * as model from '../js/RNBmodel'*/
 //import * as rf from "../../js/RNBreference"
 //import * as IO from '../backend/RNB_IO'
 import * as replay from "./RNBreplay"
+import * as IO from "../../backend/RNB_IO"
 import i18n from "../../i18n"
 
 import HistoryEntry from "./HistoryEntry.vue"
@@ -36,7 +37,15 @@ function setReplayStep(event) {
 }
 
 async function localCopyGameToPracticeGame2() {
-	store.gameMessages.rewindErrorText = i18n.global.t("replay.notImplemented")
+	spinoffSuccessText.value = ""
+	spinoffErrorText.value = ""
+	const result = await IO.copyGameToNewPracticeGame()
+	if (result?.newID) {
+		const url = `${window.location.origin}/RNB/${result.newID}/show/`
+		spinoffSuccessText.value = `${i18n.global.t("replay.gameCreated")} <a href="${url}" target="_blank" rel="noopener">${url}</a>`
+	} else {
+		spinoffErrorText.value = i18n.global.t("replay.copyGameError")
+	}
 }
 
 function copyToClipboard() {

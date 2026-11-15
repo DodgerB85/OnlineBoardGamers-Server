@@ -7,6 +7,7 @@ app_name = "ROW"
 urlpatterns = [
     path("", views.index, name="index"),
     path("<int:game_id>/show/", views.showROWgame, name="showROWgame"),
+    path("<int:game_id>/replay/<int:replayStep>/", views.showROWgame, {"spoilerFree": True}, name="showROWreplayStep"),
     path("help/", views.ROWhelp, name="ROWhelp"),
     ## API routes
     path("createROWgame/", views.createROWgame, name="createROWgame"),

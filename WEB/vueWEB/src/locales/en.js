@@ -143,6 +143,12 @@ export default {
 		unknown: "Unknown",
 	},
 	replay: {
+		stepAria: "Replay step",
+		moveUi: "Move UI",
+		copyThisGame: "Copy This Game",
+		toNewGame: "To New Game",
+		gameCreated: "Game created:",
+		copyGameError: "Unable to create the practice game.",
 		backToMyLastMove: "Back to my last move",
 		useArrows: "Use the arrows to step through the game. This will not alter the current game in any way",
 		copyUrl: "Copy URL to this move to clipboard",

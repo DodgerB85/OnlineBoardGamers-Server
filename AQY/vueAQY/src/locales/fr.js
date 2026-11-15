@@ -178,6 +178,9 @@ export default {
 		gameIconsNet: "game-icons.net",
 	},
 	replayArea: {
+		stepAria: "Étape de relecture",
+		gameCreated: "Partie créée :",
+		copyGameError: "Impossible de créer la partie d'entraînement.",
 		backToMyLastMove: "Revenir à mon dernier coup",
 		copiedToClipboard: "{url} copié dans le presse-papiers",
 		notImplementedYet: "Pas encore implémenté",

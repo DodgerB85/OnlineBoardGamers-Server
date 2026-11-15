@@ -463,6 +463,7 @@ export default {
 		map: "Map",
 		inspector: "Inspector",
 		useEshu: "Use Eshu",
+		stepAria: "Replay step",
 		backToMyLastMove: "Back to my last move",
 		first: "First move",
 		backFive: "Back five moves",

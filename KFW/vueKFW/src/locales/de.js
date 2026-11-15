@@ -315,6 +315,10 @@ export default {
 	},
 	replay: {
 		notImplemented: "Noch nicht implementiert",
+		stepAria: "Wiedergabeschritt",
+		backToMyLastMove: "Zurück zu meinem letzten Zug",
+		gameCreated: "Spiel erstellt:",
+		copyGameError: "Das Übungsspiel konnte nicht erstellt werden.",
 		copyThisGame: "Dieses Spiel in ein neues Spiel kopieren",
 		moveUi: "UI nach",
 		toBottom: "unten verschieben",

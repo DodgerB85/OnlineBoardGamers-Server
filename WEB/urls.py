@@ -20,6 +20,7 @@ def redirect_old_url(request, original_id):
 urlpatterns = [
     path("", views.index, name="index"),
     path("<int:game_id>/show/", views.showWEBgame, name="showWEBgame"),
+    path("<int:game_id>/replay/<int:replayStep>/", views.showWEBgame, {"spoilerFree": True}, name="showWEBreplayStep"),
     path("<int:original_id>/", redirect_old_url, name="redirect_old_url"),
     # path('<int:game_id>/replay/<int:replayStep>', views.showINDgame, {'spoilerFree': True}, name='showINDreplayStep'),
     path("help/", views.WEBhelp, name="WEBhelp"),

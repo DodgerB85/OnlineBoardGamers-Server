@@ -551,7 +551,7 @@ export async function simpleImportWholeKFWmodel(input, importContext) {
 	}
 }
 
-export function exportKFWmodel(includeContext = false) {
+export function exportKFWmodel(includeContext = false, raw = false, omitHistory = false) {
 	const store = useModelStore()
 	let temp = []
 
@@ -664,7 +664,7 @@ export function exportKFWmodel(includeContext = false) {
 	temp.push(JSON.parse(JSON.stringify(tempAvailableTiles)))
 
 	// 5 history
-	temp.push(JSON.parse(JSON.stringify(store.history)))
+	temp.push(omitHistory ? [] : JSON.parse(JSON.stringify(store.history)))
 
 	// 6 availableResources
 	temp.push(JSON.parse(JSON.stringify(store.availableResources)))
@@ -698,6 +698,7 @@ export function exportKFWmodel(includeContext = false) {
 
 	var step1 = JSON.stringify(temp)
 
+	if (raw) return temp
 	// eslint-disable-next-line no-undef
 	let step2 = pako.gzip(step1)
 	let base64Data = btoa(String.fromCharCode(...new Uint8Array(step2)))
@@ -705,15 +706,20 @@ export function exportKFWmodel(includeContext = false) {
 	return base64Data
 }
 
-export async function importKFWmodel(input, includeContext) {
+export async function importKFWmodel(input, includeContext, raw = false, keepHistory = false) {
 	const store = useModelStore()
 
 	if (input === "" || input == undefined) return
 
-	let compressedData = Uint8Array.from(atob(input), (c) => c.charCodeAt(0))
-	// eslint-disable-next-line no-undef
-	let decompressedData = pako.ungzip(compressedData, { to: "string" })
-	let inputModel = JSON.parse(decompressedData)
+	let inputModel
+	if (raw) {
+		inputModel = input
+	} else {
+		let compressedData = Uint8Array.from(atob(input), (c) => c.charCodeAt(0))
+		// eslint-disable-next-line no-undef
+		let decompressedData = pako.ungzip(compressedData, { to: "string" })
+		inputModel = JSON.parse(decompressedData)
+	}
 
 	/*for (let i=0;i<inputModel[1].length;i++) {
 		console.log(i)
@@ -892,8 +898,10 @@ export async function importKFWmodel(input, includeContext) {
 	}
 
 	// 3 history
-	store.history.splice(0)
-	Object.assign(store.history, inputModel[5])
+	if (!keepHistory) {
+		store.history.splice(0)
+		Object.assign(store.history, inputModel[5])
+	}
 
 	// 6 availableResources
 	store.availableResources.splice(0)

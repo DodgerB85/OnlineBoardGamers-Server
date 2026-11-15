@@ -141,6 +141,7 @@
     moveUiToTop: "Move UI<br />to Top <b>▲</b>",
     copyThisGame: "Copy This Game<br />To Practice Game",
     arrowsHint: "Use the arrows to step through the game. This will not alter the current game in any way",
+    stepAria: "Replay step",
     copyUrlToClipboard: "Copy URL to this move to clipboard",
     copiedToClipboard: "{url} Copied to Clipboard",
   },

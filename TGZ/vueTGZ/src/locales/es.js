@@ -453,6 +453,7 @@ export default {
 		map: "Mapa",
 		inspector: "Inspector",
 		useEshu: "Usar Eshu",
+		stepAria: "Paso de repetición",
 		backToMyLastMove: "Volver a mi último movimiento",
 		copyThisGame: "Copiar esta partida",
 		toNewGame: "A una nueva partida",

@@ -487,6 +487,8 @@ export default {
 		backToMyLastMove: "Torna alla mia ultima mossa",
 		copyGame: "Copia questa partita",
 		toNewGame: "In una nuova partita",
+		gameCreated: "Partita creata:",
+		copyGameError: "Impossibile creare la partita di pratica.",
 		notImplemented: "Non ancora implementato",
 		moveUi: "Sposta interfaccia",
 		toBottom: "in basso",

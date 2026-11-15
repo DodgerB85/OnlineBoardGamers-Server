@@ -273,6 +273,13 @@ export default {
 	},
 	replay: {
 		title: "Repetición",
+		stepAria: "Paso de repetición",
+		copyThisGame: "Copiar esta partida",
+		toNewGame: "A un nuevo juego",
+		copyUrl: "Copiar la URL de este movimiento al portapapeles",
+		copiedToClipboard: "{url} copiado al portapapeles",
+		gameCreated: "Partida creada:",
+		copyGameError: "No se pudo crear la partida de práctica.",
 		exit: "Salir de la repetición",
 	},
 	map: {

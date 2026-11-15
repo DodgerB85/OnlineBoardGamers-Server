@@ -143,6 +143,12 @@ export default {
 		unknown: "Unbekannt",
 	},
 	replay: {
+		stepAria: "Wiedergabeschritt",
+		moveUi: "UI verschieben",
+		copyThisGame: "Dieses Spiel kopieren",
+		toNewGame: "Zu neuem Spiel",
+		gameCreated: "Spiel erstellt:",
+		copyGameError: "Das Übungsspiel konnte nicht erstellt werden.",
 		backToMyLastMove: "Zurück zu meinem letzten Zug",
 		useArrows: "Mit den Pfeilen kannst du durch die Partie gehen. Das verändert die aktuelle Partie in keiner Weise",
 		copyUrl: "URL zu diesem Zug in die Zwischenablage kopieren",

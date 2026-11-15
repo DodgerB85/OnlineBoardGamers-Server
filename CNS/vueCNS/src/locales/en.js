@@ -245,6 +245,11 @@ export default {
 		hideTileInfo: "Hide Tile Info",
 	},
 	replay: {
+		stepAria: "Replay step",
+		copyThisGame: "Copy This Game",
+		toNewGame: "To New Game",
+		gameCreated: "Game created:",
+		copyGameError: "Unable to create the practice game.",
 		backToMyLastMove: "Back to my last move",
 		moveUi: "Move UI",
 		toBottom: "to Bottom",
