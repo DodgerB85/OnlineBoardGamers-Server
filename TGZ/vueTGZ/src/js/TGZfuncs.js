@@ -178,7 +178,7 @@ function anySpecVRchanged() {
 	return false
 }
 
-export function exportModel(includeContext) {
+export function exportModel(includeContext, raw = false) {
 	const store = useModelStore()
 
 	let temp = []
@@ -268,7 +268,7 @@ export function exportModel(includeContext) {
 
 	let step1 = JSON.stringify(temp)
 	//var step2 = LZString.compressToEncodedURIComponent(step1)
-	
+	if (raw) return temp
 	// PAKO
 	// eslint-disable-next-line no-undef
 	let step2 = pako.gzip(step1)
@@ -288,7 +288,7 @@ export function exportModel(includeContext) {
 	return base64Data
 }
 
-export function importModel(input, includeContext) {
+export function importModel(input, includeContext, raw = false) {
 	// Remove ghosts
 	const store = useModelStore()
 	let ghostDivs = document.getElementsByClassName("ghostDiv")
@@ -314,14 +314,18 @@ export function importModel(input, includeContext) {
 	let step1
 	let inputModel
 
-	try {
-		step1 = Uint8Array.from(atob(input), (c) => c.charCodeAt(0))
-		// eslint-disable-next-line no-undef
-		let decompressedData = pako.ungzip(step1, { to: "string" })
-		inputModel = JSON.parse(decompressedData)
-	} catch {
-		step1 = LZString.decompressFromEncodedURIComponent(input)
-		inputModel = JSON.parse(step1)
+	if (raw) {
+		inputModel = input
+	} else {
+		try {
+			step1 = Uint8Array.from(atob(input), (c) => c.charCodeAt(0))
+			// eslint-disable-next-line no-undef
+			let decompressedData = pako.ungzip(step1, { to: "string" })
+			inputModel = JSON.parse(decompressedData)
+		} catch {
+			step1 = LZString.decompressFromEncodedURIComponent(input)
+			inputModel = JSON.parse(step1)
+		}
 	}
 
 	//console.log(inputModel)

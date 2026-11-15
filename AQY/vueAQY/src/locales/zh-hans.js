@@ -178,6 +178,9 @@ export default {
 		gameIconsNet: "game-icons.net",
 	},
 	replayArea: {
+		stepAria: "回放步骤",
+		gameCreated: "游戏已创建：",
+		copyGameError: "无法创建练习游戏。",
 		backToMyLastMove: "回到我的上一步",
 		copiedToClipboard: "{url} 已复制到剪贴板",
 		notImplementedYet: "尚未实现",

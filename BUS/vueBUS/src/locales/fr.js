@@ -248,6 +248,13 @@ export default {
 		error: "ERREUR : {error}",
 	},
 	replay: {
+		stepAria: "Étape de relecture",
+		copyThisGame: "Copier cette partie",
+		toNewGame: "Vers un nouveau jeu",
+		copyUrl: "Copier l'URL de ce coup dans le presse-papiers",
+		copiedToClipboard: "{url} copié dans le presse-papiers",
+		gameCreated: "Partie créée :",
+		copyGameError: "Impossible de créer la partie d'entraînement.",
 		backToMyLastMove: "Revenir à mon dernier coup",
 		exitReplayMode: "Quitter le mode relecture",
 	},

@@ -297,6 +297,42 @@ export async function kickout() {
 	}
 }
 
+export async function copyGameToNewPracticeGame() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+
+	// Frame k is the state after history[k]; the last frame is the live state.
+	const historyCopy = [...store.history]
+	let data
+	try {
+		store.history = store.history.slice(0, Math.min(store.replayStep + 1, store.history.length))
+		data = model.exportGameData()
+	} finally {
+		store.history = historyCopy
+	}
+
+	const csrftoken = funcs.getCookie("csrftoken")
+	try {
+		const response = await fetch("/createGameCopy/", {
+			method: "POST",
+			body: JSON.stringify({
+				action: "copyGame",
+				gameID: personal.gameID,
+				pov: personal.pov,
+				turn: store.gameflow.turn,
+				phase: store.gameflow.phase,
+				data,
+			}),
+			headers: { "X-CSRFToken": csrftoken },
+		})
+		if (!response.ok) throw new Error("Network response was not ok")
+		return await response.json()
+	} catch (error) {
+		console.error("Error copying DDL game:", error)
+		return null
+	}
+}
+
 export async function castVote(topic) {
 	const store = useModelStore()
 	const personal = usePersonalStore()

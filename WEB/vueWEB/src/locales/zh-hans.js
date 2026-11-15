@@ -143,6 +143,12 @@ export default {
 		unknown: "未知",
 	},
 	replay: {
+		stepAria: "回放步骤",
+		moveUi: "移动界面",
+		copyThisGame: "复制本局游戏",
+		toNewGame: "到新游戏",
+		gameCreated: "游戏已创建：",
+		copyGameError: "无法创建练习游戏。",
 		backToMyLastMove: "回到我的上一步",
 		useArrows: "使用箭头逐步浏览游戏。这不会以任何方式改变当前游戏",
 		copyUrl: "复制此步骤的链接到剪贴板",

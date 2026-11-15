@@ -315,6 +315,10 @@ export default {
 	},
 	replay: {
 		notImplemented: "Aún no implementado",
+		stepAria: "Paso de repetición",
+		backToMyLastMove: "Volver a mi último movimiento",
+		gameCreated: "Partida creada:",
+		copyGameError: "No se pudo crear la partida de práctica.",
 		copyThisGame: "Copiar esta partida a una nueva partida",
 		moveUi: "Mover interfaz",
 		toBottom: "abajo",

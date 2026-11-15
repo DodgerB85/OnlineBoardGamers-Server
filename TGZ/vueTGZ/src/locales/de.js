@@ -452,6 +452,7 @@ export default {
 		map: "Karte",
 		inspector: "Inspektor",
 		useEshu: "Eshu verwenden",
+		stepAria: "Wiedergabeschritt",
 		backToMyLastMove: "Zurück zu meinem letzten Zug",
 		copyThisGame: "Dieses Spiel kopieren",
 		toNewGame: "Zu neuem Spiel",

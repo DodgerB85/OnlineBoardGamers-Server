@@ -143,6 +143,12 @@ export default {
 		unknown: "Desconocido",
 	},
 	replay: {
+		stepAria: "Paso de repetición",
+		moveUi: "Mover interfaz",
+		copyThisGame: "Copiar esta partida",
+		toNewGame: "A un nuevo juego",
+		gameCreated: "Partida creada:",
+		copyGameError: "No se pudo crear la partida de práctica.",
 		backToMyLastMove: "Volver a mi última jugada",
 		useArrows: "Usa las flechas para avanzar por la partida. Esto no alterará la partida actual de ninguna manera",
 		copyUrl: "Copiar URL de esta jugada al portapapeles",

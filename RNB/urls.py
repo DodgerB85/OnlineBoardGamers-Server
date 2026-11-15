@@ -9,6 +9,7 @@ urlpatterns = [
     path("", views.index, name="index"),
     # path("RNB/", views.showRNBgame, name="showRNBgame"),
     path("<int:game_id>/show/", views.showRNBgame, name="showRNBgame"),
+    path("<int:game_id>/replay/<int:replayStep>/", views.showRNBgame, {"spoilerFree": True}, name="showRNBreplayStep"),
     path("<int:game_id>/maponly/", views.showRNBmap, name="showRNBmap"),
     path("RNBmapEditor/", views.RNBmapEditor, name="RNBmapEditor"),
     path("RNBmapHelp/", views.RNBmapHelp, name="RNBmapHelp"),

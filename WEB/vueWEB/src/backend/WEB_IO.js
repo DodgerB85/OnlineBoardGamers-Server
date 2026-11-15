@@ -468,6 +468,42 @@ async function updateDataFromLoadRewind() {
 }
 
 // Simply saves as a no kickout missing ALSO FOR GRAVE GAME OVER
+export async function copyGameToNewPracticeGame() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+
+	// computedHistory has a synthetic NEW_GAME entry first, so the history cutoff is the replay index.
+	const historyCopy = [...store.history]
+	let data
+	try {
+		store.history = store.history.slice(0, Math.max(0, store.replayStep))
+		data = funcs.exportWEBmodel(false, false)
+	} finally {
+		store.history = historyCopy
+	}
+
+	let csrftoken = funcs.getCookie("csrftoken")
+	try {
+		const response = await fetch("/createGameCopy/", {
+			method: "POST",
+			body: JSON.stringify({
+				action: "copyGame",
+				gameID: personal.gameID,
+				pov: personal.pov,
+				turn: store.gameflow.turn,
+				phase: store.gameflow.phase,
+				data,
+			}),
+			headers: { "X-CSRFToken": csrftoken },
+		})
+		if (!response.ok) throw new Error("Network response was not ok")
+		return await response.json()
+	} catch (error) {
+		console.error("Error copying WEB game:", error)
+		return null
+	}
+}
+
 export async function resign() {
 	/* ONLY GET HERE WITH 0 HEX ACTIONS USED */
 	const store = useModelStore()

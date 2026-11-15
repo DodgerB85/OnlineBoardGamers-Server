@@ -245,6 +245,11 @@ export default {
 		hideTileInfo: "Ocultar información de loseta",
 	},
 	replay: {
+		stepAria: "Paso de repetición",
+		copyThisGame: "Copiar esta partida",
+		toNewGame: "A un nuevo juego",
+		gameCreated: "Partida creada:",
+		copyGameError: "No se pudo crear la partida de práctica.",
 		backToMyLastMove: "Volver a mi último movimiento",
 		moveUi: "Mover interfaz",
 		toBottom: "abajo",

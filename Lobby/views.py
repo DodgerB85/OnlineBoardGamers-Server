@@ -4394,6 +4394,82 @@ def TGZtournamentMain(request, tournamentName):
 
 
 @login_required
+@require_POST
+def create_game_copy(request):
+    """Create a practice-game copy of any game from the state the client sends."""
+    jsonData = json.loads(request.body)
+    if jsonData.get("action") != "copyGame":
+        return JsonResponse({"error": "Wrong request."}, status=400)
+
+    source_game = Game.objects.filter(id=jsonData.get("gameID")).first()
+    if source_game is None:
+        raise Http404(gettext("Game does not exist"))
+    if not source_game.players.filter(player=request.user).exists():
+        return JsonResponse({"error": "Not a player in this game."}, status=403)
+
+    data = jsonData.get("data")
+    if not data:
+        return JsonResponse({"error": "No game data."}, status=400)
+
+    starting_options = json.loads(source_game.startingOptions) if source_game.startingOptions else []
+    if not isinstance(starting_options, list):
+        starting_options = []
+    if rf.SO_TRAINING_GAME not in starting_options:
+        starting_options.insert(0, rf.SO_TRAINING_GAME)
+
+    max_players = source_game.maxPlayers
+    pov = int(jsonData.get("pov", 0) or 0)
+    if pov < 0 or pov >= max_players:
+        pov = 0
+    shadow_names = rf.SHADOW_PLAYER_NAMES[: max(0, max_players - 1)]
+    if len(shadow_names) < max_players - 1:
+        return JsonResponse({"error": "Not enough shadow players."}, status=400)
+
+    now = str(int(time.time() * 1000))
+    with transaction.atomic():
+        new_game = Game(
+            gameCode=source_game.gameCode,
+            gameName=("[Copy] - " + (source_game.gameName or f"Game {source_game.id}"))[:200],
+            gameDescription=source_game.gameDescription,
+            creator=request.user,
+            host=request.user,
+            gamePace=source_game.gamePace,
+            turn=int(jsonData.get("turn", source_game.turn)),
+            phase=int(jsonData.get("phase", source_game.phase)),
+            created=now,
+            latestUpdate=now,
+            playerOrderSeed=source_game.playerOrderSeed,
+            startingOptions=json.dumps(starting_options, separators=(",", ":")),
+            maxPlayers=max_players,
+            gameStatus="ACTIVE",
+            kickoutDuration=source_game.kickoutDuration,
+            zoomLevels=source_game.zoomLevels,
+            startingMap=source_game.startingMap,
+            gameData=data,
+            statsExcludedGame=True,
+            FCMnotificationSuppression="0" * max_players if source_game.gameCode == "FCM" else "000000",
+        )
+        new_game.save()
+
+        shadow_index = 0
+        for seat in range(max_players):
+            if seat == pov:
+                GamePlayer.objects.create(game=new_game, player=request.user, seat_order=seat, is_current=True)
+            else:
+                GamePlayer.objects.create(
+                    game=new_game,
+                    player=User.objects.get(username=shadow_names[shadow_index]),
+                    seat_order=seat,
+                )
+                shadow_index += 1
+
+        new_game.rewindData = json.dumps([data])
+        new_game.save()
+
+    return JsonResponse({"response": "ok", "newID": new_game.id})
+
+
+@login_required
 def setStopEmails(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)

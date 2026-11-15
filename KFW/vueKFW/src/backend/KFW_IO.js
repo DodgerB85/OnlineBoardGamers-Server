@@ -622,6 +622,41 @@ export async function saveGameForGameOver() {
 	}
 }
 
+export async function copyGameToNewPracticeGame(step) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+
+	const historyCopy = [...store.history]
+	let data
+	try {
+		store.history = store.history.slice(0, Math.max(1, step + 1))
+		data = funcs.exportKFWmodel(false)
+	} finally {
+		store.history = historyCopy
+	}
+
+	let csrftoken = funcs.getCookie("csrftoken")
+	try {
+		const response = await fetch("/createGameCopy/", {
+			method: "POST",
+			body: JSON.stringify({
+				action: "copyGame",
+				gameID: personal.gameID,
+				pov: personal.pov,
+				turn: store.gameflow.turn,
+				phase: store.gameflow.phase,
+				data,
+			}),
+			headers: { "X-CSRFToken": csrftoken },
+		})
+		if (!response.ok) throw new Error("Network response was not ok")
+		return await response.json()
+	} catch (error) {
+		console.error("Error copying KFW game:", error)
+		return null
+	}
+}
+
 export async function sendChatMessage(newEntry) {
 	const store = useModelStore()
 	const personal = usePersonalStore()

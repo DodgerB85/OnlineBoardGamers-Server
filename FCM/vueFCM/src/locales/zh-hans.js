@@ -1021,6 +1021,7 @@ export default {
 		"moveUiToTop": "将界面移到顶部 <b>▲</b>",
 		"copyThisGame": "将本局复制为<br />新游戏",
 		"arrowsHint": "使用箭头逐步查看游戏。这不会以任何方式改变当前游戏",
+		"stepAria": "回放步骤",
 		"copyUrlToClipboard": "复制此步的URL到剪贴板",
 		"copiedToClipboard": "{url} 已复制到剪贴板"
 	},

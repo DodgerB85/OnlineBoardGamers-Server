@@ -178,6 +178,9 @@ export default {
 		gameIconsNet: "game-icons.net",
 	},
 	replayArea: {
+		stepAria: "Wiedergabeschritt",
+		gameCreated: "Spiel erstellt:",
+		copyGameError: "Das Übungsspiel konnte nicht erstellt werden.",
 		backToMyLastMove: "Zurück zu meinem letzten Zug",
 		copiedToClipboard: "{url} in die Zwischenablage kopiert",
 		notImplementedYet: "Noch nicht implementiert",

@@ -19,6 +19,7 @@ def redirect_old_url(request, original_id):
 urlpatterns = [
     path("", views.index, name="index"),
     path("<int:game_id>/show/", views.showKFWgame, name="showKFWgame"),
+    path("<int:game_id>/replay/<int:replayStep>/", views.showKFWgame, {"spoilerFree": True}, name="showKFWreplayStep"),
     path("<int:original_id>/", redirect_old_url, name="redirect_old_url"),
     path("help/", views.KFWhelp, name="KFWhelp"),
     ## API routes

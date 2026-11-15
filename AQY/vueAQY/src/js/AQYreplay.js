@@ -14,7 +14,7 @@ export function goToReplayStep(step) {
 	const store = useModelStore()
 
 	store.replayStep = step
-	funcs.importModel(store.replayData[store.replayStep], false, true)
+	funcs.importModel(store.replayData[store.replayStep], false, true, true)
 	//map.calculateCanvasSize()
 
 	history.setupHistoryHighlight(store.history[store.replayStep][0], store.history[store.replayStep][3], store.replayStep, true) // ADD STEP???
@@ -51,7 +51,7 @@ export function performStep(amount) {
 		}
 	}
 
-	funcs.importModel(store.replayData[store.replayStep], false, true)
+	funcs.importModel(store.replayData[store.replayStep], false, true, true)
 
 	history.setupHistoryHighlight(store.history[store.replayStep][0], store.history[store.replayStep][3], store.replayStep, true) // ADD STEP??
 	if (store.topMenuViews.showingPlayerIndex !== -1) store.topMenuViews.showingPlayerIndex = store.history[store.replayStep][1]
@@ -166,7 +166,7 @@ export async function generateReplayData(spoilerFree = false) {
 		// new turn
 		else if (store.history[i][0] === rf.HIST_NEW_TURN) replayNewTurn(i, store.history[i][1], store.history[i][3])
 
-		replayData.push(funcs.exportModel(true))
+		replayData.push(funcs.exportModel(true, undefined, true))
 
 		if (i % 5 === 0 && pBarEl != null) {
 			let percent = (i / store.history.length) * 100

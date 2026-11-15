@@ -539,6 +539,42 @@ export async function saveZoom(zoomLevel) {
 	}
 }
 
+export async function copyGameToNewPracticeGame() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+
+	// Export the visible replay position with the history cut at that point.
+	const historyCopy = [...store.history]
+	let data
+	try {
+		store.history = store.history.slice(0, store.replayStep + 1)
+		data = funcs.exportBUSmodel(false)
+	} finally {
+		store.history = historyCopy
+	}
+
+	let csrftoken = funcs.getCookie("csrftoken")
+	try {
+		const response = await fetch("/createGameCopy/", {
+			method: "POST",
+			body: JSON.stringify({
+				action: "copyGame",
+				gameID: personal.gameID,
+				pov: personal.pov,
+				turn: store.gameflow.turn,
+				phase: store.gameflow.phase,
+				data,
+			}),
+			headers: { "X-CSRFToken": csrftoken },
+		})
+		if (!response.ok) throw new Error("Network response was not ok")
+		return await response.json()
+	} catch (error) {
+		console.error("Error copying BUS game:", error)
+		return null
+	}
+}
+
 export async function castVote(topic) {
 	const store = useModelStore()
 	const personal = usePersonalStore()

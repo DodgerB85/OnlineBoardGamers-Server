@@ -431,7 +431,7 @@ export async function simpleImportWholeModel(input) {
 	map.calculateCanvasSize()
 }
 
-export function exportModel(includeContext, consolelog) {
+export function exportModel(includeContext, consolelog, raw = false) {
 	const store = useModelStore()
 
 	let temp = []
@@ -564,6 +564,7 @@ export function exportModel(includeContext, consolelog) {
 	let step1 = JSON.stringify(temp)
 
 	if (consolelog) console.log(step1)
+	if (raw) return temp
 	// eslint-disable-next-line no-undef
 	let step2 = pako.gzip(step1)
 	let base64Data = btoa(String.fromCharCode(...new Uint8Array(step2)))
@@ -674,7 +675,7 @@ function grassInitialCityWater() {
 	}
 }
 
-export async function importModel(input, includeContext, keepNeighbours) {
+export async function importModel(input, includeContext, keepNeighbours, raw = false) {
 	// Remove ghosts
 	const store = useModelStore()
 	let ghostDivs = document.getElementsByClassName("ghostDiv")
@@ -685,10 +686,15 @@ export async function importModel(input, includeContext, keepNeighbours) {
 
 	if (input === "" || input == undefined) return
 
-	let compressedData = Uint8Array.from(atob(input), (c) => c.charCodeAt(0))
-	// eslint-disable-next-line no-undef
-	let decompressedData = pako.ungzip(compressedData, { to: "string" })
-	let inputModel = JSON.parse(decompressedData)
+	let inputModel
+	if (raw) {
+		inputModel = input
+	} else {
+		let compressedData = Uint8Array.from(atob(input), (c) => c.charCodeAt(0))
+		// eslint-disable-next-line no-undef
+		let decompressedData = pako.ungzip(compressedData, { to: "string" })
+		inputModel = JSON.parse(decompressedData)
+	}
 
 	// 0 - map
 	/*	temp.push([

@@ -487,6 +487,8 @@ export default {
 		backToMyLastMove: "返回我的上一步",
 		copyGame: "复制此游戏",
 		toNewGame: "到新游戏",
+		gameCreated: "游戏已创建：",
+		copyGameError: "无法创建练习游戏。",
 		notImplemented: "尚未实现",
 		moveUi: "移动界面",
 		toBottom: "到底部",

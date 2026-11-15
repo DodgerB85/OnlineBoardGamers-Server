@@ -539,7 +539,7 @@ export async function generateReplayData(spoilerFree = false) {
 	for (let i = 0; i < store.history.length; i++) {
 		if (i !== 0) performReplayEndTurn(i)
 
-		spinoffReplayData.push(funcs.exportModel(true))
+		spinoffReplayData.push(funcs.exportModel(true, true))
 
 		if (store.history[i][0] === rf.HIST_BUILD_FIRST_MON) replayAddMonument(i, store.history[i][1], store.history[i][3])
 		else if (store.history[i][0] === rf.HIST_BID) replayBid(i, store.history[i][1], store.history[i][3])
@@ -560,7 +560,7 @@ export async function generateReplayData(spoilerFree = false) {
 		else if (store.history[i][0] === rf.HIST_CHOOSE_ANYANWU_MON) replayChoseAnyanwuMon(i, store.history[i][1], store.history[i][3])
 		else if (store.history[i][0] === rf.HIST_BUILD_OYA_MON) replayBuildOyaMon(i, store.history[i][1], store.history[i][3])
 
-		replayData.push(funcs.exportModel(true))
+		replayData.push(funcs.exportModel(true, true))
 
 		if (i % 3 === 0 && pBarEl != null) {
 			let percent = (i / store.history.length) * 100

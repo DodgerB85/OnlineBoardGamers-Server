@@ -43,6 +43,7 @@ urlpatterns = [
     path("helpTournaments/", views.helpTournaments, name="helpTournaments"),
     path("helpTournamentsMini/", views.helpTournamentsMini, name="helpTournamentsMini"),
     path("newGames/", views.newGamesPage, name="newGamesPage"),
+    path("createGameCopy/", views.create_game_copy, name="createGameCopy"),
     path("newMiniTournaments/", views.newMiniTournaments, name="newMiniTournaments"),
     path("fcmNewCode/", views.fcmNewCode, name="fcmNewCode"),
     path("createFCMpage/", views.createFCMpage, name="createFCMpage"),

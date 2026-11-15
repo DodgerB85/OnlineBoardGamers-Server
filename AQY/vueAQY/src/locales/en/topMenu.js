@@ -102,6 +102,9 @@ export default {
     gameIconsNet: "game-icons.net",
   },
   replayArea: {
+    stepAria: "Replay step",
+    gameCreated: "Game created:",
+    copyGameError: "Unable to create the practice game.",
     backToMyLastMove: "Back to my last move",
     copiedToClipboard: "{url} Copied to Clipboard",
     notImplementedYet: "Not implemented yet",

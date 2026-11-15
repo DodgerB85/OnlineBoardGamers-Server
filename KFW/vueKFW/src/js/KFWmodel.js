@@ -38,7 +38,12 @@ export function addHistory(event, playerIndex, timeOffset, params) {
 			time -= store.history[i][2]
 		}
 	}
-	store.history.push([event, playerIndex, time, [...params]])
+	// Raw snapshot after the action; replay is snapshot-based because KFW has no
+	// action-replay handlers. History is omitted from the snapshot to avoid recursion.
+	// shortcut: one full model per action, upgrade to keyframe+action replay if saves grow too large.
+	const entry = [event, playerIndex, time, [...params]]
+	entry.push(funcs.exportKFWmodel(false, true, true))
+	store.history.push(entry)
 }
 
 export function createUndoPoint() {

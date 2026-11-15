@@ -178,6 +178,9 @@ export default {
 		gameIconsNet: "game-icons.net",
 	},
 	replayArea: {
+		stepAria: "Passo replay",
+		gameCreated: "Partita creata:",
+		copyGameError: "Impossibile creare la partita di pratica.",
 		backToMyLastMove: "Torna alla mia ultima mossa",
 		copiedToClipboard: "{url} copiato negli appunti",
 		notImplementedYet: "Non ancora implementato",

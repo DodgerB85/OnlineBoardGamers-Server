@@ -452,6 +452,7 @@ export default {
 		map: "地图",
 		inspector: "检查器",
 		useEshu: "使用 Eshu",
+		stepAria: "回放步骤",
 		backToMyLastMove: "返回我的上一步",
 		copyThisGame: "复制本局游戏",
 		toNewGame: "到新游戏",

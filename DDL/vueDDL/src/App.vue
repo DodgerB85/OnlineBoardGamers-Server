@@ -30,6 +30,7 @@ const store = useModelStore()
 const personal = usePersonalStore()
 
 model.initGame()
+if (window.initData?.spoilerFree) store.viewSettings.showReplay = true
 controller.startPlayerTurn()
 
 let pollTimer = null

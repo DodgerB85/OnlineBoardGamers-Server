@@ -15,6 +15,42 @@ import i18n from "../i18n"
 export const SUPER_USERS = ["BotKickStarter"]
 export const DEBUG_USERS = ["BotKickStarter", "admin"]
 
+export async function copyGameToNewPracticeGame() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+
+	// Export the visible replay position with the history cut at that point.
+	const historyCopy = [...store.history]
+	let data
+	try {
+		store.history = store.history.slice(0, store.replayStep + 1)
+		data = funcs.exportModel(true)
+	} finally {
+		store.history = historyCopy
+	}
+
+	var csrftoken = funcs.getCookie("csrftoken")
+	try {
+		const response = await fetch("/createGameCopy/", {
+			method: "POST",
+			body: JSON.stringify({
+				action: "copyGame",
+				gameID: personal.gameID,
+				pov: personal.pov,
+				turn: store.gameflow.turn,
+				phase: store.gameflow.phase,
+				data,
+			}),
+			headers: { "X-CSRFToken": csrftoken },
+		})
+		if (!response.ok) throw new Error("Network response was not ok")
+		return await response.json()
+	} catch (error) {
+		console.error("Error copying AQY game:", error)
+		return null
+	}
+}
+
 export async function submitBug(bugContent) {
 	const store = useModelStore()
 	const personal = usePersonalStore()

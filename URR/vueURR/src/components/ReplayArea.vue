@@ -1,5 +1,6 @@
 <script setup>
-import { onMounted, onBeforeUnmount, computed, watch } from "vue"
+import { onMounted, onBeforeUnmount, computed, watch, nextTick, ref } from "vue"
+import { useI18n } from "vue-i18n"
 import * as model from "../js/URRmodel.js"
 import * as funcs from "../js/URRfuncs.js"
 import * as IO from "../backend/URR_IO.js"
@@ -8,12 +9,16 @@ import { useModelStore } from "../stores/URRstore.js"
 import { usePersonalStore } from "../stores/URRpersonal.js"
 const store = useModelStore()
 const personal = usePersonalStore()
+const { t } = useI18n()
 
-// Replay opens on the latest position; the slider is 0-based internally but
-// displays the first step as 1.
-store.replayStep.index = Math.max(0, store.history.length - 1)
+// Replay opens on the latest position, or on the shared link's step.
+const requestedStep = window.initData?.spoilerFree ? Number(window.initData.replayStep) : NaN
+store.replayStep.index = Number.isInteger(requestedStep) && requestedStep >= 0 ? Math.min(requestedStep, store.history.length - 1) : Math.max(0, store.history.length - 1)
 const step = computed({ get: () => store.replayStep.index, set: (index) => { store.replayStep.index = index } })
 const liveSnapshot = funcs.simpleExportWholeURRmodel()
+const copyMessage = ref("")
+const spinoffSuccessText = ref("")
+const spinoffErrorText = ref("")
 
 onMounted(applyStep)
 watch(step, applyStep)
@@ -58,6 +63,54 @@ function next() {
 function exitReplay() {
 	store.viewSettings.showReplay = false
 }
+
+async function copyGameToNewPracticeGame() {
+	spinoffErrorText.value = ""
+	spinoffSuccessText.value = ""
+	const result = await IO.copyGameToNewPracticeGame(step.value)
+	if (result?.newID) {
+		const url = `${window.location.origin}/URR/${result.newID}/show/`
+		spinoffSuccessText.value = `${t("replay.gameCreated")} <a href="${url}" target="_blank" rel="noopener">${url}</a>`
+	} else {
+		spinoffErrorText.value = t("replay.copyGameError")
+	}
+}
+
+function copyToClipboard() {
+	const textToCopy = `${window.location.origin}/URR/${personal.gameID}/replay/${step.value + 1}`
+	const textarea = document.createElement("textarea")
+	textarea.value = textToCopy
+	document.body.appendChild(textarea)
+	textarea.select()
+	document.execCommand("copy")
+	document.body.removeChild(textarea)
+
+	copyMessage.value = t("replay.copiedToClipboard", { url: textToCopy })
+
+	nextTick(() => {
+		const button = document.getElementById("copyURLbutton")
+		const popup = document.getElementById("popup")
+		clearTimeout(popup.fadeTimeout)
+		popup.style.opacity = "1"
+		popup.style.display = "block"
+
+		const buttonRect = button.getBoundingClientRect()
+		const popupRect = popup.getBoundingClientRect()
+		const below = buttonRect.bottom + 10
+		const offsetTop = below + popupRect.height <= window.innerHeight ? below : buttonRect.top - popupRect.height - 10
+		const offsetLeft = Math.max(10, Math.min(window.innerWidth - popupRect.width - 10, buttonRect.left + (buttonRect.width - popupRect.width) / 2))
+
+		popup.style.top = offsetTop + "px"
+		popup.style.left = offsetLeft + "px"
+
+		popup.fadeTimeout = setTimeout(() => {
+			popup.style.opacity = "0"
+			setTimeout(() => {
+				popup.style.display = "none"
+			}, 300)
+		}, 2000)
+	})
+}
 </script>
 
 <template>
@@ -69,12 +122,21 @@ function exitReplay() {
 		<span>{{ $t("replay.step", { step: step + 1, total: maxStep() + 1 }) }}</span>
 		<button class="actionsLineButton" :disabled="step >= maxStep()" @click="next">{{ $t("replay.next") }} &gt;</button>
 		<button class="actionsLineButton" @click="store.viewSettings.showHistory = !store.viewSettings.showHistory">{{ $t("replay.history") }}</button>
+		<button v-if="personal.pov >= 0" class="actionsLineButton" @click="copyGameToNewPracticeGame">{{ $t("replay.copyThisGame") }}<br />{{ $t("replay.toNewGame") }}</button>
+		<button id="copyURLbutton" class="actionsLineButton" @click="copyToClipboard">{{ $t("replay.copyUrl") }}</button>
 		<button class="actionsLineButton" @click="exitReplay">{{ $t("replay.exit") }}</button>
+		<div id="popup" class="popup">{{ copyMessage }}</div>
+		<div v-if="spinoffSuccessText !== ''" class="spinoffSuccessText" v-html="spinoffSuccessText"></div>
+		<div v-if="spinoffErrorText !== ''" class="spinoffErrorText">{{ spinoffErrorText }}</div>
 	</div>
 </template>
 
 <style scoped>
 #replayArea { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; background: #d4eafd; border: 1px solid black; padding: 8px; margin: 10px 12px 0; text-align: center; font-size: 16px; font-weight: 400; }
 #replayArea input { width: min(300px, 35vw); }
+.spinoffSuccessText, .spinoffErrorText { flex-basis: 100%; padding: 10px; font-weight: bold; }
+.spinoffSuccessText { color: darkgreen; background-color: lightblue; }
+.spinoffErrorText { color: darkred; background-color: lightblue; }
+.popup { position: fixed; z-index: 10000; background-color: #f7f7f7; padding: 10px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); opacity: 0; transition: opacity 0.3s; }
 @media (max-width: 1050px) { .actionsLineButton, #replayArea input { min-height: 44px; box-sizing: border-box; } }
 </style>

@@ -495,6 +495,8 @@ export default {
 		backToMyLastMove: "Back to my last move",
 		copyGame: "Copy This Game",
 		toNewGame: "To New Game",
+		gameCreated: "Game created:",
+		copyGameError: "Unable to create the practice game.",
 		notImplemented: "Not implemented yet",
 		moveUi: "Move UI",
 		toBottom: "to Bottom",

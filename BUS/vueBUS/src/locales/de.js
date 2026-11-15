@@ -248,6 +248,13 @@ export default {
 		error: "FEHLER: {error}",
 	},
 	replay: {
+		stepAria: "Wiedergabeschritt",
+		copyThisGame: "Dieses Spiel kopieren",
+		toNewGame: "Zu neuem Spiel",
+		copyUrl: "URL zu diesem Zug in die Zwischenablage kopieren",
+		copiedToClipboard: "{url} in die Zwischenablage kopiert",
+		gameCreated: "Spiel erstellt:",
+		copyGameError: "Das Übungsspiel konnte nicht erstellt werden.",
 		backToMyLastMove: "Zurück zu meinem letzten Zug",
 		exitReplayMode: "Wiedergabemodus beenden",
 	},

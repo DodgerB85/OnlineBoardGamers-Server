@@ -9,6 +9,7 @@ import * as model from "./js/ROWmodel"
 import * as rf from "./js/ROWreference"
 import * as player from "./js/ROWplayer"
 import * as view from "./js/ROWview"
+import * as replay from "./js/ROWreplay"
 
 import TopMenu from "./components/TopMenu.vue"
 import TopMenuViews from "./components/TopMenuViews.vue"
@@ -68,6 +69,7 @@ const statusBanner = computed(() => ({
 
 let kickoutTimer = null
 onMounted(() => {
+	if (window.initData?.spoilerFree) replay.enterReplay()
 	kickoutTimer = setInterval(() => {
 		if (personal.secondsToNextKickout > 0) personal.secondsToNextKickout--
 	}, 1000)

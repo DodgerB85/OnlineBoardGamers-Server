@@ -248,6 +248,13 @@ export default {
 		error: "ERRORE: {error}",
 	},
 	replay: {
+		stepAria: "Passo replay",
+		copyThisGame: "Copia questa partita",
+		toNewGame: "A nuova partita",
+		copyUrl: "Copia l'URL di questa mossa negli appunti",
+		copiedToClipboard: "{url} copiato negli appunti",
+		gameCreated: "Partita creata:",
+		copyGameError: "Impossibile creare la partita di pratica.",
 		backToMyLastMove: "Torna alla mia ultima mossa",
 		exitReplayMode: "Esci dalla modalità replay",
 	},
