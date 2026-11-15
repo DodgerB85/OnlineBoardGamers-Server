@@ -18,6 +18,7 @@
  */
 
 import { useModelStore } from "../stores/RNBstore.js"
+import { usePersonalStore } from "../stores/RNBpersonal.js"
 
 import * as rf from "./RNBreference.js"
 import * as model from "./RNBmodel.js"
@@ -111,8 +112,14 @@ function addExtraMineOutput(mine) {
 // wood on a transporter, or the plant itself, to fire the plant.
 export function isSetupMode() {
 	const store = useModelStore()
-	if (store.gameflow.phase === rf.PHASE_PRODUCTION_SETUP_TO) return true
-	return store.gameflow.phase === rf.PRE_PHASE_PRODUCTION && store.context.productionSetupPending
+	const personal = usePersonalStore()
+	// A production preset before primaries produce
+	if (store.gameflow.phase === rf.PRE_PHASE_PRODUCTION) return personal.canPlay() && store.context.productionSetupPending
+	// The real setup phase: only players in the setup turn order may act, but a
+	// loaded pre-move still needs the panel so it can be finished.
+	if (store.gameflow.phase !== rf.PHASE_PRODUCTION_SETUP_TO) return false
+	if (personal.trainingGame || personal.soloGame) return true
+	return personal.pov >= 0 && store.gameflow.turnOrder.includes(personal.pov)
 }
 
 export function updateSetupHighlights() {

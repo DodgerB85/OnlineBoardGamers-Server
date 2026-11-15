@@ -483,6 +483,7 @@ export default {
 		addsBricks: "Adds {count} brick:",
 		addsBricksPlural: "Adds {count} bricks:",
 		stagedExhibition: "{name} staged an exhibition of {beauty} works at {target}'s tile",
+		caravanArrived: "{name}'s exhibition caravan reached {target}'s tile but did not qualify as a show",
 		showAtTile: "{name}: show with {beauty} artworks",
 		emptyMine: "is empty",
 		poweredDoubled: "Powered by electricity - doubled output",

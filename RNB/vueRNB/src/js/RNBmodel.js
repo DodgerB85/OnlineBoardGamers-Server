@@ -1379,7 +1379,7 @@ export function getCorrectTurnForPhasePreseet(actualCurrentTurn, actualCurrentPh
 		return actualCurrentTurn
 	}
 	// If the FUTURE phase is the SAME or LOWER than the currentPhase, it must be NEXT turn
-	if (furturePhase <= actualCurrentPhase) {
+	if (rf.phaseOrder(furturePhase) <= rf.phaseOrder(actualCurrentPhase)) {
 		return actualCurrentTurn + 1
 	}
 }

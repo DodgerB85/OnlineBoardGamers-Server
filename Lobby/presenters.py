@@ -1760,8 +1760,13 @@ class RNBpresenter(GamePresenter):
             return {}
         gp = self.gameObj.players.filter(seat_order=seat).first()
         gp_move_data = gp.moveDataJSON if gp and gp.moveDataJSON else []
+        # Exact phase first: setup (17) follows wonder (15), so the old first-match
+        # fallback could return a stale phase-15 entry instead of the setup move.
         for entry in gp_move_data:
-            if entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase or entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase - 1 or entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase - rfRNB.PHASE_LOOKBACK_AMOUNT:
+            if entry["turn"] == self.gameObj.turn and entry["phase"] == self.gameObj.phase:
+                return entry
+        for entry in gp_move_data:
+            if entry["turn"] == self.gameObj.turn and entry["phase"] in (self.gameObj.phase - 1, self.gameObj.phase - rfRNB.PHASE_LOOKBACK_AMOUNT):
                 return entry
         return {}
 

@@ -1069,9 +1069,10 @@ export function verifySingleStackAction(stackActionData) {
 		if (!atelier.isArtEnabled() || !caravan || caravan.type !== rf.EXHIBITION_TRANSPORTER || loc.isOOBlocation(caravan.location)) return 1
 		if (caravan.ownerIndex !== playerIndex || stackAction[2] !== playerIndex || stackAction[3] === playerIndex) return 2
 		if (!model.homeMarkersOnHex(caravan.location[1]).some((marker) => marker.ownerIndex === stackAction[3])) return 3
-		const beauty = new Set(model.resourcesOnTransport(caravan.id).map((r) => r.type)).size
-		const isShow = !atelier.hasShownAt(playerIndex, stackAction[3]) && beauty >= 3 && beauty <= 5 && beauty > atelier.bestShownAtTarget(stackAction[3])
-		return stackAction[4] === (isShow ? beauty : 0) ? 0 : 4
+		// The recorded value is informational: performExhibitionStackAction recomputes the show
+		// against the state at application, so a pre-set arrival after a better show still applies.
+		if (typeof stackAction[4] !== "number" || (stackAction[4] !== 0 && (stackAction[4] < 3 || stackAction[4] > 5))) return 4
+		return 0
 	}
 
 	if (action === rf.STACK_TAKE_TRAIN) {

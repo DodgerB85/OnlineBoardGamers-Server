@@ -155,14 +155,7 @@ export function checkExhibitionOnMove(transporterObj) {
 	const stagerPlayerIndex = transporterObj.ownerIndex
 	const targetPlayerIndex = homeMarker.ownerIndex
 
-	// Beauty = number of DIFFERENT works of art carried
-	let beauty = new Set(model.resourcesOnTransport(transporterObj.id).map((r) => r.type)).size
-
-	// Strictly more beautiful than the best show already staged at this tile (cap 5)
-	const best = bestShownAtTarget(targetPlayerIndex)
-	if (hasShownAt(stagerPlayerIndex, targetPlayerIndex) || beauty < 3 || beauty <= best || beauty > 5) beauty = 0
-
-	performExhibitionStackAction([rf.STACK_EXHIBITION, transporterObj.id, stagerPlayerIndex, targetPlayerIndex, beauty])
+	const beauty = performExhibitionStackAction([rf.STACK_EXHIBITION, transporterObj.id, stagerPlayerIndex, targetPlayerIndex, 0])
 
 	stack.addItemToStack({
 		action: rf.STACK_EXHIBITION,
@@ -206,16 +199,27 @@ export function flushPendingExhibition() {
 	pendingShow.run()
 }
 
-// Re-applies a recorded STACK_EXHIBITION action (replay / rewind).
+// Applies a recorded STACK_EXHIBITION action (live, replay / rewind). The caravan always
+// vanishes on arrival; the show value is recomputed here so a pre-set action applied after
+// another player's better show in the same phase is a no-show instead of a failed stack.
 export function performExhibitionStackAction(stackAction) {
 	// [STACK_EXHIBITION, caravanTransID, stagerIdx, targetIdx, beauty]
 	const caravanTransID = stackAction[1]
 	const stagerPlayerIndex = stackAction[2]
 	const targetPlayerIndex = stackAction[3]
-	const beauty = stackAction[4]
 	const transObj = model.getTransporterByID(caravanTransID)
+	let beauty = 0
 	if (transObj) {
 		const store = useModelStore()
+		const actualBeauty = new Set(model.resourcesOnTransport(transObj.id).map((r) => r.type)).size
+		const isShow =
+			isArtEnabled() &&
+			!hasShownAt(stagerPlayerIndex, targetPlayerIndex) &&
+			actualBeauty >= 3 &&
+			actualBeauty <= 5 &&
+			actualBeauty > bestShownAtTarget(targetPlayerIndex)
+		beauty = isShow ? actualBeauty : 0
+		stackAction[4] = beauty
 		if (store.context.selectedTransporterIDforTM === transObj.id) store.context.selectedTransporterIDforTM = -1
 		for (const goose of model.resourcesFollowingTransporter(transObj.id)) goose.location = [...loc.convertLocationToBucket(transObj.location)]
 		for (const res of model.resourcesOnTransport(transObj.id)) {
@@ -224,6 +228,7 @@ export function performExhibitionStackAction(stackAction) {
 		transObj.location = loc.setOOBlocation()
 	}
 	if (beauty > 0) playerArtState(stagerPlayerIndex).artShownAt[targetPlayerIndex] = beauty
+	return beauty
 }
 
 // ============================================================================
