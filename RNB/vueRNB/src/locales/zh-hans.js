@@ -483,6 +483,7 @@ export default {
 	},
 	replay: {
 		step: "步骤：{current} / {total}",
+		stepAria: "回放步骤",
 		backToMyLastMove: "返回我的上一步",
 		copyGame: "复制此游戏",
 		toNewGame: "到新游戏",

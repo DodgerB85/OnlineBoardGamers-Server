@@ -483,6 +483,7 @@ export default {
 	},
 	replay: {
 		step: "Schritt: {current} / {total}",
+		stepAria: "Wiedergabeschritt",
 		backToMyLastMove: "Zurück zu meinem letzten Zug",
 		copyGame: "Dieses Spiel kopieren",
 		toNewGame: "In neues Spiel",

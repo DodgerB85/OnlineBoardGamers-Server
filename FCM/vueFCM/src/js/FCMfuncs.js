@@ -16,6 +16,37 @@ export const shuffle = (array) => {
 	return array
 }
 
+/**
+ * Keep the client's seat names in step with the server. Seat index is the stable
+ * identity: store.players[i] always belongs to GamePlayer seat i.
+ */
+export function syncSeatPlayerNames(seatPlayerNames, myName) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	if (Array.isArray(seatPlayerNames) && seatPlayerNames.length === store.players.length) {
+		for (let i = 0; i < store.players.length; i++) {
+			const newName = seatPlayerNames[i]
+			if (!newName) continue
+			const player = store.players[i]
+			const oldName = player.name
+			if (!oldName || oldName === newName) continue
+			player.name = newName
+			if (!player.displayName || player.displayName === oldName) player.displayName = newName
+		}
+	}
+	if (myName) personal.name = myName
+}
+
+/** Move rows are seat-indexed; make their cached name match the current seat name. */
+export function alignMoveDataNames(data) {
+	const store = useModelStore()
+	if (!Array.isArray(data)) return data
+	for (let i = 0; i < data.length && i < store.players.length; i++) {
+		if (Array.isArray(data[i]) && data[i].length > 0) data[i][0] = store.players[i].name
+	}
+	return data
+}
+
 export function booleanToInt(b) {
 	if (b === true) {
 		return 1
@@ -783,6 +814,7 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	// Using .map() is more efficient than .splice() followed by a loop of .push()
 	store.players.splice(0)
 	store.players = inputArr[IMPORT_INDEX].map((entry) => importPlayer(entry))
+	if (!forGameOver) syncSeatPlayerNames(window.initData.seatPlayerNames || window.initData.playerNames, window.initData.name)
 
 	IMPORT_INDEX++
 

@@ -14,7 +14,7 @@ const store = useModelStore()
 import { usePersonalStore } from "../../stores/RNBpersonal.js"
 const personal = usePersonalStore()
 
-import { ref } from "vue"
+import { nextTick, ref } from "vue"
 
 const spinoffSuccessText = ref("")
 const spinoffErrorText = ref("")
@@ -25,6 +25,14 @@ function performStep(amount) {
 	spinoffSuccessText.value = ""
 	spinoffErrorText.value = ""
 	replay.performStep(amount)
+}
+
+function setReplayStep(event) {
+	const index = Number(event.target.value)
+	if (index === store.replayStep.index) return
+	store.clearHistoryHelpers()
+	store.clearMessages()
+	replay.goToReplayStep(index)
 }
 
 async function localCopyGameToPracticeGame2() {
@@ -45,32 +53,37 @@ function copyToClipboard() {
 
 	copyMessage.value = i18n.global.t("replay.copiedToClipboard", { url: textToCopy })
 
-	const button = document.getElementById("copyURLbutton")
-	const popup = document.getElementById("popup")
+	// Position the popup after its new text has been rendered, so it is centred and fully on-screen.
+	nextTick(() => {
+		const button = document.getElementById("copyURLbutton")
+		const popup = document.getElementById("popup")
 
-	// Hide any existing popup and reset the timer
-	clearTimeout(popup.fadeTimeout)
+		// Hide any existing popup and reset the timer
+		clearTimeout(popup.fadeTimeout)
 
-	popup.style.opacity = "1"
-	popup.style.display = "block"
+		popup.style.opacity = "1"
+		popup.style.display = "block"
 
-	const buttonRect = button.getBoundingClientRect()
-	const popupRect = popup.getBoundingClientRect()
-	const offsetTop = buttonRect.top + buttonRect.height + 10 // Adjust the offset as needed
-	const offsetLeft = buttonRect.left + (buttonRect.width - popupRect.width) / 2
+		const buttonRect = button.getBoundingClientRect()
+		const popupRect = popup.getBoundingClientRect()
+		const below = buttonRect.bottom + 10
+		// Flip above the button when a bottom-positioned bar leaves no room underneath.
+		const offsetTop = below + popupRect.height <= window.innerHeight ? below : buttonRect.top - popupRect.height - 10
+		const offsetLeft = Math.max(10, Math.min(window.innerWidth - popupRect.width - 10, buttonRect.left + (buttonRect.width - popupRect.width) / 2))
 
-	popup.style.top = offsetTop + "px"
-	popup.style.left = offsetLeft + "px"
+		popup.style.top = offsetTop + "px"
+		popup.style.left = offsetLeft + "px"
 
-	// Fade out the popup after 2 seconds
-	popup.fadeTimeout = setTimeout(() => {
-		popup.style.opacity = "0"
+		// Fade out the popup after 2 seconds
+		popup.fadeTimeout = setTimeout(() => {
+			popup.style.opacity = "0"
 
-		// Hide the popup after the fade-out animation completes
-		setTimeout(() => {
-			popup.style.display = "none"
-		}, 300)
-	}, 2000)
+			// Hide the popup after the fade-out animation completes
+			setTimeout(() => {
+				popup.style.display = "none"
+			}, 300)
+		}, 2000)
+	})
 }
 
 function shouldDisableBackwardsReplay() {
@@ -84,55 +97,45 @@ function shouldDisableForwardsReplay() {
 
 <template>
 	<template v-if="store.viewSettings.showReplay">
-		<button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="shouldDisableBackwardsReplay()" @click="performStep(-999)">{{ $t("replay.backToMyLastMove") }}</button>
-		<button class="actionsLineButton" :disabled="shouldDisableBackwardsReplay()" @click="performStep(-99)">|&lt;</button>
-		<button class="actionsLineButton" :disabled="shouldDisableBackwardsReplay()" @click="performStep(-9)">&lt;&lt;</button>
-		<button class="actionsLineButton" :disabled="shouldDisableBackwardsReplay()" @click="performStep(-1)">&lt;</button>
-		<div id="replayStepSpan">
-		{{ store.replayStep.computedHistoryIndex + 1 }} / {{ store.computedHistory.length }}
-		<template v-if="store.replayStep.subStep !== -1">{{ $t("replay.step", { current: store.replayStep.subStep + 1, total: store.replayStep.maxStep + 1 }) }}</template>
-		</div>
-		<button class="actionsLineButton" :disabled="shouldDisableForwardsReplay()" @click="performStep(1)">&gt;</button>
-		<button class="actionsLineButton" :disabled="shouldDisableForwardsReplay()" @click="performStep(9)">&gt;&gt;</button>
-		<button class="actionsLineButton" :disabled="shouldDisableForwardsReplay()" @click="performStep(99)">&gt;|</button>
+		<div id="replayArea" :class="{ replayAtBottom: store.viewSettings.replayAtBottom }">
+			<button v-if="personal.pov >= 0" class="actionsLineButton" :disabled="shouldDisableBackwardsReplay()" @click="performStep(-999)">{{ $t("replay.backToMyLastMove") }}</button>
+			<button class="actionsLineButton" :disabled="shouldDisableBackwardsReplay()" @click="performStep(-99)">|&lt;</button>
+			<button class="actionsLineButton" :disabled="shouldDisableBackwardsReplay()" @click="performStep(-9)">&lt;&lt;</button>
+			<button class="actionsLineButton" :disabled="shouldDisableBackwardsReplay()" @click="performStep(-1)">&lt;</button>
+			<input type="range" min="0" :max="Math.max(0, store.replayData.length - 1)" :value="store.replayStep.index" :aria-label="$t('replay.stepAria')" @input="setReplayStep" />
+			<div id="replayStepSpan">
+				{{ store.replayStep.computedHistoryIndex + 1 }} / {{ store.computedHistory.length }}
+				<template v-if="store.replayStep.subStep !== -1">{{ $t("replay.step", { current: store.replayStep.subStep + 1, total: store.replayStep.maxStep + 1 }) }}</template>
+			</div>
+			<button class="actionsLineButton" :disabled="shouldDisableForwardsReplay()" @click="performStep(1)">&gt;</button>
+			<button class="actionsLineButton" :disabled="shouldDisableForwardsReplay()" @click="performStep(9)">&gt;&gt;</button>
+			<button class="actionsLineButton" :disabled="shouldDisableForwardsReplay()" @click="performStep(99)">&gt;|</button>
 
-		<!--<div class="copyGameButtonDiv" v-if="personal.name != undefined">
-            <button @click="localCopyGameToPracticeGame(false)" class="actionsLineButton">
-                Copy Game From<br />Before This Move<br />To Practice Game
-            </button>
-        </div>-->
-		<div class="copyGameButtonDiv" v-if="personal.name != undefined">
-			<button @click="localCopyGameToPracticeGame2()" class="actionsLineButton">
-				{{ $t("replay.copyGame") }}
-				<br />
-				{{ $t("replay.toNewGame") }}
-			</button>
-			<button @click="store.viewSettings.replayAtBottom = !store.viewSettings.replayAtBottom" class="actionsLineButton">
-				<template v-if="!store.viewSettings.replayAtBottom">
-					{{ $t("replay.moveUi") }}
+			<template v-if="personal.name != undefined">
+				<button @click="localCopyGameToPracticeGame2()" class="actionsLineButton">
+					{{ $t("replay.copyGame") }}
 					<br />
-					{{ $t("replay.toBottom") }}
-					<b>▼</b>
-				</template>
-				<template v-if="store.viewSettings.replayAtBottom">
-					{{ $t("replay.moveUi") }}
-					<br />
-					{{ $t("replay.toTop") }}
-					<b>▲</b>
-				</template>
-			</button>
+					{{ $t("replay.toNewGame") }}
+				</button>
+				<button @click="store.viewSettings.replayAtBottom = !store.viewSettings.replayAtBottom" class="actionsLineButton">
+					<template v-if="!store.viewSettings.replayAtBottom">
+						{{ $t("replay.moveUi") }}
+						<br />
+						{{ $t("replay.toBottom") }}
+						<b>▼</b>
+					</template>
+					<template v-if="store.viewSettings.replayAtBottom">
+						{{ $t("replay.moveUi") }}
+						<br />
+						{{ $t("replay.toTop") }}
+						<b>▲</b>
+					</template>
+				</button>
+			</template>
+
+			<button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">{{ $t("replay.copyUrl") }}</button>
+			<div id="popup" class="popup">{{ copyMessage }}</div>
 		</div>
-		<!--<div v-if="personal.name != undefined && store.replayStep === store.replayData.length - 1 && store.gameflow.phase !== rf.PHASE_GAME_OVER"
-            class="copyGameButtonDiv">
-            <button @click="localCopyGameToPracticeGame(true)" class="actionsLineButton">
-                Copy Game From<br />After This Move<br />To Practice Game
-            </button>
-        </div>-->
-		<br />
-		{{ $t("replay.useArrows") }}
-		<br />
-		<button id="copyURLbutton" @click="copyToClipboard" class="actionsLineButton">{{ $t("replay.copyUrl") }}</button>
-		<div id="popup" class="popup">{{ copyMessage }}</div>
 
 		<div v-if="spinoffSuccessText !== ''" class="spinoffSuccessText" v-html="spinoffSuccessText"></div>
 		<div v-if="spinoffErrorText !== ''" class="spinoffErrorText">{{ spinoffErrorText }}</div>
@@ -194,14 +197,37 @@ function shouldDisableForwardsReplay() {
 	background-color: lightblue;
 }
 
-.copyGameButtonDiv {
-	display: inline-block;
-	vertical-align: middle;
+#replayArea {
+	position: sticky;
+	top: 0;
+	z-index: 9998;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 8px;
+	background: #d4eafd;
+	border: 1px solid black;
+	padding: 8px;
+	margin: 10px 12px 0;
+	text-align: center;
+	font-size: 16px;
+	font-weight: 400;
+}
+
+/* In the bottom position the bar follows the map's bottom edge instead. */
+#replayArea.replayAtBottom {
+	top: auto;
+	bottom: 0;
+}
+
+#replayArea input[type="range"] {
+	width: min(300px, 35vw);
 }
 
 #replayStepSpan {
 	display: inline-block;
-	min-width: 215px;
+	min-width: 160px;
 }
 
 .replayHistoryEntry {
@@ -211,7 +237,7 @@ function shouldDisableForwardsReplay() {
 }
 
 .actionsLineButton {
-	margin: 10px;
+	margin: 0;
 	/*width: 100px;*/
 	width: fit-content;
 	border: 2px solid green;
@@ -228,7 +254,8 @@ function shouldDisableForwardsReplay() {
 }
 
 .popup {
-	position: absolute;
+	position: fixed;
+	z-index: 10000;
 	background-color: #f7f7f7;
 	padding: 10px;
 	border-radius: 4px;

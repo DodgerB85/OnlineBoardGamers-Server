@@ -297,7 +297,9 @@ export async function initGame() {
 		// You must be involved, have moved, and not be able to play
 		if (store.gameflow.phase >= rf.PHASE_WORKING_DAY && window.initData.moveData !== "") {
 			let decompressedData = funcs.decompressData(window.initData.moveData)
-			if (decompressedData[0] !== window.initData.name) {
+			const mySeatName = personal.pov >= 0 && store.players[personal.pov] ? store.players[personal.pov].name : window.initData.name
+			if (decompressedData) decompressedData[0] = mySeatName
+			if (decompressedData[0] !== mySeatName) {
 				alert(i18n.global.t("alerts.nameMatchError"))
 			} else {
 				store.context.preMoveData = decompressedData[3]
@@ -308,7 +310,9 @@ export async function initGame() {
 			}
 		} else if (store.gameflow.phase === rf.PHASE_RESTRUCTURING && window.initData.moveData !== "") {
 			let decompressedData = funcs.decompressData(window.initData.moveData)
-			if (decompressedData[0] !== window.initData.name) {
+			const mySeatName = personal.pov >= 0 && store.players[personal.pov] ? store.players[personal.pov].name : window.initData.name
+			if (decompressedData) decompressedData[0] = mySeatName
+			if (decompressedData[0] !== mySeatName) {
 				alert(i18n.global.t("alerts.nameMatchError"))
 			} else if (decompressedData[3] && decompressedData[3].length === 3) {
 				store.players[personal.pov].beach = [...decompressedData[3][0]]

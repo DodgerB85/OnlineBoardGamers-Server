@@ -106,7 +106,7 @@ export function passKickout() {
 			// just keeps their first 10 resources and discards the rest.
 			if (rules.isRequiredToPlayCleanUp(timedOutPlayerIndex)) store.players[timedOutPlayerIndex].resources.splice(10)
 		}
-		controller.endPlayerTurn(true, false, { passKickoutFor: targetName })
+		controller.endPlayerTurn(true, false, { passKickoutFor: targetName, passKickoutSeat: timedOutPlayerIndex })
 		return
 	}
 
@@ -135,7 +135,7 @@ export function passKickout() {
 	let savedPov = personal.pov
 	personal.pov = timedOutPlayerIndex
 	store.gameflow.turnOrder = store.gameflow.turnOrder.filter((idx) => idx !== timedOutPlayerIndex)
-	IO.saveSimulMove(moveData, false, targetName)
+	IO.saveSimulMove(moveData, false, targetName, timedOutPlayerIndex)
 	personal.pov = savedPov
 }
 

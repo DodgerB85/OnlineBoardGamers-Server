@@ -90,6 +90,7 @@ class FcmPassKickoutTest(TestCase):
                 "notRequiedPlayerNames": [],
                 "continueFromStalledGame": False,
                 "passKickoutFor": "alice",
+                "passKickoutSeat": 0,
             },
         )
 
