@@ -219,8 +219,8 @@ const playerFilledSVG = `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.or
 						<!-- TRAIN TRACKS - roads draw over them -->
 						<g v-if="store.mapData.displaySettings.showTrainTracks && store.gameOptions.useTrains && hex.fullTrainTrackPath?.length">
 							<!-- Black track with white dashed centre, like the printed &cetera maps -->
-							<path v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackBlack' + i" :d="chain.d" stroke="black" :stroke-width="(124 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-							<path v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" :stroke-width="(64 * store.RATIO).toFixed(0)" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackBlack' + i" :d="chain.d" stroke="black" :stroke-width="(160 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" :stroke-width="(100 * store.RATIO).toFixed(0)" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 						</g>
 						<!-- ROADS - drawn after the tracks so they sit on top -->
 						<g v-if="store.mapData.displaySettings.showRoads && 1 == 1">

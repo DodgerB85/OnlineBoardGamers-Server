@@ -785,34 +785,26 @@ const computedMaxNeutralBricks = computed(() => {
 						<!-- TRAIN TRACKS - roads draw over them -->
 						<g v-if="store.gameOptions.useTrains && computedZoomData.fullTrainTrackPathZP?.length">
 							<!-- Black track with white dashed centre, like the printed &cetera maps -->
-							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathZP" :key="'trackBlack' + i" :d="chain.d" stroke="black" stroke-width="124" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathZP" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" stroke-width="64" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathZP" :key="'trackBlack' + i" :d="chain.d" stroke="black" stroke-width="160" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathZP" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" stroke-width="100" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 						</g>
 						<!-- ROADS - drawn after the tracks so they sit on top -->
 						<path :d="computedZoomData.fullRoadPathZP" stroke="#1C2526" stroke-width="60" stroke-linejoin="round" stroke-linecap="round" />
 						<path :d="computedZoomData.fullRoadPathZP" stroke="#F5F5F5" stroke-width="7" stroke-dasharray="25 20" fill="none" />
 						<g v-if="store.gameOptions.useElectricity && computedZoomData.fullPowerLinePathZP">
-							<path :d="computedZoomData.fullPowerLinePathZP" stroke="#1C2526" stroke-width="40" stroke-linejoin="round" stroke-linecap="round" fill="none" />
-							<path
-								:d="computedZoomData.fullPowerLinePathZP"
-								:stroke="electricity.isHexPowered(computedZoomData.hexID) ? '#F4C542' : '#C0392B'"
-								stroke-width="30"
-								:stroke-dasharray="electricity.isHexPowered(computedZoomData.hexID) ? 'none' : '16 10'"
-								stroke-linejoin="round"
-								stroke-linecap="round"
-								fill="none" />
-							<path
-								:d="computedZoomData.fullPowerLinePathZP"
-								:stroke="electricity.isHexPowered(computedZoomData.hexID) ? '#FFF3B0' : '#7A1F1F'"
-								stroke-width="7"
-								:stroke-dasharray="electricity.isHexPowered(computedZoomData.hexID) ? '3 12' : '3 9'"
-								stroke-linejoin="round"
-								stroke-linecap="round"
-								fill="none" />
-							<g v-for="(p, i) in computedZoomData.powerLinePoints" :key="'pylon' + i">
-								<circle :cx="p[0]" :cy="p[1]" r="26" fill="#1C2526" />
-								<circle :cx="p[0]" :cy="p[1]" r="12" :fill="electricity.isHexPowered(computedZoomData.hexID) ? '#F4C542' : '#C0392B'" />
-							</g>
+							<path :d="computedZoomData.fullPowerLinePathZP" stroke="#1C2526" stroke-width="18" stroke-linejoin="round" stroke-linecap="round" fill="none" />
+							<path :d="computedZoomData.fullPowerLinePathZP" :stroke="electricity.isHexPowered(computedZoomData.hexID) ? '#F4C542' : '#E74C3C'" stroke-width="10" stroke-linejoin="round" stroke-linecap="round" fill="none" />
+							<!-- Square pylon at every power-line join -->
+							<rect
+								v-for="(p, i) in computedZoomData.powerLinePoints"
+								:key="'pylon' + i"
+								:x="p[0] - 20"
+								:y="p[1] - 20"
+								width="40"
+								height="40"
+								:fill="electricity.isHexPowered(computedZoomData.hexID) ? '#F4C542' : '#E74C3C'"
+								stroke="#1C2526"
+								stroke-width="6" />
 						</g>
 					</g>
 					<!-- BUILDINGS-->

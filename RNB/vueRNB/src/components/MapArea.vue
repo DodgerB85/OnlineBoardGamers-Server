@@ -78,6 +78,29 @@ const hexesForDisplay = computed(() =>
 	}))
 )
 
+// Pylons are collected across all hexes and drawn once after every hex layer.
+// Otherwise the next hex's power line paints over the square at the shared edge.
+const powerPylons = computed(() => {
+	const pylons = new Map()
+	const angle = store.hexStyle === rf.FLAT ? Math.PI / 6 : 0
+	const cos = Math.cos(angle)
+	const sin = Math.sin(angle)
+	for (const hex of hexesForDisplay.value) {
+		if (!hex.powerLinePoints?.length) continue
+		for (const p of hex.powerLinePoints) {
+			const x = p[0] * store.RATIO
+			const y = p[1] * store.RATIO
+			const sx = hex.rawXY[0] + x * cos - y * sin
+			const sy = hex.rawXY[1] + x * sin + y * cos
+			const key = `${sx.toFixed(1)},${sy.toFixed(1)}`
+			const existing = pylons.get(key)
+			if (existing) existing.powered = existing.powered || hex.powered
+			else pylons.set(key, { x: sx, y: sy, powered: hex.powered })
+		}
+	}
+	return [...pylons.values()]
+})
+
 // Prevent animation on page load
 // 1. Flag to prevent animations on initial page load
 const isFullyMounted = ref(false)
@@ -601,8 +624,8 @@ function getAtelierRecipeGfx(recipeIdx) {
 						<!-- TRAIN TRACKS - same paths/anchors as roads; roads draw over them -->
 						<g v-if="store.mapData.displaySettings.showTrainTracks && store.gameOptions.useTrains && hex.fullTrainTrackPath?.length">
 							<!-- Black track with white dashed centre, like the printed &cetera maps -->
-							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackBlack' + i" :d="chain.d" stroke="black" :stroke-width="(124 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" :stroke-width="(64 * store.RATIO).toFixed(0)" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackBlack' + i" :d="chain.d" stroke="black" :stroke-width="(160 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" :stroke-width="(100 * store.RATIO).toFixed(0)" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 						</g>
 						<!-- ROADS - drawn after the tracks so they sit on top -->
 						<g v-if="store.mapData.displaySettings.showRoads && 1 == 1">
@@ -613,33 +636,10 @@ function getAtelierRecipeGfx(recipeIdx) {
 								<path class="noClick" :d="hex.fullRoadPath" stroke="#F5F5F5" :stroke-width="(7 * store.RATIO).toFixed(0)" :stroke-dasharray="`${(25 * store.RATIO).toFixed(0)} ${(20 * store.RATIO).toFixed(0)}`" fill="none" />
 							</g>
 						</g>
-						<!-- POWER LINES - amber when powered, dashed red when unpowered -->
+						<!-- POWER LINES - thin black-edged line; red when unpowered, yellow when powered -->
 						<g v-if="store.gameOptions.useElectricity && hex.fullPowerLinePath">
-							<path class="noClick" :d="hex.fullPowerLinePath" stroke="#1C2526" :stroke-width="Math.max(5, 30 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="round" fill="none" />
-							<path
-								class="noClick"
-								:d="hex.fullPowerLinePath"
-								:stroke="hex.powered ? '#F4C542' : '#C0392B'"
-								:stroke-width="Math.max(4, 22 * store.RATIO).toFixed(0)"
-								:stroke-dasharray="hex.powered ? 'none' : `${Math.max(5, 16 * store.RATIO).toFixed(0)} ${Math.max(3, 9 * store.RATIO).toFixed(0)}`"
-								stroke-linejoin="round"
-								stroke-linecap="round"
-								fill="none" />
-							<path
-								class="noClick"
-								:d="hex.fullPowerLinePath"
-								:stroke="hex.powered ? '#FFF3B0' : '#7A1F1F'"
-								:stroke-width="Math.max(1, 5 * store.RATIO).toFixed(0)"
-								:stroke-dasharray="`${Math.max(2, 3 * store.RATIO).toFixed(0)} ${hex.powered ? Math.max(6, 12 * store.RATIO).toFixed(0) : Math.max(5, 9 * store.RATIO).toFixed(0)}`"
-								stroke-linejoin="round"
-								stroke-linecap="round"
-								fill="none" />
-							<!-- Pylons: dark circle with a power-coloured centre. The outer radius
-							     must be larger than the cable or the dots disappear inside it. -->
-							<g v-for="(p, i) in hex.powerLinePoints" :key="'pylon' + i" class="noClick">
-								<circle :cx="p[0] * store.RATIO" :cy="p[1] * store.RATIO" :r="Math.max(8, 24 * store.RATIO)" fill="#1C2526" />
-								<circle :cx="p[0] * store.RATIO" :cy="p[1] * store.RATIO" :r="Math.max(4, 12 * store.RATIO)" :fill="hex.powered ? '#F4C542' : '#C0392B'" />
-							</g>
+							<path class="noClick" :d="hex.fullPowerLinePath" stroke="#1C2526" :stroke-width="Math.max(3, 14 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="round" fill="none" />
+							<path class="noClick" :d="hex.fullPowerLinePath" :stroke="hex.powered ? '#F4C542' : '#E74C3C'" :stroke-width="Math.max(2, 8 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="round" fill="none" />
 						</g>
 					</g>
 					<!-- NOT FINE TO ROTATE TO FLAT-->
@@ -753,6 +753,21 @@ function getAtelierRecipeGfx(recipeIdx) {
 					</g>
 				</g>
 				<!-- END OF INDIVIDUAL HEX-->
+
+				<!-- POWER LINE PYLONS - after every hex line so shared-edge squares stay visible -->
+				<g v-if="store.gameOptions.useElectricity">
+					<rect
+						class="noClick"
+						v-for="(p, i) in powerPylons"
+						:key="'pylon' + i"
+						:x="p.x - Math.max(14, 34 * store.RATIO) / 2"
+						:y="p.y - Math.max(14, 34 * store.RATIO) / 2"
+						:width="Math.max(14, 34 * store.RATIO)"
+						:height="Math.max(14, 34 * store.RATIO)"
+						:fill="p.powered ? '#F4C542' : '#E74C3C'"
+						stroke="#1C2526"
+						:stroke-width="Math.max(2, 4 * store.RATIO)" />
+				</g>
 
 				<!-- HEX PIECES TO Highlight UNDER TRANSPORTERS -->
 				<g v-for="(entry, idx) in store.context.hexPiecesToHighlightUnderTransporters" :key="idx" :transform="`translate(${model.getHexByID(entry[0]).rawXY[0]} , ${model.getHexByID(entry[0]).rawXY[1]})`">
