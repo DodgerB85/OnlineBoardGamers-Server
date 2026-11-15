@@ -205,11 +205,12 @@ const getFullTurnOrderArray = computed(() => {
 				<span class="currentPhaseGlow">{{ $t("playerTable.setup") }}</span>
 				►
 			</template>
-			<span :class="{ currentPhaseGlow: rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase) || rf.PHASE_CONFLICT_PRODUCTIONS.includes(store.gameflow.phase) }">
+			<span :class="{ currentPhaseGlow: rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase) || rf.PHASE_CONFLICT_PRODUCTIONS.includes(store.gameflow.phase) || store.gameflow.phase === rf.PHASE_PRODUCTION_SETUP_TO }">
 				{{ $t("playerTable.production") }}
 				<span v-if="store.gameflow.phase === rf.PHASE_CONFLICT_PRODUCTION_DECISION">{{ $t("playerTable.conflictDecision") }}</span>
 				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_PRODUCTION_PRAYING">{{ $t("playerTable.conflictPraying") }}</span>
 				<span v-else-if="store.gameflow.phase === rf.PHASE_CONFLICT_PRODUCTION_TURN_ORDER">{{ $t("playerTable.conflictTurnOrder") }}</span>
+				<span v-else-if="store.gameflow.phase === rf.PHASE_PRODUCTION_SETUP_TO">{{ $t("playerTable.productionSetup") }}</span>
 			</span>
 			►
 			<span :class="{ currentPhaseGlow: rf.PHASE_MOVEMENTS.includes(store.gameflow.phase) || rf.PHASE_CONFLICT_MOVEMENTS.includes(store.gameflow.phase) }">

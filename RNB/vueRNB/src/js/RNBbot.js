@@ -4,6 +4,7 @@ import * as controller from "./RNBcontroller"
 import * as model from "./RNBmodel"
 import * as wonder from "./RNBwonder"
 import * as context from "./RNBcontext.js"
+import * as productionSetup from "./RNBproductionSetup.js"
 import { useModelStore } from "../stores/RNBstore.js"
 import { usePersonalStore } from "../stores/RNBpersonal"
 
@@ -110,11 +111,10 @@ export async function actionPlayerKickout() {
 				
 				store.gameflow.turnOrder = store.gameflow.turnOrder.filter((idx) => idx !== timedOutPlayerIndex)
 				removeBotPlayers()
+				productionSetup.dropPlayersWithoutChoices()
 
-				if (store.gameflow.turnOrder.length === 0) {
-					controller.endCurrentPhase()
-					controller.startPhase()
-				}
+				// endCurrentPhase starts the next phase itself (setup is followed directly by production)
+				if (store.gameflow.turnOrder.length === 0) controller.endCurrentPhase()
 
 				await IO.saveGame(true, false)
 				return

@@ -447,6 +447,7 @@ const computedEntry3 = computed(() => {
 		ret.stackSteps = []
 		if (rf.PHASE_MOVEMENTS.includes(entry[3][0])) ret.title = i18n.global.t("history.movementPhase")
 		else if (rf.PHASE_PRODUCTIONS.includes(entry[3][0])) ret.title = i18n.global.t("history.productionPhase")
+		else if (entry[3][0] === rf.PHASE_PRODUCTION_SETUP_TO) ret.title = i18n.global.t("phases.productionSetup")
 		else if (rf.PHASE_BUILDINGS.includes(entry[3][0])) ret.title = i18n.global.t("history.buildingPhase")
 		else if (rf.PHASE_WONDERS.includes(entry[3][0])) ret.title = i18n.global.t("history.wonderPhase")
 		// If there is only 1 entry, then the phase was skipped
@@ -1769,10 +1770,14 @@ const computedEntry3 = computed(() => {
 					<!-- Art & The Atelier: EXHIBITION -->
 					<template v-if="stackEntry.action === rf.STACK_EXHIBITION">
 						<div class="flexContainer stackEntryDiv">
-							<i18n-t keypath="history.stagedExhibition" tag="span" scope="global">
+							<i18n-t v-if="stackEntry.beauty > 0" keypath="history.stagedExhibition" tag="span" scope="global">
 								<template #name><span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.stagerIdx].colour)">{{ personal.getHistoryName(stackEntry.stagerIdx) }}</span></template>
 								<template #target><span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.targetIdx].colour)">{{ stackEntry.targetName }}</span></template>
 								<template #beauty>{{ stackEntry.beauty }}</template>
+							</i18n-t>
+							<i18n-t v-else keypath="history.caravanArrived" tag="span" scope="global">
+								<template #name><span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.stagerIdx].colour)">{{ personal.getHistoryName(stackEntry.stagerIdx) }}</span></template>
+								<template #target><span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.targetIdx].colour)">{{ stackEntry.targetName }}</span></template>
 							</i18n-t>
 						</div>
 					</template>

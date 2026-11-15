@@ -45,6 +45,7 @@ const personal = usePersonalStore()
 //const globalRoadNetworks = computes.globalRoadNetworks
 
 import { ref, computed, onMounted } from "vue"
+import * as productionSetup from "../js/RNBproductionSetup.js"
 //import WonderScreen from "./WonderScreen.vue"
 //const showErrorPopup = ref(false)
 
@@ -655,6 +656,7 @@ function getAtelierRecipeGfx(recipeIdx) {
 									:width="bldg.width * store.RATIO"
 									:height="bldg.height * store.RATIO"
 									:fill="`url(#pattern_${bldg.img})`"
+									:opacity="productionSetup.isUnfiredPlant(bldg.id) ? 0.45 : 1"
 									:style="{
 										strokeWidth: highlight.shouldHighlightItem(rf.ITEM_BUILT_BUILDING, bldg.id) ? 20 * store.RATIO : bldg.strengthened ? 30 * store.RATIO : 2 * store.RATIO,
 									}" />

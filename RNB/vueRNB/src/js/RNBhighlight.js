@@ -27,6 +27,7 @@ import * as produce from "./RNBproduce"
 import * as wonder from "./RNBwonder"
 import * as stack from "./RNBstack"
 import * as train from "./RNBtrain"
+import * as productionSetup from "./RNBproductionSetup.js"
 
 export function deselectTransporter() {
 	const store = useModelStore()
@@ -108,6 +109,10 @@ export function updateAllHighlightsForTransporterMode() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	if (!personal.canPlay()) return
+	if (productionSetup.isSetupMode()) {
+		productionSetup.updateSetupHighlights()
+		return
+	}
 
 	// If you have illegal geese, return
 	if (store.context.errorUnableToDropGeeseAtSea === true) {
@@ -691,7 +696,7 @@ export function getEligibleTransportersForRemoval(playerIndex, isTotalProblem, i
 	// Planes & Aeroports: if you have too many planes, you MUST remove a plane
 	else if (isPlaneProblem) typesForRemoval.push(rf.AIR_TYPE)
 	// When the only problem is total, allow removing any type
-	else if (isTotalProblem) typesForRemoval = [rf.LAND_TYPE, rf.WATER_TYPE, rf.AIR_TYPE]
+	else if (isTotalProblem) typesForRemoval = [rf.LAND_TYPE, rf.WATER_TYPE, rf.AIR_TYPE, rf.EXHIBITION_TRANSPORTER]
 
 	// Planes & Aeroports: the global 8-transporter total always applies. When total is
 	// exceeded alongside a type-specific cap, all types contributing to that total should

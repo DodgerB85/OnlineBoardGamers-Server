@@ -130,12 +130,12 @@ export function getNextPhaseFromHistory() {
 		if (store.history[idx][0] === rf.HIST_STACK_ACTIONS && rf.PHASE_PRODUCTIONS.includes(store.history[idx][3][0])) return rf.PHASE_MOVEMENT_TO
 		if (store.history[idx][0] === rf.HIST_STACK_ACTIONS && rf.PHASE_MOVEMENTS.includes(store.history[idx][3][0])) return rf.PHASE_BUILDING_TO
 		if (store.history[idx][0] === rf.HIST_STACK_ACTIONS && rf.PHASE_BUILDINGS.includes(store.history[idx][3][0])) return rf.PHASE_WONDER_TO
-		if (store.history[idx][0] === rf.HIST_STACK_ACTIONS && rf.PHASE_WONDERS.includes(store.history[idx][3][0])) return rf.PHASE_PRODUCTION_TO
+		if (store.history[idx][0] === rf.HIST_STACK_ACTIONS && rf.PHASE_WONDERS.includes(store.history[idx][3][0])) return rf.PHASE_PRODUCTION_SETUP_TO
 
 		if (store.history[idx][0] === rf.HIST_NO_PRODUCTION_ACTIONS) return rf.PHASE_MOVEMENT_TO
 		if (store.history[idx][0] === rf.HIST_NO_MOVEMENT_ACTIONS) return rf.PHASE_BUILDING_TO
 		if (store.history[idx][0] === rf.HIST_NO_BUILDING_ACTIONS) return rf.PHASE_WONDER_TO
-		if (store.history[idx][0] === rf.HIST_NO_WONDER_ACTIONS) return rf.PHASE_PRODUCTION_TO
+		if (store.history[idx][0] === rf.HIST_NO_WONDER_ACTIONS) return rf.PHASE_PRODUCTION_SETUP_TO
 
 		idx--
 	}

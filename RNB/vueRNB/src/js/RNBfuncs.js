@@ -1,3 +1,4 @@
+import * as atelier from "./RNBatelier.js"
 /**
  * shuffle
  * removeItemAll
@@ -20,6 +21,7 @@ import * as stack from "./RNBstack"
 import * as context from "./RNBcontext"
 import i18n from "../i18n"
 import * as wonder from "./RNBwonder"
+import * as electricity from "./RNBelectricity"
 
 import { useModelStore } from "../stores/RNBstore.js"
 import { usePersonalStore } from "../stores/RNBpersonal.js"
@@ -78,7 +80,7 @@ export function sleep(ms) {
 export function compressData64(data) {
 	let step1 = JSON.stringify(data)
 	// eslint-disable-next-line no-undef
-	let step2 = pako.gzip(step1)
+	let step2 = pako.gzip(step1, { level: 9 })
 	let base64Data = btoa(String.fromCharCode(...new Uint8Array(step2)))
 
 	return base64Data
@@ -155,6 +157,7 @@ export function htmlUnescape(value) {
 /*** MAP */
 // Wipe everything to reset map building
 export function clearMap(keepHistory) {
+	atelier.cancelPendingExhibition()
 	const store = useModelStore()
 	if (!keepHistory) store.history.splice(0)
 
@@ -713,6 +716,7 @@ export async function simpleImportWholeRNBmodel(inputBase64, keepHistory = false
 }
 
 export function exportRNBmodel(forGameOver) {
+	atelier.flushPendingExhibition()
 	const store = useModelStore()
 	let temp = []
 
@@ -725,9 +729,8 @@ export function exportRNBmodel(forGameOver) {
 		else tempPlayer.push([store.players[i].name, store.players[i].displayName])
 		// 1 - colour
 		tempPlayer.push(store.players[i].colour)
-		// 2 - Art & The Atelier: shows staged per target, best beauty shown at this tile
+		// 2 - Art & The Atelier: shows staged per target
 		if (store.gameOptions.useArt) tempPlayer.push(store.players[i].artShownAt || {})
-		if (store.gameOptions.useArt) tempPlayer.push(store.players[i].artBestShownHere || 0)
 
 		tempPlayers.push(tempPlayer)
 	}
@@ -795,6 +798,8 @@ export function exportRNBmodel(forGameOver) {
 		tempGameflow.push(JSON.parse(JSON.stringify(store.gameflow.newWonderTurnOrder))) // 5
 		tempGameflow.push(JSON.parse(JSON.stringify(store.gameflow.newWonderPrayingOrder))) // 6
 		tempGameflow.push(JSON.parse(JSON.stringify(store.gameflow.productionDecisions || {}))) // 7 - &c production setup choices
+		// 8 - power plants working this turn (fuelled at wonder end / production setup, used at production start)
+		tempGameflow.push([store.context.powerPlantsFueledTurn, electricity.getAllPowerPlants().filter((b) => b.powerActive === true).map((b) => [b.id, b.powerFuelType])])
 		temp.push(JSON.parse(JSON.stringify(tempGameflow)))
 
 		// 7 - ongoingVars
@@ -807,7 +812,7 @@ export function exportRNBmodel(forGameOver) {
 	let step1 = JSON.stringify(temp)
 
 	// eslint-disable-next-line no-undef
-	let step2 = pako.gzip(step1)
+	let step2 = pako.gzip(step1, { level: 9 })
 	let base64Data = btoa(String.fromCharCode(...new Uint8Array(step2)))
 
 	return base64Data
@@ -887,7 +892,6 @@ export function importRNBmodel(input, forGameOver) {
 			RnD: [...RnD],
 			// Art & The Atelier: restored for old saves that lack these fields
 			artShownAt: entry[2] || {},
-			artBestShownHere: entry[3] || 0,
 		})
 	}
 
@@ -1205,6 +1209,19 @@ export function importRNBmodel(input, forGameOver) {
 			}
 			histIdx--
 		}
+	}
+
+	// Power plants working this turn (buildings exist only now)
+	if (!forGameOver && inputModel[6]?.length > 8) {
+		const [fueledTurn, workingPlants] = inputModel[6][8]
+		for (const [bldgID, fuelType] of workingPlants) {
+			const bldg = model.getBuildingByID(bldgID)
+			if (!bldg) continue
+			bldg.powerActive = true
+			bldg.powerFuelType = fuelType
+		}
+		store.context.powerPlantsFueledTurn = fueledTurn
+		electricity.computePoweredStateFromActivePlants()
 	}
 
 	// Finally, check if deserts need to be converted
