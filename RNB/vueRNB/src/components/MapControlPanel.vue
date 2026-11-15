@@ -42,11 +42,12 @@ function colourOverlayLabel() {
 
 function toggleShowAll() {
 	// If any is hidden, show all
-	let anyHidden = !store.mapData.displaySettings.showTransporters || !store.mapData.displaySettings.showResources || !store.mapData.displaySettings.showRoads || !store.mapData.displaySettings.showBridges || !store.mapData.displaySettings.showBuildings || !store.mapData.displaySettings.showHomeMakres
+	let anyHidden = !store.mapData.displaySettings.showTransporters || !store.mapData.displaySettings.showResources || !store.mapData.displaySettings.showRoads || !store.mapData.displaySettings.showTrainTracks || !store.mapData.displaySettings.showBridges || !store.mapData.displaySettings.showBuildings || !store.mapData.displaySettings.showHomeMakres
 
 	store.mapData.displaySettings.showTransporters = anyHidden
 	store.mapData.displaySettings.showResources = anyHidden
 	store.mapData.displaySettings.showRoads = anyHidden
+	store.mapData.displaySettings.showTrainTracks = anyHidden
 	store.mapData.displaySettings.showBridges = anyHidden
 	store.mapData.displaySettings.showWalls = anyHidden
 	store.mapData.displaySettings.showBuildings = anyHidden
@@ -190,7 +191,7 @@ function loadGameData() {
 		<b><u>{{ $t("mapControl.displaySettings") }}</u></b>
 		<br />
 		<button class="actionsLineButton" @click="toggleShowAll">
-			<span v-if="store.mapData.displaySettings.showTransporters && store.mapData.displaySettings.showResources && store.mapData.displaySettings.showRoads && store.mapData.displaySettings.showBridges && store.mapData.displaySettings.showBuildings && store.mapData.displaySettings.showHomeMakres">{{ $t("mapControl.hideAll") }}</span>
+			<span v-if="store.mapData.displaySettings.showTransporters && store.mapData.displaySettings.showResources && store.mapData.displaySettings.showRoads && store.mapData.displaySettings.showTrainTracks && store.mapData.displaySettings.showBridges && store.mapData.displaySettings.showBuildings && store.mapData.displaySettings.showHomeMakres">{{ $t("mapControl.hideAll") }}</span>
 			<span v-else>{{ $t("mapControl.showAll") }}</span>
 		</button>
 		<br />
@@ -207,6 +208,11 @@ function loadGameData() {
 		<button class="actionsLineButton" @click="store.mapData.displaySettings.showRoads = !store.mapData.displaySettings.showRoads">
 			<span v-if="store.mapData.displaySettings.showRoads">{{ $t("mapControl.hideRoads") }}</span>
 			<span v-else>{{ $t("mapControl.showRoads") }}</span>
+		</button>
+		<br />
+		<button class="actionsLineButton" @click="store.mapData.displaySettings.showTrainTracks = !store.mapData.displaySettings.showTrainTracks">
+			<span v-if="store.mapData.displaySettings.showTrainTracks">{{ $t("mapControl.hideTrainTracks") }}</span>
+			<span v-else>{{ $t("mapControl.showTrainTracks") }}</span>
 		</button>
 		<br />
 		<button class="actionsLineButton" @click="store.mapData.displaySettings.showBridges = !store.mapData.displaySettings.showBridges">

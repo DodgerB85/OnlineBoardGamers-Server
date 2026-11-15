@@ -572,7 +572,13 @@ store.refSize = 2400
 								<path :transform="store.hexStyle === rf.FLAT ? 'rotate(0 0 0)' : ''" :d="view.getBridgeSVGpath(hex.hexID, bridgeEntry, false, false).bridgeD" stroke="black" :stroke-width="40 * store.RATIO" fill="none" />
 							</g>
 						</g>
-						<!-- ROADS -->
+						<!-- TRAIN TRACKS - roads draw over them -->
+						<g v-if="store.mapData.displaySettings.showTrainTracks && store.gameOptions.useTrains && hex.fullTrainTrackPath?.length">
+							<!-- Black track with white dashed centre, like the printed &cetera maps -->
+							<path v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackBlack' + i" :d="chain.d" stroke="black" :stroke-width="(124 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" :stroke-width="(64 * store.RATIO).toFixed(0)" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+						</g>
+						<!-- ROADS - drawn after the tracks so they sit on top -->
 						<g v-if="store.mapData.displaySettings.showRoads">
 							<!-- Draw the roads and white lines -->
 							<g :transform="`rotate(${store.hexStyle === rf.FLAT ? 0 : 0} 0 0)`">
@@ -580,12 +586,6 @@ store.refSize = 2400
 								<path :d="hex.fullRoadPath" stroke="#1C2526" :stroke-width="60 * store.RATIO" stroke-linejoin="round" stroke-linecap="round" />
 								<path :d="hex.fullRoadPath" stroke="#F5F5F5" :stroke-width="(7 * store.RATIO).toFixed(0)" :stroke-dasharray="`${(25 * store.RATIO).toFixed(0)} ${(20 * store.RATIO).toFixed(0)}`" fill="none" />
 							</g>
-						</g>
-						<!-- TRAIN TRACKS -->
-						<g v-if="store.gameOptions.useTrains && hex.fullTrainTrackPath?.length">
-							<!-- Black track with white dashed centre, like the printed &cetera maps -->
-							<path v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackBlack' + i" :d="chain.d" stroke="black" :stroke-width="(124 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-							<path v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" :stroke-width="(64 * store.RATIO).toFixed(0)" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 						</g>
 					</g>
 					<!-- NOT FINE TO ROTATE TO FLAT-->

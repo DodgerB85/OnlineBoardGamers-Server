@@ -377,6 +377,8 @@ export default {
 		showResources: "显示资源",
 		hideRoads: "隐藏道路",
 		showRoads: "显示道路",
+		hideTrainTracks: "隐藏铁路",
+		showTrainTracks: "显示铁路",
 		hideBridges: "隐藏桥梁",
 		showBridges: "显示桥梁",
 		hideWalls: "隐藏城墙",

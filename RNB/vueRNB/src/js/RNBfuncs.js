@@ -1062,6 +1062,24 @@ export function importRNBmodel(input, forGameOver) {
 						const bldgLocation = stack.decompressLocation(bldgLoc)
 						newBuildings.push([bldgType, bldgLocation, 9, store.gameflow.turn])
 					}
+				} else if (customEntry[0] === rf.CUSTOM_ADD_ROAD) {
+					for (const [fromLoc, toLoc] of customEntry.slice(1)) {
+						const fromLocation = stack.decompressLocation(fromLoc)
+						const toLocation = stack.decompressLocation(toLoc)
+						newRoads.push([
+							[fromLocation[1], fromLocation[2]],
+							[toLocation[1], toLocation[2]],
+						])
+					}
+				} else if (customEntry[0] === rf.CUSTOM_ADD_POWER_LINE) {
+					for (const [fromLoc, toLoc] of customEntry.slice(1)) {
+						const fromLocation = stack.decompressLocation(fromLoc)
+						const toLocation = stack.decompressLocation(toLoc)
+						newPowerLines.push([
+							[fromLocation[1], fromLocation[2]],
+							[toLocation[1], toLocation[2]],
+						])
+					}
 				}
 			}
 			// Auto-research needs to be done here

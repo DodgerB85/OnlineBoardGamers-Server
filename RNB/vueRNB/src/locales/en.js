@@ -383,6 +383,8 @@ export default {
 		showResources: "Show Resources",
 		hideRoads: "Hide Roads",
 		showRoads: "Show Roads",
+		hideTrainTracks: "Hide Train Tracks",
+		showTrainTracks: "Show Train Tracks",
 		hideBridges: "Hide Bridges",
 		showBridges: "Show Bridges",
 		hideWalls: "Hide Walls",

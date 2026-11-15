@@ -73,6 +73,8 @@ const hexesForDisplay = computed(() =>
 		fullRoadPath: hex.fullRoadPath,
 		fullPowerLinePath: hex.fullPowerLinePath,
 		fullTrainTrackPath: hex.fullTrainTrackPath,
+		powerLinePoints: hex.powerLinePoints,
+		powered: electricity.isHexPowered(hex.hexID),
 	}))
 )
 
@@ -596,7 +598,13 @@ function getAtelierRecipeGfx(recipeIdx) {
 								<path class="noClick" :transform="store.hexStyle === rf.FLAT ? 'rotate(0 0 0)' : ''" :d="view.getBridgeSVGpath(hex.hexID, bridgeEntry, false, false).bridgeD" stroke="black" :stroke-width="40 * store.RATIO" fill="none" />
 							</g>
 						</g>
-						<!-- ROADS -->
+						<!-- TRAIN TRACKS - same paths/anchors as roads; roads draw over them -->
+						<g v-if="store.mapData.displaySettings.showTrainTracks && store.gameOptions.useTrains && hex.fullTrainTrackPath?.length">
+							<!-- Black track with white dashed centre, like the printed &cetera maps -->
+							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackBlack' + i" :d="chain.d" stroke="black" :stroke-width="(124 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" :stroke-width="(64 * store.RATIO).toFixed(0)" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+						</g>
+						<!-- ROADS - drawn after the tracks so they sit on top -->
 						<g v-if="store.mapData.displaySettings.showRoads && 1 == 1">
 							<!-- Draw the roads and white lines -->
 							<g :transform="`rotate(${store.hexStyle === rf.FLAT ? 0 : 0} 0 0)`">
@@ -605,16 +613,33 @@ function getAtelierRecipeGfx(recipeIdx) {
 								<path class="noClick" :d="hex.fullRoadPath" stroke="#F5F5F5" :stroke-width="(7 * store.RATIO).toFixed(0)" :stroke-dasharray="`${(25 * store.RATIO).toFixed(0)} ${(20 * store.RATIO).toFixed(0)}`" fill="none" />
 							</g>
 						</g>
-						<!-- TRAIN TRACKS - same paths/anchors as roads -->
-						<g v-if="store.gameOptions.useTrains && hex.fullTrainTrackPath?.length">
-							<!-- Black track with white dashed centre, like the printed &cetera maps -->
-							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackBlack' + i" :d="chain.d" stroke="black" :stroke-width="(124 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" :stroke-width="(64 * store.RATIO).toFixed(0)" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-						</g>
-						<!-- POWER LINES - dotted blocks: red when unpowered, yellow when powered -->
+						<!-- POWER LINES - amber when powered, dashed red when unpowered -->
 						<g v-if="store.gameOptions.useElectricity && hex.fullPowerLinePath">
-							<path class="noClick" :d="hex.fullPowerLinePath" stroke="#333333" :stroke-width="(14 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="round" fill="none" />
-							<path class="noClick" :d="hex.fullPowerLinePath" :stroke="electricity.isHexPowered(hex.hexID) ? '#FFD700' : '#E53935'" :stroke-width="(4 * store.RATIO).toFixed(0)" :stroke-dasharray="`${(8 * store.RATIO).toFixed(0)} ${(14 * store.RATIO).toFixed(0)}`" fill="none" />
+							<path class="noClick" :d="hex.fullPowerLinePath" stroke="#1C2526" :stroke-width="Math.max(5, 30 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="round" fill="none" />
+							<path
+								class="noClick"
+								:d="hex.fullPowerLinePath"
+								:stroke="hex.powered ? '#F4C542' : '#C0392B'"
+								:stroke-width="Math.max(4, 22 * store.RATIO).toFixed(0)"
+								:stroke-dasharray="hex.powered ? 'none' : `${Math.max(5, 16 * store.RATIO).toFixed(0)} ${Math.max(3, 9 * store.RATIO).toFixed(0)}`"
+								stroke-linejoin="round"
+								stroke-linecap="round"
+								fill="none" />
+							<path
+								class="noClick"
+								:d="hex.fullPowerLinePath"
+								:stroke="hex.powered ? '#FFF3B0' : '#7A1F1F'"
+								:stroke-width="Math.max(1, 5 * store.RATIO).toFixed(0)"
+								:stroke-dasharray="`${Math.max(2, 3 * store.RATIO).toFixed(0)} ${hex.powered ? Math.max(6, 12 * store.RATIO).toFixed(0) : Math.max(5, 9 * store.RATIO).toFixed(0)}`"
+								stroke-linejoin="round"
+								stroke-linecap="round"
+								fill="none" />
+							<!-- Pylons: dark circle with a power-coloured centre. The outer radius
+							     must be larger than the cable or the dots disappear inside it. -->
+							<g v-for="(p, i) in hex.powerLinePoints" :key="'pylon' + i" class="noClick">
+								<circle :cx="p[0] * store.RATIO" :cy="p[1] * store.RATIO" :r="Math.max(8, 24 * store.RATIO)" fill="#1C2526" />
+								<circle :cx="p[0] * store.RATIO" :cy="p[1] * store.RATIO" :r="Math.max(4, 12 * store.RATIO)" :fill="hex.powered ? '#F4C542' : '#C0392B'" />
+							</g>
 						</g>
 					</g>
 					<!-- NOT FINE TO ROTATE TO FLAT-->

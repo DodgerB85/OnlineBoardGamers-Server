@@ -407,6 +407,18 @@ function replayAddCustomScenarioElements(_historyIndex, _playerIndex, entry3) {
 				const decompressedLocation = stack.decompressLocation(transLocation)
 				model.addTransporterToGame(transPlayerIndex, transporterType, decompressedLocation, true)
 			}
+		} else if (action === rf.CUSTOM_ADD_ROAD) {
+			for (const [fromLoc, toLoc] of entry3[i].slice(1)) {
+				const fromLocation = stack.decompressLocation(fromLoc)
+				const toLocation = stack.decompressLocation(toLoc)
+				map.addRoadToMap_core([fromLocation[1], fromLocation[2]], [toLocation[1], toLocation[2]], -1, false)
+			}
+		} else if (action === rf.CUSTOM_ADD_POWER_LINE) {
+			for (const [fromLoc, toLoc] of entry3[i].slice(1)) {
+				const fromLocation = stack.decompressLocation(fromLoc)
+				const toLocation = stack.decompressLocation(toLoc)
+				map.addPowerLineToMap_core([fromLocation[1], fromLocation[2]], [toLocation[1], toLocation[2]], -1, false)
+			}
 		} else if (action === rf.CUSTOM_ALL_PLAYERS_PRE_RESEARCHED) {
 			for (const playerObj of store.players) {
 				for (const researchIdx of entry3[i][1]) {

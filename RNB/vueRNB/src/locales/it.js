@@ -377,6 +377,8 @@ export default {
 		showResources: "Mostra risorse",
 		hideRoads: "Nascondi strade",
 		showRoads: "Mostra strade",
+		hideTrainTracks: "Nascondi binari",
+		showTrainTracks: "Mostra binari",
 		hideBridges: "Nascondi ponti",
 		showBridges: "Mostra ponti",
 		hideWalls: "Nascondi muri",

@@ -441,6 +441,17 @@ export const computedHexes = computed(() => {
 				return `M${seg[0][0] * 1} ${seg[0][1] * 1} L${seg[1][0] * 1} ${seg[1][1] * 1}`
 			})
 			.join(" ")
+		// Unique vertices/edge points for the pylon dots
+		const seenPowerLinePoints = new Set()
+		hex.powerLinePoints = []
+		for (const segment of hex.powerLineSegments) {
+			for (const point of segment) {
+				const key = `${point[0].toFixed(2)},${point[1].toFixed(2)}`
+				if (seenPowerLinePoints.has(key)) continue
+				seenPowerLinePoints.add(key)
+				hex.powerLinePoints.push(point)
+			}
+		}
 		hex.fullTrainTrackPath = trainTrackSegmentsToPath(hex.trainTrackSegments, store.RATIO, hex.hexTerrainID > rf.CITY)
 		hex.fullTrainTrackPathZP = trainTrackSegmentsToPath(hex.trainTrackSegments, 1, hex.hexTerrainID > rf.CITY)
 	}

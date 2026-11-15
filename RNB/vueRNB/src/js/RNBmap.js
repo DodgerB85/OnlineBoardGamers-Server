@@ -487,8 +487,14 @@ export function clickedHighlight(entry, event = null) {
 			const fromHexID = store.context.newRoadInfo[0][0]
 			const firstFromBucketInList = store.context.newRoadInfo[0][1][0]
 			const secondEntry = store.context.newRoadInfo[1]
-			// ADMIN CHEAT ONLY
-			addRoadToMap([fromHexID, firstFromBucketInList], [secondEntry[0], secondEntry[1][0]])
+			// ADMIN CHEAT ONLY - no transporter or resources needed
+			const fromBucketLocation = [rf.LOCATION_BUCKET, fromHexID, firstFromBucketInList]
+			const toBucketLocation = [rf.LOCATION_BUCKET, secondEntry[0], secondEntry[1][0]]
+			addRoadToMap_core([fromHexID, firstFromBucketInList], [secondEntry[0], secondEntry[1][0]], -1, false)
+			// Recreate this cheat road from history on replay and game load
+			model.addHistory(rf.HIST_ADD_CUSTOM_SCENARIO_ELEMENTS, -1, 0, [[rf.CUSTOM_ADD_ROAD, [stack.compressLocation(fromBucketLocation), stack.compressLocation(toBucketLocation)]]])
+			context.resetContextAndHighlights()
+			highlight.updateAllHighlightsForTransporterMode()
 			return
 		}
 	}
@@ -508,8 +514,13 @@ export function clickedHighlight(entry, event = null) {
 			const firstFromBucketInList = store.context.newRoadInfo[0][1][0]
 			const secondEntry = store.context.newRoadInfo[1]
 			// ADMIN CHEAT ONLY - build without needing a transporter or resources
+			const fromBucketLocation = [rf.LOCATION_BUCKET, fromHexID, firstFromBucketInList]
+			const toBucketLocation = [rf.LOCATION_BUCKET, secondEntry[0], secondEntry[1][0]]
 			addPowerLineToMap_core([fromHexID, firstFromBucketInList], [secondEntry[0], secondEntry[1][0]], -1, false)
-			store.context.newRoadInfo.splice(0)
+			// Recreate this cheat line from history on replay and game load
+			model.addHistory(rf.HIST_ADD_CUSTOM_SCENARIO_ELEMENTS, -1, 0, [[rf.CUSTOM_ADD_POWER_LINE, [stack.compressLocation(fromBucketLocation), stack.compressLocation(toBucketLocation)]]])
+			context.resetContextAndHighlights()
+			highlight.updateAllHighlightsForTransporterMode()
 			return
 		}
 	}

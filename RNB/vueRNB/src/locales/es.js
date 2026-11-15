@@ -377,6 +377,8 @@ export default {
 		showResources: "Mostrar recursos",
 		hideRoads: "Ocultar carreteras",
 		showRoads: "Mostrar carreteras",
+		hideTrainTracks: "Ocultar vías de tren",
+		showTrainTracks: "Mostrar vías de tren",
 		hideBridges: "Ocultar puentes",
 		showBridges: "Mostrar puentes",
 		hideWalls: "Ocultar muros",
