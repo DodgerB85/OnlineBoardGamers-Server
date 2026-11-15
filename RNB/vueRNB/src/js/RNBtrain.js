@@ -230,7 +230,8 @@ export function takeTrain(transporterID, toHexID, toBucketID, fareRes) {
 	const toBucketLocation = [rf.LOCATION_BUCKET, toHexID, toBucketID]
 	const transporterOntrans = model.transportersOnTransporter(transporterID)
 	const resourcesOnTransporter = model.resourcesOnTransport(transporterID)
-	const geese = model.resourcesFollowingTransporter(transporterID)
+	// A following goose used as the fare is spent, so it no longer follows
+	const geese = model.resourcesFollowingTransporter(transporterID).filter((r) => r.id !== fare.id)
 
 	const currentStack = [rf.STACK_TAKE_TRAIN]
 	currentStack.push(stack.getTransIDtoUse(transporterObj))

@@ -5,6 +5,7 @@ import { fileURLToPath, URL } from "node:url"
 
 // Great Western Trail (ROW) Vue 3 client.
 export default defineConfig(({ command }) => ({
+	logLevel: "warn",
 	plugins: [vue()],
 	root: resolve("./src"),
 	server: {

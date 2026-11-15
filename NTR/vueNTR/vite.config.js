@@ -5,6 +5,7 @@ import { resolve } from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
+  logLevel: 'warn',
   plugins: [vue()],
   root: resolve('./src'),
   server: {

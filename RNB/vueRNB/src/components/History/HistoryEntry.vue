@@ -1464,8 +1464,7 @@ const computedEntry3 = computed(() => {
 					<template v-if="stackEntry.action === rf.STACK_MOVE_LAND || stackEntry.action === rf.STACK_TAKE_TRAIN">
 						<div class="flexContainer stackEntryDiv" @click.stop="clickedStackEntry(entry[0], stackEntry.hexPiecesToHighlight, [])">
 							<span v-if="stackEntry.action === rf.STACK_TAKE_TRAIN" class="trainRideLabel">{{ $t("history.takesTrain") }}</span>
-							<MiniHex :hexID="stackEntry.fromHexID" :hexPiecesToOutline="[[stackEntry.fromHexID, [stackEntry.fromBucketId]]]" />
-							<img v-if="stackEntry.action === rf.STACK_TAKE_TRAIN" class="stackResFollowingTransporterImg" :src="view.getImage(stackEntry.fareGfx)" />
+							<MiniHex :hexID="stackEntry.fromHexID" :hexPiecesToOutline="[[stackEntry.fromHexID, [stackEntry.fromBucketId]]]" :resGfx="stackEntry.fareGfx" />
 							<img v-for="i in stackEntry.numGeeseFollowing" :key="i" class="stackResFollowingTransporterImg" :src="view.getImage(`res_${rf.RES_GOOSE}`)" />
 							<img class="stackTransporterImg" :src="view.getImage(`${stackEntry.transporterGfx}`)" />
 							<img class="stackContentsImg" v-for="(content, idx2) in stackEntry.contentsGfx" :key="idx2" :src="view.getImage(content)" />
@@ -1945,7 +1944,7 @@ const computedEntry3 = computed(() => {
 	box-sizing: border-box;
 }
 
-/* Trains: labels the entry as a train ride; the goods icon beside it is the fare */
+/* Trains: labels the entry as a train ride; the fare is drawn on the departure hex */
 .trainRideLabel {
 	font-weight: bold;
 	margin-right: 4px;

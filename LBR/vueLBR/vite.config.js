@@ -3,6 +3,7 @@ import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
 
 export default defineConfig(({ command }) => ({
+	logLevel: "warn",
 	plugins: [vue()],
 	root: resolve("./src"),
 	server: {

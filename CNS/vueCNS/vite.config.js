@@ -5,6 +5,7 @@ import { fileURLToPath, URL } from "node:url"
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
+	logLevel: "warn",
 	plugins: [vue()],
 	root: resolve("./src"),
 	server: {
@@ -82,17 +83,10 @@ export default defineConfig(({ command }) => ({
 					const info = assetInfo.name.split(".")
 					const extType = info[info.length - 1]
 
-					//console.log(assetInfo)
-					//console.log(`INFO: ${assetInfo.name} - ${assetInfo.originalFileNames[0]}`)
-					//console.log(new URL(`@static/CNS/images/help/clickPlayers.jpg`, import.meta.url).href)
-					//console.log('ABOVE')
 					if (/\.(jpg|png|jpe?g|gif|svg|webp|webm|mp3)$/.test(assetInfo.name)) {
-						//console.log(new URL(`@static/CNS/images/help/clickPlayers.jpg`, import.meta.url).href)
 						if (assetInfo.originalFileNames[0].startsWith("../../static/CNS/images/hexes/")) {
-							console.log("1111111")
 							return `images/hexes/[name].${extType}`
 						} else if (assetInfo.originalFileNames[0].startsWith("../../static/CNS/images/")) {
-							console.log("333333")
 							return `images/[name].${extType}`
 						}
 

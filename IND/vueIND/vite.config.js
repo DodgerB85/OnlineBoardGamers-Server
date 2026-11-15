@@ -6,6 +6,7 @@ import { fileURLToPath, URL } from "node:url"
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
+	logLevel: "warn",
 	plugins: [vue()],
 	root: resolve("./src"),
 	server: {
@@ -83,24 +84,16 @@ export default defineConfig(({ command }) => ({
 					const info = assetInfo.name.split(".")
 					const extType = info[info.length - 1]
 
-					//console.log(assetInfo)
-					//console.log(`INFO: ${assetInfo.name} - ${assetInfo.originalFileNames[0]}`)
-					//console.log(new URL(`@static/IND/images/help/clickPlayers.jpg`, import.meta.url).href)
-					//console.log('ABOVE')
 					if (/\.(jpg|png|jpe?g|gif|svg|webp|webm|mp3)$/.test(assetInfo.name)) {
-						//console.log(new URL(`@static/IND/images/help/clickPlayers.jpg`, import.meta.url).href)
 						if (assetInfo.originalFileNames[0].startsWith("../../static/IND/images/maps/")) {
-							console.log("1111111")
 							return `images/maps/[name].${extType}`
 						} else if (assetInfo.originalFileNames[0].startsWith("../../static/IND/images/ships/")) {
-							console.log("222222")
 							return `images/ships/[name].${extType}`
 						} else if (assetInfo.originalFileNames[0].startsWith("../../static/IND/images/PHP/companyCards/")) {
 							return `images/PHP/companyCards/[name].${extType}`
 						} else if (assetInfo.originalFileNames[0].startsWith("../../static/IND/images/PHP/eraCards/")) {
 							return `images/PHP/eraCards/[name].${extType}`
 						} else if (assetInfo.originalFileNames[0].startsWith("../../static/IND/images/")) {
-							console.log("333333")
 							return `images/[name].${extType}`
 						}
 

@@ -278,6 +278,7 @@ test("a following goose can pay the fare", { skip: skip }, () => {
 
 	train.takeTrain(0, 2, train.getTrackBucketsInHex(2)[0], goose)
 	assert.equal(goose.location[0], rf.LOCATION_OOB, "the following goose is spent")
+	assert.equal(store.actionStack[0].historyEntry.length, 6, "the spent goose is not also counted as a follower in the history")
 })
 
 test("following geese ride the animation and are dropped at the destination", { skip: skip }, () => {
