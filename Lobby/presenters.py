@@ -2584,10 +2584,9 @@ class FCMpresenter(GamePresenter):
             return 0
 
     # Takes in self, request, and then 3 JSON[""] pieces of string data
-    def endGame(self, request, _winnerUsername, _finalScores, _tournamentData, _gameID):
+    def endGame(self, request, _winnerUsername, _finalScores, _tournamentData, _gameID, winnerSeat=None, finalScoresSeats=None):
         from django_q.tasks import async_task
 
-        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import (
             SF_M_ProcessAnyTournamentEndGame,
         )
@@ -2600,22 +2599,35 @@ class FCMpresenter(GamePresenter):
         self.gameObj.activeVotes = None
         self.gameObj.gameStatus = "FINISHED"
 
-        winner_user = User.objects.get(username=_winnerUsername)
-        winner_gp = self.gameObj.players.filter(player=winner_user).first()
+        players = list(self.gameObj.players.select_related("player"))
+        winner_gp = None
+        if isinstance(winnerSeat, int):
+            winner_gp = next((gp for gp in players if gp.seat_order == winnerSeat and gp.player), None)
+        if not winner_gp:
+            winner_gp = next((gp for gp in players if gp.player and gp.player.username == _winnerUsername), None)
         if winner_gp:
             winner_gp.winner = True
             winner_gp.save()
+        winner_username = winner_gp.player.username if winner_gp and winner_gp.player else _winnerUsername
 
         self.clearAllMoveDataV2()
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
 
+        final_scores = _finalScores
+        if isinstance(finalScoresSeats, list) and len(finalScoresSeats) == len(_finalScores):
+            names_by_seat = {gp.seat_order: gp.player.username for gp in players if gp.player}
+            final_scores = [
+                [names_by_seat.get(seat) or (_finalScores[pos][0] if pos < len(_finalScores) else ""), score]
+                for pos, (seat, score) in enumerate(finalScoresSeats)
+            ]
+
         # Winner first; each entry becomes [username, posText, pos] for the notification
         ordinals = ["1st - Congratulations!", "2nd", "3rd", "4th", "5th", "6th"]
         convertedFinalPositions = []
-        for pos in range(len(_finalScores)):
+        for pos in range(len(final_scores)):
             posText = ordinals[pos] if pos < len(ordinals) else "Last"
-            convertedFinalPositions.append([_finalScores[pos][0], posText, pos])
+            convertedFinalPositions.append([final_scores[pos][0], posText, pos])
 
         async_task("Lobby.sharedFunctions.sharedNotifications.SN_M_sendEndGameNotificationAnyGame", "FCM", convertedFinalPositions, _gameID, self.gameObj.gamePace, self.getGameName(), request.user.username)
 
@@ -2624,7 +2636,7 @@ class FCMpresenter(GamePresenter):
                 request,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
-                [_winnerUsername],
+                [winner_username],
                 _tournamentData,
             )
         elif self.gameObj.relatedMiniTournament:
@@ -2632,7 +2644,7 @@ class FCMpresenter(GamePresenter):
                 request,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
-                [_winnerUsername],
+                [winner_username],
                 _tournamentData,
             )
 

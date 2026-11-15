@@ -72,6 +72,11 @@ def _canActInGame(request, currentGame):
     return is_game_admin(request.user) or currentGame.players.filter(player=request.user).exists()
 
 
+def _seat_player_names(currentGame):
+    """Usernames in seat order; empty strings keep GamePlayer/playerNames aligned."""
+    return [gp.player.username if gp.player else "" for gp in currentGame.players.select_related("player").order_by("seat_order")]
+
+
 def _resolvePassKickoutTarget(request, currentGame, presenter, jsonData):
     """Validate a normal player's "keep the timed-out player in the game" skip.
 
@@ -82,6 +87,10 @@ def _resolvePassKickoutTarget(request, currentGame, presenter, jsonData):
     superuser BKSN path never comes through here.
     """
     target = jsonData.get("passKickoutFor", "")
+    seat = jsonData.get("passKickoutSeat")
+    if isinstance(seat, int):
+        target_gp = currentGame.players.filter(seat_order=seat).select_related("player").first()
+        target = target_gp.player.username if target_gp and target_gp.player else ""
     if not target or target == request.user.username:
         return "", False
     is_participant = currentGame.players.filter(player__username=request.user.username).exists()
@@ -91,6 +100,16 @@ def _resolvePassKickoutTarget(request, currentGame, presenter, jsonData):
     if not is_participant or not current_players or target != current_players[0] or presenter.kickoutRequired() != 2:
         return "", True
     return target, False
+
+
+def _resolve_kickout_user(currentGame, jsonData):
+    """Prefer the seat index from the client; fall back to the legacy username."""
+    seat = jsonData.get("kickedSeat")
+    if isinstance(seat, int):
+        gp = currentGame.players.filter(seat_order=seat).select_related("player").first()
+        if gp and gp.player:
+            return gp.player
+    return User.objects.get(username=jsonData["kickedName"])
 
 
 # Permanent roster cards lost by accident. Temporary workers and the union
@@ -588,6 +607,7 @@ def showFCMgame(request, game_id, spoilerFree=False, replayStep=1):
             "chatNotification": chatNotification,
             "moveData": moveData,
             "allPlayerListBySeat": allPlayerListBySeat,
+            "seatPlayerNames": json.dumps(_seat_player_names(currentGame)),
             "currentNotes": currentNotes,
             "kickoutRequired": kickoutRequired,
             "involvedPlayer": involvedPlayer,
@@ -692,6 +712,8 @@ def _processTurn(request):
                 "latestUpdate": currentGame.latestUpdate,
                 "startingMap": currentGame.startingMap if currentGame.startingMap else [],
                 "OOBpreference": OOBpreference,
+                "seatPlayerNames": _seat_player_names(currentGame),
+                "myName": request.user.username,
             },
             safe=False,
         )
@@ -1198,6 +1220,8 @@ def _processTurn(request):
                 jsonData["finalScores"],
                 jsonData["tournamentData"],
                 jsonData["gameID"],
+                winnerSeat=jsonData.get("winnerSeat"),
+                finalScoresSeats=jsonData.get("finalScoresSeats"),
             )
         else:
             # A rewind downgrades any single-permission grants. This must NOT run
@@ -1407,7 +1431,7 @@ def _processTurn(request):
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
 
-        _missingPlayer = User.objects.get(username=jsonData["kickedName"])
+        _missingPlayer = _resolve_kickout_user(currentGame, jsonData)
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
@@ -1450,6 +1474,8 @@ def _processTurn(request):
                 jsonData["finalScores"],
                 jsonData["tournamentData"],
                 jsonData["gameID"],
+                winnerSeat=jsonData.get("winnerSeat"),
+                finalScoresSeats=jsonData.get("finalScoresSeats"),
             )
 
         return JsonResponse(
@@ -1469,13 +1495,13 @@ def _processTurn(request):
         # requester's own vote for this target is more than 2 days old.
         # If the vote is only recorded, return straight away without kicking.
         # Only apply when the client signals it understands voteCast responses.
+        _missingPlayer = _resolve_kickout_user(currentGame, jsonData)
         if jsonData.get("supportsVoting"):
-            kickout_vote_result = presenter.processKickoutVote(request.user, jsonData["kickedName"])
+            kickout_vote_result = presenter.processKickoutVote(request.user, _missingPlayer.username)
             if kickout_vote_result["voteCast"]:
                 currentGame.save()
                 return JsonResponse(kickout_vote_result, safe=False)
 
-        _missingPlayer = User.objects.get(username=jsonData["kickedName"])
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
@@ -1657,7 +1683,7 @@ def _processTurn(request):
         if str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
             return _syncErrorResponse("FCM adminKickout - gameID:", request, currentGame, presenter, jsonData)
 
-        _missingPlayer = User.objects.get(username=jsonData["kickedName"])
+        _missingPlayer = _resolve_kickout_user(currentGame, jsonData)
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
 
@@ -1990,6 +2016,8 @@ def FCMdata(request, dataType):
                     "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                     "specialData": specialData,
                     "latestUpdate": currentGame.latestUpdate,
+                    "seatPlayerNames": _seat_player_names(currentGame),
+                    "myName": request.user.username if request.user.is_authenticated else "",
                 },
                 safe=False,
             )
@@ -2011,6 +2039,8 @@ def FCMdata(request, dataType):
                 "specialData": specialData,
                 "latestUpdate": currentGame.latestUpdate,
                 "startingMap": currentGame.startingMap if currentGame.startingMap else [],
+                "seatPlayerNames": _seat_player_names(currentGame),
+                "myName": request.user.username if request.user.is_authenticated else "",
             },
             safe=False,
         )

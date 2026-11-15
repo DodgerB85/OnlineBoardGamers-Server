@@ -226,6 +226,8 @@ export async function loadGame() {
 			// Keep the snapshot importFCMmodel rebuilds the grid from (FCMfuncs) up to
 			// date, or live updates resurrect the page-load map (stale UP tile slots)
 			window.initData.startingMap = Array.isArray(result.startingMap) ? result.startingMap : JSON.parse(result.startingMap)
+			if (result.seatPlayerNames) window.initData.seatPlayerNames = result.seatPlayerNames
+			if (result.myName) window.initData.name = result.myName
 			//let suppressActions = false
 			//if (result.specialData) suppressActions = true
 			// Do this to update the top line info / green player highlights
@@ -241,9 +243,11 @@ export async function loadGame() {
 			if (personal.pov >= 0 && result.specialData) {
 				if (store.gameflow.phase >= rf.PHASE_WORKING_DAY && store.gameflow.phase !== rf.PHASE_CLEAN_UP) {
 					let decompressedData = funcs.decompressData(result.specialData)
+					if (decompressedData) decompressedData[0] = store.players[personal.pov].name
 					if (decompressedData && decompressedData[0] === store.players[personal.pov].name) store.context.preMoveData = decompressedData[3]
 				} else if (store.gameflow.phase === rf.PHASE_RESTRUCTURING) {
 					let decompressedData = funcs.decompressData(result.specialData)
+					if (decompressedData) decompressedData[0] = store.players[personal.pov].name
 					if (decompressedData && decompressedData[0] === store.players[personal.pov].name) {
 						store.players[personal.pov].beach = [...decompressedData[3][0]]
 						store.players[personal.pov].employees = [...decompressedData[3][1]]
@@ -510,8 +514,10 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
 		postData.status = "FINISHED" // USED
 		postData.winner = rules.winner(false) // USED
+		postData.winnerSeat = rules.winner(true)
 		//callData.deleteMoves = "true" // USED
 		let finalScores = []
+		let finalScoresSeats = []
 		/*for (let j = 0; j < store.players.length; j++) {
 				if (store.players[j].displayName == rf.BOT_NAME && store.players[j].money > 0) store.players[j].money *= -1
 				finalScores.push([store.players[j].name, store.players[j].money])
@@ -541,8 +547,10 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 			let j = store.gameflow.fullTurnOrder[i]
 			if (store.players[j].displayName == rf.BOT_NAME && store.players[j].money > 0) store.players[j].money *= -1
 			finalScores.push([store.players[j].name, store.players[j].money])
+			finalScoresSeats.push([j, store.players[j].money])
 		}
 		postData.finalScores = finalScores
+		postData.finalScoresSeats = finalScoresSeats
 		postData.gameData = funcs.exportFCMmodel(true, false)
 	}
 
@@ -807,7 +815,7 @@ export async function saveOOBpreference() {
 	}
 }
 
-export async function saveSimulMove(moveData, continueFromStalledGame = false, passKickoutFor = "") {
+export async function saveSimulMove(moveData, continueFromStalledGame = false, passKickoutFor = "", passKickoutSeat = null) {
 	if (usePersonalStore().tutorial) return // Tutorial game is never persisted
 	const store = useModelStore()
 	const personal = usePersonalStore()
@@ -877,6 +885,7 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false, p
 		notRequiedPlayerNames: notRequiedPlayerNames,
 		continueFromStalledGame: continueFromStalledGame,
 		passKickoutFor: passKickoutFor,
+		passKickoutSeat: passKickoutSeat,
 	}
 
 	/* This is only used in PASS_KICKOUT function
@@ -959,7 +968,7 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false, p
 		console.error("Error fetching data:", error)
 		personal.haltPlay = false
 		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingGame")
-		store.gameMessages.retrySave = () => saveSimulMove(retryMoveData, continueFromStalledGame, passKickoutFor)
+		store.gameMessages.retrySave = () => saveSimulMove(retryMoveData, continueFromStalledGame, passKickoutFor, passKickoutSeat)
 		reportSaveError("FCM simul move save error", `LU=${personal.latestUpdate}`, error)
 	}
 }
@@ -977,6 +986,7 @@ export async function kickout(kickedPlayerIndex) {
 		action: "kickout",
 		gameID: personal.gameID,
 		kickedName: kickedName,
+		kickedSeat: kickedPlayerIndex,
 		latestUpdate: personal.latestUpdate,
 		supportsVoting: true,
 	}
@@ -1322,6 +1332,8 @@ export async function checkForLatestData() {
 			//let suppressActions = false
 			//if (data.specialData) suppressActions = true
 			if (data.startingMap != null) window.initData.startingMap = Array.isArray(data.startingMap) ? data.startingMap : JSON.parse(data.startingMap)
+			if (data.seatPlayerNames) window.initData.seatPlayerNames = data.seatPlayerNames
+			if (data.myName) window.initData.name = data.myName
 			funcs.importFCMmodel(loadDataString)
 			// Match fresh page load / old C.reloadModel: clear stale highlights + fire state, then rebuild turn UI
 			// (import zeros summary totals; without startPlayerTurn, hire.total stays 0 → hired.length === total+1)
@@ -1709,6 +1721,7 @@ export function processSimulMoveData(data) {
 	const personal = usePersonalStore()
 	// data is the entire compressed playersMoveData
 	let decompressedData = funcs.decompressObjectFromDB(data)
+	decompressedData = funcs.alignMoveDataNames(decompressedData)
 	if (store.gameflow.phase === rf.PHASE_SETUP_RESERVE) {
 		let histEntries = []
 		let reserve = []
