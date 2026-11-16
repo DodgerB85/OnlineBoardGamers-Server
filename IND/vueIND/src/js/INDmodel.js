@@ -1528,6 +1528,17 @@ export function markActiveCompaniesWithNoStartTerritoriesForRemoval() {
 	}
 }
 
+/** Take the marked deeds out of the game. Availability is never re-checked, so a freed area cannot bring one back. */
+export function removeMarkedCompanies() {
+	const store = useModelStore()
+	for (let i = store.availableCompanies.length - 1; i >= 0; i--) {
+		if (store.availableCompanies[i].markedForRemoval) {
+			addHistory(rf.HIST_REMOVE_COMPANY_NO_TERRS, -1, 0, [store.availableCompanies[i].id])
+			store.availableCompanies.splice(i, 1)
+		}
+	}
+}
+
 /** UTILS */
 export function getActiveCompanyFromAnyTerritory(terrID) {
 	const store = useModelStore()

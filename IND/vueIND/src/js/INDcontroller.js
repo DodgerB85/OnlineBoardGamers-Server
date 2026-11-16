@@ -252,6 +252,9 @@ export function endCurrentPhase() {
 	if (store.gameflow.phase === rf.PHASE_NEW_ERA) {
 		store.gameflow.turnOrder = [...store.gameflow.fullTurnOrder]
 		Bot.removeBotPlayers()
+		// A deed with no starting area is discarded now, before a Siap Saji merger can free an area again
+		model.markActiveCompaniesWithNoStartTerritoriesForRemoval()
+		model.removeMarkedCompanies()
 
 		store.gameflow.phase = rf.PHASE_BID_TURN_ORDER
 	} else if (store.gameflow.phase === rf.PHASE_BID_TURN_ORDER) {
@@ -300,12 +303,7 @@ export function endCurrentPhase() {
 		model.resetShippingCompanies(true)
 
 		// Remove unusable companies
-		for (let i = store.availableCompanies.length - 1; i >= 0; i--) {
-			if (store.availableCompanies[i].markedForRemoval) {
-				model.addHistory(rf.HIST_REMOVE_COMPANY_NO_TERRS, -1, 0, [store.availableCompanies[i].id])
-				store.availableCompanies.splice(i, 1)
-			}
-		}
+		model.removeMarkedCompanies()
 
 		// Check and action city growth
 		store.gameflow.phase = rf.PHASE_CITY_GROWTH
