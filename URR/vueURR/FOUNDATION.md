@@ -12,6 +12,7 @@ Rules reference: [Ur, 1830 BC rulebook](../Ur1830Rules.md). The client implement
 
 `applyAction(position, playerIndex, action)` produces a new position; invalid actions throw without mutating the input. Game data is plain JSON. Player seats use indexes, and states, nations and terrain use constants from `URRreference.js`. Player turn order remains sequential and compatible with the shared server protocol.
 
+
 ## Implemented gameplay
 
 - Nation division, treaty purchases, bids and auctions, independent nation income, and First Akkadians' three-land grant and payment to Akkad.
