@@ -1,12 +1,10 @@
-import importlib
 import json
 
 from django.apps import apps as django_apps
 from django.test import TestCase
 
+from Lobby.migrationHelpers import backfill_remaining_turn_order
 from Lobby.models import Game, GamePlayer, User
-
-TURN_ORDER_MIGRATION = importlib.import_module("Lobby.migrations.0143_gameplayer_remainingturnorder")
 
 
 class TurnOrderTests(TestCase):
@@ -59,7 +57,7 @@ class TurnOrderTests(TestCase):
         self.game.serverCurrentPlayerNamesInTurnOrder = [self.players[2].username, self.players[0].username]
         self.game.save(update_fields=["serverCurrentPlayerNamesInTurnOrder"])
 
-        TURN_ORDER_MIGRATION.backfill_remaining_turn_order(django_apps, None)
+        backfill_remaining_turn_order(django_apps, None)
 
         for gp in self.game_players:
             gp.refresh_from_db()
@@ -73,7 +71,7 @@ class TurnOrderTests(TestCase):
         self.game.serverCurrentPlayerNamesInTurnOrder = [self.players[0].username]
         self.game.save(update_fields=["gameCode", "currentPlayersInTurnOrder", "serverCurrentPlayerNamesInTurnOrder"])
 
-        TURN_ORDER_MIGRATION.backfill_remaining_turn_order(django_apps, None)
+        backfill_remaining_turn_order(django_apps, None)
 
         for gp in self.game_players:
             gp.refresh_from_db()

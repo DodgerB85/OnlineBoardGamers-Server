@@ -1,13 +1,11 @@
-import importlib
 import json
 import time
 
 from django.apps import apps as django_apps
 from django.test import TestCase
 
+from Lobby.migrationHelpers import backfill_flexi_seconds
 from Lobby.models import Game, GamePlayer, User
-
-FLEXI_MIGRATION = importlib.import_module("Lobby.migrations.0141_gameplayer_flexisecondsused")
 
 
 class FlexiTimeMigrationTests(TestCase):
@@ -22,7 +20,7 @@ class FlexiTimeMigrationTests(TestCase):
         self.game.kickoutFlexiData = json.dumps([["player1", 300], ["player2", 0]])
         self.game.save(update_fields=["kickoutFlexiData"])
 
-        FLEXI_MIGRATION.backfill_flexi_seconds(django_apps, None)
+        backfill_flexi_seconds(django_apps, None)
 
         self.gp.refresh_from_db()
         self.other_gp.refresh_from_db()
@@ -34,7 +32,7 @@ class FlexiTimeMigrationTests(TestCase):
         self.game.kickoutFlexiData = json.dumps([["player1", 300]])
         self.game.save(update_fields=["gameStatus", "kickoutFlexiData"])
 
-        FLEXI_MIGRATION.backfill_flexi_seconds(django_apps, None)
+        backfill_flexi_seconds(django_apps, None)
 
         self.gp.refresh_from_db()
         self.assertEqual(self.gp.flexiSecondsUsed, 0)

@@ -1,12 +1,10 @@
-import importlib
 import json
 
 from django.apps import apps as django_apps
 from django.test import TestCase
 
+from Lobby.migrationHelpers import migrate_fcm_move_data
 from Lobby.models import Game, GamePlayer, User
-
-FCM_MOVE_MIGRATION = importlib.import_module("Lobby.migrations.0137_migrate_fcm_move_data_to_gameplayer")
 
 
 class FcmMoveDataMigrationTests(TestCase):
@@ -32,7 +30,7 @@ class FcmMoveDataMigrationTests(TestCase):
         self.gp_bob = GamePlayer.objects.create(game=self.game, player=self.bob, seat_order=1)
 
     def _migrate(self):
-        FCM_MOVE_MIGRATION.migrate_fcm_move_data(django_apps, None)
+        migrate_fcm_move_data(django_apps, None)
 
     def test_migration_copies_rows_into_game_players(self):
         self._migrate()

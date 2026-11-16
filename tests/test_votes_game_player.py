@@ -1,14 +1,11 @@
-import importlib
 import time
 
 from django.apps import apps as django_apps
 from django.test import TestCase
 
 import Lobby.sharedFunctions.constants as rf
+from Lobby.migrationHelpers import clear_active_votes, convert_kickout_vote_targets
 from Lobby.models import Game, GamePlayer, User
-
-VOTES_MIGRATION = importlib.import_module("Lobby.migrations.0140_gameplayer_votesjson")
-KICKOUT_MIGRATION = importlib.import_module("Lobby.migrations.0142_kickout_vote_targets_to_gameplayer")
 
 
 class GamePlayerVotesTests(TestCase):
@@ -118,7 +115,7 @@ class GamePlayerVotesTests(TestCase):
         self.game.activeVotes = {"rewind_consent_votes": {self.players[0].username: 2}}
         self.game.save(update_fields=["activeVotes"])
 
-        VOTES_MIGRATION.clear_active_votes(django_apps, None)
+        clear_active_votes(django_apps, None)
 
         self.game.refresh_from_db()
         self.assertIsNone(self.game.activeVotes)
@@ -129,7 +126,7 @@ class GamePlayerVotesTests(TestCase):
         voter.votesJSON = {rf.KICKOUT_VOTE_TOPIC: [target.player.username, 123456]}
         voter.save(update_fields=["votesJSON"])
 
-        KICKOUT_MIGRATION.convert_kickout_vote_targets(django_apps, None)
+        convert_kickout_vote_targets(django_apps, None)
 
         voter.refresh_from_db()
         self.assertEqual(voter.votesJSON[rf.KICKOUT_VOTE_TOPIC], [target.pk, 123456])

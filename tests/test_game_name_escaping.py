@@ -1,4 +1,3 @@
-import importlib
 import re
 from pathlib import Path
 
@@ -6,6 +5,7 @@ from django.apps import apps
 from django.test import TestCase
 from django.urls import reverse
 
+from Lobby.migrationHelpers import unescape_game_text
 from Lobby.models import Game, User
 
 
@@ -50,13 +50,12 @@ class GameNameEscapingTests(TestCase):
             self.assertIsNone(unescaped.search(path.read_text(encoding="utf-8")), path.name)
 
     def test_migration_unescapes_stored_names(self):
-        migration = importlib.import_module("Lobby.migrations.0128_unescape_game_text")
         creator = self.creator
         stacked = Game.objects.create(gameCode="AQY", creator=creator, host=creator, gameStatus="ACTIVE", gameName="Again&amp;amp;again", gameDescription="A &amp; B")
         clean = Game.objects.create(gameCode="AQY", creator=creator, host=creator, gameStatus="ACTIVE", gameName="Again&again")
         other_game = Game.objects.create(gameCode="CNS", creator=creator, host=creator, gameStatus="ACTIVE", gameName="Again&amp;again")
 
-        migration.unescape_game_text(apps, None)
+        unescape_game_text(apps, None)
 
         stacked.refresh_from_db()
         self.assertEqual(stacked.gameName, "Again&again")

@@ -1,12 +1,10 @@
-import importlib
 import json
 
 from django.apps import apps as django_apps
 from django.test import TestCase
 
+from Lobby.migrationHelpers import migrate_kfw_player_data
 from Lobby.models import Game, GamePlayer, User
-
-KFW_DATA_MIGRATION = importlib.import_module("Lobby.migrations.0139_migrate_kfw_player_data_to_gameplayer")
 
 
 class KfwPlayerDataMigrationTests(TestCase):
@@ -40,7 +38,7 @@ class KfwPlayerDataMigrationTests(TestCase):
         self.gp_bob = GamePlayer.objects.create(game=self.game, player=self.bob, seat_order=1)
 
     def _migrate(self):
-        KFW_DATA_MIGRATION.migrate_kfw_player_data(django_apps, None)
+        migrate_kfw_player_data(django_apps, None)
 
     def test_migration_copies_hidden_and_move_data(self):
         self._migrate()
