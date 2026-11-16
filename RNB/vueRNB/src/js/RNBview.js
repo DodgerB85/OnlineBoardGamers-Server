@@ -16,6 +16,7 @@ import * as computes from "./RNBcomputes"
 import { useModelStore } from "../stores/RNBstore.js"
 import { usePersonalStore } from "../stores/RNBpersonal"
 import i18n from "../i18n"
+import { reactive } from "vue"
 
 const t = (key, named) => i18n.global.t(key, named)
 
@@ -1340,4 +1341,68 @@ export function resetConflictPreferences() {
 	store.conflictPreset.turnOrderDecision = rf.CONFLICT_TURN_ORDER_WAIT_AND_SEE // Default: Last option
 	store.conflictPreset.skipWonderPhaseDecision = rf.CONFLICT_SKIP_WONDER_PHASE_WAIT_AND_SEE // Default: Last option
 	store.conflictPreset.skipProductionPhaseDecision = rf.CONFLICT_SKIP_PRODUCTION_PHASE_WAIT_AND_SEE // Default: Last option
+}
+
+// Art & The Atelier: the arrival popup and its celebration.
+const EXHIBITION_COLOURS = ["#ff595e", "#ffca3a", "#8ac926", "#1982c4", "#6a4c93", "#ff924c"]
+export const exhibitionPopup = reactive({
+	show: false,
+	isShow: false,
+	hexID: -1,
+	reasonText: "",
+	confetti: [],
+	fireworks: [],
+	timer: null,
+})
+
+// Why an exhibition did not count as a show, as readable text.
+export function exhibitionReasonText(reason) {
+	if (!reason) return ""
+	if (reason.code === rf.ART_NO_SHOW_ALREADY_SHOWN) return t("exhibition.reasonAlreadyShown")
+	if (reason.code === rf.ART_NO_SHOW_TOO_FEW) return t("exhibition.reasonTooFew", { actual: reason.actualBeauty, required: reason.required })
+	if (reason.code === rf.ART_NO_SHOW_NOT_BEST) return reason.noMore ? t("exhibition.reasonNoMore") : t("exhibition.reasonNotBest", { best: reason.best, required: reason.required })
+	return ""
+}
+
+export function showExhibitionPopup(outcome) {
+	clearTimeout(exhibitionPopup.timer)
+	exhibitionPopup.isShow = outcome.beauty > 0
+	exhibitionPopup.hexID = outcome.hexID
+	exhibitionPopup.reasonText = exhibitionReasonText(outcome.reason)
+	exhibitionPopup.confetti = exhibitionPopup.isShow ? makeConfetti() : []
+	exhibitionPopup.fireworks = exhibitionPopup.isShow ? makeFireworks() : []
+	exhibitionPopup.show = true
+	exhibitionPopup.timer = setTimeout(() => {
+		exhibitionPopup.show = false
+	}, 3000)
+}
+
+export function closeExhibitionPopup() {
+	clearTimeout(exhibitionPopup.timer)
+	exhibitionPopup.timer = null
+	exhibitionPopup.show = false
+}
+
+function makeConfetti() {
+	return Array.from({ length: 30 }, (_, i) => ({
+		id: i,
+		style: {
+			left: `${4 + Math.random() * 92}%`,
+			backgroundColor: EXHIBITION_COLOURS[i % EXHIBITION_COLOURS.length],
+			animationDelay: `${(Math.random() * 0.8).toFixed(2)}s`,
+			animationDuration: `${(1.2 + Math.random() * 0.8).toFixed(2)}s`,
+		},
+	}))
+}
+
+function makeFireworks() {
+	return Array.from({ length: 4 }, (_, i) => ({
+		id: i,
+		style: {
+			left: `${10 + Math.random() * 80}%`,
+			top: `${10 + Math.random() * 60}%`,
+			"--fw-colour": EXHIBITION_COLOURS[(i + 2) % EXHIBITION_COLOURS.length],
+			animationDelay: `${(Math.random() * 1.2).toFixed(2)}s`,
+		},
+	}))
 }

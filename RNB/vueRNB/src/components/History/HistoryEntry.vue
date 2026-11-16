@@ -1050,12 +1050,15 @@ const computedEntry3 = computed(() => {
 				thisStepHist.bricks = bricks
 				thisStepHist.addBrickText = addBrickText
 			}
-			// Art & The Atelier: [STACK_EXHIBITION, caravanTransID, stagerIdx, targetIdx, beauty]
+			// Art & The Atelier: [STACK_EXHIBITION, caravanTransID, stagerIdx, targetIdx, beauty, reason]
 			else if (stackAction[0] === rf.STACK_EXHIBITION) {
 				thisStepHist.action = rf.STACK_EXHIBITION
 				thisStepHist.stagerIdx = stackAction[2]
 				thisStepHist.targetIdx = stackAction[3]
 				thisStepHist.beauty = stackAction[4]
+				// A show has 5 elements; a no-show carries its reason as the 6th
+				thisStepHist.reason = stackAction.length > 5 ? stackAction[5] : null
+				thisStepHist.reasonText = view.exhibitionReasonText(thisStepHist.reason)
 				thisStepHist.targetName = personal.getHistoryName(thisStepHist.targetIdx)
 			}
 			thisStepHist.singleStackEntryID = i - 1
@@ -1072,7 +1075,7 @@ const computedEntry3 = computed(() => {
 </script>
 
 <template>
-	<div v-if="1==1 || rf.DEBUG_USERS.includes(personal.name) && !store.viewSettings.showReplay" class="entry3Div">0: {{ entry[0] }} 1: {{ entry[1] }} 3: {{ entry[3] }}</div>
+	<div v-if="rf.DEBUG_USERS.includes(personal.name) && !store.viewSettings.showReplay" class="entry3Div">0: {{ entry[0] }} 1: {{ entry[1] }} 3: {{ entry[3] }}</div>
 	<!-- New Game -->
 	<template v-if="entry[0] === rf.HIST_NEW_GAME">
 		<div class="log separator mainEntry" :class="{ selectableHistory: store.viewSettings.showReplay }" @click="clickedHistoryEntry(entry[0], entry[3], entry_ID)">
@@ -1777,6 +1780,11 @@ const computedEntry3 = computed(() => {
 								<template #name><span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.stagerIdx].colour)">{{ personal.getHistoryName(stackEntry.stagerIdx) }}</span></template>
 								<template #target><span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.targetIdx].colour)">{{ stackEntry.targetName }}</span></template>
 								<template #beauty>{{ stackEntry.beauty }}</template>
+							</i18n-t>
+							<i18n-t v-else-if="stackEntry.reasonText" keypath="history.exhibitionNoShow" tag="span" scope="global">
+								<template #name><span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.stagerIdx].colour)">{{ personal.getHistoryName(stackEntry.stagerIdx) }}</span></template>
+								<template #target><span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.targetIdx].colour)">{{ stackEntry.targetName }}</span></template>
+								<template #reason>{{ stackEntry.reasonText }}</template>
 							</i18n-t>
 							<i18n-t v-else keypath="history.caravanArrived" tag="span" scope="global">
 								<template #name><span :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[stackEntry.stagerIdx].colour)">{{ personal.getHistoryName(stackEntry.stagerIdx) }}</span></template>

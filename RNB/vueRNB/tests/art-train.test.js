@@ -20,16 +20,19 @@ test('invalid exhibitions consume caravan and artwork, drop geese, and replay id
  const actions = []
  const c = run(load('RNBatelier', {
   useModelStore: () => store,
-  rf: { EXHIBITION_TRANSPORTER: 8, PHASE_MOVEMENTS: [4], STACK_EXHIBITION: 27 },
+  rf: { EXHIBITION_TRANSPORTER: 8, PHASE_MOVEMENTS: [4], STACK_EXHIBITION: 27, ART_NO_SHOW_ALREADY_SHOWN: 1, ART_NO_SHOW_TOO_FEW: 2, ART_NO_SHOW_NOT_BEST: 3 },
   model: { homeMarkersOnHex: () => [{ ownerIndex: 1 }], resourcesOnTransport: () => [art], resourcesFollowingTransporter: () => [goose], getTransporterByID: () => caravan },
   loc: { isOOBlocation: l => l[0] === -1, setOOBlocation: () => [-1], convertLocationToBucket: l => l },
   stack: { getTransIDtoUse: () => 1, addItemToStack: a => actions.push(a) }
  }))
- assert.equal(c.checkExhibitionOnMove(caravan), true)
+ const outcome = c.checkExhibitionOnMove(caravan)
+ assert.equal(outcome.beauty, 0)
+ assert.equal(outcome.reason.code, 2)
  assert.equal(caravan.location[0], -1)
  assert.equal(art.location[0], -1)
  assert.equal(goose.location[1], 7)
  assert.equal(actions[0].historyEntry[4], 0)
+ assert.equal(actions[0].historyEntry[5].code, 2)
  assert.equal(c.countDistinctShows(0), 0)
  caravan.location = [1, 7, 0]
  c.performExhibitionStackAction(actions[0].historyEntry)
@@ -102,7 +105,7 @@ test('pre-set show applied after a better show is a no-show but still vanishes',
  const store = { gameOptions: { useArt: true }, gameflow: { phase: 4 }, context: {}, players: [{ artShownAt: {} }, { artShownAt: {} }, { artShownAt: { 1: 5 } }] }
  const c = run(load('RNBatelier', {
   useModelStore: () => store,
-  rf: { EXHIBITION_TRANSPORTER: 8, PHASE_MOVEMENTS: [4], STACK_EXHIBITION: 27 },
+  rf: { EXHIBITION_TRANSPORTER: 8, PHASE_MOVEMENTS: [4], STACK_EXHIBITION: 27, ART_NO_SHOW_ALREADY_SHOWN: 1, ART_NO_SHOW_TOO_FEW: 2, ART_NO_SHOW_NOT_BEST: 3 },
   model: { getTransporterByID: () => caravan, homeMarkersOnHex: () => [{ ownerIndex: 1 }], resourcesOnTransport: () => arts, resourcesFollowingTransporter: () => [] },
   loc: { isOOBlocation: l => l[0] === -1, setOOBlocation: () => [-1], convertLocationToBucket: l => l },
   stack: { getTransIDtoUse: () => 1, addItemToStack: () => {} }

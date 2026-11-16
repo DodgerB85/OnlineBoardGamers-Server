@@ -806,7 +806,8 @@ export function moveTransporterTo(entry, transporterID, event = null) {
 		// Art & The Atelier: an exhibition caravan landing on another player's starting
 		// tile may stage a show (caravan + artwork vanish, recorded as a stack action).
 		// The show waits for the move animation to finish so the caravan is seen arriving.
-		atelier.scheduleExhibitionAfterAnimation(transporterObj, () => {
+		atelier.scheduleExhibitionAfterAnimation(transporterObj, (outcome) => {
+			view.showExhibitionPopup(outcome)
 			context.resetContextAndHighlights()
 			highlight.updateAllHighlightsForTransporterMode()
 			context.createUndoPoint()

@@ -293,6 +293,22 @@ const transporterScreenPosition = computed(() => {
 	}
 })
 
+// Art & The Atelier: anchor the arrival popup above the target hex on screen.
+const exhibitionScreenPosition = computed(() => {
+	if (!view.exhibitionPopup.show || view.exhibitionPopup.hexID < 0) return null
+	const svg = document.getElementById("hexSVG")
+	if (!svg) return null
+	const hex = model.getHexByID(view.exhibitionPopup.hexID)
+	if (!hex) return null
+	const screenCTM = svg.getScreenCTM()
+	if (!screenCTM) return null
+	const pt = svg.createSVGPoint()
+	pt.x = hex.rawXY[0]
+	pt.y = hex.rawXY[1]
+	const screenPos = pt.matrixTransform(screenCTM)
+	return { x: screenPos.x, y: screenPos.y }
+})
+
 function getBubblePosition(idx) {
 	// Count available research options
 	const availableOptions = controller
@@ -450,11 +466,35 @@ function getAtelierRecipeGfx(recipeIdx) {
 	if (output > rf.RES_UPPER_LIMIT) return `transporter_${output}_${personal.getCorrectedColour(controller.currentPlayerObj().colour)}`
 	return `res_${output}`
 }
+
+// Art & The Atelier: bubble label - the good/transporter the recipe produces
+function getAtelierRecipeName(recipeIdx) {
+	const output = atelier.getAtelierStats().recipes[recipeIdx].output
+	if (output > rf.RES_UPPER_LIMIT) return rf.ALL_TRANSPORTER_STRINGS[output - rf.DONKEY]
+	return rf.ALL_RES_STRINGS[output]
+}
 </script>
 
 <template>
 	<div>
 		<ActionArea />
+		<!-- Art & The Atelier: an exhibition always takes place; a show gets the celebration -->
+		<transition name="fadeOut">
+			<div v-if="view.exhibitionPopup.show && exhibitionScreenPosition" class="exhibitionAnchor" :style="{ left: exhibitionScreenPosition.x + 'px', top: exhibitionScreenPosition.y + 'px' }">
+				<div v-if="view.exhibitionPopup.isShow" class="exhibitionCelebration">
+					<span v-for="piece in view.exhibitionPopup.confetti" :key="piece.id" class="confettiPiece" :style="piece.style"></span>
+					<span v-for="fw in view.exhibitionPopup.fireworks" :key="'fw' + fw.id" class="fireworkBurst" :style="fw.style"></span>
+				</div>
+				<div class="exhibitionPopup" :class="{ exhibitionShow: view.exhibitionPopup.isShow }" @mouseenter="view.closeExhibitionPopup()">
+					<div class="exhibitionPopupTitle">{{ $t("exhibition.takesPlace") }}</div>
+					<div v-if="view.exhibitionPopup.isShow" class="exhibitionPopupResult">{{ $t("exhibition.countsAsShow") }}</div>
+					<template v-else>
+						<div class="exhibitionPopupResult">{{ $t("exhibition.notAShow") }}</div>
+						<div v-if="view.exhibitionPopup.reasonText" class="exhibitionPopupReason">{{ view.exhibitionPopup.reasonText }}</div>
+					</template>
+				</div>
+			</div>
+		</transition>
 		<div
 			id="hexDIV"
 			:style="{
@@ -1047,7 +1087,7 @@ function getAtelierRecipeGfx(recipeIdx) {
 						<div class="researchBubble" @click="map.produceAtelierRecipe(recipeIdx)" :style="getAtelierRecipeBubblePosition(recipeIdx)">
 							<div class="researchBubbleContent">
 								<img :src="view.getImage(getAtelierRecipeGfx(recipeIdx))" class="researchBubbleImg" />
-								<span class="researchBubbleText">Produce</span>
+								<span class="researchBubbleText">{{ getAtelierRecipeName(recipeIdx) }}</span>
 							</div>
 						</div>
 					</template>
@@ -1585,6 +1625,117 @@ function getAtelierRecipeGfx(recipeIdx) {
 	}
 	100% {
 		transform: scale(2.5);
+		opacity: 0;
+	}
+}
+
+/* Art & The Atelier: exhibition arrival popup, anchored over the target hex */
+.exhibitionAnchor {
+	position: fixed;
+	width: 0;
+	height: 0;
+	z-index: 2000;
+}
+
+.exhibitionPopup {
+	position: absolute;
+	left: 0;
+	top: 0;
+	transform: translate(-50%, calc(-100% - 55px));
+	min-width: 170px;
+	max-width: 290px;
+	padding: 10px;
+	border-radius: 5px;
+	background: #8a4b00;
+	color: white;
+	font-size: 13px;
+	line-height: 1.3;
+	text-align: center;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.exhibitionPopup.exhibitionShow {
+	background: forestgreen;
+}
+
+.exhibitionPopupTitle {
+	font-weight: bold;
+	margin-bottom: 3px;
+}
+
+.exhibitionPopupResult {
+	font-weight: bold;
+}
+
+.exhibitionPopupReason {
+	margin-top: 3px;
+	font-size: 12px;
+	font-weight: normal;
+}
+
+.exhibitionCelebration {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 320px;
+	height: 320px;
+	transform: translate(-50%, -50%);
+	pointer-events: none;
+	overflow: hidden;
+}
+
+.confettiPiece {
+	position: absolute;
+	top: -16px;
+	width: 8px;
+	height: 14px;
+	border-radius: 2px;
+	animation-name: confettiFall;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite;
+}
+
+.fireworkBurst {
+	position: absolute;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: radial-gradient(circle, #fff 0 20%, var(--fw-colour) 35%, transparent 70%);
+	box-shadow: 0 0 8px 2px var(--fw-colour);
+	animation: fireworkBurst 1.6s ease-out infinite;
+}
+
+.fireworkBurst::after {
+	content: "";
+	position: absolute;
+	inset: -8px;
+	border: 2px solid var(--fw-colour);
+	border-radius: 50%;
+	opacity: 0.8;
+}
+
+@keyframes confettiFall {
+	0% {
+		transform: translate3d(0, -10px, 0) rotate(0deg);
+		opacity: 1;
+	}
+	100% {
+		transform: translate3d(0, 330px, 0) rotate(720deg);
+		opacity: 0;
+	}
+}
+
+@keyframes fireworkBurst {
+	0% {
+		transform: scale(0.2);
+		opacity: 0;
+	}
+	15% {
+		transform: scale(1);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(2.6);
 		opacity: 0;
 	}
 }

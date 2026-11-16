@@ -82,7 +82,7 @@ globalThis.document = globalThis.document || {
 globalThis.window.document = globalThis.window.document || globalThis.document
 globalThis.alert = globalThis.alert || (() => {})
 
-let rf, hd, model, produce, stack, atelier, funcs, useModelStore, usePersonalStore, createPinia, setActivePinia, setupError
+let rf, hd, model, produce, stack, atelier, funcs, view, useModelStore, usePersonalStore, createPinia, setActivePinia, setupError
 try {
 	await import("../src/pakoLib.js") // attaches the pako browser global used by RNBfuncs.js
 	;({ createPinia, setActivePinia } = await import("pinia"))
@@ -93,6 +93,7 @@ try {
 	stack = await import("../src/js/RNBstack.js")
 	atelier = await import("../src/js/RNBatelier.js")
 	funcs = await import("../src/js/RNBfuncs.js")
+	view = await import("../src/js/RNBview.js")
 	;({ useModelStore } = await import("../src/stores/RNBstore.js"))
 	;({ usePersonalStore } = await import("../src/stores/RNBpersonal.js"))
 } catch (error) {
@@ -112,7 +113,7 @@ function setupArtMap() {
 	personal.gameCreationTimestamp = 0
 
 	store.players.splice(0)
-	for (const [name, colour] of [["A", 0], ["B", 1]]) {
+	for (const [name, colour] of [["A", 0], ["B", 1], ["C", 2]]) {
 		store.players.push({ name, displayName: name, colour, RnD: [0, 0, 0, 0, 0, 0, 0, 0], artShownAt: {} })
 	}
 
@@ -131,6 +132,7 @@ function setupArtMap() {
 	store.ALL_HOME_MARKERS.splice(0)
 	store.wonderBricks.splice(0)
 	store.history.splice(0)
+	store.actionStack.splice(0)
 
 	store.gameOptions.useArt = true
 	store.gameOptions.useElectricity = false
@@ -159,6 +161,15 @@ function addTransporter(store, id, type, location, ownerIndex = 0) {
 	})
 }
 
+function addCaravanWithArt(store, id, artCount, ownerIndex = 0) {
+	addTransporter(store, id, rf.EXHIBITION_TRANSPORTER, [rf.LOCATION_LAND_VERTEX, 0, 0], ownerIndex)
+	for (let i = 0; i < artCount; i++) {
+		model.addResourceToGame_core(rf.ALL_ARTWORK_RES[i], [rf.LOCATION_BUCKET, 0, 0], 9)
+		store.ALL_RESOURCES[store.ALL_RESOURCES.length - 1].location = [rf.LOCATION_TRANSPORTER, id]
+	}
+	return model.getTransporterByID(id)
+}
+
 test("atelier donkey->caravan production verifies with the recipe index in the last stack slot", skip, () => {
 	const { store, bucketID } = setupArtMap()
 	const atelierLocation = [rf.LOCATION_BUCKET, 0, bucketID]
@@ -185,6 +196,61 @@ test("a caravan cannot pick up another transporter", skip, () => {
 
 	const entry = [rf.STACK_PICKUP_TRANSPORTER, 0, 1, [0]]
 	assert.equal(stack.verifySingleStackAction({ action: rf.STACK_PICKUP_TRANSPORTER, historyEntry: entry, playerIndex: 0 }), 4)
+})
+
+test("every exhibition takes place, and non-shows carry the reason why", skip, () => {
+	const { store, bucketID } = setupArtMap()
+	store.gameflow.phase = rf.PHASE_MOVEMENT_TO
+	// A and B both have starting tiles on hex 0; C's shows count on both.
+	store.ALL_HOME_MARKERS.push({ ownerIndex: 0, location: [rf.LOCATION_BUCKET, 0, bucketID] })
+	store.ALL_HOME_MARKERS.push({ ownerIndex: 1, location: [rf.LOCATION_BUCKET, 0, bucketID] })
+
+	// One artwork: too few for a show, but the caravan still vanishes.
+	const one = addCaravanWithArt(store, 0, 1)
+	const tooFew = atelier.checkExhibitionOnMove(one)
+	assert.equal(tooFew.beauty, 0)
+	assert.equal(tooFew.reason.code, rf.ART_NO_SHOW_TOO_FEW)
+	assert.equal(tooFew.reason.actualBeauty, 1)
+	assert.equal(tooFew.reason.required, 3)
+	assert.equal(one.location[0], rf.LOCATION_OOB, "the caravan vanishes either way")
+
+	// Three different artworks: a show.
+	const three = addCaravanWithArt(store, 1, 3)
+	const show = atelier.checkExhibitionOnMove(three)
+	assert.equal(show.beauty, 3)
+	assert.equal(show.reason, null)
+	assert.deepEqual(store.players[0].artShownAt, { 1: 3 })
+	const showEntry = store.actionStack[store.actionStack.length - 1].historyEntry
+	assert.equal(showEntry.length, 5, "a show has no reason element")
+	assert.ok(showEntry.every((entry) => entry !== null), "history entries may not contain nulls")
+
+	// Same player at the same tile: only one show per tile.
+	const again = addCaravanWithArt(store, 2, 4)
+	const already = atelier.checkExhibitionOnMove(again)
+	assert.equal(already.reason.code, rf.ART_NO_SHOW_ALREADY_SHOWN)
+
+	// C has a better show at A's tile, so B's 4 works do not beat it.
+	store.players[2].artShownAt = { 0: 4 }
+	const notBest = addCaravanWithArt(store, 3, 4, 1)
+	const tooSmall = atelier.checkExhibitionOnMove(notBest)
+	assert.equal(tooSmall.beauty, 0)
+	assert.equal(tooSmall.reason.code, rf.ART_NO_SHOW_NOT_BEST)
+	assert.equal(tooSmall.reason.best, 4)
+	assert.equal(tooSmall.reason.required, 5)
+
+	// Five works already shown: no further exhibitions are possible.
+	store.players[2].artShownAt = { 0: 5 }
+	const noMore = addCaravanWithArt(store, 4, 5, 1)
+	const impossible = atelier.checkExhibitionOnMove(noMore)
+	assert.equal(impossible.reason.code, rf.ART_NO_SHOW_NOT_BEST)
+	assert.equal(impossible.reason.noMore, true)
+})
+
+test("exhibition popup reasons are readable", skip, () => {
+	assert.match(view.exhibitionReasonText({ code: rf.ART_NO_SHOW_TOO_FEW, actualBeauty: 1, required: 3 }), /1 of the 3/)
+	assert.match(view.exhibitionReasonText({ code: rf.ART_NO_SHOW_ALREADY_SHOWN }), /one show/i)
+	assert.match(view.exhibitionReasonText({ code: rf.ART_NO_SHOW_NOT_BEST, best: 4, required: 5 }), /4 works/)
+	assert.match(view.exhibitionReasonText({ code: rf.ART_NO_SHOW_NOT_BEST, best: 5, required: 6, noMore: true }), /no further/i)
 })
 
 test("a powered quarry produces one marble, then a normal stone", skip, () => {
@@ -216,6 +282,8 @@ test("shows are rebuilt from the history on load, not from the player export", s
 		[
 			[rf.HIST_STACK_ACTIONS, 0, 0, [rf.PHASE_MOVEMENT_TO, [rf.STACK_EXHIBITION, 9, 0, 1, 3]]],
 			[rf.HIST_STACK_ACTIONS, 0, 0, [rf.PHASE_MOVEMENT_TO, [rf.STACK_EXHIBITION, 9, 1, 0, 0]]],
+			// An older save wrote a null reason for a successful show
+			[rf.HIST_STACK_ACTIONS, 0, 0, [rf.PHASE_MOVEMENT_TO, [rf.STACK_EXHIBITION, 9, 1, 0, 4, null]]],
 		],
 		[],
 	]
@@ -223,7 +291,18 @@ test("shows are rebuilt from the history on load, not from the player export", s
 	funcs.importRNBmodel(b64, true)
 
 	assert.deepEqual(store.players[0].artShownAt, { 1: 3 }, "the recorded show from history")
-	assert.deepEqual(store.players[1].artShownAt, {}, "a no-show is not recorded")
+	assert.deepEqual(store.players[1].artShownAt, { 0: 4 }, "no-show reasons are not recorded")
+	assert.equal(store.history[2][3][1].length, 5, "a null show reason is cleaned on load")
+})
+
+test("every atelier recipe output has a bubble name", skip, () => {
+	const stats = rf.BUILDING_STATS.find((b) => b.building === rf.BLDG_ATELIER)
+	for (const recipe of stats.recipes) {
+		const name = recipe.output > rf.RES_UPPER_LIMIT ? rf.ALL_TRANSPORTER_STRINGS[recipe.output - rf.DONKEY] : rf.ALL_RES_STRINGS[recipe.output]
+		assert.ok(name, `recipe output ${recipe.output} has a display name`)
+	}
+	assert.equal(rf.ALL_RES_STRINGS[rf.RES_WOOD_CARVING], "Wood Carving")
+	assert.equal(rf.ALL_TRANSPORTER_STRINGS[rf.EXHIBITION_TRANSPORTER - rf.DONKEY], "Exhibition Caravan")
 })
 
 test("artwork scores 20 each, multiplied by one plus the number of tiles shown", skip, () => {

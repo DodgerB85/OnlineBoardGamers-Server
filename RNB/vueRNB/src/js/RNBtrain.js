@@ -261,7 +261,8 @@ export function takeTrain(transporterID, toHexID, toBucketID, fareRes) {
 	highlight.updateAllHighlightsForTransporterMode()
 }
 
-function onExhibitionShown() {
+function onExhibitionShown(outcome) {
+	view.showExhibitionPopup(outcome)
 	context.resetContextAndHighlights()
 	highlight.updateAllHighlightsForTransporterMode()
 	context.createUndoPoint()

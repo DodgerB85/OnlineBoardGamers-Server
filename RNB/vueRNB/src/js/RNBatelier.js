@@ -141,28 +141,33 @@ export function countDistinctShows(playerIndex) {
 
 // Called after an exhibition caravan completes a move (live play). If the caravan
 // stands on another player's starting tile, it and its artwork vanish; valid shows score.
+// Returns { beauty, reason, stagerPlayerIndex, targetPlayerIndex } or null when the
+// caravan is not on another player's starting tile.
 export function checkExhibitionOnMove(transporterObj) {
 	const store = useModelStore()
-	if (!isArtEnabled()) return false
-	if (!isExhibitionTransporter(transporterObj)) return false
-	if (!rf.PHASE_MOVEMENTS.includes(store.gameflow.phase)) return false
-	if (!transporterObj || loc.isOOBlocation(transporterObj.location)) return false
+	if (!transporterObj || !isExhibitionTransporter(transporterObj)) return null
+	if (!isArtEnabled()) return null
+	if (!rf.PHASE_MOVEMENTS.includes(store.gameflow.phase)) return null
+	if (loc.isOOBlocation(transporterObj.location)) return null
 
 	const hexID = transporterObj.location[1]
 	const homeMarker = model.homeMarkersOnHex(hexID).find((m) => m.ownerIndex !== transporterObj.ownerIndex)
-	if (!homeMarker) return false
+	if (!homeMarker) return null
 
 	const stagerPlayerIndex = transporterObj.ownerIndex
 	const targetPlayerIndex = homeMarker.ownerIndex
+	const stackAction = [rf.STACK_EXHIBITION, transporterObj.id, stagerPlayerIndex, targetPlayerIndex, 0]
+	const beauty = performExhibitionStackAction(stackAction)
+	const reason = stackAction.length > 5 ? stackAction[5] : null
 
-	const beauty = performExhibitionStackAction([rf.STACK_EXHIBITION, transporterObj.id, stagerPlayerIndex, targetPlayerIndex, 0])
-
+	const historyEntry = [rf.STACK_EXHIBITION, stack.getTransIDtoUse(transporterObj), stagerPlayerIndex, targetPlayerIndex, beauty]
+	if (reason) historyEntry.push(reason)
 	stack.addItemToStack({
 		action: rf.STACK_EXHIBITION,
-		historyEntry: [rf.STACK_EXHIBITION, stack.getTransIDtoUse(transporterObj), stagerPlayerIndex, targetPlayerIndex, beauty],
+		historyEntry,
 		playerIndex: stagerPlayerIndex,
 	})
-	return true
+	return { beauty, reason, stagerPlayerIndex, targetPlayerIndex, hexID }
 }
 
 // Every show staged at targetPlayerIndex's starting tile, as [stagerPlayerIndex, beauty].
@@ -182,7 +187,8 @@ export function scheduleExhibitionAfterAnimation(transporterObj, onShown) {
 		pendingShow = null
 		// Look the caravan up again: an undo in the meantime replaces the objects
 		const fresh = model.getTransporterByID(transporterID)
-		if (fresh && checkExhibitionOnMove(fresh)) onShown()
+		const outcome = fresh ? checkExhibitionOnMove(fresh) : null
+		if (outcome) onShown(outcome)
 	}
 	pendingShow = { run, timer: setTimeout(run, ms + 100) }
 }
@@ -199,11 +205,28 @@ export function flushPendingExhibition() {
 	pendingShow.run()
 }
 
+// Decides whether an exhibition is a show. `reason` is null for a show, otherwise it
+// records why not so the popup and the history can explain it.
+export function getExhibitionOutcome(stagerPlayerIndex, targetPlayerIndex, actualBeauty) {
+	if (!isArtEnabled()) return { beauty: 0, reason: null }
+	if (hasShownAt(stagerPlayerIndex, targetPlayerIndex)) {
+		return { beauty: 0, reason: { code: rf.ART_NO_SHOW_ALREADY_SHOWN } }
+	}
+	const best = bestShownAtTarget(targetPlayerIndex)
+	if (actualBeauty < 3) {
+		return { beauty: 0, reason: { code: rf.ART_NO_SHOW_TOO_FEW, actualBeauty, required: 3 } }
+	}
+	if (actualBeauty <= best) {
+		return { beauty: 0, reason: { code: rf.ART_NO_SHOW_NOT_BEST, actualBeauty, best, required: best + 1, noMore: best >= 5 } }
+	}
+	return { beauty: actualBeauty, reason: null }
+}
+
 // Applies a recorded STACK_EXHIBITION action (live, replay / rewind). The caravan always
 // vanishes on arrival; the show value is recomputed here so a pre-set action applied after
 // another player's better show in the same phase is a no-show instead of a failed stack.
 export function performExhibitionStackAction(stackAction) {
-	// [STACK_EXHIBITION, caravanTransID, stagerIdx, targetIdx, beauty]
+	// [STACK_EXHIBITION, caravanTransID, stagerIdx, targetIdx, beauty, reason]
 	const caravanTransID = stackAction[1]
 	const stagerPlayerIndex = stackAction[2]
 	const targetPlayerIndex = stackAction[3]
@@ -212,14 +235,12 @@ export function performExhibitionStackAction(stackAction) {
 	if (transObj) {
 		const store = useModelStore()
 		const actualBeauty = new Set(model.resourcesOnTransport(transObj.id).map((r) => r.type)).size
-		const isShow =
-			isArtEnabled() &&
-			!hasShownAt(stagerPlayerIndex, targetPlayerIndex) &&
-			actualBeauty >= 3 &&
-			actualBeauty <= 5 &&
-			actualBeauty > bestShownAtTarget(targetPlayerIndex)
-		beauty = isShow ? actualBeauty : 0
+		const outcome = getExhibitionOutcome(stagerPlayerIndex, targetPlayerIndex, actualBeauty)
+		beauty = outcome.beauty
 		stackAction[4] = beauty
+		// addItemToStack rejects null entries, so a show simply has no reason element
+		if (outcome.reason) stackAction[5] = outcome.reason
+		else if (stackAction.length > 5) stackAction.length = 5
 		if (store.context.selectedTransporterIDforTM === transObj.id) store.context.selectedTransporterIDforTM = -1
 		for (const goose of model.resourcesFollowingTransporter(transObj.id)) goose.location = [...loc.convertLocationToBucket(transObj.location)]
 		for (const res of model.resourcesOnTransport(transObj.id)) {
@@ -239,7 +260,6 @@ export function performExhibitionStackAction(stackAction) {
 // (1 + number of distinct starting tiles where they staged a show).
 export function scoreArtwork(playerIndex) {
 	if (!isArtEnabled()) return 0
-	const store = useModelStore()
 	const myTransporterIDs = model.getTransportersByPlayerIndex(playerIndex).map((t) => t.id)
 	const artworkCount = model.getAllInGameResources().filter((r) => rf.ALL_ARTWORK_RES.includes(r.type) && loc.isOnSelectedTransporterIDs(r.location, myTransporterIDs)).length
 	if (artworkCount === 0) return 0

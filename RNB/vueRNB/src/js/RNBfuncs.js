@@ -1093,7 +1093,10 @@ export function importRNBmodel(input, forGameOver) {
 		else if (entry[0] === rf.HIST_STACK_ACTIONS) {
 			// Art & The Atelier: shows are rebuilt from history, not stored on the players
 			for (const stackAction of entry[3].slice(1)) {
-				if (stackAction[0] === rf.STACK_EXHIBITION && stackAction[4] > 0) store.players[stackAction[2]].artShownAt[stackAction[3]] = stackAction[4]
+				if (stackAction[0] !== rf.STACK_EXHIBITION) continue
+				// A show is [.., beauty] with 5 elements; older saves may carry a null 6th
+				if (stackAction.length > 5 && stackAction[5] == null) stackAction.length = 5
+				if (stackAction[4] > 0) store.players[stackAction[2]].artShownAt[stackAction[3]] = stackAction[4]
 			}
 			if (rf.PHASE_BUILDINGS.includes(entry[3][0]) || rf.PHASE_PRODUCTIONS.includes(entry[3][0])) {
 				for (const stackAction of entry[3].slice(1)) {

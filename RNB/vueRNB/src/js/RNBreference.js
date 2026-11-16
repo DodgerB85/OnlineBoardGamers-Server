@@ -535,6 +535,11 @@ export const TOTAL_RES = 20
 
 export const ALL_ARTWORK_RES = [RES_WOOD_CARVING, RES_RING, RES_SKETCH, RES_POTTERY, RES_STATUE]
 
+// Art & The Atelier: why an exhibition did not count as a show
+export const ART_NO_SHOW_ALREADY_SHOWN = 1
+export const ART_NO_SHOW_TOO_FEW = 2
+export const ART_NO_SHOW_NOT_BEST = 3
+
 export const ALL_RES = [RES_TRUNKS, RES_BOARDS, RES_PAPER, RES_GOOSE, RES_CLAY, RES_STONE, RES_FUEL, RES_IRON, RES_GOLD, RES_COINS, RES_STOCK, RES_BOMB, RES_MANAGER, RES_PEARL, RES_MARBLE, ...ALL_ARTWORK_RES]
 
 export const ALL_POINT_SCORING_RES = [RES_GOLD, RES_COINS, RES_STOCK]
@@ -566,7 +571,7 @@ export const AIR_TRANSPORTERS = [PLANE]
 // like LAND_TYPE / WATER_TYPE without disturbing those groups.
 export const AIR_TYPE = PLANE
 
-export const ALL_TRANSPORTER_STRINGS = ["Donkey", "Wagon", "Truck", "Raft", "Rowboat", "Steamer", "Plane", "Exhibition T"]
+export const ALL_TRANSPORTER_STRINGS = ["Donkey", "Wagon", "Truck", "Raft", "Rowboat", "Steamer", "Plane", "Exhibition Caravan"]
 
 // NB THESE ARE 2 SEPERATE FLAGS, NOT RELATED TO THE LIST OF GOODS
 export const LAND_TYPE = 30
