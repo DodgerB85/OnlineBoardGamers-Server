@@ -729,8 +729,6 @@ export function exportRNBmodel(forGameOver) {
 		else tempPlayer.push([store.players[i].name, store.players[i].displayName])
 		// 1 - colour
 		tempPlayer.push(store.players[i].colour)
-		// 2 - Art & The Atelier: shows staged per target
-		if (store.gameOptions.useArt) tempPlayer.push(store.players[i].artShownAt || {})
 
 		tempPlayers.push(tempPlayer)
 	}
@@ -890,8 +888,8 @@ export function importRNBmodel(input, forGameOver) {
 			displayName: displayName,
 			colour: colour,
 			RnD: [...RnD],
-			// Art & The Atelier: restored for old saves that lack these fields
-			artShownAt: entry[2] || {},
+			// Art & The Atelier: rebuilt from the show history below
+			artShownAt: {},
 		})
 	}
 
@@ -1093,6 +1091,10 @@ export function importRNBmodel(input, forGameOver) {
 		}
 		//
 		else if (entry[0] === rf.HIST_STACK_ACTIONS) {
+			// Art & The Atelier: shows are rebuilt from history, not stored on the players
+			for (const stackAction of entry[3].slice(1)) {
+				if (stackAction[0] === rf.STACK_EXHIBITION && stackAction[4] > 0) store.players[stackAction[2]].artShownAt[stackAction[3]] = stackAction[4]
+			}
 			if (rf.PHASE_BUILDINGS.includes(entry[3][0]) || rf.PHASE_PRODUCTIONS.includes(entry[3][0])) {
 				for (const stackAction of entry[3].slice(1)) {
 					if (stackAction[0] === rf.STACK_BUILD_BUILDING) {

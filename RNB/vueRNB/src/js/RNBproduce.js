@@ -58,7 +58,9 @@ export function addBuildingOutputResourcesToGame_core(buildingID, forcedOutputRe
 				resToProduce = atelierOutputRes
 			}
 			model.addResourceToGame_core(resToProduce, location, playerIndex)
-			if (isPoweredPrimary) model.addResourceToGame_core(resToProduce, location, playerIndex)
+			// A powered marble quarry produces one marble, then a normal stone: the
+			// first marble means there is no longer "no marble on the tile".
+			if (isPoweredPrimary) model.addResourceToGame_core(produceMarble ? rf.RES_STONE : resToProduce, location, playerIndex)
 			continue
 		}
 

@@ -156,6 +156,8 @@ async function resetDataForReplay() {
 	// Reset Players
 	for (let i = 0; i < store.players.length; i++) {
 		store.players[i].RnD = [0, 0, 0, 0, 0, 0, 0, 0]
+		// Art & The Atelier: shows are replayed from history, so start with none
+		store.players[i].artShownAt = {}
 	}
 
 	let mapData = funcs.exportMapOnly()

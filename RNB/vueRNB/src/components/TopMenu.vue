@@ -14,6 +14,7 @@ import * as funcs from "../js/RNBfuncs"
 import * as replay from "../components/History/RNBreplay"
 import * as context from "../js/RNBcontext"
 import * as highlight from "../js/RNBhighlight"
+import * as atelier from "../js/RNBatelier"
 //import * as model from "../js/RNBmodel"
 
 import { useModelStore } from "../stores/RNBstore.js"
@@ -33,6 +34,9 @@ function toggleBug() {
 
 async function toggleReplay() {
 	if (!store.viewSettings.showReplay) {
+		// Art & The Atelier: a show waiting on its arrival animation must be recorded
+		// before the replay snapshot is taken, or it would be lost on exit
+		atelier.flushPendingExhibition()
 		store.replayResetData = funcs.simpleExportWholeRNBmodel(true)
 		store.viewSettings.showReplay = true
 

@@ -2622,7 +2622,8 @@ export function executePickupTransporter(transporterID) {
 	const store = useModelStore()
 	const selectedTransporterObj = model.getTransporterByID(store.context.selectedTransporterIDforTM)
 	// Planes & Aeroports: a plane may never carry another transporter
-	if (selectedTransporterObj.type === rf.PLANE) return
+	// Art & The Atelier: a caravan may only carry artwork
+	if (selectedTransporterObj.type === rf.PLANE || selectedTransporterObj.type === rf.EXHIBITION_TRANSPORTER) return
 	// create the stack
 	const pickerUpLocation = selectedTransporterObj.location
 	const compressedPickedUpLocation = stack.compressLocation(pickerUpLocation)

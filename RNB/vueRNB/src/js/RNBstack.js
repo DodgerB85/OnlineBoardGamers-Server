@@ -1487,7 +1487,8 @@ export function verifySingleStackAction(stackActionData) {
 		const mainTransporterObj = model.getTransporterByID(mainTransporterID)
 		const transporterBeingPickedUpObj = model.getTransporterByID(transporterBeingPickedUpID)
 		// Planes & Aeroports: a plane may never carry another transporter
-		if (mainTransporterObj.type === rf.PLANE) return 4
+		// Art & The Atelier: a caravan may only carry artwork
+		if (mainTransporterObj.type === rf.PLANE || mainTransporterObj.type === rf.EXHIBITION_TRANSPORTER) return 4
 		const eligibleLocations = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(mainTransporterObj.location, false)
 
 		if (!util.includesArray(eligibleLocations, transporterBeingPickedUpObj.location)) return 1
@@ -1933,7 +1934,9 @@ export function verifySingleStackAction(stackActionData) {
 
 		let inputResources = bldgStats.inputRes[0]
 		if (bldgStats.inputRes.length > 1 && stackAction.length > 4) {
-			const resIdx = stackAction[4]
+			// Art & The Atelier: the recipe index is the last element; slot 4 is the removed
+			// donkey for the caravan recipe (see performSingleStackAction)
+			const resIdx = bldgObj.type === rf.BLDG_ATELIER ? stackAction[stackAction.length - 1] : stackAction[4]
 			inputResources = bldgStats.inputRes[resIdx]
 		}
 

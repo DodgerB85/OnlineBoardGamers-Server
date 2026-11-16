@@ -211,8 +211,9 @@ const computedEntry3 = computed(() => {
 			priEntry.outputResourcesGfx = []
 			// ELECTRICITY: a -3 marker at index 2 means this primary was powered/doubled
 			priEntry.powered = priHistEntry.length > 2 && priHistEntry[2] === -3
-			// Art & The Atelier: a -4 marker at index 3 means the quarry produced marble
-			priEntry.producedMarble = priHistEntry.length > 3 && priHistEntry[3] === -4
+			// Art & The Atelier: a -4 marker means the quarry produced marble. It follows the
+			// -3 marker when the quarry was powered, and takes its slot when it was not.
+			priEntry.producedMarble = priHistEntry.includes(-4)
 			if (buildingType === rf.BLDG_POWER_PLANT) {
 				// ELECTRICITY: powered power plant. Entry: [bldgID, loc, fuelType, -3]
 				priEntry.isPowerPlant = true
@@ -228,6 +229,9 @@ const computedEntry3 = computed(() => {
 					priEntry.outputResourcesGfx.push("res_" + String(outRes))
 				}
 			}
+			// ELECTRICITY: the second good of a powered primary. A powered marble quarry's
+			// first good is marble, its second is a normal stone (a marble is now on the tile).
+			priEntry.poweredExtraResourcesGfx = priEntry.powered ? (priEntry.producedMarble ? bldgStats.outputRes.map((r) => "res_" + String(r)) : [...priEntry.outputResourcesGfx]) : []
 			Object.assign(priEntry, getHighlightData([fullLocation]))
 			priEntry.isMine = buildingType === rf.BLDG_MINE
 			ret.primaryProductions.push(priEntry)
@@ -1192,7 +1196,7 @@ const computedEntry3 = computed(() => {
 								<!-- ELECTRICITY: a powered primary also produces another of its goods -->
 								<span v-if="primaryEntry.powered" class="electricitySymbol" :title="$t('history.poweredDoubled')">⚡</span>
 								<template v-if="primaryEntry.powered">
-									<img v-for="(resGfx, idx3) in primaryEntry.outputResourcesGfx" :key="'d' + idx3" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
+									<img v-for="(resGfx, idx3) in primaryEntry.poweredExtraResourcesGfx" :key="'d' + idx3" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
 								</template>
 							</template>
 							<template v-else>{{ $t("history.emptyMine") }}</template>
