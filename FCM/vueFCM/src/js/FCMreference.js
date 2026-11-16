@@ -734,11 +734,18 @@ export const MARKETING_CAMPAIGNS = [
 	{ type: PHONE, width: 2, height: 1 },
 	{ type: PHONE, width: 2, height: 1 },
 	{ type: PHONE, width: 2, height: 1 },//35
+	{ type: PHONE, width: 2, height: 1 },//36
+	{ type: PHONE, width: 2, height: 1 },
+	{ type: PHONE, width: 2, height: 1 },
+	{ type: PHONE, width: 2, height: 1 },
+	{ type: PHONE, width: 2, height: 1 },
+	{ type: PHONE, width: 2, height: 1 },//41
 
 ]
 
 export const SMALL_CAMPAIGNS = [1, 2, 3, 9, 10, 15, 16]
-export const ROTATABLE_CAMPAIGNS = [4, 5, 6, 11, 13, 14, 30, 31, 32, 33, 34, 35]
+export const PHONE_CAMPAIGNS = Array.from({ length: 12 }, (_, i) => 30 + i)
+export const ROTATABLE_CAMPAIGNS = [4, 5, 6, 11, 13, 14, ...PHONE_CAMPAIGNS]
 
 //rf.PARKS = [
 //	{shape: "I", width: 4, height: 1 }

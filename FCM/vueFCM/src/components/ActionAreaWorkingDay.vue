@@ -6,6 +6,7 @@
  *
  */
 import * as rf from "../js/FCMreference"
+import * as phone from "../js/FCMphone"
 import * as controller from "../js/FCMcontroller"
 import * as view from "../js/FCMview"
 import * as rules from "../js/FCMrules"
@@ -61,6 +62,14 @@ const computedAvailableMarketers = computed(() => {
 	marketers.push(...Array.from({ length: temporaryCount }, () => ({ employee: rf.MARKETING_TRAINEE, temporary: true })))
 	// Mass Marketeers are sent automatically
 	return marketers.filter((entry) => entry.employee !== rf.MASS_MARKETEER)
+})
+
+// Only display progress for an existing, unfinished modern phone-group lock.
+const computedPhoneGroupLock = computed(() => {
+	const group = store.context.phoneGroupAction?.group
+	if (!phone.modern() || !Number.isInteger(group) || group < 0 || group > 3) return null
+	const lock = store.mediaLine.phoneGroups[group]
+	return Array.isArray(lock?.cards) && lock.cards.length > 0 && lock.cards.length < 3 && lock.cards.every((number, index) => number === phone.groupCards(group)[index]) ? lock : null
 })
 
 // Media Line mod: TV channel - all required houses picked
@@ -552,7 +561,9 @@ const computedProducers = computed(() => {
 
 				<AddItemBox :itemBeingAdded="rf.ITEM_BOX_CAMPAIGN" />
 				<!-- Media Line: the second phone token keeps the first token's good and duration -->
-				<p v-if="store.context.mediaLineSecondCall">{{ $t("workingDay.phoneTokenSameAsFirst") }}</p>
+				<p v-if="phone.modern() && rf.PHONE_CAMPAIGNS.includes(store.context.campaign) && !computedPhoneGroupLock">{{ $t("workingDay.phoneGroupRules") }}</p>
+				<p v-if="computedPhoneGroupLock">{{ $t("workingDay.phoneGroupProgress", { current: computedPhoneGroupLock.cards.length + 1 }) }}</p>
+				<p v-else-if="store.context.mediaLineSecondCall">{{ $t("workingDay.phoneTokenSameAsFirst") }}</p>
 
 				<!-- Hawker truck: route-based placement -->
 				<template v-if="store.context.campaign >= 25 && store.context.campaign <= 27">
@@ -574,13 +585,14 @@ const computedProducers = computed(() => {
 				<!-- Gourmet guides / giant billboards: button placement (Media Line phone tokens use map clicks) -->
 				<p v-else-if="store.context.campaign > 16 && rf.MARKETING_CAMPAIGNS[store.context.campaign].type !== rf.PHONE"><button class="actionsLineButton" @click="controller.placeMarketingCampaign(0)">{{ $t("workingDay.placeCampaign") }}</button></p>
 				<p v-else>{{ $t("workingDay.clickToPlaceCampaign") }}</p>
+				<button v-if="phone.modern() && rf.PHONE_CAMPAIGNS.includes(store.context.campaign) && !phone.pending() && !phone.legalOrientations(store.context.marketer, store.context.campaign).some(o => o.positions.length)" class="actionsLineButton" @click="controller.cancelMarketer()">{{ $t("workingDay.neverMind") }}</button>
 
 				<br />
 				<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 				<button class="actionsLineButton" @click="controller.resetSubphase()">{{ $t("workingDay.reset") }}</button>
 				<button v-if="store.context.nightShift" class="actionsLineButton" @click="controller.skipNightShiftManager()">{{ $t("actionArea.skipNightShiftManager") }}</button>
 				<!-- Media Line: finish the action after just one phone token -->
-				<button v-if="store.context.mediaLineSecondCall" class="actionsLineButton" @click="controller.resetMarketingSelection()">{{ $t("workingDay.skipSecondPhoneToken") }}</button>
+				<button v-if="store.context.mediaLineSecondCall && !phone.modern()" class="actionsLineButton" @click="controller.resetMarketingSelection()">{{ $t("workingDay.skipSecondPhoneToken") }}</button>
 			</template>
 		</template>
 	</template>

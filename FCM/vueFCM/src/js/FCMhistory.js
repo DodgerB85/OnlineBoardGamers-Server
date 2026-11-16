@@ -143,7 +143,7 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 				else highlightIndex -= rf.ssW * height
 			}
 		}
-		if (campaignNumber <= 16 || (campaignNumber >= 30 && campaignNumber <= 35)) {
+		if (campaignNumber <= 16 || rf.PHONE_CAMPAIGNS.includes(campaignNumber)) {
 			for (let i = 0; i < height; i++) for (let j = 0; j < width; j++) squares.push(highlightIndex + j + rf.ssW * i)
 		} else if (campaignNumber === 28 || campaignNumber === 29) {
 			// Media Line mod: TV channel - highlight the picked houses

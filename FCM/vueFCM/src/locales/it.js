@@ -767,7 +767,7 @@ export default {
 		"buildHouse": "{name} costruisce la casa #{num} {orient} alle coordinate ({x}, {y})",
 		"buildGarden": "{name} costruisce un giardino per la casa #{num} {orient} alle coordinate ({x}, {y})",
 		"buildApartment": "{name} costruisce l'appartamento #{num} alle coordinate ({x}, {y})",
-		"movesOutHouse": "{name} fa trasferire la casa #{num} alle coordinate ({x}, {y})",
+		"movesOutHouse": "{name} piazza un segnalino OUT sulla casa #{num} in ({x}, {y})",
 		"buildFreeway": "{name} costruisce un'autostrada {orient} alle coordinate ({x}, {y})",
 		"openRestaurantLocal": "{name} costruisce un nuovo ristorante alle coordinate ({x}, {y}) rivolto verso {facing}, aprendolo al turno successivo",
 		"openRestaurant": "{name} apre un nuovo ristorante alle coordinate ({x}, {y}) di fronte a {facing}",
@@ -951,8 +951,8 @@ export default {
 		"chooseEdgeForGarden": "Scegli un bordo per il giardino",
 		"chooseHouseForGarden": "Scegli una casa a cui aggiungere un giardino",
 		"apartment": "Condominio",
-		"moveOut": "Trasloco",
-		"chooseHouseToMoveOut": "Scegli una casa o un appartamento da far traslocare (nessuna domanda attiva)"
+		"moveOut": "Piazza un segnalino OUT",
+		"chooseHouseToMoveOut": "Scegli una casa o un condominio senza domanda"
 	},
 	"playerDetails": {
 		"noMilestones": "Nessuna pietra miliare",

@@ -1905,3 +1905,119 @@ msgstr ""
 "Jalon « Premier Développeur d'Affaires Senior utilisé » : le premier joueur "
 "à en utiliser un gagne ce jalon. Récompense : ajouter une tuile à la ville "
 "(comme le jalon du Lobbyiste)."
+
+#. Simplified phone groups (new games only).
+msgid "Media Line adds phone and TV advertising. There are 12 phone tokens: four groups of three, numbered 6.5 / 7.5 / 8.5 / 9.5. The Telemarketer milestone and phone/TV group bonuses are removed; ordinary demand and sales income are unchanged."
+msgstr "Media Line ajoute la publicité téléphonique et télévisée. Il y a 12 téléphones : quatre groupes de trois, 6.5 / 7.5 / 8.5 / 9.5. Le jalon du Télévendeur et les bonus de groupes téléphone/TV sont supprimés ; demande et revenus normaux restent inchangés."
+
+#. Simplified phone groups (new games only).
+msgid "Telemarketer: place phone or lower-level advertising. Phones are 2x1; each group uses the same good and duration (1-3 rounds). The clicked square is the origin and must be within your restaurant tile or its four orthogonal neighbours. The token may extend in any of four directions across tile or range boundaries. Both cells must be empty ground on the map; no building adjacency is required. All touching houses are affected. Billboard action limits are unchanged."
+msgstr "Télévendeur : placez une publicité téléphonique ou inférieure. Les téléphones font 2x1 ; un groupe partage produit et durée de 1–3 tours. La case cliquée est l’origine, dans la tuile du restaurant ou ses quatre voisines orthogonales. Le jeton peut s’étendre dans les quatre directions au-delà des tuiles ou de la zone. Les deux cases doivent être vides et sur la carte ; aucun contact avec un bâtiment n’est requis. Toutes les maisons touchées sont affectées. Les panneaux gardent leurs limites d’action."
+
+#. Simplified phone groups (new games only).
+msgid "Phone groups cannot be mixed or shared between employees or players. Continue to three tokens while any legal position remains; only when all four directions have no space does the action finish automatically. After the first token, the whole group and employee stay reserved until all placed tokens expire; unplaced tokens are unavailable. Placing zero consumes neither group nor employee. TV Announcers and Brand Directors follow the same phone rules."
+msgstr "Ne mélangez pas les groupes et ne les partagez pas entre employés ou joueurs. Continuez jusqu’à trois jetons tant qu’une place est légale ; fin automatique seulement si les quatre directions sont bloquées. Dès le premier jeton, groupe et employé restent réservés jusqu’à l’expiration de tous les jetons placés ; les autres sont indisponibles. Zéro jeton ne consomme rien. Présentateurs TV et Directeurs de Marque suivent les mêmes règles téléphoniques."
+
+#. Simplified phone groups (new games only).
+msgid "Compatibility: older games and replays retain their original phone rules, including building adjacency. TV retains two channels; its selection, range, duration, headlines, training and independent milestone are unchanged."
+msgstr "Compatibilité : anciennes parties et relectures gardent leurs règles téléphoniques, dont le contact avec les bâtiments. La TV reste à deux chaînes ; sélection, portée, durée, gros titres, formation et jalon indépendant ne changent pas."
+
+#. Concise Media Line player help.
+msgid "Phone and TV advertising. Phones have four groups of three, 6.5 / 7.5 / 8.5 / 9.5: 12 phone tokens. No Telemarketer milestone or phone/TV group bonuses. Older games retain their original rules."
+msgstr "Publicité téléphonique et télévisée. Téléphones : quatre groupes de trois, 6.5 / 7.5 / 8.5 / 9.5, soit 12 jetons. Ni jalon du Télévendeur ni bonus de groupes téléphone/TV. Les anciennes parties gardent leurs règles d’origine."
+
+#. Concise Media Line player help.
+msgid "Training: Marketing Trainee → Telemarketer → TV Announcer → Brand Director. Six of each; cards may be stacked."
+msgstr "Formation : Stagiaire Marketing → Télévendeur → Présentateur TV → Directeur de Marque. Six de chaque ; cartes empilables."
+
+#. Concise Media Line player help.
+msgid "Telemarketer: phone or lower-level advertising. A phone is 2x1. Click an origin in your restaurant tile or its four orthogonal neighbours; extend in four directions across tile or range boundaries. Both cells must be empty ground on the map; no house or apartment adjacency is required. All touching houses are affected. Billboard limits are unchanged."
+msgstr "Télévendeur : publicité téléphonique ou inférieure. Un téléphone fait 2x1. Cliquez une origine dans la tuile du restaurant ou ses quatre voisines orthogonales ; le jeton peut s’étendre dans quatre directions au-delà des tuiles ou de la zone. Les deux cases doivent être du terrain vide sur la carte ; aucun contact avec une maison ou un appartement n’est requis. Toutes les maisons touchées sont affectées. Les limites des panneaux restent inchangées."
+
+#. Concise Media Line player help.
+msgid "Select one phone group, using the same good and duration (1-3 rounds). Do not mix groups or split them between employees or players. Place all three while space remains; finish early only if all four directions have no legal position."
+msgstr "Choisissez un groupe téléphonique, avec le même produit et la même durée (1-3 tours). Ne mélangez pas les groupes et ne les partagez pas entre employés ou joueurs. Posez les trois jetons tant qu’il reste de la place ; fin anticipée seulement sans position légale dans les quatre directions."
+
+#. Concise Media Line player help.
+msgid "From the first token, reserve the whole group and employee until all placed tokens expire; unplaced tokens cannot be borrowed. Zero tokens consume neither group nor employee. TV Announcers and Brand Directors use the same phone rules."
+msgstr "Dès le premier jeton, tout le groupe et l’employé restent réservés jusqu’à l’expiration de tous les jetons placés ; les autres ne se prêtent pas. Zéro jeton ne consomme ni groupe ni employé. Présentateurs TV et Directeurs de Marque suivent les mêmes règles téléphoniques."
+
+#. Concise Media Line player help.
+msgid "TV: 2 channels, at most two campaigns at once. Choose 5 houses within 2 steps of your restaurant (13 tiles); choose all if fewer than 5 are available. Place an antenna on each for 1-4 nights."
+msgstr "TV : 2 chaînes, au plus deux campagnes simultanées. Choisissez 5 maisons à 2 pas du restaurant (13 tuiles) ; s’il y en a moins de 5, choisissez-les toutes. Chacune reçoit une antenne pour 1-4 nuits."
+
+#. Concise Media Line player help.
+msgid "Headline: TV Announcer only; each working announcer may publish once per turn for free. At the next turn’s dinner, all city unit prices change by ±$5. Headlines stack or cancel, capped at ±$10 total; apply before garden multipliers."
+msgstr "Gros titre : Présentateur TV uniquement ; chaque présentateur au travail peut publier gratuitement une fois par tour. Au dîner du prochain tour, tous les prix unitaires de la ville changent de ±$5. Les titres s’additionnent ou s’annulent, avec un total plafonné à ±$10 ; appliquer avant le multiplicateur de jardin."
+
+#. Concise Media Line player help.
+msgid "Advertising resolves in this turn’s Marketing Campaigns phase; headlines affect the next turn. Keep the usual 3-demand cap per house. Unserved orders remain and may be supplied by anyone."
+msgstr "Les publicités sont résolues pendant la phase de Marketing de ce tour ; les gros titres agissent au tour suivant. Le plafond reste de 3 demandes par maison. Les demandes non satisfaites restent et peuvent être servies par n’importe qui."
+
+#. Concise Media Line player help.
+msgid "First TV Announcer used milestone: each holder’s first campaign generates 2 demand per house per night instead of 1."
+msgstr "Jalon « Premier Présentateur TV utilisé » : la première campagne TV de chaque détenteur produit 2 demandes par maison et par nuit au lieu de 1."
+
+#. Concise Media Line player help.
+msgid "Adds telephone and television advertising."
+msgstr "Ajoute la publicité téléphonique et télévisée."
+
+#. Concise Media Line player help.
+msgid "Training: Marketing Trainee → Telemarketer → TV Announcer → Brand Director; 6 cards of each, stackable."
+msgstr "Formation : Stagiaire Marketing → Télévendeur → Présentateur TV → Directeur de Marque ; 6 cartes de chaque, empilables."
+
+#. Concise Media Line player help.
+msgid "Telemarketers may place phone or lower-level advertising. Select one group at a time, with the same good and duration (1–3 rounds)."
+msgstr "Les Télévendeurs peuvent placer de la publicité téléphonique ou de niveau inférieur. Choisissez un groupe à la fois, avec le même produit et la même durée (1–3 tours)."
+
+#. Concise Media Line player help.
+msgid "Phones: four groups, 6.5 / 7.5 / 8.5 / 9.5, with 3 cards each, 12 cards in total. Placement is allowed on the tile containing the restaurant entrance and the tiles above, below, left and right, 5 tiles in total."
+msgstr "Téléphones : quatre groupes, 6.5 / 7.5 / 8.5 / 9.5, de 3 cartes chacun, soit 12 cartes au total. Placement autorisé sur la tuile de l’entrée du restaurant et les tuiles au-dessus, au-dessous, à gauche et à droite, soit 5 tuiles au total."
+
+#. Concise Media Line player help.
+msgid "TV Announcers may place TV, phone or lower-level advertising. TV channels may carry the same good for the same duration (1–4 rounds)."
+msgstr "Les Présentateurs TV peuvent placer de la publicité télévisée, téléphonique ou de niveau inférieur. Les chaînes TV peuvent annoncer le même produit pour la même durée (1–4 tours)."
+
+#. Concise Media Line player help.
+msgid "TV has 2 channels, numbered 3.5/4.5. Choose 5 houses within 2 tiles of the tile containing the restaurant entrance for TV marketing."
+msgstr "La TV a 2 chaînes, numérotées 3.5/4.5. Choisissez 5 maisons à une distance maximale de 2 tuiles de la tuile de l’entrée du restaurant pour le marketing télévisé."
+
+#. Concise Media Line player help.
+msgid "Headlines are available only to TV Announcers. Each working employee chooses once per round: at the next round’s dinner, all city goods’ unit prices change by ±5. Changes can stack or cancel; price increases have no upper limit, and the price floor is 0."
+msgstr "Les gros titres sont réservés aux Présentateurs TV. Chaque employé au travail choisit une fois par tour : au dîner du tour suivant, les prix unitaires de tous les produits de la ville changent de ±5. Les changements s’additionnent ou s’annulent ; les hausses sont sans limite et le prix plancher est 0."
+
+#. Concise Media Line player help.
+msgid "“First TV Announcer used” milestone: during the recipient’s first TV advertising campaign, place 2 demand."
+msgstr "Jalon « Premier Présentateur TV utilisé » : pendant la première campagne de publicité TV du bénéficiaire, placez 2 demandes."
+
+#. Concise Media Line player help.
+msgid "Headlines are available only to TV Announcers. Each working employee chooses once per round: at the next round’s dinner, all city goods’ unit prices change by ±5. Changes can stack or cancel."
+msgstr "Les gros titres sont réservés aux Présentateurs TV. Chaque employé au travail choisit une fois par tour : au dîner du tour suivant, les prix unitaires de tous les produits de la ville changent de ±5. Les changements s’additionnent ou s’annulent."
+
+#. Senior Business Developer concise player help.
+msgid "The Senior Business Developer adds apartments and OUT markers to the New Business Developer’s actions."
+msgstr "Le Développeur d’Affaires Senior ajoute les immeubles et les marqueurs OUT aux actions du Nouveau Développeur d’Affaires."
+
+#. Senior Business Developer concise player help.
+msgid "Train a New Business Developer into a Senior Business Developer. Each player may own one, including employees on the beach. Shared supply: 1 card for 2–3 players, 2 for 4, 3 for 5–6."
+msgstr "Formez un Nouveau Développeur d’Affaires en Développeur d’Affaires Senior. Une carte maximum par joueur, plage comprise. Réserve commune : 1 carte à 2–3 joueurs, 2 à 4, 3 à 5–6."
+
+#. Senior Business Developer concise player help.
+msgid "Once per round, choose one action: place a house, a garden, an apartment, or an OUT marker."
+msgstr "Une fois par manche, choisissez une action : placer une maison, un jardin, un immeuble ou un marqueur OUT."
+
+#. Senior Business Developer concise player help.
+msgid "The three apartments, 15¾, 21¾ and 27¾, each occupy 3×3 squares. Demand and marketing follow the base apartment rules."
+msgstr "Les trois immeubles, 15¾, 21¾ et 27¾, occupent chacun 3×3 cases. La demande et le marketing suivent les règles de base des immeubles."
+
+#. Senior Business Developer concise player help.
+msgid "Place an OUT marker only on a house or apartment with no active demand. The building stays in place and receives no new demand for the rest of the game. Already marked or pending buildings and the stadium cannot be marked."
+msgstr "Un marqueur OUT ne peut être placé que sur une maison ou un immeuble sans demande active. Le bâtiment reste en place et ne reçoit plus de nouvelle demande jusqu’à la fin de la partie. Les bâtiments déjà marqués ou en attente et le stade sont exclus."
+
+#. Senior Business Developer concise player help.
+msgid "All players share 8 OUT markers. Each placement permanently spends one; markers cannot be removed or recovered. When none remain, this action is unavailable."
+msgstr "Tous les joueurs partagent 8 marqueurs OUT. Chaque placement en dépense un définitivement ; ils ne peuvent être ni retirés ni récupérés. Sans marqueur disponible, cette action est impossible."
+
+#. Senior Business Developer concise player help.
+msgid "The first player to use a Senior Business Developer gains its milestone and may add 1 map tile, as with the Lobbyist milestone. Other modules combine normally; house, garden and tile supplies follow the applicable base and module rules."
+msgstr "Le premier joueur à l’utiliser obtient son objectif et peut ajouter 1 tuile au plan, comme pour l’objectif du Lobbyiste. Les autres modules se combinent normalement ; les réserves de maisons, jardins et tuiles suivent les règles de base et de modules applicables."

@@ -2,6 +2,7 @@ import i18n from "../i18n"
 const t = i18n.global.t // Shortcut
 
 import * as rf from "./FCMreference"
+import * as phone from "./FCMphone"
 import * as map from "./FCMmap"
 import * as model from "./FCMmodel"
 
@@ -85,6 +86,18 @@ export function phaseStr(phase) {
 }
 
 export function getImage(image) {
+	if (image === `emp_${rf.TELEMARKETER}`) {
+		if (!phone.modern()) return new URL(`../../../static/FCM/images/e_telemarketer_legacy.jpg`, import.meta.url).href
+		if (String(i18n.global.locale.value).startsWith('zh')) return new URL(`../../../static/FCM/images/e_telemarketer.jpg`, import.meta.url).href
+		return new URL(`../../../static/FCM/images/e_telemarketer_en.jpg`, import.meta.url).href
+	}
+	if (/^campaign_(3[0-9]|4[01])$/.test(image) && phone.modern()) {
+		const group = phone.groupOf(Number(image.slice(9)))
+		return [new URL(`../../../static/FCM/images/marketing_phone_65_v1.jpg`, import.meta.url).href,
+			new URL(`../../../static/FCM/images/marketing_phone_75_v1.jpg`, import.meta.url).href,
+			new URL(`../../../static/FCM/images/marketing_phone_85_v1.jpg`, import.meta.url).href,
+			new URL(`../../../static/FCM/images/marketing_phone_95_v1.jpg`, import.meta.url).href][group]
+	}
 	// Icons
 	if (image === "icon-house") return new URL(`../../../static/FCM/images/house.svg`, import.meta.url).href
 	else if (image === "icon-nextGame") return new URL(`../../../static/FCM/images/icon-nextGame.svg`, import.meta.url).href
@@ -241,7 +254,10 @@ export function getImage(image) {
 	else if (image === `emp_${rf.FRY_CHEF}`) return new URL(`../../../static/FCM/images/e_fry_chef.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.TELEMARKETER}`) return new URL(`../../../static/FCM/images/e_telemarketer.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.TV_ANNOUNCER}`) return new URL(`../../../static/FCM/images/e_tv_announcer.jpg`, import.meta.url).href
-	else if (image === `emp_${rf.SENIOR_BUSINESS_DEVELOPER}`) return new URL(`../../../static/FCM/images/e_senior_business_developer_x1.jpg`, import.meta.url).href
+	else if (image === `emp_${rf.SENIOR_BUSINESS_DEVELOPER}`) {
+		if (String(i18n.global.locale.value).startsWith('zh')) return new URL(`../../../static/FCM/images/e_senior_business_developer_x1_out_zh.png`, import.meta.url).href
+		return new URL(`../../../static/FCM/images/e_senior_business_developer_x1_out_en.png`, import.meta.url).href
+	}
 	else if (image === `emp_${rf.KIMCHI_MASTER}`) return new URL(`../../../static/FCM/images/e_kimchi_master.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.NOODLE_COOK}`) return new URL(`../../../static/FCM/images/e_noodle_cook.jpg`, import.meta.url).href
 	else if (image === `emp_${rf.NOODLE_CHEF}`) return new URL(`../../../static/FCM/images/e_noodle_chef.jpg`, import.meta.url).href

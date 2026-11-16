@@ -15,6 +15,7 @@
     bank: "Bank: ${bank}",
   },
   topMenuViews: {
+		"availableApartments": "Available apartments",
     // Bug Report
     bugErrorRequired: "Please enter a bug report",
     bugReportTitle: "Bug Report",

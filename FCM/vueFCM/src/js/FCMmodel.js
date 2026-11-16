@@ -1,4 +1,5 @@
 import * as rf from "./FCMreference"
+import * as phone from "./FCMphone"
 import * as controller from "./FCMcontroller"
 import * as map from "./FCMmap"
 import * as funcs from "./FCMfuncs"
@@ -31,6 +32,14 @@ import i18n from "../i18n"
  */
 export function setupNewGame(opts = {}) {
 	const store = useModelStore()
+	store.mediaLine.rulesVersion = 1
+	store.mediaLine.phoneGroups = {}
+	store.context.phoneGroupAction = null
+	controller.resetMarketingSelection()
+	store.mediaLine.headlines = []
+	store.mediaLine.doubleCampaigns = []
+	store.mediaLine.doubleUsedBy = []
+	store.mediaLine.night = { groups: {}, aLinePushers: [] }
 	const init = window.initData || {}
 	const playerNames = opts.playerNames || init.playerNames || []
 	const displayNamesArr = opts.displayNames || init.displayNames || ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
@@ -547,9 +556,9 @@ export function setupKetchupExpansion(playerNumber) {
 	if (store.startingOptions.mediaLine) {
 		store.availableEmployees[rf.TELEMARKETER] = 6
 		store.availableEmployees[rf.TV_ANNOUNCER] = 6
-		store.availableMarketingCampaigns.push(28, 29, 30, 31, 32, 33, 34, 35)
+		store.availableMarketingCampaigns.push(28, 29, ...rf.PHONE_CAMPAIGNS.slice(0, store.mediaLine.rulesVersion === 1 ? 12 : 6))
 		if (store.startingOptions.useMilestones) {
-			store.availableMilestones.push(rf.FIRST_TELEMARKETER_USED)
+			if (store.mediaLine.rulesVersion === 0) store.availableMilestones.push(rf.FIRST_TELEMARKETER_USED)
 			store.availableMilestones.push(rf.FIRST_TV_ANNOUNCER_USED)
 		}
 	}
@@ -587,6 +596,10 @@ export function startLaborMarketTurn() {
 }
 
 export function findPlayerForCampaign(number) {
+	if (phone.modern() && phone.isPhone(number)) {
+		const lock = useModelStore().mediaLine.phoneGroups[phone.groupOf(number)]
+		if (lock) return lock.owner
+	}
 	const store = useModelStore()
 	if (Number.isInteger(store.laborMarket.temporaryCampaignOwners[number])) return store.laborMarket.temporaryCampaignOwners[number]
 	for (let i = 0; i < store.players.length; i++) {
@@ -609,7 +622,8 @@ export function addMarketingCampaign(number, index, rotated, good, duration, hou
 		houses: houses || [],
 		//nightShift: nightShift,
 	})
-	store.availableMarketingCampaigns.splice(store.availableMarketingCampaigns.indexOf(number), 1)
+	const poolIndex = store.availableMarketingCampaigns.indexOf(number)
+	if (poolIndex !== -1) store.availableMarketingCampaigns.splice(poolIndex, 1)
 
 	// Media Line mod: TV channels have no board token - the selected houses are
 	// marked with antennas instead
@@ -700,7 +714,7 @@ export function removeMarketingCampaign(number) {
 	store.campaigns = store.campaigns.filter((c) => c.number !== number)
 
 	// 3. Update store and sort
-	store.availableMarketingCampaigns.push(number)
+	if (!(phone.modern() && phone.isPhone(number) && store.mediaLine.phoneGroups[phone.groupOf(number)])) store.availableMarketingCampaigns.push(number)
 	store.availableMarketingCampaigns.sort((a, b) => a - b)
 
 	// 4. Update map

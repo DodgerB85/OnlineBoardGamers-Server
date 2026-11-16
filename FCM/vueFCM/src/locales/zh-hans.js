@@ -396,13 +396,13 @@ export default {
 		"unionOrganizerDesc": "5人起算，最多者各得1张。占CEO直属槽，无行动，工资$5。",
 
 		"telemarketer": "电话推销员",
-		"telemarketerDesc": "在十字五板块范围（餐厅板块加上下左右）的空地放置电话牌，不需要沿路",
+		"telemarketerDesc": "放置电话或更低级的广告，持续时间3回合",
 
 		"tvAnnouncer": "电视广播员",
 		"tvAnnouncerDesc": "在菱形十三板块范围内选 5 栋房装天线，每晚可发一条头条",
 
 		"seniorBusinessDeveloper": "资深业务拓展经理",
-		"seniorBusinessDeveloperDesc": "放置房屋、花园或公寓，或让一座房屋搬离（每回合一次）"
+		"seniorBusinessDeveloperDesc": "放置房屋、花园、公寓或OUT标记"
 	},
 	"laborMarket": {
 		"unionMustWork": "你必须安排工会组织者上班"
@@ -521,6 +521,8 @@ export default {
 		"placeCampaign": "放置营销板块",
 		"clickToPlaceCampaign": "点击地图上的高亮方格放置您的营销板块",
 		"phoneTokenSameAsFirst": "第二张电话牌自动沿用第一张的商品与时长",
+		"phoneGroupProgress": "正在放置第 {current}/3 张。",
+		"phoneGroupRules": "选择一组电话牌，同商品、同时长，有位置须放满3张。",
 		"tvChannelProgress": "为您的电视频道选择房屋：{current}/5",
 		"skipSecondPhoneToken": "跳过第二张电话牌",
 		"publishHeadline": "发布头条（免费动作，还可发布 {left} 条）：",
@@ -617,6 +619,7 @@ export default {
 		"bank": "银行余额：${bank}"
 	},
 	"topMenuViews": {
+		"availableApartments": "可用公寓",
 		"bugReportTitle": "错误报告",
 		"bugIntro": "如果您遇到任何问题，请提交一个错误报告，并尽可能提供详细信息。",
 		"coffeeBugQuestion": "您的bug和咖啡有关吗？",
@@ -839,7 +842,7 @@ export default {
 		"buildHouse": "{name} 在坐标 ({x},{y}) 建造房屋 #{num}，朝向 {orient}。",
 		"buildGarden": "{name} 在坐标（{x}，{y}）为房屋 #{num} 建造了一个花园，朝向为 {orient}。",
 		"buildApartment": "{name} 在坐标 ({x},{y}) 建造公寓 #{num}。",
-		"movesOutHouse": "{name} 在坐标 ({x},{y}) 让房屋 #{num} 搬离。",
+		"movesOutHouse": "{name} 在坐标 ({x},{y}) 为房屋 #{num} 放置OUT标记。",
 		"buildFreeway": "{name} 在坐标 ({x},{y}) 建造高速公路，朝向 {orient}。",
 		"openRestaurantLocal": "{name} 在坐标（{x}，{y}）处开设了一家新的餐厅，面向 {facing}，下一回合开业",
 		"openRestaurant": "{name} 在坐标（{x}，{y}）开了一家新餐厅，朝向 {facing}",
@@ -999,8 +1002,8 @@ export default {
 		"chooseHouseForGarden": "选择一所房子新建花园",
 		"chooseEdgeForGarden": "为花园选择一条边",
 		"apartment": "公寓",
-		"moveOut": "搬离",
-		"chooseHouseToMoveOut": "选择一所房子或公寓搬离（不能有未满足需求）"
+		"moveOut": "放置 OUT 标记",
+		"chooseHouseToMoveOut": "选择没有需求的房屋或公寓"
 	},
 	"playerDetails": {
 		"noMilestones": "不使用里程碑",

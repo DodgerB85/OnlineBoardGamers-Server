@@ -137,7 +137,7 @@
     buildHouse: "{name} builds house #{num} {orient} at co-ordinates ({x}, {y})",
     buildGarden: "{name} builds a garden for house #{num} {orient} at co-ordinates ({x}, {y})",
     buildApartment: "{name} builds apartment #{num} at co-ordinates ({x}, {y})",
-    movesOutHouse: "{name} moves out house #{num} at co-ordinates ({x}, {y})",
+    movesOutHouse: "{name} places an OUT marker on house #{num} at co-ordinates ({x}, {y})",
     buildFreeway: "{name} builds a Freeway {orient} at co-ordinates ({x}, {y})",
     openRestaurantLocal: "{name} builds a new restaurant at co-ordinates ({x}, {y}) facing {facing}, opening next turn",
     openRestaurant: "{name} opens a new restaurant at co-ordinates ({x}, {y}) facing {facing}",

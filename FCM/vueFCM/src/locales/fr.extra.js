@@ -45,12 +45,12 @@ export default {
 		"unionOrganizer": "Organisateur syndical",
 		"unionOrganizerDesc": "5+ ouvriers : chaque entreprise la plus importante en reçoit un. Emplacement direct du CEO ; aucune action ; salaire de 5 $.",
 		"telemarketer": "Télévendeur",
-		"telemarketerDesc": "Placez des jetons téléphone sur un terrain vide dans la croix de 5 cases autour d'un restaurant, aucune route nécessaire",
+		"telemarketerDesc": "Placez une publicité téléphonique ou de niveau inférieur, durée 3 tours",
 		"tvAnnouncer": "Présentateur TV",
 		"tvAnnouncerDesc": "Choisissez 5 maisons dans le losange de 13 cases autour d'un restaurant et publiez un gros titre par tour",
 
 		"seniorBusinessDeveloper": "Développeur d'Affaires Senior",
-		"seniorBusinessDeveloperDesc": "Placez une maison, un jardin ou un immeuble ; ou faites déménager une maison (une fois par tour)"
+		"seniorBusinessDeveloperDesc": "Placez une maison, un jardin, un immeuble ou un marqueur OUT"
 	},
 	"laborMarket": {
 		"unionMustWork": "Vous devez employer l'Organisateur syndical"
@@ -72,6 +72,8 @@ export default {
 		"resetRecruiting": "Réinitialiser le recrutement",
 		"clickToUndoTrain": "Cliquez pour annuler cette formation",
 		"phoneTokenSameAsFirst": "Le deuxième jeton téléphone utilise automatiquement la même marchandise et la même durée que le premier",
+		"phoneGroupProgress": "Placez le téléphone {current}/3.",
+		"phoneGroupRules": "Choisissez un groupe : même produit et durée. Placez les 3 tant qu’il reste de la place.",
 		"tvChannelProgress": "Choisissez des maisons pour votre chaîne TV : {current}/5",
 		"skipSecondPhoneToken": "Passer le deuxième jeton téléphone",
 		"publishHeadline": "Publier un gros titre (action gratuite, {left} restant) :",
@@ -84,6 +86,7 @@ export default {
 		"headhuntedEmployeeBadge": "Débauché · Changement de poste ${amount}"
 	},
 	"topMenuViews": {
+		"availableApartments": "Immeubles disponibles",
 		"nonHireable": "Non embauchable"
 	},
 	"history": {

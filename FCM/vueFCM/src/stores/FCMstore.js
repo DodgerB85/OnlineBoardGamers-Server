@@ -175,6 +175,8 @@ export const useModelStore = defineStore("store", () => {
 	// the saved state: campaigns register their groups at payday, dinner settles
 	// them a turn later - a page reload in between must not lose the bonus.
 	const mediaLine = reactive({
+		rulesVersion: 0, // Unmarked saves/replays retain the original rules.
+		phoneGroups: {}, // group -> { owner, marketer, cards, good, duration }
 		headlines: [], // { turn, playerIndex, value } with value +5 / -5
 		doubleCampaigns: [],
 		doubleUsedBy: [],
@@ -275,6 +277,7 @@ export const useModelStore = defineStore("store", () => {
 		// Media Line mod
 		tvHouses: [], // House numbers picked for the TV channel campaign
 		mediaLineSecondCall: false, // Phone token: second placement within the same action
+		phoneGroupAction: null,
 		selectedBuilding: -1,
 		house: 1,
 		houseIndex: -1, // Board index of the house being given a garden

@@ -89,7 +89,7 @@ describe("Media Line constants", () => {
 	})
 
 	it("registers campaign slots 28-35", () => {
-		expect(rf.MARKETING_CAMPAIGNS).toHaveLength(36)
+		expect(rf.MARKETING_CAMPAIGNS).toHaveLength(42)
 		expect(rf.MARKETING_CAMPAIGNS[28]).toEqual({ type: rf.TV_CHANNEL, width: 1, height: 1 })
 		expect(rf.MARKETING_CAMPAIGNS[29]).toEqual({ type: rf.TV_CHANNEL, width: 1, height: 1 })
 		for (let n = 30; n <= 35; n++) {
@@ -259,9 +259,10 @@ describe("Media Line B3 diamond range", () => {
 	})
 })
 
-describe("Media Line B2 phone token placement", () => {
+describe("Media Line B2 legacy phone token placement", () => {
 	function phoneBoard(withHouse) {
 		const store = freshGame(2, ["50"])
+		store.mediaLine.rulesVersion = 0 // preserve the original building-adjacency contract
 		const coords = blankCoords()
 		stamp(coords, 40, 40, 2, 2, rf.RESTAURANT_OPEN)
 		if (withHouse) stamp(coords, 38, 40, 2, 3, rf.HOUSE + 7)
@@ -609,8 +610,9 @@ describe("Media Line stage 4 - headline publication", () => {
 		expect(store2.mediaLine.headlines).toHaveLength(0)
 	})
 
-	it("applies only next turn and clamps the city total at +/-10", () => {
+	it("legacy applies only next turn and clamps the city total at +/-10", () => {
 		const store = freshGame(2, ["50"])
+		store.mediaLine.rulesVersion = 0
 		expect(rules.giveHeadlineTotal()).toBe(0)
 		// Published this turn: not effective tonight
 		store.mediaLine.headlines.push({ turn: store.gameflow.turn, playerIndex: 0, value: 5 })
@@ -623,6 +625,31 @@ describe("Media Line stage 4 - headline publication", () => {
 		store.mediaLine.headlines.splice(0)
 		for (let i = 0; i < 4; i++) store.mediaLine.headlines.push({ turn: store.gameflow.turn - 1, playerIndex: 1, value: -5 })
 		expect(rules.giveHeadlineTotal()).toBe(-10)
+	})
+
+	it.each([15, 20, -15, -20])("uncapped modern headline total is %i", (total) => {
+		const store = freshGame(2, ["50"])
+		store.mediaLine.rulesVersion = 1
+		expect(store.mediaLine.rulesVersion).toBe(1)
+		store.gameflow.turn = 3
+		for (let i = 0; i < Math.abs(total) / 5; i++) store.mediaLine.headlines.push({ turn: 2, playerIndex: i % 2, value: Math.sign(total) * 5 })
+		expect(rules.giveHeadlineTotal()).toBe(total)
+	})
+
+	it("uncapped modern headlines cancel before summing and last only next dinner", () => {
+		const store = freshGame(2, ["50"])
+		store.mediaLine.rulesVersion = 1
+		store.gameflow.turn = 3
+		for (const value of [5,5,5,5,-5,-5,-5]) store.mediaLine.headlines.push({ turn: 2, playerIndex: 0, value })
+		store.mediaLine.headlines.push({ turn: 1, playerIndex: 0, value: 5 }, { turn: 3, playerIndex: 1, value: -5 })
+		expect(rules.giveHeadlineTotal()).toBe(5)
+		store.gameflow.turn = 4
+		expect(rules.giveHeadlineTotal()).toBe(-5)
+		store.gameflow.turn = 5
+		expect(rules.giveHeadlineTotal()).toBe(0)
+		store.startingOptions.mediaLine = false
+		store.gameflow.turn = 3
+		expect(rules.giveHeadlineTotal()).toBe(0)
 	})
 
 	it("is inert without the mod", () => {
@@ -698,6 +725,38 @@ describe("Media Line stage 4 - headline in dinner settlement", () => {
 		store.needs.push({ number: store.houseUnderTest, needs: [[rf.BURGER, -1]] })
 		return store.houseUnderTest
 	}
+
+	it.each([20, -20])("uncapped modern real dinner applies %i per item without a zero floor", (total) => {
+		const store = dinnerFreshGame()
+		store.mediaLine.rulesVersion = 1
+		placeAndFeed(store)
+		store.players[0].resources.push(rf.BURGER)
+		store.needs[0].needs.push([rf.BURGER, -1])
+		for (let i = 0; i < 4; i++) store.mediaLine.headlines.push({ turn: 2, playerIndex: i % 2, value: total / 4 })
+		const moneyBefore = store.players[0].money
+		rules.doDinnerTime(false)
+		expect(store.players[0].money - moneyBefore).toBe(2 * (10 + total))
+		const soldHouse = store.history.find(e => e[0] === rf.HIST_DINNER_TIME)[3].find(h => h[0] === store.houseUnderTest)
+		expect(soldHouse[5]).toBe(total)
+	})
+
+	it.each([20, -20])("uncapped modern dinner keeps garden plus park multiplier before bonus (%i)", (total) => {
+		const store = dinnerFreshGame()
+		store.mediaLine.rulesVersion = 1
+		const house = placeAndFeed(store)
+		store.gardens.push({ house })
+		const restaurantCells = store.players[0].restaurants.flatMap(r => mapMod.giveAllSpaceForAToken(r.index, 2, 2))
+		const parkIndex = mapMod.neighbours(mapMod.getZoneOfHouse(house)).find(i => !restaurantCells.includes(i) && store.mapData.coords[i] !== rf.ROAD)
+		expect(parkIndex).toBeDefined()
+		store.mapData.coords[parkIndex] = rf.PARK
+		expect(model.hasGarden(house)).toBe(true)
+		expect(model.adjacentToPark(house)).toBe(true)
+		store.players[0].milestones.push(rf.FIRST_BURGER_MARKETED)
+		for (let i = 0; i < 4; i++) store.mediaLine.headlines.push({ turn: 2, playerIndex: i % 2, value: total / 4 })
+		const moneyBefore = store.players[0].money
+		rules.doDinnerTime(false)
+		expect(store.players[0].money - moneyBefore).toBe((10 + total) * 3 + 5)
+	})
 
 	it("adds tonight's headline to the sale price", () => {
 		const store = dinnerFreshGame()
@@ -938,6 +997,23 @@ describe("Media Line stage 5 - milestone 1 grouped all-eat bonus", () => {
 		const bonusEntry = store.history.find((h) => h[0] === rf.HIST_MEDIA_LINE_BONUS)
 		expect(bonusEntry[3][0]).toBe(0)
 		expect(bonusEntry[3][1]).toBe(50)
+	})
+
+	it("new rules retain normal sales without the obsolete TV group bonus or bookkeeping", () => {
+		const store = nightBoard()
+		store.mediaLine.rulesVersion = 1
+		const houses = ensureServable(store, 5).slice(0, 5)
+		model.addMarketingCampaign(28, -1, false, rf.BURGER, 9, houses)
+		store.players[0].marketers.push({ campaign: 28, marketer: rf.TV_ANNOUNCER, nightShift: false })
+		store.players[0].milestones.push(rf.FIRST_TELEMARKETER_USED) // stale data cannot re-enable it
+		rules.doMarketingCampaigns(false)
+		expect(store.mediaLine.night).toEqual({ groups: {}, aLinePushers: [] })
+		store.players[0].resources = Array(5).fill(rf.BURGER)
+		const before = store.players[0].money
+		rules.doDinnerTime(false)
+		expect(store.players[0].money - before).toBe(50)
+		expect(store.history.find(h => h[0] === rf.HIST_INCOME)[3][0]).toHaveLength(2)
+		expect(store.history.some(h => h[0] === rf.HIST_MEDIA_LINE_BONUS)).toBe(false)
 	})
 
 	it("an own A-line campaign still running breaks purity (no bonus)", () => {
@@ -1276,6 +1352,60 @@ describe("Media Line stage 6 - save / load round trip", () => {
 		expect(result).not.toBe(-9999)
 		return store
 	}
+
+	it.each([[0,20],[0,-20],[1,20],[1,-20]])("uncapped modern persistence keeps rule version %i and headline %i", (version, total) => {
+		for (const format of ['wire', 'raw', 'compressed']) {
+			const store = seedMLGame()
+			store.externalStartingOptions.push('50')
+			store.mapData.tiles = mapMod.generateRandomMap(2)
+			mapMod.initCoords()
+			store.mediaLine.rulesVersion = version
+			store.history.push([rf.HIST_NEW_TURN,-1,998,[1]], [rf.HIST_NEW_TURN,-1,999,[5]])
+			for (let i = 0; i < 4; i++) store.mediaLine.headlines.push({ turn: 4, playerIndex: i % 2, value: total / 4 })
+			const saved = format === 'wire' ? funcs.exportFCMmodel(false, false) : funcs.simpleExportWholeFCMmodel(format === 'raw')
+			store.mediaLine.rulesVersion = 1 - version
+			store.mediaLine.headlines = []
+			if (format === 'wire') {
+				globalThis.window.initData = { startingOptions: ['50'], startingMap: STARTING_MAP, playerNames: ['P0', 'P1'] }
+				expect(funcs.importFCMmodel(saved, false, false)).not.toBe(-9999)
+			} else funcs.simpleImportWholeFCMmodel(saved, format === 'raw')
+			expect(store.mediaLine.rulesVersion).toBe(version)
+			expect(store.startingOptions.mediaLine).toBe(true)
+			expect(store.gameflow.turn).toBe(5)
+			expect(store.mediaLine.headlines).toHaveLength(4)
+			expect(rules.giveHeadlineTotal()).toBe(version === 1 ? total : Math.sign(total) * 10)
+		}
+	})
+
+	it.each([0,1])("uncapped modern real replay retains headline version %i", async version => {
+		const store = seedMLGame()
+		store.externalStartingOptions.push('50')
+		store.mediaLine.rulesVersion = version
+		store.gameflow.turn = 1
+		store.mapData.tiles = mapMod.generateRandomMap(2)
+		mapMod.initCoords()
+		globalThis.window.initData = { startingOptions: ['50'], startingMap: STARTING_MAP, playerNames: ['P0','P1'] }
+		const employees = new Array(4).fill(rf.TV_ANNOUNCER)
+		store.history.push([rf.HIST_NEW_TURN,-1,999,[1]], [rf.HIST_HIRE,0,1000,employees], [rf.HIST_CHOOSE_STRUCTURE,0,1001,[employees,[]]])
+		store.players[0].employees = employees.slice()
+		for (let i = 0; i < 4; i++) controller.publishHeadline(5)
+		expect(store.mediaLine.headlines).toHaveLength(4)
+		store.history.push([rf.HIST_NEW_TURN,-1,1009,[2]])
+		globalThis.document = { querySelector: () => null }
+		await replay.generateReplayData()
+		const count = store.history.length
+		const snapshots = JSON.stringify(store.replayData)
+		replay.goToReplayStep(count - 1)
+		expect(store.mediaLine.rulesVersion).toBe(version)
+		expect(store.gameflow.turn).toBe(2)
+		expect(rules.giveHeadlineTotal()).toBe(version === 1 ? 20 : 10)
+		replay.goToReplayStep(0)
+		expect(store.mediaLine.headlines).toHaveLength(0)
+		replay.goToReplayStep(count - 1)
+		expect(store.gameflow.turn).toBe(2)
+		expect(rules.giveHeadlineTotal()).toBe(version === 1 ? 20 : 10)
+		expect(JSON.stringify(store.replayData)).toBe(snapshots)
+	})
 
 	it("exportFCMmodel keeps TV houses, phone tokens and the media line state", () => {
 		const store = seedMLGame()

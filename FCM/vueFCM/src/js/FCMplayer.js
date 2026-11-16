@@ -1,6 +1,7 @@
 import { useModelStore } from "../stores/FCMstore.js"
 
 import * as rf from "./FCMreference"
+import * as phone from "./FCMphone"
 import * as rules from "./FCMrules"
 import * as controller from "./FCMcontroller.js"
 import * as model from "./FCMmodel.js"
@@ -271,6 +272,7 @@ export function addCampaignToMarketer(playerIndex, marketer, campaign) {
 }
 
 export function recallMarketeer(playerIndex, campaign) {
+	if (phone.modern() && phone.isPhone(campaign) && phone.recall(campaign)) return
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
 

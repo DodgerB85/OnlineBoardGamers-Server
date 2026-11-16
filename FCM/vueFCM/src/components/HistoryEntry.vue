@@ -662,7 +662,7 @@ const computedEntry3 = computed(() => {
 	} else if (entry[0] === rf.HIST_INCOME) {
 		ret.none = param.length === 0
 		ret.jazzTable = !!store.startingOptions.jazzMusicians
-		ret.mediaLine = !!store.startingOptions.mediaLine
+		ret.mediaLine = !!store.startingOptions.mediaLine && store.mediaLine.rulesVersion === 0
 		// Coffee-module rows carry coffee income at index 3 (always length 4).
 		// Older entries only ever had length 2 or 3, so they stay pooled.
 		// Media Line rows also grow to length 4, so gate the split on the

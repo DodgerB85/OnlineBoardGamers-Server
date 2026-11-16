@@ -1,5 +1,6 @@
 <script setup>
 import * as rf from "../js/FCMreference"
+import * as phone from "../js/FCMphone"
 import * as map from "../js/FCMmap"
 import * as view from "../js/FCMview"
 import * as model from "../js/FCMmodel"
@@ -29,7 +30,10 @@ watch(() => store.context.rotation, () => {
 		changeGhost(index, false)
 		return
 	}
-	if (store.context.lobbyistMilestoneActive) {
+	if (store.gameflow.subphase === rf.SUBPHASE_MARKETING && phone.modern() && phone.isPhone(store.context.campaign)) {
+		store.viewSettings.currentGhostIndex = null
+		changeGhost(index, true)
+	} else if (store.context.lobbyistMilestoneActive) {
 		showLobbyistMSTileGhost(index)
 	} else if (rf.isHousesSubphase(store.gameflow.subphase) && store.context.selectedBuilding !== -1 && store.context.selectedBuilding !== -2 && !rf.APARTMENTS.includes(store.context.selectedBuilding)) {
 		showHouseGhost(index)
@@ -104,6 +108,7 @@ function heatOpacity(score) {
 }
 
 function clickedOnSquare(index) {
+	if (phone.modern() && phone.isPhone(store.context.campaign)) store.viewSettings.currentGhostIndex = null
 	ghostImgRef.value.style.display = "none"
 	ghostDivRef.value.style.display = "none"
 	ghostRoadworkIndexes.value = []
@@ -621,7 +626,8 @@ function changeGhost(index, add, event) {
 		img.style.opacity = 0.5
 
 		let r = "0"
-		const [x, y] = view.getXYforSmallSquare(index)
+		const phonePlacement = phone.modern() && phone.isPhone(store.context.campaign) ? phone.footprint(index, store.context.rotation) : null
+		const [x, y] = view.getXYforSmallSquare(phonePlacement ? phonePlacement.index : index)
 		let adjustedX = x
 		let adjustedY = y
 

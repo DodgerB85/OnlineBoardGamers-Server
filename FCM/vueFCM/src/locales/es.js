@@ -767,7 +767,7 @@ export default {
 		"buildHouse": "{name} construye la casa #{num} {orient} en las coordenadas ({x}, {y})",
 		"buildGarden": "{name} construye un jardín para la casa #{num} {orient} en las coordenadas ({x}, {y})",
 		"buildApartment": "{name} construye el apartamento #{num} en las coordenadas ({x}, {y})",
-		"movesOutHouse": "{name} desaloja la casa #{num} en las coordenadas ({x}, {y})",
+		"movesOutHouse": "{name} coloca un marcador OUT en la casa #{num} en ({x}, {y})",
 		"buildFreeway": "{name} construye una autopista {orient} en las coordenadas ({x}, {y})",
 		"openRestaurantLocal": "{name} construye un nuevo restaurante en las coordenadas ({x}, {y}) frente a {facing} y se abre en el siguiente turno.",
 		"openRestaurant": "{name} abre un nuevo restaurante en las coordenadas ({x}, {y}) frente a {facing}",
@@ -951,8 +951,8 @@ export default {
 		"chooseEdgeForGarden": "Elige un borde para el jardín.",
 		"chooseHouseForGarden": "Elige una casa para agregar un jardín.",
 		"apartment": "Apartamento",
-		"moveOut": "Mudanza",
-		"chooseHouseToMoveOut": "Elige una casa o apartamento para que se mude (sin demanda activa)"
+		"moveOut": "Colocar marcador OUT",
+		"chooseHouseToMoveOut": "Elige una casa o apartamento sin demanda"
 	},
 	"playerDetails": {
 		"noMilestones": "Sin hitos",
