@@ -113,8 +113,8 @@
     chooseEdgeForGarden: "Choose an edge for the garden",
     chooseHouseForGarden: "Choose a house to add a garden",
     apartment: "Apartment",
-    moveOut: "Move Out",
-    chooseHouseToMoveOut: "Choose a house or apartment to move out (no active demand)",
+    moveOut: "Place OUT marker",
+    chooseHouseToMoveOut: "Choose a house or apartment with no demand",
   },
 
   playerDetails: {

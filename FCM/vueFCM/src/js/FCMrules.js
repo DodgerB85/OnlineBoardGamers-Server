@@ -1,4 +1,5 @@
 import * as rf from "./FCMreference"
+import * as phone from "./FCMphone"
 import * as controller from "./FCMcontroller"
 import * as map from "./FCMmap"
 import * as funcs from "./FCMfuncs"
@@ -869,7 +870,7 @@ export function restaurantRoadTest(index) {
 }
 
 // Give possible positions for marketing campaign
-export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, rotated) {
+export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, rotated, phoneRotation) {
 	const store = useModelStore()
 	const campaignData = rf.MARKETING_CAMPAIGNS[campaignId]
 
@@ -943,7 +944,7 @@ export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, 
 			})
 	}
 
-	// --- CASE A2: PHONE TOKENS (Media Line mod) - 2x1 attached to a building in
+	// --- CASE A2: PHONE TOKENS (Media Line mod) - 2x1 on empty ground in
 	// the cross of 5 map tiles (the restaurant's tile plus the 4 orthogonal
 	// neighbours). Like any other token the card may straddle the edge of the
 	// zone into the next tile (one cell each side); roads are irrelevant (radio
@@ -956,15 +957,17 @@ export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, 
 		const possibilities = []
 		for (const anchor of zone) {
 			const [ax, ay] = map.giveCoord(anchor)
-			if (ax + w > rf.ssW || ay + h > rf.ssH) continue // never wrap off the board edge
-			const cells = map.giveAllSpaceForAToken(anchor, w, h)
+			if (!(phone.modern() && phoneRotation !== undefined) && (ax + w > rf.ssW || ay + h > rf.ssH)) continue // canonical legacy edge check
+			const placement = phone.modern() && phoneRotation !== undefined ? phone.footprint(anchor, phoneRotation) : null
+			if (phone.modern() && phoneRotation !== undefined && !placement) continue
+			const cells = placement ? placement.cells : map.giveAllSpaceForAToken(anchor, w, h)
 			const fits = cells.every((c) => store.mapData.coords[c] === rf.EMPTY_SPACE)
-			// A phone token must touch at least one house/apartment building.
-			const touchesBuilding = map.neighbours(cells).some((c) => {
+			// Only legacy games require adjacency to a house/apartment.
+			const touchesBuilding = !phone.modern() && map.neighbours(cells).some((c) => {
 				const v = store.mapData.coords[c]
 				return v > rf.HOUSE && v < rf.HOUSE_ENC_MAX
 			})
-			if (fits && touchesBuilding) possibilities.push(anchor)
+			if (fits && (phone.modern() || touchesBuilding)) possibilities.push(anchor)
 		}
 		return possibilities
 	}
@@ -1601,6 +1604,7 @@ export function possibleMarketingCampaigns(availabilities, marketer) {
 	// 3. Filter the availabilities array
 	return availabilities.filter((campaignId) => {
 		const campaign = rf.MARKETING_CAMPAIGNS[campaignId]
+		if (phone.modern() && phone.isPhone(campaignId)) return allowedSet.has(rf.PHONE) && phone.availableGroups(availabilities).includes(campaignId)
 		return campaign && allowedSet.has(campaign.type)
 	})
 }
@@ -1775,6 +1779,7 @@ export function availableNewRoads() {
 
 // Media Line B-line keys (decimal, interleaved with A-line numbers); A-line keys stay raw
 export function campaignSortKey(number) {
+	if (useModelStore().mediaLine.rulesVersion === 1 && rf.PHONE_CAMPAIGNS.includes(number)) return 6.5 + Math.floor((number - 30) / 3)
 	if (number >= 28 && number <= 35) return [3.5, 4.5, 6.5, 6.6, 7.5, 7.6, 8.5, 8.6][number - 28]
 	return number
 }
@@ -1791,7 +1796,7 @@ export function getPlaceInFullTurnOrderForPlayer(playerIndex) {
 // Media Line mod: city-wide headline modifier for tonight's dinner.
 // Headlines are published during a working day and take effect only at the
 // NEXT turn's dinner (gameflow.turn has not yet incremented during dinner).
-// Stacks freely, city total clamped to +/-10.
+// Modern headlines stack without limits; legacy city totals retain +/-10.
 export function giveHeadlineTotal() {
 	const store = useModelStore()
 	if (!store.startingOptions.mediaLine) return 0
@@ -1799,7 +1804,7 @@ export function giveHeadlineTotal() {
 	for (const h of store.mediaLine.headlines) {
 		if (h.turn === store.gameflow.turn - 1) sum += h.value
 	}
-	return Math.max(-10, Math.min(10, sum))
+	return phone.modern() ? sum : Math.max(-10, Math.min(10, sum))
 }
 
 // Media Line mod: milestone 1 (First Telemarketer Used) - grouped all-eat
@@ -1815,7 +1820,7 @@ function settleMediaLineGroups(sold, replayOnly) {
 	const bonuses = new Array(store.players.length).fill(0)
 	const night = store.mediaLine.night
 	store.mediaLine.night = { groups: {}, aLinePushers: [] } // reset for the next night
-	if (!store.startingOptions.mediaLine) return bonuses
+	if (!store.startingOptions.mediaLine || phone.modern()) return bonuses
 
 	for (let i = 0; i < store.players.length; i++) {
 		if (!plyr.hasMilestone(i, rf.FIRST_TELEMARKETER_USED)) continue
@@ -2071,7 +2076,7 @@ export function doDinnerTime(replayOnly) {
 
 	// --- PHASE 3: CALCULATE FINAL EARNINGS & BONUSES ---
 	// Media Line mod: headlines published last working day shift every sale
-	// price city-wide tonight (city total clamped to +/-10; negative legal)
+	// price city-wide tonight (modern unlimited, legacy +/-10; negative legal)
 	const headlineTotal = giveHeadlineTotal()
 	sold.forEach((sale) => {
 		const pIdx = sale.playerIndex
@@ -2158,7 +2163,7 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 			const supplement = Math.ceil(total / 2)
 			total += supplement
 			hI.push(supplement)
-		} else if (store.startingOptions.mediaLine) hI.push(0)
+		} else if (store.startingOptions.mediaLine && !phone.modern()) hI.push(0)
 
 		// Coffee split (Coffee module only): pad the CFO slot so coffee income always
 		// lands at index 3. Old entries never have length 4, so the history reader can
@@ -2171,7 +2176,7 @@ function finalizePayouts(earnings, coffeeEarnings, ketchupWinners, sold, replayO
 		// Media Line mod: milestone 1 bonus gets its own column in the income
 		// table, always LAST (index 3 without coffee, index 4 with it); the
 		// money itself was already paid in settleMediaLineGroups
-		if (store.startingOptions.mediaLine) hI.push(mediaLineBonuses[playerIndex])
+		if (store.startingOptions.mediaLine && !phone.modern()) hI.push(mediaLineBonuses[playerIndex])
 
 		histoIncome[playerIndex] = hI
 		p.money += total
@@ -2924,7 +2929,7 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 	for (let mmLoop = totalMassMarketers; mmLoop >= 0; mmLoop--) {
 		// Sort campaigns by number (Media Line mod: B-line campaigns use
 		// decimal sort keys so they interleave into the A-line order)
-		const sortedCampaigns = [...store.campaigns].sort((a, b) => campaignSortKey(a.number) - campaignSortKey(b.number))
+		const sortedCampaigns = [...store.campaigns].sort((a, b) => campaignSortKey(a.number) - campaignSortKey(b.number) || a.number - b.number)
 
 		const histObj = []
 		const earnedByPlayers = []
@@ -2937,10 +2942,10 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 			// the campaign still markets, just without a player attribution.
 			const isRadio = rf.MARKETING_CAMPAIGNS[campaign.number].type === rf.RADIO
 			const isAirplane = rf.MARKETING_CAMPAIGNS[campaign.number].type === rf.AIRPLANE
-			const isBLine = store.startingOptions.mediaLine && campaign.number >= 28 && campaign.number <= 35
+			const isBLine = store.startingOptions.mediaLine && !phone.modern() && campaign.number >= 28 && campaign.number <= 35
 
 			// Media Line mod: nightly bookkeeping for the grouped all-eat bonus
-			if (store.startingOptions.mediaLine) {
+			if (store.startingOptions.mediaLine && !phone.modern()) {
 				const night = store.mediaLine.night
 				if (isBLine) {
 					if (!night.groups[campaign.number]) night.groups[campaign.number] = { owner: playerIndex, houses: [] }
@@ -3265,7 +3270,7 @@ export function giveMarketingMilestones(playerIndex, marketer) {
 			break
 		// Media Line mod
 		case rf.TELEMARKETER:
-			plyr.awardMilestone(playerIndex, rf.FIRST_TELEMARKETER_USED)
+			if (!phone.modern()) plyr.awardMilestone(playerIndex, rf.FIRST_TELEMARKETER_USED)
 			break
 		case rf.TV_ANNOUNCER:
 			plyr.awardMilestone(playerIndex, rf.FIRST_TV_ANNOUNCER_USED)

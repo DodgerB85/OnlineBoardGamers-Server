@@ -18,6 +18,7 @@ document.addEventListener("keyup", rotateKeyHandler)
 
 <script setup>
 import * as rf from "../../js/FCMreference"
+import * as phone from "../../js/FCMphone"
 import * as view from "../../js/FCMview"
 import * as controller from "../../js/FCMcontroller"
 import * as rules from "../../js/FCMrules"
@@ -52,7 +53,8 @@ const suppressTransition = ref(false)
 
 function isTwoRotationItem() {
 	if (isHouse && !store.startingOptions.hawkers) return true
-	if (isCampaign || isFreeway) return true
+	if (isCampaign) return !(phone.modern() && phone.isPhone(store.context.campaign))
+	if (isFreeway) return true
 	if (isLobbyist && lobbyistHasTwoRotations()) return true
 	return false
 }
@@ -81,7 +83,7 @@ const activeItemIdentity = computed(() => {
 	return null
 })
 
-watch(activeItemIdentity, () => snapDegrees(0))
+watch(activeItemIdentity, () => snapDegrees(isCampaign && phone.modern() && phone.isPhone(store.context.campaign) ? store.context.rotation * 90 : 0))
 
 // Degrees accumulate freely so the CSS transition always spins in the clicked
 // direction (rotate(450deg) == rotate(90deg) visually)
@@ -124,7 +126,7 @@ function rotateClockwise() {
 
 function rotateAntiClockwise() {
 	if (isCampaign && !computedRotatableCampaign.value) return
-	if (isCampaign) controller.rotateCampaign()
+	if (isCampaign) controller.rotateCampaign(-1)
 	currentDegrees.value -= 90
 	if (isLobbyist) nextTick(() => controller.updateLobbyistHighlights())
 }
@@ -217,7 +219,7 @@ const computedSbdOutTokensLeft = computed(() => rules.outTokensRemaining())
 
 // --- CAMPAIGN OPTIONS ---
 
-const computedMaxDuration = computed(() => rules.giveMaxDurationForMarketer(store.context.marketer))
+const computedMaxDuration = computed(() => store.mediaLine.rulesVersion === 1 && rf.PHONE_CAMPAIGNS.includes(store.context.campaign) ? Math.min(3, rules.giveMaxDurationForMarketer(store.context.marketer)) : rules.giveMaxDurationForMarketer(store.context.marketer))
 
 const computedRotatableCampaign = computed(() => {
 	const campaignData = rf.MARKETING_CAMPAIGNS[store.context.campaign]
@@ -392,7 +394,7 @@ function flipLobbyist(vertical) {
 		<template v-if="isCampaign">
 			<!-- Campaign choice -->
 			<div class="addBoxSection">
-				<img v-for="campaign in store.context.campaigns" :key="campaign" :src="view.getImage(`campaign_${campaign}`)" class="selectable campaignChoiceImg" :class="{ selectedChoice: store.context.campaign === campaign }" :style="campaignChoiceStyle(campaign)" @click="controller.chooseCampaign(campaign)" :alt="campaign" />
+				<img v-for="campaign in store.context.campaigns" :key="campaign" :src="view.getImage(`campaign_${campaign}`)" class="selectable campaignChoiceImg" :class="{ selectedChoice: store.context.campaign === campaign }" :style="campaignChoiceStyle(campaign)" @click="controller.chooseCampaign(campaign)" :alt="rules.campaignSortKey(campaign)" />
 			</div>
 
 			<!-- Main good (locked to the first token during the second phone call and the second campaign manager tile) -->
@@ -419,7 +421,7 @@ function flipLobbyist(vertical) {
 			<!-- Rotation + preview -->
 			<div class="addBoxSection rotationSection" :style="{ minHeight: computedRotationMinHeight }">
 				<img :src="view.getImage('rot_anticlockwise')" class="rotateButton" :class="{ dimmedRotateButton: !computedRotatableCampaign }" @click="rotateAntiClockwise" />
-				<img :src="computedCampaignPreviewSrc" class="campaignPreviewImg" :style="{ ...computedPreviewWidth, ...rotationStyle }" :alt="store.context.campaign" />
+				<img :src="computedCampaignPreviewSrc" class="campaignPreviewImg" :style="{ ...computedPreviewWidth, ...rotationStyle }" :alt="rules.campaignSortKey(store.context.campaign)" />
 				<img :src="view.getImage('rot_clockwise')" class="rotateButton" :class="{ dimmedRotateButton: !computedRotatableCampaign }" @click="rotateClockwise" />
 			</div>
 		</template>
@@ -487,7 +489,7 @@ function flipLobbyist(vertical) {
 						<img class="sbdSquareChoiceImg" :src="view.getImage('apartment')" :alt="$t('items.apartment')" />
 						<span class="numberHolder sbdAptNumberHolder">{{ apt === rf.APARTMENT_15 ? '15¾' : apt === rf.APARTMENT_21 ? '21¾' : '27¾' }}</span>
 					</span>
-					<span v-if="computedSbdMoveOutAvailable" class="houseHolder" :class="{ selected: store.context.selectedBuilding === -2 }" @click="controller.selectMoveOutToBuild()">
+					<span v-if="computedSbdMoveOutAvailable" class="houseHolder" :class="{ selected: store.context.selectedBuilding === -2 }" :title="$t('items.moveOut')" @click="controller.selectMoveOutToBuild()">
 						<img class="sbdSquareChoiceImg" :src="view.getImage('movedOut')" :alt="$t('items.moveOut')" />
 						<span class="numberHolder">({{ computedSbdOutTokensLeft }})</span>
 					</span>

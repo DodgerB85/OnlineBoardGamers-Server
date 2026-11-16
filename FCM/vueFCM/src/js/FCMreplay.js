@@ -1,4 +1,5 @@
 import * as rf from "./FCMreference"
+import * as phone from "./FCMphone"
 import * as controller from "./FCMcontroller"
 import * as history from "./FCMhistory"
 import * as map from "./FCMmap"
@@ -140,8 +141,11 @@ export function replaySetupKetchupExpansion(playerNumber) {
 	if (store.startingOptions.mediaLine) {
 		store.availableEmployees[rf.TELEMARKETER] = 6
 		store.availableEmployees[rf.TV_ANNOUNCER] = 6
-		store.availableMarketingCampaigns.push(28, 29, 30, 31, 32, 33, 34, 35)
-		if (store.startingOptions.useMilestones) store.availableMilestones.push(rf.FIRST_TELEMARKETER_USED, rf.FIRST_TV_ANNOUNCER_USED)
+		store.availableMarketingCampaigns.push(28, 29, ...rf.PHONE_CAMPAIGNS.slice(0, phone.modern() ? 12 : 6))
+		if (store.startingOptions.useMilestones) {
+			if (!phone.modern()) store.availableMilestones.push(rf.FIRST_TELEMARKETER_USED)
+			store.availableMilestones.push(rf.FIRST_TV_ANNOUNCER_USED)
+		}
 	}
 	if (store.startingOptions.seniorBusinessDeveloper) {
 		store.availableEmployees[rf.SENIOR_BUSINESS_DEVELOPER] = max
@@ -152,6 +156,11 @@ export function replaySetupKetchupExpansion(playerNumber) {
 
 export function resetDataForReplay() {
 	const store = useModelStore()
+	store.mediaLine.phoneGroups = {}
+	store.mediaLine.headlines = []
+	store.mediaLine.doubleCampaigns = []
+	store.mediaLine.doubleUsedBy = []
+	store.mediaLine.night = { groups: {}, aLinePushers: [] }
 	store.replayData.splice(0)
 
 	for (let i = 0; i < store.players.length; i++) {
@@ -822,6 +831,8 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 		*/
 	let campaignNumber = param[0]
 	// Media Line mod: TV channels log the chosen house NUMBERS in place of a
+	// board index. New-rule phones use the whole-group replay path.
+	if (phone.modern() && phone.isPhone(campaignNumber)) return phone.replayPlacement(playerIndex, param)
 	// board index (they have no token); phone tokens log a normal board index
 	const isTV = campaignNumber === 28 || campaignNumber === 29
 	const isPhone = campaignNumber >= 30 && campaignNumber <= 35

@@ -45,12 +45,12 @@ export default {
 		"unionOrganizer": "Gewerkschaftsorganisator",
 		"unionOrganizerDesc": "5+ Arbeiter: Jede größte Firma erhält einen. Direkter CEO-Slot; keine Aktion; 5 $ Gehalt.",
 		"telemarketer": "Telemarketer",
-		"telemarketerDesc": "Lege Telefonmarker auf freies Feld im 5-Felder-Kreuz um ein Restaurant, keine Straßen nötig",
+		"telemarketerDesc": "Telefonwerbung oder niedrigere Werbung platzieren, Dauer 3 Runden",
 		"tvAnnouncer": "TV-Ansager",
 		"tvAnnouncerDesc": "Wähle 5 Häuser im 13-Felder-Rautenmuster um ein Restaurant und veröffentliche pro Runde eine Schlagzeile",
 
 		"seniorBusinessDeveloper": "Senior Business Developer",
-		"seniorBusinessDeveloperDesc": "Platziere ein Haus, einen Garten oder ein Wohngebäude; oder lass ein Haus ausziehen (einmal pro Runde)"
+		"seniorBusinessDeveloperDesc": "Ein Haus, einen Garten, ein Wohngebäude oder einen OUT-Marker platzieren"
 	},
 	"laborMarket": {
 		"unionMustWork": "Du musst den Gewerkschaftsorganisator einsetzen"
@@ -72,6 +72,8 @@ export default {
 		"resetRecruiting": "Rekrutierung zurücksetzen",
 		"clickToUndoTrain": "Klicken, um diese Schulung rückgängig zu machen",
 		"phoneTokenSameAsFirst": "Der zweite Telefonmarker verwendet automatisch dieselbe Ware und Dauer wie der erste",
+		"phoneGroupProgress": "Telefon {current}/3 platzieren.",
+		"phoneGroupRules": "Wähle eine Telefongruppe: gleiche Ware und Dauer. Bei freiem Platz alle 3 legen.",
 		"tvChannelProgress": "Wähle Häuser für deinen TV-Kanal: {current}/5",
 		"skipSecondPhoneToken": "Zweiten Telefonmarker überspringen",
 		"publishHeadline": "Schlagzeile veröffentlichen (kostenlose Aktion, {left} übrig):",
@@ -84,6 +86,7 @@ export default {
 		"headhuntedEmployeeBadge": "Abgeworben · Wechselgehalt ${amount}"
 	},
 	"topMenuViews": {
+		"availableApartments": "Verfügbare Wohngebäude",
 		"nonHireable": "Nicht einstellbar"
 	},
 	"history": {

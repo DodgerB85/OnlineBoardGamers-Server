@@ -59,7 +59,7 @@ const campaignDisplays = computed(() => {
 	for (const c of store.campaigns) {
 		// Gourmet guides / giant billboards / hawker trucks / TV channels are off-board items.
 		// Media Line phone tokens (30-35) render like normal campaigns.
-		if (c.number < 1 || (c.number > 16 && !(c.number >= 30 && c.number <= 35))) continue
+		if (c.number < 1 || (c.number > 16 && !rf.PHONE_CAMPAIGNS.includes(c.number))) continue
 		if (c.index < 0) continue
 
 		const campaignData = rf.MARKETING_CAMPAIGNS[c.number]
@@ -121,7 +121,7 @@ const campaignDisplays = computed(() => {
 		const goodLabel = i18n.global.t(GOOD_LABEL_KEYS[c.good] ?? "items.none")
 		const durationLabel = c.duration === 9 ? i18n.global.t("history.eternally") : i18n.global.t("history.forTurns", c.duration)
 		const owner = player === -1 ? "" : player.displayName + " — "
-		const title = owner + i18n.global.t("items.campaignTooltip", { num: c.number, good: goodLabel, duration: durationLabel })
+		const title = owner + i18n.global.t("items.campaignTooltip", { num: rules.campaignSortKey(c.number), good: goodLabel, duration: durationLabel })
 
 		let imgName = "campaign_" + c.number
 		if (secondGood !== -1 && campaignData.type === rf.AIRPLANE) imgName += "a"

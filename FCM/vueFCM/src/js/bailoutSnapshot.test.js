@@ -54,6 +54,7 @@ function seed({ sbd = true, secondBailout = true, laborMarket = false, mediaLine
 		store.availableEmployees[rf.UNION_ORGANIZER] = 1
 	}
 	if (mediaLine) Object.assign(store.mediaLine, {
+		rulesVersion: 0, // This fixture exercises the legacy grouped-bonus saved state.
 		headlines: [{ turn: 5, playerIndex: 1, value: -5 }], doubleCampaigns: [28], doubleUsedBy: [0],
 		night: { groups: { 28: { owner: 0, houses: [1, 7] } }, aLinePushers: [1] },
 	})
@@ -90,7 +91,7 @@ describe("Second Bailout whole-model snapshot regression", () => {
 		const expected = savedState(store)
 		const snapshot = funcs.simpleExportWholeFCMmodel()
 		const wire = funcs.decompressData(snapshot)
-		expect(wire.at(-1)).toEqual(expected.bailout)
+		expect(wire.find(slot => slot && !Array.isArray(slot) && Object.hasOwn(slot, 'pending'))).toEqual(expected.bailout)
 		corrupt(store)
 		funcs.simpleImportWholeFCMmodel(snapshot)
 		expect(store.bailout).toEqual(expected.bailout)

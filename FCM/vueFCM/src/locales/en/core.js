@@ -453,13 +453,13 @@ employees: {
   unionOrganizerDesc: "5+ workers: each largest company gets one. CEO-direct slot; no action; $5 salary.",
 
   telemarketer: "Telemarketer",
-  telemarketerDesc: "Place phone tokens on empty ground in the 5-tile cross around a restaurant, no roads needed",
+  telemarketerDesc: "Place phone or lower-level advertising, duration 3 turns",
 
   tvAnnouncer: "TV Announcer",
   tvAnnouncerDesc: "Pick 5 houses in the 13-tile diamond around a restaurant and publish one headline per turn",
 
   seniorBusinessDeveloper: "Senior Business Developer",
-  seniorBusinessDeveloperDesc: "Place a house, garden, or apartment; or move out a house (one per turn)"
+  seniorBusinessDeveloperDesc: "Place a house, garden, apartment or OUT marker"
 },
 
 laborMarket: {

@@ -20,6 +20,8 @@ export function clearAllHighlights() {
 
 export function resetContext() {
     const store = useModelStore()
+	store.context.phoneGroupAction = null
+	store.context.mediaLineSecondCall = false
 	resetEndOfDaySummaryData()
 
 	store.context.action = rf.ACT_NONE

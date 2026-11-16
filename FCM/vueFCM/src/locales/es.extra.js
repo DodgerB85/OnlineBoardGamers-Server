@@ -45,12 +45,12 @@ export default {
 		"unionOrganizer": "Organizador sindical",
 		"unionOrganizerDesc": "5+ trabajadores: cada empresa más grande recibe uno. Hueco directo del CEO; sin acción; salario de $5.",
 		"telemarketer": "Teleoperador",
-		"telemarketerDesc": "Coloca fichas de teléfono en terreno vacío en la cruz de 5 casillas alrededor de un restaurante, no hacen falta carreteras",
+		"telemarketerDesc": "Coloca publicidad telefónica o de nivel inferior, duración 3 turnos",
 		"tvAnnouncer": "Locutor de TV",
 		"tvAnnouncerDesc": "Elige 5 casas en el rombo de 13 casillas alrededor de un restaurante y publica un titular por turno",
 
 		"seniorBusinessDeveloper": "Desarrollador de Negocios Senior",
-		"seniorBusinessDeveloperDesc": "Coloca una casa, jardín o apartamento; o haz que una casa se mude (una vez por turno)"
+		"seniorBusinessDeveloperDesc": "Coloca una casa, jardín, apartamento o marcador OUT"
 	},
 	"laborMarket": {
 		"unionMustWork": "Debes emplear al Organizador sindical"
@@ -72,6 +72,8 @@ export default {
 		"resetRecruiting": "Reiniciar reclutamiento",
 		"clickToUndoTrain": "Haz clic para deshacer esta formación",
 		"phoneTokenSameAsFirst": "La segunda ficha de teléfono usa automáticamente el mismo producto y la misma duración que la primera",
+		"phoneGroupProgress": "Coloca el teléfono {current}/3.",
+		"phoneGroupRules": "Elige un grupo: mismo producto y duración. Coloca las 3 si hay espacio.",
 		"tvChannelProgress": "Elige casas para tu canal de TV: {current}/5",
 		"skipSecondPhoneToken": "Saltar la segunda ficha de teléfono",
 		"publishHeadline": "Publicar un titular (acción gratuita, quedan {left}):",
@@ -84,6 +86,7 @@ export default {
 		"headhuntedEmployeeBadge": "Cazado · Cambio de puesto ${amount}"
 	},
 	"topMenuViews": {
+		"availableApartments": "Apartamentos disponibles",
 		"nonHireable": "No se puede contratar"
 	},
 	"history": {

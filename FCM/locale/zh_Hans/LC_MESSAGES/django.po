@@ -2061,3 +2061,119 @@ msgstr "里程碑「首位使用资深业务拓展经理」：首个使用该员
 
 #~ msgid "Permanent permission"
 #~ msgstr "永久许可"
+
+#. Simplified phone groups (new games only).
+msgid "Media Line adds phone and TV advertising. There are 12 phone tokens: four groups of three, numbered 6.5 / 7.5 / 8.5 / 9.5. The Telemarketer milestone and phone/TV group bonuses are removed; ordinary demand and sales income are unchanged."
+msgstr "电波营销增加电话和电视广告。电话共12张：6.5／7.5／8.5／9.5四组各3张。电话推销员里程碑及电话／电视分组奖金取消，普通需求和卖货收入不变。"
+
+#. Simplified phone groups (new games only).
+msgid "Telemarketer: place phone or lower-level advertising. Phones are 2x1; each group uses the same good and duration (1-3 rounds). The clicked square is the origin and must be within your restaurant tile or its four orthogonal neighbours. The token may extend in any of four directions across tile or range boundaries. Both cells must be empty ground on the map; no building adjacency is required. All touching houses are affected. Billboard action limits are unchanged."
+msgstr "电话推销员：放置电话或更低级的广告。电话牌为2×1，同组同商品、同时长（1—3回合）。点击格为起点，须在餐厅所在板块及上下左右五板块内；可向四个方向跨板块或范围边界伸出。两格均须为地图内空地，不必邻接房屋或公寓；接触的房屋均受影响。广告牌行动数量不变。"
+
+#. Simplified phone groups (new games only).
+msgid "Phone groups cannot be mixed or shared between employees or players. Continue to three tokens while any legal position remains; only when all four directions have no space does the action finish automatically. After the first token, the whole group and employee stay reserved until all placed tokens expire; unplaced tokens are unavailable. Placing zero consumes neither group nor employee. TV Announcers and Brand Directors follow the same phone rules."
+msgstr "电话组不能混用或拆给不同员工、玩家。有合法位置须继续放至3张，四个方向均无位才自动结束。放出至少1张，整组及员工锁定至已放牌全部到期；未放牌也不可借用。完全没放牌不消耗组或员工。电视广播员和品牌总监放电话时同样适用。"
+
+#. Simplified phone groups (new games only).
+msgid "Compatibility: older games and replays retain their original phone rules, including building adjacency. TV retains two channels; its selection, range, duration, headlines, training and independent milestone are unchanged."
+msgstr "兼容说明：旧局及旧回放保留原电话规则，包括邻接建筑的要求。电视仍为2个频道，其选择、范围、时长、头条、晋升和独立里程碑不变。"
+
+#. Concise Media Line player help.
+msgid "Phone and TV advertising. Phones have four groups of three, 6.5 / 7.5 / 8.5 / 9.5: 12 phone tokens. No Telemarketer milestone or phone/TV group bonuses. Older games retain their original rules."
+msgstr "增加电话和电视广告。电话6.5／7.5／8.5／9.5四组各3张，共12张。取消电话推销员里程碑及电话／电视分组奖金。旧局保留原规则。"
+
+#. Concise Media Line player help.
+msgid "Training: Marketing Trainee → Telemarketer → TV Announcer → Brand Director. Six of each; cards may be stacked."
+msgstr "培训：营销实习生→电话推销员→电视广播员→品牌总监，各6张，可叠放。"
+
+#. Concise Media Line player help.
+msgid "Telemarketer: phone or lower-level advertising. A phone is 2x1. Click an origin in your restaurant tile or its four orthogonal neighbours; extend in four directions across tile or range boundaries. Both cells must be empty ground on the map; no house or apartment adjacency is required. All touching houses are affected. Billboard limits are unchanged."
+msgstr "电话推销员可放电话或更低级广告。电话为2×1；点击起点须在餐厅所在板块及上下左右五板块内，可四向跨板块或范围伸出。两格须为地图内空地，不必贴房屋或公寓；接触的房屋均受影响。广告牌数量限制不变。"
+
+#. Concise Media Line player help.
+msgid "Select one phone group, using the same good and duration (1-3 rounds). Do not mix groups or split them between employees or players. Place all three while space remains; finish early only if all four directions have no legal position."
+msgstr "一次选一组，同商品、同时长（1—3回合）；不可混组或拆给不同员工、玩家。有位须放满3张，四向均无位才提前结束。"
+
+#. Concise Media Line player help.
+msgid "From the first token, reserve the whole group and employee until all placed tokens expire; unplaced tokens cannot be borrowed. Zero tokens consume neither group nor employee. TV Announcers and Brand Directors use the same phone rules."
+msgstr "放出首张后，整组及员工锁定至已放牌全部到期；未放牌不可借用。零张不消耗组或员工。电视广播员和品牌总监放电话也遵守此规则。"
+
+#. Concise Media Line player help.
+msgid "TV: 2 channels, at most two campaigns at once. Choose 5 houses within 2 steps of your restaurant (13 tiles); choose all if fewer than 5 are available. Place an antenna on each for 1-4 nights."
+msgstr "电视共2频道，最多同时投放两场。选餐厅2步内（13板块）的5栋房屋，不足5栋则全选，每栋装天线，持续1—4夜。"
+
+#. Concise Media Line player help.
+msgid "Headline: TV Announcer only; each working announcer may publish once per turn for free. At the next turn’s dinner, all city unit prices change by ±$5. Headlines stack or cancel, capped at ±$10 total; apply before garden multipliers."
+msgstr "头条仅电视广播员可用，每名在岗员工每回合免费一次：下回合晚餐全城商品单价±5，可叠加抵消，总上限±10，在花园倍增前计入价格。"
+
+#. Concise Media Line player help.
+msgid "Advertising resolves in this turn’s Marketing Campaigns phase; headlines affect the next turn. Keep the usual 3-demand cap per house. Unserved orders remain and may be supplied by anyone."
+msgstr "广告在本轮营销阶段结算，头条下回合生效。每房仍上限3需求；未满足的需求保留，任何人均可供货。"
+
+#. Concise Media Line player help.
+msgid "First TV Announcer used milestone: each holder’s first campaign generates 2 demand per house per night instead of 1."
+msgstr "“首位使用电视广播员”里程碑：每位获得者的首场电视广告，每房每夜2需求而非1。"
+
+#. Concise Media Line player help.
+msgid "Adds telephone and television advertising."
+msgstr "增加电话和电视广告。"
+
+#. Concise Media Line player help.
+msgid "Training: Marketing Trainee → Telemarketer → TV Announcer → Brand Director; 6 cards of each, stackable."
+msgstr "培训：营销实习生→电话推销员→电视广播员→品牌总监，各6张，可叠放。"
+
+#. Concise Media Line player help.
+msgid "Telemarketers may place phone or lower-level advertising. Select one group at a time, with the same good and duration (1–3 rounds)."
+msgstr "电话推销员可放电话或更低级的广告。一次选一组，同商品、同时长（1—3回合）"
+
+#. Concise Media Line player help.
+msgid "Phones: four groups, 6.5 / 7.5 / 8.5 / 9.5, with 3 cards each, 12 cards in total. Placement is allowed on the tile containing the restaurant entrance and the tiles above, below, left and right, 5 tiles in total."
+msgstr "电话6.5／7.5／8.5／9.5四组各3张，共12张。可放置范围为餐厅入口所在板块以及上下左右共5个板块"
+
+#. Concise Media Line player help.
+msgid "TV Announcers may place TV, phone or lower-level advertising. TV channels may carry the same good for the same duration (1–4 rounds)."
+msgstr "电视广播员的可以放置电视、电话或更低级的广告，电视频道可以放置同商品、同时长（1—4回合）"
+
+#. Concise Media Line player help.
+msgid "TV has 2 channels, numbered 3.5/4.5. Choose 5 houses within 2 tiles of the tile containing the restaurant entrance for TV marketing."
+msgstr "电视有2频道，为3.5/4.5。可选择餐厅入口所在板块距离2板块内的5个房子进行电视营销"
+
+#. Concise Media Line player help.
+msgid "Headlines are available only to TV Announcers. Each working employee chooses once per round: at the next round’s dinner, all city goods’ unit prices change by ±5. Changes can stack or cancel; price increases have no upper limit, and the price floor is 0."
+msgstr "头条仅电视广播员可用，每名在岗员工每回合选择一次：下回合晚餐全城商品单价±5，可叠加抵消，涨价无上限，减价不能超过0"
+
+#. Concise Media Line player help.
+msgid "“First TV Announcer used” milestone: during the recipient’s first TV advertising campaign, place 2 demand."
+msgstr "“首位使用电视广播员”里程碑：获得者首场电视广告期间，放置2需求。"
+
+#. Concise Media Line player help.
+msgid "Headlines are available only to TV Announcers. Each working employee chooses once per round: at the next round’s dinner, all city goods’ unit prices change by ±5. Changes can stack or cancel."
+msgstr "头条仅电视广播员可用，每名在岗员工每回合选择一次：下回合晚餐全城商品单价±5，可叠加抵消。"
+
+#. Senior Business Developer concise player help.
+msgid "The Senior Business Developer adds apartments and OUT markers to the New Business Developer’s actions."
+msgstr "资深业务拓展经理在新业务拓展经理的行动基础上，增加放置公寓和OUT标记。"
+
+#. Senior Business Developer concise player help.
+msgid "Train a New Business Developer into a Senior Business Developer. Each player may own one, including employees on the beach. Shared supply: 1 card for 2–3 players, 2 for 4, 3 for 5–6."
+msgstr "培训：新业务拓展经理→资深业务拓展经理。每人最多1张，含沙滩上的员工。公共供给：2—3人1张，4人2张，5—6人3张。"
+
+#. Senior Business Developer concise player help.
+msgid "Once per round, choose one action: place a house, a garden, an apartment, or an OUT marker."
+msgstr "每回合四选一：放置房屋、花园、公寓或OUT标记。"
+
+#. Senior Business Developer concise player help.
+msgid "The three apartments, 15¾, 21¾ and 27¾, each occupy 3×3 squares. Demand and marketing follow the base apartment rules."
+msgstr "三栋公寓门牌为15¾、21¾、27¾，均占3×3格，需求和营销按基础公寓规则处理。"
+
+#. Senior Business Developer concise player help.
+msgid "Place an OUT marker only on a house or apartment with no active demand. The building stays in place and receives no new demand for the rest of the game. Already marked or pending buildings and the stadium cannot be marked."
+msgstr "只能对没有需求的房屋或公寓放置OUT标记。建筑保留原位，本局不再接收新需求。已标记、待标记的建筑及体育场不能放置。"
+
+#. Senior Business Developer concise player help.
+msgid "All players share 8 OUT markers. Each placement permanently spends one; markers cannot be removed or recovered. When none remain, this action is unavailable."
+msgstr "全体玩家共用8枚OUT标记，每次永久消耗1枚，不可移除或回收。用完后不能再执行此行动。"
+
+#. Senior Business Developer concise player help.
+msgid "The first player to use a Senior Business Developer gains its milestone and may add 1 map tile, as with the Lobbyist milestone. Other modules combine normally; house, garden and tile supplies follow the applicable base and module rules."
+msgstr "首位使用者获得“首位使用资深业务拓展经理”里程碑，可增加1个地图板块，与提案人里程碑相同。可与其他模组叠加；房屋、花园和板块供给按适用的基础及模组规则处理。"

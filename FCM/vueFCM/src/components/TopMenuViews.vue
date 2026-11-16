@@ -821,6 +821,17 @@ const sortedCampaigns = computed(() => {
 				</p>
 			</div>
 
+			<!-- SENIOR BUSINESS DEVELOPER APARTMENTS -->
+			<div v-if="store.startingOptions.seniorBusinessDeveloper" class="reserveSection" data-sbd-apartments>
+				<p><b>{{ $t('topMenuViews.availableApartments') }} ({{ rules.availableApartments().length }})</b></p>
+				<div class="housesContainer">
+					<span v-for="apt in rules.availableApartments()" :key="'reserve-apartment-' + apt" class="parkRoadReserveHolder reserveApartment">
+						<img :src="view.getImage('apartment')" :alt="$t('items.apartment')" width="75" height="75" />
+						<span>#{{ apt === rf.APARTMENT_15 ? '15¾' : apt === rf.APARTMENT_21 ? '21¾' : '27¾' }} · 3×3</span>
+					</span>
+				</div>
+			</div>
+
 			<!-- PARKS -->
 			<div v-if="rules.availableParks(store).length > 0" class="reserveSection">
 				<p><b>{{ $t('topMenuViews.availableParks') }}</b></p>

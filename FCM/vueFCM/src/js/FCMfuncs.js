@@ -1,7 +1,9 @@
 import * as rf from "./FCMreference"
+import * as phone from "./FCMphone"
 import * as map from "./FCMmap"
 import * as model from "./FCMmodel"
 import * as context from "./FCMcontext"
+import * as controller from "./FCMcontroller"
 import * as view from "./FCMview"
 
 import { useModelStore } from "../stores/FCMstore.js"
@@ -254,7 +256,7 @@ export function simpleExportWholeFCMmodel(raw = false) {
 	temp.push(JSON.parse(JSON.stringify(store.bailout)))
 
 	// 24 - Media Line mod (only when chosen)
-	if (store.startingOptions.mediaLine) temp.push(JSON.parse(JSON.stringify(store.mediaLine)))
+	if (store.startingOptions.mediaLine || phone.modern()) temp.push(JSON.parse(JSON.stringify(store.mediaLine)))
 
 	if (raw) return temp
 	return compressData(temp)
@@ -606,7 +608,7 @@ export function exportFCMmodel(forGameOver, includeContext, historyCutoff) {
 			// Media Line mod phone tokens (30-35) are stored like standard ones;
 			// TV channels (28-29) have no token, so their chosen houses are stored
 			// instead: [number, good, duration, ...houses]
-			if ((c.number >= 30 && c.number <= 35) || c.number <= 16) {
+			if (phone.isPhone(c.number) || c.number <= 16) {
 				entry.push(exportIndex(c.index), c.good)
 				if (c.duration !== 9) entry.push(c.duration)
 				if (rf.ROTATABLE_CAMPAIGNS.includes(c.number) && c.rotated) entry.push(6)
@@ -748,7 +750,7 @@ export function exportFCMmodel(forGameOver, includeContext, historyCutoff) {
 
 	// Media Line mod (only when the module was chosen; shape-detected on load).
 	// Compact positional slot, tagged like the Labor Market one.
-	if (store.startingOptions.mediaLine) temp.push(exportMediaLineSlot())
+	if (store.startingOptions.mediaLine || phone.modern()) temp.push(exportMediaLineSlot())
 
 	return compressData(temp)
 }
@@ -782,11 +784,14 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	}
 
 	const inputArr = step2
+	let mediaRules
+	try { mediaRules = validateMediaRules(inputArr, window.initData?.playerNames?.length) } catch { return -9999 }
 
 	const store = useModelStore()
 	let IMPORT_INDEX = 0
 	// Now set up internal options -- THIS JUST SETS UP THE TRUE?FALSE FLAGS
 	model.setInternalStartingOptions(window.initData.startingOptions)
+	store.mediaLine.rulesVersion = mediaRules.version
 
 	// 0 - map
 	store.mapData.tiles = map.expandMapToFullGrid(window.initData.startingMap, window.initData.playerNames.length)
@@ -885,7 +890,7 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 		const num = c[0]
 		// Media Line mod: phone tokens (30-35) use the standard layout; TV
 		// channels (28-29) carry [number, good, duration, ...houses] instead
-		const isStandard = num <= 16 || (num >= 30 && num <= 35)
+		const isStandard = num <= 16 || phone.isPhone(num)
 		const isTV = num === 28 || num === 29
 
 		// Create base object
@@ -919,7 +924,7 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 
 	// Update the Map UI
 	for (const camp of store.campaigns) {
-		if ((camp.number >= 1 && camp.number <= 16) || (camp.number >= 30 && camp.number <= 35)) {
+		if ((camp.number >= 1 && camp.number <= 16) || phone.isPhone(camp.number)) {
 			map.addElement(rf.TYPE_CAMPAIGN, camp.number, camp.index, camp.rotated)
 		}
 	}
@@ -1127,7 +1132,9 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 			// Produce-count arrays were trimmed for storage; pad back to full item length
 			if (contextData.justProduced) contextData.justProduced.added = padItemCounts(contextData.justProduced.added)
 			if (contextData.endOfDaySummaryData?.produce) contextData.endOfDaySummaryData.produce.produced = padItemCounts(contextData.endOfDaySummaryData.produce.produced)
-			Object.assign(store.context, contextData)
+			// Older contexts omit the new phone action. Do not merge a previous
+			// game's pending action into them; retain explicit legacy second calls.
+			Object.assign(store.context, { phoneGroupAction: null, mediaLineSecondCall: false }, contextData)
 			IMPORT_INDEX++
 		} else context.resetContext()
 	} else {
@@ -1342,7 +1349,7 @@ export function restoreBailoutState(inputArr, index = inputArr.length - 1, forGa
 //             doubleUsedBy, groupsFlat, aLinePushers]
 //   legacy:  { headlines, doubleCampaign, doubleUsed, night }
 function isMediaLineSlot(el) {
-	if (Array.isArray(el)) return el.length >= 7 && el[0] === -rf.SO_MEDIA_LINE
+	if (Array.isArray(el)) return el[0] === -rf.SO_MEDIA_LINE
 	return Boolean(el && typeof el === "object" && !Array.isArray(el) && Array.isArray(el.headlines))
 }
 
@@ -1354,6 +1361,52 @@ function isMediaLineSlot(el) {
 // Headlines are flat [turn, playerIndex, value, ...] and pruned to the current
 // and previous turn (only those can still affect quota or tonight's dinner).
 // Groups are flat [campaignNum, owner, houseCount, ...houses].
+// Validate the entire tagged extension before either import path changes state.
+// Wire format version is separate from the per-game rules revision.
+export function validateMediaRules(input, playerCount = 6) {
+ if (!Array.isArray(input)) throw new TypeError('Invalid game snapshot')
+ const slots = input.filter(isMediaLineSlot)
+ if (slots.length > 1) throw new TypeError('Duplicate Media Line extension')
+ const slot = slots[0]
+ if (!slot) return {version:0,locks:{}}
+ const fail = () => { throw new TypeError('Invalid Media Line extension') }
+ let version = 0, locks = {}
+ if (Array.isArray(slot)) {
+  if (![1,2,3].includes(slot[1]) || slot.length !== (slot[1] === 3 ? 9 : 7)) fail()
+  if (![2,5,6].every(i=>Array.isArray(slot[i]))) fail()
+  if (slot[2].length % 3 || !slot[2].every(Number.isInteger)) fail()
+  for(let i=2;i<slot[2].length;i+=3) if(![5,-5].includes(slot[2][i])) fail()
+  if (slot[1] >= 2 && (![3,4].every(i=>Array.isArray(slot[i])&&slot[i].every(Number.isInteger)))) fail()
+  let i=0
+  while(i<slot[5].length) {
+   const count=slot[5][i+2]
+   if (!Number.isInteger(count)||count<0||i+3+count>slot[5].length||!slot[5].slice(i,i+3+count).every(Number.isInteger)) fail()
+   i+=3+count
+  }
+  if(slot[1]===3) {
+   if(slot[7]!==1 || slot[5].length || slot[6].length) fail()
+   version=1; locks=slot[8]
+  }
+ } else {
+  if(slot.rulesVersion !== undefined && ![0,1].includes(slot.rulesVersion)) fail()
+  version=slot.rulesVersion ?? 0; locks=slot.phoneGroups ?? {}
+ }
+ if (!locks || typeof locks!=='object' || Array.isArray(locks)) fail()
+ for(const [g,lock] of Object.entries(locks)) {
+  if (!['0','1','2','3'].includes(g) || !lock || typeof lock!=='object') fail()
+  if (!Number.isInteger(lock.owner) || lock.owner<0 || lock.owner>=playerCount || ![rf.TELEMARKETER,rf.TV_ANNOUNCER,rf.BRAND_DIRECTOR].includes(lock.marketer) || ![rf.LEMONADE,rf.COKE,rf.BEER,rf.PIZZA,rf.BURGER,rf.FRIED_CHICKEN].includes(lock.good) || !Number.isInteger(lock.duration) || lock.duration<1 || lock.duration>3) fail()
+  if (!Array.isArray(lock.cards) || lock.cards.length<1 || lock.cards.length>3 || !lock.cards.every((n,i)=>n===phone.groupCards(Number(g))[i])) fail()
+ }
+ if (version===1) for (const value of input) {
+  let c=value
+  if(typeof c==='string' && c.startsWith('{')) { try { c=JSON.parse(c) } catch { fail() } }
+  if(!c || typeof c!=='object' || c.phoneGroupAction==null) continue
+  const g=c.phoneGroupAction.group, lock=locks[g]
+  if(!Number.isInteger(g)||g<0||g>3||!lock||c.campaign!==phone.groupCards(g)[lock.cards.length]||c.marketer!==lock.marketer||c.good!==lock.good||c.duration!==lock.duration||c.mediaLineSecondCall!==true) fail()
+ }
+ return {version,locks:JSON.parse(JSON.stringify(locks))}
+}
+
 export function exportMediaLineSlot() {
 	const store = useModelStore()
 	const ml = store.mediaLine
@@ -1367,6 +1420,7 @@ export function exportMediaLineSlot() {
 	for (const [num, g] of Object.entries(ml.night.groups)) {
 		groups.push(Number(num), g.owner, g.houses.length, ...g.houses)
 	}
+	if (phone.modern()) return [-rf.SO_MEDIA_LINE, 3, headlines, [...ml.doubleCampaigns], [...ml.doubleUsedBy], [], [], 1, JSON.parse(JSON.stringify(ml.phoneGroups))]
 	return [-rf.SO_MEDIA_LINE, 2, headlines, [...ml.doubleCampaigns], [...ml.doubleUsedBy], groups, [...ml.night.aLinePushers]]
 }
 
@@ -1375,6 +1429,16 @@ export function exportMediaLineSlot() {
 // both the compact slot and the legacy verbose object.
 export function restoreMediaLineState(inputArr) {
 	const store = useModelStore()
+	const checked = validateMediaRules(inputArr, store.players.length)
+	store.mediaLine.rulesVersion = checked.version
+	store.mediaLine.phoneGroups = checked.locks
+	if (checked.version === 1) store.availableMarketingCampaigns = store.availableMarketingCampaigns.filter(n => !phone.isPhone(n) || !checked.locks[phone.groupOf(n)])
+	// The compact gameflow intentionally omits the working subphase. A saved
+	// forced phone chain must resume marketing, not the default hiring screen.
+	if (phone.pending()) {
+		store.gameflow.subphase = rf.SUBPHASE_MARKETING
+		controller.setCampaignPlacementHighlights()
+	}
 	store.mediaLine.headlines = []
 	store.mediaLine.doubleCampaigns = []
 	store.mediaLine.doubleUsedBy = []
@@ -1599,7 +1663,10 @@ export function simpleImportWholeFCMmodel(inputBase64, raw = false) {
 	const store = useModelStore()
 
 	
-	let inputModel = raw ? inputBase64 : decompressData(inputBase64)
+	// Continuing a restored action must never mutate the stored undo/replay snapshot.
+	let inputModel = raw ? JSON.parse(JSON.stringify(inputBase64)) : decompressData(inputBase64)
+	const mediaRules = validateMediaRules(inputModel, inputModel[1]?.length)
+	store.mediaLine.rulesVersion = mediaRules.version
 
 	// Now set up internal options
 	model.setInternalStartingOptions(store.externalStartingOptions)
@@ -1653,7 +1720,7 @@ export function simpleImportWholeFCMmodel(inputBase64, raw = false) {
 	store.campaigns.splice(0)
 	Object.assign(store.campaigns, inputModel[7])
 	for (let i = 0; i < store.campaigns.length; i++) {
-		if ((store.campaigns[i].number >= 1 && store.campaigns[i].number <= 16) || (store.campaigns[i].number >= 30 && store.campaigns[i].number <= 35)) map.addElement(rf.TYPE_CAMPAIGN, store.campaigns[i].number, store.campaigns[i].index, store.campaigns[i].rotated)
+		if ((store.campaigns[i].number >= 1 && store.campaigns[i].number <= 16) || phone.isPhone(store.campaigns[i].number)) map.addElement(rf.TYPE_CAMPAIGN, store.campaigns[i].number, store.campaigns[i].index, store.campaigns[i].rotated)
 	}
 
 	// 8 - gardens

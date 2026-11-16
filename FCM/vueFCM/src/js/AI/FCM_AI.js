@@ -1,4 +1,5 @@
 import * as rf from "../FCMreference"
+import * as phone from "../FCMphone"
 import * as model from "../FCMmodel"
 import * as map from "../FCMmap"
 import * as funcs from "../FCMfuncs"
@@ -260,6 +261,11 @@ export async function makeAImove() {
 					else if (avail.includes(rf.FIRST_DRINK_MARKETED)) good = rf.LEMONADE
 					else if (plyr.hasMilestone(playerIndex, rf.FIRST_PIZZA_MARKETED)) good = rf.PIZZA
 					else if (plyr.hasMilestone(playerIndex, rf.FIRST_BURGER_MARKETED)) good = rf.BURGER
+				}
+
+				if (phone.modern() && phone.isPhone(campaign)) {
+					phone.autoPlace(marketer,campaign,good,1)
+					continue
 				}
 
 				const isInfinite =

@@ -45,12 +45,12 @@ export default {
 		"unionOrganizer": "Organizzatore sindacale",
 		"unionOrganizerDesc": "5+ lavoratori: ogni azienda più grande ne riceve uno. Slot diretto del CEO; nessuna azione; stipendio di 5 $.",
 		"telemarketer": "Telemarketer",
-		"telemarketerDesc": "Posiziona gettoni telefono su terreno vuoto nella croce di 5 caselle attorno a un ristorante, senza bisogno di strade",
+		"telemarketerDesc": "Posiziona pubblicità telefonica o di livello inferiore, durata 3 turni",
 		"tvAnnouncer": "Annunciatore TV",
 		"tvAnnouncerDesc": "Scegli 5 case nel rombo di 13 caselle attorno a un ristorante e pubblica un titolo per turno",
 
 		"seniorBusinessDeveloper": "Sviluppatore di Business Senior",
-		"seniorBusinessDeveloperDesc": "Piazza una casa, un giardino o un condominio; oppure fai traslocare una casa (una volta per turno)"
+		"seniorBusinessDeveloperDesc": "Piazza una casa, un giardino, un condominio o un segnalino OUT"
 	},
 	"laborMarket": {
 		"unionMustWork": "Devi impiegare l'Organizzatore sindacale"
@@ -72,6 +72,8 @@ export default {
 		"resetRecruiting": "Reimposta reclutamento",
 		"clickToUndoTrain": "Fai clic per annullare questa formazione",
 		"phoneTokenSameAsFirst": "Il secondo gettone telefono usa automaticamente lo stesso bene e la stessa durata del primo",
+		"phoneGroupProgress": "Posiziona il telefono {current}/3.",
+		"phoneGroupRules": "Scegli un gruppo: stesso bene e durata. Colloca tutti e 3 finché c’è spazio.",
 		"tvChannelProgress": "Scegli le case per il tuo canale TV: {current}/5",
 		"skipSecondPhoneToken": "Salta il secondo gettone telefono",
 		"publishHeadline": "Pubblica un titolo (azione gratuita, {left} rimasti):",
@@ -84,6 +86,7 @@ export default {
 		"headhuntedEmployeeBadge": "Reclutato · Cambio mansione ${amount}"
 	},
 	"topMenuViews": {
+		"availableApartments": "Condomini disponibili",
 		"nonHireable": "Non assumibile"
 	},
 	"history": {

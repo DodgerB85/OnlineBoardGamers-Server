@@ -1,4 +1,5 @@
 import * as rf from "./FCMreference"
+import * as phone from "./FCMphone"
 import * as controller from "./FCMcontroller"
 import * as map from "./FCMmap"
 import * as funcs from "./FCMfuncs"
@@ -139,6 +140,7 @@ export function isSimulPhase(phase = -1) {
  *****************************************************************/
 
 export function endWorkingDaySubphase() {
+	if (phone.pending()) return
 	const store = useModelStore()
 	store.clearCoffeeHistoryInfo()
 	context.clearAllHighlights()
@@ -1256,11 +1258,12 @@ export function setCampaignPlacementHighlights() {
 	// Phone tokens (Media Line mod) are placed by map click despite their high numbers.
 	if (store.context.campaign > 16 && campaignData.type !== rf.PHONE) return
 
-	store.highlights.indexesToHighlightYellow = rules.givePossiblePositionsForMarketingCampaign(store.context.marketer, store.context.campaign, store.context.rotated)
+	store.highlights.indexesToHighlightYellow = rules.givePossiblePositionsForMarketingCampaign(store.context.marketer, store.context.campaign, store.context.rotated, phone.modern() && phone.isPhone(store.context.campaign) ? store.context.rotation : undefined)
 }
 
 // Clear the current marketer/campaign selection and return to the marketer choice screen
 export function resetMarketingSelection() {
+	if (phone.pending()) return
 	const store = useModelStore()
 	context.clearAllHighlights()
 
@@ -1288,6 +1291,7 @@ export function resetMarketingSelection() {
 }
 
 export function selectMarketer(marketer, nightShift, temporary = false) {
+	if (phone.pending()) return
 	const store = useModelStore()
 	const playerIndex = currentPlayerIndex()
 	const playerObj = currentPlayerObj()
@@ -1335,6 +1339,7 @@ export function selectMarketer(marketer, nightShift, temporary = false) {
 	store.context.double = double
 
 	store.context.campaign = campaigns[0]
+	if (phone.modern() && phone.isPhone(store.context.campaign)) store.context.rotation = 0
 	store.context.good = 0
 	store.context.rotated = false
 	store.context.secondGood = -1
@@ -1344,17 +1349,21 @@ export function selectMarketer(marketer, nightShift, temporary = false) {
 }
 
 export function chooseCampaign(campaign) {
+	if (phone.pending()) return
 	const store = useModelStore()
+	if (phone.modern() && (!Number.isInteger(campaign) || !store.context.campaigns.includes(campaign))) return
 	const newType = rf.MARKETING_CAMPAIGNS[campaign]?.type
 	const wasPlane = rf.MARKETING_CAMPAIGNS[store.context.campaign]?.type === rf.AIRPLANE
 	store.context.campaign = campaign
-	store.context.rotated = false
+		store.context.rotated = false
+		if (phone.modern() && phone.isPhone(campaign)) store.context.rotation = 0
 	if (newType !== rf.AIRPLANE || !wasPlane) {
 		store.context.secondGood = -1
 		store.context.refusePlaneDouble = false
 	}
 	if (campaignDurationInfinite()) store.context.duration = 9
 	else if (store.context.duration === 9) store.context.duration = 1
+	if (phone.modern() && phone.isPhone(campaign)) store.context.duration = Math.min(store.context.duration, 3)
 
 	if (store.context.restaurantMilestone) {
 		store.highlights.indexesToHighlightYellow = rules.givePossiblePositionsForMailboxRestaurantMilestone(campaign, store.context.newRestaurantIndex)
@@ -1364,6 +1373,7 @@ export function chooseCampaign(campaign) {
 }
 
 export function chooseGood(good) {
+	if (phone.pending()) return
 	const store = useModelStore()
 	store.context.good = good
 
@@ -1375,22 +1385,28 @@ export function chooseGood(good) {
 }
 
 export function chooseSecondGood(good) {
+	if (phone.modern() && phone.isPhone(useModelStore().context.campaign)) return
 	const store = useModelStore()
 	store.context.secondGood = good
 	store.context.refusePlaneDouble = good === -1
 }
 
 export function chooseDuration(duration) {
+	if (phone.pending()) return
+	if (phone.modern() && phone.isPhone(useModelStore().context.campaign) && (!Number.isInteger(duration) || duration < 1 || duration > 3)) return
 	const store = useModelStore()
 	store.context.duration = duration
 }
 
-export function rotateCampaign() {
+export function rotateCampaign(step = 1) {
 	const store = useModelStore()
 	const campaignData = rf.MARKETING_CAMPAIGNS[store.context.campaign]
 	if (campaignData.width === campaignData.height || campaignData.type === rf.GIANT_BILLBOARD) return
 
-	store.context.rotated = !store.context.rotated
+	if (phone.modern() && phone.isPhone(store.context.campaign)) {
+		store.context.rotation = (store.context.rotation + step + 4) % 4
+		store.context.rotated = store.context.rotation % 2 === 1
+	} else store.context.rotated = !store.context.rotated
 
 	if (store.context.restaurantMilestone) {
 		store.highlights.indexesToHighlightYellow = rules.givePossiblePositionsForMailboxRestaurantMilestone(store.context.campaign, store.context.newRestaurantIndex)
@@ -1419,7 +1435,12 @@ function rollbackMarketerSelectionMilestones() {
 }
 
 export function cancelMarketer() {
+	if (phone.pending()) return
 	const store = useModelStore()
+	if (phone.modern() && phone.isPhone(store.context.campaign)) {
+		rollbackMarketerSelectionMilestones()
+		return resetMarketingSelection()
+	}
 	const playerObj = currentPlayerObj()
 
 	rollbackMarketerSelectionMilestones()
@@ -1486,6 +1507,7 @@ function awardCampaignTypeAndGoodMilestones(playerIndex) {
 
 // Place campaign in model - after you click on square / press Place button
 export function placeMarketingCampaign(index) {
+	if (phone.modern() && phone.isPhone(useModelStore().context.campaign)) return phone.place(index)
 	const store = useModelStore()
 	const playerIndex = currentPlayerIndex()
 	const playerObj = currentPlayerObj()

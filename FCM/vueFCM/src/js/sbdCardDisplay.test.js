@@ -15,7 +15,7 @@ beforeAll(() => {
 
 describe("SBD card display", () => {
 	it("uses the x1 full-card image without changing other cards", () => {
-		expect(view.getImage(`emp_${rf.SENIOR_BUSINESS_DEVELOPER}`)).toMatch(/\/e_senior_business_developer_x1\.jpg$/)
+		expect(view.getImage(`emp_${rf.SENIOR_BUSINESS_DEVELOPER}`)).toMatch(/\/e_senior_business_developer_x1_out_(?:zh|en)\.png$/)
 		expect(view.getImage(`emp_${rf.GURU}`)).toMatch(/\/e_guru\.jpg$/)
 	})
 
@@ -37,7 +37,8 @@ describe("SBD card display", () => {
 
 	it("shows the x1 card and rule in static help", () => {
 		const html = fs.readFileSync(new URL("../../../templates/FCM/fanExpansionsHelp.html", import.meta.url), "utf8")
-		expect(html).toContain("FCM/images/e_senior_business_developer_x1.jpg")
-		expect(html).toContain("Senior Business Developer is a ×1 employee")
+		expect(html).toContain("FCM/images/e_senior_business_developer_x1_out_zh.png")
+		expect(html).toContain("FCM/images/e_senior_business_developer_x1_out_en.png")
+		expect(html).toContain("Each player may own one, including employees on the beach")
 	})
 })
