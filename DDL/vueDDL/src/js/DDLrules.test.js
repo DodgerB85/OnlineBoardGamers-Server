@@ -232,6 +232,25 @@ describe("building and trading", () => {
 		expect(player.gear[0]).toBe(yard.gear)
 	})
 
+	it("charges one trade energy per privileged tile, then uses it free", () => {
+		const state = game()
+		const player = state.players[0]
+		player.ship.node = "P8"
+		const planet = rules.planetState(state, 8)
+		const yard = rf.SPACEYARD_TYPES[planet.site.tileId]
+		const other = rf.PRIMARY_GOODS.find((g) => g !== yard.cost[0])
+		planet.site.built = true
+		planet.privileges.site = 0
+		player.goods.push(yard.cost[0], other, yard.cost[0], other)
+		player.energy[rf.BLUE_ENERGY] = 1
+		state.gameflow.turnType = rf.TURN_ACTION
+		expect(rules.buyGear(state, 0, 0, other).ok).toBe(true)
+		expect(player.energy[rf.BLUE_ENERGY]).toBe(0)
+		expect(player.freeTradeTiles).toContain("8:site")
+		expect(rules.buyGear(state, 0, 1, other).ok).toBe(true)
+		expect(player.gear[1]).toBe(yard.gear)
+	})
+
 	it("sells to a consumer for its points", () => {
 		const state = game()
 		const player = state.players[0]
