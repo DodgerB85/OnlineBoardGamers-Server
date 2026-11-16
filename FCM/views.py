@@ -1349,7 +1349,28 @@ def _processTurn(request):
 
         response = presenter.getJsonMoveResponseV2(notRequiedPlayerNames)
 
+        # A stalled simul phase is recovered by a client re-sending an empty move.
+        # If moves are still missing, persist the recovered turn order: otherwise
+        # the browser gets its turn order back but is_current, the lobby, the
+        # kickout timer and turn notifications all stay empty.
+        playersToMove = []
+        if continueFromStalledGame and response.get("allPlayersMoved") is False:
+            playersToMove = response.get("playersToMove", [])
+            presenter.setCurrentPlayersFromArrInTurnOrder(playersToMove)
+
         currentGame.save()
+
+        playerListToNotify = [name for name in playersToMove if name not in (request.user.username, "FcmBot", "FcmAI")]
+        if playerListToNotify:
+            presenter.sendYourTurnNotification(
+                "FCM",
+                playerListToNotify,
+                jsonData["gameID"],
+                presenter.getGameName(),
+                currentGame,
+                jsonData["latestUpdate"],
+            )
+
         return JsonResponse(response, safe=False)
 
     ################### PRE TURN
