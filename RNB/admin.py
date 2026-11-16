@@ -47,8 +47,10 @@ class RNBmapAdmin(admin.ModelAdmin):
 class RNBMapScoreAdmin(admin.ModelAdmin):
     form = RNBMapScoreForm
     list_display = ('user', 'map_ref', 'score', 'timeStamp', 'game_display')
-    list_filter = ('map_ref', 'user', 'game')
-    search_fields = ('user__username', 'map_ref__name', 'score')
+    # No user/game list filters: each renders every user/game in the sidebar.
+    # Search by username or game id instead.
+    list_filter = ('map_ref',)
+    search_fields = ('user__username', 'map_ref__name', 'score', 'game__id')
     ordering = ('-score', 'timeStamp')
     autocomplete_fields = ['user']
 

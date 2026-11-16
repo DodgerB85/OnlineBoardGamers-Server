@@ -31,6 +31,7 @@ from .modelProxies import (
     KFWMainTournament,
     KFWMiniTournament,
     LBRgame,
+    NoCurrentPlayerGame,
     NTRgame,
     NTRMiniTournament,
     RNBgame,
@@ -70,14 +71,16 @@ class ProfileAdmin(admin.ModelAdmin):
     search_fields = ["user__username", "email_confirmed"]
     list_display = ("user", "email_confirmed", "is_site_admin", "is_game_admin", "availabilityMoveCounts", "availabilityTurnCounts")
     list_filter = ("is_site_admin", "is_game_admin")
+    autocomplete_fields = ("user", "blacklistedPlayers")
 
 
 @admin.register(Tournament)
 class TournamentAdmin(admin.ModelAdmin):
     save_on_top = True
     save_as = True
-    filter_horizontal = ("startingPlayers", "nextRoundPlayers", "invitedPlayers")
-    autocomplete_fields = ("creator",)
+    # Autocomplete instead of filter_horizontal: the user table is large and
+    # filter_horizontal renders every user as an <option> on every tournament page.
+    autocomplete_fields = ("creator", "startingPlayers", "nextRoundPlayers", "invitedPlayers")
     search_fields = ["tournamentName"]
     list_filter = ("tournamentCategory", "gameCode", "tournamentStatus")
 
@@ -150,6 +153,7 @@ class GameAdmin(admin.ModelAdmin):
     save_on_top = True
     save_as = True
     list_per_page = 100
+    ordering = ("-id",)
 
     # 1. Performance: Use native autocomplete for all User relations
     autocomplete_fields = [
@@ -242,8 +246,9 @@ class GameAdmin(admin.ModelAdmin):
     # Nice column headers
     @admin.display(description="Players")
     def player_list(self, obj):
-        #       1. Fetch related objects
-        players = obj.players.all().select_related("player")
+        # Use the queryset's prefetch cache ("players__player"); select_related()
+        # here would clone the cached queryset and re-query once per game.
+        players = obj.players.all()
 
         links = []
         for p in players:
@@ -450,6 +455,11 @@ class GameAdmin(admin.ModelAdmin):
     )
 
 
+@admin.register(NoCurrentPlayerGame)
+class NoCurrentPlayerGameAdmin(GameAdmin):
+    """ACTIVE games with no current seat - normally a stuck game."""
+
+
 @admin.register(GamePlayer)
 class GamePlayerAdmin(admin.ModelAdmin):
     list_display = (
@@ -465,7 +475,10 @@ class GamePlayerAdmin(admin.ModelAdmin):
     )
     list_filter = ("winner", "is_current", "is_missing", "is_kicked")
     search_fields = ("player__username", "game__gameName")
-    autocomplete_fields = ("player",)
+    autocomplete_fields = ("game", "player")
+    # player is nullable, so Django's automatic select_related() would skip it.
+    list_select_related = ("game", "player")
+    ordering = ("-id",)
 
 
 admin.site.register(changelog)

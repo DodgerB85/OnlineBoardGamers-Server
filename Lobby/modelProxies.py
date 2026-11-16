@@ -1,3 +1,5 @@
+from django.db import models
+
 from Lobby.models import Game, Tournament
 
 ################### Register Tournament objects when MAIN to specific app
@@ -384,3 +386,22 @@ class NTRgame(Game):
         app_label = "NTR"
         verbose_name = "NTR_Game"
         verbose_name_plural = "NTR_Games"
+
+
+################### Games that need attention
+
+
+class NoCurrentPlayerGameManager(models.Manager):
+    def get_queryset(self):
+        # ACTIVE games are in progress, so at least one seat must be current.
+        return super().get_queryset().filter(gameStatus="ACTIVE").exclude(players__is_current=True)
+
+
+class NoCurrentPlayerGame(Game):
+    objects = NoCurrentPlayerGameManager()
+
+    class Meta:
+        proxy = True
+        app_label = "Lobby"
+        verbose_name = "Game with no current player"
+        verbose_name_plural = "Games with no current player"

@@ -354,7 +354,7 @@ class BaseGame(models.Model):
     playerOrderSeed = models.PositiveSmallIntegerField(blank=False, default=0)
 
     # Set default as 2. Games with min 3 players explicity set the defult to 3 before creation
-    maxPlayers = models.PositiveSmallIntegerField(blank=False, default=2)
+    maxPlayers = models.PositiveSmallIntegerField(blank=False, default=2, db_index=True)
 
     # I removed this these the models - I checked each record creation for each model,
     # and set it to 1 if a game starts at 1 instead of 0.
@@ -415,6 +415,7 @@ class Game(BaseGame):
         choices=SR_GAMES_CODES_AND_NAMES_CHOICES,
         default="FCM",
         db_column="gameCode",
+        db_index=True,
     )
 
     streakDays = models.PositiveIntegerField(default=0)
