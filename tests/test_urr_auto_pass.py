@@ -7,6 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from Lobby.models import Game, GamePlayer, User
+from Lobby.sharedFunctions.constants import SO_TRAINING_GAME
 from URR import URRconstants as rfURR
 
 TURN_URL = "URR:processURRturn"
@@ -33,15 +34,37 @@ class UrrAutoPassTests(TestCase):
             GamePlayer.objects.create(game=self.game, player=user, seat_order=index, is_current=index == 0)
         self.client.force_login(self.users[0])
 
-    def post(self, action, **payload):
+    def post_to(self, game, action, **payload):
         return self.client.post(
             reverse(TURN_URL),
-            json.dumps({"action": action, "gameID": self.game.id, **payload}),
+            json.dumps({"action": action, "gameID": game.id, **payload}),
             content_type="application/json",
         )
 
+    def post(self, action, **payload):
+        return self.post_to(self.game, action, **payload)
+
     def game_player(self, index):
         return GamePlayer.objects.get(game=self.game, player=self.users[index])
+
+    def training_game(self):
+        shadows = [User.objects.create_user(username=f"SHADOW_auto{i}", password="pw") for i in range(2)]
+        game = Game.objects.create(
+            gameCode="URR",
+            creator=self.users[0],
+            host=self.users[0],
+            gameStatus="ACTIVE",
+            turn=4,
+            phase=rfURR.PHASE_SETTLEMENT,
+            maxPlayers=3,
+            latestUpdate=str(int(time.time() * 1000)),
+            startingOptions=json.dumps([SO_TRAINING_GAME]),
+            playerOrderSeed=1,
+            serverCurrentPlayerNamesInTurnOrder=[self.users[0].username, *(shadow.username for shadow in shadows)],
+        )
+        for index, user in enumerate([self.users[0], *shadows]):
+            GamePlayer.objects.create(game=game, player=user, seat_order=index, is_current=index == 0)
+        return game, shadows
 
     def test_phase_mode_is_stamped_with_the_current_turn_and_does_not_change_the_game_version(self):
         version = self.game.latestUpdate
@@ -100,6 +123,23 @@ class UrrAutoPassTests(TestCase):
         outsider = User.objects.create_user(username="urrAutoPassOutsider", password="pw")
         self.client.force_login(outsider)
         self.assertEqual(self.post("setAutoPass", mode="phase", prices=[]).status_code, 403)
+
+    def test_a_practice_game_can_target_the_acting_shadow_seat(self):
+        game, shadows = self.training_game()
+
+        response = self.post_to(game, "setAutoPass", mode="phase", prices=[], target=shadows[0].username)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(GamePlayer.objects.get(game=game, player=shadows[0]).moveDataJSON["urrAutoPass"]["mode"], "phase")
+        self.assertFalse(GamePlayer.objects.get(game=game, player=self.users[0]).moveDataJSON)
+
+    def test_a_normal_game_cannot_target_another_player(self):
+        response = self.post("setAutoPass", mode="phase", prices=[], target=self.users[1].username)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(self.game_player(0).moveDataJSON)
+        self.assertFalse(self.game_player(1).moveDataJSON)
+        self.assertEqual(self.post("setAutoPass", mode="phase", prices=[], target=self.users[0].username).status_code, 200)
 
     def test_the_show_page_gives_the_client_the_stored_flag(self):
         self.post("setAutoPass", mode="phase", prices=[])

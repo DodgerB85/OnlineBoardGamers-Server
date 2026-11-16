@@ -491,7 +491,18 @@ def setAutoPass(request, currentGame, jsonData):
     if currentGame.gameStatus == "FINISHED":
         return JsonResponse({"ok": True, "autoPassData": getAutoPassData(currentGame)}, safe=False)
 
-    gp = currentGame.players.select_related("player").filter(player=request.user, is_kicked=False, is_missing=False).first()
+    try:
+        starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    except json.JSONDecodeError:
+        starting_options = []
+    active_players = currentGame.players.select_related("player").filter(is_kicked=False, is_missing=False)
+    target = jsonData.get("target")
+    if target is not None and not isinstance(target, str):
+        return JsonResponse({"ok": False, "error": gettext("Invalid auto-pass target.")}, status=400, safe=False)
+    if rf.SO_TRAINING_GAME not in starting_options and target and target != request.user.username:
+        return JsonResponse({"ok": False, "error": gettext("You can only set your own auto-pass.")}, status=403, safe=False)
+    # A practice game has one human who controls every shadow seat.
+    gp = active_players.filter(player__username=target).first() if rf.SO_TRAINING_GAME in starting_options and target else active_players.filter(player=request.user).first()
     if gp is None:
         return JsonResponse({"ok": False, "error": gettext("You are not an active player in this game.")}, status=403, safe=False)
 

@@ -159,9 +159,9 @@ async function autoPassRequest(action, payload = {}) {
 	return data.autoPassData || {}
 }
 
-export async function saveAutoPass(mode, prices = []) {
+export async function saveAutoPass(mode, prices = [], target = null) {
 	try {
-		await autoPassRequest("setAutoPass", { mode, prices })
+		await autoPassRequest("setAutoPass", { mode, prices, target })
 		return true
 	} catch (error) {
 		console.error("Error saving auto-pass:", error)
