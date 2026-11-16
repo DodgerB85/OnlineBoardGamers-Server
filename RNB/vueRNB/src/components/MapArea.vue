@@ -73,6 +73,7 @@ const hexesForDisplay = computed(() =>
 		fullRoadPath: hex.fullRoadPath,
 		fullPowerLinePath: hex.fullPowerLinePath,
 		fullTrainTrackPath: hex.fullTrainTrackPath,
+		fullTrainTrackPathOffset: hex.fullTrainTrackPathOffset,
 		powerLinePoints: hex.powerLinePoints,
 		powered: electricity.isHexPowered(hex.hexID),
 	}))
@@ -667,6 +668,13 @@ function getAtelierRecipeName(recipeIdx) {
 							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackBlack' + i" :d="chain.d" stroke="black" :stroke-width="(100 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" :stroke-width="(76 * store.RATIO).toFixed(0)" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 						</g>
+						<!-- TRAIN TRACKS (style 2) - offset beside the road; the road covers the inner overlap -->
+						<g v-if="store.mapData.displaySettings.trackStyle === 2 && store.mapData.displaySettings.showTrainTracks && store.gameOptions.useTrains && hex.fullTrainTrackPath?.length">
+							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackRailCase' + i" :d="chain.d" stroke="white" :stroke-width="(34 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackTiesCase' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" :stroke-width="(104 * store.RATIO).toFixed(0)" stroke-dasharray="0.12 0.38" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackRail' + i" :d="chain.d" stroke="black" :stroke-width="(20 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackTies' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="black" :stroke-width="(88 * store.RATIO).toFixed(0)" stroke-dasharray="0.12 0.38" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+						</g>
 						<!-- ROADS - drawn after the tracks so they sit on top -->
 						<g v-if="store.mapData.displaySettings.showRoads && 1 == 1">
 							<!-- Draw the roads and white lines -->
@@ -675,13 +683,6 @@ function getAtelierRecipeName(recipeIdx) {
 								<path class="noClick" :d="hex.fullRoadPath" stroke="#1C2526" :stroke-width="60 * store.RATIO" stroke-linejoin="round" stroke-linecap="round" />
 								<path class="noClick" :d="hex.fullRoadPath" stroke="#F5F5F5" :stroke-width="(7 * store.RATIO).toFixed(0)" :stroke-dasharray="`${(25 * store.RATIO).toFixed(0)} ${(20 * store.RATIO).toFixed(0)}`" fill="none" />
 							</g>
-						</g>
-						<!-- TRAIN TRACKS (style 2) - drawn after the roads so the rail is never hidden -->
-						<g v-if="store.mapData.displaySettings.trackStyle === 2 && store.mapData.displaySettings.showTrainTracks && store.gameOptions.useTrains && hex.fullTrainTrackPath?.length">
-							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackRailCase' + i" :d="chain.d" stroke="white" :stroke-width="(34 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackTiesCase' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" :stroke-width="(104 * store.RATIO).toFixed(0)" stroke-dasharray="0.12 0.38" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackRail' + i" :d="chain.d" stroke="black" :stroke-width="(20 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackTies' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="black" :stroke-width="(88 * store.RATIO).toFixed(0)" stroke-dasharray="0.12 0.38" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 						</g>
 						<!-- POWER LINES - thin black-edged line; red when unpowered, yellow when powered -->
 						<g v-if="store.gameOptions.useElectricity && hex.fullPowerLinePath">
@@ -1704,21 +1705,19 @@ function getAtelierRecipeName(recipeIdx) {
 
 .fireworkBurst {
 	position: absolute;
-	width: 12px;
-	height: 12px;
+	width: var(--fw-size, 90px);
+	height: var(--fw-size, 90px);
+	transform: translate(-50%, -50%) scale(0.2);
 	border-radius: 50%;
-	background: radial-gradient(circle, #fff 0 20%, var(--fw-colour) 35%, transparent 70%);
-	box-shadow: 0 0 8px 2px var(--fw-colour);
-	animation: fireworkBurst 1.6s ease-out infinite;
-}
-
-.fireworkBurst::after {
-	content: "";
-	position: absolute;
-	inset: -8px;
-	border: 2px solid var(--fw-colour);
-	border-radius: 50%;
-	opacity: 0.8;
+	background:
+		radial-gradient(circle, #fff 0 16%, rgba(255, 255, 255, 0.35) 30%, transparent 70%),
+		repeating-conic-gradient(from 0deg, var(--fw-colour) 0deg 2.4deg, transparent 2.4deg 22.5deg),
+		repeating-conic-gradient(from 11deg, rgba(255, 255, 255, 0.85) 0deg 1.2deg, transparent 1.2deg 45deg);
+	-webkit-mask: radial-gradient(circle, #000 0 16%, rgba(0, 0, 0, 0.55) 38%, transparent 66%);
+	mask: radial-gradient(circle, #000 0 16%, rgba(0, 0, 0, 0.55) 38%, transparent 66%);
+	filter: drop-shadow(0 0 4px var(--fw-colour));
+	animation: fireworkBurst 1.45s ease-out infinite;
+	pointer-events: none;
 }
 
 @keyframes confettiFall {
@@ -1734,15 +1733,17 @@ function getAtelierRecipeName(recipeIdx) {
 
 @keyframes fireworkBurst {
 	0% {
-		transform: scale(0.2);
+		transform: translate(-50%, -50%) scale(0.15);
 		opacity: 0;
 	}
-	15% {
-		transform: scale(1);
+	12% {
+		opacity: 1;
+	}
+	55% {
 		opacity: 1;
 	}
 	100% {
-		transform: scale(2.6);
+		transform: translate(-50%, -50%) scale(1.15);
 		opacity: 0;
 	}
 }

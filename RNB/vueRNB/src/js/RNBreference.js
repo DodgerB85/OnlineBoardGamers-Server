@@ -57,6 +57,8 @@ export const SO_TRAINING_GAME = 102
 export const DEFAULT_BLDG_WIDTH = 250
 export const DEFAULT_BLDG_HEIGHT = 250
 export const DEFAULT_RES_WIDTH = 150
+// Style 2 tracks are drawn beside the road so both stay readable
+export const TRACK_STYLE2_OFFSET = 70
 export const DEFAULT_RES_HEIGHT = 150
 
 /* Ratios */

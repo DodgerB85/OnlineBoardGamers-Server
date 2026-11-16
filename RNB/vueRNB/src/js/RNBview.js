@@ -1410,13 +1410,15 @@ function makeConfetti() {
 }
 
 function makeFireworks() {
-	return Array.from({ length: 4 }, (_, i) => ({
+	return Array.from({ length: 5 }, (_, i) => ({
 		id: i,
 		style: {
 			left: `${10 + Math.random() * 80}%`,
 			top: `${10 + Math.random() * 60}%`,
 			"--fw-colour": EXHIBITION_COLOURS[(i + 2) % EXHIBITION_COLOURS.length],
+			"--fw-size": `${70 + Math.random() * 50}px`,
 			animationDelay: `${(Math.random() * 1.2).toFixed(2)}s`,
+			animationDuration: `${(1.2 + Math.random() * 0.5).toFixed(2)}s`,
 		},
 	}))
 }

@@ -153,6 +153,8 @@ test("train track builds, compresses to TN and reloads", { skip: skip }, () => {
 		assert.ok(Array.isArray(hex.fullTrainTrackPath) && hex.fullTrainTrackPath.length === 1, `hex ${hex.hexID} draws one track chain`)
 		assert.match(hex.fullTrainTrackPath[0].d, /^M/, `hex ${hex.hexID} chain has an SVG path`)
 		assert.ok(Number.isInteger(hex.fullTrainTrackPath[0].dashes) && hex.fullTrainTrackPath[0].dashes >= 1, `hex ${hex.hexID} chain has a whole number of dash periods`)
+		assert.ok(Array.isArray(hex.fullTrainTrackPathOffset) && hex.fullTrainTrackPathOffset.length === 1, `hex ${hex.hexID} draws one style-2 chain`)
+		assert.notEqual(hex.fullTrainTrackPathOffset[0].d, hex.fullTrainTrackPath[0].d, `hex ${hex.hexID} style-2 chain sits beside the road`)
 	}
 
 	const tn = map.compressTrainTracksForMap()

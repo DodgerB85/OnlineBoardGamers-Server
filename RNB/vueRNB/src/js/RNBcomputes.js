@@ -59,7 +59,41 @@ function smoothPolylinePath(points, fmt, free) {
 // Returns [{ d, dashes }]: each chain gets a whole number of dash periods (white 100 + gap 100,
 // unscaled) so, drawn with pathLength = 2 * dashes and a half-dash offset, it starts and ends
 // on half a white dash and dashes join up across hex edges.
-function trainTrackSegmentsToPath(segments, scale, free) {
+// Shift a chain sideways so a road on the same alignment leaves it visible. Orient by the x
+// component first: hex roads run at multiples of 60°, so a dominant-axis rule flips sides at 45°.
+function offsetPolyline(points, offset) {
+	const dx = points[1][0] - points[0][0]
+	const dy = points[1][1] - points[0][1]
+	const sign = dx === 0 ? (dy < 0 ? -1 : 1) : Math.sign(dx)
+	const normals = []
+	for (let i = 1; i < points.length; i++) {
+		const sx = points[i][0] - points[i - 1][0]
+		const sy = points[i][1] - points[i - 1][1]
+		const len = Math.hypot(sx, sy) || 1
+		normals.push([(-sy / len) * sign, (sx / len) * sign])
+	}
+	const out = []
+	for (let i = 0; i < points.length; i++) {
+		const n1 = normals[Math.max(0, i - 1)]
+		const n2 = normals[Math.min(normals.length - 1, i)]
+		let nx = n1[0] + n2[0]
+		let ny = n1[1] + n2[1]
+		const nl = Math.hypot(nx, ny)
+		if (nl < 1e-6) {
+			nx = n1[0]
+			ny = n1[1]
+		} else {
+			nx /= nl
+			ny /= nl
+		}
+		// miter: stay `offset` away from both adjoining segments, clamped on hairpins
+		const step = offset / Math.max(0.25, nx * n1[0] + ny * n1[1])
+		out.push([points[i][0] + nx * step, points[i][1] + ny * step])
+	}
+	return out
+}
+
+function trainTrackSegmentsToPath(segments, scale, free, offset = 0) {
 	if (!segments.length) return []
 	const key = (p) => `${p[0].toFixed(2)},${p[1].toFixed(2)}`
 	const nodeSegments = new Map()
@@ -104,7 +138,8 @@ function trainTrackSegmentsToPath(segments, scale, free) {
 
 		let length = 0
 		for (let j = 1; j < points.length; j++) length += Math.hypot(points[j][0] - points[j - 1][0], points[j][1] - points[j - 1][1])
-		chains.push({ d: smoothPolylinePath(points, (p) => `${p[0] * scale} ${p[1] * scale}`, free), dashes: Math.max(1, Math.round(length / 200)) })
+		const renderedPoints = offset === 0 ? points : offsetPolyline(points, offset)
+		chains.push({ d: smoothPolylinePath(renderedPoints, (p) => `${p[0] * scale} ${p[1] * scale}`, free), dashes: Math.max(1, Math.round(length / 200)) })
 	}
 	return chains
 }
@@ -452,8 +487,11 @@ export const computedHexes = computed(() => {
 				hex.powerLinePoints.push(point)
 			}
 		}
-		hex.fullTrainTrackPath = trainTrackSegmentsToPath(hex.trainTrackSegments, store.RATIO, hex.hexTerrainID > rf.CITY)
-		hex.fullTrainTrackPathZP = trainTrackSegmentsToPath(hex.trainTrackSegments, 1, hex.hexTerrainID > rf.CITY)
+		const trackFree = hex.hexTerrainID > rf.CITY
+		hex.fullTrainTrackPath = trainTrackSegmentsToPath(hex.trainTrackSegments, store.RATIO, trackFree)
+		hex.fullTrainTrackPathZP = trainTrackSegmentsToPath(hex.trainTrackSegments, 1, trackFree)
+		hex.fullTrainTrackPathOffset = trainTrackSegmentsToPath(hex.trainTrackSegments, store.RATIO, trackFree, rf.TRACK_STYLE2_OFFSET)
+		hex.fullTrainTrackPathOffsetZP = trainTrackSegmentsToPath(hex.trainTrackSegments, 1, trackFree, rf.TRACK_STYLE2_OFFSET)
 	}
 
 	return computedHexes
