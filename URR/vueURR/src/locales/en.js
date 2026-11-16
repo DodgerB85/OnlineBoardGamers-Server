@@ -823,7 +823,6 @@ export default {
 		gameCreated: "Game created:",
 		copyGameError: "Unable to create the practice game.",
 		history: "History",
-		exit: "Exit Replay",
 	},
 	waterPlayback: {
 		aria: "Recorded water flow",

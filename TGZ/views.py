@@ -58,7 +58,7 @@ def _preferred_tgz_options(profile):
 
 
 def index(request):
-    return HttpResponse("Secret tip! Click your name in the top right in a PRACTICE game to unlock all gods!")
+    return HttpResponse("Secret tip! Click your name in the top right in a PRACTICE game to unlock all gods!", headers={"X-Robots-Tag": "noindex"})
 
 
 def redirectLegacyTGZ(request, original_id):

@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at ROW")
+    return HttpResponse("Hello, world. You're at ROW", headers={"X-Robots-Tag": "noindex"})
 
 
 def ROWhelp(request):

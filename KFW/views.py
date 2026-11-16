@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at KFW")
+    return HttpResponse("Hello, world. You're at KFW", headers={"X-Robots-Tag": "noindex"})
 
 
 def KFWhelp(request):

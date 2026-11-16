@@ -3,7 +3,7 @@ from django.shortcuts import redirect, render
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at PPF")
+    return HttpResponse("Hello, world. You're at PPF", headers={"X-Robots-Tag": "noindex"})
 
 
 def showPPFgame(request, game_id=1, spoilerFree=False, replayStep=1):

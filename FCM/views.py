@@ -232,7 +232,7 @@ def _fcm_block_employee_loss(request, currentGame, presenter, new_game_data, new
 
 
 def index(request):
-    return HttpResponse('Hello! Psssssssssssst...... Start a Practice Game of FCM and click on "Connected" in the top right 5 times!')
+    return HttpResponse('Hello! Psssssssssssst...... Start a Practice Game of FCM and click on "Connected" in the top right 5 times!', headers={"X-Robots-Tag": "noindex"})
 
 
 def FCMhelp(request):

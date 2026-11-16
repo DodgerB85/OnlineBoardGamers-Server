@@ -825,7 +825,6 @@ export default {
 		gameCreated: "Partie créée :",
 		copyGameError: "Impossible de créer la partie d'entraînement.",
 		history: "Historique",
-		exit: "Quitter la relecture",
 	},
 	waterPlayback: {
 		aria: "Écoulement d'eau enregistré",

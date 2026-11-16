@@ -825,7 +825,6 @@ export default {
 		gameCreated: "Partita creata:",
 		copyGameError: "Impossibile creare la partita di pratica.",
 		history: "Cronologia",
-		exit: "Esci dal replay",
 	},
 	waterPlayback: {
 		aria: "Flusso d'acqua registrato",

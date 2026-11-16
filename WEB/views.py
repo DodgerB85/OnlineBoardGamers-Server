@@ -35,7 +35,7 @@ WEB_DB_LOCK_NAME = "lockWEBgame_"
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at WEB")
+    return HttpResponse("Hello, world. You're at WEB", headers={"X-Robots-Tag": "noindex"})
 
 
 def WEBhelp(request):

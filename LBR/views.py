@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at Land Between Rivers")
+    return HttpResponse("Hello, world. You're at Land Between Rivers", headers={"X-Robots-Tag": "noindex"})
 
 
 def LBRhelp(request):

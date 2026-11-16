@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at DDL")
+    return HttpResponse("Hello, world. You're at DDL", headers={"X-Robots-Tag": "noindex"})
 
 
 def DDLhelp(request):

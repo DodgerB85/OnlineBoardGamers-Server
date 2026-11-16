@@ -31,7 +31,7 @@ from . import NTRconstants as rfNTR
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at Napoleon's Triumph")
+    return HttpResponse("Hello, world. You're at Napoleon's Triumph", headers={"X-Robots-Tag": "noindex"})
 
 
 def NTRhelp(request):

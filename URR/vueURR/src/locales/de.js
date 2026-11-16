@@ -825,7 +825,6 @@ export default {
 		gameCreated: "Spiel erstellt:",
 		copyGameError: "Das Übungsspiel konnte nicht erstellt werden.",
 		history: "Verlauf",
-		exit: "Wiedergabe beenden",
 	},
 	waterPlayback: {
 		aria: "Aufgezeichneter Wasserfluss",

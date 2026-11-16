@@ -62,7 +62,7 @@ def _preferred_bus_options(profile):
 
 
 def index(request):
-    return HttpResponse("Hello Geeks")
+    return HttpResponse("Hello Geeks", headers={"X-Robots-Tag": "noindex"})
 
 
 def BUShelp(request):

@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
 # Create your views here.
 def index(request):
-    return HttpResponse("Hello, world. You're at the CNS index")
+    return HttpResponse("Hello, world. You're at the CNS index", headers={"X-Robots-Tag": "noindex"})
 
 
 def redirectLegacyCNS(request, original_id):

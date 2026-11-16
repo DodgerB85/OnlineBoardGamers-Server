@@ -32,6 +32,34 @@ class SeoTests(TestCase):
         )
         self.assertContains(response, "Food Chain Magnate Help | Online Board Gamers")
 
+    def test_utility_pages_are_noindex(self):
+        pages = [
+            "/login/",
+            "/register/",
+            "/donate/success/",
+            "/password_reset/",
+            "/reset/done/",
+        ]
+        for path in pages:
+            with self.subTest(path=path):
+                response = self.client.get(path)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
+                self.assertContains(response, '<meta name="robots" content="noindex, follow">')
+
+    def test_donate_cancel_is_noindex(self):
+        response = self.client.get("/donate/cancel/")
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(response["X-Robots-Tag"], "noindex")
+        self.assertNotIn("X-Robots-Tag", self.client.get("/donate/"))
+
+    def test_game_root_pages_are_noindex(self):
+        for code in ("FCM", "HLC", "TGZ", "CNS", "AQY", "IND", "KFW", "WEB", "BUS", "RNB", "LBR", "NTR", "URR", "DDL", "ROW", "PPF"):
+            with self.subTest(code=code):
+                response = self.client.get(f"/{code}/")
+                self.assertEqual(response.status_code, HTTPStatus.OK)
+                self.assertEqual(response["X-Robots-Tag"], "noindex")
+
     def test_public_pages_render_with_own_canonical(self):
         pages = [
             "/",

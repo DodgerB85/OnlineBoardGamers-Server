@@ -825,7 +825,6 @@ export default {
 		gameCreated: "Partida creada:",
 		copyGameError: "No se pudo crear la partida de práctica.",
 		history: "Historial",
-		exit: "Salir de la repetición",
 	},
 	waterPlayback: {
 		aria: "Flujo de agua grabado",

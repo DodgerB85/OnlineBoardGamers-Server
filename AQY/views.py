@@ -41,7 +41,7 @@ AQY_DB_LOCK_NAME = "lockAQYgame_"
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at AQY")
+    return HttpResponse("Hello, world. You're at AQY", headers={"X-Robots-Tag": "noindex"})
 
 
 def AQYhelp(request):

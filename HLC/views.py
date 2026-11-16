@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
 
 def index(request):
-    return HttpResponse("Hello Geeks")
+    return HttpResponse("Hello Geeks", headers={"X-Robots-Tag": "noindex"})
 
 
 @login_required

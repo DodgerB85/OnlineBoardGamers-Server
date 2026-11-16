@@ -1348,7 +1348,9 @@ def donate(request):
 
 def donate_cancel(request):
     messages.success(request, gettext("Thank you for taking a look"))
-    return render(request, "Lobby/donate/donate.html")
+    response = render(request, "Lobby/donate/donate.html")
+    response["X-Robots-Tag"] = "noindex"
+    return response
 
 
 def donate_success(request):

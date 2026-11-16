@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at URR")
+    return HttpResponse("Hello, world. You're at URR", headers={"X-Robots-Tag": "noindex"})
 
 
 def URRhelp(request):

@@ -70,7 +70,7 @@ def _validateTurnOrderTransition(old_order, new_order, moved_player_name, game_i
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at RNB")
+    return HttpResponse("Hello, world. You're at RNB", headers={"X-Robots-Tag": "noindex"})
 
 
 def RNBhelp(request):

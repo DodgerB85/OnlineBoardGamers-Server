@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at IND")
+    return HttpResponse("Hello, world. You're at IND", headers={"X-Robots-Tag": "noindex"})
 
 
 def showINDgameOLD(request):

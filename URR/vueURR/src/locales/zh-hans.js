@@ -825,7 +825,6 @@ export default {
 		gameCreated: "游戏已创建：",
 		copyGameError: "无法创建练习游戏。",
 		history: "历史",
-		exit: "退出回放",
 	},
 	waterPlayback: {
 		aria: "录制的水流",
