@@ -22,12 +22,14 @@ services:
       - "8000:8000"
     links:
       - db
+    restart: on-failure
     environment:
       DJANGO_SUPERUSER_USERNAME: admin
       DJANGO_SUPERUSER_EMAIL: admin@example.com
       DJANGO_SUPERUSER_PASSWORD: password
       # The Docker stack always uses the db service, even if .env was switched
       # to SQLite by the quick setup route.
+      LOCAL_USER: "True"
       LOCAL_USER_SQLITE3: "False"
       LOCAL_DB_HOST: db
       LOCAL_DB_NAME: obs
@@ -45,6 +47,7 @@ services:
     links:
       - db
     environment:
+      LOCAL_USER: "True"
       LOCAL_USER_SQLITE3: "False"
       LOCAL_DB_HOST: db
       LOCAL_DB_NAME: obs
