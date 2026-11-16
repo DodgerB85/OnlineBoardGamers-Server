@@ -590,10 +590,10 @@ store.refSize = 2400
 						</g>
 						<!-- TRAIN TRACKS (style 2) - draw over roads to keep crossings visible -->
 						<g v-if="store.mapData.displaySettings.trackStyle === 2 && store.mapData.displaySettings.showTrainTracks && store.gameOptions.useTrains && hex.fullTrainTrackPath?.length">
-							<path v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackRailCase' + i" :d="chain.d" stroke="white" :stroke-width="(34 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-							<path v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackTiesCase' + i" :d="chain.d" stroke="white" :stroke-width="(104 * store.RATIO).toFixed(0)" :stroke-dasharray="`${chain.tieSpacing * 0.24} ${chain.tieSpacing * 0.76}`" :stroke-dashoffset="chain.tieOffset" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackRailCase' + i" :d="chain.d" stroke="#A68A64" :stroke-width="(34 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackTiesCase' + i" :d="chain.d" stroke="#A68A64" :stroke-width="(104 * store.RATIO).toFixed(0)" :stroke-dasharray="`${chain.tieSpacing * 0.12} ${chain.tieSpacing * 0.88}`" :stroke-dashoffset="chain.tieOffset" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 							<path v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackRail' + i" :d="chain.d" stroke="black" :stroke-width="(20 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-							<path v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackTies' + i" :d="chain.d" stroke="black" :stroke-width="(88 * store.RATIO).toFixed(0)" :stroke-dasharray="`${chain.tieSpacing * 0.24} ${chain.tieSpacing * 0.76}`" :stroke-dashoffset="chain.tieOffset" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackTies' + i" :d="chain.d" stroke="black" :stroke-width="(88 * store.RATIO).toFixed(0)" :stroke-dasharray="`${chain.tieSpacing * 0.12} ${chain.tieSpacing * 0.88}`" :stroke-dashoffset="chain.tieOffset" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 						</g>
 					</g>
 					<!-- NOT FINE TO ROTATE TO FLAT-->

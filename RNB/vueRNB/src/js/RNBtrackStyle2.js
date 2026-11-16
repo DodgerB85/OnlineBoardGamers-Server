@@ -46,14 +46,14 @@ export function offsetTrackNetwork(chunks, offset, canMove, tolerance = 2) {
 		const distances = [0]
 		for (let i = 1; i < shifted.length; i++) distances.push(distances[i - 1] + Math.hypot(shifted[i][0] - shifted[i - 1][0], shifted[i][1] - shifted[i - 1][1]))
 		// Fit whole sleeper periods to the route, including the closing seam of a loop.
-		const tieSpacing = distances.at(-1) / Math.max(1, Math.round(distances.at(-1) / 50)) || 50
+		const tieSpacing = distances.at(-1) / Math.max(1, Math.round(distances.at(-1) / 100)) || 100
 		for (const part of parts) {
 			const piece = shifted.slice(part.first, part.last)
 			const phase = part.reversed ? -distances[part.last - 1] : distances[part.first]
 			output[part.edge.index] = {
 				points: part.reversed ? piece.reverse() : piece,
 				tieSpacing,
-				tieOffset: ((phase + tieSpacing * 0.12) % tieSpacing + tieSpacing) % tieSpacing,
+				tieOffset: ((phase + tieSpacing * 0.06) % tieSpacing + tieSpacing) % tieSpacing,
 			}
 		}
 	}

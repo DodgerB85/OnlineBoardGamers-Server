@@ -793,10 +793,10 @@ const computedMaxNeutralBricks = computed(() => {
 						<path :d="computedZoomData.fullRoadPathZP" stroke="#F5F5F5" stroke-width="7" stroke-dasharray="25 20" fill="none" />
 						<!-- TRAIN TRACKS (style 2) - draw over roads to keep crossings visible -->
 						<g v-if="store.mapData.displaySettings.trackStyle === 2 && store.gameOptions.useTrains && computedZoomData.fullTrainTrackPathZP?.length">
-							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathOffsetZP" :key="'trackRailCase' + i" :d="chain.d" stroke="white" stroke-width="34" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathOffsetZP" :key="'trackTiesCase' + i" :d="chain.d" stroke="white" stroke-width="104" :stroke-dasharray="`${chain.tieSpacing * 0.24} ${chain.tieSpacing * 0.76}`" :stroke-dashoffset="chain.tieOffset" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathOffsetZP" :key="'trackRailCase' + i" :d="chain.d" stroke="#A68A64" stroke-width="34" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathOffsetZP" :key="'trackTiesCase' + i" :d="chain.d" stroke="#A68A64" stroke-width="104" :stroke-dasharray="`${chain.tieSpacing * 0.12} ${chain.tieSpacing * 0.88}`" :stroke-dashoffset="chain.tieOffset" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathOffsetZP" :key="'trackRail' + i" :d="chain.d" stroke="black" stroke-width="20" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathOffsetZP" :key="'trackTies' + i" :d="chain.d" stroke="black" stroke-width="88" :stroke-dasharray="`${chain.tieSpacing * 0.24} ${chain.tieSpacing * 0.76}`" :stroke-dashoffset="chain.tieOffset" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathOffsetZP" :key="'trackTies' + i" :d="chain.d" stroke="black" stroke-width="88" :stroke-dasharray="`${chain.tieSpacing * 0.12} ${chain.tieSpacing * 0.88}`" :stroke-dashoffset="chain.tieOffset" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 						</g>
 						<g v-if="store.gameOptions.useElectricity && computedZoomData.fullPowerLinePathZP">
 							<path :d="computedZoomData.fullPowerLinePathZP" stroke="#1C2526" stroke-width="18" stroke-linejoin="round" stroke-linecap="round" fill="none" />

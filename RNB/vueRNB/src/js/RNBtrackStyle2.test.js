@@ -71,14 +71,15 @@ test("sleepers keep their spacing through unequal and reversed tile segments", (
 	for (const chunk of result) {
 		assert.equal(chunk.tieSpacing, result[0].tieSpacing)
 		const start = chunk.points[0][0], end = chunk.points.at(-1)[0]
-		const phase = chunk.tieOffset - chunk.tieSpacing * 0.12
+		const phase = chunk.tieOffset - chunk.tieSpacing * 0.06
 		for (let n = -1; n < 30; n++) {
 			const along = n * chunk.tieSpacing - phase
 			if (along >= -1e-8 && along <= Math.abs(end - start) + 1e-8) centres.push(start + Math.sign(end - start) * along)
 		}
 	}
 	centres.sort((a, b) => a - b)
-	assert.ok(centres.length > 15)
+	assert.equal(centres.length, 11)
+	assert.ok(Math.abs(result[0].tieSpacing - 100) < 1)
 	for (let i = 1; i < centres.length; i++) assert.ok(Math.abs(centres[i] - centres[i - 1] - result[0].tieSpacing) < 1e-8)
 })
 
