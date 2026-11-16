@@ -3160,6 +3160,16 @@ class KFWpresenter(GamePresenter):
 
     # TODO can this be moved to gen P?
     def getCurrentPlayers(self):
+        # Practice games score the final seats one at a time, but only the seat
+        # whose turn it is gets is_current. Keep offering every unscored seat,
+        # or the seats after the first can never submit.
+        if self.isTrainingGame() and self.gameObj.phase == 4:
+            return [
+                gp.player.username
+                for gp in self.gameObj.players.filter(is_missing=False).exclude(is_kicked=True).select_related("player").order_by("seat_order")
+                if gp.player and gp.player.username != "KfwBot" and not self.hasMoveEndData(gp.player.username)
+            ]
+
         _currentPlayers = []
         currentPlayersArr = self.getArrayOfIsCurrentPlayers()
         current_usernames_set = set(u.strip() for u in currentPlayersArr if u.strip())

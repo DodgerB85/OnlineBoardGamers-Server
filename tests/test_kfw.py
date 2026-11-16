@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
+import Lobby.sharedFunctions.constants as rf
 from Lobby.models import Game, GamePlayer
 
 
@@ -173,6 +174,77 @@ class KFWFinalScoringTests(TestCase):
         self.gp_one.refresh_from_db()
         self.gp_two.refresh_from_db()
         self.assertEqual([self.gp_one.currentMoveData, self.gp_two.currentMoveData], ["final-a", ""])
+
+
+class KFWTrainingFinalScoringTests(TestCase):
+    """Practice games score seat by seat, so the unscored seat must stay current."""
+
+    def setUp(self):
+        user_model = get_user_model()
+        self.player_one = user_model.objects.create_user(username="kfw_training_a", password="pw")
+        self.player_two = user_model.objects.create_user(username="kfw_training_b", password="pw")
+
+        self.game = Game.objects.create(
+            gameCode="KFW",
+            creator=self.player_one,
+            host=self.player_one,
+            gameStatus="ACTIVE",
+            maxPlayers=2,
+            turn=0,
+            phase=4,
+            startingOptions=json.dumps([rf.SO_TRAINING_GAME]),
+        )
+        self.gp_one = GamePlayer.objects.create(game=self.game, player=self.player_one, seat_order=0, is_current=True)
+        self.gp_two = GamePlayer.objects.create(game=self.game, player=self.player_two, seat_order=1)
+        for gp in (self.gp_one, self.gp_two):
+            gp.moveDataJSON = {"hidden": [[0, 0, 0, 0], [0, 0, 0], []]}
+            gp.save(update_fields=["moveDataJSON"])
+        self.game.KFWserverData = json.dumps([[0, 0, 0, 0], [0, 0, 0]])
+        self.game.save()
+        self.client.force_login(self.player_one)
+
+    def submit(self, name, move):
+        return self.client.post(
+            reverse("KFW:processKFWturn"),
+            data=json.dumps(
+                {
+                    "action": "saveFinalScoringMove",
+                    "latestUpdate": self.game.latestUpdate,
+                    "moveData": move,
+                    "turn": 0,
+                    "phase": 4,
+                    "status": "ACTIVE",
+                    "gameID": self.game.id,
+                    "BKSN": name,
+                    "data2": self.game.presenter().compressData([]),
+                }
+            ),
+            content_type="application/json",
+        )
+
+    def test_the_unscored_seat_is_offered_after_the_first_submit(self):
+        data = self.submit(self.player_one.username, "score-one").json()
+
+        self.assertEqual(next(item["ready"] for item in data if "ready" in item), [True, False])
+        self.assertFalse(data[-1]["allReady"])
+        self.gp_two.refresh_from_db()
+        self.assertTrue(self.gp_two.is_current)
+
+    def test_a_game_with_no_current_players_offers_the_unscored_seat(self):
+        # The state game 38396 was left in: the first seat scored and every is_current flag was cleared.
+        self.gp_one.is_current = False
+        self.gp_one.currentMoveTime = "1710000000001"
+        self.gp_one.currentMoveData = "score-one"
+        self.gp_one.save(update_fields=["is_current", "currentMoveTime", "currentMoveData"])
+
+        self.assertEqual(self.game.presenter().getCurrentPlayers(), [self.player_two.username])
+
+    def test_both_seats_can_finish(self):
+        self.submit(self.player_one.username, "score-one")
+
+        data = self.submit(self.player_two.username, "score-two").json()
+
+        self.assertTrue(data[-1]["allReady"])
 
 
 class KFWKickoutVoteTests(TestCase):
