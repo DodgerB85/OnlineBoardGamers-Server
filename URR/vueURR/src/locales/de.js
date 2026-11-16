@@ -601,7 +601,6 @@ export default {
 		endTurnNet: "Zug beenden ({net} SPL)",
 		passEndTurn: "Passen & Zug beenden",
 		passEndTurnAndPhase: "Passen & Zug beenden & Phase",
-		autoPassPhase: "In dieser Siedlungsphase meine späteren Züge automatisch passen",
 		autoPassPhaseFor: "In dieser Siedlungsphase die späteren Züge von {name} automatisch passen",
 		autoPassStopOnPrice: "Stoppen, wenn sich ein Landpreis ändert",
 		autoPassActive: "Automatisches Passen ist für diese Siedlungsphase aktiv.",

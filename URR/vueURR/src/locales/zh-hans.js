@@ -601,7 +601,6 @@ export default {
 		endTurnNet: "结束回合（{net} SPL）",
 		passEndTurn: "跳过并结束回合",
 		passEndTurnAndPhase: "跳过并结束回合和阶段",
-		autoPassPhase: "在本定居阶段自动跳过我的后续回合",
 		autoPassPhaseFor: "在本定居阶段自动跳过 {name} 的后续回合",
 		autoPassStopOnPrice: "土地价格变化时停止",
 		autoPassActive: "本定居阶段的自动跳过已启用。",

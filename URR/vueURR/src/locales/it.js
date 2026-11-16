@@ -601,7 +601,6 @@ export default {
 		endTurnNet: "Termina turno ({net} SPL)",
 		passEndTurn: "Passa e termina turno",
 		passEndTurnAndPhase: "Passa e termina turno e fase",
-		autoPassPhase: "Passa automaticamente i miei turni successivi in questa fase di insediamento",
 		autoPassPhaseFor: "Passa automaticamente i turni successivi di {name} in questa fase di insediamento",
 		autoPassStopOnPrice: "Interrompi se cambia il prezzo di una terra",
 		autoPassActive: "Il passaggio automatico è attivo per questa fase di insediamento.",

@@ -601,7 +601,6 @@ export default {
 		endTurnNet: "Terminer le tour ({net} SPL)",
 		passEndTurn: "Passer et terminer le tour",
 		passEndTurnAndPhase: "Passer et terminer le tour et la phase",
-		autoPassPhase: "Passer automatiquement mes tours suivants pendant cette phase de colonisation",
 		autoPassPhaseFor: "Passer automatiquement les tours suivants de {name} pendant cette phase de colonisation",
 		autoPassStopOnPrice: "Arrêter si le prix d'une terre change",
 		autoPassActive: "Le passage automatique est actif pour cette phase de colonisation.",

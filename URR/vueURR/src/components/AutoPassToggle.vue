@@ -23,6 +23,9 @@ const storedFlag = computed(() => targetName.value ? store.autoPassData[targetNa
 const active = computed(() => rules.isAutoPassActive(store, storedFlag.value))
 const stoppedByPrice = computed(() => storedFlag.value?.mode === rf.AUTO_PASS_PRICE && storedFlag.value?.turn === store.gameflow.turn && !active.value)
 const busy = computed(() => saving.value || store.viewSettings.isSaving || personal.haltPlay)
+// Ticking a box only stages the change; the Save button is the only thing that reaches the server.
+const desiredMode = computed(() => enabled.value ? (stopOnPrice.value ? rf.AUTO_PASS_PRICE : rf.AUTO_PASS_PHASE) : null)
+const pending = computed(() => desiredMode.value !== (active.value ? storedFlag.value.mode : null))
 const otherActiveFlags = computed(() => {
 	if (!personal.trainingGame) return []
 	return store.players
@@ -37,7 +40,7 @@ async function save() {
 	if (busy.value) return
 	saving.value = true
 	failed.value = false
-	const mode = enabled.value ? (stopOnPrice.value ? rf.AUTO_PASS_PRICE : rf.AUTO_PASS_PHASE) : null
+	const mode = desiredMode.value
 	const saved = await IO.saveAutoPass(mode, mode === rf.AUTO_PASS_PRICE ? [...store.landPrices] : [], targetName.value)
 	if (!saved) {
 		failed.value = true
@@ -49,11 +52,9 @@ async function save() {
 function setEnabled(value) {
 	enabled.value = value
 	if (!value) stopOnPrice.value = false
-	save()
 }
 function setStopOnPrice(value) {
 	stopOnPrice.value = value
-	save()
 }
 async function cancelFlag(name) {
 	if (busy.value) return
@@ -66,10 +67,11 @@ async function cancelFlag(name) {
 
 <template>
 	<div v-if="visible" class="autoPass">
-		<label class="autoPassRow"><input type="checkbox" :checked="enabled" :disabled="busy" @change="setEnabled($event.target.checked)" /> {{ personal.trainingGame ? $t("actions.autoPassPhaseFor", { name: target.displayName || targetName }) : $t("actions.autoPassPhase") }}</label>
+		<label class="autoPassRow"><input type="checkbox" :checked="enabled" :disabled="busy" @change="setEnabled($event.target.checked)" /> {{ $t("actions.autoPassPhaseFor", { name: target.displayName || targetName }) }}</label>
 		<label v-if="enabled" class="autoPassRow autoPassNested"><input type="checkbox" :checked="stopOnPrice" :disabled="busy" @change="setStopOnPrice($event.target.checked)" /> {{ $t("actions.autoPassStopOnPrice") }}</label>
 		<small v-if="enabled" class="autoPassStatus" role="status">{{ $t("actions.autoPassActive") }}</small>
 		<small v-if="stoppedByPrice" class="autoPassStatus" role="status">{{ $t("actions.autoPassStopped") }}</small>
+		<button v-if="pending" type="button" class="actionsLineButton" :disabled="busy" @click="save">{{ $t("common.save") }}</button>
 		<div v-if="otherActiveFlags.length" class="autoPassOthers">
 			<small>{{ $t("actions.autoPassOthers") }}</small>
 			<span v-for="entry in otherActiveFlags" :key="entry.player.name" class="autoPassOther">

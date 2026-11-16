@@ -599,7 +599,6 @@ export default {
 		endTurnNet: "End Turn ({net} SPL)",
 		passEndTurn: "Pass & End Turn",
 		passEndTurnAndPhase: "Pass & End Turn & Phase",
-		autoPassPhase: "Auto-pass my later turns this settlement phase",
 		autoPassPhaseFor: "Auto-pass {name}'s later turns this settlement phase",
 		autoPassStopOnPrice: "Stop if a land price changes",
 		autoPassActive: "Auto-pass is on for this settlement phase.",
