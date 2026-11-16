@@ -1,12 +1,10 @@
-import importlib
 import json
 
 from django.apps import apps as django_apps
 from django.test import TestCase
 
+from Lobby.migrationHelpers import migrate_ind_pre_move_data
 from Lobby.models import Game, GamePlayer, User
-
-IND_MOVE_MIGRATION = importlib.import_module("Lobby.migrations.0138_migrate_ind_pre_move_data_to_gameplayer")
 
 
 class IndMoveDataMigrationTests(TestCase):
@@ -33,7 +31,7 @@ class IndMoveDataMigrationTests(TestCase):
         self.gp_bob = GamePlayer.objects.create(game=self.game, player=self.bob, seat_order=1)
 
     def _migrate(self):
-        IND_MOVE_MIGRATION.migrate_ind_pre_move_data(django_apps, None)
+        migrate_ind_pre_move_data(django_apps, None)
 
     def test_migration_copies_rows_into_game_players(self):
         self._migrate()
