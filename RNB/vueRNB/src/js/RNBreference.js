@@ -462,7 +462,9 @@ export const TERR_POLDER_DRY = 8
 export const TERR_VOID = 9 // blank hex
 
 export const TERR_ANY_LAND = [TERR_WOODS, TERR_PASTURE, TERR_ROCK, TERR_MOUNTAINS, TERR_DESERT, TERR_POLDER, TERR_POLDER_WET, TERR_POLDER_DRY]
-export const TERR_ANY_LAND_EXCEPT_DESERT = [TERR_WOODS, TERR_PASTURE, TERR_ROCK, TERR_MOUNTAINS]
+// &c polders are land for buildings (&c rules: only woodcutter/quarry/mine/oil rig/pearl
+// fishery are barred, secondary producers, shoreline buildings and the atelier are allowed)
+export const TERR_ANY_LAND_EXCEPT_DESERT = [TERR_WOODS, TERR_PASTURE, TERR_ROCK, TERR_MOUNTAINS, TERR_POLDER, TERR_POLDER_WET, TERR_POLDER_DRY]
 export const TERR_ANY = [TERR_WOODS, TERR_PASTURE, TERR_ROCK, TERR_MOUNTAINS, TERR_DESERT, TERR_SEA, TERR_POLDER, TERR_POLDER_WET, TERR_POLDER_DRY]
 export const TERR_IS_POLDER = [TERR_POLDER, TERR_POLDER_WET, TERR_POLDER_DRY]
 export const TERR_ACTS_LIKE_WATER = [TERR_SEA, TERR_POLDER_WET]
