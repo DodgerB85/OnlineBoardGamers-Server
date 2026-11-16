@@ -51,7 +51,7 @@ class SeniorHelpTests(unittest.TestCase):
         import hashlib
         current=(ROOT/'FCM/templates/FCM/fanExpansionsHelp.html').read_text(encoding='utf-8')
         self.assertEqual(hashlib.sha256(current.replace(section(current),'').encode()).hexdigest(),
-            '4b85b625ce1ee8725723e1febf62baf6c2c3ba07107122577f9a2c18fca2c564')
+            'b342b90734f1f44b1be1b9edfda8727ab69a65f1b74b46fd1fec3c8f2a264ebf')
     def test_generator_and_lossless_art_are_idempotent(self):
         import subprocess,sys,hashlib
         from PIL import Image, ImageChops

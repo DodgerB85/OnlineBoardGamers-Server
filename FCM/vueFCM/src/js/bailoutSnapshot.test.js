@@ -64,7 +64,11 @@ function seed({ sbd = true, secondBailout = true, laborMarket = false, mediaLine
 
 const clone = (value) => JSON.parse(JSON.stringify(value))
 function savedState(store) {
-	return clone({ bailout: store.bailout, laborMarket: store.laborMarket, mediaLine: store.mediaLine,
+	const mediaLine = clone(store.mediaLine)
+	// Module-off saves omit the revision slot outside the draft phase; import
+	// therefore restores the legacy default.
+	if (!store.startingOptions.mediaLine && store.gameflow.phase !== rf.PHASE_SETUP_MODULES) mediaLine.rulesVersion = 0
+	return clone({ bailout: store.bailout, laborMarket: store.laborMarket, mediaLine,
 		stadium: store.stadium, players: store.players, bank: store.bank, bankBroken: store.bankBroken,
 		history: store.history, availableEmployees: store.availableEmployees })
 }

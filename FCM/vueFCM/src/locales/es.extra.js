@@ -45,7 +45,7 @@ export default {
 		"unionOrganizer": "Organizador sindical",
 		"unionOrganizerDesc": "5+ trabajadores: cada empresa más grande recibe uno. Hueco directo del CEO; sin acción; salario de $5.",
 		"telemarketer": "Teleoperador",
-		"telemarketerDesc": "Coloca publicidad telefónica o de nivel inferior, duración 3 turnos",
+		"telemarketerDesc": "Coloca publicidad telefónica o de nivel inferior, duración 1–3 turnos",
 		"tvAnnouncer": "Locutor de TV",
 		"tvAnnouncerDesc": "Elige 5 casas en el rombo de 13 casillas alrededor de un restaurante y publica un titular por turno",
 

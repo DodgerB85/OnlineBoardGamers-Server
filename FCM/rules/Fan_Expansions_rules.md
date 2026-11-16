@@ -1,7 +1,7 @@
 # Food Chain Magnate: Fan expansions — Rules
 
-> Converted from `FCM/templates/FCM/fanExpansionsHelp.html` on 2026-10-24.
-> This is the in-game help text for these modules; images are linked to the local static copies.
+> Converted from `FCM/templates/FCM/fanExpansionsHelp.html` on 2026-11-16.
+> The help page is the player-facing source of truth; this file is the long-form reference. Images are linked to the local static copies.
 
 These modules are fan-made expansions. They are not official Splotter Spellen content.
 
@@ -82,18 +82,47 @@ In the base game the bank only breaks once. With this module the city steps in t
 
 ## Media Line
 
-![](/static/FCM/images/e_telemarketer.jpg)
+![](/static/FCM/images/e_telemarketer_en.jpg)
 ![](/static/FCM/images/e_tv_announcer.jpg)
 
 ### Overview
-The base game's marketing is paper: billboards, mail, airplanes. This module adds the airwaves. A Telemarketer calls the houses right next door - no roads required, one call per house. A TV Announcer mounts antennas on five nearby roofs and owns the news: one story moves every unit price in the city by $5 tomorrow, up or down. Demand is small but surgical - the payoff is one perfectly stocked jackpot night that can break the bank.
+This module adds telephone and television advertising. A Telemarketer works the neighbourhood by phone; a TV Announcer mounts antennas on nearby roofs and owns the news. Games created after the grouped-phone revision use 12 phone cards in four groups of three; older games keep the original six phone cards and their building-adjacency rule.
 
 ### Rules
-- Training chain: Marketing Trainee → Telemarketer (level 2) → TV Announcer (level 3) → Brand Director. Six of each; cards may be stacked.
-- Telemarketer: places 2x1 phone tokens attached to buildings (not roads) within one orthogonal step of your restaurant (a cross of 5 tiles). Each action places up to two tokens - two calls with the same food and duration, placed together; you may place only one. A token wedged between two houses reaches both. Duration 1-3 nights. The city has only 6 tokens: at most 6 calls on the board at once.
-- TV Announcer: picks exactly 5 houses within 2 steps of your restaurant (a diamond of 13 tiles), or every candidate if fewer than 5 are available, and mounts a rooftop antenna on each. Duration 1-4 nights. The city has only 2 channels: at most 2 TV campaigns at once; one player holding both has a monopoly.
-- Headline (TV Announcer only, free, one per working announcer per turn): tomorrow night every unit price in the city changes by +$5 (Prime Time) or -$5 (Bad Press). The shift is applied per item and before garden/park multipliers, so a 3-item sale changes by $15 and a garden sale doubles the shift before bonuses are added. Stories stack and cancel each other out, clamped to a city-wide total of +$10 or -$10.
-- Timing: media campaigns run in the normal Marketing Campaigns phase of the turn they are placed, like all campaigns. The TV headline is the exception: it takes effect at the next turn’s dinner. Houses keep the usual 3-demand cap; the different media push in a fixed order.
+- Training chain: Marketing Trainee → Telemarketer (level 2) → TV Announcer (level 3) → Brand Director. There are six Telemarketer cards and six TV Announcer cards; cards may be stacked.
+- Phones (new games): 12 cards in four groups, numbered 6.5 / 7.5 / 8.5 / 9.5, three cards per group. A Telemarketer, TV Announcer or Brand Director selects one whole group, one good and one duration (1-3 rounds). The group is placed one card at a time while any legal position remains; all cards use the same good and duration and cannot be split between employees or players. From the first card the group and the employee stay reserved until every placed token expires; unplaced cards are unavailable during that time. Placing none consumes neither the group nor the employee.
+- Phone placement: a 2x1 token. The clicked origin must be in a tile containing a restaurant door or one of its four orthogonal neighbours; the token may extend right, down, left or up, including across tile or range boundaries. Both cells must be empty ground inside the map. Building adjacency is not required. Every house touching either cell is affected.
+- TV Announcer: picks exactly 5 houses within 2 steps of the restaurant (a diamond of 13 tiles), or every candidate if fewer than 5 are available, and mounts a rooftop antenna on each. Duration 1-4 rounds. The city has only 2 channels: at most 2 TV campaigns at once; one player holding both has a monopoly. Brand Directors may also place TV campaigns.
+- Headline (TV Announcer only, free, one per working announcer per round): at the next round's dinner every unit price in the city changes by +$5 (Prime Time) or -$5 (Bad Press). The shift is applied per item and before garden/park multipliers. New games let headlines stack or cancel without a cap; legacy games clamp the city total to +/-$10.
+- Timing: media campaigns run in the normal Marketing Campaigns phase of the round they are placed, like all campaigns. The TV headline is the exception: it takes effect at the next round's dinner. Houses keep the usual 3-demand cap; the different media push in a fixed order.
 - Unserved orders stay on the house and may be fulfilled by anyone.
-- Milestone "First Telemarketer used": unlocks a permanent group bonus - at Dinnertime, if every house of one of your media groups (the 2 phone houses or the 5 antenna houses) is served entirely by you, earn $10 per house ($20 per phone group, $50 per TV group; groups settle separately). Requires purity: no other marketing employees or campaigns of yours may be active that night.
-- Milestone "First TV Announcer used": one-time launch bonus - during your first TV campaign, every antenna house gets 2 demand per night instead of 1. Each player who has the milestone gets this separately.
+- Milestones: new games have no "First Telemarketer used" milestone and no phone/TV group all-eat bonus. The "First TV Announcer used" milestone remains: during the recipient's first TV campaign, every antenna house gets 2 demand per night instead of 1; each holder gets it separately.
+- Legacy compatibility: games and replays without the grouped-phone revision keep the original rules - six phone cards (30-35), placement attached to a building in the 5-tile cross, two-token actions with the same food and duration, the "First Telemarketer used" milestone/group bonus, and the +/-10 headline cap.
+
+## New Map
+
+![New Map](/static/FCM/images/so_newMap.svg)
+![New Map tiles overview](/static/FCM/images/new_map_tiles_overview.jpg)
+
+### Overview
+This module adds 15 fan-designed tiles - more crossroads, more T-junctions, three drink pickups on a single tile, and one deliberately designed road tile. 15 new houses (numbers 20, 23, 24, 26-37) arrive with them: the city gets bigger and the houses-to-gardens ratio changes - the New Business Developer's garden cap is raised from 8 to 15.
+
+### Rules
+- Tile pool: the 15 new tiles join the random tile pool. Tick the sub-option to draw the map from the 15 new tiles first and fill the remaining slots from the normal pool.
+- Garden cap: the garden cap is raised from 8 to 15.
+- Compatibility: stacks with all other modules.
+
+## Senior Business Developer
+
+![Senior Business Developer](/static/FCM/images/e_senior_business_developer_x1_out_en.png)
+
+### Overview
+The Senior Business Developer adds apartments and OUT markers to the New Business Developer's actions.
+
+### Rules
+- Train a New Business Developer into a Senior Business Developer. Each player may own one, including employees on the beach. Shared supply: 1 card for 2-3 players, 2 for 4, 3 for 5-6.
+- Once per round, choose one action: place a house, a garden, an apartment, or an OUT marker.
+- The three apartments, 15¾, 21¾ and 27¾, each occupy 3x3 squares. Demand and marketing follow the base apartment rules.
+- Place an OUT marker only on a house or apartment with no active demand. The building stays in place and receives no new demand for the rest of the game. Already marked or pending buildings and the stadium cannot be marked.
+- All players share 8 OUT markers. Each placement permanently spends one; markers cannot be removed or recovered. When none remain, this action is unavailable.
+- The first player to use a Senior Business Developer gains its milestone and may add 1 map tile, as with the Lobbyist milestone. Other modules combine normally; house, garden and tile supplies follow the applicable base and module rules.

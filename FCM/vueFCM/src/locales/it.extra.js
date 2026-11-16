@@ -45,7 +45,7 @@ export default {
 		"unionOrganizer": "Organizzatore sindacale",
 		"unionOrganizerDesc": "5+ lavoratori: ogni azienda più grande ne riceve uno. Slot diretto del CEO; nessuna azione; stipendio di 5 $.",
 		"telemarketer": "Telemarketer",
-		"telemarketerDesc": "Posiziona pubblicità telefonica o di livello inferiore, durata 3 turni",
+		"telemarketerDesc": "Posiziona pubblicità telefonica o di livello inferiore, durata 1–3 turni",
 		"tvAnnouncer": "Annunciatore TV",
 		"tvAnnouncerDesc": "Scegli 5 case nel rombo di 13 caselle attorno a un ristorante e pubblica un titolo per turno",
 

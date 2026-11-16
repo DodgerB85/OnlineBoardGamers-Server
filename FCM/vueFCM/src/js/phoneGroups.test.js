@@ -454,14 +454,52 @@ describe('phone save and replay compatibility', () => {
   expect(s.campaigns.map(c=>c.number)).toEqual([39,40,41]); expect(s.mediaLine.phoneGroups[3].cards).toEqual([39,40,41])
   expect(s.availableMarketingCampaigns).not.toContain(40)
  })
- it.each([0,1])('module-off save retains revision %s for later Media Line drafting', version => {
-  const s=game([]); let data=decode(funcs.exportFCMmodel(false,false))
-  if(version===0) data=data.filter(v=>!(Array.isArray(v)&&v[0]===-rf.SO_MEDIA_LINE))
+ it('module-off non-draft save omits the Media Line slot', () => {
+  const s=game([]); const data=decode(funcs.exportFCMmodel(false,false))
+  expect(data.some(v=>Array.isArray(v)&&v[0]===-rf.SO_MEDIA_LINE)).toBe(false)
+  s.mediaLine.rulesVersion=1
   expect(funcs.importFCMmodel(encode(data),false,false)).not.toBe(-9999)
-  expect(s.mediaLine.rulesVersion).toBe(version); expect(s.startingOptions.mediaLine).toBe(false)
-  s.externalStartingOptions.push('50'); model.setInternalStartingOptions(['50']); model.setupKetchupExpansion(2)
-  expect(s.availableMarketingCampaigns.filter(n=>rf.PHONE_CAMPAIGNS.includes(n))).toHaveLength(version===1?12:6)
-  expect(s.availableMilestones.includes(rf.FIRST_TELEMARKETER_USED)).toBe(version===0)
+  expect(s.mediaLine.rulesVersion).toBe(0); expect(s.startingOptions.mediaLine).toBe(false)
+ })
+ it('draft-phase save keeps the revision, and drafting Media Line keeps the game modern after reload', () => {
+  const s=game([rf.SO_DRAFT_MODULE_BREAKER]); expect(s.gameflow.phase).toBe(rf.PHASE_SETUP_MODULES)
+  const draftSave=funcs.exportFCMmodel(false,false), draftData=decode(draftSave)
+  const slot=draftData.find(v=>Array.isArray(v)&&v[0]===-rf.SO_MEDIA_LINE)
+  expect(slot).toBeTruthy(); expect(slot[1]).toBe(3); expect(slot[7]).toBe(1); expect(s.startingOptions.mediaLine).toBe(false)
+  // Reload during drafting: the revision must survive before the module is active.
+  s.mediaLine.rulesVersion=0
+  expect(funcs.importFCMmodel(draftSave,false,false)).not.toBe(-9999)
+  expect(s.mediaLine.rulesVersion).toBe(1)
+  // saveModuleSelection() applies the drafted option before exporting the save.
+  s.externalStartingOptions.push(String(rf.SO_MEDIA_LINE))
+  window.initData.startingOptions=[...window.initData.startingOptions,String(rf.SO_MEDIA_LINE)]
+  model.setInternalStartingOptions(s.externalStartingOptions); model.setupKetchupExpansion(s.players.length)
+  expect(s.startingOptions.mediaLine).toBe(true)
+  const draftedSave=funcs.exportFCMmodel(false,false), draftedData=decode(draftedSave)
+  expect(draftedData.some(v=>Array.isArray(v)&&v[0]===-rf.SO_MEDIA_LINE)).toBe(true)
+  s.mediaLine.rulesVersion=0
+  expect(funcs.importFCMmodel(draftedSave,false,false)).not.toBe(-9999)
+  expect(s.mediaLine.rulesVersion).toBe(1)
+  expect(s.availableMarketingCampaigns.filter(n=>rf.PHONE_CAMPAIGNS.includes(n))).toHaveLength(12)
+  expect(s.availableMilestones).not.toContain(rf.FIRST_TELEMARKETER_USED)
+ })
+ it('an old draft save stays legacy when Media Line is drafted later', () => {
+  const s=game([rf.SO_DRAFT_MODULE_BREAKER]); let data=decode(funcs.exportFCMmodel(false,false))
+  data=data.filter(v=>!(Array.isArray(v)&&v[0]===-rf.SO_MEDIA_LINE))
+  s.mediaLine.rulesVersion=0
+  expect(funcs.importFCMmodel(encode(data),false,false)).not.toBe(-9999)
+  expect(s.mediaLine.rulesVersion).toBe(0)
+  s.externalStartingOptions.push(String(rf.SO_MEDIA_LINE))
+  window.initData.startingOptions=[...window.initData.startingOptions,String(rf.SO_MEDIA_LINE)]
+  model.setInternalStartingOptions(s.externalStartingOptions); model.setupKetchupExpansion(s.players.length)
+  expect(s.availableMarketingCampaigns.filter(n=>rf.PHONE_CAMPAIGNS.includes(n))).toHaveLength(6)
+  expect(s.availableMilestones).toContain(rf.FIRST_TELEMARKETER_USED)
+  const oldDrafted=funcs.exportFCMmodel(false,false), oldSlot=decode(oldDrafted).find(v=>Array.isArray(v)&&v[0]===-rf.SO_MEDIA_LINE)
+  expect(oldSlot[1]).toBe(2)
+  s.mediaLine.rulesVersion=1
+  expect(funcs.importFCMmodel(oldDrafted,false,false)).not.toBe(-9999)
+  expect(s.mediaLine.rulesVersion).toBe(0)
+  expect(s.availableMarketingCampaigns.filter(n=>rf.PHONE_CAMPAIGNS.includes(n))).toHaveLength(6)
  })
  it.each([false,true])('new schema coexists with Stadium/Labor Market/Bailout/SBD tails (raw=%s)', raw => {
   const s=game(['50','47','48','49','53']); s.gameflow.turn=5; s.gameflow.phase=rf.PHASE_WORKING_DAY
@@ -546,7 +584,7 @@ describe('phone artwork and visible wording', () => {
   expect(action).toContain('!phone.modern()')
   expect(action).toContain('phoneGroupProgress')
   const zh=fs.readFileSync(new URL('../locales/zh-hans.js',import.meta.url),'utf8')
-  expect(zh).toContain('放置电话或更低级的广告，持续时间3回合')
+  expect(zh).toContain('放置电话或更低级的广告，持续时间1—3回合')
   const help=fs.readFileSync(new URL('../../../templates/FCM/fanExpansionsHelp.html',import.meta.url),'utf8')
   expect(help).toContain('6.5 / 7.5 / 8.5 / 9.5')
   expect(help).not.toContain('unlocks a permanent group bonus')

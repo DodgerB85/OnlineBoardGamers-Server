@@ -36,5 +36,5 @@ def main():
         difference=ImageChops.difference(source,image);difference.paste((0,0,0),BOX)
         assert difference.getbbox() is None
         report.append({'language':lang,'image':file.name,'lines':lines,'fontSize':size/scale,'outsideAbilityBoxPixelsIdentical':True,'size':image.size,'box':BOX})
-    print(json.dumps(report,ensure_ascii=False,indent=2))
+    print(json.dumps(report,ensure_ascii=True,indent=2))
 if __name__=='__main__':main()

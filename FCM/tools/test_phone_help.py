@@ -88,14 +88,14 @@ class PhoneHelpTests(unittest.TestCase):
                     self.assertNotIn('fuzzy',entry.flags)
                     self.assertEqual(mo.gettext(msgid),entry.msgstr)
 
-    def test_short_overview_and_seven_points(self):
+    def test_short_overview_and_eight_points(self):
         html,text=rendered_section('zh-hans')
-        self.assertEqual(html.count('<li>'),7)
-        self.assertLessEqual(len(re.sub(r'\s','',text)),650)
+        self.assertEqual(html.count('<li>'),8)
+        self.assertLessEqual(len(re.sub(r'\s','',text)),800)
         self.assertNotIn('<details>',html)
         self.assertNotIn('rulesVersion',text)
 
-    def test_six_languages_render_all_eight_expected_messages(self):
+    def test_six_languages_render_all_nine_expected_messages(self):
         source=json.loads((ROOT/'FCM/tools/phone_help_translations.json').read_text(encoding='utf-8'))
         for lang in LANGS:
             html,_=rendered_section(lang)
@@ -128,10 +128,10 @@ class PhoneHelpTests(unittest.TestCase):
             self.assertIn('12',text)
 
     def test_user_chinese_copy_exact_and_removed_rules_absent(self):
-        expected = ['增加电话和电视广告。', '培训：营销实习生→电话推销员→电视广播员→品牌总监，各6张，可叠放。', '电话推销员可放电话或更低级的广告。一次选一组，同商品、同时长（1—3回合）', '电话6.5／7.5／8.5／9.5四组各3张，共12张。可放置范围为餐厅入口所在板块以及上下左右共5个板块', '电视广播员的可以放置电视、电话或更低级的广告，电视频道可以放置同商品、同时长（1—4回合）', '电视有2频道，为3.5/4.5。可选择餐厅入口所在板块距离2板块内的5个房子进行电视营销', '头条仅电视广播员可用，每名在岗员工每回合选择一次：下回合晚餐全城商品单价±5，可叠加抵消。', '“首位使用电视广播员”里程碑：获得者首场电视广告期间，放置2需求。']
+        expected = ['增加电话和电视广告。', '培训：营销实习生→电话推销员→电视广播员→品牌总监，各6张，可叠放。', '电话推销员可放电话或更低级的广告。一次选一组，同商品、同时长（1—3回合）', '电话6.5／7.5／8.5／9.5四组各3张，共12张。可放置范围为餐厅入口所在板块以及上下左右共5个板块', '电视广播员的可以放置电视、电话或更低级的广告，电视频道可以放置同商品、同时长（1—4回合）', '电视有2频道，为3.5/4.5。可选择餐厅入口所在板块距离2板块内的5个房子进行电视营销', '头条仅电视广播员可用，每名在岗员工每回合选择一次：下回合晚餐全城商品单价±5，可叠加抵消。', '“首位使用电视广播员”里程碑：获得者首场电视广告期间，放置2需求。', '兼容说明：旧局及旧回放保留原电话规则，包括邻接建筑的要求。电视仍为2个频道，其选择、范围、时长、头条、晋升和独立里程碑不变。']
         html,text=rendered_section('zh-hans')
         self.assertEqual(re.findall(r'<(?:p|li)>(.*?)</(?:p|li)>',html,re.S),expected)
-        for removed in ['四向','整组','锁定','旧局','±10','每房每夜','而非1','花园','免费','涨价无上限','减价不能超过0']:
+        for removed in ['四向','整组','锁定','±10','每房每夜','而非1','花园','免费','涨价无上限','减价不能超过0']:
             self.assertNotIn(removed,text)
 
 if __name__=='__main__':

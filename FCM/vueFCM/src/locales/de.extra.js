@@ -45,7 +45,7 @@ export default {
 		"unionOrganizer": "Gewerkschaftsorganisator",
 		"unionOrganizerDesc": "5+ Arbeiter: Jede größte Firma erhält einen. Direkter CEO-Slot; keine Aktion; 5 $ Gehalt.",
 		"telemarketer": "Telemarketer",
-		"telemarketerDesc": "Telefonwerbung oder niedrigere Werbung platzieren, Dauer 3 Runden",
+		"telemarketerDesc": "Telefonwerbung oder niedrigere Werbung platzieren, Dauer 1–3 Runden",
 		"tvAnnouncer": "TV-Ansager",
 		"tvAnnouncerDesc": "Wähle 5 Häuser im 13-Felder-Rautenmuster um ein Restaurant und veröffentliche pro Runde eine Schlagzeile",
 

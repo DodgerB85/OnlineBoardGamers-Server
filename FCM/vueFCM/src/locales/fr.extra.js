@@ -45,7 +45,7 @@ export default {
 		"unionOrganizer": "Organisateur syndical",
 		"unionOrganizerDesc": "5+ ouvriers : chaque entreprise la plus importante en reçoit un. Emplacement direct du CEO ; aucune action ; salaire de 5 $.",
 		"telemarketer": "Télévendeur",
-		"telemarketerDesc": "Placez une publicité téléphonique ou de niveau inférieur, durée 3 tours",
+		"telemarketerDesc": "Placez une publicité téléphonique ou de niveau inférieur, durée 1–3 tours",
 		"tvAnnouncer": "Présentateur TV",
 		"tvAnnouncerDesc": "Choisissez 5 maisons dans le losange de 13 cases autour d'un restaurant et publiez un gros titre par tour",
 

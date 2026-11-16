@@ -13,9 +13,9 @@ import polib
 ROOT = Path(__file__).resolve().parents[1]
 translations = json.loads((ROOT/'tools/phone_help_translations.json').read_text(encoding='utf-8'))
 ids = translations['en']
-assert len(ids) == len(set(ids)) == 8
+assert len(ids) == len(set(ids)) == 9
 assert set(translations) == {'en', 'zh_Hans', 'de', 'es', 'fr', 'it'}
-assert all(len(items) == 8 and all(items) for items in translations.values())
+assert all(len(items) == 9 and all(items) for items in translations.values())
 
 template = ROOT/'templates/FCM/fanExpansionsHelp.html'
 text = template.read_text(encoding='utf-8')

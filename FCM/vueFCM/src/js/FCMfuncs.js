@@ -749,8 +749,10 @@ export function exportFCMmodel(forGameOver, includeContext, historyCutoff) {
 	}
 
 	// Media Line mod (only when the module was chosen; shape-detected on load).
-	// Compact positional slot, tagged like the Labor Market one.
-	if (store.startingOptions.mediaLine || phone.modern()) temp.push(exportMediaLineSlot())
+	// The draft phase happens before the module is activated, so keep the
+	// revision marker while drafting; otherwise a draft reload would default
+	// the game to legacy phones.
+	if (store.startingOptions.mediaLine || (phone.modern() && store.gameflow.phase === rf.PHASE_SETUP_MODULES)) temp.push(exportMediaLineSlot())
 
 	return compressData(temp)
 }

@@ -396,7 +396,7 @@ export default {
 		"unionOrganizerDesc": "5人起算，最多者各得1张。占CEO直属槽，无行动，工资$5。",
 
 		"telemarketer": "电话推销员",
-		"telemarketerDesc": "放置电话或更低级的广告，持续时间3回合",
+		"telemarketerDesc": "放置电话或更低级的广告，持续时间1—3回合",
 
 		"tvAnnouncer": "电视广播员",
 		"tvAnnouncerDesc": "在菱形十三板块范围内选 5 栋房装天线，每晚可发一条头条",
