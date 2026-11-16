@@ -29,6 +29,21 @@ export function getAutomaticAction(game) {
 	return null
 }
 
+// A pass preference only applies to the settlement turn it was saved for.
+export function isAutoPassActive(game, flag) {
+	if (!flag || game.gameflow.phase !== rf.PHASE_SETTLEMENT || flag.turn !== game.gameflow.turn) return false
+	if (flag.mode === rf.AUTO_PASS_PHASE) return true
+	if (flag.mode !== rf.AUTO_PASS_PRICE || !Array.isArray(flag.prices)) return false
+	return flag.prices.length === game.landPrices.length && flag.prices.every((price, index) => price === game.landPrices[index])
+}
+
+// A pass that ends the phase keeps the card when the player already holds it.
+export function keepsPrimogenitureIfPassing(game, player) {
+	if (game.gameflow.phase !== rf.PHASE_SETTLEMENT || game.gameflow.passes !== game.players.length - 1) return false
+	const bid = game.gameflow.primogenitureBid
+	return bid ? bid.player === player : game.gameflow.primogeniture === player
+}
+
 export function ownedLand(game, stateId, player = null) {
 	return game.board.areas.filter((area) => area.state === stateId && area.owner !== null && (player === null || area.owner === player))
 }

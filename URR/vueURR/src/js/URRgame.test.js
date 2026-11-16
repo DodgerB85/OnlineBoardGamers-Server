@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import test from "node:test"
 import { createGame, applyAction, restoreDevelopmentChoices, finishGame } from "./URRgame.js"
 import * as rf from "./URRreference.js"
-import { canExchangeBarahshum, getAutomaticAction, remainingWaterworkTokens } from "./URRrules.js"
+import { canExchangeBarahshum, getAutomaticAction, isAutoPassActive, keepsPrimogenitureIfPassing, remainingWaterworkTokens } from "./URRrules.js"
 import { crewRemovalIndices, groupedDraftSteps, actionSummary, actionPanelGame, defaultEndAction, endsDecision, turnCost } from "./URRturnDraft.js"
 import { startWaterRouting, waterChoices } from "./URRwater.js"
 
@@ -431,6 +431,40 @@ test("Reducing to the mandatory minimum restores the unpurchased crew and First 
 	assert.deepEqual(crewRemovalIndices([{ state: optional, action }, { state: optional, action }], 1, rf.STATE_AKKAD), [1])
 })
 
+
+test("Auto-pass flags only apply to their stamped settlement turn", () => {
+	const game = createGame(["A", "B", "C"])
+	game.gameflow.phase = rf.PHASE_SETTLEMENT
+	game.gameflow.turn = 3
+
+	assert.equal(isAutoPassActive(game, { mode: rf.AUTO_PASS_PHASE, turn: 3 }), true)
+	assert.equal(isAutoPassActive(game, { mode: rf.AUTO_PASS_PHASE, turn: 2 }), false)
+	assert.equal(isAutoPassActive(game, { mode: rf.AUTO_PASS_PRICE, turn: 3, prices: [...game.landPrices] }), true)
+
+	const changed = [...game.landPrices]
+	changed[0] -= 1
+	assert.equal(isAutoPassActive(game, { mode: rf.AUTO_PASS_PRICE, turn: 3, prices: changed }), false)
+
+	game.gameflow.phase = rf.PHASE_DEVELOPMENT
+	assert.equal(isAutoPassActive(game, { mode: rf.AUTO_PASS_PHASE, turn: 3 }), false)
+	assert.equal(isAutoPassActive(game, null), false)
+})
+
+test("the last pass keeps primogeniture only when the card is already secured", () => {
+	const game = createGame(["A", "B", "C"])
+	game.gameflow.phase = rf.PHASE_SETTLEMENT
+	game.gameflow.passes = 2
+	game.gameflow.primogeniture = 1
+	assert.equal(keepsPrimogenitureIfPassing(game, 1), true)
+	assert.equal(keepsPrimogenitureIfPassing(game, 0), false)
+
+	game.gameflow.primogenitureBid = { player: 0, amount: 10 }
+	assert.equal(keepsPrimogenitureIfPassing(game, 0), true)
+	assert.equal(keepsPrimogenitureIfPassing(game, 1), false)
+
+	game.gameflow.passes = 1
+	assert.equal(keepsPrimogenitureIfPassing(game, 0), false)
+})
 
 test("Restoring an irrigation checkpoint returns the water for another hex", () => {
 	const game = createGame(["A", "B", "C"])

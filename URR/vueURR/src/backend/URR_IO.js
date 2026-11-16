@@ -60,10 +60,14 @@ export async function saveGame(saveRewind = true) {
 
 	try {
 		// A resignation or kickout down to the last player ends the game before any bot replay.
-		if (!model.finishGameIfOnePlayerLeft()) model.playMissingSeats()
+		if (!model.finishGameIfOnePlayerLeft()) {
+			// Read the flags immediately before the save so a just-set auto-pass is not missed.
+			if (store.gameflow.phase === rf.PHASE_SETTLEMENT) await refreshAutoPassData()
+			model.playInactiveSeats(store.autoPassData)
+		}
 	} catch (error) {
 		// The App.vue fallback retries the abandoned seat on the next load.
-		console.error("Unable to pass for a missing seat:", error)
+		console.error("Unable to resolve inactive seats:", error)
 	}
 	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder } = getNextCurrentPlayers()
 
@@ -139,6 +143,38 @@ export async function saveGame(saveRewind = true) {
 	} finally {
 		store.viewSettings.isSaving = false
 		if (!personal.haltPlay) WS.refreshPendingGameUpdate()
+	}
+}
+
+async function autoPassRequest(action, payload = {}) {
+	const personal = usePersonalStore()
+	const response = await fetch("/URR/processURRturn/", {
+		method: "POST",
+		body: JSON.stringify({ action, gameID: personal.gameID, ...payload }),
+		headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
+	})
+	const data = await response.json()
+	if (!response.ok || data.ok === false) throw new Error(data.error || "Network response was not ok")
+	useModelStore().setAutoPassData(data.autoPassData || {})
+	return data.autoPassData || {}
+}
+
+export async function saveAutoPass(mode, prices = []) {
+	try {
+		await autoPassRequest("setAutoPass", { mode, prices })
+		return true
+	} catch (error) {
+		console.error("Error saving auto-pass:", error)
+		return false
+	}
+}
+
+export async function refreshAutoPassData() {
+	try {
+		return await autoPassRequest("getAutoPassData")
+	} catch (error) {
+		console.error("Error fetching auto-pass data:", error)
+		return useModelStore().autoPassData
 	}
 }
 
@@ -318,6 +354,7 @@ function updateKickoutData(data) {
 	personal.secondsToNextKickout = data.secondsToNextKickout
 	store.kickoutVotesData = data.kickoutVotesData
 	store.kickoutVoteThreshold = data.kickoutVoteThreshold
+	if (data.autoPassData) store.setAutoPassData(data.autoPassData)
 	model.setMissingPlayers(data.missingPlayers)
 }
 

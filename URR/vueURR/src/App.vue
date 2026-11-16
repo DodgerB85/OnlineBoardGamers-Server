@@ -23,6 +23,7 @@ import GameOverview from "./components/GameOverview.vue"
 import DevelopmentProgress from "./components/DevelopmentProgress.vue"
 import TurnOrder from "./components/TurnOrder.vue"
 import TurnControls from "./components/TurnControls.vue"
+import AutoPassToggle from "./components/AutoPassToggle.vue"
 import GameActions from "./components/GameActions.vue"
 import StateStrip from "./components/StateStrip.vue"
 import PlayerHoldings from "./components/PlayerHoldings.vue"
@@ -266,6 +267,7 @@ function showDebug() {
 				<div v-if="!isNationDivision" class="actionPanelHeading"><small class="actingLabel"><template v-if="actingLabel">{{ actingLabel }}</template><PlayerMarker v-if="actingPlayer !== undefined" :index="actingPlayer" /><span v-if="actingPlayer !== undefined">{{ store.players[actingPlayer].displayName }}</span></small><small v-if="actingState !== null" class="actingLabel actingState"><img :src="assets.getStateOrderImage(actingState)" alt="" />{{ $t("common.state") }}: {{ rf.STATE_NAMES[actingState] }}</small>{{ actionPanelTitle }}</div>
 				<div v-if="isNationDivision || controlsForViewer || store.gameflow.phase === rf.PHASE_GAME_OVER" class="actionPanelBody"><NationMarket v-if="isNationDivision" :is-board-layout="isNationDivision" />
 				<GameActions v-else ref="gameActions" @inspect="revealStatus" :key="store.turnDraft.revision" @select-area="selectedArea = $event" @change-map-action="mapAction = $event" @change-action-targets="actionTargets = $event" :selected-area="selectedArea" :path="canalPath" @clear-path="map.finishDig()" @change-removal="removalArea = $event" @change-land-draft="landDraft = $event" @change-turn-action="turnAction = $event" @change-dig-capacity="digCapacity = $event" /></div>
+				<AutoPassToggle />
 				<TurnControls v-if="controlsForViewer" :is-nation-division="isNationDivision" :turn-action="turnAction" :land-draft="landDraft" @end-turn="finishTurn" />
 				<button v-if="personal.canResign()" class="resignButton actionsLineButton" @click="store.viewSettings.showResignPanel = !store.viewSettings.showResignPanel">{{ $t("resign.title") }}</button>
 			</aside>

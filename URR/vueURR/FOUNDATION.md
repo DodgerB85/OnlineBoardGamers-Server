@@ -15,7 +15,7 @@ Rules reference: [Ur, 1830 BC rulebook](../Ur1830Rules.md). The client implement
 ## Implemented gameplay
 
 - Nation division, treaty purchases, bids and auctions, independent nation income, and First Akkadians' three-land grant and payment to Akkad.
-- Settlement purchases, ordered sale batches, land prices, price movement, primogeniture bidding, state emergence and kingship succession.
+- Settlement purchases, ordered sale batches, land prices, price movement, primogeniture bidding (with a last-pass hint when the card is already secured), consecutive passes, per-player auto-pass for the rest of the phase or until land prices move, state emergence and kingship succession.
 - Canal construction by state crews and Eridu; equipment purchases, era changes, obsolete crews, waterwork construction and consent requests.
 - Maintenance liquidation and revolution resolution, including throne-preserving sales and compulsory harvest distribution after revolution.
 - Barahshum's between-turn canal exchange and Calah's free waterwork exchange.

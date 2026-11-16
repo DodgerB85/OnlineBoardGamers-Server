@@ -230,9 +230,38 @@ test("a missing seat plays under the bot name but keeps its own name in history"
 test("a missing seat hands the turn to the next live player", () => {
 	storeGame(createGame(["A", "B", "C"]))
 	model.setMissingPlayers(["A", "B"])
-	model.playMissingSeats()
+	model.playInactiveSeats()
 	assert.equal(store.gameflow.turnOrder[0], 2)
 	assert.equal(store.players[2].isMissing, undefined)
+})
+
+test("auto-pass seats are skipped together with missing seats", () => {
+	const game = createGame(["A", "B", "C"])
+	game.gameflow.phase = rf.PHASE_SETTLEMENT
+	game.gameflow.turn = 1
+	storeGame(game)
+	store.players[1].isMissing = true
+
+	model.playInactiveSeats({
+		A: { mode: rf.AUTO_PASS_PHASE, turn: 1 },
+		B: { mode: rf.AUTO_PASS_PHASE, turn: 1 },
+	})
+
+	assert.equal(store.gameflow.turnOrder[0], 2)
+	assert.equal(store.history.length, 3)
+	assert.deepEqual(store.history.slice(1).map((entry) => entry[0]), [10, 10])
+})
+
+test("a stale auto-pass flag does not skip the current turn", () => {
+	const game = createGame(["A", "B", "C"])
+	game.gameflow.phase = rf.PHASE_SETTLEMENT
+	game.gameflow.turn = 2
+	storeGame(game)
+
+	model.playInactiveSeats({ A: { mode: rf.AUTO_PASS_PHASE, turn: 1 } })
+
+	assert.equal(store.gameflow.turnOrder[0], 0)
+	assert.equal(store.history.length, 1)
 })
 
 test("a rewind entry survives the save and replays without changing the position", () => {

@@ -40,6 +40,10 @@ export const PHASE_GAME_OVER = 4
 export const MAIN_PHASES = [PHASE_SETTLEMENT, PHASE_DEVELOPMENT, PHASE_RAINY_SEASON]
 export const ALL_PHASES = [PHASE_DIVIDING_NATIONS, PHASE_SETTLEMENT, PHASE_DEVELOPMENT, PHASE_RAINY_SEASON, PHASE_GAME_OVER]
 
+// --- Settlement auto-pass (stored per GamePlayer, outside saved game data) ---
+export const AUTO_PASS_PHASE = "phase"
+export const AUTO_PASS_PRICE = "price"
+
 // --- The six states ---
 export const STATE_AKKAD = 0
 export const STATE_BABYLON = 1

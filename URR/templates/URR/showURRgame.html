@@ -177,6 +177,7 @@
     {% endif %}
     initData.notes = '{{ notes|escapejs }}';
     initData.yourTurnAudioType = {{ yourTurnAudioType }};
+    initData.autoPassData = {{ autoPassData|default:"{}"|safe }};
     {% endif %}
 
     {% if displayNames %}

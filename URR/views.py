@@ -114,6 +114,7 @@ def showURRgame(request, game_id=1, spoilerFree=False, replayStep=1):
         return render(request, "URR/showURRgame.html", returnData)
 
     returnData.update(result["involved_data"])
+    returnData["autoPassData"] = json.dumps(getAutoPassData(currentGame))
 
     ## NEW GAME: the shadow display names are stashed in the creator's notes on creation.
     # Hand them over once, then clear them so they never show up as personal notes.
@@ -214,6 +215,12 @@ def _processURRturn(request):
             },
             safe=False,
         )
+
+    elif jsonData["action"] == "setAutoPass":
+        return setAutoPass(request, currentGame, jsonData)
+
+    elif jsonData["action"] == "getAutoPassData":
+        return JsonResponse({"autoPassData": getAutoPassData(currentGame)}, safe=False)
 
     elif jsonData["action"] == "loadRewind":
         if str(latest_update) != str(currentGame.latestUpdate):
@@ -466,8 +473,53 @@ def saveZoomURR(request):
     return shared_save_zoom(request, "URR")
 
 
+AUTO_PASS_KEY = "urrAutoPass"
+AUTO_PASS_MODES = ("phase", "price")
+
+
+def getAutoPassData(currentGame):
+    flags = {}
+    for gp in currentGame.players.select_related("player").filter(is_kicked=False, player__isnull=False):
+        state = gp.moveDataJSON if isinstance(gp.moveDataJSON, dict) else {}
+        flag = state.get(AUTO_PASS_KEY)
+        if isinstance(flag, dict):
+            flags[gp.player.username] = flag
+    return flags
+
+
+def setAutoPass(request, currentGame, jsonData):
+    if currentGame.gameStatus == "FINISHED":
+        return JsonResponse({"ok": True, "autoPassData": getAutoPassData(currentGame)}, safe=False)
+
+    gp = currentGame.players.select_related("player").filter(player=request.user, is_kicked=False, is_missing=False).first()
+    if gp is None:
+        return JsonResponse({"ok": False, "error": gettext("You are not an active player in this game.")}, status=403, safe=False)
+
+    mode = jsonData.get("mode")
+    if mode is not None and mode not in AUTO_PASS_MODES:
+        return JsonResponse({"ok": False, "error": gettext("Invalid auto-pass mode.")}, status=400, safe=False)
+    if mode is not None and currentGame.phase != rfURR.PHASE_SETTLEMENT:
+        return JsonResponse({"ok": False, "error": gettext("Auto-pass can only be set during settlement.")}, status=400, safe=False)
+
+    prices = []
+    if mode == "price":
+        prices = jsonData.get("prices")
+        if not (isinstance(prices, list) and len(prices) == len(rfURR.ALL_LAND_TYPES) and all(isinstance(price, int) and 0 <= price <= 999 for price in prices)):
+            return JsonResponse({"ok": False, "error": gettext("Invalid land prices.")}, status=400, safe=False)
+
+    state = gp.moveDataJSON if isinstance(gp.moveDataJSON, dict) else {}
+    if mode is None:
+        state.pop(AUTO_PASS_KEY, None)
+    else:
+        state[AUTO_PASS_KEY] = {"mode": mode, "turn": currentGame.turn, "prices": prices}
+    gp.moveDataJSON = state or None
+    gp.save(update_fields=["moveDataJSON"])
+    return JsonResponse({"ok": True, "autoPassData": getAutoPassData(currentGame)}, safe=False)
+
+
 def getKickoutData(presenter):
     return {
+        "autoPassData": getAutoPassData(presenter.gameObj),
         "kickoutRequired": presenter.kickoutRequired(),
         "kickoutVotesData": presenter.getKickoutVotesData(),
         "kickoutVoteThreshold": presenter.getKickoutVoteThreshold(),

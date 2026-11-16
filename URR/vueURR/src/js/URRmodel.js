@@ -3,6 +3,7 @@ import { usePersonalStore } from "../stores/URRpersonal.js"
 import * as rf from "./URRreference.js"
 import * as funcs from "./URRfuncs.js"
 import * as game from "./URRgame.js"
+import * as rules from "./URRrules.js"
 import * as historyStorage from "./URRhistoryStorage.js"
 import { encodeAction } from "./URRhistoryActions.js"
 import i18n from "../i18n.js"
@@ -36,6 +37,7 @@ export function initGame() {
 	personal.finishedGame = initData.finishedGame || false
 	personal.gameDataB64 = initData.gameData || {}
 	personal.haltPlay = false
+	store.setAutoPassData(initData.autoPassData || {})
 
 	store.gameName = initData.gameName || ""
 	store.gameflow.turn = initData.turn || 1
@@ -106,15 +108,19 @@ export function performAction(playerIndex, action) {
 	addHistory(rf.HIST_ACTION, playerIndex, action)
 }
 
-// Missing seats never hold the turn: their remaining duties resolve with the
-// bot policy as soon as they come up, so the next real player is notified.
-export function playMissingSeats() {
+// Missing seats and auto-passing seats never hold the turn: missing seats use
+// the bot policy, auto-passing seats pass until the phase or their turn changes.
+// shortcut: auto-pass only advances when a client saves, upgrade with server-side turn automation
+export function playInactiveSeats(autoPassData = {}) {
 	const store = useModelStore()
 	// ponytail: bounded loop, a bot policy that stops advancing just leaves the seat to the App.vue fallback
 	for (let guard = 0; guard < 500 && store.gameflow.phase !== rf.PHASE_GAME_OVER; guard++) {
 		const player = store.gameflow.turnOrder[0]
-		if (!store.players[player]?.isMissing) return
-		const action = game.getBotAction(snapshotState())
+		const playerObj = store.players[player]
+		if (!playerObj) return
+		const action = playerObj.isMissing
+			? game.getBotAction(snapshotState())
+			: (rules.isAutoPassActive(store, autoPassData[playerObj.name]) ? { type: "pass" } : null)
 		if (!action) return
 		performAction(player, action)
 	}

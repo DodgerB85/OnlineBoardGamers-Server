@@ -168,6 +168,11 @@ export const useModelStore = defineStore("store", () => {
 	const statsExcludeVotesData = ref({})
 	const kickoutVotesData = ref({})
 	const kickoutVoteThreshold = ref(1)
+	// Per-gamePlayer auto-pass flags, read from the server beside the game data.
+	const autoPassData = ref({})
+	function setAutoPassData(data) {
+		autoPassData.value = data || {}
+	}
 
 	// Replay
 	const replayData = reactive([])
@@ -208,6 +213,8 @@ export const useModelStore = defineStore("store", () => {
 		statsExcludeVotesData,
 		kickoutVotesData,
 		kickoutVoteThreshold,
+		autoPassData,
+		setAutoPassData,
 		replayData,
 		replayStep,
 		clearMessages,
