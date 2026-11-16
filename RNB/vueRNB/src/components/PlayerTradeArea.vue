@@ -16,7 +16,6 @@ const showTradePanel = ref(false)
 const tradeOpponentIdx = ref(-1)
 const tradeYourResIDs = ref([])
 const tradeTheirResIDs = ref([])
-const tradeConfirmStep = ref(false)
 
 const isTradeEnabled = computed(() => {
 	return rf.PHASE_WONDERS.includes(store.gameflow.phase) && !personal.soloGame && store.gameOptions.useTrade
@@ -88,7 +87,6 @@ function resetTradeForm() {
 	tradeOpponentIdx.value = -1
 	tradeYourResIDs.value = []
 	tradeTheirResIDs.value = []
-	tradeConfirmStep.value = false
 }
 
 function toggleYourRes(resID) {
@@ -105,10 +103,6 @@ function toggleTheirRes(resID) {
 
 function proposeTrade() {
 	if (!canPropose.value) return
-	tradeConfirmStep.value = true
-}
-
-function confirmPropose() {
 	IO.proposeTrade(tradeOpponentIdx.value, [...tradeYourResIDs.value], [...tradeTheirResIDs.value])
 	resetTradeForm()
 }
@@ -137,10 +131,6 @@ function completeTradeLocal() {
 	store.context.resIDsInWonderBrick.splice(0)
 	store.context.wonderError = 0
 	highlight.updateAllHighlightsForTransporterMode()
-}
-
-function cancelPropose() {
-	tradeConfirmStep.value = false
 }
 
 function localAcceptTrade(entry) {
@@ -188,6 +178,20 @@ function resName(resID) {
 						<span class="tradeResList">
 							<img v-for="resID in entry[3]" :key="resID" class="tradeResImg" :src="resName(resID)" />
 						</span>
+						<div class="tradeSummary">
+							<div>
+								<strong>{{ $t("trade.youGive") }}</strong>
+								<span class="tradeResList">
+									<img v-for="resID in entry[3]" :key="'give' + resID" class="tradeSummaryResImg" :src="resName(resID)" />
+								</span>
+							</div>
+							<div>
+								<strong>{{ $t("trade.youReceive") }}</strong>
+								<span class="tradeResList">
+									<img v-for="resID in entry[2]" :key="'receive' + resID" class="tradeSummaryResImg" :src="resName(resID)" />
+								</span>
+							</div>
+						</div>
 						<br />
 						<button class="actionsLineButton" @click="localAcceptTrade(entry)">{{ $t("trade.accept") }}</button>
 						<button class="actionsLineButton" @click="localRejectTrade(entry)">{{ $t("trade.reject") }}</button>
@@ -209,13 +213,27 @@ function resName(resID) {
 						<span class="tradeResList">
 							<img v-for="resID in entry[3]" :key="resID" class="tradeResImg" :src="resName(resID)" />
 						</span>
+						<div class="tradeSummary">
+							<div>
+								<strong>{{ $t("trade.youGive") }}</strong>
+								<span class="tradeResList">
+									<img v-for="resID in entry[2]" :key="'give' + resID" class="tradeSummaryResImg" :src="resName(resID)" />
+								</span>
+							</div>
+							<div>
+								<strong>{{ $t("trade.youReceive") }}</strong>
+								<span class="tradeResList">
+									<img v-for="resID in entry[3]" :key="'receive' + resID" class="tradeSummaryResImg" :src="resName(resID)" />
+								</span>
+							</div>
+						</div>
 						<br />
 						<button class="actionsLineButton" @click="localCancelTrade(entry)">{{ $t("trade.cancel") }}</button>
 					</div>
 				</div>
 
 				<!-- TRADE SETUP -->
-				<div v-if="!tradeConfirmStep && (!hasEndedTurn || isTrainingMode)" class="tradeSection">
+				<div v-if="!hasEndedTurn || isTrainingMode" class="tradeSection">
 					<strong>{{ $t("trade.proposeTrade") }}</strong>
 					<br />
 					<span>{{ $t("trade.opponent") }}</span>
@@ -249,32 +267,29 @@ function resName(resID) {
 							</div>
 						</div>
 
-						<button v-if="isTrainingMode" class="actionsLineButton" :disabled="!canPropose" @click="completeTradeLocal">{{ $t("trade.completeTrade") }}</button>
-						<button v-else class="actionsLineButton" :disabled="!canPropose" @click="proposeTrade">{{ $t("trade.propose") }}</button>
+						<button v-if="isTrainingMode" class="actionsLineButton" :disabled="!canPropose" @click="completeTradeLocal">{{ $t("trade.proposeTo", { name: store.players[tradeOpponentIdx].displayName }) }}</button>
+						<button v-else class="actionsLineButton" :disabled="!canPropose" @click="proposeTrade">{{ $t("trade.proposeTo", { name: store.players[tradeOpponentIdx].displayName }) }}</button>
+
+						<div class="tradeSummary">
+							<div>
+								<strong>{{ $t("trade.youGive") }}</strong>
+								<span class="tradeResList">
+									<img v-for="resID in tradeYourResIDs" :key="'give' + resID" class="tradeSummaryResImg" :src="resName(resID)" />
+								</span>
+							</div>
+							<div>
+								<strong>{{ $t("trade.youReceive") }}</strong>
+								<span class="tradeResList">
+									<img v-for="resID in tradeTheirResIDs" :key="'receive' + resID" class="tradeSummaryResImg" :src="resName(resID)" />
+								</span>
+							</div>
+						</div>
 					</div>
 				</div>
 
 				<!-- ENDED TURN - cannot propose -->
-				<div v-if="!tradeConfirmStep && hasEndedTurn && !isTrainingMode" class="tradeSection">
+				<div v-if="hasEndedTurn && !isTrainingMode" class="tradeSection">
 					<span class="donkeyWarningSpan">{{ $t("trade.notAfterEndTurn") }}</span>
-				</div>
-
-				<!-- CONFIRM TRADE -->
-				<div v-if="tradeConfirmStep && !isTrainingMode" class="tradeSection">
-					<strong>{{ $t("trade.confirmTrade") }}</strong>
-					<br />
-					<span>{{ $t("trade.youGive") }}</span>
-					<span class="tradeResList">
-						<img v-for="resID in tradeYourResIDs" :key="resID" class="tradeResImg" :src="resName(resID)" />
-					</span>
-					<br />
-					<span>{{ $t("trade.youReceive") }}</span>
-					<span class="tradeResList">
-						<img v-for="resID in tradeTheirResIDs" :key="resID" class="tradeResImg" :src="resName(resID)" />
-					</span>
-					<br />
-					<button class="actionsLineButton" @click="confirmPropose">{{ $t("trade.confirm") }}</button>
-					<button class="actionsLineButton" @click="cancelPropose">{{ $t("trade.back") }}</button>
 				</div>
 			</div>
 		</div>
@@ -306,7 +321,7 @@ function resName(resID) {
 	width: 100%;
 }
 .tradePanelWrap.tradePanelOpen {
-	max-height: 500px;
+	max-height: 650px;
 }
 .tradePanelInner {
 	background-color: #d4eafd;
@@ -339,7 +354,7 @@ function resName(resID) {
 	border-radius: 3px;
 }
 .tradeResSelectable:hover {
-	border-color: #888;
+	border-color: yellow;
 }
 .tradeResSelected {
 	border-color: #4caf50;
@@ -348,6 +363,16 @@ function resName(resID) {
 }
 .tradeGoodsSection {
 	margin: 5px 0;
+}
+.tradeSummary {
+	margin-top: 6px;
+	line-height: 1.6;
+}
+.tradeSummaryResImg {
+	width: 24px;
+	height: 24px;
+	vertical-align: middle;
+	margin: 1px;
 }
 .donkeyWarningSpan {
 	color: #f44336;

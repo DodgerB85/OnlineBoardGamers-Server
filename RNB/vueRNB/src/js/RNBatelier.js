@@ -225,8 +225,10 @@ export function getExhibitionOutcome(stagerPlayerIndex, targetPlayerIndex, actua
 // Applies a recorded STACK_EXHIBITION action (live, replay / rewind). The caravan always
 // vanishes on arrival; the show value is recomputed here so a pre-set action applied after
 // another player's better show in the same phase is a no-show instead of a failed stack.
+// [STACK_EXHIBITION, caravanTransID, stagerIdx, targetIdx, beauty] for a show, with the
+// reason object appended as a 6th element only when it was not a show.
 export function performExhibitionStackAction(stackAction) {
-	// [STACK_EXHIBITION, caravanTransID, stagerIdx, targetIdx, beauty, reason]
+	// [STACK_EXHIBITION, caravanTransID, stagerIdx, targetIdx, beauty, reason?]
 	const caravanTransID = stackAction[1]
 	const stagerPlayerIndex = stackAction[2]
 	const targetPlayerIndex = stackAction[3]

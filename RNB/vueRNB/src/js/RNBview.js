@@ -1353,7 +1353,10 @@ export const exhibitionPopup = reactive({
 	confetti: [],
 	fireworks: [],
 	timer: null,
+	openedAt: 0,
 })
+// Increments on every show/close so a timer from an older popup cannot hide a newer one
+let exhibitionPopupGeneration = 0
 
 // Why an exhibition did not count as a show, as readable text.
 export function exhibitionReasonText(reason) {
@@ -1366,21 +1369,32 @@ export function exhibitionReasonText(reason) {
 
 export function showExhibitionPopup(outcome) {
 	clearTimeout(exhibitionPopup.timer)
+	const generation = ++exhibitionPopupGeneration
 	exhibitionPopup.isShow = outcome.beauty > 0
 	exhibitionPopup.hexID = outcome.hexID
 	exhibitionPopup.reasonText = exhibitionReasonText(outcome.reason)
 	exhibitionPopup.confetti = exhibitionPopup.isShow ? makeConfetti() : []
 	exhibitionPopup.fireworks = exhibitionPopup.isShow ? makeFireworks() : []
+	exhibitionPopup.openedAt = Date.now()
 	exhibitionPopup.show = true
 	exhibitionPopup.timer = setTimeout(() => {
-		exhibitionPopup.show = false
-	}, 3000)
+		// A stale timer must not hide a newer exhibition
+		if (generation === exhibitionPopupGeneration) exhibitionPopup.show = false
+	}, 5000)
 }
 
 export function closeExhibitionPopup() {
+	exhibitionPopupGeneration++
 	clearTimeout(exhibitionPopup.timer)
 	exhibitionPopup.timer = null
 	exhibitionPopup.show = false
+}
+
+// Moving the mouse over the popup dismisses it, but not while it is still appearing
+// (the card can land under the cursor that just clicked the destination tile).
+export function hoverExhibitionPopup() {
+	if (Date.now() - exhibitionPopup.openedAt < 1000) return
+	closeExhibitionPopup()
 }
 
 function makeConfetti() {

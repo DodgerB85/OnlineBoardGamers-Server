@@ -148,6 +148,7 @@ export const useModelStore = defineStore("store", () => {
 			showResources: true,
 			showRoads: true,
 			showTrainTracks: true,
+			trackStyle: 1,
 			showBridges: true,
 			showWalls: true,
 			showBuildings: true,

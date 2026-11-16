@@ -4,6 +4,7 @@ const MESSAGES = {
 	en: {
 		turn: "Turn {turn}",
 		yourTurn: "YOUR TURN",
+		preMove: "YOU MAY SET A PRE-MOVE",
 		waitingFor: "Waiting for {names}",
 		waitingNext: "Waiting for the next player",
 		replay: "Replay",
@@ -12,6 +13,7 @@ const MESSAGES = {
 	de: {
 		turn: "Runde {turn}",
 		yourTurn: "DU BIST DRAN",
+		preMove: "DU KANNST EINEN VORZUG FESTLEGEN",
 		waitingFor: "Warte auf {names}",
 		waitingNext: "Warte auf den nächsten Spieler",
 		replay: "Wiedergabe",
@@ -20,6 +22,7 @@ const MESSAGES = {
 	es: {
 		turn: "Turno {turn}",
 		yourTurn: "TU TURNO",
+		preMove: "PUEDES PREPARAR UN MOVIMIENTO",
 		waitingFor: "Esperando a {names}",
 		waitingNext: "Esperando al siguiente jugador",
 		replay: "Repetición",
@@ -28,6 +31,7 @@ const MESSAGES = {
 	fr: {
 		turn: "Tour {turn}",
 		yourTurn: "À VOUS",
+		preMove: "VOUS POUVEZ PRÉPARER UN COUP",
 		waitingFor: "En attente de {names}",
 		waitingNext: "En attente du prochain joueur",
 		replay: "Relecture",
@@ -36,6 +40,7 @@ const MESSAGES = {
 	it: {
 		turn: "Turno {turn}",
 		yourTurn: "TOCCA A TE",
+		preMove: "PUOI PREPARARE UNA MOSSA",
 		waitingFor: "In attesa di {names}",
 		waitingNext: "In attesa del prossimo giocatore",
 		replay: "Riproduzione",
@@ -44,6 +49,7 @@ const MESSAGES = {
 	"zh-hans": {
 		turn: "第 {turn} 回合",
 		yourTurn: "轮到你了",
+		preMove: "你可以预设行动",
 		waitingFor: "等待 {names}",
 		waitingNext: "等待下一位玩家",
 		replay: "回放",
@@ -52,6 +58,7 @@ const MESSAGES = {
 	pt: {
 		turn: "Turno {turn}",
 		yourTurn: "É A SUA VEZ",
+		preMove: "PODE PREPARAR UM MOVIMENTO",
 		waitingFor: "A aguardar {names}",
 		waitingNext: "A aguardar o próximo jogador",
 		replay: "Repetição",
@@ -60,6 +67,7 @@ const MESSAGES = {
 	nl: {
 		turn: "Beurt {turn}",
 		yourTurn: "JIJ BENT AAN DE BEURT",
+		preMove: "JE KUNT EEN VOORZET DOEN",
 		waitingFor: "Wachten op {names}",
 		waitingNext: "Wachten op de volgende speler",
 		replay: "Herhaling",
@@ -124,6 +132,7 @@ export function getStatusBannerLabels(locale, { turn, names } = {}) {
 	return {
 		turn: turn === undefined || turn === null || turn === "" ? "" : format(message.turn, { turn }),
 		yourTurn: message.yourTurn,
+		preMove: message.preMove,
 		waitingFor: names ? format(message.waitingFor, { names }) : "",
 		waitingNext: message.waitingNext,
 		replay: message.replay,

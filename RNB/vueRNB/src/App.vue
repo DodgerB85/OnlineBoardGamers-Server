@@ -60,10 +60,13 @@ const statusBanner = computed(() => {
 	const playerIndex = store.gameflow.turnOrder[0]
 	const playerObj = playerIndex === undefined ? null : store.players[playerIndex]
 	const isMyTurn = personal.canPlay()
+	// Pseudo-simul phases let later players act early: that is a pre-move, not their turn.
+	const isPreMove = isMyTurn && controller.playingOutOfTurn()
 	return {
 		labels: getStatusBannerLabels(window.initData.locale, { turn: store.gameflow.turn }),
 		phase: view.phaseStr(store.gameflow.phase),
 		isMyTurn,
+		isPreMove,
 		isGameOver: store.gameflow.phase === rf.PHASE_GAME_OVER,
 		isReplay: store.viewSettings.showReplay || store.viewSettings.generatingReplay,
 		player: !isMyTurn && playerObj ? { name: playerObj.displayName, background: personal.getCorrectedColourHex(playerObj.colour) } : null,

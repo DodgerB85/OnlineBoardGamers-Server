@@ -1248,6 +1248,9 @@ async function updateDataFromLoadRewind() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 
+	// Rewinding wipes all trade proposals
+	funcs.decompressTradeData("")
+
 	let wsConnecting = null
 	if (personal.liveWS) {
 		wsConnecting = WS.StartWebSocket() // No 'await'! Starts in background.
@@ -1285,6 +1288,7 @@ async function updateDataFromLoadRewind() {
 
 		// Broadcast update
 		WS.broadcastGameUpdate(wsConnecting)
+		WS.broadcastTradeUpdate()
 
 		store.viewSettings.showLoader = false
 		store.viewSettings.performingRewind = false
@@ -2502,6 +2506,11 @@ export async function acceptTrade(tradeEntry) {
 		if (data.syncError) return
 		if (data.tradeError) {
 			store.gameMessages.actionError = data.tradeError
+			// A stale offer is removed server-side; refresh it and tell the other clients
+			if (data.playerTradeData) {
+				funcs.decompressTradeData(data.playerTradeData)
+				WS.broadcastTradeUpdate()
+			}
 			return
 		}
 		if (data.success) {

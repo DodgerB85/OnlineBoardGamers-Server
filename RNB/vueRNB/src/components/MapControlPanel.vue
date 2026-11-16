@@ -215,6 +215,10 @@ function loadGameData() {
 			<span v-else>{{ $t("mapControl.showTrainTracks") }}</span>
 		</button>
 		<br />
+		<button v-if="store.gameOptions.useTrains" class="actionsLineButton" @click="store.mapData.displaySettings.trackStyle = store.mapData.displaySettings.trackStyle === 1 ? 2 : 1">
+			{{ $t("mapControl.trackStyle") }}: {{ store.mapData.displaySettings.trackStyle }}
+		</button>
+		<br />
 		<button class="actionsLineButton" @click="store.mapData.displaySettings.showBridges = !store.mapData.displaySettings.showBridges">
 			<span v-if="store.mapData.displaySettings.showBridges">{{ $t("mapControl.hideBridges") }}</span>
 			<span v-else>{{ $t("mapControl.showBridges") }}</span>

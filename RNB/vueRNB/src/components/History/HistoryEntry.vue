@@ -1050,7 +1050,8 @@ const computedEntry3 = computed(() => {
 				thisStepHist.bricks = bricks
 				thisStepHist.addBrickText = addBrickText
 			}
-			// Art & The Atelier: [STACK_EXHIBITION, caravanTransID, stagerIdx, targetIdx, beauty, reason]
+			// Art & The Atelier: [STACK_EXHIBITION, caravanTransID, stagerIdx, targetIdx, beauty]
+			// A no-show appends its reason as the 6th element.
 			else if (stackAction[0] === rf.STACK_EXHIBITION) {
 				thisStepHist.action = rf.STACK_EXHIBITION
 				thisStepHist.stagerIdx = stackAction[2]

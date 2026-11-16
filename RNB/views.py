@@ -1081,6 +1081,9 @@ def _processRNBturn(request):
         # Firstly, wipe all move Data
         PwipeAllMoveData(currentGame)
 
+        # Rewinding undoes every trade proposal made since the saved point
+        currentGame.playerTradeData = ""
+
         loadDatab64 = currentRewindDataArray.pop() if currentRewindDataArray else ""
 
         # Decode the Base64 string from the rewind list into raw bytes for the BLOB field
@@ -1351,6 +1354,25 @@ def _cancel_trades_for_player(trade_data, player_index):
     return len(trade_data["playerTrades"]) != original_len
 
 
+def _remove_matching_trades(trade_data, proposer_idx, acceptor_idx, offered_res_ids, requested_res_ids):
+    """Drop the specific offer so a stale accept does not leave a dead trade on the board."""
+    trades = trade_data.get("playerTrades", [])
+    trade_data["playerTrades"] = [
+        t
+        for t in trades
+        if not (len(t) >= 5 and t[0] == proposer_idx and t[1] == acceptor_idx and t[2] == offered_res_ids and t[3] == requested_res_ids)
+    ]
+    return len(trade_data["playerTrades"]) != len(trades)
+
+
+def _stale_trade_error(currentGame, trade_data, proposer_idx, acceptor_idx, offered_res_ids, requested_res_ids, message):
+    """Remove a trade that can no longer be fulfilled and return the updated trade data."""
+    _remove_matching_trades(trade_data, proposer_idx, acceptor_idx, offered_res_ids, requested_res_ids)
+    currentGame.playerTradeData = _compress_rnb_trade_data(trade_data)
+    currentGame.save()
+    return JsonResponse({"tradeError": message, "playerTradeData": currentGame.playerTradeData}, safe=False)
+
+
 @login_required()
 def processRNBtrade(request):
     return process_game_with_mutex(request, _processRNBtrade, mutex_prefix="processTurn_")
@@ -1491,11 +1513,27 @@ def _handle_rnb_accept_trade(request, currentGame, presenter, raw_data, trade_da
     if not _rnb_player_has_transporter_on_home(raw_data, proposer_idx, proposer_home) or not _rnb_player_has_transporter_on_home(
         raw_data, acceptor_idx, target_home
     ):
-        return JsonResponse({"tradeError": "Both players need a transporter on their home tile"}, safe=False)
+        return _stale_trade_error(
+            currentGame,
+            trade_data,
+            proposer_idx,
+            acceptor_idx,
+            offered_res_ids,
+            requested_res_ids,
+            "Both players need a transporter on their home tile",
+        )
     if not _rnb_validate_trade_resources(raw_data[3], offered_res_ids, proposer_home) or not _rnb_validate_trade_resources(
         raw_data[3], requested_res_ids, target_home
     ):
-        return JsonResponse({"tradeError": "Trade goods are no longer on the home tiles"}, safe=False)
+        return _stale_trade_error(
+            currentGame,
+            trade_data,
+            proposer_idx,
+            acceptor_idx,
+            offered_res_ids,
+            requested_res_ids,
+            "Trade goods are no longer on the home tiles",
+        )
 
     # gameData resource location is compressed: [hexID] for bucket 0, [hexID, bucketID] otherwise.
     all_resources = raw_data[3]
@@ -1505,10 +1543,7 @@ def _handle_rnb_accept_trade(request, currentGame, presenter, raw_data, trade_da
         all_resources[rid][1] = list(proposer_home)
     currentGame.gameData = _compress_rnb_gamedata(raw_data)
 
-    trade_data["playerTrades"] = [
-        t for t in trade_data.get("playerTrades", [])
-        if not (t[0] == proposer_idx and t[1] == acceptor_idx and t[2] == trade_entry[2] and t[3] == trade_entry[3])
-    ]
+    _remove_matching_trades(trade_data, proposer_idx, acceptor_idx, offered_res_ids, requested_res_ids)
 
     _cancel_trades_for_player(trade_data, proposer_idx)
     _cancel_trades_for_player(trade_data, acceptor_idx)

@@ -299,7 +299,7 @@ const exhibitionScreenPosition = computed(() => {
 	const svg = document.getElementById("hexSVG")
 	if (!svg) return null
 	const hex = model.getHexByID(view.exhibitionPopup.hexID)
-	if (!hex) return null
+	if (!hex || !hex.rawXY) return null
 	const screenCTM = svg.getScreenCTM()
 	if (!screenCTM) return null
 	const pt = svg.createSVGPoint()
@@ -485,7 +485,7 @@ function getAtelierRecipeName(recipeIdx) {
 					<span v-for="piece in view.exhibitionPopup.confetti" :key="piece.id" class="confettiPiece" :style="piece.style"></span>
 					<span v-for="fw in view.exhibitionPopup.fireworks" :key="'fw' + fw.id" class="fireworkBurst" :style="fw.style"></span>
 				</div>
-				<div class="exhibitionPopup" :class="{ exhibitionShow: view.exhibitionPopup.isShow }" @mouseenter="view.closeExhibitionPopup()">
+				<div class="exhibitionPopup" :class="{ exhibitionShow: view.exhibitionPopup.isShow }" @mousemove="view.hoverExhibitionPopup()">
 					<div class="exhibitionPopupTitle">{{ $t("exhibition.takesPlace") }}</div>
 					<div v-if="view.exhibitionPopup.isShow" class="exhibitionPopupResult">{{ $t("exhibition.countsAsShow") }}</div>
 					<template v-else>
@@ -661,8 +661,8 @@ function getAtelierRecipeName(recipeIdx) {
 								<path class="noClick" :transform="store.hexStyle === rf.FLAT ? 'rotate(0 0 0)' : ''" :d="view.getBridgeSVGpath(hex.hexID, bridgeEntry, false, false).bridgeD" stroke="black" :stroke-width="40 * store.RATIO" fill="none" />
 							</g>
 						</g>
-						<!-- TRAIN TRACKS - same paths/anchors as roads; roads draw over them -->
-						<g v-if="store.mapData.displaySettings.showTrainTracks && store.gameOptions.useTrains && hex.fullTrainTrackPath?.length">
+						<!-- TRAIN TRACKS (style 1) - same paths/anchors as roads; roads draw over them -->
+						<g v-if="store.mapData.displaySettings.trackStyle === 1 && store.mapData.displaySettings.showTrainTracks && store.gameOptions.useTrains && hex.fullTrainTrackPath?.length">
 							<!-- Black track with white dashed centre, like the printed &cetera maps -->
 							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackBlack' + i" :d="chain.d" stroke="black" :stroke-width="(100 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" :stroke-width="(76 * store.RATIO).toFixed(0)" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
@@ -675,6 +675,13 @@ function getAtelierRecipeName(recipeIdx) {
 								<path class="noClick" :d="hex.fullRoadPath" stroke="#1C2526" :stroke-width="60 * store.RATIO" stroke-linejoin="round" stroke-linecap="round" />
 								<path class="noClick" :d="hex.fullRoadPath" stroke="#F5F5F5" :stroke-width="(7 * store.RATIO).toFixed(0)" :stroke-dasharray="`${(25 * store.RATIO).toFixed(0)} ${(20 * store.RATIO).toFixed(0)}`" fill="none" />
 							</g>
+						</g>
+						<!-- TRAIN TRACKS (style 2) - drawn after the roads so the rail is never hidden -->
+						<g v-if="store.mapData.displaySettings.trackStyle === 2 && store.mapData.displaySettings.showTrainTracks && store.gameOptions.useTrains && hex.fullTrainTrackPath?.length">
+							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackRailCase' + i" :d="chain.d" stroke="white" :stroke-width="(34 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackTiesCase' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" :stroke-width="(104 * store.RATIO).toFixed(0)" stroke-dasharray="0.12 0.38" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackRail' + i" :d="chain.d" stroke="black" :stroke-width="(20 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path class="noClick" v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackTies' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="black" :stroke-width="(88 * store.RATIO).toFixed(0)" stroke-dasharray="0.12 0.38" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 						</g>
 						<!-- POWER LINES - thin black-edged line; red when unpowered, yellow when powered -->
 						<g v-if="store.gameOptions.useElectricity && hex.fullPowerLinePath">

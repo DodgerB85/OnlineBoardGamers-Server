@@ -16,6 +16,7 @@ django.setup()
 from RNB import RNBconstants as rfRNB
 from RNB.views import (
     _get_rnb_home_location,
+    _remove_matching_trades,
     _rnb_player_has_transporter_on_home,
     _rnb_trade_option_enabled,
     _rnb_validate_trade_resources,
@@ -65,6 +66,25 @@ class RNBTradeRulesTests(unittest.TestCase):
     def test_trade_option_gate(self):
         self.assertTrue(_rnb_trade_option_enabled(SimpleNamespace(startingOptions=json.dumps([rfRNB.SO_TRADE]))))
         self.assertFalse(_rnb_trade_option_enabled(SimpleNamespace(startingOptions=json.dumps([rfRNB.SO_BOMBS]))))
+
+    def test_stale_accept_removes_only_the_matching_trade(self):
+        trade_data = {
+            "playerTrades": [
+                [0, 1, [10], [20], "pending"],
+                [0, 2, [10], [21], "pending"],
+                [2, 1, [11], [20], "pending"],
+            ]
+        }
+        self.assertTrue(_remove_matching_trades(trade_data, 0, 1, [10], [20]))
+        self.assertEqual(
+            trade_data["playerTrades"],
+            [[0, 2, [10], [21], "pending"], [2, 1, [11], [20], "pending"]],
+        )
+
+    def test_remove_matching_trades_reports_when_nothing_matched(self):
+        trade_data = {"playerTrades": [[0, 1, [10], [20], "pending"]]}
+        self.assertFalse(_remove_matching_trades(trade_data, 0, 2, [10], [20]))
+        self.assertEqual(trade_data["playerTrades"], [[0, 1, [10], [20], "pending"]])
 
 
 if __name__ == "__main__":

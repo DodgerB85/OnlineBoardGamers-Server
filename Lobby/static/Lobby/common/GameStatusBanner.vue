@@ -6,6 +6,7 @@ defineProps({
 	phase: { type: String, default: "" },
 	action: { type: String, default: "" },
 	isMyTurn: { type: Boolean, default: false },
+	isPreMove: { type: Boolean, default: false },
 	isGameOver: { type: Boolean, default: false },
 	isReplay: { type: Boolean, default: false },
 	player: { type: Object, default: null },
@@ -14,7 +15,7 @@ defineProps({
 </script>
 
 <template>
-	<div id="statusBanner" :class="{ myTurn: isMyTurn && !isReplay && !isGameOver, gameOver: isGameOver }" role="status" aria-live="polite">
+	<div id="statusBanner" :class="{ myTurn: isMyTurn && !isPreMove && !isReplay && !isGameOver, preMove: isPreMove && !isReplay && !isGameOver, gameOver: isGameOver }" role="status" aria-live="polite">
 		<span class="statusMeta">
 			<span v-if="labels.turn">{{ labels.turn }}</span>
 			<!-- The game-over state already shows the game-over label once. -->
@@ -23,6 +24,10 @@ defineProps({
 		<span class="statusState">
 			<template v-if="isReplay">{{ labels.replay }}</template>
 			<template v-else-if="isGameOver">{{ labels.gameOver }}</template>
+			<template v-else-if="isPreMove">
+				<span class="preMoveBadge">{{ labels.preMove }}</span>
+				<span v-if="action" class="statusAction">{{ action }}</span>
+			</template>
 			<template v-else-if="isMyTurn">
 				<span class="yourTurnBadge">{{ labels.yourTurn }}</span>
 				<span v-if="action" class="statusAction">{{ action }}</span>
@@ -61,6 +66,10 @@ defineProps({
 #statusBanner.myTurn {
 	background-color: lightgreen;
 }
+#statusBanner.preMove {
+	/* Lighter than a real turn so an early pre-move is visually distinct */
+	background-color: #e4f7dc;
+}
 #statusBanner.gameOver {
 	background-color: lightgoldenrodyellow;
 }
@@ -82,6 +91,15 @@ defineProps({
 	display: inline-block;
 	background-color: darkgreen;
 	color: white;
+	border-radius: 10px;
+	padding: 1px 8px;
+	font-size: 0.9em;
+}
+.preMoveBadge {
+	display: inline-block;
+	background-color: #d9f2c4;
+	color: #1a5c1a;
+	border: 1px solid #6aa84f;
 	border-radius: 10px;
 	padding: 1px 8px;
 	font-size: 0.9em;

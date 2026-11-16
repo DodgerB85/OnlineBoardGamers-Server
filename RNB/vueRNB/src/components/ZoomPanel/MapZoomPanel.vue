@@ -782,8 +782,8 @@ const computedMaxNeutralBricks = computed(() => {
 						<g v-for="(bridgeEntry, bridgeIdx) in computedZoomData.builtBridges" :key="bridgeIdx">
 							<path :d="view.getBridgeSVGpath(store.mapData.zoomData.hexID, bridgeEntry, false, false, true).bridgeD" stroke="black" :stroke-width="40" fill="none" />
 						</g>
-						<!-- TRAIN TRACKS - roads draw over them -->
-						<g v-if="store.gameOptions.useTrains && computedZoomData.fullTrainTrackPathZP?.length">
+						<!-- TRAIN TRACKS (style 1) - roads draw over them -->
+						<g v-if="store.mapData.displaySettings.trackStyle === 1 && store.gameOptions.useTrains && computedZoomData.fullTrainTrackPathZP?.length">
 							<!-- Black track with white dashed centre, like the printed &cetera maps -->
 							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathZP" :key="'trackBlack' + i" :d="chain.d" stroke="black" stroke-width="100" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathZP" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" stroke-width="76" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
@@ -791,6 +791,13 @@ const computedMaxNeutralBricks = computed(() => {
 						<!-- ROADS - drawn after the tracks so they sit on top -->
 						<path :d="computedZoomData.fullRoadPathZP" stroke="#1C2526" stroke-width="60" stroke-linejoin="round" stroke-linecap="round" />
 						<path :d="computedZoomData.fullRoadPathZP" stroke="#F5F5F5" stroke-width="7" stroke-dasharray="25 20" fill="none" />
+						<!-- TRAIN TRACKS (style 2) - drawn after the roads so the rail is never hidden -->
+						<g v-if="store.mapData.displaySettings.trackStyle === 2 && store.gameOptions.useTrains && computedZoomData.fullTrainTrackPathZP?.length">
+							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathZP" :key="'trackRailCase' + i" :d="chain.d" stroke="white" stroke-width="34" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathZP" :key="'trackTiesCase' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" stroke-width="104" stroke-dasharray="0.12 0.38" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathZP" :key="'trackRail' + i" :d="chain.d" stroke="black" stroke-width="20" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in computedZoomData.fullTrainTrackPathZP" :key="'trackTies' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="black" stroke-width="88" stroke-dasharray="0.12 0.38" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+						</g>
 						<g v-if="store.gameOptions.useElectricity && computedZoomData.fullPowerLinePathZP">
 							<path :d="computedZoomData.fullPowerLinePathZP" stroke="#1C2526" stroke-width="18" stroke-linejoin="round" stroke-linecap="round" fill="none" />
 							<path :d="computedZoomData.fullPowerLinePathZP" :stroke="electricity.isHexPowered(computedZoomData.hexID) ? '#F4C542' : '#E74C3C'" stroke-width="10" stroke-linejoin="round" stroke-linecap="round" fill="none" />

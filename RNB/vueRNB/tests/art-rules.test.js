@@ -253,6 +253,24 @@ test("exhibition popup reasons are readable", skip, () => {
 	assert.match(view.exhibitionReasonText({ code: rf.ART_NO_SHOW_NOT_BEST, best: 5, required: 6, noMore: true }), /no further/i)
 })
 
+test("the exhibition popup targets the arrival hex and celebrates only a show", skip, () => {
+	view.showExhibitionPopup({ beauty: 3, reason: null, hexID: 42 })
+	assert.equal(view.exhibitionPopup.show, true)
+	assert.equal(view.exhibitionPopup.isShow, true)
+	assert.equal(view.exhibitionPopup.hexID, 42)
+	assert.ok(view.exhibitionPopup.confetti.length > 0)
+	assert.ok(view.exhibitionPopup.fireworks.length > 0)
+	view.closeExhibitionPopup()
+	assert.equal(view.exhibitionPopup.show, false)
+
+	view.showExhibitionPopup({ beauty: 0, reason: { code: rf.ART_NO_SHOW_TOO_FEW, actualBeauty: 1, required: 3 }, hexID: 7 })
+	assert.equal(view.exhibitionPopup.isShow, false)
+	assert.equal(view.exhibitionPopup.hexID, 7)
+	assert.equal(view.exhibitionPopup.confetti.length, 0)
+	assert.ok(view.exhibitionPopup.reasonText.length > 0)
+	view.closeExhibitionPopup()
+})
+
 test("a powered quarry produces one marble, then a normal stone", skip, () => {
 	const { store, bucketID } = setupArtMap()
 	const quarryLocation = [rf.LOCATION_BUCKET, 0, bucketID]
