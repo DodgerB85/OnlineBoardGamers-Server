@@ -247,7 +247,6 @@ export default {
 		cancelAllMovesFromHere: "Annulla tutte le mosse da qui",
 		previewPreset: "Anteprima di questa mossa preimpostata",
 		presetPhase: "Preimposta fase {phase}",
-		polderNote: "Nota: il movimento può essere preimpostato dopo che i polder sono stati risolti nella fase della Meraviglia",
 		tooFarFuture: "Troppo lontano nel futuro",
 		cancel: "Annulla",
 		saveNewSettings: "Salva nuove impostazioni",

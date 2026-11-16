@@ -247,7 +247,6 @@ export default {
 		cancelAllMovesFromHere: "从此处取消所有行动",
 		previewPreset: "预览此预设行动",
 		presetPhase: "预设{phase}阶段",
-		polderNote: "注意：只有在奇迹阶段解决圩田后才能预设移动",
 		tooFarFuture: "太遥远了",
 		cancel: "取消",
 		saveNewSettings: "保存新设置",
