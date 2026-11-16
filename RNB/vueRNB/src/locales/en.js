@@ -247,7 +247,6 @@ export default {
 		cancelAllMovesFromHere: "Cancel All Moves From Here",
 		previewPreset: "Preview this preset move",
 		presetPhase: "Pre-set {phase} Phase",
-		polderNote: "Note: Movement can be preset once polders have been resolved in the Wonder phase",
 		tooFarFuture: "Too far in the future",
 		cancel: "Cancel",
 		saveNewSettings: "Save New Settings",

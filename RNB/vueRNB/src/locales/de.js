@@ -247,7 +247,6 @@ export default {
 		cancelAllMovesFromHere: "Alle Züge ab hier abbrechen",
 		previewPreset: "Diesen vorausgeplanten Zug in der Vorschau anzeigen",
 		presetPhase: "Phase {phase} vorausplanen",
-		polderNote: "Hinweis: Bewegung kann vorausgeplant werden, sobald die Polder in der Wunderphase aufgelöst wurden",
 		tooFarFuture: "Zu weit in der Zukunft",
 		cancel: "Abbrechen",
 		saveNewSettings: "Neue Einstellungen speichern",

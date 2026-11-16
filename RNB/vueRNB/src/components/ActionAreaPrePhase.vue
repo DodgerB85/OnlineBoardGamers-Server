@@ -350,20 +350,6 @@ function canCancelPreMove(futureUnboundedMainPhaseNum) {
 	return -1
 }
 
-// With polders, the wonder phase flips polder land/sea status, so presetting a FUTURE-TURN phase
-// before that wonder resolves could go out of sync. Production is exempt (it doesn't depend on
-// polder status). Limit presets to the next production turn; offer a note instead of the button after it.
-function showPolderNote(idx) {
-	if (!store.gameOptions.usePolders) return false
-	const entry = getUnboundedFutureMainPhases.value[idx]
-	if (entry === undefined) return false
-	// Same-turn phases are before the upcoming wonder flip - safe
-	if (Math.floor(entry / 16) === 0) return false
-	// Production phases don't care whether polders are land or sea
-	if (entry % 16 === rf.PHASE_PRODUCTION_TO) return false
-	return canSetPreMove(entry)
-}
-
 function canSetPreMove(futureUnboundedMainPhaseNum) {
 	if (!hasSetImmediateConflictPhase.value) return false
 	// If you have set an immdiate conflict response, and it is in conflict phases, you
@@ -488,10 +474,7 @@ const hasSetImmediateConflictPhase = computed(() => {
 								<line x1="24" y1="9" x2="26" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
 							</svg>
 						</button>
-						<button class="actionsLineButton" @click="presetMainPhase(futureUnboundedMainPhaseNum, $event)" v-if="!showPolderNote(idx) && canSetPreMove(futureUnboundedMainPhaseNum)">{{ $t("prePhase.presetPhase", { phase: view.phaseStr(futureUnboundedMainPhaseNum % 16) }) }}</button>
-						<template v-if="showPolderNote(idx)">
-							{{ $t("prePhase.polderNote") }}
-						</template>
+						<button class="actionsLineButton" @click="presetMainPhase(futureUnboundedMainPhaseNum, $event)" v-if="canSetPreMove(futureUnboundedMainPhaseNum)">{{ $t("prePhase.presetPhase", { phase: view.phaseStr(futureUnboundedMainPhaseNum % 16) }) }}</button>
 					</template>
 					<template v-else>
 						<br />

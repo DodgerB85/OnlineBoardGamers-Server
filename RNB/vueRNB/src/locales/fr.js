@@ -247,7 +247,6 @@ export default {
 		cancelAllMovesFromHere: "Annuler tous les coups à partir d'ici",
 		previewPreset: "Aperçu de ce coup prédéfini",
 		presetPhase: "Prédéfinir la phase {phase}",
-		polderNote: "Remarque : le déplacement peut être prédéfini une fois les polders résolus pendant la phase de Merveille",
 		tooFarFuture: "Trop loin dans le futur",
 		cancel: "Annuler",
 		saveNewSettings: "Enregistrer les nouveaux réglages",

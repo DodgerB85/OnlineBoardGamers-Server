@@ -247,7 +247,6 @@ export default {
 		cancelAllMovesFromHere: "Cancelar todos los movimientos desde aquí",
 		previewPreset: "Ver este movimiento preestablecido",
 		presetPhase: "Preestablecer fase {phase}",
-		polderNote: "Nota: el movimiento puede preestablecerse una vez resueltos los pólders en la fase de Maravilla",
 		tooFarFuture: "Demasiado lejos en el futuro",
 		cancel: "Cancelar",
 		saveNewSettings: "Guardar nueva configuración",
