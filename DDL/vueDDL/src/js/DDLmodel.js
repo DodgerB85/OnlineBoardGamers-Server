@@ -151,7 +151,10 @@ export function snapshotState() {
 
 export function addHistory(event, playerIndex, params = []) {
 	const store = useModelStore()
+	const personal = usePersonalStore()
 	store.history.push([event, playerIndex, snapshotState(), params])
+	// A new action makes any undone step unreachable.
+	personal.redoStack.splice(0)
 	// A complete game is under 400 actions: 24 action turns plus collect turns,
 	// highways, moves, builds and trades.
 	if (store.history.length > 400) store.history.splice(0, store.history.length - 400)

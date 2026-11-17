@@ -11,6 +11,7 @@ import { useI18n } from "vue-i18n"
 import { useModelStore } from "../stores/DDLstore.js"
 import { usePersonalStore } from "../stores/DDLpersonal.js"
 import PlayerTable from "./PlayerTable.vue"
+import ReferencePanel from "./ReferencePanel.vue"
 const { t } = useI18n()
 const store = useModelStore()
 const personal = usePersonalStore()
@@ -160,6 +161,7 @@ function localCastVote(topic) {
 		<PlayerTable :minimiseInfoForMainScreen="false" />
 		<p><b>{{ $t("topMenuViews.info.gameName") }}</b> {{ store.gameName }}</p>
 		<p>{{ $t("topMenuViews.info.description") }}</p>
+		<ReferencePanel />
 		<h3>{{ $t("topMenuViews.info.playerAid") }}</h3>
 		<img :src="view.playerAidImage()" :alt="$t('topMenuViews.info.aidAlt')" class="playerAidImage" />
 		<p><a href="/DDL/help/" target="_blank">{{ $t("topMenuViews.info.rulesHelp") }}</a></p>

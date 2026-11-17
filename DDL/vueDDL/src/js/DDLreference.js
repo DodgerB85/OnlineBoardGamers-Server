@@ -169,6 +169,21 @@ export const CONSUMER_COLUMNS = [
 	[3, 3, 10, 10, 30, 30],
 ]
 
+// Which factories make or use a good, and which consumer tile buys it. The
+// reference panel reads these so the conversion tree cannot drift from the
+// factory and consumer tables above.
+export function factoriesMaking(goodId) {
+	return FACTORY_TYPES.filter((factory) => factory.output === goodId)
+}
+
+export function factoriesUsing(goodId) {
+	return FACTORY_TYPES.filter((factory) => factory.input.includes(goodId))
+}
+
+export function consumerFor(goodId) {
+	return CONSUMER_TILES.find((tile) => tile.good === goodId) || null
+}
+
 export const CONSUMER_SLOT_POSITIONS = [
 	[
 		[1555, 58],

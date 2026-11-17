@@ -35,6 +35,58 @@ choices show input/output goods, points and remaining supply. Other players and
 spectators retain a read-only board. Ship details and action controls share one
 column, leaving the board uncovered.
 
+## Player feedback round — 2026-11-17
+
+Board tiles under each planet now read mine, factory, then site (market), and a
+spaceyard chip shows its printed cost good plus NAV/BLD/MER/CGO in the gear's
+energy colour, so the five starting yards can be read without visiting them.
+Hovering a planet states its mine, factory recipe and site in words. The action
+column grew to 320 px and every goods icon keeps a name tooltip; factory options
+also print the recipe as text.
+
+Info now opens a goods reference (each good's factories, its consumer value and
+what uses it) and a starting-planet table (mine, spaceyard gear, cost, built
+state), followed by the four rules that caused the most confusion: highways skip
+dots for their owner only, a new consumer site is built with its printed good
+and one build energy before it can be sold to, undo reaches only the current
+action turn, and energy is limited to 40 per colour.
+
+Undo, Redo and Restart turn act on the current action turn only. They restore
+the history snapshot of the previous or first entry of the turn and save without
+a rewind point, so a plan can be tried on the real board and dropped. Ending the
+turn commits it. The first entry of the turn — not the button that opened it — is
+the floor, so a free action turn from an energy shortage is covered too.
+
+Collect-energy pre-orders store a list of colours per player in `gameData`. The
+player's own client takes one marker per collect turn while the page is open, at
+least eight seconds after the last edit, and stops on an energy shortage so the
+free action turn is played by hand. Orders are consumed head first, so the
+limited stock still resolves in the chosen order. Nothing else about a collect
+turn changes: the marker, the crew quarters and the stock are the same as a hand
+click. Other clients never submit for the active seat.
+
+`startPlayerTurn` used to re-enter highway placement after every save, which hid
+the movement targets whenever free highway parts were unspent; movement now keeps
+the board in movement mode while steps remain.
+
+## Validation — 2026-11-17
+
+Headless Chrome played a fresh three-seat practice game from gear and starting
+planets to the game-over screen: 24 action turns, interleaved collect turns,
+mid-space dot hopping, exploration of four planets, mine trades, energy and cargo
+discards, pathways, undo/redo, and a reload of the finished game. No save
+returned a sync error.
+
+Prepared fixtures checked the rest: a consumer site built for its printed good
+and then sold to, a factory built and used to produce, a spaceyard built with its
+two goods and its gear installed, gear bought at a built yard, a privilege
+claimed for three build energy, a paid highway, and undo/redo of that highway.
+
+The pre-order queue was checked with two intended collects, one removed, the
+remaining one collected automatically after the eight-second hold, and the queue
+persisted across a reload. The 88 frontend tests and 13 DDL backend tests pass.
+The board and the reference panel were checked at 1440 × 900 and 1366 × 768.
+
 ## Validation — 2026-11-11
 
 Headless Chrome completed a three-seat practice game through all 24 action

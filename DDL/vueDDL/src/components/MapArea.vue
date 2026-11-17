@@ -98,6 +98,7 @@ const planetItems = computed(() =>
 			state,
 			ships,
 			style: pct([planet.x, planet.y]),
+			low: planet.y > 900,
 			mine: state ? state.mine : null,
 			site: state ? state.site : null,
 			factory: state ? state.factory : null,
@@ -260,11 +261,24 @@ function siteLabel(site) {
 		if (!tile) return t("action.consumer")
 		return site.built
 			? t("map.siteValue", { good: rf.goodName(tile.good), points: tile.points })
-			: t("map.siteBuildValue", { good: rf.goodName(tile.good), points: tile.buildPoints })
+			: t("map.siteBuildTo", { good: rf.goodName(tile.good), points: tile.buildPoints, sell: tile.points })
 	}
 	const type = rf.SPACEYARD_TYPES[site.tileId]
-	return type ? t("map.gearYard", { gear: rf.gearName(type.gear) }) : t("action.spaceyard")
+	if (!type) return t("action.spaceyard")
+	return site.built
+		? t("map.yardSellsGear", { gear: rf.gearName(type.gear), good: rf.goodName(type.cost[0]) })
+		: t("map.yardBuildTo", { gear: rf.gearName(type.gear), good: rf.goodName(type.cost[0]) })
 }
+
+// The unbuilt site chip has to answer "which spaceyard is here?" without a
+// trip to the planet, so it shows the printed cost good and the gear short name.
+const GEAR_SHORT = { navigator: "NAV", builder: "BLD", merchant: "MER", cargo: "CGO" }
+const GEAR_COLOUR = { navigator: "#d33a3a", builder: "#e0b528", merchant: "#2f6fd0", cargo: "#333333" }
+
+function spaceyardType(site) {
+	return site && site.kind === "spaceyard" ? rf.SPACEYARD_TYPES[site.tileId] : null
+}
+
 
 function siteGood(site) {
 	if (!site) return null
@@ -284,24 +298,37 @@ function factoryGood(factory) {
 function privilegeColour(owner) {
 	return owner >= 0 ? personal.getCorrectedColourHex(store.players[owner].colour) : "transparent"
 }
+
+// One hover tells the whole planet, so a player never has to fly there to read
+// a site or a factory.
+function planetTooltip(item) {
+	const lines = [item.planet.name]
+	if (item.mine !== null) lines.push(t("map.mineTitle", { good: rf.goodName(item.mine) }))
+	if (item.factory) lines.push(t("action.factoryLine", { factory: rf.factoryName(item.factory.typeId) }))
+	if (item.site) lines.push(siteLabel(item.site))
+	if (item.ships.length > 0) lines.push(item.ships.map((entry) => entry.p.displayName).join(", "))
+	return lines.join("\n")
+}
 </script>
 
 <template>
 	<div class="boardWrap" ref="wrapEl" :style="{ maxHeight: wrapMaxHeight + 'px' }">
 		<div class="boardScaler" :style="{ width: boardWidth + 'px', height: boardHeight + 'px' }">
 		<div class="board" :style="[boardStyle, { transform: `scale(${scale})` }]">
-			<div v-for="item in planetItems" :key="item.planet.id" class="planet" :class="{ startPlanet: item.planet.start, highlighted: highlightedPlanets.has(item.planet.id), selected: store.context.selectedPlanet === item.planet.id || (choosingPathways && [store.context.selectedPathwayIn, store.context.selectedPathwayOut].includes(item.planet.id)) }" :style="item.style">
-				<button type="button" class="planetDisc" :data-planet="item.planet.id" :class="{ start: item.planet.start }" :title="item.planet.name" :aria-label="item.planet.name" @click="onPlanetClick(item.planet)"></button>
+			<div v-for="item in planetItems" :key="item.planet.id" class="planet" :class="{ startPlanet: item.planet.start, highlighted: highlightedPlanets.has(item.planet.id), selected: store.context.selectedPlanet === item.planet.id || (choosingPathways && [store.context.selectedPathwayIn, store.context.selectedPathwayOut].includes(item.planet.id)), low: item.low }" :style="item.style">
+				<button type="button" class="planetDisc" :data-planet="item.planet.id" :class="{ start: item.planet.start }" :title="planetTooltip(item)" :aria-label="item.planet.name" @click="onPlanetClick(item.planet)"></button>
 				<div class="planetStatus">
-					<button v-if="item.mine !== null" type="button" class="mapTile mineTile" :disabled="!canTradeHere(item.planet.id)" :title="$t('action.takeGood', { good: rf.goodName(item.mine) })" :aria-label="$t('action.takeGood', { good: rf.goodName(item.mine) })" @click="controller.tradeMine">
+					<button v-if="item.mine !== null" type="button" class="mapTile mineTile" :disabled="!canTradeHere(item.planet.id)" :title="$t('map.mineTitle', { good: rf.goodName(item.mine) })" :aria-label="$t('action.takeGood', { good: rf.goodName(item.mine) })" @click="controller.tradeMine">
 						<img class="mineIcon" :src="funcs.goodImage(item.mine)" alt="" />
-					</button>
-					<button v-if="item.site" type="button" class="mapTile siteChip" :disabled="!canTradeHere(item.planet.id)" :aria-label="siteLabel(item.site)" @click="openSite(item)" :class="{ built: item.site.built, unbuilt: !item.site.built }" :title="siteLabel(item.site)">
-						<img v-if="siteGood(item.site) !== null" :src="funcs.goodImage(siteGood(item.site))" />
-						<span v-else aria-hidden="true">⚙</span>
 					</button>
 					<button v-if="item.factory" type="button" class="mapTile factoryChip" :disabled="!canTradeHere(item.planet.id)" :title="$t('action.produceGood', { good: rf.goodName(factoryGood(item.factory)) })" :aria-label="$t('action.produceGood', { good: rf.goodName(factoryGood(item.factory)) })" @click="controller.tradeFactory">
 						<img :src="funcs.goodImage(factoryGood(item.factory))" alt="" />
+					</button>
+					<button v-if="item.site" type="button" class="mapTile siteChip" :disabled="!canTradeHere(item.planet.id)" :aria-label="siteLabel(item.site)" @click="openSite(item)" :class="{ built: item.site.built, unbuilt: !item.site.built }" :title="siteLabel(item.site)">
+						<img v-if="spaceyardType(item.site)" :src="funcs.goodImage(spaceyardType(item.site).cost[0])" :alt="rf.goodName(spaceyardType(item.site).cost[0])" />
+						<img v-else-if="siteGood(item.site) !== null" :src="funcs.goodImage(siteGood(item.site))" :alt="rf.goodName(siteGood(item.site))" />
+						<span v-if="spaceyardType(item.site)" class="gearShort" :style="{ backgroundColor: GEAR_COLOUR[spaceyardType(item.site).gear] || '#333' }">{{ GEAR_SHORT[spaceyardType(item.site).gear] || "?" }}</span>
+						<span v-else-if="siteGood(item.site) === null" aria-hidden="true">⚙</span>
 					</button>
 				</div>
 				<div class="privilegeRow">
@@ -315,7 +342,7 @@ function privilegeColour(owner) {
 				<span class="shipBody" :style="{ backgroundColor: ship.colour }"></span>
 			</div>
 
-			<div v-for="hw in highwayItems" :key="hw.node" class="highwayCube" :style="{ ...hw.style, backgroundColor: hw.colour }" :title="$t('map.highway')"></div>
+			<div v-for="hw in highwayItems" :key="hw.node" class="highwayCube" :style="{ ...hw.style, backgroundColor: hw.colour }" :title="$t('map.highwayOwned', { player: store.players[hw.owner].displayName })"></div>
 
 			<div v-for="cube in turnCubeItems" :key="cube.turn" class="turnCube" :style="{ ...cube.style, backgroundColor: cube.colour }" :title="$t('map.turnCube', { turn: cube.turn })"></div>
 
@@ -409,7 +436,11 @@ function privilegeColour(owner) {
 	white-space: nowrap;
 	pointer-events: none;
 }
-.mineIcon { width: 22px; height: 22px; background: #3b3b3b; border: 1px solid #ddd; border-radius: 3px; }
+.mineIcon { width: 26px; height: 26px; background: #3b3b3b; border: 1px solid #ddd; border-radius: 3px; }
+/* The bottom-of-the-board planets would otherwise push their tiles onto the
+   printed turn track, so their tiles sit above the disc instead. */
+.planet.low .planetStatus { transform: translate(-50%, -74px); }
+.planet.low .privilegeRow { transform: translate(-50%, -96px); }
 .siteChip {
 	display: inline-flex;
 	align-items: center;
@@ -425,9 +456,10 @@ function privilegeColour(owner) {
 	overflow: hidden;
 }
 .siteChip.built { background: #4aa3df; color: #fff; border-color: #1e5c8a; }
-.siteChip img { width: 18px; height: 18px; }
+.siteChip img { width: 20px; height: 20px; }
+.gearShort { font-size: 8px; font-weight: bold; color: #fff; border-radius: 2px; padding: 0 2px; letter-spacing: 0.02em; }
 .factoryChip { display: inline-flex; background: #7c5eb0; border: 1px solid #3c2b5e; border-radius: 3px; padding: 1px; }
-.factoryChip img { width: 20px; height: 20px; }
+.factoryChip img { width: 22px; height: 22px; }
 .privilegeRow {
 	position: absolute;
 	left: 50%;

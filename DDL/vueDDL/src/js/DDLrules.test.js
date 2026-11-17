@@ -395,3 +395,56 @@ describe("pathways", () => {
 		expect(rules.canUsePathway(state, 0)).toBe(false)
 	})
 })
+
+describe("collect-energy pre-orders", () => {
+	it("queues colours in order and refuses unknown colours", () => {
+		const state = game()
+		expect(rules.collectQueue(state.players[0])).toEqual([])
+		expect(rules.queueCollect(state, 0, rf.BLUE_ENERGY).ok).toBe(true)
+		expect(rules.queueCollect(state, 0, rf.RED_ENERGY).ok).toBe(true)
+		expect(rules.queueCollect(state, 0, rf.RED_ENERGY).ok).toBe(true)
+		expect(rules.queueCollect(state, 0, 7).ok).toBe(false)
+		expect(rules.collectQueue(state.players[0])).toEqual([rf.BLUE_ENERGY, rf.RED_ENERGY, rf.RED_ENERGY])
+		expect(rules.removeQueuedCollect(state, 0, 1).ok).toBe(true)
+		expect(rules.collectQueue(state.players[0])).toEqual([rf.BLUE_ENERGY, rf.RED_ENERGY])
+		expect(rules.clearCollectQueue(state, 0).ok).toBe(true)
+		expect(rules.collectQueue(state.players[0])).toEqual([])
+	})
+
+	it("caps the queue at the number of action turns left in the game", () => {
+		const state = game()
+		for (let i = 0; i < rules.MAX_COLLECT_QUEUE; i++) rules.queueCollect(state, 0, rf.RED_ENERGY)
+		expect(rules.queueCollect(state, 0, rf.RED_ENERGY).ok).toBe(false)
+		expect(rules.collectQueue(state.players[0])).toHaveLength(rules.MAX_COLLECT_QUEUE)
+	})
+
+	it("takes the head only when it is the colour that was collected", () => {
+		const state = game()
+		rules.queueCollect(state, 0, rf.BLUE_ENERGY)
+		rules.queueCollect(state, 0, rf.RED_ENERGY)
+		expect(rules.consumeQueuedCollect(state, 0, rf.RED_ENERGY).ok).toBe(false)
+		expect(rules.consumeQueuedCollect(state, 0, rf.BLUE_ENERGY).ok).toBe(true)
+		expect(rules.collectQueue(state.players[0])).toEqual([rf.RED_ENERGY])
+	})
+
+	it("collects the queued colour exactly like a hand collect", () => {
+		const state = game()
+		state.players[0].gear[0] = "navigator"
+		rules.queueCollect(state, 0, rf.RED_ENERGY)
+		const colour = rules.collectQueue(state.players[0])[0]
+		const result = rules.collectEnergy(state, 0, colour)
+		expect(result.ok).toBe(true)
+		expect(state.players[0].energy[rf.RED_ENERGY]).toBe(2)
+		expect(state.board.energyStock[rf.RED_ENERGY]).toBe(rf.ENERGY_STOCK_PER_COLOUR - 2)
+		expect(state.gameflow.turnOrder[0]).toBe(1)
+	})
+
+	it("keeps the queue when the collect is rejected", () => {
+		const state = game()
+		rules.queueCollect(state, 0, rf.RED_ENERGY)
+		state.gameflow.turnType = rf.TURN_ACTION
+		const result = rules.collectEnergy(state, 0, rf.RED_ENERGY)
+		expect(result.ok).toBe(false)
+		expect(rules.collectQueue(state.players[0])).toEqual([rf.RED_ENERGY])
+	})
+})

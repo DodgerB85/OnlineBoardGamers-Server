@@ -24,6 +24,10 @@ function cargoText(player) {
 	return `${rules.cargoUsed(player)}/${rules.cargoCapacity(player)}`
 }
 
+function queueLength(player) {
+	return rules.collectQueue(player).length
+}
+
 function statusText(player, idx) {
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return t("playerTable.finalScore", { score: rules.finalScore(player) })
 	if (isCurrent(idx)) return t("common.currentTurn")
@@ -41,6 +45,7 @@ function statusText(player, idx) {
 			<span class="stat" :title="$t('playerTable.storedEnergy')">⚡ {{ energyTotal(player) }}</span>
 			<span class="stat" :title="$t('playerTable.cargoUsed')">📦 {{ cargoText(player) }}</span>
 			<span class="stat" :title="$t('playerTable.privilegesLeft')">🔵 {{ player.privileges }}</span>
+			<span v-if="queueLength(player)" class="stat queueStat" :title="$t('playerTable.collectQueueTitle')">🕒 {{ queueLength(player) }}</span>
 			<span v-if="player.auctionBid" class="stat auctionStat" :title="$t('playerTable.auctionBidTitle')">{{ $t("playerTable.bidAmount", { amount: player.auctionBid }) }}</span>
 			<span class="status">{{ statusText(player, idx) }}</span>
 		</div>
@@ -75,5 +80,6 @@ function statusText(player, idx) {
 .playerScore { font-weight: bold; font-size: 15px; }
 .stat { color: #333; white-space: nowrap; }
 .auctionStat { color: #8a4b00; }
+.queueStat { color: #1c4f8b; }
 .status { font-size: 11px; color: #555; font-style: italic; }
 </style>
