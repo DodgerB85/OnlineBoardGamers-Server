@@ -579,7 +579,14 @@ store.refSize = 2400
 							<path v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackBlack' + i" :d="chain.d" stroke="black" :stroke-width="(100 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 							<path v-for="(chain, i) in hex.fullTrainTrackPath" :key="'trackWhite' + i" :d="chain.d" :pathLength="2 * chain.dashes" stroke="white" :stroke-width="(76 * store.RATIO).toFixed(0)" stroke-dasharray="1 1" stroke-dashoffset="0.5" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 						</g>
-						<!-- ROADS - drawn above style 1 tracks -->
+						<!-- TRAIN TRACKS (style 2) - drawn under the roads, which cover the track where the two overlap -->
+						<g v-if="store.mapData.displaySettings.trackStyle === 2 && store.mapData.displaySettings.showTrainTracks && store.gameOptions.useTrains && hex.fullTrainTrackPath?.length">
+							<path v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackRailCase' + i" :d="chain.d" stroke="#A68A64" :stroke-width="(34 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackTiesCase' + i" :d="chain.d" stroke="#A68A64" :stroke-width="(104 * store.RATIO).toFixed(0)" :stroke-dasharray="`${chain.tieSpacing * 0.12} ${chain.tieSpacing * 0.88}`" :stroke-dashoffset="chain.tieOffset" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackRail' + i" :d="chain.d" stroke="black" :stroke-width="(20 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+							<path v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackTies' + i" :d="chain.d" stroke="black" :stroke-width="(88 * store.RATIO).toFixed(0)" :stroke-dasharray="`${chain.tieSpacing * 0.12} ${chain.tieSpacing * 0.88}`" :stroke-dashoffset="chain.tieOffset" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
+						</g>
+						<!-- ROADS - drawn above the tracks so they sit on top where they overlap -->
 						<g v-if="store.mapData.displaySettings.showRoads">
 							<!-- Draw the roads and white lines -->
 							<g :transform="`rotate(${store.hexStyle === rf.FLAT ? 0 : 0} 0 0)`">
@@ -587,13 +594,6 @@ store.refSize = 2400
 								<path :d="hex.fullRoadPath" stroke="#1C2526" :stroke-width="60 * store.RATIO" stroke-linejoin="round" stroke-linecap="round" />
 								<path :d="hex.fullRoadPath" stroke="#F5F5F5" :stroke-width="(7 * store.RATIO).toFixed(0)" :stroke-dasharray="`${(25 * store.RATIO).toFixed(0)} ${(20 * store.RATIO).toFixed(0)}`" fill="none" />
 							</g>
-						</g>
-						<!-- TRAIN TRACKS (style 2) - draw over roads to keep crossings visible -->
-						<g v-if="store.mapData.displaySettings.trackStyle === 2 && store.mapData.displaySettings.showTrainTracks && store.gameOptions.useTrains && hex.fullTrainTrackPath?.length">
-							<path v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackRailCase' + i" :d="chain.d" stroke="#A68A64" :stroke-width="(34 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-							<path v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackTiesCase' + i" :d="chain.d" stroke="#A68A64" :stroke-width="(104 * store.RATIO).toFixed(0)" :stroke-dasharray="`${chain.tieSpacing * 0.12} ${chain.tieSpacing * 0.88}`" :stroke-dashoffset="chain.tieOffset" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-							<path v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackRail' + i" :d="chain.d" stroke="black" :stroke-width="(20 * store.RATIO).toFixed(0)" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
-							<path v-for="(chain, i) in hex.fullTrainTrackPathOffset" :key="'trackTies' + i" :d="chain.d" stroke="black" :stroke-width="(88 * store.RATIO).toFixed(0)" :stroke-dasharray="`${chain.tieSpacing * 0.12} ${chain.tieSpacing * 0.88}`" :stroke-dashoffset="chain.tieOffset" stroke-linejoin="round" stroke-linecap="butt" fill="none" />
 						</g>
 					</g>
 					<!-- NOT FINE TO ROTATE TO FLAT-->
