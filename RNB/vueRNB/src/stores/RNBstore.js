@@ -436,6 +436,8 @@ export const useModelStore = defineStore("store", () => {
 		if (!personal.soloGame) {
 			// Add in an entry if there was no conflict
 			for (let i = computedHistory.length - 2; i >= 0; i--) {
+				// A trade does not change the phase; its neighbours are compared instead
+				if (computedHistory[i][0] === rf.HIST_PLAYER_TRADE) continue
 				// check if this entry AND next have different phases, and both being stack
 				let phaseChangeRet = histJS.changeOfPhaseWithNoConflictDetected(i)
 				if (phaseChangeRet[0] === true) {
@@ -446,7 +448,9 @@ export const useModelStore = defineStore("store", () => {
 
 			// Add an entry if the PREVIOUS entry was a DIFFERENT MAIN phase - ie no conflict
 			if (gameflow.phase !== rf.PHASE_GAME_OVER && rf.MAIN_PHASES.includes(gameflow.phase)) {
-				if (history[history.length - 1][0] === rf.HIST_STACK_ACTIONS && history[history.length - 1][3][0] !== gameflow.phase) {
+				let lastNonTradeIdx = history.length - 1
+				while (lastNonTradeIdx >= 0 && history[lastNonTradeIdx][0] === rf.HIST_PLAYER_TRADE) lastNonTradeIdx--
+				if (lastNonTradeIdx >= 0 && history[lastNonTradeIdx][0] === rf.HIST_STACK_ACTIONS && history[lastNonTradeIdx][3][0] !== gameflow.phase) {
 					computedHistory.push([rf.HIST_NO_CONFLICT, -1, computedHistory[computedHistory.length - 1][2], []])
 				}
 			}

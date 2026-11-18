@@ -446,6 +446,17 @@ const computedEntry3 = computed(() => {
 			}
 			ret.newTurnOrder[ret.missingPlayerData[1]] = ret.missingPlayerData[0]
 		}
+	} else if (entry[0] === rf.HIST_PLAYER_TRADE) {
+		ret.offeredResGfxs = []
+		ret.requestedResGfxs = []
+		for (const resID of entry[3][1]) {
+			const resObj = history.getResByID_HIST(resID)
+			if (resObj) ret.offeredResGfxs.push("res_" + String(resObj.type))
+		}
+		for (const resID of entry[3][2]) {
+			const resObj = history.getResByID_HIST(resID)
+			if (resObj) ret.requestedResGfxs.push("res_" + String(resObj.type))
+		}
 	} else if (entry[0] === rf.HIST_STACK_ACTIONS) {
 		ret.title = ""
 		ret.stackSteps = []
@@ -1451,6 +1462,24 @@ const computedEntry3 = computed(() => {
 					<img v-for="(transporterGfx, idx) in computedEntry3.transporterGfxs" :key="idx" class="buildingProductionTransporterImg" :src="view.getImage(transporterGfx)" />
 					<img v-for="(resGfx, idx) in computedEntry3.resGfxs" :key="idx" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
 				</div>
+			</div>
+		</div>
+	</template>
+
+	<!-- PLAYER TRADE -->
+	<template v-if="entry[0] === rf.HIST_PLAYER_TRADE">
+		<div class="log mainEntry">
+			<div class="header">
+				<span>{{ funcs.timestampToString(entry[2]) }}</span>
+			</div>
+			<div class="container">
+				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ personal.getHistoryName(entry[1]) }}</span>
+				{{ $t("trade.offers") }}
+				<img v-for="(resGfx, idx) in computedEntry3.offeredResGfxs" :key="'give' + idx" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
+				{{ $t("trade.to") }}
+				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][0]].colour)">{{ personal.getHistoryName(entry[3][0]) }}</span>
+				{{ $t("trade.for") }}
+				<img v-for="(resGfx, idx) in computedEntry3.requestedResGfxs" :key="'receive' + idx" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
 			</div>
 		</div>
 	</template>

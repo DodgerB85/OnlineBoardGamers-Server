@@ -1246,6 +1246,7 @@ def _processRNBturn(request):
 # ===== PLAYER TRADE =====
 
 RNB_HIST_CHOOSE_HOME_TILE = 2
+RNB_HIST_PLAYER_TRADE = 41
 RNB_LOCATION_DOCKED = 3
 RNB_WATER_TRANSPORTER_TYPES = {33, 34, 35}  # raft, rowboat, steamer
 
@@ -1288,31 +1289,49 @@ def _get_rnb_home_location(raw_data, player_index):
     return None
 
 
+def _rnb_transporter_is_on_hex(transporter, hex_id):
+    transporter_type = transporter[1]
+    location = transporter[2]
+    if not location:
+        return False
+    if transporter_type in RNB_WATER_TRANSPORTER_TYPES:
+        # River vertices use [hex] or [hex, vertex]; sea vertices and docks use a -1/3 flag.
+        if location[0] == hex_id:
+            return True
+        if location[0] == -1 and len(location) >= 3 and location[1] == hex_id:
+            return True
+        if location[0] == RNB_LOCATION_DOCKED and len(location) >= 2 and location[1] == hex_id:
+            return True
+        return False
+    return len(location) >= 2 and location[0] == hex_id
+
+
 def _rnb_player_has_transporter_on_home(raw_data, player_index, home_location):
     if not home_location or len(raw_data) <= 2:
         return False
     home_hex = home_location[0]
-    for transporter in raw_data[2]:
-        if int(transporter[0]) != int(player_index):
-            continue
-        transporter_type = transporter[1]
-        location = transporter[2]
-        if not location:
-            continue
-        if transporter_type in RNB_WATER_TRANSPORTER_TYPES:
-            # River vertices use [hex] or [hex, vertex]; sea vertices and docks use a -1/3 flag.
-            if location[0] == home_hex:
-                return True
-            if location[0] == -1 and len(location) >= 3 and location[1] == home_hex:
-                return True
-            if location[0] == RNB_LOCATION_DOCKED and len(location) >= 2 and location[1] == home_hex:
-                return True
-        elif len(location) >= 2 and location[0] == home_hex:
-            return True
+    return any(int(transporter[0]) == int(player_index) and _rnb_transporter_is_on_hex(transporter, home_hex) for transporter in raw_data[2])
+
+
+def _rnb_resource_is_on_home(location, home_hex, transporters, player_index):
+    if not location:
+        return False
+    # Bucket IDs beyond 0 are still on the home tile.
+    if location[0] == home_hex:
+        return True
+    # Goods on your own transporter count as being on the tile it is on.
+    if location[0] == -1 and len(location) == 2:
+        transporter_id = location[1]
+        return (
+            isinstance(transporter_id, int)
+            and 0 <= transporter_id < len(transporters)
+            and int(transporters[transporter_id][0]) == int(player_index)
+            and _rnb_transporter_is_on_hex(transporters[transporter_id], home_hex)
+        )
     return False
 
 
-def _rnb_validate_trade_resources(resources, res_ids, home_location):
+def _rnb_validate_trade_resources(resources, res_ids, home_location, transporters, player_index):
     if not isinstance(res_ids, list):
         return False
     home_hex = home_location[0]
@@ -1321,7 +1340,7 @@ def _rnb_validate_trade_resources(resources, res_ids, home_location):
         if not isinstance(rid, int) or isinstance(rid, bool) or rid < 0 or rid >= len(resources):
             return False
         location = resources[rid][1]
-        if rid in seen or not location or location[0] != home_hex:
+        if rid in seen or not _rnb_resource_is_on_home(location, home_hex, transporters, player_index):
             return False
         seen.add(rid)
     return True
@@ -1447,9 +1466,9 @@ def _handle_rnb_propose_trade(request, currentGame, presenter, raw_data, trade_d
         return JsonResponse({"tradeError": "You need a transporter on your home tile"}, safe=False)
     if not _rnb_player_has_transporter_on_home(raw_data, target_idx, target_home):
         return JsonResponse({"tradeError": "Opponent has no transporter on their home tile"}, safe=False)
-    if not _rnb_validate_trade_resources(raw_data[3], your_res_ids, proposer_home):
+    if not _rnb_validate_trade_resources(raw_data[3], your_res_ids, proposer_home, raw_data[2], proposer_idx):
         return JsonResponse({"tradeError": "Offered goods are not on your home tile"}, safe=False)
-    if not _rnb_validate_trade_resources(raw_data[3], their_res_ids, target_home):
+    if not _rnb_validate_trade_resources(raw_data[3], their_res_ids, target_home, raw_data[2], target_idx):
         return JsonResponse({"tradeError": "Requested goods are not on their home tile"}, safe=False)
 
     if len(trade_data.get("playerTrades", [])) >= 5:
@@ -1522,8 +1541,8 @@ def _handle_rnb_accept_trade(request, currentGame, presenter, raw_data, trade_da
             requested_res_ids,
             "Both players need a transporter on their home tile",
         )
-    if not _rnb_validate_trade_resources(raw_data[3], offered_res_ids, proposer_home) or not _rnb_validate_trade_resources(
-        raw_data[3], requested_res_ids, target_home
+    if not _rnb_validate_trade_resources(raw_data[3], offered_res_ids, proposer_home, raw_data[2], proposer_idx) or not _rnb_validate_trade_resources(
+        raw_data[3], requested_res_ids, target_home, raw_data[2], acceptor_idx
     ):
         return _stale_trade_error(
             currentGame,
@@ -1541,6 +1560,11 @@ def _handle_rnb_accept_trade(request, currentGame, presenter, raw_data, trade_da
         all_resources[rid][1] = list(target_home)
     for rid in requested_res_ids:
         all_resources[rid][1] = list(proposer_home)
+
+    _append_trade_history(currentGame, raw_data, proposer_idx, acceptor_idx, offered_res_ids, requested_res_ids)
+    _delete_pending_moves_for_player(currentGame, proposer_idx)
+    _delete_pending_moves_for_player(currentGame, acceptor_idx)
+
     currentGame.gameData = _compress_rnb_gamedata(raw_data)
 
     _remove_matching_trades(trade_data, proposer_idx, acceptor_idx, offered_res_ids, requested_res_ids)
@@ -1636,6 +1660,33 @@ def _cancel_all_trades_on_turn_submit(currentGame, player_name):
         if _cancel_trades_for_player(trade_data, player_idx):
             currentGame.playerTradeData = _compress_rnb_trade_data(trade_data)
             currentGame.save()
+
+
+def _append_trade_history(currentGame, raw_data, proposer_idx, acceptor_idx, offered_res_ids, requested_res_ids):
+    """Record the accepted trade in the game history, using the same per-entry delta the client stores."""
+    if len(raw_data) <= 4 or not isinstance(raw_data[4], list):
+        return
+    elapsed = int(time.time()) - int(currentGame.created or 0) // 1000
+    for entry in raw_data[4]:
+        if isinstance(entry, list) and len(entry) > 2 and isinstance(entry[2], (int, float)) and not isinstance(entry[2], bool):
+            elapsed -= entry[2]
+    raw_data[4].append([RNB_HIST_PLAYER_TRADE, proposer_idx, elapsed, [acceptor_idx, list(offered_res_ids), list(requested_res_ids)]])
+
+
+def _delete_pending_moves_for_player(currentGame, player_index):
+    """A trade changes a player's goods, so their queued pre-set moves can no longer be trusted."""
+    presenter = cast("RNBpresenter", currentGame.presenter())
+    all_names = presenter.getAllPlayersOrderedySeatInArray(False, True)
+    if player_index < 0 or player_index >= len(all_names):
+        return
+    gp_player = currentGame.players.only("moveDataJSON").filter(player__username=all_names[player_index]).first()
+    if not gp_player or not gp_player.moveDataJSON:
+        return
+    pending_moves = [move for move in gp_player.moveDataJSON if move.get("status") == "pending"]
+    if not pending_moves:
+        return
+    gp_player.moveDataJSON = [move for move in gp_player.moveDataJSON if move.get("status") != "pending"]
+    gp_player.save(update_fields=["moveDataJSON"])
 
 
 def doSaveRewind(currentGame, jsonData):

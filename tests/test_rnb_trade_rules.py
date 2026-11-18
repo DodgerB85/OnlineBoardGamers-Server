@@ -5,6 +5,7 @@ import os
 import sys
 import unittest
 from types import SimpleNamespace
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -15,12 +16,28 @@ django.setup()
 
 from RNB import RNBconstants as rfRNB
 from RNB.views import (
+    _append_trade_history,
+    _delete_pending_moves_for_player,
     _get_rnb_home_location,
     _remove_matching_trades,
     _rnb_player_has_transporter_on_home,
     _rnb_trade_option_enabled,
     _rnb_validate_trade_resources,
 )
+
+
+class _FakePlayers:
+    def __init__(self, game_player):
+        self.game_player = game_player
+
+    def only(self, *_fields):
+        return self
+
+    def filter(self, **_lookups):
+        return self
+
+    def first(self):
+        return self.game_player
 
 
 class RNBTradeRulesTests(unittest.TestCase):
@@ -41,12 +58,51 @@ class RNBTradeRulesTests(unittest.TestCase):
 
     def test_goods_must_be_on_the_home_tile(self):
         home = [5]
-        self.assertTrue(_rnb_validate_trade_resources(self.raw_data[3], [0], home))
-        self.assertTrue(_rnb_validate_trade_resources(self.raw_data[3], [1], home))
-        self.assertFalse(_rnb_validate_trade_resources(self.raw_data[3], [2], home))
-        self.assertFalse(_rnb_validate_trade_resources(self.raw_data[3], [0, 0], home))
-        self.assertFalse(_rnb_validate_trade_resources(self.raw_data[3], [-1], home))
-        self.assertFalse(_rnb_validate_trade_resources(self.raw_data[3], [99], home))
+        self.assertTrue(_rnb_validate_trade_resources(self.raw_data[3], [0], home, self.raw_data[2], 0))
+        self.assertTrue(_rnb_validate_trade_resources(self.raw_data[3], [1], home, self.raw_data[2], 0))
+        self.assertFalse(_rnb_validate_trade_resources(self.raw_data[3], [2], home, self.raw_data[2], 0))
+        self.assertFalse(_rnb_validate_trade_resources(self.raw_data[3], [0, 0], home, self.raw_data[2], 0))
+        self.assertFalse(_rnb_validate_trade_resources(self.raw_data[3], [-1], home, self.raw_data[2], 0))
+        self.assertFalse(_rnb_validate_trade_resources(self.raw_data[3], [99], home, self.raw_data[2], 0))
+
+    def test_goods_on_a_transporter_count_as_on_that_tile(self):
+        resources = [[0, [-1, 0], 1], [1, [-1, 1], 2]]
+        self.assertTrue(_rnb_validate_trade_resources(resources, [0], [5], self.raw_data[2], 0))
+        self.assertTrue(_rnb_validate_trade_resources(resources, [1], [6], self.raw_data[2], 1))
+        self.assertFalse(_rnb_validate_trade_resources(resources, [0], [6], self.raw_data[2], 0))
+        self.assertFalse(_rnb_validate_trade_resources(resources, [1], [5], self.raw_data[2], 1))
+
+    def test_goods_must_be_on_your_own_transporter(self):
+        transporters = self.raw_data[2] + [[1, 30, [5, 2]]]
+        resources = [[0, [-1, 2], 1]]
+        self.assertFalse(_rnb_validate_trade_resources(resources, [0], [5], transporters, 0))
+        self.assertTrue(_rnb_validate_trade_resources(resources, [0], [5], transporters, 1))
+
+    def test_goods_on_a_carried_transporter_are_not_on_the_tile(self):
+        transporters = [[0, 30, [5, 1]], [1, 30, [6, 1]], [0, 30, [-1, 0]]]
+        resources = [[0, [-1, 2], 1]]
+        self.assertFalse(_rnb_validate_trade_resources(resources, [0], [5], transporters, 0))
+
+    def test_trade_history_entry_gets_the_relative_time(self):
+        raw_data = [[], [], [], [], [[2, 0, 10, [5]]]]
+        game = SimpleNamespace(created=str(1_700_000_000_000))
+        with patch("RNB.views.time.time", return_value=1_700_000_100):
+            _append_trade_history(game, raw_data, 0, 1, [5], [6])
+        self.assertEqual(raw_data[4][-1], [41, 0, 90, [1, [5], [6]]])
+
+    def test_pending_presets_are_dropped_but_current_moves_are_kept(self):
+        game_player = SimpleNamespace(
+            moveDataJSON=[
+                {"status": "pending", "turn": 2},
+                {"status": "current", "turn": 1},
+                {"status": "pending", "turn": 3},
+            ],
+            save=lambda **_kwargs: None,
+        )
+        presenter = SimpleNamespace(getAllPlayersOrderedySeatInArray=lambda *_args: ["p0", "p1"])
+        game = SimpleNamespace(presenter=lambda: presenter, players=_FakePlayers(game_player))
+        _delete_pending_moves_for_player(game, 1)
+        self.assertEqual(game_player.moveDataJSON, [{"status": "current", "turn": 1}])
 
     def test_both_players_need_a_transporter_on_their_home_tile(self):
         self.assertTrue(_rnb_player_has_transporter_on_home(self.raw_data, 0, [5]))

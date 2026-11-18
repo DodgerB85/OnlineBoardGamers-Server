@@ -260,6 +260,7 @@ export const HIST_CONFLICT_TURN_ORDER = 6
 		else if (store.computedHistory[i][0] === rf.HIST_POST_PRODUCTION) replayPostProduction(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_RESIGN) replayResign(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_KICKOUT) replayKickout(i, store.computedHistory[i][1], store.computedHistory[i][3])
+		else if (store.computedHistory[i][0] === rf.HIST_PLAYER_TRADE) replayPlayerTrade(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		// if it is a stack of actions, replay and save each one separately
 		else if (store.computedHistory[i][0] === rf.HIST_STACK_ACTIONS) {
 			const stackActions = store.computedHistory[i][3]
@@ -494,6 +495,22 @@ function replayResign(_historyIndex, playerIndex, _entry3) {
 
 function replayKickout(_historyIndex, _playerIndex, entry3) {
 	model.removeAllTransportersAndGoodsForPlayerIndex(entry3[0])
+}
+
+// entry3 is [acceptorIdx, offeredResIDs (proposer gives), requestedResIDs (acceptor gives)]
+function replayPlayerTrade(_historyIndex, playerIndex, entry3) {
+	const store = useModelStore()
+	const proposerHome = store.ALL_HOME_MARKERS.find((m) => m.ownerIndex === playerIndex)
+	const acceptorHome = store.ALL_HOME_MARKERS.find((m) => m.ownerIndex === entry3[0])
+	if (!proposerHome || !acceptorHome) return
+	for (const resID of entry3[1]) {
+		const resObj = store.ALL_RESOURCES.find((r) => r.id === resID)
+		if (resObj) resObj.location = [...acceptorHome.location]
+	}
+	for (const resID of entry3[2]) {
+		const resObj = store.ALL_RESOURCES.find((r) => r.id === resID)
+		if (resObj) resObj.location = [...proposerHome.location]
+	}
 }
 
 /**************************** STACK ACTION REPLAYS */

@@ -137,8 +137,15 @@ export function changeOfPhaseWithNoConflictDetected(computerHistIdx) {
 	let oldPhase = -1
 	let newPhase = -1
 
-	const entry1 = store.history[computerHistIdx]
-	const entry2 = store.history[computerHistIdx + 1]
+	// Trades are recorded between phase stacks; they do not end a phase.
+	let oldIdx = computerHistIdx
+	while (oldIdx >= 0 && store.history[oldIdx][0] === rf.HIST_PLAYER_TRADE) oldIdx--
+	let newIdx = computerHistIdx + 1
+	while (newIdx < store.history.length && store.history[newIdx][0] === rf.HIST_PLAYER_TRADE) newIdx++
+	if (oldIdx < 0 || newIdx >= store.history.length) return [false, -1]
+
+	const entry1 = store.history[oldIdx]
+	const entry2 = store.history[newIdx]
 	if (entry1[0] === rf.HIST_STACK_ACTIONS && rf.PHASE_PRODUCTIONS.includes(entry1[3][0])) oldPhase = rf.PHASE_PRODUCTION_TO
 	if (entry1[0] === rf.HIST_STACK_ACTIONS && rf.PHASE_MOVEMENTS.includes(entry1[3][0])) oldPhase = rf.PHASE_MOVEMENT_TO
 	if (entry1[0] === rf.HIST_STACK_ACTIONS && rf.PHASE_BUILDINGS.includes(entry1[3][0])) oldPhase = rf.PHASE_BUILDING_TO

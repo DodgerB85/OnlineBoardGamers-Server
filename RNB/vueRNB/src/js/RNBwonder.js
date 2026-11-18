@@ -324,9 +324,8 @@ export function requiredResourcesForWonderBrick(playerIndex, extraBricks = 0) {
 	const bricksInWonder = store.wonderBricks.length + extraBricks
 	if (bricksInWonder >= 17) baseResRequired = 2
 	let justBuiltBricks = 0 + extraBricks
-	const entriesToIgnore = [rf.HIST_REWIND, rf.HIST_KICKOUT, rf.HIST_RESIGN]
 	let idx = store.history.length - 1
-	while (idx >= 0 && entriesToIgnore.includes(store.history[idx][0])) idx--
+	while (idx >= 0 && rf.ENTRIES_TO_IGNORE.includes(store.history[idx][0])) idx--
 	if (store.history[idx][0] === rf.HIST_STACK_ACTIONS && store.history[idx][3][0] === rf.PHASE_WONDER_TO && store.history[idx][1] === playerIndex) {
 		// Find the stack entry
 		let brickEntry = store.history[idx][3].find((x) => x[0] === rf.STACK_ADD_WONDER_BRICKS)

@@ -33,21 +33,18 @@ const eligibleOpponents = computed(() => {
 		.filter((p) => p.idx !== personal.pov)
 })
 
-const yourResIDsOnHomeTile = computed(() => {
-	if (personal.pov < 0) return []
-	const homeMarker = store.ALL_HOME_MARKERS.find((m) => m.ownerIndex === personal.pov)
+function resIDsOnHomeTile(playerIndex) {
+	if (playerIndex < 0) return []
+	const homeMarker = store.ALL_HOME_MARKERS.find((m) => m.ownerIndex === playerIndex)
 	if (!homeMarker) return []
 	const hexID = homeMarker.location[1]
-	return store.ALL_RESOURCES.filter((r) => r.location[0] === rf.LOCATION_BUCKET && r.location[1] === hexID).map((r) => r.id)
-})
+	const transporterIDs = model.getTransportersByPlayerIndexAndHexID(playerIndex, hexID).map((t) => t.id)
+	return store.ALL_RESOURCES.filter((r) => (r.location[0] === rf.LOCATION_BUCKET && r.location[1] === hexID) || (r.location[0] === rf.LOCATION_TRANSPORTER && transporterIDs.includes(r.location[1]))).map((r) => r.id)
+}
 
-const theirResIDsOnHomeTile = computed(() => {
-	if (tradeOpponentIdx.value < 0) return []
-	const homeMarker = store.ALL_HOME_MARKERS.find((m) => m.ownerIndex === tradeOpponentIdx.value)
-	if (!homeMarker) return []
-	const hexID = homeMarker.location[1]
-	return store.ALL_RESOURCES.filter((r) => r.location[0] === rf.LOCATION_BUCKET && r.location[1] === hexID).map((r) => r.id)
-})
+const yourResIDsOnHomeTile = computed(() => resIDsOnHomeTile(personal.pov))
+
+const theirResIDsOnHomeTile = computed(() => resIDsOnHomeTile(tradeOpponentIdx.value))
 
 const proposerHasTransporter = computed(() => {
 	if (personal.pov < 0) return false
@@ -113,18 +110,21 @@ function completeTradeLocal() {
 	// POV is the proposer; tradeOpponentIdx is the other player.
 	const proposerIdx = personal.pov
 	const targetIdx = tradeOpponentIdx.value
+	const offeredResIDs = [...tradeYourResIDs.value]
+	const requestedResIDs = [...tradeTheirResIDs.value]
 	const proposerHomeMarker = store.ALL_HOME_MARKERS.find((m) => m.ownerIndex === proposerIdx)
 	const targetHomeMarker = store.ALL_HOME_MARKERS.find((m) => m.ownerIndex === targetIdx)
 	if (proposerHomeMarker && targetHomeMarker) {
 		const proposerHex = proposerHomeMarker.location[1]
 		const targetHex = targetHomeMarker.location[1]
-		for (const rid of tradeYourResIDs.value) {
+		for (const rid of offeredResIDs) {
 			if (store.ALL_RESOURCES[rid]) store.ALL_RESOURCES[rid].location = [rf.LOCATION_BUCKET, targetHex, 0]
 		}
-		for (const rid of tradeTheirResIDs.value) {
+		for (const rid of requestedResIDs) {
 			if (store.ALL_RESOURCES[rid]) store.ALL_RESOURCES[rid].location = [rf.LOCATION_BUCKET, proposerHex, 0]
 		}
 	}
+	model.addHistory(rf.HIST_PLAYER_TRADE, proposerIdx, 0, [targetIdx, offeredResIDs, requestedResIDs])
 	resetTradeForm()
 	// Clear cached wonder resource lists so they recompute from the new locations
 	store.context.resIDsOnHomeTile.splice(0)
