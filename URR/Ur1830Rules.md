@@ -567,7 +567,7 @@ A state owning Eridu need not have another digging crew. If a player owns Eridu,
 
 Price: 220 SPL
 
-Yield per round: 35 SPL
+Yield per round: 40 SPL
 
 Special properties: The money paid for this nation goes into the state of Akkad. The player who bought the First Akkadians immediately gets three Savannah lands in the state of Akkad. Unlike other independent nations, these fields can be owned by a player while the First Akkadians is an independent nation owned by a player.
 

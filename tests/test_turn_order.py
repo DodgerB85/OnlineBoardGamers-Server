@@ -78,3 +78,37 @@ class TurnOrderTests(TestCase):
         self.assertEqual(self.game_players[2].remainingTurnOrder, 1)
         self.assertEqual(self.game_players[1].remainingTurnOrder, 2)
         self.assertIsNone(self.game_players[0].remainingTurnOrder)
+
+    def test_kicked_seat_left_in_the_queue_is_not_returned(self):
+        presenter = self.game.presenter()
+        kicked_gp = self.game_players[1]
+        kicked_gp.is_kicked = True
+        kicked_gp.remainingTurnOrder = 1
+        kicked_gp.save(update_fields=["is_kicked", "remainingTurnOrder"])
+        self.game_players[0].remainingTurnOrder = 2
+        self.game_players[0].save(update_fields=["remainingTurnOrder"])
+
+        self.assertEqual(presenter.getRemainingTurnOrderNames(), [self.players[0].username])
+
+    def test_stale_save_cannot_restore_a_kicked_seat_to_the_queue(self):
+        presenter = self.game.presenter()
+        kicked_gp = self.game_players[1]
+        kicked_gp.is_kicked = True
+        kicked_gp.save(update_fields=["is_kicked"])
+
+        # A stale client sends the queue it had before the kickout
+        presenter.setServerCurrentPlayerNamesInTurnOrder([self.players[1].username, self.players[0].username])
+
+        kicked_gp.refresh_from_db()
+        self.assertIsNone(kicked_gp.remainingTurnOrder)
+        self.assertEqual(self.game.serverCurrentPlayerNamesInTurnOrder, [self.players[0].username])
+        self.assertEqual(presenter.getRemainingTurnOrderNames(), [self.players[0].username])
+
+    def test_kicked_seat_played_by_ai_stays_in_the_queue(self):
+        ai_gp = self.game_players[1]
+        ai_gp.is_kicked = True
+        ai_gp.is_ai = True
+        ai_gp.remainingTurnOrder = 1
+        ai_gp.save(update_fields=["is_kicked", "is_ai", "remainingTurnOrder"])
+
+        self.assertEqual(self.game.presenter().getRemainingTurnOrderNames(), [self.players[1].username])

@@ -425,10 +425,10 @@ class GamePresenter:
 
     def getRemainingTurnOrderNames(self):
         """Turn-order queue as usernames, ordered by GamePlayer.remainingTurnOrder."""
-        rows = self.gameObj.players.filter(remainingTurnOrder__isnull=False).select_related("player").order_by("remainingTurnOrder")
-        names = [gp.player.username for gp in rows if gp.player]
-        if names:
-            return names
+        rows = list(self.gameObj.players.filter(remainingTurnOrder__isnull=False).select_related("player").order_by("remainingTurnOrder"))
+        if rows:
+            # A kicked seat cannot act; leaving it here lets a stale queue name a turn nobody owns.
+            return [gp.player.username for gp in rows if gp.player and not (gp.is_kicked and not gp.is_ai)]
 
         # Fallback for pre-migration rows and tests that seed the legacy Game fields.
         if self.gameObj.gameCode == "HLC" and self.gameObj.currentPlayersInTurnOrder:
@@ -448,6 +448,10 @@ class GamePresenter:
                 self.gameObj.serverCurrentPlayerNamesInTurnOrder = [solo_gp.player.username]
                 self.gameObj.save()
                 return
+        # A stale client saves before it drops a just-kicked player from its own turn order,
+        # so filter here too or the queue names a turn no is_current flag backs.
+        kicked_usernames = set(self.gameObj.players.filter(is_kicked=True, is_ai=False).values_list("player__username", flat=True))
+        playersInTurnOrderArray = [name for name in (playersInTurnOrderArray or []) if name not in kicked_usernames]
         self._setRemainingTurnOrder(playersInTurnOrderArray)
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = playersInTurnOrderArray
         self.gameObj.save()

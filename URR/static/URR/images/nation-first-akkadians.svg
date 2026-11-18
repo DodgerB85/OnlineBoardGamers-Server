@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 371 234" width="371" height="234">
-	<title>First Akkadians: 220 SPL, 35 SPL income per round</title>
+	<title>First Akkadians: 220 SPL, 40 SPL income per round</title>
 	<rect x=".5" y=".5" width="370" height="233" fill="white" stroke="black" />
 	<text x="16" y="39" font-family="Georgia, 'Times New Roman', serif" font-size="23" font-weight="bold">First Akkadians</text>
 	<text x="16" y="77" font-family="Arial, sans-serif" font-size="14" fill="black">
@@ -12,6 +12,6 @@
 	</text>
 	<g font-family="Arial, sans-serif" font-size="16" font-weight="bold">
 		<text x="16" y="218">220 SPL</text>
-		<text x="354" y="218" text-anchor="end">Rev. 35 SPL</text>
+		<text x="354" y="218" text-anchor="end">Rev. 40 SPL</text>
 	</g>
 </svg>

@@ -6,8 +6,7 @@ const STATIC_IMAGES = "/static/URR/images/"
 const TERRAIN_FILES = ["terrain-hills.png", "terrain-forest.png", "terrain-savannah.png", "terrain-desert.png"]
 const CITY_FILES = ["city-hills.png", "city-forest.png", "city-savannah.png", "city-desert.png"]
 const STATE_FILES = ["akkad", "babylon", "elam", "persia", "sumer", "urartu"]
-// The archived First Akkadians bitmap prints 40 SPL; the current rulebook specifies 35.
-// Der and Calah also use references matching the current ownership and location rules.
+// Der and Calah use references matching the current ownership and location rules.
 const NATION_FILES = ["nation-ashur.png", "nation-barahshum.png", "nation-calah.svg", "nation-der.svg", "nation-eridu.png", "nation-first-akkadians.svg"]
 
 export function getAsset(name) { return STATIC_IMAGES + name }
