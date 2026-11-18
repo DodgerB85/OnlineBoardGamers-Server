@@ -204,8 +204,9 @@ export function syncPoldersToBrickCount() {
 	if (!store.gameOptions.usePolders) return
 	const brickCount = store.wonderBricks.length
 	let toggleCount = 0
+	// A row counts once its first brick is placed, i.e. one past its start, matching togglePoldersIfNewRow
 	for (const rowStart of WONDER_ROW_STARTS) {
-		if (rowStart > 0 && brickCount >= rowStart) toggleCount++
+		if (rowStart > 0 && brickCount > rowStart) toggleCount++
 	}
 	const shouldBeWet = toggleCount % 2 === 0
 	store.mapData.hexData.forEach((hex) => {

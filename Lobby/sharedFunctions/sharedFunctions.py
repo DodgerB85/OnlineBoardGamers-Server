@@ -185,6 +185,16 @@ def SF_serializeGame(game, user, player_context):
 
     is_involved = user.id in all_ids and user.id not in missing_ids if user else False
 
+    # RNB: an offer waiting for this player; trade indices count seat-ordered, non-missing players as the trade endpoints do
+    trade_notification = False
+    if is_involved and game_code == "RNB" and game.gameStatus == "ACTIVE" and game.playerTradeData:
+        from RNB.views import _decompress_rnb_trade_data
+
+        seat_names = [gp.player.username for gp in all_game_players if gp.player and not gp.is_missing]
+        if user.username in seat_names:
+            seat = seat_names.index(user.username)
+            trade_notification = any(trade[1] == seat for trade in _decompress_rnb_trade_data(game.playerTradeData)["playerTrades"])
+
     # 5. Shadow/Delete Logic
     is_training_game = any(name in all_usernames for name in rf.SHADOW_USERNAMES) or game.maxPlayers == 1
     is_deleteable = is_training_game and (user == game.creator if user else False)
@@ -281,6 +291,7 @@ def SF_serializeGame(game, user, player_context):
         "myMove": is_my_move,
         "involvedPlayer": is_involved,
         "chatNotification": user.id in chat_notify_ids if user else False,
+        "tradeNotification": trade_notification,
         "pendingFinish": user.id in pending_finish_ids if user else False,
         "latestUpdateElapsedTimeString": elapsed_str,
         "deleteableGame": is_deleteable,
