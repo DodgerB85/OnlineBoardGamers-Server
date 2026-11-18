@@ -279,7 +279,9 @@ function getMapWidthAndShift() {
 	if (store.players.length === 6) mapWidthSq = 30
 	let xShift = 30
 	let yShift = 30
-	if (store.startingOptions.lobbyists) {
+	// The SBD tile reward expands the board without Lobbyists; follow the used
+	// grid or a tile added left/top exports a negative x that wraps a row on load.
+	if (store.startingOptions.lobbyists || store.startingOptions.seniorBusinessDeveloper) {
 		let tileWidth = map.getUsedRowCol()[1].length
 		mapWidthSq = tileWidth * 5
 		let firstRow = -1

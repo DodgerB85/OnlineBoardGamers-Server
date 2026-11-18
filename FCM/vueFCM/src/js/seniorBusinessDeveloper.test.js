@@ -290,6 +290,22 @@ describe("Senior Business Developer — save/load", () => {
 		expect(useModelStore().mapData.tiles[emptyPair]).toBe(tile)
 	})
 
+	it("keeps a house on a tile added left of the board", () => {
+		freshGame()
+		// Row 8, col 5: one tile left of the 2-player board. Rotation 3 puts the
+		// tile's empty 2x2 next to both 2x2 parks.
+		mapMod.addTileToMap(31, (8 * 17 + 5) * 2, 3)
+		const index = (5 * 5 + 3) + (8 * 5 + 3) * rf.ssW
+		model.addHouse(1, index, 1)
+
+		const b64 = funcs.exportFCMmodel(false, false)
+
+		setActivePinia(createPinia())
+		window.initData = { startingOptions: SBD_ONLY, startingMap: STARTING_MAP, playerNames: ["P0", "P1"] }
+		funcs.importFCMmodel(b64, false, false)
+		expect(mapMod.findIndexForHouse(1)).toBe(index)
+	})
+
 	it("loads a pre-fix SBD save that has no added-tile slot", () => {
 		freshGame()
 		placeHouse(1)
