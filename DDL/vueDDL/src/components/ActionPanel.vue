@@ -69,6 +69,24 @@ const goodChoices = computed(() => {
 	return rf.GOODS.filter((g) => counts[g.id] > 0).map((g) => ({ ...g, count: counts[g.id] }))
 })
 
+// Undo inside the action turn: the board can be used as a sandbox.
+const canUndo = computed(() => controller.canUndoAction())
+const canRedo = computed(() => controller.canRedoAction())
+const canReset = computed(() => controller.canResetActionTurn())
+const stepsTaken = computed(() => controller.actionStepsTaken())
+
+// Collect-energy pre-orders.
+const myQueue = computed(() => (me.value ? rules.collectQueue(me.value) : []))
+function energyShort(colour) {
+	return view.energyLabel(colour).charAt(0)
+}
+function addQueued(colour) {
+	controller.queueCollect(colour)
+}
+function dropQueued(index) {
+	controller.unqueueCollect(index)
+}
+
 const site = computed(() => (planetState.value ? planetState.value.site : null))
 const siteCost = computed(() => (planet.value ? rules.siteCost(store, planet.value.id) : null))
 const spaceyardType = computed(() => {
@@ -225,19 +243,42 @@ function openTradeModal() {
 						</button>
 					</div>
 					<button class="actionsLineButton bigAction" @click="takeAction">{{ $t("action.takeAction") }}</button>
+
+					<div class="subSection collectQueue">
+						<b>{{ $t("collectQueue.title") }}</b>
+						<div class="smallNote">{{ $t("collectQueue.hint") }}</div>
+						<div class="buttonGrid">
+							<button v-for="c in 3" :key="c" class="actionsLineButton queueAddButton" :style="{ borderColor: rf.ENERGY_HEX[c - 1] }" @click="addQueued(c - 1)">+ {{ view.energyLabel(c - 1) }}</button>
+						</div>
+						<div v-if="myQueue.length" class="queueList">
+							<span v-for="(colour, index) in myQueue" :key="index" class="queueChip" :style="{ backgroundColor: rf.ENERGY_HEX[colour] }" :title="$t('collectQueue.chipTitle', { number: index + 1, colour: view.energyLabel(colour) })">
+								{{ energyShort(colour) }}
+								<button type="button" class="queueDrop" :aria-label="$t('collectQueue.remove', { colour: view.energyLabel(colour) })" @click="dropQueued(index)">×</button>
+							</span>
+							<button class="actionsLineButton queueClearButton" @click="controller.clearCollectQueue">{{ $t("collectQueue.clear") }}</button>
+						</div>
+					</div>
 				</template>
 
 				<template v-else-if="store.gameflow.turnType === rf.TURN_ACTION">
 					<p v-if="store.gameflow.pendingExplore" class="hint">{{ $t("map.chooseExplore") }}</p>
-					<div v-else class="buttonGrid">
-						<button class="actionsLineButton" v-if="store.gameflow.freeHighwaysLeft > 0" @click="openHighways(false)">{{ $t("action.placeFreeHighway", { count: store.gameflow.freeHighwaysLeft }) }}</button>
-						<button class="actionsLineButton" :disabled="yellowAvailable <= 0" @click="openHighways(true)">{{ $t("action.buildHighway") }}</button>
-						<button class="actionsLineButton" :disabled="store.gameflow.movement.remaining > 0 ? false : redAvailable <= 0" @click="openMove">{{ $t("action.move") }}</button>
-						<button class="actionsLineButton" @click="openBuild">{{ $t("action.build") }}</button>
-						<button class="actionsLineButton" @click="openTrade">{{ $t("action.trade") }}</button>
-						<button class="actionsLineButton" @click="openPathways">{{ $t("action.pathways") }}</button>
-						<button class="actionsLineButton endTurnButton" @click="controller.endActionTurn">{{ $t("action.endTurn") }}</button>
-					</div>
+					<template v-else>
+						<div class="undoRow">
+							<button type="button" class="actionsLineButton undoButton" :disabled="!canUndo" :title="$t('undo.undoHint')" @click="controller.undoActionStep">↶ {{ $t("undo.undo") }}</button>
+							<button type="button" class="actionsLineButton undoButton" :disabled="!canRedo" :title="$t('undo.redoHint')" @click="controller.redoActionStep">↷ {{ $t("undo.redo") }}</button>
+							<button type="button" class="actionsLineButton undoButton" :disabled="!canReset" :title="$t('undo.restartHint')" @click="controller.resetActionTurn">{{ $t("undo.restart") }}</button>
+							<span class="smallNote">{{ $t("undo.steps", { count: stepsTaken }) }}</span>
+						</div>
+						<div class="buttonGrid">
+							<button class="actionsLineButton" v-if="store.gameflow.freeHighwaysLeft > 0" @click="openHighways(false)">{{ $t("action.placeFreeHighway", { count: store.gameflow.freeHighwaysLeft }) }}</button>
+							<button class="actionsLineButton" :disabled="yellowAvailable <= 0" @click="openHighways(true)">{{ $t("action.buildHighway") }}</button>
+							<button class="actionsLineButton" :disabled="store.gameflow.movement.remaining > 0 ? false : redAvailable <= 0" @click="openMove">{{ $t("action.move") }}</button>
+							<button class="actionsLineButton" @click="openBuild">{{ $t("action.build") }}</button>
+							<button class="actionsLineButton" @click="openTrade">{{ $t("action.trade") }}</button>
+							<button class="actionsLineButton" @click="openPathways">{{ $t("action.pathways") }}</button>
+							<button class="actionsLineButton endTurnButton" @click="controller.endActionTurn">{{ $t("action.endTurn") }}</button>
+						</div>
+					</template>
 
 					<div v-if="store.context.action === rf.ACT_PLACE_HIGHWAYS" class="subPanel">
 						<b>{{ $t("action.placeHighway") }}</b> {{ $t("action.placeHighwayHint") }}
@@ -255,14 +296,19 @@ function openTradeModal() {
 							<div class="planetHeader">{{ planet.name }}</div>
 							<div class="subSection">
 								<b>{{ $t("action.factorySlot") }}</b>
+								<button type="button" class="referenceLink" @click="store.viewSettings.showInfo = true">{{ $t("action.openReference") }}</button>
 								<div v-if="planetState.factory" class="smallNote">{{ $t("action.factoryLine", { factory: rf.factoryName(planetState.factory.typeId) }) }}</div>
 								<div v-else class="factoryList">
 									<div v-for="factory in buildableFactories" :key="factory.id" class="factoryOption">
-										<span class="recipe" :title="rf.factoryName(factory.id)">
-											<img v-for="(good, index) in factory.input" :key="index" :src="funcs.goodImage(good)" :alt="rf.goodName(good)" />
-											<span>→</span><img :src="funcs.goodImage(factory.output)" :alt="rf.goodName(factory.output)" />
-											<span>{{ factory.points }} {{ $t("common.vp") }} · ×{{ factory.count }}</span>
-										</span>
+										<div class="factoryText">
+											<span class="recipe" :title="rf.factoryName(factory.id)">
+												<img v-for="(good, index) in factory.input" :key="index" :src="funcs.goodImage(good)" :alt="rf.goodName(good)" :title="rf.goodName(good)" />
+												<span>→</span>
+												<img :src="funcs.goodImage(factory.output)" :alt="rf.goodName(factory.output)" :title="rf.goodName(factory.output)" />
+												<span>{{ factory.points }} {{ $t("common.vp") }} · ×{{ factory.count }}</span>
+											</span>
+											<span class="recipeNames">{{ rf.factoryName(factory.id) }}</span>
+										</div>
 										<button class="actionsLineButton" :disabled="!factory.affordable" @click="controller.buildFactory(factory.id)">{{ $t("action.build") }}</button>
 									</div>
 									<div v-if="buildableFactories.length === 0" class="smallNote">{{ $t("action.noFactories") }}</div>
@@ -274,7 +320,10 @@ function openTradeModal() {
 								<div v-else-if="site.built" class="smallNote">{{ $t("action.alreadyBuilt", { kind: site.kind === "spaceyard" ? $t("action.spaceyard") : $t("action.consumerSite") }) }}</div>
 								<div v-else>
 									<div v-if="siteCost.random">{{ $t("action.buildSiteLine", { kind: $t("action.spaceyard"), good: rf.goodName(siteCost.printed) }) }}</div>
-									<div v-else>{{ $t("action.buildConsumerLine", { good: rf.goodName(siteCost.printed) }) }}</div>
+									<div v-else>
+										<div>{{ $t("action.buildConsumerLine", { good: rf.goodName(siteCost.printed) }) }}</div>
+										<div class="smallNote">{{ $t("action.consumerThenSells", { good: rf.goodName(siteCost.printed), points: consumerTile ? consumerTile.points : 0 }) }}</div>
+									</div>
 									<select v-if="siteCost.random" v-model.number="randomGood">
 										<option :value="-1">{{ $t("common.chooseSecondGood") }}</option>
 										<option v-for="g in goodChoices" :key="g.id" :value="g.id" :disabled="g.id === siteCost.printed">{{ $t("common.goodCount", { good: rf.goodName(g.id), count: g.count }) }}</option>
@@ -309,6 +358,7 @@ function openTradeModal() {
 							</div>
 							<div v-if="site && !site.built" class="subSection">
 								<div class="smallNote">{{ $t("action.siteNotBuilt", { kind: site.kind === "spaceyard" ? $t("action.spaceyard") : $t("action.consumerSite") }) }}</div>
+								<div class="smallNote">{{ siteCost && siteCost.random ? $t("action.buildSiteLine", { kind: $t("action.spaceyard"), good: rf.goodName(siteCost.printed) }) : $t("action.buildConsumerLine", { good: rf.goodName(siteCost.printed) }) }}</div>
 								<button class="actionsLineButton" @click="openBuild">{{ $t("action.buildSite") }}</button>
 							</div>
 							<div v-if="!factoryRecipe && !planet.start" class="subSection">
@@ -435,11 +485,21 @@ function openTradeModal() {
 /* Cap the offers list so a pile of trade offers scrolls instead of growing the panel and shifting the board. */
 .subSection.offers { max-height: 40vh; overflow-y: auto; }
 .smallNote { color: #666; font-size: 11px; }
-.recipe { display: inline-flex; align-items: center; gap: 2px; flex-wrap: wrap; }
-.recipe img { width: 22px; height: 22px; object-fit: contain; }
-.factoryList { display: flex; flex-direction: column; gap: 2px; }
-.factoryOption { display: flex; justify-content: space-between; align-items: center; gap: 4px; font-size: 11px; }
+.recipe { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+.recipe img { width: 26px; height: 26px; object-fit: contain; }
+.recipeNames { display: block; font-size: 10px; color: #444; line-height: 1.2; margin-top: 1px; }
+.factoryList { display: flex; flex-direction: column; gap: 3px; }
+.factoryOption { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px; font-size: 11px; }
 .factoryOption .actionsLineButton { margin: 0; padding: 2px 5px; font-size: 11px; }
+.referenceLink { border: 0; background: transparent; color: #1c4f8b; text-decoration: underline; cursor: pointer; font-size: 10px; padding: 0 0 0 4px; }
+.undoRow { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px dashed #9fb4cc; }
+#actionPanel .undoButton { margin: 0; padding: 2px 6px; font-size: 11px; border-color: #3d5a80; }
+.collectQueue { width: 100%; }
+.collectQueue .queueAddButton { margin: 2px 2px 0 0; padding: 2px 6px; font-size: 11px; background: #fff; border-width: 2px; }
+.queueList { display: flex; flex-wrap: wrap; align-items: center; gap: 3px; margin-top: 4px; }
+.queueChip { display: inline-flex; align-items: center; gap: 1px; color: #fff; font-weight: bold; font-size: 11px; border-radius: 10px; padding: 1px 2px 1px 6px; border: 1px solid #222; }
+.queueDrop { border: 0; background: transparent; color: #fff; cursor: pointer; font-size: 12px; line-height: 1; padding: 0 3px; }
+#actionPanel .queueClearButton { margin: 0; padding: 1px 5px; font-size: 10px; border-color: #a33; color: #800; }
 .pathwaySelection { display: flex; flex-direction: column; gap: 4px; }
 select { max-width: 100%; font-size: 11px; margin: 2px; }
 .tradeOffer { border: 1px solid #c9b06a; border-radius: 3px; padding: 3px; margin-top: 3px; background: #fff; }

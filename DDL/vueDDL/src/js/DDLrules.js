@@ -82,6 +82,50 @@ function takeCube(state, playerIndex) {
 	return false
 }
 
+// Collect-energy pre-orders -------------------------------------------------
+// A queue of colours for the player's own future collect-energy turns. The
+// colour is still chosen one marker at a time and the stock order is kept, so
+// queueing changes only who clicks, never what a collect turn does.
+
+export function collectQueue(player) {
+	return player && Array.isArray(player.collectQueue) ? player.collectQueue : []
+}
+
+// One entry per turn: 24 action turns is the whole game, so longer is noise.
+export const MAX_COLLECT_QUEUE = 24
+
+export function queueCollect(state, playerIndex, colour) {
+	if (![0, 1, 2].includes(colour)) return { ok: false, message: t("errors.invalidEnergyColour") }
+	const player = state.players[playerIndex]
+	const queue = collectQueue(player)
+	if (queue.length >= MAX_COLLECT_QUEUE) return { ok: false, message: t("errors.collectQueueFull") }
+	player.collectQueue = [...queue, colour]
+	return { ok: true, colour, length: player.collectQueue.length }
+}
+
+export function removeQueuedCollect(state, playerIndex, index) {
+	const player = state.players[playerIndex]
+	const queue = collectQueue(player)
+	if (index < 0 || index >= queue.length) return { ok: false, message: t("errors.queueEntry") }
+	player.collectQueue = queue.filter((_, i) => i !== index)
+	return { ok: true }
+}
+
+export function clearCollectQueue(state, playerIndex) {
+	state.players[playerIndex].collectQueue = []
+	return { ok: true }
+}
+
+// Takes the head of the queue. Called only after collectEnergy has validated,
+// so a failed collect never eats the entry.
+export function consumeQueuedCollect(state, playerIndex, colour) {
+	const player = state.players[playerIndex]
+	const queue = collectQueue(player)
+	if (queue.length === 0 || queue[0] !== colour) return { ok: false }
+	player.collectQueue = queue.slice(1)
+	return { ok: true }
+}
+
 export function playerPlanet(state, playerIndex) {
 	const node = state.players[playerIndex].ship.node
 	return node ? rf.planetByNode(node) : null
@@ -215,6 +259,7 @@ export function createInitialState({ playerNames, colours, seed = 1, auction = f
 		privileges: 10,
 		pathways: { placed: false, in: null, out: null },
 		freeTradeTiles: [],
+		collectQueue: [],
 	}))
 
 	const startPlanets = rf.PLANETS.filter((p) => p.start)

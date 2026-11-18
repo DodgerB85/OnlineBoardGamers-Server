@@ -70,13 +70,19 @@ export function startPlayerTurn() {
 	if (store.gameflow.pendingExplore) {
 		return
 	}
-	if (store.gameflow.turnType === rf.TURN_ACTION && store.gameflow.movement.remaining > 0) store.context.action = rf.ACT_MOVE
-	if (store.gameflow.turnType === rf.TURN_ACTION && store.gameflow.freeHighwaysLeft > 0) store.context.action = rf.ACT_PLACE_HIGHWAYS
-	if (store.gameflow.turnType === rf.TURN_ACTION && [rf.ACT_BUILD, rf.ACT_TRADE, rf.ACT_PLACE_HIGHWAYS, rf.ACT_PATHWAY].includes(previousAction)) {
-		store.context.action = previousAction
-		store.context.highwayCostsEnergy = highwayCostsEnergy
+	// Keep the movement mode while steps are left: the free-highway stage would
+	// otherwise take the board back on every save and hide the planet targets.
+	const inActionTurn = store.gameflow.turnType === rf.TURN_ACTION
+	if (inActionTurn && store.gameflow.movement.remaining > 0) store.context.action = rf.ACT_MOVE
+	else {
+		if (inActionTurn && store.gameflow.freeHighwaysLeft > 0) store.context.action = rf.ACT_PLACE_HIGHWAYS
+		if (inActionTurn && [rf.ACT_BUILD, rf.ACT_TRADE, rf.ACT_PLACE_HIGHWAYS, rf.ACT_PATHWAY].includes(previousAction)) {
+			store.context.action = previousAction
+			store.context.highwayCostsEnergy = highwayCostsEnergy
+		}
 	}
 	if (personal.myTradeOffers.length === 0) personal.myTradeOffers = store.board.trades.filter((t) => t.status === "pending" && t.to === personal.pov)
+	maybeRunCollectQueue()
 }
 
 function advanceSetupTurn(state) {
@@ -208,7 +214,170 @@ function handleAuctionBids(data, round = 1) {
 
 // Main turn ---------------------------------------------------------------
 
-export async function collectEnergy(colour) {
+// Undo --------------------------------------------------------------------
+// The history holds a full state snapshot after every event, so taking a step
+// back is a matter of restoring the snapshot of the previous entry. Only the
+// current action turn is reachable: the first entry of the turn is the floor.
+
+function inCurrentActionTurn(entry, turn, actor) {
+	if (!entry || !entry[2] || !entry[2].gameflow) return false
+	const flow = entry[2].gameflow
+	return flow.turn === turn && flow.turnType === rf.TURN_ACTION && flow.turnOrder[0] === actor
+}
+
+function actionTurnStartIndex() {
+	const store = useModelStore()
+	const turn = store.gameflow.turn
+	const actor = store.gameflow.turnOrder[0]
+	for (let i = store.history.length - 1; i >= 0; i--) {
+		if (!inCurrentActionTurn(store.history[i], turn, actor)) return i + 1
+	}
+	return 0
+}
+
+export function actionStepsTaken() {
+	const store = useModelStore()
+	if (store.gameflow.turnType !== rf.TURN_ACTION) return 0
+	return Math.max(0, store.history.length - 1 - actionTurnStartIndex())
+}
+
+function canStepBack() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	if (store.viewSettings.showReplay || !personal.canPlay()) return false
+	if (store.gameflow.turnType !== rf.TURN_ACTION) return false
+	if (!isMyTurn()) return false
+	return actionStepsTaken() > 0
+}
+
+export function canUndoAction() {
+	return canStepBack()
+}
+
+export function canRedoAction() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	if (store.viewSettings.showReplay || !personal.canPlay()) return false
+	if (store.gameflow.turnType !== rf.TURN_ACTION) return false
+	const entry = personal.redoStack[personal.redoStack.length - 1]
+	return !!entry && entry.turn === store.gameflow.turn && entry.actor === store.gameflow.turnOrder[0]
+}
+
+export function canResetActionTurn() {
+	return canStepBack()
+}
+
+function rememberForRedo(entry) {
+	const store = useModelStore()
+	usePersonalStore().redoStack.push({
+		state: entry[2],
+		entry,
+		turn: store.gameflow.turn,
+		actor: store.gameflow.turnOrder[0],
+	})
+}
+
+export async function undoActionStep() {
+	const store = useModelStore()
+	if (!canStepBack()) return false
+	const last = store.history.length - 1
+	rememberForRedo(store.history[last])
+	model.applySnapshot(store.history[last - 1][2])
+	store.history.splice(last, 1)
+	store.gameMessages.successText = t("messages.actionUndone")
+	await IO.saveGame(false)
+	return true
+}
+
+export async function redoActionStep() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	if (!canRedoAction()) {
+		personal.redoStack.splice(0)
+		return false
+	}
+	const step = personal.redoStack.pop()
+	store.history.push(step.entry)
+	model.applySnapshot(step.state)
+	await IO.saveGame(false)
+	return true
+}
+
+// Back to the moment the turn started, cube already on the turn track: a clean
+// board, so a plan can be tried out and dropped.
+export async function resetActionTurn() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	if (!canStepBack()) return false
+	const start = actionTurnStartIndex()
+	store.history.splice(start + 1)
+	model.applySnapshot(store.history[start][2])
+	personal.redoStack.splice(0)
+	store.gameMessages.successText = t("messages.actionTurnReset")
+	await IO.saveGame(false)
+	return true
+}
+
+// Collect-energy pre-orders ------------------------------------------------
+// The queue is stored per player in gameData and collected one marker per turn
+// by that player's own client, so the choice of colour is still made one turn
+// at a time and the limited stock order is unchanged.
+
+export async function queueCollect(colour) {
+	const store = useModelStore()
+	const result = rules.queueCollect(model.stateFromStore(), actingPlayerIndex(), colour)
+	if (!result.ok) {
+		store.gameMessages.actionError = result.message
+		return false
+	}
+	usePersonalStore().collectQueueTouched = Date.now()
+	await IO.saveGame(false)
+	return true
+}
+
+export async function unqueueCollect(index) {
+	const store = useModelStore()
+	const result = rules.removeQueuedCollect(model.stateFromStore(), actingPlayerIndex(), index)
+	if (!result.ok) {
+		store.gameMessages.actionError = result.message
+		return false
+	}
+	usePersonalStore().collectQueueTouched = Date.now()
+	await IO.saveGame(false)
+	return true
+}
+
+export async function clearCollectQueue() {
+	rules.clearCollectQueue(model.stateFromStore(), actingPlayerIndex())
+	usePersonalStore().collectQueueTouched = Date.now()
+	await IO.saveGame(false)
+	return true
+}
+
+// One queued collect per turn, and only while this player's own client is on a
+// collect turn. A shortage stops here: the free action turn is played by hand.
+// Editing the queue holds the collector back for a moment so the player can
+// finish choosing before their turn is taken.
+const QUEUE_HOLD_MS = 8000
+let collectTimer = null
+
+export function maybeRunCollectQueue() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	if (collectTimer || store.viewSettings.showReplay) return
+	if (!personal.canPlay() || !isMyTurn()) return
+	if (store.gameflow.phase !== rf.PHASE_MAIN || store.gameflow.turnType !== rf.TURN_CHOOSE) return
+	const actor = actingPlayerIndex()
+	if (rules.collectQueue(store.players[actor]).length === 0) return
+	if (Date.now() - personal.collectQueueTouched < QUEUE_HOLD_MS) return
+	collectTimer = setTimeout(() => {
+		collectTimer = null
+		const queue = rules.collectQueue(store.players[store.gameflow.turnOrder[0]])
+		if (queue.length > 0) collectEnergy(queue[0], { fromQueue: true })
+	}, 1200)
+}
+
+export async function collectEnergy(colour, options = {}) {
 	const store = useModelStore()
 	const actor = actingPlayerIndex()
 	const result = rules.collectEnergy(model.stateFromStore(), actor, colour)
@@ -216,10 +385,16 @@ export async function collectEnergy(colour) {
 		store.gameMessages.actionError = result.message
 		return false
 	}
+	if (options.fromQueue) rules.consumeQueuedCollect(model.stateFromStore(), actor, colour)
 	model.addHistory(rf.HIST_ENERGY, actor, [colour, result.produced, result.virtual, result.gains])
 	const energyKeys = ["movement", "build", "trade"]
 	const collected = result.gains.map((n, i) => (n ? n + " " + t("energy." + energyKeys[i]) : "")).filter(Boolean).join(", ")
-	store.gameMessages.successText = result.virtual ? result.message : t("energy.collectedGains", { gains: collected })
+	if (options.fromQueue) {
+		store.gameMessages.successText = t("energy.collectedPreOrder", { colour: t("energy." + energyKeys[colour]) })
+		if (result.virtual) store.gameMessages.successText += " " + result.message
+	} else {
+		store.gameMessages.successText = result.virtual ? result.message : t("energy.collectedGains", { gains: collected })
+	}
 	await IO.saveGame(true)
 	return true
 }

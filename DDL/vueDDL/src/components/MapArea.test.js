@@ -95,4 +95,25 @@ describe("map decisions", () => {
 		expect(exit).toContain("disabled")
 	})
 
+	it("names the spaceyard on its planet chip and reads the planet in words", async () => {
+		const store = useModelStore()
+		const planet = rules.planetState(store, 8)
+		const type = rf.SPACEYARD_TYPES[planet.site.tileId]
+		const html = await renderMap()
+		expect(html).toContain(`alt="${rf.goodName(type.cost[0])}"`)
+		expect(html).toContain(">BLD<")
+		expect(html).toContain(`Spaceyard: build with ${rf.goodName(type.cost[0])}`)
+		expect(html).toContain(`Mine: ${rf.goodName(planet.mine)}`)
+	})
+
+	it("shows the mine, then the factory, then the site on a planet", async () => {
+		const store = useModelStore()
+		const planet = rules.planetState(store, 0)
+		planet.factory = { typeId: 0 }
+		planet.site = { kind: "consumer", tileId: 9, built: false }
+		const html = await renderMap()
+		const block = html.match(/<div class="planetStatus"[^>]*>[\s\S]*?<\/div>/)[0]
+		expect(block.indexOf("mineTile")).toBeLessThan(block.indexOf("factoryChip"))
+		expect(block.indexOf("factoryChip")).toBeLessThan(block.indexOf("siteChip"))
+	})
 })

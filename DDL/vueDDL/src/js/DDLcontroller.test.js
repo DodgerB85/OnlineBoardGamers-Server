@@ -128,3 +128,106 @@ describe("auction handoff", () => {
 		expect(IO.saveGame).toHaveBeenCalledTimes(1)
 	})
 })
+
+describe("undo inside the action turn", () => {
+	function actionGame() {
+		const store = useModelStore()
+		store.gameflow.turnType = rf.TURN_ACTION
+		store.gameflow.freeHighwaysLeft = 0
+		store.players[0].energy = [3, 3, 3]
+		store.players[0].goods = [3, 0, 3, 0]
+		store.players[0].ship.node = "P0"
+		model.addHistory(rf.HIST_ACTION_START, 0, [store.gameflow.turn])
+		return store
+	}
+
+	it("takes back one action and puts it back with redo", async () => {
+		const store = actionGame()
+		await controller.buildFactory(0)
+		const scoreAfterBuild = store.players[0].score
+		expect(scoreAfterBuild).toBe(10)
+		expect(controller.canUndoAction()).toBe(true)
+		expect(await controller.undoActionStep()).toBe(true)
+		expect(store.players[0].score).toBe(0)
+		expect(store.players[0].energy[rf.YELLOW_ENERGY]).toBe(3)
+		expect(controller.canRedoAction()).toBe(true)
+		expect(await controller.redoActionStep()).toBe(true)
+		expect(store.players[0].score).toBe(scoreAfterBuild)
+		expect(controller.canRedoAction()).toBe(false)
+	})
+
+	it("never reaches back past the start of the turn", async () => {
+		actionGame()
+		expect(controller.canUndoAction()).toBe(false)
+		await controller.buildFactory(0)
+		await controller.undoActionStep()
+		expect(controller.canUndoAction()).toBe(false)
+		expect(await controller.undoActionStep()).toBe(false)
+	})
+
+	it("restarts the turn from its first snapshot", async () => {
+		const store = actionGame()
+		await controller.buildFactory(0)
+		await controller.tradeMine()
+		expect(store.players[0].score).toBe(10)
+		expect(store.players[0].goods).toHaveLength(3)
+		expect(await controller.resetActionTurn()).toBe(true)
+		expect(store.players[0].score).toBe(0)
+		expect(store.players[0].energy[rf.YELLOW_ENERGY]).toBe(3)
+		expect(store.players[0].energy[rf.BLUE_ENERGY]).toBe(3)
+		expect(store.players[0].goods).toHaveLength(4)
+		expect(controller.canUndoAction()).toBe(false)
+		expect(store.gameflow.turnType).toBe(rf.TURN_ACTION)
+	})
+
+	it("saves without adding a rewind point", async () => {
+		actionGame()
+		await controller.buildFactory(0)
+		await controller.undoActionStep()
+		expect(IO.saveGame).toHaveBeenLastCalledWith(false)
+	})
+
+	it("drops the redo stack once a new action is taken", async () => {
+		actionGame()
+		await controller.buildFactory(0)
+		await controller.undoActionStep()
+		await controller.buildFactory(0)
+		expect(controller.canRedoAction()).toBe(false)
+	})
+
+	it("is unavailable while the game is replayed", async () => {
+		actionGame()
+		await controller.buildFactory(0)
+		useModelStore().viewSettings.showReplay = true
+		expect(controller.canUndoAction()).toBe(false)
+		expect(await controller.undoActionStep()).toBe(false)
+	})
+})
+
+describe("collect pre-orders", () => {
+	it("queues a colour without spending anything", async () => {
+		const store = useModelStore()
+		await controller.queueCollect(rf.BLUE_ENERGY)
+		expect(store.players[0].collectQueue).toEqual([rf.BLUE_ENERGY])
+		expect(store.players[0].energy).toEqual([0, 0, 0])
+		expect(store.gameflow.turnOrder[0]).toBe(0)
+	})
+
+	it("collects the head of the queue and drops it before saving", async () => {
+		const store = useModelStore()
+		await controller.queueCollect(rf.BLUE_ENERGY)
+		await controller.queueCollect(rf.RED_ENERGY)
+		await controller.collectEnergy(rf.BLUE_ENERGY, { fromQueue: true })
+		expect(store.players[0].energy[rf.BLUE_ENERGY]).toBe(1)
+		expect(store.players[0].collectQueue).toEqual([rf.RED_ENERGY])
+		expect(store.gameflow.turnOrder[0]).toBe(1)
+		expect(IO.saveGame).toHaveBeenCalled()
+	})
+
+	it("leaves the queue alone when the player collects by hand", async () => {
+		const store = useModelStore()
+		await controller.queueCollect(rf.BLUE_ENERGY)
+		await controller.collectEnergy(rf.RED_ENERGY)
+		expect(store.players[0].collectQueue).toEqual([rf.BLUE_ENERGY])
+	})
+})

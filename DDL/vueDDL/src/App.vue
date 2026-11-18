@@ -36,6 +36,9 @@ controller.startPlayerTurn()
 let pollTimer = null
 let kickoutTimer = null
 function poll() {
+	// A queued collect keeps the game moving while this page is open, so the
+	// pre-order is checked on the same clock as the data poll.
+	controller.maybeRunCollectQueue()
 	if (personal.pov < 0 || personal.finishedGame || personal.haltPlay || store.viewSettings.showReplay) return
 	if (store.gameflow.phase === 0 && store.gameflow.setup.auction && !store.gameflow.setup.auctionResolved) {
 		controller.pollAuction()
@@ -157,7 +160,7 @@ body {
 	align-items: flex-start;
 	min-width: 0;
 }
-.turnColumn { width: 264px; flex: 0 0 264px; display: flex; flex-direction: column; gap: 8px; }
+.turnColumn { width: 320px; flex: 0 0 320px; display: flex; flex-direction: column; gap: 8px; }
 .boardColumn { flex: 1 1 auto; min-width: 0; }
 #loaderOverlay {
 	position: fixed;

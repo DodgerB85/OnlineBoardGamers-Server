@@ -32,6 +32,12 @@ export const usePersonalStore = defineStore("personal", () => {
 	var auctionSubmitted = false
 	var auctionBid = 0
 	var myTradeOffers = []
+	// Local only: action steps taken back inside the current action turn. The
+	// game state itself is restored from the history snapshots.
+	var redoStack = []
+	// Local only: when the player last touched their collect-energy pre-order,
+	// which holds the auto-collect back for a moment after each edit.
+	var collectQueueTouched = 0
 
 	function canPlay() {
 		if (this.haltPlay) return false
@@ -86,6 +92,8 @@ export const usePersonalStore = defineStore("personal", () => {
 		auctionSubmitted,
 		auctionBid,
 		myTradeOffers,
+		redoStack,
+		collectQueueTouched,
 		canPlay,
 		canBid,
 		canResign,
