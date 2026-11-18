@@ -275,6 +275,29 @@ class TestSFserializeGame(PrintSuccessTestCase):
         self.assertTrue(result["experiencedGame"])
         self.assertEqual(result["latestUpdateElapsedTimeString"], "1min 0s")
 
+    def test_rnb_incoming_trade_offer_is_notified(self):
+        from RNB.views import _compress_rnb_trade_data
+
+        creator = User.objects.create_user(username="creator", password="testpass123")
+        proposer = User.objects.create_user(username="proposer", password="testpass123")
+        target = User.objects.create_user(username="target", password="testpass123")
+        game = Game.objects.create(
+            gameCode="RNB",
+            creator=creator,
+            host=creator,
+            gameStatus="ACTIVE",
+            playerTradeData=_compress_rnb_trade_data({"playerTrades": [[0, 1, [10], [20], "pending"]]}),
+        )
+        GamePlayer.objects.create(game=game, player=proposer, seat_order=0)
+        GamePlayer.objects.create(game=game, player=target, seat_order=1)
+        players = list(game.players.all().select_related("player"))
+
+        incoming = SF_serializeGame(game, target, {"all_game_players": players, "invited_users": []})
+        outgoing = SF_serializeGame(game, proposer, {"all_game_players": players, "invited_users": []})
+
+        self.assertTrue(incoming["tradeNotification"])
+        self.assertFalse(outgoing["tradeNotification"])
+
     def test_missing_player_is_not_involved(self):
         creator = User.objects.create_user(username="creator", password="testpass123")
         user = User.objects.create_user(username="missing", password="testpass123")

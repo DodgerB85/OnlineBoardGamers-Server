@@ -1473,7 +1473,7 @@ def index(request):
         [],
     )
     my_move_games_data = []
-    current_chat = finished_chat = False
+    current_chat = finished_chat = current_trade = False
     finished_games_count = 0  # Track finished games for early exit optimization
 
     for game in all_user_games:
@@ -1546,6 +1546,8 @@ def index(request):
                     my_move_games_data.append([serialized["gameCode"], serialized["gameID"]])
                 if serialized["chatNotification"]:
                     current_chat = True
+                if serialized["tradeNotification"]:
+                    current_trade = True
             elif status in ["WAITING", "AVAILABLE", "PRIVATE"]:
                 waiting_games.append(serialized)
             elif status == "FINISHED":
@@ -1616,6 +1618,7 @@ def index(request):
             "availableTournaments": available_tournaments,
             "showLangs": user.username in {"admin", "庄生", "Salfuman", "mhmnz2"},
             "currentChat": current_chat,
+            "currentTrade": current_trade,
             "finishedChat": finished_chat,
             "myMoveGamesData": my_move_games_data,
             "available_MT": available_MT,

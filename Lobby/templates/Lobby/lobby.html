@@ -132,6 +132,14 @@
                          src="{% static "Lobby/images/icon-chat-lobby.svg" %}"
                          title="{% translate "New Chat Message" %}" />
                 {% endif %}
+                {% if currentTrade %}
+                    <img class="tabChatIcon chat-ping"
+                         alt="{% translate "Trade" %}"
+                         width="18"
+                         height="18"
+                         src="{% static "RNB/images/icon-trade.svg" %}"
+                         title="{% translate "Trade offer waiting" %}" />
+                {% endif %}
                 <span class="tab-label">{% translate "Current" %}</span>
                 <span class="tab-count" id="currentCount">({{ currentCount }})</span>
             </button>
