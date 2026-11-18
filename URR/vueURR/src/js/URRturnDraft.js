@@ -1,6 +1,6 @@
 import * as rf from "./URRreference.js"
 import * as water from "./URRwater.js"
-import { nextCardEra, hasMaintenanceCrew } from "./URRrules.js"
+import { nextCardEra } from "./URRrules.js"
 import i18n from "../i18n.js"
 
 const t = i18n.global.t
@@ -89,12 +89,4 @@ export function groupedDraftSteps(steps) {
 		group.label = t("turn.crewGroup", { count: group.count, era: era === 5 ? "M" : era, capacity, total: price * group.count })
 	}
 	return groups
-}
-
-
-export function crewRemovalIndices(steps, index, stateId) {
-	const crews = steps.map((step, position) => ({ step, position })).filter(({ step }) => step.action.type === "buyCard")
-	if (crews.length !== 2 || hasMaintenanceCrew(crews[0].step.state, stateId)) return [index]
-	const remaining = crews.find((crew) => crew.position !== index).position
-	return [index, remaining - Number(index < remaining)]
 }

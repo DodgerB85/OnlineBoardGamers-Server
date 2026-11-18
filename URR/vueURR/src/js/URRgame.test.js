@@ -3,7 +3,7 @@ import test from "node:test"
 import { createGame, applyAction, restoreDevelopmentChoices, finishGame } from "./URRgame.js"
 import * as rf from "./URRreference.js"
 import { canExchangeBarahshum, getAutomaticAction, isAutoPassActive, keepsPrimogenitureIfPassing, remainingWaterworkTokens } from "./URRrules.js"
-import { crewRemovalIndices, groupedDraftSteps, actionSummary, actionPanelGame, defaultEndAction, endsDecision, turnCost } from "./URRturnDraft.js"
+import { groupedDraftSteps, actionSummary, actionPanelGame, defaultEndAction, endsDecision, turnCost } from "./URRturnDraft.js"
 import { startWaterRouting, waterChoices } from "./URRwater.js"
 
 test("A sole pump receives all water automatically and stops at its downstream choice", () => {
@@ -388,7 +388,7 @@ test("Hiring in Akkad previews First Akkadians dissolution without changing the 
 })
 
 
-test("Draft groups combine identical crews and retain the right removal indices", () => {
+test("Draft groups combine identical crews", () => {
 	const firstEra = createGame(["A", "B", "C"])
 	const secondEra = structuredClone(firstEra)
 	secondEra.cardSupply[1] = 0
@@ -408,27 +408,25 @@ test("Draft groups combine identical crews and retain the right removal indices"
 })
 
 
-test("Reducing to the mandatory minimum restores the unpurchased crew and First Akkadians", () => {
-	const before = betweenStatesGame()
-	before.gameflow.developmentStep = "purchasing"
-	before.states[rf.STATE_AKKAD].diggers = []
-	before.states[rf.STATE_AKKAD].money = 500
-	Object.assign(before.nations[rf.NATION_FIRST_AKKADIANS], { ownerType: "player", owner: 0, isRemoved: false })
-	const action = { type: "buyCard", kind: "digger" }
-	const first = applyAction(before, 0, action)
-	const steps = [{ state: before, action }, { state: first, action }]
-	assert.deepEqual(crewRemovalIndices(steps, 1, rf.STATE_AKKAD), [1, 0])
-	assert.deepEqual(crewRemovalIndices(steps, 0, rf.STATE_AKKAD), [0, 0])
-	let restored
-	for (const index of crewRemovalIndices(steps, 1, rf.STATE_AKKAD)) {
-		restored = steps[index].state
-		steps.splice(index, 1)
-	}
-	assert.equal(restored.states[rf.STATE_AKKAD].diggers.length, 0)
-	assert.equal(restored.nations[rf.NATION_FIRST_AKKADIANS].isRemoved, false)
-	assert.equal(restored.states[rf.STATE_AKKAD].money, 500)
-	const optional = betweenStatesGame()
-	assert.deepEqual(crewRemovalIndices([{ state: optional, action }, { state: optional, action }], 1, rf.STATE_AKKAD), [1])
+test("Reservoir, crew, reservoir keeps the crew in Era 1 and the last reservoir in Era 2", () => {
+	const game = createGame(["A", "B", "C"])
+	const state = game.states[rf.STATE_SUMER]
+	Object.assign(state, { money: 500, king: 0, isActive: true, diggers: [] })
+	Object.assign(game.gameflow, { phase: rf.PHASE_DEVELOPMENT, stateOrder: [rf.STATE_SUMER], stateIndex: 0, developmentStep: "purchasing", turnOrder: [0] })
+	game.era = 1
+	game.cardSupply = { 1: 2, 2: 8, 3: 7, 4: 5 }
+	const first = applyAction(game, 0, { type: "requestWaterwork", kind: "reservoir", area: "printed-5-3" })
+	assert.equal(first.board.areas.find((area) => area.id === "printed-5-3").waterwork.capacity, 2)
+	assert.equal(first.cardSupply[1], 1)
+	const crew = applyAction(first, 0, { type: "buyCard", kind: "digger" })
+	assert.equal(crew.states[rf.STATE_SUMER].diggers.at(-1).capacity, "1+1")
+	assert.equal(crew.cardSupply[1], 0)
+	assert.equal(crew.era, 1)
+	const last = applyAction(crew, 0, { type: "requestWaterwork", kind: "reservoir", area: "printed-6-5" })
+	assert.equal(last.board.areas.find((area) => area.id === "printed-6-5").waterwork.capacity, 4)
+	assert.equal(last.states[rf.STATE_SUMER].money, 340)
+	assert.equal(last.cardSupply[2], 7)
+	assert.equal(last.era, 2)
 })
 
 

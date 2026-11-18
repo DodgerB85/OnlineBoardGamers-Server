@@ -538,6 +538,7 @@ export default {
 		removeCrew: "Rimuovi una squadra",
 		removeAllCrews: "Rimuovi tutte le squadre assunte",
 		addCrew: "Aggiungi una squadra",
+		requiredCrewHint: "Squadra obbligatoria: {capacity}. Verrà assunta alla fine del tuo turno se non ne assumi una.",
 		backToDigging: "Torna a scavare",
 		eraStarts: "Il prossimo acquisto inizia l’era {era}.",
 		eraRetire: " Le squadre dell'era {era} vanno in pensione.",

@@ -532,6 +532,7 @@ export default {
 		removeCrew: "Remove one crew",
 		removeAllCrews: "Remove all hired crews",
 		addCrew: "Add one crew",
+		requiredCrewHint: "Required crew: {capacity}. If you do not hire one, it will be hired at the end of your turn.",
 		backToDigging: "Back to digging",
 		eraStarts: "The next purchase starts era {era}.",
 		eraRetire: " Era {era} crews retire.",

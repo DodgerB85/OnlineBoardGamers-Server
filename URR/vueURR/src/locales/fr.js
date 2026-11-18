@@ -538,6 +538,7 @@ export default {
 		removeCrew: "Retirer une équipe",
 		removeAllCrews: "Retirer toutes les équipes embauchées",
 		addCrew: "Ajouter une équipe",
+		requiredCrewHint: "Équipe obligatoire : {capacity}. Elle sera embauchée à la fin de votre tour si vous n'en embauchez pas une.",
 		backToDigging: "Retour au creusement",
 		eraStarts: "Le prochain achat commence l’ère {era}.",
 		eraRetire: " Les équipes de l'ère {era} prennent leur retraite.",

@@ -538,6 +538,7 @@ export default {
 		removeCrew: "移除一支工程队",
 		removeAllCrews: "移除所有已雇佣的工程队",
 		addCrew: "添加一支工程队",
+		requiredCrewHint: "必需工程队：{capacity}。若未雇佣，将在回合结束时自动雇佣。",
 		backToDigging: "返回挖掘",
 		eraStarts: "下次购买将进入第 {era} 时代。",
 		eraRetire: " 第 {era} 时代的工程队将退役。",

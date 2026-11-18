@@ -14,7 +14,7 @@ import * as rf from "../js/URRreference"
 import * as rules from "../js/URRrules"
 import * as controller from "../js/URRcontroller"
 import * as model from "../js/URRmodel"
-import { actionPanelGame, groupedDraftSteps, crewRemovalIndices } from "../js/URRturnDraft.js"
+import { actionPanelGame, groupedDraftSteps } from "../js/URRturnDraft.js"
 import { previewWaterPlan } from "../js/URRwaterPlan.js"
 import { applyAction, previewMaintenanceSales } from "../js/URRgame"
 import * as boardRules from "../js/URRmap"
@@ -356,32 +356,23 @@ const noSiteReason = computed(() => {
 })
 const crewSteps = computed(() => store.turnDraft.steps.map((step, index) => ({ step, index })).filter(({ step }) => step.action?.type === "buyCard"))
 const hasRequiredHire = computed(() => state.value && !rules.hasMaintenanceCrew(game.value, state.value.id))
-const crewCount = computed(() => crewSteps.value.length + Number(hasRequiredHire.value))
-const canRemoveCrew = computed(() => {
-	const last = crewSteps.value.at(-1)
-	return !!last && (crewSteps.value.length > 1 || rules.hasMaintenanceCrew(last.step.state, state.value.id))
-})
+const crewCount = computed(() => crewSteps.value.length)
+const canRemoveCrew = computed(() => crewSteps.value.length > 0)
 async function addCrew() {
-	if (hasRequiredHire.value && !await controller.submitAction({ type: "buyCard", kind: "digger" })) return
 	await submit({ type: "buyCard", kind: "digger" })
 }
 async function removeCrew(index = crewSteps.value.at(-1).index) {
-	for (const position of crewRemovalIndices(store.turnDraft.steps, index, state.value.id)) {
-		const previousCount = store.turnDraft.steps.length
-		await controller.removeDraftStep(position)
-		if (store.turnDraft.steps.length !== previousCount - 1) return
-	}
+	const previousCount = store.turnDraft.steps.length
+	await controller.removeDraftStep(index)
+	return store.turnDraft.steps.length === previousCount - 1
 }
 async function removeAllCrews() {
 	while (canRemoveCrew.value) {
-		const previousCount = store.turnDraft.steps.length
-		await removeCrew()
-		if (store.turnDraft.steps.length === previousCount) return
+		if (!await removeCrew()) return
 	}
 }
-const draftGroups = computed(() => groupedDraftSteps(hasRequiredHire.value
-	? [...store.turnDraft.steps, { state: game.value, action: { type: "buyCard", kind: "digger" } }]
-	: store.turnDraft.steps))
+// The fallback crew is shown as a hint, not appended to the ordered draft.
+const draftGroups = computed(() => groupedDraftSteps(store.turnDraft.steps))
 const treasuryBefore = computed(() => store.turnDraft.start ? store.turnDraft.start.state.states[state.value.id].money : state.value.money)
 const treasuryAfter = computed(() => maintenancePreview.value?.game?.states[state.value.id].money ?? state.value.money)
 const treasuryChange = computed(() => {
@@ -627,6 +618,7 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 						<label v-if="ownedCalah"><input type="checkbox" v-model="useCalah" /> <CurrencyText :text="$t('actions.useCalah', { income: rf.NATION_INCOMES[rf.NATION_CALAH] })" /></label>
 						<p v-if="!store.turnDraft.ready && !equipSites.length" class="error"><CurrencyText :text="noSiteReason" /></p>
 						<div class="crewStepper"><span>{{ $t("actions.crewStepper", { era: cardEra === 5 ? 'M' : cardEra, capacity: cardData.digger[0] }) }}<br>{{ cardData.digger[1] }} <CurrencyIcon /></span><span class="stepper"><button :disabled="!canRemoveCrew" :aria-label="$t('actions.removeCrew')" @click="removeCrew()">−</button><b>{{ crewCount }}</b><button :disabled="!!crewError" :aria-label="$t('actions.addCrew')" @click="addCrew">+</button></span></div>
+						<p v-if="hasRequiredHire" class="hint">{{ $t("actions.requiredCrewHint", { capacity: cardData.digger[0] }) }}</p>
 						<p v-if="crewError" class="hint"><CurrencyText :text="crewError" /></p>
 						<button v-if="game.gameflow.developmentStep === 'digging' && unusedCrews.length" class="actionsLineButton" @click="diggingDone = false">{{ $t("actions.backToDigging") }}</button>
 						<p v-if="cardEra > game.era" class="eraChange">{{ $t("actions.eraStarts", { era: cardEra === 5 ? 'M' : cardEra }) }}<template v-if="cardEra >= 3">{{ $t("actions.eraRetire", { era: cardEra - 2 }) }}</template><template v-if="cardEra === 3">{{ $t("actions.nationsAssimilated") }}</template><template v-if="cardEra === 4">{{ $t("actions.nationsDissolve") }}</template></p>

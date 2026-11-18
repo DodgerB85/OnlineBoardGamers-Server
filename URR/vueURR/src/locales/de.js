@@ -538,6 +538,7 @@ export default {
 		removeCrew: "Einen Trupp entfernen",
 		removeAllCrews: "Alle angeheuerten Trupps entfernen",
 		addCrew: "Einen Trupp hinzufügen",
+		requiredCrewHint: "Erforderlicher Trupp: {capacity}. Wird am Ende deines Zuges angeheuert, wenn du keinen anheuerst.",
 		backToDigging: "Zurück zum Graben",
 		eraStarts: "Der nächste Einkauf startet Ära {era}.",
 		eraRetire: " Trupps der Ära {era} scheiden aus.",

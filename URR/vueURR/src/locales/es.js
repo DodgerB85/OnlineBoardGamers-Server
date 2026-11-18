@@ -538,6 +538,7 @@ export default {
 		removeCrew: "Quitar una cuadrilla",
 		removeAllCrews: "Quitar todas las cuadrillas contratadas",
 		addCrew: "Añadir una cuadrilla",
+		requiredCrewHint: "Cuadrilla obligatoria: {capacity}. Se contratará al final de tu turno si no contratas una.",
 		backToDigging: "Volver a excavar",
 		eraStarts: "La próxima compra inicia la era {era}.",
 		eraRetire: " Las cuadrillas de la era {era} se retiran.",
