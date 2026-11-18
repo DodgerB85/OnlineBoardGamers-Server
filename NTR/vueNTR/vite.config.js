@@ -1,15 +1,15 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from "vite"
+import vue from "@vitejs/plugin-vue"
 
-import { resolve } from 'path';
+import { resolve } from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
-  logLevel: 'warn',
+  logLevel: "info",
   plugins: [vue()],
-  root: resolve('./src'),
+  root: resolve("./src"),
   server: {
-    host: '0.0.0.0',
+    host: "0.0.0.0",
     port: 3066,
     open: false,
     watch: {
@@ -34,16 +34,16 @@ export default defineConfig(({ command }) => ({
   },
   // NTR serves its images straight from Django (/static/NTR/images/...), so it
   // needs no @static alias or /static proxy the other games use.
-  base: command === 'serve' ? '/static/' : 'https://www.onlineboardgamers.com/static/NTR',
+  base: command === "serve" ? "/static/" : "https://www.onlineboardgamers.com/static/NTR",
   build: {
-    outDir: resolve('../static/NTR/NTRvuedist'),
-    assetsDir: './assets',
+    outDir: resolve("../static/NTR/NTRvuedist"),
+    assetsDir: "./assets",
     manifest: false,
     emptyOutDir: true,
-    target: 'es2015',
+    target: "es2015",
     rollupOptions: {
       input: {
-        main: resolve('./src/main.js')
+        main: resolve("./src/main.js")
       },
       output: {
         entryFileNames: `[name].js`,
@@ -51,7 +51,7 @@ export default defineConfig(({ command }) => ({
         // served stale by Cloudflare/browsers for the full max-age.
         chunkFileNames: `[name]-[hash].js`,
         assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split('.')
+          const info = assetInfo.name.split(".")
           const extType = info[info.length - 1]
 
           if (/\.(jpg|png|jpe?g|gif|svg|webp|webm|mp3)$/.test(assetInfo.name)) {

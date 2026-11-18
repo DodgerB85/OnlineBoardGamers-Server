@@ -1,8 +1,8 @@
-/*import { fileURLToPath, URL } from 'node:url'
+/*import { fileURLToPath, URL } from "node:url"
 
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
+import { defineConfig } from "vite"
+import vue from "@vitejs/plugin-vue"
+import vueDevTools from "vite-plugin-vue-devtools"
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -12,7 +12,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      "@": fileURLToPath(new URL("./src", import.meta.url))
     },
   },
 })*/
@@ -25,7 +25,7 @@ import { fileURLToPath, URL } from "node:url"
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
-	logLevel: "warn",
+	logLevel: "info",
 	plugins: [vue()],
 	root: resolve("./src"),
 	server: {

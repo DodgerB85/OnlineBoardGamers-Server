@@ -6,7 +6,11 @@ SET OBG_HOME=%~dp0
 echo Starting OBG Development Environment...
 
 REM --- Activate the virtual environment using the variable ---
-call "%OBG_HOME%\.venv_local\Scripts\activate"
+if exist "%OBG_HOME%\.venv\Scripts\activate" (
+    call "%OBG_HOME%\.venv\Scripts\activate"
+) else (
+    call "%OBG_HOME%\.venv_local\Scripts\activate"
+)
 
 REM Check if activation was successful (optional)
 IF ERRORLEVEL 1 (

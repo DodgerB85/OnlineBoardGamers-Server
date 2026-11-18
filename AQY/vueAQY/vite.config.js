@@ -1,17 +1,17 @@
-//import { defineConfig } from 'vite'
-//import vue from '@vitejs/plugin-vue'
+//import { defineConfig } from "vite"
+//import vue from "@vitejs/plugin-vue"
 //
-//import { resolve } from 'path';
+//import { resolve } from "path";
 //
-//import { fileURLToPath, URL } from 'node:url'
-////import { fileURLToPath, URL } from 'url'
+//import { fileURLToPath, URL } from "node:url"
+////import { fileURLToPath, URL } from "url"
 //
 //// https://vitejs.dev/config/
 //export default defineConfig(({ command, mode }) => ({
 //  plugins: [vue()],
-//  root: resolve('./src'),
+//  root: resolve("./src"),
 //  server: {
-//    host: 'localhost',
+//    host: "localhost",
 //    port: 3018,
 //    open: false,
 //    watch: {
@@ -23,35 +23,35 @@
 //
 //    resolve: {
 //    alias:
-//      command === 'serve'
-//        ? [{ find: '@static', replacement: fileURLToPath(new URL('./src', import.meta.url)) }]
-//        : [{ find: '@static', replacement: fileURLToPath(new URL('../static', import.meta.url)) }]
+//      command === "serve"
+//        ? [{ find: "@static", replacement: fileURLToPath(new URL("./src", import.meta.url)) }]
+//        : [{ find: "@static", replacement: fileURLToPath(new URL("../static", import.meta.url)) }]
 //  },
-//   base: command === 'serve' ? '/static/' : 'https://www.onlineboardgamers.com/static/AQY',
+//   base: command === "serve" ? "/static/" : "https://www.onlineboardgamers.com/static/AQY",
 //  build: {
-//    outDir: resolve('../static/AQY/AQYvuedist'),
-//    assetsDir: './assets',
+//    outDir: resolve("../static/AQY/AQYvuedist"),
+//    assetsDir: "./assets",
 //    manifest: true,
 //    emptyOutDir: true,
-//    target: 'es2015',
+//    target: "es2015",
 //    //
 //    //minify: true,
 //    //
 //    rollupOptions: {
 //      external: [
-//        'NonExistingPath',
+//        "NonExistingPath",
 //        // Needed to enable building of /static/ links
 //        /^\/static.*/,
 //      ],
 //      input: {
-//        main: resolve('./src/main.js')
+//        main: resolve("./src/main.js")
 //      },
 //      output: {
 //        entryFileNames: `[name].js`,
 //        chunkFileNames: `[name].js`,
 //        //assetFileNames: `[name].[ext]`
 //        assetFileNames: (assetInfo) => {
-//          const info = assetInfo.name.split('.')
+//          const info = assetInfo.name.split(".")
 //          const extType = info[info.length - 1]
 //          if (/\.(jpg|png|jpe?g|gif|svg|webp|webm|mp3)$/.test(assetInfo.name)) {
 //            return `images/[name].${extType}`
@@ -79,7 +79,7 @@ import { fileURLToPath, URL } from "node:url"
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
-	logLevel: "warn",
+	logLevel: "info",
 	plugins: [vue()],
 	root: resolve("./src"),
 	server: {

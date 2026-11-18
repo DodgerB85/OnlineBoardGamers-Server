@@ -869,6 +869,13 @@ export function restaurantRoadTest(index) {
 	return -1
 }
 
+// An airplane campaign's click square sits one square off the board edge.
+// Flip between that square and the board edge; the mapping is its own inverse.
+export function airplaneHighlightFlip(index, rotated) {
+	if (rotated) return index % 5 === 0 ? index - 1 : index + 1
+	return index % (rf.ssW * 5) < rf.ssW ? index - rf.ssW : index + rf.ssW
+}
+
 // Give possible positions for marketing campaign
 export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, rotated, phoneRotation) {
 	const store = useModelStore()
@@ -937,11 +944,7 @@ export function givePossiblePositionsForMarketingCampaign(marketer, campaignId, 
 				}
 				return true
 			})
-			.map((pos) => {
-				// Adjust final highlight to sit on the board edge
-				if (rotated) return pos % 5 === 0 ? pos - 1 : pos + 1
-				return pos % (ssDim * 5) < ssDim ? pos - ssDim : pos + ssDim
-			})
+			.map((pos) => airplaneHighlightFlip(pos, rotated))
 	}
 
 	// --- CASE A2: PHONE TOKENS (Media Line mod) - 2x1 on empty ground in

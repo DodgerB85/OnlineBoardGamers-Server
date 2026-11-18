@@ -184,6 +184,21 @@ describe("cancelling a Brand Manager selection", () => {
 	})
 })
 
+describe("airplane placement highlights", () => {
+	it("maps a click square to the board edge and back", () => {
+		expect(rules.airplaneHighlightFlip(2579, true)).toBe(2580)
+		expect(rules.airplaneHighlightFlip(2600, true)).toBe(2599)
+		expect(rules.airplaneHighlightFlip(2495, false)).toBe(2580)
+		expect(rules.airplaneHighlightFlip(3855, false)).toBe(3770)
+		for (const index of [2579, 2580, 2600, 2599]) {
+			expect(rules.airplaneHighlightFlip(rules.airplaneHighlightFlip(index, true), true)).toBe(index)
+		}
+		for (const index of [2495, 2580, 3855, 3770]) {
+			expect(rules.airplaneHighlightFlip(rules.airplaneHighlightFlip(index, false), false)).toBe(index)
+		}
+	})
+})
+
 describe("repeat route stop bubble", () => {
 	it("only shows after a repeat when range is gone or all exits stay on the tile", () => {
 		useModelStore().mapData.dimensions = [10, 10]

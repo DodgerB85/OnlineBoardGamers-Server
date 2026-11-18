@@ -7,7 +7,7 @@ import { fileURLToPath, URL } from "node:url"
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
-	logLevel: "warn",
+	logLevel: "info",
 	plugins: [vue()],
 	root: resolve("./src"),
 	server: {

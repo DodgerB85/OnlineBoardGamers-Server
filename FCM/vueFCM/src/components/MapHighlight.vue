@@ -85,12 +85,24 @@ function stopRoute() {
 	else controller.stopCollecting()
 }
 
+// A rotated airplane's legal squares are one cell outside the board, where a
+// tablet leaves only a sliver visible (left) or hides them under the summary
+// (right). Draw those yellow squares on the board edge instead; the original
+// index still places the plane outside.
+const isRotatedAirplanePlacement = computed(
+	() =>
+		store.gameflow.subphase === rf.SUBPHASE_MARKETING &&
+		store.context.rotated === true &&
+		rf.MARKETING_CAMPAIGNS[store.context.campaign]?.type === rf.AIRPLANE,
+)
+
 // Freeway placement highlights: precompute x/y for the whole batch with a single
 // getUsedRowCol() scan, so the template no longer calls getXYforSmallSquare per element.
 const freewayHighlights = computed(() => {
 	const used = map.getUsedRowCol()
 	return store.highlights.indexesToHighlightYellow.map((index) => {
-		const [x, y] = view.getXYforSmallSquare(index, used)
+		const displayIndex = isRotatedAirplanePlacement.value ? rules.airplaneHighlightFlip(index, true) : index
+		const [x, y] = view.getXYforSmallSquare(displayIndex, used)
 		return { index, x, y }
 	})
 })

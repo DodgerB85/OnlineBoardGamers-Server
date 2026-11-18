@@ -1,9 +1,9 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from "vite"
+import vue from "@vitejs/plugin-vue"
 
-import { resolve } from 'path';
+import { resolve } from "path";
 
-import { fileURLToPath, URL } from 'node:url'
+import { fileURLToPath, URL } from "node:url"
 //import dotenv from 'dotenv'
 
 // Load environment variables from root .env
@@ -11,18 +11,18 @@ import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
-  logLevel: 'warn',
+  logLevel: "info",
   plugins: [vue()],
-  root: resolve('./src'),
+  root: resolve("./src"),
   server: {
-    host: '0.0.0.0',
+    host: "0.0.0.0",
     port: 3048,
     open: false,
     proxy: {
       // Static images are served by Django (:8000); the Vue app's new URL(...)
       // image references resolve to the Vite dev origin (:3048) otherwise.
-      '/static/FCM': {
-        target: process.env.VITE_DJANGO_URL || 'http://localhost:8000',
+      "/static/FCM": {
+        target: process.env.VITE_DJANGO_URL || "http://localhost:8000",
         changeOrigin: true,
       },
     },
@@ -50,29 +50,29 @@ export default defineConfig(({ command }) => ({
 
     resolve: {
     alias:
-      command === 'serve'
-        ? [{ find: '@static', replacement: fileURLToPath(new URL('./src', import.meta.url)) }]
-        : [{ find: '@static', replacement: fileURLToPath(new URL('../static', import.meta.url)) }]
+      command === "serve"
+        ? [{ find: "@static", replacement: fileURLToPath(new URL("./src", import.meta.url)) }]
+        : [{ find: "@static", replacement: fileURLToPath(new URL("../static", import.meta.url)) }]
   },
    // Production serves assets from the absolute site URL; local test builds can
    // point back at the local Django server by setting VITE_BASE_URL=/static/FCM
-   base: command === 'serve' ? '/static/' : (process.env.VITE_BASE_URL || 'https://www.onlineboardgamers.com/static/FCM'),
+   base: command === "serve" ? "/static/" : (process.env.VITE_BASE_URL || "https://www.onlineboardgamers.com/static/FCM"),
   build: {
-    outDir: resolve('../static/FCM/FCMvuedist'),
-    assetsDir: './assets',
+    outDir: resolve("../static/FCM/FCMvuedist"),
+    assetsDir: "./assets",
     manifest: false,
     emptyOutDir: true,
-    target: 'es2015',
+    target: "es2015",
     //minify: true,
     rollupOptions: {
       external: [
-        'NonExistingPath',
+        "NonExistingPath",
         // Needed to enable building of /static/ links
         /^\/static.*/,
       ],
       input: {
-        main: resolve('./src/main.js'),
-        admin: resolve('./src/admin.js')
+        main: resolve("./src/main.js"),
+        admin: resolve("./src/admin.js")
       },
       output: {
         entryFileNames: `[name].js`,
@@ -84,17 +84,17 @@ export default defineConfig(({ command }) => ({
         chunkFileNames: `[name]-[hash].js`,
         //assetFileNames: `[name].[ext]`
         assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split('.')
+          const info = assetInfo.name.split(".")
           const extType = info[info.length - 1]
 
           if (/\.(jpg|png|jpe?g|gif|svg|webp|webm|mp3)$/.test(assetInfo.name)) {
-            if (assetInfo.originalFileNames[0].startsWith('../../static/FCM/images/tiles/')) {
+            if (assetInfo.originalFileNames[0].startsWith("../../static/FCM/images/tiles/")) {
               return `images/tiles/[name].${extType}`;
-            } else if (assetInfo.originalFileNames[0].startsWith('../../static/FCM/images/contracts/')) {
+            } else if (assetInfo.originalFileNames[0].startsWith("../../static/FCM/images/contracts/")) {
               return `images/contracts/[name].${extType}`;
-            }else if (assetInfo.originalFileNames[0].startsWith('../../static/FCM/images/extensions/')) {
+            }else if (assetInfo.originalFileNames[0].startsWith("../../static/FCM/images/extensions/")) {
               return `images/extensions/[name].${extType}`;
-            } else if (assetInfo.originalFileNames[0].startsWith('../../static/FCM/images/')) {
+            } else if (assetInfo.originalFileNames[0].startsWith("../../static/FCM/images/")) {
               return `images/[name].${extType}`;
             }
             else return `images/[name].${extType}`
