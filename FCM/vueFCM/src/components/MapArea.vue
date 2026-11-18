@@ -248,9 +248,8 @@ const houseDisplays = computed(() => {
 		const [x, y] = view.getXYforSmallSquare(house.index)
 		let adjustedX = x
 		let adjustedY = y
-		let houseRotation = 0
-		if (!store.startingOptions.hawkers && house.rotated) houseRotation = 1
-		else if (store.startingOptions.hawkers) houseRotation = house.rotated
+		// Legacy/AI houses store a boolean; true is the old landscape rotation.
+		const houseRotation = house.rotated === true ? 1 : house.rotated || 0
 
 		if (house.rotated === 1 || house.rotated === 3 || house.rotated === true) {
 			adjustedX += 0.5 * sqSize
@@ -650,7 +649,7 @@ const needDisplays = computed(() => {
 			let adjustedX = x
 			let adjustedY = y
 			const offsetHouse = model.getHouseOffset(need.number)
-			let rotated = houseObj.rotated === 1
+			let rotated = houseObj.rotated === 1 || houseObj.rotated === 3 || houseObj.rotated === true
 			if (offsetHouse === -1 || offsetHouse === 2) rotated = true
 
 			let D = GOODS_HOUSE.V

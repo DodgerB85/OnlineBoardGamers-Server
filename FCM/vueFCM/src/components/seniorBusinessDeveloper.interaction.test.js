@@ -312,3 +312,17 @@ describe("SBD milestone — real Vue rotation and tile placement", () => {
 		expect(store.mapData.tiles[entry[3][3] * 2 + 1]).toBe(1)
 	})
 })
+
+describe("house rotation — every game", () => {
+	it("cycles a house through all four rotations without the Hawkers module", async () => {
+		freshGame()
+		expect(store.startingOptions.hawkers).toBe(false)
+		controller.setupHousesAndGardensPhase()
+		await nextTick()
+		expect(store.context.selectedBuilding).toBeGreaterThan(0)
+		for (const rotation of [1, 2, 3, 0]) {
+			await click(image("rot_clockwise"))
+			expect(store.context.rotation).toBe(rotation)
+		}
+	})
+})

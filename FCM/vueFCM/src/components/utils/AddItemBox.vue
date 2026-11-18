@@ -52,7 +52,6 @@ const currentDegrees = ref(store.context.rotation * 90)
 const suppressTransition = ref(false)
 
 function isTwoRotationItem() {
-	if (isHouse && !store.startingOptions.hawkers) return true
 	if (isCampaign) return !(phone.modern() && phone.isPhone(store.context.campaign))
 	if (isFreeway) return true
 	if (isLobbyist && lobbyistHasTwoRotations()) return true
@@ -88,7 +87,7 @@ watch(activeItemIdentity, () => snapDegrees(isCampaign && phone.modern() && phon
 // Degrees accumulate freely so the CSS transition always spins in the clicked
 // direction (rotate(450deg) == rotate(90deg) visually)
 watch(currentDegrees, (deg) => {
-	if ((isHouse || isCampaign || isFreeway) && isTwoRotationItem()) store.context.rotation = Math.round(deg / 90) % 2 === 0 ? 0 : 1
+	if ((isCampaign || isFreeway) && isTwoRotationItem()) store.context.rotation = Math.round(deg / 90) % 2 === 0 ? 0 : 1
 	else if (isLobbyist) {
 		if (lobbyistHasTwoRotations()) store.context.rotation = Math.round(deg / 90) % 2 === 0 ? 0 : 1
 		else store.context.rotation = (((Math.round(deg / 90) % 4) + 4) % 4)

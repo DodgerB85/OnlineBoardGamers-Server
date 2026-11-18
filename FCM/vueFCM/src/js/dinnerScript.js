@@ -133,7 +133,7 @@ function tokenPositions(store, buildingNumber, isApartment, goods) {
 	let adjustedX = x
 	let adjustedY = y
 	const offsetHouse = model.getHouseOffset(buildingNumber)
-	let rotated = houseObj.rotated === 1
+	let rotated = houseObj.rotated === 1 || houseObj.rotated === 3 || houseObj.rotated === true
 	if (offsetHouse === -1 || offsetHouse === 2) rotated = true
 
 	let D = GOODS_HOUSE.V
