@@ -7,7 +7,7 @@ const TERRAIN_FILES = ["terrain-hills.png", "terrain-forest.png", "terrain-savan
 const CITY_FILES = ["city-hills.png", "city-forest.png", "city-savannah.png", "city-desert.png"]
 const STATE_FILES = ["akkad", "babylon", "elam", "persia", "sumer", "urartu"]
 // Der and Calah use references matching the current ownership and location rules.
-const NATION_FILES = ["nation-ashur.png", "nation-barahshum.png", "nation-calah.svg", "nation-der.svg", "nation-eridu.png", "nation-first-akkadians.svg"]
+const NATION_FILES = ["nation-ashur.png", "nation-barahshum.png", "nation-calah.svg", "nation-der.svg", "nation-eridu.png", "nation-first-akkadians.svg?v=2"]
 
 export function getAsset(name) { return STATIC_IMAGES + name }
 export function getTerrainImage(type, isCity = false) { return getAsset((isCity ? CITY_FILES : TERRAIN_FILES)[type]) }
