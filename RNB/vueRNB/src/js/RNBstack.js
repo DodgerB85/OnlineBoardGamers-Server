@@ -3010,6 +3010,7 @@ export function resetStackControlData() {
 	store.stackControl.failedStackHistoryEntry.splice(0)
 	store.stackControl.loadedPreMove = false
 	store.stackControl.loadedPreMoveIsSkip = false
+	store.stackControl.preMoveResetData = ""
 }
 
 export function saveKnownLengths() {

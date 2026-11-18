@@ -73,6 +73,7 @@ export const useModelStore = defineStore("store", () => {
 		loadedPreMoveIsSkip: false,
 		failedStackHistoryEntry: [],
 		previewingPhase: null,
+		preMoveResetData: "",
 	})
 
 	const RATIO = computed(() => {

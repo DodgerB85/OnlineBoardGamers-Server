@@ -49,9 +49,20 @@ export async function sendDiscordWebhook(message) {
 // button), so a lingering preview must be undone first. Otherwise the previewer's move gets
 // baked into the shared gameData while their turnOrder slot is untouched, and they get an
 // extra "ghost" turn later when it's genuinely their turn. See issue #106.
+// The dedicated snapshot is needed because processStacks() overwrites wholeTurnResetData
+// after the preview is loaded, which used to make the rollback keep the preview.
 export function clearUnfinalizedPreMoveBeforeExport() {
 	const store = useModelStore()
-	if (store.stackControl.loadedPreMove && store.gameflow.phase !== rf.PHASE_GAME_OVER) {
+	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return
+	if (store.stackControl.preMoveResetData) {
+		const savedWonderTurnOrder = [...store.gameflow.wonderTurnOrder]
+		// Use the snapshot taken before the preview, not wholeTurnResetData: processStacks()
+		// overwrites that while catching up, which used to roll back to a state that already
+		// contained the preview and then saved it as fact.
+		store.wholeTurnResetData = store.stackControl.preMoveResetData
+		context.resetWholeTurn()
+		store.gameflow.wonderTurnOrder = savedWonderTurnOrder
+	} else if (store.stackControl.loadedPreMove) {
 		const savedWonderTurnOrder = [...store.gameflow.wonderTurnOrder]
 		context.resetWholeTurn()
 		store.gameflow.wonderTurnOrder = savedWonderTurnOrder
@@ -1422,6 +1433,12 @@ export async function reloadGameData(updatingFromWSAndCanPlay = false) {
 			store.wholeTurnResetData = funcs.simpleExportWholeRNBmodel()
 			window.initData.gameDataB64 = data.gameDataB64
 			personal.gameDataB64 = data.gameDataB64
+
+			// A player who already has this main phase in the turn's history has finished it.
+			// Drop them from the turn order so a stale preset/save cannot give them a second phase.
+			if (rf.MAIN_PHASES.includes(store.gameflow.phase)) {
+				store.gameflow.turnOrder = store.gameflow.turnOrder.filter((idx) => !model.hasPlayerActedInPhaseThisTurn(idx, store.gameflow.phase))
+			}
 		}
 
 		personal.secondsToNextKickout = data.secondsToNextKickout
@@ -2002,6 +2019,19 @@ export function processStacks(allStackData) {
 
 export function processMainMoveStacks(allStackData) {
 	const store = useModelStore()
+	const personal = usePersonalStore()
+
+	// A player whose phase is already in this turn's history has finished it,
+	// even if a preset is still stored or the turn order was rebuilt around them.
+	// Keep the local player's unfinalized preview, which is their turn in progress.
+	store.gameflow.turnOrder = store.gameflow.turnOrder.filter((idx) => (idx === personal.pov && store.stackControl.loadedPreMove) || !model.hasPlayerActedInPhaseThisTurn(idx, store.gameflow.phase))
+
+	// Drop their stored preset for this phase too, otherwise it is replayed.
+	const activeNames = new Set(store.gameflow.turnOrder.map((idx) => store.players[idx].name))
+	for (let i = allStackData.length - 1; i >= 0; i--) {
+		const data = allStackData[i]
+		if (data.turn === store.gameflow.turn && data.phase === store.gameflow.phase && !activeNames.has(data.username)) allStackData.splice(i, 1)
+	}
 
 	// NO! DO NOT SKIP OUT OF ORDER!
 	// Otherwise we end up being unable to cancel the skip move if we're not first in TO
@@ -2035,6 +2065,21 @@ export function processMainMoveStacks(allStackData) {
 	if (store.gameflow.turnOrder.length > 0) nextDataIndex = allStackData.findIndex((data) => data.turn === store.gameflow.turn && data.phase === store.gameflow.phase && data.username === store.players[store.gameflow.turnOrder[0]].name)
 	while (nextDataIndex !== -1) {
 		const nextData = allStackData[nextDataIndex]
+
+		// Presets are kept for a couple of phases, so a player who already finished
+		// this phase (eg a preset applied just after a conflict) must not play it again.
+		// Consume the stale entry so it cannot resurface on a later stack pass.
+		// The local player's loaded preview is not a completed move.
+		const actingPlayerIndex = store.gameflow.turnOrder[0]
+		if (!(actingPlayerIndex === personal.pov && store.stackControl.loadedPreMove) && model.hasPlayerActedInPhaseThisTurn(actingPlayerIndex, store.gameflow.phase)) {
+			allStackData.splice(nextDataIndex, 1)
+			store.allStackData = allStackData
+			store.gameflow.turnOrder.shift()
+			productionSetup.dropPlayersWithoutChoices()
+			if (store.gameflow.turnOrder.length > 0) nextDataIndex = allStackData.findIndex((data) => data.turn === store.gameflow.turn && data.phase === store.gameflow.phase && data.username === store.players[store.gameflow.turnOrder[0]].name)
+			else nextDataIndex = -1
+			continue
+		}
 
 		// First, check for a skipped move
 		if (nextData.actionStack === "SKIP") {
@@ -2262,9 +2307,14 @@ export function loadCurrentMove() {
 		// Reload the pre-move for the current phase whenever the player is still in the turn
 		// order (current or pending) — this is what lets them see / continue it when opening
 		// the game, and lets the pre-set flow redo the already-done pre-moves.
-		if (currentMoveData.turn === store.gameflow.turn && currentMoveData.phase === store.gameflow.phase && currentMoveData.username === store.players[personal.pov].name && store.gameflow.turnOrder.includes(personal.pov)) {
+		// Skip it if they already completed this phase this turn: loading it again would
+		// apply a prefix/suffix of the move a second time (the "two movement phases" bug).
+		if (currentMoveData.turn === store.gameflow.turn && currentMoveData.phase === store.gameflow.phase && currentMoveData.username === store.players[personal.pov].name && store.gameflow.turnOrder.includes(personal.pov) && !model.hasPlayerActedInPhaseThisTurn(personal.pov, store.gameflow.phase)) {
 			// A recovery reload can reach here twice; keep the reset snapshot free of the first preview.
 			clearUnfinalizedPreMoveBeforeExport()
+			// Dedicated snapshot: processStacks() overwrites wholeTurnResetData while catching up,
+			// but any later save must still roll back to this clean pre-preview state.
+			store.stackControl.preMoveResetData = funcs.simpleExportWholeRNBmodel()
 			stack.attemptToLoadWholeCurrentMoveStack(currentMoveData, store.gameflow.phase)
 			if (store.actionStack.length > 0) {
 				store.stackControl.loadedPreMove = true

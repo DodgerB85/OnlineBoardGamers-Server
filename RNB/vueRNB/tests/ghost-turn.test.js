@@ -223,6 +223,24 @@ test("pending player's pre-set move IS loaded as a local pseudo-simul preview", 
 	assert.deepEqual(store.ALL_TRANSPORTERS[0].location, [rf.LOCATION_OOB], "the preview is performed on the live board")
 })
 
+test("issue #106: a preview still clears after processStacks overwrites wholeTurnResetData", { skip: skip }, () => {
+	const { store } = setupMovementPhaseWithPreSetMove(2) // s4lm is 3rd, pending
+
+	// A pending player's preset is previewed locally.
+	IO.loadCurrentMove()
+	assert.equal(store.history.length, 1, "sanity check: the preview is on the board")
+
+	// processStacks() takes a wholeTurnResetData snapshot while catching up, after the
+	// preview is already applied. That must not become the rollback point for saves.
+	store.wholeTurnResetData = funcs.simpleExportWholeRNBmodel()
+
+	IO.clearUnfinalizedPreMoveBeforeExport()
+
+	assert.equal(store.history.length, 0, "the preview is rolled back, not baked in")
+	assert.deepEqual(store.ALL_TRANSPORTERS[0].location, [rf.LOCATION_LAND_VERTEX, 1, 0], "the board is clean")
+	assert.equal(store.stackControl.loadedPreMove, false)
+})
+
 test("issue #106: an unfinalized preview must not be exported when someone else triggers a save", { skip: skip }, () => {
 	const { store } = setupMovementPhaseWithPreSetMove(2) // s4lm is 3rd, pending; A is current
 

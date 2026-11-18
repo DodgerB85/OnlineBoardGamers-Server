@@ -16,7 +16,8 @@ export default defineConfig({
     },
   },
 })*/
-import { defineConfig } from "vite"
+import { createLogger, defineConfig } from "vite"
+import { quietAssetLogger } from "../../tools/viteLogger.mjs"
 import vue from "@vitejs/plugin-vue"
 
 import { resolve } from "path"
@@ -26,6 +27,7 @@ import { fileURLToPath, URL } from "node:url"
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
 	logLevel: "info",
+	customLogger: quietAssetLogger(createLogger),
 	plugins: [vue()],
 	root: resolve("./src"),
 	server: {

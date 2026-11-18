@@ -189,6 +189,7 @@ export async function initGame() {
 		personal.transactionID = window.initData.transactionID
 		const allStackData = window.initData.allStackData || []
 		store.allStackData = allStackData
+		IO.clearUnfinalizedPreMoveBeforeExport()
 		IO.processStacks(allStackData)
 		await IO.saveAndUpdateNotifictionsAfterStack(false, true)
 	}
@@ -198,6 +199,7 @@ export async function initGame() {
 	if (personal.pov >= 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER && Number.isInteger(firstPlayerIdx) && firstPlayerIdx >= 0 && firstPlayerIdx < store.players.length && store.players[firstPlayerIdx].displayName === rf.BOT_NAME) {
 		const allStackData = window.initData.allStackData || []
 		store.allStackData = allStackData
+		IO.clearUnfinalizedPreMoveBeforeExport()
 		IO.processStacks(allStackData)
 		await IO.saveAndUpdateNotifictionsAfterStack(false, true)
 	}
@@ -364,8 +366,6 @@ export async function initLoadGame(gameDataB64) {
 	personal.currentMoveData = window.initData.currentMoveData
 	personal.allMyMoveData = window.initData.allMyMoveData || []
 
-	IO.loadCurrentMove()
-
 	// Recalculate dynamic turn order sequencing when inside simultaneous phases
 	if (controller.isSimulPhase() || controller.isMainPhaseAndPseudoSimul()) {
 		let currentNames = window.initData.currentPlayers
@@ -378,6 +378,11 @@ export async function initLoadGame(gameDataB64) {
 			}
 		}
 
+		// A player who already has this main phase in the turn's history has finished it.
+		if (rf.MAIN_PHASES.includes(store.gameflow.phase)) {
+			store.gameflow.turnOrder = store.gameflow.turnOrder.filter((idx) => !hasPlayerActedInPhaseThisTurn(idx, store.gameflow.phase))
+		}
+
 		// KICKSTART: a main/simul phase with no current players is only valid as a transient
 		// state mid-saveStackMove. Seeing it on reload means the phase never advanced, so drive
 		// it forward now via processStacks + persist the result. Skip if a transactionID is set,
@@ -387,6 +392,10 @@ export async function initLoadGame(gameDataB64) {
 			await IO.saveAndUpdateNotifictionsAfterStack(false)
 		}
 	}
+
+	// Load the local preset only after the server's current players have rebuilt the
+	// turn order, so a pending preset is never applied against a stale order.
+	IO.loadCurrentMove()
 
 	// Inject structures when spoiler protection rules apply
 	if (window.initData.spoilerFree) {
@@ -1237,6 +1246,24 @@ export function addHistory(event, playerIndex, timeOffset, params) {
 		}
 	}
 	store.history.push([event, playerIndex, time, util.deepCloneValue(params)])
+}
+
+// Presets stay in moveDataJSON for a couple of phases, so a player who has
+// already completed this phase must never have their preset played again
+// (eg an early preset applied around conflict resolution).
+export function hasPlayerActedInPhaseThisTurn(playerIndex, phase) {
+	const store = useModelStore()
+	for (let i = store.history.length - 1; i >= 0; i--) {
+		const entry = store.history[i]
+		if (entry[0] === rf.HIST_NEW_TURN) return false
+		if (entry[1] !== playerIndex) continue
+		if (entry[0] === rf.HIST_STACK_ACTIONS && entry[3] && entry[3][0] === phase) return true
+		if (entry[0] === rf.HIST_NO_PRODUCTION_ACTIONS && rf.PHASE_PRODUCTIONS.includes(phase)) return true
+		if (entry[0] === rf.HIST_NO_MOVEMENT_ACTIONS && rf.PHASE_MOVEMENTS.includes(phase)) return true
+		if (entry[0] === rf.HIST_NO_BUILDING_ACTIONS && rf.PHASE_BUILDINGS.includes(phase)) return true
+		if (entry[0] === rf.HIST_NO_WONDER_ACTIONS && rf.PHASE_WONDERS.includes(phase)) return true
+	}
+	return false
 }
 
 export function addHexToMap(coord, rotation, hexTerrainID) {
