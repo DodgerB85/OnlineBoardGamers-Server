@@ -22,6 +22,8 @@ Choose a starting planet directly on the map. During movement, highlighted
 planets and road cells are clickable, including when the next planet is beyond
 the remaining movement allowance. Enter and Space also activate road targets.
 Stop Moving saves the spent movement allowance, so reloading cannot restore it.
+Highway cubes sit at the centres of the same road cells, including
+the two junctions. The board stays in place while a highway placement saves.
 
 Exploration uses the highlighted top consumer tile in either board column.
 Pathways are selected entrance first, then exit on the map; Clear starts the
@@ -29,6 +31,7 @@ selection again and Place pathways confirms it. Occupied pathway planets are
 excluded. Click an entrance arrow beside your planet to use its pathway.
 Exploration takes priority over other action controls.
 
+Tiles and privilege markers sit in their printed mine, site and factory slots.
 On the acting player's planet, click the mine or factory good to trade there.
 Click a site to open its build or trade controls beside the ship. Factory
 choices show input/output goods, points and remaining supply. Other players and
@@ -37,8 +40,7 @@ column, leaving the board uncovered.
 
 ## Player feedback round — 2026-11-17
 
-Board tiles under each planet now read mine, factory, then site (market), and a
-spaceyard chip shows its printed cost good plus NAV/BLD/MER/CGO in the gear's
+Each spaceyard chip shows its printed cost good plus NAV/BLD/MER/CGO in the gear's
 energy colour, so the five starting yards can be read without visiting them.
 Hovering a planet states its mine, factory recipe and site in words. The action
 column grew to 320 px and every goods icon keeps a name tooltip; factory options

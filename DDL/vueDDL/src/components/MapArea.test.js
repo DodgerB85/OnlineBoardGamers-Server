@@ -106,14 +106,14 @@ describe("map decisions", () => {
 		expect(html).toContain(`Mine: ${rf.goodName(planet.mine)}`)
 	})
 
-	it("shows the mine, then the factory, then the site on a planet", async () => {
+	it("shows tiles and their privileges in the order of the printed planet slots", async () => {
 		const store = useModelStore()
 		const planet = rules.planetState(store, 0)
 		planet.factory = { typeId: 0 }
 		planet.site = { kind: "consumer", tileId: 9, built: false }
+		planet.privileges.factory = 1
 		const html = await renderMap()
-		const block = html.match(/<div class="planetStatus"[^>]*>[\s\S]*?<\/div>/)[0]
-		expect(block.indexOf("mineTile")).toBeLessThan(block.indexOf("factoryChip"))
-		expect(block.indexOf("factoryChip")).toBeLessThan(block.indexOf("siteChip"))
+		const block = html.match(/<div class="planetStatus" data-planet="0"[^>]*>[\s\S]*?<\/div>/)[0]
+		expect(block).toMatch(/mineTile[\s\S]*siteChip[\s\S]*factoryChip[\s\S]*privDot/)
 	})
 })
