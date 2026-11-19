@@ -52,6 +52,7 @@ async function clickedPlayerBox(playerIndex) {
 }
 
 function showCurrentPlayerGlow(playerIndex) {
+	if (store.bailout.pending) return playerIndex === controller.currentPlayerIndex()
 	if (!controller.isSimulPhase(store.gameflow.phase) && playerIndex === store.gameflow.turnOrder[0]) return true
 	if (controller.isSimulPhase(store.gameflow.phase) && store.gameflow.turnOrder.includes(playerIndex)) return true
 	return false
@@ -63,7 +64,7 @@ function showCurrentPlayerGlow(playerIndex) {
 		<div v-for="playerIndex in playerLineSource" :key="playerIndex" class="playerBox" :class="{ currentPlayerGlow: showCurrentPlayerGlow(playerIndex), selectedPlayer: store.viewSettings.showingPlayerIndex === playerIndex }" role="button" tabindex="0" :aria-pressed="store.viewSettings.showingPlayerIndex === playerIndex" @click="clickedPlayerBox(playerIndex)" @keydown.enter.prevent="clickedPlayerBox(playerIndex)" @keydown.space.prevent="clickedPlayerBox(playerIndex)">
 			<img class="playerRestoSymbol" :src="view.getImage('player_resto_icon_' + personal.getCorrectedColour(store.players[playerIndex].colour))" />
 			<br />
-			<span class="playerNameSpan" :class="{ currentPlayerNameGlow: playerIndex === store.gameflow.turnOrder[0] }">{{ store.players[playerIndex].displayName }}</span>
+			<span class="playerNameSpan" :class="{ currentPlayerNameGlow: store.bailout.pending ? playerIndex === controller.currentPlayerIndex() : playerIndex === store.gameflow.turnOrder[0] }">{{ store.players[playerIndex].displayName }}</span>
 			<br />
 			${{ store.players[playerIndex].money }}
 			<span v-if="moneyDeltas[playerIndex]" class="moneyDelta" :class="{ moneyLoss: moneyDeltas[playerIndex] < 0 }">{{ moneyDeltas[playerIndex] > 0 ? "+" : "-" }}${{ Math.abs(moneyDeltas[playerIndex]) }}</span>

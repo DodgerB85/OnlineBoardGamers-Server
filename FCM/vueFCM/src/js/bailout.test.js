@@ -242,6 +242,46 @@ describe("claim night", () => {
 	})
 })
 
+describe("strict bailout order", () => {
+	function open(count = 3) {
+		const s = freshGame(count)
+		s.gameflow.fullTurnOrder = count === 3 ? [2, 0, 1] : [...s.gameflow.fullTurnOrder].reverse()
+		s.bankBroken = 1
+		rules.handleBankBreak(false)
+		return s
+	}
+	it.each([rf => rf.CAMPAIGN_MANAGER, () => -1])("rejects a later player's claim or decline without mutations", pick => {
+		const s = open()
+		const before = JSON.stringify([s.bailout, s.availableEmployees, s.players, s.history])
+		rules.claimBailoutEmployee(0, pick(rf))
+		expect(JSON.stringify([s.bailout, s.availableEmployees, s.players, s.history])).toBe(before)
+	})
+	it("the last shared card belongs to the first seat in the snapshot, not the first caller", () => {
+		const s = open()
+		s.bailout.pool[rf.CAMPAIGN_MANAGER] = s.availableEmployees[rf.CAMPAIGN_MANAGER] = 1
+		rules.claimBailoutEmployee(0, rf.CAMPAIGN_MANAGER)
+		rules.claimBailoutEmployee(2, rf.CAMPAIGN_MANAGER)
+		expect(s.players[2].beach).toEqual([rf.CAMPAIGN_MANAGER])
+		expect(s.players[0].beach).toEqual([])
+	})
+	it.each([3, 4, 6])("claims and declines advance the snapshot order with %i seats", count => {
+		const s = open(count)
+		for (const idx of s.bailout.order) {
+			expect(rules.currentBailoutPlayer()).toBe(idx)
+			expect(rules.claimBailoutEmployee(idx, idx % 2 ? -1 : rf.CAMPAIGN_MANAGER)).toBe(true)
+		}
+		expect(rules.currentBailoutPlayer()).toBe(-1)
+		expect(s.bailout.pending).toBe(false)
+	})
+	it("invalid employee and exhausted actual market do not advance", () => {
+		const s = open()
+		rules.claimBailoutEmployee(2, rf.CEO)
+		s.availableEmployees[rf.CAMPAIGN_MANAGER] = 0
+		rules.claimBailoutEmployee(2, rf.CAMPAIGN_MANAGER)
+		expect(s.bailout.claims).toEqual({})
+	})
+})
+
 describe("bailout wire-format persistence", () => {
 	function decodeExport(b64) {
 		return JSON.parse(pako.ungzip(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), { to: "string" }))

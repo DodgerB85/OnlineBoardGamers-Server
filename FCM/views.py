@@ -111,6 +111,29 @@ FCM_EPHEMERAL_EMPLOYEES = {56, 58}  # TEMPORARY_WORKER, UNION_ORGANIZER
 FCM_CFO = 4  # fired by rule when a player reaches $100 at dinner
 
 
+def _fcm_bailout_next_player(game_data, starting_options):
+    """Read the existing optional wire slot; gift turns outrank phase presets."""
+    if rfFCM.SO_SECOND_BAILOUT not in starting_options or not game_data:
+        return None
+    try:
+        data = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(game_data))).decode("utf-8"))
+        tile_slot = rfFCM.SO_LOBBYISTS in starting_options or rfFCM.SO_SENIOR_BUSINESS_DEVELOPER in starting_options
+        players = data[int(tile_slot)]
+        for slot in data[-2:]:
+            if isinstance(slot, dict) and slot.get("pending") and "order" in slot and "claims" in slot:
+                order, claims = slot["order"], {int(k): v for k, v in slot["claims"].items()}
+            elif isinstance(slot, list) and len(slot) == 3 and all(isinstance(x, list) for x in slot) and all(isinstance(i, int) for i in slot[0]) and all(isinstance(i, int) for i in slot[1] + slot[2]):
+                order, claims = slot[0], dict(zip(slot[2][::2], slot[2][1::2]))
+            else:
+                continue
+            for seat in order:
+                if seat not in claims:
+                    return players[seat][0][0]
+    except (ValueError, TypeError, IndexError, KeyError, zlib.error):
+        return None
+    return None
+
+
 def _fcm_roster_cards(game_data, starting_options):
     """Name -> permanent employee cards owned (structure + beach + marketers)."""
     try:
@@ -678,6 +701,11 @@ def _processTurn(request):
     if jsonData["action"] != "loadNew" and not _canActInGame(request, currentGame):
         return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
+    if jsonData["action"] in ("preTurn", "saveSimulMove"):
+        starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        if _fcm_bailout_next_player(currentGame.gameData, starting_options):
+            return JsonResponse({"syncError": True}, safe=False)
+
     # loads the latest game and updates latest-Update
     if jsonData["action"] == "loadNew":
         # NB finished game should trigger a location.reload, but this is here as a reminder
@@ -1028,6 +1056,9 @@ def _processTurn(request):
                 currentRewindDataArray.append(oldData)
         # NB: rewindData is serialized later (before the single final save)
 
+        bailout_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+        had_bailout = _fcm_bailout_next_player(currentGame.gameData, bailout_options) is not None
+        bailout_next = _fcm_bailout_next_player(jsonData["gameData"], bailout_options)
         currentGame.gameData = jsonData["gameData"]
 
         returnOOBpreferences = False
@@ -1080,10 +1111,10 @@ def _processTurn(request):
             returnOOBpreferences = True
 
         # If the stored game is not payday, and the new data IS payday, then we need to return payday preturns
-        if oldPhase != rfFCM.PHASE_PAYDAY and jsonData["phase"] == rfFCM.PHASE_PAYDAY and rfFCM.SO_STRICT_PAYDAY_FRIDGE not in starting_options:
+        if (oldPhase != rfFCM.PHASE_PAYDAY or had_bailout) and not bailout_next and jsonData["phase"] == rfFCM.PHASE_PAYDAY and rfFCM.SO_STRICT_PAYDAY_FRIDGE not in starting_options:
             returnPaydayPreturns = True
         # Same for cleanup
-        if oldPhase != rfFCM.PHASE_CLEAN_UP and jsonData["phase"] == rfFCM.PHASE_CLEAN_UP and rfFCM.SO_STRICT_PAYDAY_FRIDGE not in starting_options:
+        if (oldPhase != rfFCM.PHASE_CLEAN_UP or had_bailout) and not bailout_next and jsonData["phase"] == rfFCM.PHASE_CLEAN_UP and rfFCM.SO_STRICT_PAYDAY_FRIDGE not in starting_options:
             returnFridgePreturns = True
 
         # Remove move data at start of reatruc
@@ -1140,11 +1171,11 @@ def _processTurn(request):
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         # First, save the currentPlayers from the jsonData
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], acting_username=nameToUse, old_latest_update=oldVer)
+        presenter.setCurrentPlayersFromArrInTurnOrder([bailout_next] if bailout_next else jsonData["nextPlayer"], acting_username=nameToUse, old_latest_update=oldVer)
 
         # Before sending notifications, update the currentPlayers
         # If saving into phase 2/7/9, then update for simul players
-        if jsonData["phase"] == rfFCM.PHASE_SETUP_RESERVE or jsonData["phase"] == rfFCM.PHASE_PAYDAY or jsonData["phase"] == rfFCM.PHASE_CLEAN_UP:
+        if not bailout_next and jsonData["phase"] in (rfFCM.PHASE_SETUP_RESERVE, rfFCM.PHASE_PAYDAY, rfFCM.PHASE_CLEAN_UP):
             presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayersFCM())
 
         # Send Notifications - payday/fridge with moves are already removd

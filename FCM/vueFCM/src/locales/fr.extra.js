@@ -14,6 +14,8 @@ export default {
 		"loadFailed": "Impossible de charger les rappels de tour."
 		},
 		"bailoutTitle": "La ville renfloue la banque !",
+		"bailoutOrder": "Ordre de choix du cadeau",
+		"bailoutWaiting": "Au tour de {name}. Les autres joueurs doivent attendre.",
 		"bailoutBody": "Choisissez un employé marketing de niveau 2 gratuit (premier arrivé, premier servi). Le cadeau ne compte pas comme une embauche – l'employé rejoint votre plage et est payé comme tout autre employé.",
 		"bailoutNothingLeft": "Plus rien à réclamer.",
 		"bailoutDecline": "Refuser le cadeau",

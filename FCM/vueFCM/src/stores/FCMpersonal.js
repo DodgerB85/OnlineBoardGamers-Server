@@ -15,6 +15,7 @@ import * as controller from "../js/FCMcontroller"
 import { defineStore } from "pinia"
 import * as rf from "../js/FCMreference"
 import * as funcs from "../js/FCMfuncs"
+import * as rules from "../js/FCMrules"
 
 import { useModelStore } from "./FCMstore.js"
 
@@ -53,6 +54,11 @@ export const usePersonalStore = defineStore("personal", () => {
 		const store = useModelStore()
 
 		// Handle Obvious Conditions
+		if (store.bailout.pending) {
+			if (this.haltPlay || store.viewSettings.showReplay || store.gameflow.phase === rf.PHASE_GAME_OVER || this.pov < 0) return false
+			const idx = rules.currentBailoutPlayer()
+			return idx >= 0 && store.players[idx].displayName !== rf.BOT_NAME && (this.trainingGame || this.pov === idx)
+		}
 		if (store.gameflow.turnOrder.length > 0) {
 			let obj = controller.currentPlayerObj()
 			if (obj && obj.displayName === "FcmAI") return false

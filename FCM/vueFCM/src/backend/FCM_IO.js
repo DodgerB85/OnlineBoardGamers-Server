@@ -455,7 +455,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 
 	let nextPlayer = [controller.currentPlayerObj().name]
 	// If you are saving FROM non simul, and next phase IS simul, construct the whole list
-	if (controller.isSimulPhase(phase)) {
+	if (!store.bailout.pending && controller.isSimulPhase(phase)) {
 		// Check if simul phase is being reset, eg rewind / resign / kick
 		if (restartAnySimulPhase) {
 			store.gameflow.fullTurnOrder.splice(0)
@@ -588,6 +588,15 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 			return
 		}
 
+		// The gift queue suspends ordinary phase pre-moves and auto-processing.
+		if (store.bailout.pending) {
+			store.viewSettings.showGameLoader = false
+			personal.haltPlay = false
+			personal.secondsToNextKickout = result.secondsToNextKickout
+			restartKickoutTimers()
+			if (personal.liveWS) WS.broadcastGameUpdate()
+			return true
+		}
 		//if (!global.stopRender) await funcs.sleep(0)
 		store.viewSettings.showGameLoader = false
 
@@ -720,6 +729,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 		if (personal.liveWS) WS.broadcastGameUpdate()
 
 		if (controller.currentPlayerObj().name === rf.AI_NAME && store.gameflow.phase != rf.PHASE_GAME_OVER) makeAImove()
+		return true
 	} catch (error) {
 		console.error("Error fetching data:", error)
 		personal.haltPlay = false
@@ -731,6 +741,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 
 export async function savePreTurn(preMoveDataRaw) {
 	const store = useModelStore()
+	if (store.bailout.pending) return
 	const personal = usePersonalStore()
 	if (personal.tutorial) return // Tutorial game is never persisted
 	store.viewSettings.showGameLoader = true
@@ -816,6 +827,7 @@ export async function saveOOBpreference() {
 }
 
 export async function saveSimulMove(moveData, continueFromStalledGame = false, passKickoutFor = "", passKickoutSeat = null) {
+	if (useModelStore().bailout.pending) return
 	if (usePersonalStore().tutorial) return // Tutorial game is never persisted
 	const store = useModelStore()
 	const personal = usePersonalStore()
