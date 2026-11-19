@@ -346,6 +346,8 @@ export default {
 		skipConflictPhase: "Skip Conflict Phase",
 	},
 	trade: {
+		offerWaiting: "Trade offer from {names} is waiting. Accept or reject it in the Wonder phase.",
+		answerBeforeEndTurn: "You have a trade offer waiting. Accept or reject it in the Wonder phase before ending your turn.",
 		button: "Trade",
 		incomingTrades: "Incoming Trades:",
 		offers: "offers:",

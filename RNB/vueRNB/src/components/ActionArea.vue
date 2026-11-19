@@ -50,6 +50,11 @@ const showBgStatsQr = ref(false)
 const bgStatsCopied = ref(false)
 const bgStatsQrSvg = computed(() => (showBgStatsQr.value ? window.OBGQR.toSvg(bgStatsUrl.value) : ""))
 
+// Offers are only answered in the wonder phase, so name the sender in the earlier phases
+const incomingTradeNames = computed(() =>
+	store.context.tradeRelevantIncoming.map((entry) => store.players[entry[0]]?.displayName).filter(Boolean)
+)
+
 function copyBgStatsLink() {
 	// Clipboard permission can be refused; the QR code below is the fallback.
 	navigator.clipboard.writeText(bgStatsUrl.value).then(() => {
@@ -191,6 +196,11 @@ function finishActionsAndEndTurn(event = null) {
 }
 
 function localEndPlayerTurn() {
+	// The server drops trades involving whoever submits, so do not end the turn with one waiting
+	if (incomingTradeNames.value.length > 0) {
+		store.gameMessages.actionError = t("trade.answerBeforeEndTurn")
+		return
+	}
 	store.context.researchHexIDpossibilities.splice(0)
 	// If you have just played a pre-phase, then store the move
 	if (rf.ALL_PRE_PHASE_MAIN_PHASES.includes(store.gameflow.phase)) {
@@ -704,6 +714,11 @@ const getGameOverReason = computed(() => {
 		<template v-if="store.gameMessages.successText !== ''">
 			<h2 id="successText" v-html="store.gameMessages.successText"></h2>
 		</template>
+
+		<!-- A trade offer is only answerable in the wonder phase, so say where it is from any earlier phase -->
+		<span v-if="incomingTradeNames.length > 0 && !rf.PHASE_WONDERS.includes(store.gameflow.phase)" class="donkeyWarningSpan">
+			{{ $t("trade.offerWaiting", { names: incomingTradeNames.join(", ") }) }}
+		</span>
 
 		<!-- ALWAYS SHOWS GAME END-->
 		<template v-if="store.gameflow.phase === rf.PHASE_GAME_OVER">
