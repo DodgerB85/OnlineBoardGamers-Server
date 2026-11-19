@@ -19,7 +19,7 @@ user-agents==2.2.0
 django-statici18n 
 lzstring
 djlint
-django-compressor>=4.6.0
+django-compressor>=4.7.0
 jsmin>=3.0.1
 django-q2
 python-telegram-bot[webhooks,ext]
