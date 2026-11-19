@@ -287,6 +287,14 @@ export const PLANETS = [
 	{ id: 15, name: "Iota Draconis b", x: 1335, y: 754, start: false },
 ]
 
+// Top centre of each printed tile panel, indexed by planet ID.
+export const PLANET_PANELS = [
+	[162, 69.75], [261, 381.75], [666, 161.25], [804.75, 102.75],
+	[1299.75, 60], [624.75, 434.25], [886.5, 452.25], [1269.75, 336.75],
+	[155.25, 678.75], [496.5, 635.25], [187.5, 865.5], [573, 796.5],
+	[765.75, 841.5], [961.5, 659.25], [1206, 648.75], [1396.5, 819],
+]
+
 function cellCentre(points) {
 	return points.reduce((sum, point) => [sum[0] + point[0] / points.length, sum[1] + point[1] / points.length], [0, 0])
 }

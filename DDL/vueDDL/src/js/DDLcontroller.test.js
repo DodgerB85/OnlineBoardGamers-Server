@@ -29,6 +29,15 @@ beforeEach(() => {
 })
 
 describe("turn controls", () => {
+	it("keeps turn control while blocking actions during a save", () => {
+		const personal = usePersonalStore()
+		personal.haltPlay = true
+		expect(personal.hasTurnControl()).toBe(true)
+		expect(personal.canPlay()).toBe(false)
+		personal.haltPlay = false
+		expect(personal.canPlay()).toBe(true)
+	})
+
 	it("saves stopped movement and does not reopen it after save or reload", async () => {
 		const store = useModelStore()
 		store.gameflow.turnType = rf.TURN_ACTION

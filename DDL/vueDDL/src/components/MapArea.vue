@@ -98,7 +98,7 @@ const planetItems = computed(() =>
 			state,
 			ships,
 			style: pct([planet.x, planet.y]),
-			low: planet.y > 900,
+			panelStyle: pct(rf.PLANET_PANELS[planet.id]),
 			mine: state ? state.mine : null,
 			site: state ? state.site : null,
 			factory: state ? state.factory : null,
@@ -179,11 +179,12 @@ const shipItems = computed(() => {
 		const pos = map.nodePosition(player.ship.node)
 		const onPlanet = map.shipsOnNode(store, player.ship.node)
 		const offsetIndex = onPlanet.indexOf(i)
-		const angle = (Math.PI * 2 * Math.max(0, offsetIndex)) / Math.max(1, onPlanet.length)
+		const angle = (Math.PI * 2 * offsetIndex) / onPlanet.length
+		const offset = onPlanet.length > 1 ? 16 : 0
 		items.push({
 			i,
 			player,
-			style: pct([pos[0] + Math.cos(angle) * 16, pos[1] + Math.sin(angle) * 16]),
+			style: pct([pos[0] + Math.cos(angle) * offset, pos[1] + Math.sin(angle) * offset]),
 			colour: personal.getCorrectedColourHex(player.colour),
 			current: store.gameflow.turnOrder[0] === i,
 		})
@@ -315,34 +316,34 @@ function planetTooltip(item) {
 	<div class="boardWrap" ref="wrapEl" :style="{ maxHeight: wrapMaxHeight + 'px' }">
 		<div class="boardScaler" :style="{ width: boardWidth + 'px', height: boardHeight + 'px' }">
 		<div class="board" :style="[boardStyle, { transform: `scale(${scale})` }]">
-			<div v-for="item in planetItems" :key="item.planet.id" class="planet" :class="{ startPlanet: item.planet.start, highlighted: highlightedPlanets.has(item.planet.id), selected: store.context.selectedPlanet === item.planet.id || (choosingPathways && [store.context.selectedPathwayIn, store.context.selectedPathwayOut].includes(item.planet.id)), low: item.low }" :style="item.style">
-				<button type="button" class="planetDisc" :data-planet="item.planet.id" :class="{ start: item.planet.start }" :title="planetTooltip(item)" :aria-label="item.planet.name" @click="onPlanetClick(item.planet)"></button>
-				<div class="planetStatus">
+			<template v-for="item in planetItems" :key="item.planet.id">
+				<div class="planet" :class="{ startPlanet: item.planet.start, highlighted: highlightedPlanets.has(item.planet.id), selected: store.context.selectedPlanet === item.planet.id || (choosingPathways && [store.context.selectedPathwayIn, store.context.selectedPathwayOut].includes(item.planet.id)) }" :style="item.style">
+					<button type="button" class="planetDisc" :data-planet="item.planet.id" :class="{ start: item.planet.start }" :title="planetTooltip(item)" :aria-label="item.planet.name" @click="onPlanetClick(item.planet)"></button>
+				</div>
+				<div class="planetStatus" :data-planet="item.planet.id" :style="item.panelStyle">
 					<button v-if="item.mine !== null" type="button" class="mapTile mineTile" :disabled="!canTradeHere(item.planet.id)" :title="$t('map.mineTitle', { good: rf.goodName(item.mine) })" :aria-label="$t('action.takeGood', { good: rf.goodName(item.mine) })" @click="controller.tradeMine">
-						<img class="mineIcon" :src="funcs.goodImage(item.mine)" alt="" />
-					</button>
-					<button v-if="item.factory" type="button" class="mapTile factoryChip" :disabled="!canTradeHere(item.planet.id)" :title="$t('action.produceGood', { good: rf.goodName(factoryGood(item.factory)) })" :aria-label="$t('action.produceGood', { good: rf.goodName(factoryGood(item.factory)) })" @click="controller.tradeFactory">
-						<img :src="funcs.goodImage(factoryGood(item.factory))" alt="" />
+						<img :src="funcs.goodImage(item.mine)" alt="" />
+						<span v-if="item.state.privileges.mine >= 0" class="privDot" :style="{ backgroundColor: privilegeColour(item.state.privileges.mine) }" :title="$t('map.minePrivilege')"></span>
 					</button>
 					<button v-if="item.site" type="button" class="mapTile siteChip" :disabled="!canTradeHere(item.planet.id)" :aria-label="siteLabel(item.site)" @click="openSite(item)" :class="{ built: item.site.built, unbuilt: !item.site.built }" :title="siteLabel(item.site)">
 						<img v-if="spaceyardType(item.site)" :src="funcs.goodImage(spaceyardType(item.site).cost[0])" :alt="rf.goodName(spaceyardType(item.site).cost[0])" />
 						<img v-else-if="siteGood(item.site) !== null" :src="funcs.goodImage(siteGood(item.site))" :alt="rf.goodName(siteGood(item.site))" />
 						<span v-if="spaceyardType(item.site)" class="gearShort" :style="{ backgroundColor: GEAR_COLOUR[spaceyardType(item.site).gear] || '#333' }">{{ GEAR_SHORT[spaceyardType(item.site).gear] || "?" }}</span>
 						<span v-else-if="siteGood(item.site) === null" aria-hidden="true">⚙</span>
+						<span v-if="item.state.privileges.site >= 0" class="privDot" :style="{ backgroundColor: privilegeColour(item.state.privileges.site) }" :title="$t('map.sitePrivilege')"></span>
+					</button>
+					<button v-if="item.factory" type="button" class="mapTile factoryChip" :disabled="!canTradeHere(item.planet.id)" :title="$t('action.produceGood', { good: rf.goodName(factoryGood(item.factory)) })" :aria-label="$t('action.produceGood', { good: rf.goodName(factoryGood(item.factory)) })" @click="controller.tradeFactory">
+						<img :src="funcs.goodImage(factoryGood(item.factory))" alt="" />
+						<span v-if="item.state.privileges.factory >= 0" class="privDot" :style="{ backgroundColor: privilegeColour(item.state.privileges.factory) }" :title="$t('map.factoryPrivilege')"></span>
 					</button>
 				</div>
-				<div class="privilegeRow">
-					<span v-if="item.state && item.state.privileges.mine >= 0" class="privDot" :style="{ backgroundColor: privilegeColour(item.state.privileges.mine) }" :title="$t('map.minePrivilege')"></span>
-					<span v-if="item.state && item.state.privileges.site >= 0" class="privDot" :style="{ backgroundColor: privilegeColour(item.state.privileges.site) }" :title="$t('map.sitePrivilege')"></span>
-					<span v-if="item.state && item.state.privileges.factory >= 0" class="privDot" :style="{ backgroundColor: privilegeColour(item.state.privileges.factory) }" :title="$t('map.factoryPrivilege')"></span>
-				</div>
-			</div>
+			</template>
 
 			<div v-for="ship in shipItems" :key="ship.i" class="ship" :class="{ currentShip: ship.current }" :style="ship.style" :title="ship.player.displayName">
 				<span class="shipBody" :style="{ backgroundColor: ship.colour }"></span>
 			</div>
 
-			<div v-for="hw in highwayItems" :key="hw.node" class="highwayCube" :style="{ ...hw.style, backgroundColor: hw.colour }" :title="$t('map.highwayOwned', { player: store.players[hw.owner].displayName })"></div>
+			<div v-for="hw in highwayItems" :key="hw.node" class="highwayCube" :style="{ ...hw.style, '--cube-colour': hw.colour }" :title="$t('map.highwayOwned', { player: store.players[hw.owner].displayName })"></div>
 
 			<div v-for="cube in turnCubeItems" :key="cube.turn" class="turnCube" :style="{ ...cube.style, backgroundColor: cube.colour }" :title="$t('map.turnCube', { turn: cube.turn })"></div>
 
@@ -426,50 +427,50 @@ function planetTooltip(item) {
 .planet.selected .planetDisc { outline: 3px solid #00ff88; outline-offset: 2px; }
 .planetStatus {
 	position: absolute;
-	left: 50%;
-	top: 50%;
-	transform: translate(-50%, 28px);
-	display: flex;
-	gap: 3px;
-	align-items: center;
-	justify-content: center;
-	white-space: nowrap;
+	transform: translateX(-50%);
+	width: 69px;
+	display: grid;
+	grid-template-rows: repeat(3, 34.4px);
+	z-index: 4;
 	pointer-events: none;
 }
-.mineIcon { width: 26px; height: 26px; background: #3b3b3b; border: 1px solid #ddd; border-radius: 3px; }
-/* The bottom-of-the-board planets would otherwise push their tiles onto the
-   printed turn track, so their tiles sit above the disc instead. */
-.planet.low .planetStatus { transform: translate(-50%, -74px); }
-.planet.low .privilegeRow { transform: translate(-50%, -96px); }
-.siteChip {
-	display: inline-flex;
+.mapTile {
+	position: relative;
+	display: flex;
 	align-items: center;
-	gap: 2px;
-	font-size: 9px;
+	justify-content: center;
+	gap: 4px;
+	margin: 3px;
+	padding: 0;
+	border: 1px solid;
+	border-radius: 3px;
+	pointer-events: auto;
+	cursor: pointer;
+}
+.mapTile img { width: 24px; height: 24px; object-fit: contain; }
+.mapTile:disabled { cursor: default; }
+.mapTile:enabled { outline: 2px solid #00ff88; }
+.mineTile { grid-row: 1; background: #25344d; border-color: #8293ac; }
+.siteChip {
+	grid-row: 2;
+	font-size: 12px;
 	font-weight: bold;
 	color: #222;
 	background: #e8d267;
-	border: 1px solid #6d5a19;
-	border-radius: 3px;
-	padding: 1px 3px;
-	max-width: 68px;
-	overflow: hidden;
+	border-color: #6d5a19;
 }
 .siteChip.built { background: #4aa3df; color: #fff; border-color: #1e5c8a; }
-.siteChip img { width: 20px; height: 20px; }
-.gearShort { font-size: 8px; font-weight: bold; color: #fff; border-radius: 2px; padding: 0 2px; letter-spacing: 0.02em; }
-.factoryChip { display: inline-flex; background: #7c5eb0; border: 1px solid #3c2b5e; border-radius: 3px; padding: 1px; }
-.factoryChip img { width: 22px; height: 22px; }
-.privilegeRow {
+.gearShort { font-size: 9px; font-weight: bold; color: #fff; border-radius: 2px; padding: 1px 3px; letter-spacing: 0.02em; }
+.factoryChip { grid-row: 3; background: #685096; border-color: #3c2b5e; }
+.privDot {
 	position: absolute;
-	left: 50%;
-	top: 50%;
-	transform: translate(-50%, -40px);
-	display: flex;
-	gap: 2px;
-	pointer-events: none;
+	right: 1px;
+	top: 1px;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	border: 1px solid #ddd;
 }
-.privDot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #111; display: inline-block; }
 .ship {
 	position: absolute;
 	transform: translate(-50%, -50%);
@@ -489,12 +490,20 @@ function planetTooltip(item) {
 .highwayCube {
 	pointer-events: none;
 	position: absolute;
-	width: 12px;
-	height: 12px;
-	transform: translate(-50%, -50%) rotate(45deg);
-	border: 1px solid #fff;
+	/* Fit the narrowest road cell at the board's base size. */
+	width: 11px;
+	height: 11px;
+	transform: translate(-50%, -50%);
 	z-index: 8;
-	box-shadow: 0 0 3px #000;
+	clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+	background: linear-gradient(90deg, rgba(255, 255, 255, 0.12) 50%, rgba(0, 0, 0, 0.27) 50%), var(--cube-colour);
+}
+.highwayCube::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	clip-path: polygon(50% 0%, 100% 25%, 50% 50%, 0% 25%);
+	background: color-mix(in srgb, var(--cube-colour), white 42%);
 }
 .turnCube {
 	pointer-events: none;
@@ -555,10 +564,6 @@ function planetTooltip(item) {
 	border-radius: 2px;
 }
 .emptySlot { font-size: 8px; color: #ddd; }
-.mapTile { pointer-events: auto; padding: 0; cursor: pointer; }
-.mapTile:disabled { cursor: default; }
-.mapTile:enabled { outline: 2px solid #00ff88; }
-.mineTile { background: transparent; border: 0; display: inline-flex; }
 .planetDisc:focus-visible, .dotTarget:focus-visible { outline: 4px solid white; }
 .cardTarget { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; background: transparent; border: 0; z-index: 1; }
 .consumerCard.selectable { outline: 3px solid #00ff88; outline-offset: 2px; }

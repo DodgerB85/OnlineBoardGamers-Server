@@ -39,8 +39,7 @@ export const usePersonalStore = defineStore("personal", () => {
 	// which holds the auto-collect back for a moment after each edit.
 	var collectQueueTouched = 0
 
-	function canPlay() {
-		if (this.haltPlay) return false
+	function hasTurnControl() {
 		if (store.viewSettings.showReplay) return false
 		if (store.gameflow.phase === rf.PHASE_GAME_OVER) return false
 		if (this.pov < 0) return false
@@ -48,6 +47,10 @@ export const usePersonalStore = defineStore("personal", () => {
 		if (this.trainingGame) return true
 		const current = store.gameflow.turnOrder[0]
 		return this.pov === current
+	}
+
+	function canPlay() {
+		return !this.haltPlay && this.hasTurnControl()
 	}
 
 	function canBid() {
@@ -94,6 +97,7 @@ export const usePersonalStore = defineStore("personal", () => {
 		myTradeOffers,
 		redoStack,
 		collectQueueTouched,
+		hasTurnControl,
 		canPlay,
 		canBid,
 		canResign,

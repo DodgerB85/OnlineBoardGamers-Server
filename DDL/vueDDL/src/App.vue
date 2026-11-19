@@ -76,14 +76,15 @@ const waitingForTurn = computed(() => {
 
 const statusBanner = computed(() => {
 	const playerObj = controller.currentPlayerObj()
+	const isMyTurn = personal.hasTurnControl()
 	return {
 		labels: getStatusBannerLabels(window.initData.locale, { turn: store.gameflow.turn }),
 		phase: view.phaseStr(store.gameflow.phase),
 		action: view.actionTitle(store),
-		isMyTurn: personal.canPlay(),
+		isMyTurn,
 		isGameOver: store.gameflow.phase === rf.PHASE_GAME_OVER,
 		isReplay: store.viewSettings.showReplay,
-		player: !personal.canPlay() && playerObj ? { name: playerObj.displayName, background: personal.getCorrectedColourHex(playerObj.colour) } : null,
+		player: !isMyTurn && playerObj ? { name: playerObj.displayName, background: personal.getCorrectedColourHex(playerObj.colour) } : null,
 	}
 })
 </script>
