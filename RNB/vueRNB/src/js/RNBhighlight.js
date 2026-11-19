@@ -642,7 +642,9 @@ export function highlightEligibleSecondaryBuildingsForManualProduction(transport
 					const possibleLocations = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation(building.location, false).filter((x) => loc.isLandVertexLocation(x))
 					const allPlayerTransporters = model.getTransportersByPlayerIndex(playerIndex).filter((t) => t.type === rf.DONKEY)
 					if (allPlayerTransporters.length === 0) return false
-					if (!allPlayerTransporters.some((t) => possibleLocations.some((subArr) => util.arraysEqual(subArr, t.location)))) return false
+					// &c: a land transporter stranded on a flooded polder may still use the factory on the tile
+					const strandedOnFloodedPolder = (t) => loc.isSeaVertexLocation(t.location) && loc.isSpecificHexLocation(t.location, building.location[1]) && model.getHexByID(building.location[1]).currentTerrain === rf.TERR_POLDER_WET
+					if (!allPlayerTransporters.some((t) => strandedOnFloodedPolder(t) || possibleLocations.some((subArr) => util.arraysEqual(subArr, t.location)))) return false
 					return true
 				}
 				// If outputting a water transporter, check if there's enough water
