@@ -936,6 +936,13 @@ export function getManagerActivation(playerIndex, hexID) {
 	return store.gameflow.productionDecisions?.[store.gameflow.turn]?.[playerIndex]?.managers?.[hexID] ?? true
 }
 
+export function isCarriedManagerSwitchedOff(transporter) {
+	const phase = useModelStore().gameflow.phase
+	return (phase === rf.PHASE_PRODUCTION_SETUP_TO || rf.PHASE_PRODUCTIONS.includes(phase))
+		&& loc.isAnyHexLocation(transporter.location)
+		&& !getManagerActivation(transporter.ownerIndex, transporter.location[1])
+}
+
 export function isManagerActiveOnHex(hexID) {
 	// Managers placed directly on the tile (bucket / vertex / docked / river)
 	const managersOnTile = getAllInGameResources().filter((r) => r.type === rf.RES_MANAGER && loc.isSpecificHexLocation(r.location, hexID))

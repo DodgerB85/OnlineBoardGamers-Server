@@ -15,6 +15,7 @@ import * as loc from "../../js/RNBlocation"
 import * as computes from "../../js/RNBcomputes"
 import * as vec from "../../js/RNBvector"
 import * as electricity from "../../js/RNBelectricity"
+import * as productionSetup from "../../js/RNBproductionSetup"
 //import * as coord from "../../js/RNBcoordinate"
 import * as hd from "../../js/RNBhex"
 
@@ -825,6 +826,7 @@ const computedMaxNeutralBricks = computed(() => {
 							:width="bldg.width / 1.5"
 							:height="bldg.height / 1.5"
 							:fill="`url(#pattern_${bldg.img})`"
+							:opacity="productionSetup.isUnfiredPlant(bldg.id) ? 0.45 : 1"
 							:style="{
 								strokeWidth: store.context.buildingIDsToHighlight.includes(bldg.id) ? 20 * store.RATIO : bldg.strengthened ? 60 * store.RATIO : 2 * store.RATIO,
 							}" />
@@ -924,6 +926,14 @@ const computedMaxNeutralBricks = computed(() => {
 										:width="resOnTransporterWidthZP"
 										:height="resOnTransporterWidthZP"
 										:fill="`url(#pattern_${computedResObj.gfx})`" />
+									<path
+										v-if="computedResObj.type === rf.RES_MANAGER && model.isCarriedManagerSwitchedOff(transporter)"
+										:d="`M 0 0 L ${resOnTransporterWidthZP} ${resOnTransporterWidthZP} M ${resOnTransporterWidthZP} 0 L 0 ${resOnTransporterWidthZP}`"
+										class="managerSwitchedOff"
+										stroke="red"
+										stroke-width="5"
+										stroke-linecap="round"
+										style="pointer-events: none" />
 									<!-- The Triangle Indicators -->
 									<polygon v-if="computedResObj.movedTransporterID >= 0" :points="view.getCornerTrianglePoints([resOnTransporterWidthZP / 2, resOnTransporterWidthZP / 2], resOnTransporterWidthZP, resOnTransporterWidthZP, 0, 0.75)" fill="red" stroke="#000" stroke-width="5" />
 									<polygon v-if="computedResObj.movedTransporterID >= 0" :points="view.getCornerTrianglePoints([resOnTransporterWidthZP / 2, resOnTransporterWidthZP / 2], resOnTransporterWidthZP, resOnTransporterWidthZP, 1, 0.75)" fill="red" stroke="#000" stroke-width="5" />

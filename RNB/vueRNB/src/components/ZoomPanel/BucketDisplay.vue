@@ -207,6 +207,9 @@ function shouldShowUnableToDropGeeseText(transporterID) {
 					<div class="resourcesGroup" v-if="transporter.resourcesOnTransporter.length > 0">
 						<div v-for="res in transporter.resourcesOnTransporter" :key="res.id" class="resOnTransporterSummaryDiv" :class="[{ resOnTransporterSummaryDivHighlighted: store.context.resourceIDsToHighlight.includes(res.id) }, { resOnTransporterNormalSizeDiv: transporter.resourcesOnTransporter.length <= 3 }, { resOnTransporterSmallSizeDiv: transporter.resourcesOnTransporter.length > 3 }]" @click="map.clickedResOnTransporter(res.location[1], res.id)">
 							<img class="resOnTransporterSummaryImg" :src="view.getImage(res.gfx)" />
+							<svg v-if="res.type === rf.RES_MANAGER && model.isCarriedManagerSwitchedOff(transporter)" class="managerSwitchedOff" viewBox="0 0 100 100" aria-hidden="true">
+								<path d="M 8 8 L 92 92 M 92 8 L 8 92" stroke="red" stroke-width="10" stroke-linecap="round" />
+							</svg>
 							<div v-if="res.movedTransporterID !== -1" class="triangle-overlay">
 								<!-- Top Left -->
 								<div class="tri-border top-left"></div>
@@ -453,6 +456,14 @@ function shouldShowUnableToDropGeeseText(transporterID) {
 .resOnTransporterSummaryImg {
 	width: 100%;
 	height: 100%;
+}
+
+.managerSwitchedOff {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
 }
 
 .resOnTransporterSummaryDivHighlighted {

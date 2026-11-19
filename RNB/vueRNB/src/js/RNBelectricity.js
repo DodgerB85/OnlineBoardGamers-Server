@@ -121,18 +121,19 @@ export function findFreeFuelOnTile(hexID, bucketID) {
 	return null
 }
 
-// Fuel supplied from a transporter on the same tile (player override).
-export function findFuelOnTransporterOnTile(transporterID, hexID) {
+export function getCarriedFuelOnTile(transporter, hexID) {
+	if (!loc.isSpecificHexLocation(transporter.location, hexID)) return []
+	return model.resourcesOnTransport(transporter.id).filter((res) => res.type === rf.RES_BOARDS || res.type === rf.RES_TRUNKS)
+}
+
+// A transporter click and older saved moves use the default fuel.
+export function findFuelOnTransporterOnTile(transporterID, hexID, fuelID) {
 	if (transporterID === -1) return null
-	const transporterObj = model.getTransporterByID(transporterID)
-	if (!transporterObj) return null
-	if (!loc.isSpecificHexLocation(transporterObj.location, hexID)) return null
-	const resources = model.resourcesOnTransport(transporterObj.id)
-	for (const fuelType of [rf.RES_BOARDS, rf.RES_TRUNKS]) {
-		const res = resources.find((r) => r.type === fuelType)
-		if (res) return res
-	}
-	return null
+	const transporter = model.getTransporterByID(transporterID)
+	if (!transporter) return null
+	const fuel = getCarriedFuelOnTile(transporter, hexID)
+	if (fuelID !== undefined) return fuel.find((res) => res.id === fuelID || res.uniqueID === fuelID) ?? null
+	return fuel.find((res) => res.type === rf.RES_BOARDS) ?? fuel[0] ?? null
 }
 
 // Player hook for the Transporter Override: choose a transporter on the plant's
@@ -144,11 +145,11 @@ export function setPowerPlantTransporterFuel(buildingID, transporterID) {
 
 // Fuel one plant from a transporter during the owner's production setup.
 // Returns the consumed fuel's history entry, or null when the plant cannot fire.
-export function firePowerPlantFromTransporter(buildingID, transporterID) {
+export function firePowerPlantFromTransporter(buildingID, transporterID, fuelID) {
 	if (!isElectricityEnabled()) return null
 	const bldg = model.getBuildingByID(buildingID)
 	if (!bldg || !isPowerPlant(bldg) || bldg.powerActive === true) return null
-	const fuelRes = findFuelOnTransporterOnTile(transporterID, bldg.location[1])
+	const fuelRes = findFuelOnTransporterOnTile(transporterID, bldg.location[1], fuelID)
 	if (!fuelRes) return null
 	bldg.powerActive = true
 	bldg.powerFuelType = fuelRes.type

@@ -340,6 +340,7 @@ export default {
 		skipConflictPhase: "Saltar fase de conflicto",
 	},
 	trade: {
+		presetsCleared: "Se aceptó un intercambio y se borraron todos los movimientos preestablecidos pendientes.",
 		button: "Comerciar",
 		incomingTrades: "Ofertas recibidas:",
 		offers: "ofrece:",

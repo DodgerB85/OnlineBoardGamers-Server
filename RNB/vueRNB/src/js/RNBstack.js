@@ -959,7 +959,7 @@ export function addItemToStack(newItem) {
  */
 
 // Currently, this ONLY comes from processing stacks, from IO, AFTER you've saved, so must ALWAYS use store.gameflow.turnOrder[0]
-export function verifyAndPerformStack(stack, processingFirstPlayer) {
+export function verifyAndPerformStack(stack, processingFirstPlayer, moveData) {
 	const store = useModelStore()
 
 	// Capture player index and phase BEFORE performing actions,
@@ -986,7 +986,7 @@ export function verifyAndPerformStack(stack, processingFirstPlayer) {
 		}
 		// Otherwise, you need to perform the action, to set up the game
 		// in the same state to test the next action on the stack
-		else performSingleStackAction(stack[i], true)
+		else performSingleStackAction(stack[i], true, moveData)
 	}
 
 	// At this point, the stack is valid, so make the history entry
@@ -1055,11 +1055,11 @@ export function verifySingleStackAction(stackActionData) {
 				.some((t) => model.resourcesOnTransport(t.id).some((r) => r.type === rf.RES_MANAGER))
 			if (!hasManager) return 10
 		}
-		for (const [bldgID, transporterID] of stackAction[2] || []) {
+		for (const [bldgID, transporterID, fuelID] of stackAction[2] || []) {
 			const bldg = model.getBuildingByID(bldgID)
 			if (!bldg || bldg.type !== rf.BLDG_POWER_PLANT) return 11
 			if (bldg.powerActive === true) continue
-			if (!electricity.findFuelOnTransporterOnTile(transporterID, bldg.location[1])) return 12
+			if (!electricity.findFuelOnTransporterOnTile(transporterID, bldg.location[1], fuelID)) return 12
 		}
 		return 0
 	}
@@ -2137,7 +2137,7 @@ export function verifySingleStackAction(stackActionData) {
  * Most actions we can defer to eg pickupRes_core to handle the action
  * But MOVING trans is recreated here to skip out the waypoints along the way.
  */
-export function performSingleStackAction(stackActionData, swapIDs) {
+export function performSingleStackAction(stackActionData, swapIDs, moveData = {}) {
 	const store = useModelStore()
 
 	// Always try to swapIDs, if possible?
@@ -2148,7 +2148,7 @@ export function performSingleStackAction(stackActionData, swapIDs) {
 	const stackPlayerIndex = stackActionData.playerIndex
 
 	if (action === rf.STACK_PRODUCTION_SETUP) {
-		productionSetup.performSetupStackAction(stackAction, stackPlayerIndex)
+		productionSetup.performSetupStackAction(stackAction, stackPlayerIndex, moveData)
 		return
 	}
 
@@ -2986,7 +2986,7 @@ export function attemptToLoadWholeCurrentMoveStack(currentMoveData, historyPhase
 			// As this is only loading the stack from the current phase, but out of order, we KNOW all pre-prod and mines
 			// have been done. Therefore, we are ok to swap ID's
 			// EXCEPT MAYBE TRANSPORTERS ????
-			performSingleStackAction(stack[i], true)
+			performSingleStackAction(stack[i], true, currentMoveData)
 			context.createUndoPoint()
 		}
 	}

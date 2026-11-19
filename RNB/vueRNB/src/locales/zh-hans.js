@@ -340,6 +340,7 @@ export default {
 		skipConflictPhase: "跳过冲突阶段",
 	},
 	trade: {
+		presetsCleared: "交易已被接受，所有待执行的预设行动已清除。",
 		button: "交易",
 		incomingTrades: "收到的交易：",
 		offers: "提供：",

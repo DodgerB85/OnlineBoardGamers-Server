@@ -1480,6 +1480,7 @@ const computedEntry3 = computed(() => {
 				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][0]].colour)">{{ personal.getHistoryName(entry[3][0]) }}</span>
 				{{ $t("trade.for") }}
 				<img v-for="(resGfx, idx) in computedEntry3.requestedResGfxs" :key="'receive' + idx" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
+				<div v-if="entry[3][3] === true">{{ $t("trade.presetsCleared") }}</div>
 			</div>
 		</div>
 	</template>
