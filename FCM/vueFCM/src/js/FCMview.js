@@ -415,6 +415,7 @@ export function getImage(image) {
 	else if (image === "so_seniorBusinessDeveloper") return new URL(`../../../static/FCM/images/so_seniorBusinessDeveloper.svg`, import.meta.url).href
 	else if (image === "campaign_28") return new URL(`../../../static/FCM/images/antenna35.png`, import.meta.url).href
 	else if (image === "campaign_29") return new URL(`../../../static/FCM/images/antenna45.png`, import.meta.url).href
+	else if (image === "campaign_42" || image === "antenna55") return new URL(`../../../static/FCM/images/antenna55.png`, import.meta.url).href
 	else if (image === "antenna35") return new URL(`../../../static/FCM/images/antenna35.png`, import.meta.url).href
 	else if (image === "antenna45") return new URL(`../../../static/FCM/images/antenna45.png`, import.meta.url).href
 	else if (image === "headline_prime") return new URL(`../../../static/FCM/images/headline_prime.png`, import.meta.url).href

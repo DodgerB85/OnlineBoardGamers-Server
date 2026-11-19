@@ -234,22 +234,31 @@
           </div>
           <br />
 
-          <div class="FCMhelpSection">
+          <div class="FCMhelpSection" id="media-line">
             <h2 class="fcm-china-help-title">{% translate "Media Line" %}</h2>
+            <p>{% blocktranslate trimmed %}Adds telephone and television advertising.{% endblocktranslate %}</p>
             {% get_current_language as phone_language %}
             <img class="helpEmployeeImg" src="{% if phone_language|slice:':2' == 'zh' %}{% static 'FCM/images/e_telemarketer.jpg' %}{% else %}{% static 'FCM/images/e_telemarketer_en.jpg' %}{% endif %}" alt="{% trans 'Telemarketer' %}" width="145" height="225" />
             <img class="helpEmployeeImg" src="{% static 'FCM/images/e_tv_announcer.jpg' %}" alt="{% trans 'TV Announcer' %}" width="145" height="225" />
             <br />
-            <p>{% blocktranslate trimmed %}Adds telephone and television advertising.{% endblocktranslate %}</p>
+            {% if phone_language|slice:':2' == 'zh' %}
+              {% static 'FCM/images/media_line_range_three_phones_v4_zh.png' as media_range_image %}
+            {% else %}
+              {% static 'FCM/images/media_line_range_three_phones_v4_en.png' as media_range_image %}
+            {% endif %}
+            <figure id="media-line-range" class="media-line-range-figure" style="margin:16px 0">
+              <a class="media-line-range-fullsize" href="{{ media_range_image }}" target="_blank" rel="noopener" title="{% if phone_language|slice:':2' == 'zh' %}点击查看原图{% else %}Open full-size diagram{% endif %}">
+                <img id="media-line-range-diagram" src="{{ media_range_image }}" width="2320" height="1320" style="display:block;width:100%;max-width:100%;height:auto;border:1px solid #b4a38b;border-radius:6px;box-sizing:border-box" loading="lazy" alt="{% if phone_language|slice:':2' == 'zh' %}电话与电视的板块范围：三种电话放置与电视选房示例{% else %}Phone and TV tile ranges: three phone placements and TV house selection{% endif %}" />
+              </a>
+            </figure>
             <ul>
               <li>{% blocktranslate trimmed %}Training: Marketing Trainee → Telemarketer → TV Announcer → Brand Director; 6 cards of each, stackable.{% endblocktranslate %}</li>
-              <li>{% blocktranslate trimmed %}Telemarketers may place phone or lower-level advertising. Select one group at a time, with the same good and duration (1–3 rounds).{% endblocktranslate %}</li>
-              <li>{% blocktranslate trimmed %}Phones: four groups, 6.5 / 7.5 / 8.5 / 9.5, with 3 cards each, 12 cards in total. Placement is allowed on the tile containing the restaurant entrance and the tiles above, below, left and right, 5 tiles in total.{% endblocktranslate %}</li>
-              <li>{% blocktranslate trimmed %}TV Announcers may place TV, phone or lower-level advertising. TV channels may carry the same good for the same duration (1–4 rounds).{% endblocktranslate %}</li>
-              <li>{% blocktranslate trimmed %}TV has 2 channels, numbered 3.5/4.5. Choose 5 houses within 2 tiles of the tile containing the restaurant entrance for TV marketing.{% endblocktranslate %}</li>
-              <li>{% blocktranslate trimmed %}Headlines are available only to TV Announcers. Each working employee chooses once per round: at the next round’s dinner, all city goods’ unit prices change by ±5. Changes can stack or cancel.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}Telemarketers may place phone or lower-level advertising.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}Select one group at a time, with the same good and duration (1–3 rounds). Phones: four groups, 6.5 / 7.5 / 8.5 / 9.5, with 3 cards each, 12 cards in total. Placement is allowed on the tile containing the restaurant entrance and the tiles above, below, left and right, 5 tiles in total.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}TV Announcers may place TV, phone or lower-level advertising, and publish headlines.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}TV channels may carry the same good for the same duration (1–4 rounds). TV has 3 channels, numbered 3.5/4.5/5.5. Choose 5 houses within 2 tiles of the tile containing the restaurant entrance for TV marketing.{% endblocktranslate %}</li>
+              <li>{% blocktranslate trimmed %}Headlines are a special ability of TV Announcers. Each working employee chooses once per round: at the next round’s dinner, all city goods’ unit prices change by ±5. Changes can stack or cancel.{% endblocktranslate %}</li>
               <li>{% blocktranslate trimmed %}“First TV Announcer used” milestone: during the recipient’s first TV advertising campaign, place 2 demand.{% endblocktranslate %}</li>
-              <li>{% blocktranslate trimmed %}Compatibility: older games and replays retain their original phone rules, including building adjacency. TV retains two channels; its selection, range, duration, headlines, training and independent milestone are unchanged.{% endblocktranslate %}</li>
             </ul>
           </div>
           <br />

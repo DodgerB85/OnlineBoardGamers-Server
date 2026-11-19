@@ -44,7 +44,7 @@ class VisibleText(HTMLParser):
 
 def source_section():
     source=(ROOT/'FCM/templates/FCM/fanExpansionsHelp.html').read_text(encoding='utf-8')
-    return source[source.rfind('<div class="FCMhelpSection">',0,source.index('{% translate "Media Line" %}')):source.index('</div>',source.index('{% translate "Media Line" %}'))+6]
+    return source[source.index('<div class="FCMhelpSection" id="media-line">'):source.index('</div>',source.index('{% translate "Media Line" %}'))+6]
 
 def message_ids():
     section=source_section()
@@ -60,12 +60,57 @@ def render_page(lang):
 def rendered_section(lang):
     html=render_page(lang)
     anchor=html.index('e_telemarketer')
-    start=html.rfind('<div class="FCMhelpSection">',0,anchor)
+    start=html.index('<div class="FCMhelpSection" id="media-line">')
     section=html[start:html.index('</div>',anchor)+6]
     parser=VisibleText(); parser.feed(section)
     return section, ' '.join(' '.join(parser.parts).split())
 
 class PhoneHelpTests(unittest.TestCase):
+    def test_range_diagram_language_assets_and_real_template_order(self):
+        from PIL import Image
+        for lang in LANGS:
+            html,_=rendered_section(lang)
+            filename='media_line_range_three_phones_v4_' + ('zh' if lang=='zh-hans' else 'en') + '.png'
+            self.assertIn(filename,html)
+            self.assertNotIn('media_line_range_three_phones_v4_' + ('en' if lang=='zh-hans' else 'zh') + '.png',html)
+            self.assertLess(html.index('<h2'),html.index('<p>'))
+            self.assertLess(html.index('<p>'),html.index('e_telemarketer'))
+            self.assertLess(html.index('e_tv_announcer'),html.index('<figure'))
+            self.assertLess(html.index('<figure'),html.index('<ul>'))
+            self.assertIn('target="_blank" rel="noopener"',html)
+            with Image.open(ROOT/'FCM/static/FCM/images'/filename) as image:
+                self.assertEqual(image.size,(2320,1320))
+
+    def test_tv_art_generator_is_portable_and_only_generates_third_channel(self):
+        import subprocess
+        import hashlib
+        from PIL import Image, ImageChops
+        script=ROOT/'FCM/tools/make_tv_art.py'
+        source=script.read_text(encoding='utf-8')
+        self.assertNotIn('ImageFont',source)
+        self.assertNotIn('Windows/Fonts',source)
+        self.assertNotIn('(5,6)',source)
+        target=ROOT/'FCM/static/FCM/images/antenna55.png'
+        before=hashlib.sha256(target.read_bytes()).hexdigest()
+        result=subprocess.run([sys.executable,str(script)],capture_output=True,text=True)
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertEqual(before,hashlib.sha256(target.read_bytes()).hexdigest())
+        self.assertEqual(len(json.loads(result.stdout)),1)
+        original=Image.open(target.with_name('antenna35.png')).convert('RGBA')
+        generated=Image.open(target).convert('RGBA')
+        self.assertEqual(generated.crop((76,51,89,70)).tobytes(),original.crop((94,51,107,70)).tobytes())
+        generated.paste(original.crop((76,51,89,70)),(76,51,89,70))
+        self.assertIsNone(ImageChops.difference(original,generated).getbbox())
+
+    def test_three_tv_channels_in_all_languages(self):
+        counts={'en':'3 channels','zh-hans':'3频道','de':'3 Kanäle','es':'3 canales','fr':'3 chaînes','it':'3 canali'}
+        for lang,term in counts.items():
+            _,text=rendered_section(lang)
+            with self.subTest(language=lang):
+                self.assertIn(term,text)
+                self.assertIn('3.5/4.5/5.5',text)
+                self.assertNotIn('3.5/4.5/5.5/6.5',text)
+
     def test_chinese_has_no_english_fallback(self):
         _, text=rendered_section('zh-hans')
         self.assertNotRegex(text,r'[A-Za-z]{2,}', text)
@@ -88,14 +133,14 @@ class PhoneHelpTests(unittest.TestCase):
                     self.assertNotIn('fuzzy',entry.flags)
                     self.assertEqual(mo.gettext(msgid),entry.msgstr)
 
-    def test_short_overview_and_eight_points(self):
+    def test_short_overview_and_seven_points(self):
         html,text=rendered_section('zh-hans')
-        self.assertEqual(html.count('<li>'),8)
+        self.assertEqual(html.count('<li>'),7)
         self.assertLessEqual(len(re.sub(r'\s','',text)),800)
         self.assertNotIn('<details>',html)
         self.assertNotIn('rulesVersion',text)
 
-    def test_six_languages_render_all_nine_expected_messages(self):
+    def test_six_languages_render_all_eight_expected_messages(self):
         source=json.loads((ROOT/'FCM/tools/phone_help_translations.json').read_text(encoding='utf-8'))
         for lang in LANGS:
             html,_=rendered_section(lang)
@@ -116,8 +161,8 @@ class PhoneHelpTests(unittest.TestCase):
 
     def test_required_rules_in_real_chinese_and_english(self):
         checks={
-            'zh-hans':['6.5／7.5／8.5／9.5','共12张','同商品、同时长（1—3回合）','餐厅入口所在板块','共5个板块','电视广播员的可以','（1—4回合）','2频道','3.5/4.5','距离2板块内的5个房子','每名在岗员工每回合选择一次','下回合晚餐','±5','可叠加抵消。','获得者首场电视广告期间，放置2需求。'],
-            'en':['6.5 / 7.5 / 8.5 / 9.5','12 cards','same good and duration (1–3 rounds)','restaurant entrance','5 tiles','(1–4 rounds)','2 channels','3.5/4.5','5 houses within 2 tiles','Each working employee chooses once per round','next round’s dinner','±5','Changes can stack or cancel.','place 2 demand.']}
+            'zh-hans':['6.5／7.5／8.5／9.5','共12张','同商品、同时长（1—3回合）','餐厅入口所在板块','共5个板块','电视广播员的可以','（1—4回合）','3频道','3.5/4.5/5.5','距离2板块内的5个房子','每名在岗员工每回合选择一次','下回合晚餐','±5','可叠加抵消。','获得者首场电视广告期间，放置2需求。'],
+            'en':['6.5 / 7.5 / 8.5 / 9.5','12 cards','same good and duration (1–3 rounds)','restaurant entrance','5 tiles','(1–4 rounds)','3 channels','3.5/4.5/5.5','5 houses within 2 tiles','Each working employee chooses once per round','next round’s dinner','±5','Changes can stack or cancel.','place 2 demand.']}
         for lang,terms in checks.items():
             _,text=rendered_section(lang)
             for term in terms:
@@ -128,7 +173,7 @@ class PhoneHelpTests(unittest.TestCase):
             self.assertIn('12',text)
 
     def test_user_chinese_copy_exact_and_removed_rules_absent(self):
-        expected = ['增加电话和电视广告。', '培训：营销实习生→电话推销员→电视广播员→品牌总监，各6张，可叠放。', '电话推销员可放电话或更低级的广告。一次选一组，同商品、同时长（1—3回合）', '电话6.5／7.5／8.5／9.5四组各3张，共12张。可放置范围为餐厅入口所在板块以及上下左右共5个板块', '电视广播员的可以放置电视、电话或更低级的广告，电视频道可以放置同商品、同时长（1—4回合）', '电视有2频道，为3.5/4.5。可选择餐厅入口所在板块距离2板块内的5个房子进行电视营销', '头条仅电视广播员可用，每名在岗员工每回合选择一次：下回合晚餐全城商品单价±5，可叠加抵消。', '“首位使用电视广播员”里程碑：获得者首场电视广告期间，放置2需求。', '兼容说明：旧局及旧回放保留原电话规则，包括邻接建筑的要求。电视仍为2个频道，其选择、范围、时长、头条、晋升和独立里程碑不变。']
+        expected = ['增加电话和电视广告。', '培训：营销实习生→电话推销员→电视广播员→品牌总监，各6张，可叠放。', '电话推销员可放电话或更低级的广告。', '一次选一组，同商品、同时长（1—3回合）电话6.5／7.5／8.5／9.5四组各3张，共12张。可放置范围为餐厅入口所在板块以及上下左右共5个板块', '电视广播员的可以放置电视、电话或更低级的广告，并且发布头条。', '电视频道可以放置同商品、同时长（1—4回合），电视有3频道，为3.5/4.5/5.5。可选择餐厅入口所在板块距离2板块内的5个房子进行电视营销', '头条是电视广播员的特殊能力：每名在岗员工每回合选择一次：下回合晚餐全城商品单价±5，可叠加抵消。', '“首位使用电视广播员”里程碑：获得者首场电视广告期间，放置2需求。']
         html,text=rendered_section('zh-hans')
         self.assertEqual(re.findall(r'<(?:p|li)>(.*?)</(?:p|li)>',html,re.S),expected)
         for removed in ['四向','整组','锁定','±10','每房每夜','而非1','花园','免费','涨价无上限','减价不能超过0']:

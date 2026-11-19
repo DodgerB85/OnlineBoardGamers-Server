@@ -1782,6 +1782,7 @@ export function availableNewRoads() {
 
 // Media Line B-line keys (decimal, interleaved with A-line numbers); A-line keys stay raw
 export function campaignSortKey(number) {
+	if (rf.TV_CAMPAIGNS.includes(number)) return 3.5 + rf.TV_CAMPAIGNS.indexOf(number)
 	if (useModelStore().mediaLine.rulesVersion === 1 && rf.PHONE_CAMPAIGNS.includes(number)) return 6.5 + Math.floor((number - 30) / 3)
 	if (number >= 28 && number <= 35) return [3.5, 4.5, 6.5, 6.6, 7.5, 7.6, 8.5, 8.6][number - 28]
 	return number
@@ -2945,7 +2946,7 @@ export function doMarketingCampaigns(replayOnly, replayFinalPass) {
 			// the campaign still markets, just without a player attribution.
 			const isRadio = rf.MARKETING_CAMPAIGNS[campaign.number].type === rf.RADIO
 			const isAirplane = rf.MARKETING_CAMPAIGNS[campaign.number].type === rf.AIRPLANE
-			const isBLine = store.startingOptions.mediaLine && !phone.modern() && campaign.number >= 28 && campaign.number <= 35
+			const isBLine = store.startingOptions.mediaLine && !phone.modern() && (rf.TV_CAMPAIGNS.includes(campaign.number) || rf.PHONE_CAMPAIGNS.includes(campaign.number))
 
 			// Media Line mod: nightly bookkeeping for the grouped all-eat bonus
 			if (store.startingOptions.mediaLine && !phone.modern()) {

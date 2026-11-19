@@ -614,7 +614,7 @@ export function exportFCMmodel(forGameOver, includeContext, historyCutoff) {
 				entry.push(exportIndex(c.index), c.good)
 				if (c.duration !== 9) entry.push(c.duration)
 				if (rf.ROTATABLE_CAMPAIGNS.includes(c.number) && c.rotated) entry.push(6)
-			} else if (c.number === 28 || c.number === 29) {
+			} else if (rf.TV_CAMPAIGNS.includes(c.number)) {
 				entry.push(c.good, c.duration, ...(c.houses || []))
 			} else {
 				entry.push(c.good)
@@ -895,7 +895,7 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 		// Media Line mod: phone tokens (30-35) use the standard layout; TV
 		// channels (28-29) carry [number, good, duration, ...houses] instead
 		const isStandard = num <= 16 || phone.isPhone(num)
-		const isTV = num === 28 || num === 29
+		const isTV = rf.TV_CAMPAIGNS.includes(num)
 
 		// Create base object
 		const campaign = {
@@ -1367,6 +1367,7 @@ function isMediaLineSlot(el) {
 // Groups are flat [campaignNum, owner, houseCount, ...houses].
 // Validate the entire tagged extension before either import path changes state.
 // Wire format version is separate from the per-game rules revision.
+// TV supply is always derived from the shared resource definitions, not saves.
 export function validateMediaRules(input, playerCount = 6) {
  if (!Array.isArray(input)) throw new TypeError('Invalid game snapshot')
  const slots = input.filter(isMediaLineSlot)
@@ -1436,6 +1437,11 @@ export function restoreMediaLineState(inputArr) {
 	const checked = validateMediaRules(inputArr, store.players.length)
 	store.mediaLine.rulesVersion = checked.version
 	store.mediaLine.phoneGroups = checked.locks
+
+	// Rebuild only TV supply; never alter phone locks or other module inventory.
+	const availableTV = new Set(store.startingOptions.mediaLine ? rf.TV_CAMPAIGNS.filter(n => !store.campaigns.some(c => c.number === n)) : [])
+	store.availableMarketingCampaigns = store.availableMarketingCampaigns.filter(n => !rf.TV_CAMPAIGNS.includes(n) || availableTV.delete(n))
+	store.availableMarketingCampaigns.push(...availableTV)
 	if (checked.version === 1) store.availableMarketingCampaigns = store.availableMarketingCampaigns.filter(n => !phone.isPhone(n) || !checked.locks[phone.groupOf(n)])
 	// The compact gameflow intentionally omits the working subphase. A saved
 	// forced phone chain must resume marketing, not the default hiring screen.

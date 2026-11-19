@@ -89,7 +89,7 @@ describe("Media Line constants", () => {
 	})
 
 	it("registers campaign slots 28-35", () => {
-		expect(rf.MARKETING_CAMPAIGNS).toHaveLength(42)
+		expect(rf.MARKETING_CAMPAIGNS).toHaveLength(43)
 		expect(rf.MARKETING_CAMPAIGNS[28]).toEqual({ type: rf.TV_CHANNEL, width: 1, height: 1 })
 		expect(rf.MARKETING_CAMPAIGNS[29]).toEqual({ type: rf.TV_CHANNEL, width: 1, height: 1 })
 		for (let n = 30; n <= 35; n++) {
@@ -974,6 +974,58 @@ describe("Media Line stage 5 - milestone 1 grouped all-eat bonus", () => {
 		}
 		return servableHouses(store)
 	}
+
+	it.each([28, 29, 42])("legacy channel %s records a B-line group and pays its all-eat bonus", (number) => {
+		const store = nightBoard()
+		store.mediaLine.rulesVersion = 0
+		const houses = ensureServable(store, 1).slice(0, 1)
+		expect(houses).toHaveLength(1)
+		model.addMarketingCampaign(number, -1, false, rf.BURGER, 9, houses)
+		store.players[0].marketers.push({ campaign: number, marketer: rf.TV_ANNOUNCER, nightShift: false })
+		store.players[0].milestones.push(rf.FIRST_TELEMARKETER_USED)
+
+		rules.doMarketingCampaigns(false)
+		expect(store.mediaLine.night).toEqual({ groups: { [number]: { owner: 0, houses } }, aLinePushers: [] })
+		expect(store.needs.find((n) => n.number === houses[0]).needs).toEqual([[rf.BURGER, 0]])
+		store.players[0].resources = [rf.BURGER]
+		const before = store.players[0].money
+		rules.doDinnerTime(false)
+		expect(store.players[0].money - before).toBe(20)
+		expect(store.history.find((h) => h[0] === rf.HIST_MEDIA_LINE_BONUS)[3]).toEqual([0, 10, [houses]])
+	})
+
+	it("legacy channel 42 and a phone retain both B-line groups and independent all-eat bonuses", () => {
+		const store = nightBoard()
+		store.mediaLine.rulesVersion = 0
+		const servable = ensureServable(store, 5)
+		let phoneCampaign
+		let phoneHouses
+		for (let index = 0; index < store.mapData.coords.length; index++) {
+			if (![index, index + 1].every((i) => store.mapData.coords[i] === rf.EMPTY_SPACE)) continue
+			const candidate = { number: 30, index, rotated: false, good: rf.BURGER, duration: 9 }
+			const affected = rules.housesAffectedByMarketingCampaign(candidate)
+			if (affected.length > 0 && affected.every((h) => servable.includes(h))) {
+				phoneCampaign = candidate
+				phoneHouses = affected
+				break
+			}
+		}
+		expect(phoneCampaign).toBeDefined()
+		const houses = [phoneHouses[0]]
+		model.addMarketingCampaign(42, -1, false, rf.BURGER, 9, houses)
+		model.addMarketingCampaign(30, phoneCampaign.index, false, rf.BURGER, 9)
+		store.players[0].marketers.push({ campaign: 42, marketer: rf.TV_ANNOUNCER, nightShift: false }, { campaign: 30, marketer: rf.TELEMARKETER, nightShift: false })
+		store.players[0].milestones.push(rf.FIRST_TELEMARKETER_USED)
+
+		rules.doMarketingCampaigns(false)
+		expect(store.mediaLine.night).toEqual({ groups: { 42: { owner: 0, houses }, 30: { owner: 0, houses: phoneHouses } }, aLinePushers: [] })
+		const demandCount = houses.length + phoneHouses.length
+		store.players[0].resources = Array(demandCount).fill(rf.BURGER)
+		const before = store.players[0].money
+		rules.doDinnerTime(false)
+		expect(store.players[0].money - before).toBe(demandCount * 20)
+		expect(store.history.find((h) => h[0] === rf.HIST_MEDIA_LINE_BONUS)[3]).toEqual([0, demandCount * 10, [phoneHouses.slice().sort((a, b) => a - b), houses]])
+	})
 
 	it("pays $10 per house for a fully eaten TV group", () => {
 		const store = nightBoard()

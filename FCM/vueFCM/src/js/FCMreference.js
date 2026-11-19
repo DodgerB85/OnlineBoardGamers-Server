@@ -740,11 +740,13 @@ export const MARKETING_CAMPAIGNS = [
 	{ type: PHONE, width: 2, height: 1 },
 	{ type: PHONE, width: 2, height: 1 },
 	{ type: PHONE, width: 2, height: 1 },//41
+	{ type: TV_CHANNEL, width: 1, height: 1 },//42 - channel 5.5
 
 ]
 
 export const SMALL_CAMPAIGNS = [1, 2, 3, 9, 10, 15, 16]
 export const PHONE_CAMPAIGNS = Array.from({ length: 12 }, (_, i) => 30 + i)
+export const TV_CAMPAIGNS = [28, 29, 42]
 export const ROTATABLE_CAMPAIGNS = [4, 5, 6, 11, 13, 14, ...PHONE_CAMPAIGNS]
 
 //rf.PARKS = [

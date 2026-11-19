@@ -141,7 +141,7 @@ export function replaySetupKetchupExpansion(playerNumber) {
 	if (store.startingOptions.mediaLine) {
 		store.availableEmployees[rf.TELEMARKETER] = 6
 		store.availableEmployees[rf.TV_ANNOUNCER] = 6
-		store.availableMarketingCampaigns.push(28, 29, ...rf.PHONE_CAMPAIGNS.slice(0, phone.modern() ? 12 : 6))
+		store.availableMarketingCampaigns.push(...rf.TV_CAMPAIGNS, ...rf.PHONE_CAMPAIGNS.slice(0, phone.modern() ? 12 : 6))
 		if (store.startingOptions.useMilestones) {
 			if (!phone.modern()) store.availableMilestones.push(rf.FIRST_TELEMARKETER_USED)
 			store.availableMilestones.push(rf.FIRST_TV_ANNOUNCER_USED)
@@ -834,7 +834,7 @@ export function replayStartMarketingCampaign(historyIndex, playerIndex, param) {
 	// board index. New-rule phones use the whole-group replay path.
 	if (phone.modern() && phone.isPhone(campaignNumber)) return phone.replayPlacement(playerIndex, param)
 	// board index (they have no token); phone tokens log a normal board index
-	const isTV = campaignNumber === 28 || campaignNumber === 29
+	const isTV = rf.TV_CAMPAIGNS.includes(campaignNumber)
 	const isPhone = campaignNumber >= 30 && campaignNumber <= 35
 	// Media Line mod: a non-default marketer is logged last as [employee] (index 3+ is never otherwise an array)
 	const loggedMarketer = param.length > 3 && Array.isArray(param[param.length - 1]) ? param[param.length - 1][0] : -1
