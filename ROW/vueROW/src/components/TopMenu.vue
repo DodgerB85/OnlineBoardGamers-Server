@@ -184,7 +184,6 @@ function playerColor(color) {
 				<span>&nbsp;|&nbsp; {{ phaseLabel }}</span>
 				<span v-if="store.currentPlayer">&nbsp;|&nbsp; {{ store.currentPlayer }}</span>
 				<span v-if="store.missingPlayers.length" class="missing">&nbsp;|&nbsp; {{ t('app.missing', { players: store.missingPlayers.join(", ") }) }}</span>
-				<span v-if="store.gameMessages.errorText" class="error">&nbsp;|&nbsp; {{ store.gameMessages.errorText }}</span>
 				<span v-if="store.gameMessages.rewindErrorText" class="error">&nbsp;|&nbsp; {{ store.gameMessages.rewindErrorText }}</span>
 			</div>
 			<div class="playerLine">

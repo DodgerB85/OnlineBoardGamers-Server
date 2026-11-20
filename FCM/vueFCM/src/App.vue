@@ -1,4 +1,5 @@
 <script setup>
+import GameMessages from "./components/GameMessages.vue"
 /**
  * main app file. Initialise the store here
  *
@@ -89,6 +90,7 @@ document.addEventListener("keyup", function (event) {
 </script>
 
 <template>
+	<GameMessages top="124px" />
 	<TopMenu />
 	<GameStatusBanner v-bind="statusBanner" />
 	<GameToast />

@@ -735,12 +735,6 @@ function selectC0() {
 		<template v-if="store.gameMessages.rewindErrorText !== ''">
 			<h1 id="rewindErrorText">{{ store.gameMessages.rewindErrorText }}</h1>
 		</template>
-		<template v-if="store.gameMessages.errorText !== ''">
-			<h1 id="rewindErrorText">{{ store.gameMessages.errorText }}</h1>
-		</template>
-		<template v-if="store.gameMessages.successText !== ''">
-			<h1 id="successText">{{ store.gameMessages.successText }}</h1>
-		</template>
 
 		<!-- EXPERT PANEL - PRE-RESEARCH TURN -->
 		<template v-if="shouldShowPreResearchOption()">

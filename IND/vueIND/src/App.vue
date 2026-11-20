@@ -1,4 +1,5 @@
 <script setup>
+import GameMessages from "./components/GameMessages.vue"
 /**
  * 
  * change 2e comp markers (and rec'd goods)
@@ -231,6 +232,7 @@ function getWholeMiddleAreaClass() {
 </script>
 
 <template>
+	<GameMessages />
 	<svg id="patternsSVG">
 		<defs>
 			<!-- COMPANY DEEDS UNIFIED PHP -->

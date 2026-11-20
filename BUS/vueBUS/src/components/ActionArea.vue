@@ -300,12 +300,6 @@ onUnmounted(() => {
 	<template v-if="store.rewindErrorText !== ''">
 		<h1 id="rewindErrorText">{{ store.rewindErrorText }}</h1>
 	</template>
-	<template v-if="store.topMenuViews.errorText !== ''">
-		<h1 id="errorText">{{ store.topMenuViews.errorText }}</h1>
-	</template>
-	<template v-if="store.successText !== ''">
-		<h1 id="successText">{{ store.successText }}</h1>
-	</template>
 
 	<template v-if="personal.canPlay()">
 		<div id="actions">

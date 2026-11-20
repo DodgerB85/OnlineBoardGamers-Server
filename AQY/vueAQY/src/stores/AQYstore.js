@@ -289,6 +289,11 @@ export const useModelStore = defineStore("store", () => {
 		//context.countryBuildingBeingAddedPayment.splice(0)
 	}
 
+	const gameMessages = reactive({
+		successText: "",
+		errorText: "",
+	})
+
 	const topMenuViews = reactive({
 		showNotes: false,
 		showChat: false,
@@ -299,11 +304,6 @@ export const useModelStore = defineStore("store", () => {
 		showRewindPanel: false,
 		performingRewind: false,
 		rewindErrorText: "",
-		errorText: "",
-		bugErrorText: "",
-		bugSuccessText: "",
-		tradeSuccessText: "",
-		tradeErrorText: "",
 		WStradeToDisplay: [],
 		retrySave: null,
 
@@ -356,11 +356,8 @@ export const useModelStore = defineStore("store", () => {
 
 	function clearMessages() {
 		topMenuViews.rewindErrorText = ""
-		topMenuViews.errorText = ""
-		topMenuViews.bugErrorText = ""
-		topMenuViews.bugSuccessText = ""
-		topMenuViews.tradeSuccessText = ""
-		topMenuViews.tradeErrorText = ""
+		gameMessages.successText = ""
+		gameMessages.errorText = ""
 		topMenuViews.WStradeToDisplay.splice(0)
 		topMenuViews.retrySave = null
 	}
@@ -493,6 +490,7 @@ export const useModelStore = defineStore("store", () => {
 		gameflow,
 		//phaseStr,
 		topMenuViews,
+		gameMessages,
 		//currentPlayer,
 		//decompressChatData,
 		mapData,

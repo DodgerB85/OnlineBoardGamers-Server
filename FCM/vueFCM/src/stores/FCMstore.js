@@ -403,7 +403,6 @@ export const useModelStore = defineStore("store", () => {
 		actionError: "",
 		successText: "",
 		errorText: "",
-		bugErrorText: "",
 		turnEndText: "", // Store text to display after an auto-action
 		retrySave: null, // closure that retries the exact failed save
 
@@ -413,7 +412,6 @@ export const useModelStore = defineStore("store", () => {
 	function clearMessages(keepEndTurnMessage = false) {
 		gameMessages.actionError = ""
 		gameMessages.errorText = ""
-		gameMessages.bugErrorText = ""
 		gameMessages.successText = ""
 		gameMessages.turnEndText = ""
 		gameMessages.retrySave = null

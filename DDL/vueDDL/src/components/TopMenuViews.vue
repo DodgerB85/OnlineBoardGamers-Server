@@ -72,10 +72,10 @@ function clearNotes() {
 
 async function submitBug() {
 	submittingBug.value = true
-	store.gameMessages.bugErrorText = ""
 	store.gameMessages.successText = ""
+	store.gameMessages.errorText = ""
 	if (bugReportText.value.length === 0) {
-		store.gameMessages.bugErrorText = t("topMenuViews.bug.empty")
+		store.gameMessages.errorText = t("topMenuViews.bug.empty")
 		submittingBug.value = false
 		return
 	}
@@ -127,7 +127,7 @@ function localCastVote(topic) {
 	<!-- BUG REPORT -->
 	<div id="bugReport" v-if="store.viewSettings.showBug">
 		<h1>{{ $t("topMenuViews.bug.title") }}</h1>
-		<h2 class="errorText" v-if="store.gameMessages.bugErrorText !== ''" v-html="store.gameMessages.bugErrorText"></h2>
+
 		<p>{{ $t("topMenuViews.bug.intro") }}<br />{{ $t("topMenuViews.bug.data") }}</p>
 		<div><textarea cols="150" rows="10" v-model="bugReportText"></textarea></div>
 		<div>

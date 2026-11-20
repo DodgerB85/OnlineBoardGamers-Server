@@ -191,8 +191,6 @@ export const useModelStore = defineStore("store", () => {
 	const gameMessages = reactive({
 		actionError: "",
 		rewindErrorText: "",
-		bugErrorText: "",
-		bugSuccessText: "",
 		successText: "",
 		errorText: "",
 	})
@@ -200,8 +198,6 @@ export const useModelStore = defineStore("store", () => {
 	function clearMessages() {
 		gameMessages.actionError = ""
 		gameMessages.rewindErrorText = ""
-		gameMessages.bugErrorText = ""
-		gameMessages.bugSuccessText = ""
 		gameMessages.successText = ""
 		gameMessages.errorText = ""
 	}

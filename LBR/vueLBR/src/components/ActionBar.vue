@@ -23,7 +23,6 @@ const supportMax = computed(() => {
 });
 const supportChoices = computed(() => Array.from({ length: supportMax.value + 1 }, (_, i) => i));
 const conflicts = computed(() => game.value?.war?.conflicts || []);
-const message = computed(() => store.gameMessages.errorText || store.gameMessages.successText);
 
 function keepTreasure(pos) {
 	controller.keepTreasure(pos);
@@ -54,15 +53,7 @@ function decline() {
 
 	<GameOverPanel v-else-if="game.gameOver" />
 
-	<div v-else class="action-bar" :class="{ idle: !pending && !message }">
-		<div
-			v-if="message"
-			class="message"
-			:class="{ error: store.gameMessages.errorText, ok: !store.gameMessages.errorText && store.gameMessages.successText }"
-			role="status"
-		>
-			{{ message }}
-		</div>
+	<div v-else class="action-bar" :class="{ idle: !pending }">
 
 		<div class="action-controls">
 			<!-- Treasure decision -->

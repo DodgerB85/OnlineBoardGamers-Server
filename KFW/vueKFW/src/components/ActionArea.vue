@@ -413,9 +413,6 @@ function shouldShowIntroText() {
 		</template>
 
 		<!-- REWIND ERROR TEXT -->
-		<template v-if="store.gameMessages.errorText !== ''">
-			<h1 id="errorText">{{ store.gameMessages.errorText }}</h1>
-		</template>
 
 		<!-- ALWAYS SHOWS ON TURN 0 -->
 		<template v-if="shouldShowIntroText() && store.viewSettings.showIntroInfo">
@@ -506,13 +503,6 @@ function shouldShowIntroText() {
 				<span v-html="store.gameMessages.endTurnMessage"></span>
 				<br />
 			</div>
-		</template>
-
-		<template v-if="store.gameMessages.bugErrorText !== ''">
-			<h2 id="bugErrorText" v-html="store.gameMessages.bugErrorText"></h2>
-		</template>
-		<template v-if="store.gameMessages.bugSuccessText !== ''">
-			<h2 id="bugSuccessText" v-html="store.gameMessages.bugSuccessText"></h2>
 		</template>
 
 		<template v-if="personal.canPlay()">
@@ -1141,17 +1131,4 @@ function shouldShowIntroText() {
 	vertical-align: middle;
 }
 
-#bugErrorText {
-	width: 100%;
-	font-weight: bolder;
-	font-family: Arial, sans-serif;
-	text-align: center;
-	background-color: lightgoldenrodyellow;
-	color: darkred;
-}
-
-#bugSuccessText {
-	color: darkgreen;
-	background-color: lightblue;
-}
 </style>

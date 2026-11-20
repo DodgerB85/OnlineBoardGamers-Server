@@ -329,14 +329,6 @@ function cancelSales() {
 			<h1 id="rewindErrorText">{{ store.topMenuViews.rewindErrorText }}</h1>
 		</template>
 
-		<template v-if="store.topMenuViews.errorText !== ''">
-			<h1 id="errorText">{{ store.topMenuViews.errorText }}</h1>
-		</template>
-
-		<template v-if="store.topMenuViews.successText !== ''">
-			<h1 id="successText">{{ store.topMenuViews.successText }}</h1>
-		</template>
-
 		<!-- ALWAYS SHOWS GAME END-->
 		<template v-if="store.gameflow.phase === rf.PHASE_GAME_OVER">
 			<div id="gameEndDiv">

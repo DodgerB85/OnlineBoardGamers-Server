@@ -345,7 +345,6 @@ export const useModelStore = defineStore("store", () => {
 		actionError: "",
 		successText: "",
 		errorText: "",
-		bugErrorText: "",
 		turnEndText: "", // Store text to display after an auto-action
 
 		endTurnMessage: "", // store text to display AFTER YOU ENDED YOUR TURN
@@ -354,7 +353,6 @@ export const useModelStore = defineStore("store", () => {
 	function clearMessages(keepEndTurnMessage = false) {
 		gameMessages.actionError = ""
 		gameMessages.errorText = ""
-		gameMessages.bugErrorText = ""
 		gameMessages.successText = ""
 		gameMessages.turnEndText = ""
 

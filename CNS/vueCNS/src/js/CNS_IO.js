@@ -33,14 +33,13 @@ export async function submitBug(bugContent) {
 		}
 		const data = await response.json()
 		if (data.bugEntrySuccess) {
-			store.topMenuViews.bugSuccessText = i18n.global.t("io.bugSubmitted")
-			store.topMenuViews.successText = i18n.global.t("io.bugSubmitted")
+			store.gameMessages.successText = i18n.global.t("io.bugSubmitted")
 			store.topMenuViews.showLoader = false
 			store.topMenuViews.showBug = false
-		} else store.topMenuViews.bugErrorText = i18n.global.t("io.bugError")
+		} else store.gameMessages.errorText = i18n.global.t("io.bugError")
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.topMenuViews.bugErrorText = i18n.global.t("io.bugError")
+		store.gameMessages.errorText = i18n.global.t("io.bugError")
 	}
 	store.topMenuViews.showLoader = false
 }
@@ -234,7 +233,7 @@ export async function saveNotes() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.topMenuViews.showLoader = true
-	store.topMenuViews.errorText = ""
+	store.gameMessages.errorText = ""
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -251,7 +250,7 @@ export async function saveNotes() {
 		})
 		const data = await response.json()
 		if (data.error) {
-			store.topMenuViews.errorText = data.error
+			store.gameMessages.errorText = data.error
 			store.topMenuViews.showLoader = false
 			return
 		}
@@ -260,13 +259,13 @@ export async function saveNotes() {
 			throw new Error("Network response was not ok")
 		}
 		if (!data.notePosted) {
-			store.topMenuViews.errorText = i18n.global.t("io.webmasterProblem")
+			store.gameMessages.errorText = i18n.global.t("io.webmasterProblem")
 			return
 		}
 		store.topMenuViews.showLoader = false
 	} catch (error) {
 		console.error("Error saving Notes:", error)
-		store.topMenuViews.errorText = i18n.global.t("io.errorSavingNotes")
+		store.gameMessages.errorText = i18n.global.t("io.errorSavingNotes")
 
 	}
 }
@@ -444,7 +443,7 @@ export async function kickout() {
 			// Vote recorded but no kickout (yet): show the updated vote state
 			store.kickoutVotesData = JSON.parse(data.votesData)
 			store.kickoutVoteThreshold = data.threshold
-			store.topMenuViews.tradeSuccessText = i18n.global.t("io.kickoutVoteRecorded")
+			store.gameMessages.successText = i18n.global.t("io.kickoutVoteRecorded")
 			store.topMenuViews.showLoader = false
 			return data
 		}
@@ -660,7 +659,7 @@ export async function castVote(topic) {
 		store.topMenuViews.showLoader = false
 		console.log(data)
 		if (data.voteChanged === true) {
-			store.topMenuViews.tradeSuccessText = i18n.global.t("io.voteSaved")
+			store.gameMessages.successText = i18n.global.t("io.voteSaved")
 
 			if (topic === rf.DELETE_VOTE_TOPIC) {
 				personal.votedToDelete = true

@@ -181,10 +181,10 @@ async function AQYwebSocketOnInfo(IncomingInfo) {
 			store.clearMessages()
 
 			if (differencesIncoming.length === 0 && differencesOutgoing.length === 0 && differencesIrrelevant.length !== 0) {
-				//store.topMenuViews.tradeErrorText = "Other players have made a trade action. If a trade was accepted, it will show in your history"
+				//store.gameMessages.errorText = "Other players have made a trade action. If a trade was accepted, it will show in your history"
 				// Irrelevant trade added - show who proposes to who
 				if (differencesIrrelevant[0].type === "added") {
-					store.topMenuViews.tradeErrorText = i18n.global.t("alerts.tradeProposedToOther", {
+					store.gameMessages.errorText = i18n.global.t("alerts.tradeProposedToOther", {
 						proposer: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[differencesIrrelevant[0].data[0]].colour) + `">${store.players[differencesIrrelevant[0].data[0]].displayName}</span></div>`,
 						recipient: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[differencesIrrelevant[0].data[1]].colour) + `">${store.players[differencesIrrelevant[0].data[1]].displayName}</span></div>`,
 					})
@@ -193,13 +193,13 @@ async function AQYwebSocketOnInfo(IncomingInfo) {
 				// Irrelevant trade deleted - show if it was accepted or rejected
 				else if (differencesIrrelevant[0].type === "deleted") {
 					if (oldHistoryLength === newHistoryLength) {
-						store.topMenuViews.tradeErrorText = i18n.global.t("alerts.tradeRejectedFromOther", {
+						store.gameMessages.errorText = i18n.global.t("alerts.tradeRejectedFromOther", {
 							recipient: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[differencesIrrelevant[0].data[1]].colour) + `">${store.players[differencesIrrelevant[0].data[1]].displayName}</span></div>`,
 							proposer: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[differencesIrrelevant[0].data[0]].colour) + `">${store.players[differencesIrrelevant[0].data[0]].displayName}</span></div>`,
 						})
 						store.topMenuViews.WStradeToDisplay.push(...differencesIrrelevant[0].data)
 					} else {
-						store.topMenuViews.tradeSuccessText = i18n.global.t("alerts.tradeAcceptedFromOther", {
+						store.gameMessages.successText = i18n.global.t("alerts.tradeAcceptedFromOther", {
 							recipient: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[differencesIrrelevant[0].data[1]].colour) + `">${store.players[differencesIrrelevant[0].data[1]].displayName}</span></div>`,
 							proposer: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[differencesIrrelevant[0].data[0]].colour) + `">${store.players[differencesIrrelevant[0].data[0]].displayName}</span></div>`,
 						})
@@ -209,13 +209,13 @@ async function AQYwebSocketOnInfo(IncomingInfo) {
 			} else if (differencesIncoming.length > 0) {
 				// Change in incoming info
 				if (differencesIncoming[0].type === "added") {
-					store.topMenuViews.tradeSuccessText = i18n.global.t("alerts.tradeSentToYou", {
+					store.gameMessages.successText = i18n.global.t("alerts.tradeSentToYou", {
 						name: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[differencesIncoming[0].data[0]].colour) + `">${store.players[differencesIncoming[0].data[0]].displayName}</span></div>`,
 					})
 					store.topMenuViews.WStradeToDisplay.push(...differencesIncoming[0].data)
 				} else if (differencesIncoming[0].type === "deleted") {
 					// THIS CAN HAPPEN IF SOMEONE ELSE ACCEPTED A TRADE TO THE ORIGINATOR
-					store.topMenuViews.tradeErrorText = i18n.global.t("alerts.tradeCancelledByOther", {
+					store.gameMessages.errorText = i18n.global.t("alerts.tradeCancelledByOther", {
 						name: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[differencesIncoming[0].data[0]].colour) + `">${store.players[differencesIncoming[0].data[0]].displayName}</span></div>`,
 					})
 				}
@@ -224,8 +224,8 @@ async function AQYwebSocketOnInfo(IncomingInfo) {
 				if (differencesOutgoing[0].type === "added") {
 					rf.doAdminAlrt("diff out add")
 				} else if (differencesOutgoing[0].type === "deleted") {
-					if (oldHistoryLength === newHistoryLength) store.topMenuViews.tradeErrorText = i18n.global.t("alerts.tradeRejectedYours", { name: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[differencesOutgoing[0].data[1]].colour) + `">${store.players[differencesOutgoing[0].data[1]].displayName}</span></div>` })
-					else store.topMenuViews.tradeSuccessText = i18n.global.t("alerts.tradeAcceptedYours", { name: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[differencesOutgoing[0].data[1]].colour) + `">${store.players[differencesOutgoing[0].data[1]].displayName}</span></div>` })
+					if (oldHistoryLength === newHistoryLength) store.gameMessages.errorText = i18n.global.t("alerts.tradeRejectedYours", { name: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[differencesOutgoing[0].data[1]].colour) + `">${store.players[differencesOutgoing[0].data[1]].displayName}</span></div>` })
+					else store.gameMessages.successText = i18n.global.t("alerts.tradeAcceptedYours", { name: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[differencesOutgoing[0].data[1]].colour) + `">${store.players[differencesOutgoing[0].data[1]].displayName}</span></div>` })
 					store.topMenuViews.WStradeToDisplay.push(...differencesOutgoing[0].data)
 				}
 			}

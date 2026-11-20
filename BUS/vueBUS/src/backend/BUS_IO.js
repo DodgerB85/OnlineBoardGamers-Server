@@ -17,7 +17,7 @@ function clearLoader() {
 	const store = useModelStore()
 	store.topMenuViews.showLoader = false
 	store.topMenuViews.retryAction = null
-	store.topMenuViews.errorText = ""
+	store.gameMessages.errorText = ""
 }
 
 // Keep the loader up on failure, show the reason and offer a retry.
@@ -25,7 +25,7 @@ function failLoader(retry, message) {
 	const store = useModelStore()
 	store.topMenuViews.showLoader = true
 	store.topMenuViews.retryAction = retry
-	store.topMenuViews.errorText = message
+	store.gameMessages.errorText = message
 }
 
 export async function saveGame(saveRewind) {
@@ -39,7 +39,7 @@ export async function saveGame(saveRewind) {
 
 	store.topMenuViews.showLoader = true
 	store.topMenuViews.retryAction = null
-	store.topMenuViews.errorText = ""
+	store.gameMessages.errorText = ""
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -114,7 +114,7 @@ export async function sendChatMessage(newEntry) {
 	const personal = usePersonalStore()
 	store.topMenuViews.showLoader = true
 	store.topMenuViews.retryAction = null
-	store.topMenuViews.errorText = ""
+	store.gameMessages.errorText = ""
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -180,7 +180,7 @@ export async function reloadGameData() {
 	let csrftoken = funcs.getCookie("csrftoken")
 	store.topMenuViews.showLoader = true
 	store.topMenuViews.retryAction = null
-	store.topMenuViews.errorText = ""
+	store.gameMessages.errorText = ""
 
 	// Function to fetch data from the database
 	try {
@@ -242,7 +242,7 @@ export async function saveNotes() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.topMenuViews.showLoader = true
-	store.topMenuViews.errorText = ""
+	store.gameMessages.errorText = ""
 	store.topMenuViews.retryAction = null
 
 	let csrftoken = funcs.getCookie("csrftoken")
@@ -283,7 +283,7 @@ export async function loadRewind() {
 	const personal = usePersonalStore()
 	store.topMenuViews.showLoader = true
 	store.topMenuViews.retryAction = null
-	store.topMenuViews.errorText = ""
+	store.gameMessages.errorText = ""
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	if (store.gameflow.gameEnded > 0) {
@@ -360,7 +360,7 @@ async function updateDataFromLoadRewind() {
 
 	store.topMenuViews.showLoader = true
 	store.topMenuViews.retryAction = null
-	store.topMenuViews.errorText = ""
+	store.gameMessages.errorText = ""
 	let csrftoken = funcs.getCookie("csrftoken")
 	// IF AT THE END OF NON-SIMUL PHASE, SET UP NEXT PLAYER
 
@@ -411,7 +411,7 @@ export async function resign() {
 
 	store.topMenuViews.showLoader = true
 	store.topMenuViews.retryAction = null
-	store.topMenuViews.errorText = ""
+	store.gameMessages.errorText = ""
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	try {
@@ -442,7 +442,7 @@ export async function saveGameDataAfterKickout() {
 	const personal = usePersonalStore()
 	store.topMenuViews.showLoader = true
 	store.topMenuViews.retryAction = null
-	store.topMenuViews.errorText = ""
+	store.gameMessages.errorText = ""
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	var postData = {
@@ -476,7 +476,7 @@ export async function saveGameDataAfterKickout() {
 		if (data.voteCast) {
 			store.kickoutVotesData = data.votesData
 			clearLoader()
-			store.successText = i18n.global.t("io.kickoutVoteRecorded")
+			store.gameMessages.successText = i18n.global.t("io.kickoutVoteRecorded")
 			return data
 		}
 		personal.latestUpdate = data.latestUpdate
@@ -586,7 +586,7 @@ export async function castVote(topic) {
 
 	store.topMenuViews.showLoader = true
 	store.topMenuViews.retryAction = null
-	store.topMenuViews.errorText = ""
+	store.gameMessages.errorText = ""
 	let csrftoken = funcs.getCookie("csrftoken")
 
 	let postData = {
@@ -609,7 +609,7 @@ export async function castVote(topic) {
 
 		clearLoader()
 		if (data.voteChanged === true) {
-			store.successText = i18n.global.t("io.voteSaved")
+			store.gameMessages.successText = i18n.global.t("io.voteSaved")
 
 			if (topic === rf.DELETE_VOTE_TOPIC) {
 				personal.votedToDelete = true

@@ -43,10 +43,10 @@ function clearNotes() {
 
 async function submitBug() {
 	submittingBug.value = true
-	store.gameMessages.bugErrorText = ""
 	store.gameMessages.successText = ""
+	store.gameMessages.errorText = ""
 	if (bugReportText.value.length === 0) {
-		store.gameMessages.bugErrorText = t("bug.required")
+		store.gameMessages.errorText = t("bug.required")
 		submittingBug.value = false
 		return
 	}
@@ -94,7 +94,6 @@ function localCastVote(topic) {
 	<transition name="slidePanel">
 		<div id="bugReport" v-if="store.viewSettings.showBug">
 			<h1>{{ $t("bug.title") }}</h1>
-			<h2 class="errorText" v-if="store.gameMessages.bugErrorText !== ''" v-html="store.gameMessages.bugErrorText"></h2>
 			<p>
 				{{ $t("bug.intro") }}
 				<br />
@@ -151,7 +150,6 @@ function localCastVote(topic) {
 		<p>{{ $t("rewind.intro") }}</p>
 		<p>{{ $t("rewind.courtesy") }}</p>
 		<p>{{ $t("rewind.misuse") }}</p>
-		<p v-if="store.gameMessages.errorText" class="errorText" role="alert"><CurrencyText :text="store.gameMessages.errorText" /></p>
 		<button class="topMenuItem" :disabled="!!store.turnDraft.start || store.viewSettings.showLoader || store.viewSettings.isSaving || personal.haltPlay || store.viewSettings.showReplay" :title="store.turnDraft.start ? $t('rewind.resetFirst') : $t('rewind.previousTurn')" @click="IO.loadRewind()">
 			<img :src="view.getImage('icon-rewind')" alt="" />
 			<span>{{ $t("rewind.rewind") }}</span>

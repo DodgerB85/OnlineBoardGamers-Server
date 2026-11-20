@@ -102,8 +102,12 @@ export const useModelStore = defineStore("model", () => {
 		showReplay: false,
 		generatingReplay: false,
 		showStatsExcludeDropdown: false,
-		errorText: "",
 		retryAction: null,
+	})
+
+	const gameMessages = reactive({
+		successText: "",
+		errorText: "",
 	})
 
 	const turnResetData = ref("")
@@ -123,7 +127,6 @@ export const useModelStore = defineStore("model", () => {
 	const performingRewind = ref(false)
 	const performingBoardChange = ref(false)
 	const rewindErrorText = ref("")
-	const successText = ref("")
 
 	const replayStep = ref(0)
 	const replayData = reactive([])
@@ -149,8 +152,8 @@ export const useModelStore = defineStore("model", () => {
 		context.lastActionMarker = null
 		context.lastBridge = -1
 		rewindErrorText.value = ""
-		successText.value = ""
-		topMenuViews.errorText = ""
+		gameMessages.successText = ""
+		gameMessages.errorText = ""
 		topMenuViews.retryAction = null
 
 	}
@@ -171,7 +174,7 @@ export const useModelStore = defineStore("model", () => {
 		performingRewind,
 		performingBoardChange,
 		rewindErrorText,
-		successText,
+		gameMessages,
 		replayStep,
 		replayData,
 		endReplayResetData,
@@ -180,6 +183,7 @@ export const useModelStore = defineStore("model", () => {
 		kickoutVotesData,
 		kickoutVoteThreshold,
 		topMenuViews,
+		gameMessages,
 		remainingTimeStones,
 		remainingPassengers,
 		turnResetData,

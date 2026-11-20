@@ -114,14 +114,12 @@ export const useModelStore = defineStore("store", () => {
 		actionError: "",
 		successText: "",
 		errorText: "",
-		bugErrorText: "",
 		turnText: "",
 	})
 
 	function clearMessages() {
 		gameMessages.actionError = ""
 		gameMessages.errorText = ""
-		gameMessages.bugErrorText = ""
 		gameMessages.successText = ""
 		gameMessages.turnText = ""
 		context.errorText = ""

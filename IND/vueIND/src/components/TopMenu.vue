@@ -43,8 +43,8 @@ function doZoom(dir) {
 }
 
 function toggleBug() {
-	store.gameMessages.bugErrorText = ""
-	store.gameMessages.bugSuccessText = ""
+	store.gameMessages.successText = ""
+	store.gameMessages.errorText = ""
 	store.topMenuViews.showNotes = false
 	store.topMenuViews.showBug = !store.topMenuViews.showBug
 }

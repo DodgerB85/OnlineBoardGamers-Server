@@ -42,7 +42,6 @@ async function confirmKickout() {
 <template>
 	<div v-if="visible" class="kickoutDialog" role="region" aria-label="Kickout">
 		<p><b>{{ model.actorName() }}</b> has used their flexi-time and can be removed from the game.</p>
-		<p v-if="store.gameMessages.errorText" class="errorText" role="alert">{{ store.gameMessages.errorText }}</p>
 		<button v-if="!confirming" type="button" class="actionsLineButton" :disabled="submitting" @click="confirming = true">{{ voteText }}</button>
 		<template v-else>
 			<p><b>This cannot be undone.</b></p>

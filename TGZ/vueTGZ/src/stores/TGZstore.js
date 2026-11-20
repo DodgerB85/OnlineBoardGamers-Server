@@ -102,6 +102,11 @@ export const useModelStore = defineStore('store', () => {
     lastClickPosition: { x: 0, y: 0 },
   })
 
+  const gameMessages = reactive({
+    successText: '',
+    errorText: '',
+  })
+
   const topMenuViews = reactive({
     showNotes: false,
     showChat: false,
@@ -112,8 +117,6 @@ export const useModelStore = defineStore('store', () => {
     showRewindPanel: false,
     performingRewind: false,
     rewindErrorText: '',
-    errorText: '',
-    bugSuccessText: '',
     showReplay: false,
     showingPlayerIndex: -1,
     hubRangesToHighlight: [],
@@ -166,8 +169,8 @@ export const useModelStore = defineStore('store', () => {
     context.ignoreAjeShaluga = false
 
     topMenuViews.rewindErrorText = ''
-    topMenuViews.errorText = ''
-    topMenuViews.bugSuccessText = ''
+    gameMessages.successText = ''
+    gameMessages.errorText = ''
     topMenuViews.hubRangesToHighlight.splice(0)
     topMenuViews.currentGhostIndex = -1
     topMenuViews.mapInspectorMode = false
@@ -228,6 +231,7 @@ function resetTurnVars() {
     gameflow,
     //phaseStr,
     topMenuViews,
+    gameMessages,
     //currentPlayer,
     //decompressChatData,
     mapTiles,

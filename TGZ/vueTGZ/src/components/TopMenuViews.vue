@@ -30,10 +30,11 @@ function toggleBug() {
 
 async function submitBug() {
 	submittingBug.value = true
-	store.topMenuViews.bugSuccessText = ""
+	store.gameMessages.successText = ""
+	store.gameMessages.errorText = ""
 	let bugContent = document.getElementById("bugContent").value
 	if (bugContent.length === 0) {
-		store.topMenuViews.rewindErrorText = t("topMenuViews.bugErrorRequired")
+		store.gameMessages.errorText = t("topMenuViews.bugErrorRequired")
 		submittingBug.value = false
 		return
 	}

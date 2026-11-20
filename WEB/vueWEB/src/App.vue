@@ -1,4 +1,5 @@
 <script setup>
+import GameMessages from "./components/GameMessages.vue"
 /**
  * ONGOING COMMENTS
  * ================
@@ -114,6 +115,7 @@ function getUniqueTileGfx() {
 </script>
 
 <template>
+	<GameMessages />
 	<svg id="patternsSVG">
 		<!-- Get patterns for all the hex images -->
 		<defs>

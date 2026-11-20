@@ -23,7 +23,6 @@ function wholeMapZoom() {
 }
 
 function clearPanels() {
-	store.gameMessages.bugErrorText = ""
 	store.gameMessages.successText = ""
 	store.gameMessages.errorText = ""
 }

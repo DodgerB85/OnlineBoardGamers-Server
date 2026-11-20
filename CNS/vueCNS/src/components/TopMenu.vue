@@ -45,8 +45,8 @@ function tableZoom() {
 }
 
 function toggleBug() {
-	store.topMenuViews.bugErrorText = ""
-	store.topMenuViews.bugSuccessText = ""
+	store.gameMessages.errorText = ""
+	store.gameMessages.successText = ""
 	store.topMenuViews.showNotes = false
 	store.topMenuViews.showBug = !store.topMenuViews.showBug
 }

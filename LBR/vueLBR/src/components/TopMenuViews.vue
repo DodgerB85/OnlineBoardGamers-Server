@@ -11,16 +11,17 @@ const submittingBug = ref(false);
 
 async function submitBug() {
 	if (!bugReportText.value.trim()) {
-		store.gameMessages.bugErrorText = "Please describe the bug.";
+		store.gameMessages.errorText = "Please describe the bug.";
 		return;
 	}
 	submittingBug.value = true;
-	store.gameMessages.bugErrorText = "";
+	store.gameMessages.errorText = "";
+	store.gameMessages.successText = "";
 	try {
 		await IO.submitBug(bugReportText.value);
 		bugReportText.value = "";
 	} catch {
-		store.gameMessages.bugErrorText = "Could not send the bug report.";
+		store.gameMessages.errorText = "Could not send the bug report.";
 	} finally {
 		submittingBug.value = false;
 	}
@@ -41,7 +42,6 @@ async function confirmResign() {
 	<!-- BUG REPORT -->
 	<div id="bugReport" v-if="store.viewSettings.showBug">
 		<h1>Report a bug</h1>
-		<h2 class="errorText" v-if="store.gameMessages.bugErrorText" role="alert">{{ store.gameMessages.bugErrorText }}</h2>
 		<p>
 			Describe what went wrong. The current position is sent with your report.
 			<br />
@@ -63,7 +63,6 @@ async function confirmResign() {
 			<button type="button" class="utilityClose" @click="store.viewSettings.showRewindPanel = false" aria-label="Close rewind panel">×</button>
 		</div>
 		<p>Return to the position before the last saved decision. This cannot be undone.</p>
-		<p v-if="store.gameMessages.errorText" class="errorText" role="alert">{{ store.gameMessages.errorText }}</p>
 		<button type="button" class="actionsLineButton" :disabled="store.viewSettings.saving" @click="confirmRewind">Rewind</button>
 		<button type="button" class="actionsLineButton" @click="store.viewSettings.showRewindPanel = false">Cancel</button>
 	</div>
@@ -76,7 +75,6 @@ async function confirmResign() {
 		</div>
 		<p>Resign from this game? Your seat will be handed to the AI.</p>
 		<p><b>This cannot be undone.</b></p>
-		<p v-if="store.gameMessages.errorText" class="errorText" role="alert">{{ store.gameMessages.errorText }}</p>
 		<button type="button" class="actionsLineButton" :disabled="store.viewSettings.saving" @click="confirmResign">Resign</button>
 		<button type="button" class="actionsLineButton" @click="store.viewSettings.showResignPanel = false">Cancel</button>
 	</div>

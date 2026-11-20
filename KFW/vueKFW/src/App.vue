@@ -1,4 +1,5 @@
 <script setup>
+import GameMessages from "./components/GameMessages.vue"
 /*******
  * 
  * 
@@ -151,6 +152,7 @@ function removeTileInfoPopup() {
 </script>
 
 <template>
+	<GameMessages />
 	<svg id="patternsSVG">
 		<defs>
 			<!-- HEX TILES -->

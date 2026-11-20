@@ -205,7 +205,7 @@ export async function submitBug(description) {
 		store.viewSettings.showBug = false;
 		return true;
 	}
-	store.gameMessages.bugErrorText = "Could not send the bug report.";
+	store.gameMessages.errorText = "Could not send the bug report.";
 	return false;
 }
 

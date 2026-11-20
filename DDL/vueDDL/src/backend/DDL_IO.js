@@ -407,10 +407,10 @@ export async function submitBug(bugContent) {
 		if (data.bugEntrySuccess) {
 			store.gameMessages.successText = t("messages.bugSubmitted")
 			store.viewSettings.showBug = false
-		} else store.gameMessages.bugErrorText = t("errors.webmaster")
+		} else store.gameMessages.errorText = t("errors.webmaster")
 	} catch (error) {
 		console.error("Error submitting bug:", error)
-		store.gameMessages.bugErrorText = t("errors.webmaster")
+		store.gameMessages.errorText = t("errors.webmaster")
 	}
 	store.viewSettings.showLoader = false
 }

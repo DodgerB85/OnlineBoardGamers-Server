@@ -40,14 +40,13 @@ export async function submitBug(bugContent) {
 		}
 		const data = await response.json()
 		if (data.bugEntrySuccess) {
-			store.gameMessages.bugSuccessText = i18n.global.t("io.bugReportSubmitted")
 			store.gameMessages.successText = i18n.global.t("io.bugReportSubmitted")
 			store.topMenuViews.showLoader = false
 			store.topMenuViews.showBug = false
-		} else store.gameMessages.bugErrorText = i18n.global.t("io.webmasterProblemHtml")
+		} else store.gameMessages.errorText = i18n.global.t("io.webmasterProblemHtml")
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.gameMessages.bugErrorText = i18n.global.t("io.webmasterProblemHtml")
+		store.gameMessages.errorText = i18n.global.t("io.webmasterProblemHtml")
 	}
 	store.topMenuViews.showLoader = false
 }
@@ -829,7 +828,7 @@ export async function castVote(topic) {
 
 		store.topMenuViews.showLoader = false
 		if (data.voteChanged === true) {
-			store.topMenuViews.tradeSuccessText = i18n.global.t("io.voteSaved")
+			store.gameMessages.successText = i18n.global.t("io.voteSaved")
 
 			if (topic === rf.DELETE_VOTE_TOPIC) {
 				personal.votedToDelete = true

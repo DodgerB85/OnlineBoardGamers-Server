@@ -165,11 +165,11 @@ function loadRewind() {
 
 async function submitBug() {
 	submittingBug.value = true
-	store.gameMessages.bugErrorText = ""
 	store.gameMessages.successText = ""
+	store.gameMessages.errorText = ""
 
 	if (bugReportText.value.length === 0) {
-		store.gameMessages.bugErrorText = i18n.global.t("topMenuViews.bugErrorRequired")
+		store.gameMessages.errorText = i18n.global.t("topMenuViews.bugErrorRequired")
 		submittingBug.value = false
 		return
 	}
@@ -266,9 +266,6 @@ function localCastVote(topic) {
 	<transition name="slideBug">
 		<div id="bugReport" v-if="store.viewSettings.showBug">
 			<h1>{{ $t("topMenuViews.bugReport") }}</h1>
-			<template v-if="store.gameMessages.bugErrorText !== ''">
-				<h2 class="errorText" id="bugErrorText" v-html="store.gameMessages.bugErrorText"></h2>
-			</template>
 
 			<p>
 				{{ $t("topMenuViews.bugIntro") }}

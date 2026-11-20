@@ -41,7 +41,7 @@ export const useModelStore = defineStore("store", () => {
 	 * be walked one step at a time. Null until they click the first one.
 	 */
 	const movePlan = ref(null)
-	const gameMessages = reactive({ errorText: "", successText: "", bugErrorText: "", rewindErrorText: "" })
+	const gameMessages = reactive({ errorText: "", successText: "", rewindErrorText: "" })
 	const history = reactive([])
 	const chatData = reactive([])
 
@@ -146,7 +146,6 @@ export const useModelStore = defineStore("store", () => {
 	function clearMessages() {
 		gameMessages.errorText = ""
 		gameMessages.successText = ""
-		gameMessages.bugErrorText = ""
 		gameMessages.rewindErrorText = ""
 	}
 

@@ -1,4 +1,5 @@
 <script setup>
+import GameMessages from "./components/GameMessages.vue"
 import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import * as model from "./js/URRmodel"
@@ -236,6 +237,7 @@ function showDebug() {
 </script>
 
 <template>
+	<GameMessages top="calc(var(--urr-menu-height, 60px) + 4px)" />
 	<Teleport to="body"><dialog ref="mapPreview" class="nationMapPreview" :aria-label="$t('app.gameBoard')" @close="isMapPreviewOpen = false" @click="$event.target === mapPreview && closeMapPreview()">
 		<div class="mapPreviewHeader"><b>{{ $t("app.gameBoard") }}</b><button type="button" class="actionsLineButton" @click="closeMapPreview">{{ $t("common.close") }}</button></div>
 		<div class="mapPreviewViewport" tabindex="0" :aria-label="$t('app.enlargedMap')"><div id="nationMapPreviewBody"></div></div>

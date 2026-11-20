@@ -1407,13 +1407,13 @@ export async function submitBug(bugContent) {
 			store.viewSettings.showGameLoader = false
 			return true
 		} else {
-			store.gameMessages.bugErrorText = i18n.global.t("FCM_IO.bugErrorHtml")
+			store.gameMessages.errorText = i18n.global.t("FCM_IO.bugErrorHtml")
 			store.viewSettings.showGameLoader = false
 			return false
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.gameMessages.bugErrorText = i18n.global.t("FCM_IO.bugErrorHtml")
+		store.gameMessages.errorText = i18n.global.t("FCM_IO.bugErrorHtml")
 		store.viewSettings.showGameLoader = false
 		return false
 	}

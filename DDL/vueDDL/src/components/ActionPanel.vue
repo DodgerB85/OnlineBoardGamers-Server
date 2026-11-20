@@ -208,9 +208,7 @@ function openTradeModal() {
 
 <template>
 	<div id="actionPanel">
-		<div v-if="store.gameMessages.errorText" class="errorText">{{ store.gameMessages.errorText }}</div>
 		<div v-if="store.gameMessages.actionError" class="errorText">{{ store.gameMessages.actionError }}</div>
-		<div v-if="store.gameMessages.successText" class="successText">{{ store.gameMessages.successText }}</div>
 
 		<div v-if="store.gameflow.phase === rf.PHASE_GAME_OVER" class="gameOverBox">
 			<h2>{{ $t("action.gameOver") }}</h2>

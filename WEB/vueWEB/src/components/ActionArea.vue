@@ -302,9 +302,6 @@ onUnmounted(() => {
 		</template>
 
 		<!-- REWIND ERROR TEXT -->
-		<template v-if="store.gameMessages.errorText !== ''">
-			<h1 id="errorText">{{ store.gameMessages.errorText }}</h1>
-		</template>
 
 		<!-- ALWAYS SHOWS GAME END-->
 		<template v-if="store.gameflow.phase === rf.PHASE_GAME_OVER">

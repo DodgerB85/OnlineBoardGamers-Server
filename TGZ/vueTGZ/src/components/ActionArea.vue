@@ -833,12 +833,6 @@ function failedToJustPlaceCraftsmanFlag() {
 	<template v-if="store.topMenuViews.rewindErrorText !== ''">
 		<h1 id="rewindErrorText">{{ store.topMenuViews.rewindErrorText }}</h1>
 	</template>
-	<template v-else-if="store.topMenuViews.errorText !== ''">
-		<h1 id="errorText">{{ store.topMenuViews.errorText }}</h1>
-	</template>
-	<template v-else-if="store.topMenuViews.bugSuccessText !== ''">
-		<h2 id="bugSuccessText" v-html="store.topMenuViews.bugSuccessText"></h2>
-	</template>
 	<template v-else>
 		<div class="IOSfix-wrapper">
 			<h6>&nbsp;</h6>
@@ -2532,11 +2526,6 @@ function failedToJustPlaceCraftsmanFlag() {
 .cheatOptionDiv {
 	border: 2px solid black;
 	padding: 10px;
-}
-
-#bugSuccessText {
-	color: darkgreen;
-	background-color: lightblue;
 }
 
 .waitingInfo {

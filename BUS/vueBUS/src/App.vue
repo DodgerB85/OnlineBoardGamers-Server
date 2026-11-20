@@ -1,4 +1,5 @@
 <script setup>
+import GameMessages from "./components/GameMessages.vue"
 /***
  * 
  * hard to tap lines --- I want to invisbly expand the area you can click/touch when placing a
@@ -117,6 +118,7 @@ function getFlexiTimeString(playerName) {
 </script>
 
 <template>
+	<GameMessages />
 	<TopMenu />
 	<GameStatusBanner v-bind="statusBanner" />
 	<div id="wholeMiddleArea" :class="store.topMenuViews.showReplay ? 'greyBackground' : 'normalBackground'">
@@ -136,7 +138,6 @@ function getFlexiTimeString(playerName) {
 						</div>
 						<div v-if="store.topMenuViews.showLoader" id="fLoadingBar">
 							<template v-if="store.topMenuViews.retryAction">
-								<div class="loaderError">{{ store.topMenuViews.errorText }}</div>
 								<button class="actionsLineButton" @click="retryFailedAction">{{ $t('io.retrySave') }}</button>
 							</template>
 							<template v-else>

@@ -108,9 +108,8 @@ export const useModelStore = defineStore('store', () => {
 
   const gameMessages = reactive({
     actionError: '',
+    successText: '',
     errorText: '',
-    bugErrorText: '',
-    bugSuccessText: '',
     turnEndText: '', // Store text to display after an auto-action
 
     endTurnMessage: '', // store text to display AFTER YOU ENDED YOUR TURN
@@ -118,9 +117,8 @@ export const useModelStore = defineStore('store', () => {
 
   function clearMessages(keepEndTurnMessage = false) {
     gameMessages.actionError = ''
+    gameMessages.successText = ''
     gameMessages.errorText = ''
-    gameMessages.bugErrorText = ''
-    gameMessages.bugSuccessText = ''
     gameMessages.turnEndText = ''
 
     if (!keepEndTurnMessage) gameMessages.endTurnMessage = ''

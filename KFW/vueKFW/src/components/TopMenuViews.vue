@@ -122,11 +122,11 @@ function loadRewind() {
 
 async function submitBug() {
 	submittingBug.value = true
-	store.gameMessages.bugErrorText = ""
-	store.gameMessages.bugSuccessText = ""
+	store.gameMessages.successText = ""
+	store.gameMessages.errorText = ""
 
 	if (bugReportText.value.length === 0) {
-		store.gameMessages.bugErrorText = i18n.global.t("topMenuViews.bugErrorRequired")
+		store.gameMessages.errorText = i18n.global.t("topMenuViews.bugErrorRequired")
 		submittingBug.value = false
 		return
 	}

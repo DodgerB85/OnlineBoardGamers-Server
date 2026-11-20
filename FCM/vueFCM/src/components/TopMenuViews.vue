@@ -221,11 +221,11 @@ function submitRewindConsent() {
 
 async function submitBug() {
 	submittingBug.value = true
-	store.gameMessages.bugErrorText = ""
-	store.gameMessages.bugSuccessText = ""
+	store.gameMessages.successText = ""
+	store.gameMessages.errorText = ""
 
 	if (bugReportText.value.length === 0) {
-		store.gameMessages.bugErrorText = i18n.global.t("topMenuViews.bugErrorRequired")
+		store.gameMessages.errorText = i18n.global.t("topMenuViews.bugErrorRequired")
 		submittingBug.value = false
 		return
 	}
@@ -480,12 +480,6 @@ const sortedCampaigns = computed(() => {
 	<transition name="slideBug">
 		<div id="bugReport" v-if="store.viewSettings.showBug">
 			<h1>{{ $t('topMenuViews.bugReportTitle') }}</h1>
-			<template v-if="store.gameMessages.bugErrorText !== ''">
-				<h2 id="bugErrorText" v-html="store.gameMessages.bugErrorText"></h2>
-			</template>
-			<template v-if="store.gameMessages.bugSuccessText !== ''">
-				<h2 id="bugSuccessText" v-html="store.gameMessages.bugSuccessText"></h2>
-			</template>
 			<p>
 				{{ $t('topMenuViews.bugIntro') }}
 				<br />
@@ -941,19 +935,6 @@ const sortedCampaigns = computed(() => {
 .slideRes-leave-to {
 	opacity: 0;
 	height: 0px;
-}
-
-#bugErrorText {
-	width: 100%;
-	font-weight: bolder;
-	text-align: center;
-	background-color: lightgoldenrodyellow;
-	color: darkred;
-}
-
-#bugSuccessText {
-	color: darkgreen;
-	background-color: lightblue;
 }
 
 .slideNotes-enter-active,

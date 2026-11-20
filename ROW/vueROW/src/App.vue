@@ -1,4 +1,5 @@
 <script setup>
+import GameMessages from "./components/GameMessages.vue"
 /**
  * main app file. Initialise the store/model here.
  */
@@ -80,6 +81,7 @@ onUnmounted(() => {
 </script>
 
 <template>
+	<GameMessages />
 	<TopMenu />
 	<GameStatusBanner v-bind="statusBanner" />
 	<ResignPanel />

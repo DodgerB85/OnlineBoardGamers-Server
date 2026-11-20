@@ -129,10 +129,6 @@ function spendCommandPoint() {
       </div>
     </div>
 
-    <div v-if="store.gameMessages.errorText" class="gameError">
-      {{ store.gameMessages.errorText }}
-    </div>
-
     <div v-if="store.isGameOver" class="gameOver">
       {{ t('action.gameOver') }}
       <div v-if="victoryText" class="victoryText">{{ victoryText }}</div>

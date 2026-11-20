@@ -20,7 +20,6 @@ async function confirmResign() {
 		<p>{{ $t("resign.question") }}</p>
 		<p>{{ $t("resign.carryOn") }}</p>
 		<p>{{ $t("resign.aim") }}</p>
-		<p v-if="store.gameMessages.errorText" class="resignError" role="alert"><CurrencyText :text="store.gameMessages.errorText" /></p>
 		<img class="resignImage" :src="view.getImage('resign')" :alt="$t('resign.title')" />
 		<div class="resignButtons">
 			<button class="actionsLineButton" @click="close">{{ $t("resign.keepPlaying") }}</button>

@@ -348,7 +348,7 @@ export async function saveNotes() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.topMenuViews.showLoader = true
-	store.topMenuViews.errorText = ""
+	store.gameMessages.errorText = ""
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -365,7 +365,7 @@ export async function saveNotes() {
 		})
 		const data = await response.json()
 		if (data.error) {
-			store.topMenuViews.errorText = data.error
+			store.gameMessages.errorText = data.error
 			store.topMenuViews.showLoader = false
 			return
 		}
@@ -373,7 +373,7 @@ export async function saveNotes() {
 			throw new Error("Network response was not ok")
 		}
 		if (!data.notePosted) {
-			store.topMenuViews.errorText = t("io.webmasterProblem")
+			store.gameMessages.errorText = t("io.webmasterProblem")
 			return
 		}
 
@@ -656,7 +656,7 @@ export async function submitBug(bugContent) {
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
-		if (data.bugEntrySuccess) store.topMenuViews.bugSuccessText = t("io.bugReportSubmitted")
+		if (data.bugEntrySuccess) store.gameMessages.successText = t("io.bugReportSubmitted")
 		else alert(t("io.webmasterProblem"))
 	} catch (error) {
 		console.error("Error fetching data:", error)
@@ -903,7 +903,7 @@ export async function castVote(topic) {
 
 		store.topMenuViews.showLoader = false
 		if (data.voteChanged === true) {
-			store.topMenuViews.bugSuccessText = t("io.voteSaved")
+			store.gameMessages.successText = t("io.voteSaved")
 
 			if (topic === rf.DELETE_VOTE_TOPIC) {
 				personal.votedToDelete = true

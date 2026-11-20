@@ -22,7 +22,6 @@ async function confirm() {
 		<div id="resignPanel" role="dialog" aria-modal="true" :aria-label="t('topMenu.resign')" tabindex="-1" @keydown.esc.stop.prevent="close">
 			<h3>{{ t('topMenu.resign') }}</h3>
 			<p>{{ t('app.confirmResign') }}</p>
-			<p v-if="store.gameMessages.errorText" class="resignError" role="alert">{{ store.gameMessages.errorText }}</p>
 			<div class="resignButtons">
 				<button class="actionsLineButton" autofocus @click="close">{{ t('panels.cancel') }}</button>
 				<button class="actionsLineButton" @click="confirm">{{ t('topMenu.resign') }}</button>

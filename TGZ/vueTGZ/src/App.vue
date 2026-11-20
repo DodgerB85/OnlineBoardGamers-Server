@@ -1,4 +1,5 @@
 <script setup>
+import GameMessages from "./components/GameMessages.vue"
 import * as map from "./js/TGZmap"
 import * as rf from "./js/TGZreference"
 import * as funcs from "./js/TGZfuncs"
@@ -418,6 +419,7 @@ function getSplitUIleftMinWidth() {
 </script>
 
 <template>
+	<GameMessages top="124px" />
 	<TopMenu />
 	<GameStatusBanner v-bind="statusBanner" />
 	<transition name="turnBanner">

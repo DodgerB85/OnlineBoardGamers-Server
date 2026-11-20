@@ -1,4 +1,5 @@
 <script setup>
+import GameMessages from "./components/GameMessages.vue"
 /**
  * main app file. Initialise the store here
  *
@@ -335,6 +336,7 @@ document.addEventListener("keyup", function (event) {
 </script>
 
 <template>
+	<GameMessages top="124px" />
 	<svg id="patternsSVG">
 		<!-- MAP TILES -->
 		<pattern :id="`tile-${index}`" height="100%" v-for="(entry, index) in store.mapData.seed" :key="index" width="100%" patternContentUnits="objectBoundingBox">
@@ -460,14 +462,7 @@ document.addEventListener("keyup", function (event) {
 					<h1 id="rewindErrorText">{{ store.topMenuViews.rewindErrorText }}</h1>
 					<button v-if="store.topMenuViews.retrySave" class="actionsLineButton" @click="retrySave">{{ $t("aqyUi.save.redoSave") }}</button>
 				</template>
-				<template v-if="store.topMenuViews.tradeSuccessText !== ''">
-					<h1 id="tradeSuccessText" v-html="store.topMenuViews.tradeSuccessText"></h1>
-					<TradeSummary v-if="store.topMenuViews.WStradeToDisplay.length > 0" />
-				</template>
-				<template v-if="store.topMenuViews.tradeErrorText !== ''">
-					<h1 id="tradeErrorText" v-html="store.topMenuViews.tradeErrorText"></h1>
-					<TradeSummary v-if="store.topMenuViews.WStradeToDisplay.length > 0" />
-				</template>
+				<TradeSummary v-if="store.topMenuViews.WStradeToDisplay.length > 0" />
 				<div id="middle">
 					<TopMenuViews />
 					<HistoryTab />
@@ -643,24 +638,6 @@ body {
 	/*text-align: center;*/
 	background-color: lightgoldenrodyellow;
 	color: darkred;
-}
-
-#tradeSuccessText,
-#tradeErrorText {
-	font-size: 20px;
-	margin: 10px;
-	padding: 10px;
-	font-weight: bold;
-}
-
-#tradeSuccessText {
-	color: darkgreen;
-	background-color: lightblue;
-}
-
-#tradeErrorText {
-	color: darkred;
-	background-color: lightblue;
 }
 
 .turn-banner {

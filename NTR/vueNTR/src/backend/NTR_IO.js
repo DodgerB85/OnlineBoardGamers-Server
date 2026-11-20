@@ -113,16 +113,19 @@ async function doSaveGame({ status, winner, finalPositions }) {
     })
     if (!data) return
     if (data.syncError) {
-      store.gameMessages = { errorText: 'Another player moved first - loading the latest position.' }
+      store.gameMessages.errorText = 'Another player moved first - loading the latest position.'
+      store.gameMessages.successText = ''
       await checkForLatestData(true)
       return
     }
     store.latestUpdate = data.latestUpdate
     if (data.secondsToNextKickout !== undefined) store.secondsToNextKickout = data.secondsToNextKickout
-    store.gameMessages = { errorText: '', successText: '' }
+    store.gameMessages.errorText = ''
+    store.gameMessages.successText = ''
   } catch (error) {
     console.error('Error saving:', error)
-    store.gameMessages = { errorText: 'Could not save the move. Please reload the game.' }
+    store.gameMessages.errorText = 'Could not save the move. Please reload the game.'
+    store.gameMessages.successText = ''
   } finally {
     store.viewSettings.showLoader = false
   }

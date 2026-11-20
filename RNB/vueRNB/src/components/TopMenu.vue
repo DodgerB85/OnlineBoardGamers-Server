@@ -25,7 +25,6 @@ const personal = usePersonalStore()
 
 
 function toggleBug() {
-	store.gameMessages.bugErrorText = ""
 	store.gameMessages.successText = ""
 	store.gameMessages.errorText = ""
 	store.viewSettings.showNotes = false

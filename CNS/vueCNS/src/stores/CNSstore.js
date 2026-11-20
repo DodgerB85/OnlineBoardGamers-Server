@@ -109,6 +109,11 @@ export const useModelStore = defineStore('store', () => {
     partyZones: [],
   })
 
+  const gameMessages = reactive({
+    successText: '',
+    errorText: '',
+  })
+
   const topMenuViews = reactive({
     showNotes: false,
     showChat: false,
@@ -120,10 +125,6 @@ export const useModelStore = defineStore('store', () => {
     showRewindPanel: false,
     performingRewind: false,
     rewindErrorText: '',
-    errorText: '',
-    successText: '',
-    bugErrorText: '',
-    bugSuccessText: '',
     showReplay: false,
     showingPlayerIndex: -1,
     hubRangesToHighlight: [],
@@ -159,8 +160,8 @@ export const useModelStore = defineStore('store', () => {
     context.startingTurnAfterPirates = false
 
     topMenuViews.rewindErrorText = ''
-    topMenuViews.errorText = ''
-    topMenuViews.successText = ''
+    gameMessages.successText = ''
+    gameMessages.errorText = ''
 
   }
 
@@ -196,6 +197,7 @@ export const useModelStore = defineStore('store', () => {
   return {
     gameflow,
     topMenuViews,
+    gameMessages,
     hexes,
     oldBoysNetwork,
     hexDrawPile,

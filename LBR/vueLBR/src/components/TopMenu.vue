@@ -59,7 +59,8 @@ function toggleNotes() {
 function toggleBug() {
 	const open = store.viewSettings.showBug;
 	closePanels();
-	store.gameMessages.bugErrorText = "";
+	store.gameMessages.errorText = "";
+	store.gameMessages.successText = "";
 	store.viewSettings.showBug = !open;
 }
 

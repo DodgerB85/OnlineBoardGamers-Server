@@ -201,8 +201,6 @@ async function castVoteFor(topic) {
 				</div>
 			</div>
 		</transition>
-		<div v-if="store.gameMessages.successText" class="feedback success">{{ store.gameMessages.successText }}</div>
-		<div v-if="store.gameMessages.errorText" class="feedback error">{{ store.gameMessages.errorText }}</div>
 	</div>
 </template>
 

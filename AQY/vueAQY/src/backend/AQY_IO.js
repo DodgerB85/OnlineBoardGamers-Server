@@ -73,11 +73,11 @@ export async function submitBug(bugContent) {
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
-		if (data.bugEntrySuccess) store.topMenuViews.bugSuccessText = i18n.global.t("io.bugReportSubmitted")
-		else store.topMenuViews.bugErrorText = i18n.global.t("io.bugErrorHtml")
+		if (data.bugEntrySuccess) store.gameMessages.successText = i18n.global.t("io.bugReportSubmitted")
+		else store.gameMessages.errorText = i18n.global.t("io.bugErrorHtml")
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.topMenuViews.bugErrorText = i18n.global.t("io.bugErrorHtml")
+		store.gameMessages.errorText = i18n.global.t("io.bugErrorHtml")
 	}
 	store.topMenuViews.showLoader = false
 }
@@ -362,7 +362,7 @@ export async function sendProposeTrade(selectedOpponent, yourResources, opponent
 		if (data.endMoveError) {
 			store.clearVars()
 			store.clearMessages()
-			store.topMenuViews.tradeErrorText = i18n.global.t("io.tradeAlreadyFinished", {
+			store.gameMessages.errorText = i18n.global.t("io.tradeAlreadyFinished", {
 				name: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[selectedOpponent].colour) + `">${store.players[selectedOpponent].displayName}</span></div>`,
 			})
 			store.topMenuViews.showLoader = false
@@ -372,7 +372,7 @@ export async function sendProposeTrade(selectedOpponent, yourResources, opponent
 		if (data.resourceError) {
 			store.clearVars()
 			store.clearMessages()
-			store.topMenuViews.tradeErrorText = i18n.global.t("io.tradeNoResources", {
+			store.gameMessages.errorText = i18n.global.t("io.tradeNoResources", {
 				name: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[selectedOpponent].colour) + `">${store.players[selectedOpponent].displayName}</span></div>`,
 			})
 			store.topMenuViews.showLoader = false
@@ -382,16 +382,16 @@ export async function sendProposeTrade(selectedOpponent, yourResources, opponent
 		if (data.success) {
 			store.clearMessages()
 			store.clearVars()
-			//store.topMenuViews.tradeSuccessText = `Your trade has been sent to 	<div class="playerScoreSummaryDiv"><span class="mainEntryPlayerNewTurn" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[selectedOpponent].colour)">{{ store.players[selectedOpponent].displayName }}</span>
+			//store.gameMessages.successText = `Your trade has been sent to 	<div class="playerScoreSummaryDiv"><span class="mainEntryPlayerNewTurn" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[selectedOpponent].colour)">{{ store.players[selectedOpponent].displayName }}</span>
 			//	</div>" + store.players[selectedOpponent].displayName`
-			store.topMenuViews.tradeSuccessText = i18n.global.t("io.tradeSentTo", {
+			store.gameMessages.successText = i18n.global.t("io.tradeSentTo", {
 				name: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[selectedOpponent].colour) + `">${store.players[selectedOpponent].displayName}</span></div>`,
 			})
 
 			// Just a proposal, so no need to force update
 			funcs.decompressTradeData(data.playerTradeData, false)
 
-			store.topMenuViews.bugSuccessText = i18n.global.t("io.tradeProposedTo", { name: store.players[selectedOpponent].displayName })
+			store.gameMessages.successText = i18n.global.t("io.tradeProposedTo", { name: store.players[selectedOpponent].displayName })
 			store.topMenuViews.showLoader = false
 			personal.haltPlay = false
 
@@ -469,7 +469,7 @@ export async function acceptTrade(entry) {
 			// Trade accepted, so force update
 			funcs.decompressTradeData(data.playerTradeData, true)
 
-			//store.topMenuViews.bugSuccessText = "Your trade has been proposed to " + store.players[selectedOpponent].displayName
+			//store.gameMessages.successText = "Your trade has been proposed to " + store.players[selectedOpponent].displayName
 			store.topMenuViews.showLoader = false
 			personal.haltPlay = false
 
@@ -522,11 +522,11 @@ export async function rejectTrade(entry) {
 			store.clearVars()
 			// Trade rejected, so no need to force an update
 			funcs.decompressTradeData(data.playerTradeData, false)
-			store.topMenuViews.tradeSuccessText = i18n.global.t("io.tradeRejectedWith", {
+			store.gameMessages.successText = i18n.global.t("io.tradeRejectedWith", {
 				name: `<div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[entry[0]].colour) + `">${store.players[entry[0]].displayName}</span></div>`,
 			})
 
-			//store.topMenuViews.bugSuccessText = "Your trade has been proposed to " + store.players[selectedOpponent].displayName
+			//store.gameMessages.successText = "Your trade has been proposed to " + store.players[selectedOpponent].displayName
 			store.topMenuViews.showLoader = false
 			personal.haltPlay = false
 
@@ -900,7 +900,7 @@ export async function saveNotes() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.topMenuViews.showLoader = true
-	store.topMenuViews.errorText = ""
+	store.gameMessages.errorText = ""
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
@@ -917,7 +917,7 @@ export async function saveNotes() {
 		})
 		const data = await response.json()
 		if (data.error) {
-			store.topMenuViews.errorText = data.error
+			store.gameMessages.errorText = data.error
 			store.topMenuViews.showLoader = false
 			return
 		}
@@ -1118,7 +1118,7 @@ export async function kickout() {
 			// Vote recorded but no kickout (yet): show the updated vote state
 			store.kickoutVotesData = JSON.parse(data.votesData)
 			store.kickoutVoteThreshold = data.threshold
-			store.topMenuViews.tradeSuccessText = i18n.global.t("io.kickoutVoteRecorded")
+			store.gameMessages.successText = i18n.global.t("io.kickoutVoteRecorded")
 			store.topMenuViews.showLoader = false
 			return data
 		}
@@ -1300,7 +1300,7 @@ export async function castVote(topic) {
 
 		store.topMenuViews.showLoader = false
 		if (data.voteChanged === true) {
-			store.topMenuViews.tradeSuccessText = i18n.global.t("io.voteSaved")
+			store.gameMessages.successText = i18n.global.t("io.voteSaved")
 
 			if (topic === rf.DELETE_VOTE_TOPIC) {
 				personal.votedToDelete = true

@@ -38,13 +38,13 @@ export async function submitBug(bugContent) {
 		}
 		const data = await response.json()
 		if (data.bugEntrySuccess) {
-			store.gameMessages.bugSuccessText = i18n.global.t("io.bugSubmitted")
+			store.gameMessages.successText = i18n.global.t("io.bugSubmitted")
 			store.viewSettings.showLoader = false
 			store.viewSettings.showBug = false
-		} else store.gameMessages.bugErrorText = i18n.global.t("io.bugError")
+		} else store.gameMessages.errorText = i18n.global.t("io.bugError")
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.gameMessages.bugErrorText = i18n.global.t("io.bugError")
+		store.gameMessages.errorText = i18n.global.t("io.bugError")
 	}
 	store.viewSettings.showLoader = false
 }

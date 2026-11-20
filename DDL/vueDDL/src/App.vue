@@ -1,4 +1,5 @@
 <script setup>
+import GameMessages from "./components/GameMessages.vue"
 import { computed, onMounted, onUnmounted } from "vue"
 import * as model from "./js/DDLmodel"
 import * as controller from "./js/DDLcontroller"
@@ -90,6 +91,7 @@ const statusBanner = computed(() => {
 </script>
 
 <template>
+	<GameMessages />
 	<TopMenu />
 	<GameStatusBanner v-bind="statusBanner" />
 	<div id="wholeMiddleArea" :class="{ greyBackground: waitingForTurn }">

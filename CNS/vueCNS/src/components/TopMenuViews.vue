@@ -112,11 +112,11 @@ function loadRewind() {
 
 function submitBug() {
 	submittingBug.value = true
-	store.topMenuViews.bugErrorText = ""
-	store.topMenuViews.bugSuccessText = ""
+	store.gameMessages.errorText = ""
+	store.gameMessages.successText = ""
 
 	if (bugReportText.value.length === 0) {
-		store.topMenuViews.bugErrorText = i18n.global.t("topMenuViews.bugErrorRequired")
+		store.gameMessages.errorText = i18n.global.t("topMenuViews.bugErrorRequired")
 		return
 	}
 	IO.submitBug(bugReportText.value)
@@ -256,12 +256,6 @@ function localCastVote(topic) {
 	<transition name="slideBug">
 		<div id="bugReport" v-if="store.topMenuViews.showBug">
 			<h1>{{ $t("topMenuViews.bugReport") }}</h1>
-			<template v-if="store.topMenuViews.bugErrorText !== ''">
-				<h2 id="bugErrorText" v-html="store.topMenuViews.bugErrorText"></h2>
-			</template>
-			<template v-if="store.topMenuViews.bugSuccessText !== ''">
-				<h2 id="bugSuccessText" v-html="store.topMenuViews.bugSuccessText"></h2>
-			</template>
 			<p>
 				{{ $t("topMenuViews.bugIntro") }}
 				<br />
@@ -641,19 +635,6 @@ function localCastVote(topic) {
 .slideRes-leave-to {
 	opacity: 0;
 	height: 0px;
-}
-
-#bugErrorText {
-	width: 100%;
-	font-weight: bolder;
-	text-align: center;
-	background-color: lightgoldenrodyellow;
-	color: darkred;
-}
-
-#bugSuccessText {
-	color: darkgreen;
-	background-color: lightblue;
 }
 
 .slideNotes-enter-active,

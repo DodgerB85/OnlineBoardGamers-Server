@@ -1,4 +1,5 @@
 <script setup>
+import GameMessages from "./components/GameMessages.vue"
 /************* &C
  */
 /** BIG ASSUMPTIONS
@@ -131,6 +132,7 @@ if (!window.initData.showMapOnly && !window.initData.mapEditor) {
 </script>
 
 <template>
+	<GameMessages />
 	<svg id="patternsSVG">
 		<!-- Get patterns for all the hex images -->
 		<defs>

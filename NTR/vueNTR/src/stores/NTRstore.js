@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { reactive, ref, computed } from 'vue'
 
 export const useModelStore = defineStore('model', () => {
   // Game metadata
@@ -74,7 +74,7 @@ export const useModelStore = defineStore('model', () => {
   // Set when checkVictory() decides the game is over
   const victory = ref(null)
   // Save/sync feedback shown to the player
-  const gameMessages = ref({ errorText: '', successText: '' })
+  const gameMessages = reactive({ errorText: '', successText: '' })
 
   // Computed
   const isAlliedTurn = computed(() => phase.value === 0)
@@ -157,7 +157,8 @@ export const useModelStore = defineStore('model', () => {
     replayIndex.value = -1
     selection.value = { units: [], locale: null }
     victory.value = null
-    gameMessages.value = { errorText: '', successText: '' }
+    gameMessages.errorText = ''
+    gameMessages.successText = ''
   }
 
   return {

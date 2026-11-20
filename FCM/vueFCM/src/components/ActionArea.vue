@@ -593,15 +593,8 @@ function skipModuleAndEndTurn() {
 			</template>
 
 			<!-- [Rewind/ERROR] ERROR TEXT -->
-			<template v-if="store.gameMessages.errorText !== ''">
-				<h1 class="errorText">{{ store.gameMessages.errorText }}</h1>
-			</template>
 			<template v-if="store.gameMessages.actionError !== ''">
 				<h1 class="errorText">{{ store.gameMessages.actionError }}</h1>
-			</template>
-			<!-- [BUG]]  SUCCESS TEXT -->
-			<template v-if="store.gameMessages.successText !== ''">
-				<h2 id="successText" v-html="store.gameMessages.successText"></h2>
 			</template>
 
 			<!-- ALWAYS SHOWS GAME END-->

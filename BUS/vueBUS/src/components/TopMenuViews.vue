@@ -28,7 +28,7 @@ function toggleBug() {
 async function submitBug() {
 	let bugContent = document.getElementById("bugContent").value
 	if (bugContent.length === 0) {
-		store.topMenuViews.errorText = i18n.global.t("topMenuViews.bugErrorRequired")
+		store.gameMessages.errorText = i18n.global.t("topMenuViews.bugErrorRequired")
 		return
 	}
 
@@ -50,11 +50,11 @@ async function submitBug() {
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
-		if (data.bugEntrySuccess) store.successText = i18n.global.t("io.bugReportSubmitted")
-		else store.topMenuViews.errorText = i18n.global.t("io.webmasterProblem")
+		if (data.bugEntrySuccess) store.gameMessages.successText = i18n.global.t("io.bugReportSubmitted")
+		else store.gameMessages.errorText = i18n.global.t("io.webmasterProblem")
 	} catch (error) {
 		console.error("Error fetching data:", error)
-		store.topMenuViews.errorText = i18n.global.t("io.webmasterProblem")
+		store.gameMessages.errorText = i18n.global.t("io.webmasterProblem")
 	}
 
 	store.topMenuViews.showLoader = false

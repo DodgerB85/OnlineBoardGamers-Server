@@ -33,7 +33,7 @@ const { t } = useI18n()
 
 function debugButton() {
 	//model.endGame()
-	//store.topMenuViews.tradeSuccessText = `Your trade has been sent to <div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[0].colour) + `">${store.players[0].displayName}</span></div> `;
+	//store.gameMessages.successText = `Your trade has been sent to <div class="globalPlayerNameDiv"><span class="mainEntryPlayer` + personal.getCorrectedColour(store.players[0].colour) + `">${store.players[0].displayName}</span></div> `;
 	//store.famineLevel = 10
 	//store.context.gravesLeftToPlace = 3
 	//store.context.gravesLeftToRemove = 2
@@ -129,8 +129,8 @@ function doZoom(dir) {
 }
 
 function toggleBug() {
-	store.topMenuViews.bugErrorText = ""
-	store.topMenuViews.bugSuccessText = ""
+	store.gameMessages.errorText = ""
+	store.gameMessages.successText = ""
 	store.topMenuViews.showNotes = false
 	store.topMenuViews.showBug = !store.topMenuViews.showBug
 }

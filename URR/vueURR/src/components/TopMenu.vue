@@ -27,7 +27,6 @@ function fitMap() {
 	document.querySelector(".mapContainer")?.scrollIntoView({ block: "start", behavior: "smooth" })
 }
 function clearPanels() {
-	store.gameMessages.bugErrorText = ""
 	store.gameMessages.successText = ""
 	if (!personal.haltPlay) store.gameMessages.errorText = ""
 }

@@ -1,4 +1,5 @@
 <script setup>
+import GameMessages from "./components/GameMessages.vue"
 import { computed, onMounted, onUnmounted } from "vue";
 
 import TopMenu from "./components/TopMenu.vue";
@@ -83,6 +84,7 @@ onUnmounted(() => {
 </script>
 
 <template>
+	<GameMessages />
 	<TopMenu />
 	<GameStatusBanner v-bind="statusBanner" />
 	<TopMenuViews />

@@ -1,4 +1,5 @@
 <script setup>
+import GameMessages from "./components/GameMessages.vue"
 /**
  * Napoleon's Triumph - Main App Component
  * 
@@ -93,6 +94,7 @@ document.addEventListener("keyup", function (event) {
 </script>
 
 <template>
+  <GameMessages />
   <TopMenu />
   <GameStatusBanner v-bind="statusBanner" />
   <div
