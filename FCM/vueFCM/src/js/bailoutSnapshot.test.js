@@ -90,6 +90,34 @@ for (const sbd of [false, true])
 		for (const mediaLine of [false, true]) combinations.push({ sbd, secondBailout, laborMarket, mediaLine, stadium: true })
 
 describe("Second Bailout whole-model snapshot regression", () => {
+	it("raw half-claimed snapshots retain the next claimant without regranting a beach card", () => {
+		const store = seed()
+		const raw = funcs.simpleExportWholeFCMmodel(true)
+		const before = savedState(store)
+		rules.claimBailoutEmployee(1, -1)
+		funcs.simpleImportWholeFCMmodel(raw, true)
+		expect(savedState(store)).toEqual(before)
+		expect(rules.currentBailoutPlayer()).toBe(1)
+		expect(rules.claimBailoutEmployee(0, rf.CAMPAIGN_MANAGER)).toBe(false)
+	})
+	it("real replay goes forwards and backwards without duplicating the gift or its history", async () => {
+		const store = seed()
+		globalThis.document = { querySelector: () => null }
+		store.history.unshift([rf.HIST_NEW_TURN, -1, 0, [5, 1000, [123, 100]]])
+		rules.claimBailoutEmployee(1, -1)
+		const count = store.history.length
+		const replay = await import('./FCMreplay')
+		await replay.generateReplayData()
+		expect(store.players[0].beach.filter(e => e === rf.CAMPAIGN_MANAGER)).toHaveLength(1)
+		expect(store.players[1].beach).not.toContain(rf.CAMPAIGN_MANAGER)
+		const snapshots = JSON.stringify(store.replayData)
+		replay.goToReplayStep(0)
+		expect(store.players[0].beach).not.toContain(rf.CAMPAIGN_MANAGER)
+		replay.goToReplayStep(count - 1)
+		expect(store.players[0].beach.filter(e => e === rf.CAMPAIGN_MANAGER)).toHaveLength(1)
+		expect(store.history).toHaveLength(count)
+		expect(JSON.stringify(store.replayData)).toBe(snapshots)
+	})
 	it("restores pending/pool/claims/order through real export/import", () => {
 		const store = seed()
 		const expected = savedState(store)

@@ -3189,14 +3189,18 @@ function bailoutPool() {
 // Second Bailout mod: a player claims one free L2 marketer (or -1 to decline).
 // The gift is NOT a hire: no hire milestones, the employee goes to the beach and
 // joins the payroll like any normal employee.
+// Derived from the saved snapshot: no second persistent cursor to desynchronise.
+export function currentBailoutPlayer() {
+	const { bailout } = useModelStore()
+	return bailout.pending ? (bailout.order.find((pi) => bailout.claims[pi] === undefined) ?? -1) : -1
+}
+
 export function claimBailoutEmployee(playerIndex, employeeId) {
 	const store = useModelStore()
-	if (!store.bailout.pending) return
-	if (store.bailout.claims[playerIndex] !== undefined) return
-	if (!store.bailout.order.includes(playerIndex)) return
+	if (playerIndex < 0 || playerIndex !== currentBailoutPlayer()) return false
 
 	if (employeeId !== -1) {
-		if (!(store.bailout.pool[employeeId] > 0)) return
+		if (!Number.isInteger(employeeId) || !(store.bailout.pool[employeeId] > 0) || !(store.availableEmployees[employeeId] > 0)) return false
 		store.bailout.pool[employeeId]--
 		store.availableEmployees[employeeId]--
 		store.players[playerIndex].beach.push(employeeId)
@@ -3208,6 +3212,7 @@ export function claimBailoutEmployee(playerIndex, employeeId) {
 	if (store.bailout.order.every((pi) => store.bailout.claims[pi] !== undefined)) {
 		store.bailout.pending = false
 	}
+	return true
 }
 
 // This is used in C.canSkipCurrentPlayer

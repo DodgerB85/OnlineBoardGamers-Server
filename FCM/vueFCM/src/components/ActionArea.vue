@@ -86,7 +86,7 @@ const bailoutClaimRequired = computed(
 	() => store.bailout.pending && store.bailout.order.includes(controller.currentPlayerIndex()) && store.bailout.claims[controller.currentPlayerIndex()] === undefined
 )
 function claimBailout(employeeId) {
-	rules.claimBailoutEmployee(controller.currentPlayerIndex(), employeeId)
+	return controller.claimBailout(employeeId)
 }
 
 const isOnlyHumanLeft = computed(() => {
@@ -636,7 +636,7 @@ function skipModuleAndEndTurn() {
 			</template>
 
 			<!-- Turn Order Phase Summary (visible to all players) -->
-			<template v-if="store.gameflow.phase === rf.PHASE_TURN_ORDER">
+			<template v-if="!store.bailout.pending && store.gameflow.phase === rf.PHASE_TURN_ORDER">
 				<div>
 					<p v-if="store.context.action !== rf.ACT_CONFORM_END_TURN && personal.canPlay()">{{ $t("actionArea.chooseTurnOrderPosition") }}</p>
 					<template v-for="(playerIndex, idx) in store.gameflow.newTurnOrder" :key="idx">
@@ -667,6 +667,10 @@ function skipModuleAndEndTurn() {
 				</div>
 			</template>
 
+			<div v-if="store.bailout.pending" class="bailoutOrderDiv">
+				<p>{{ $t("actionArea.bailoutOrder") }}: {{ store.bailout.order.map(i => store.players[i].displayName).join(' → ') }}</p>
+				<p>{{ $t("actionArea.bailoutWaiting", { name: store.players[rules.currentBailoutPlayer()]?.displayName || '' }) }}</p>
+			</div>
 			<!-- CURRENT PLAYER ONLY-->
 			<template v-if="personal.canPlay()">
 				<!-- Second Bailout mod: forced gift claim, blocks all other actions -->
@@ -1134,10 +1138,10 @@ function skipModuleAndEndTurn() {
 
 		<!-- Expert Panel: independent of canPlay, shows preset after player has moved.
 		     Hidden during your actual working day turn and during end-turn confirm. -->
-		<template v-if="prePhaseMode && !(store.gameflow.phase === rf.PHASE_WORKING_DAY && store.gameflow.subphase === rf.SUBPHASE_CONFIRM_END_TURN && !isOnlyHumanLeft)">
+		<template v-if="!store.bailout.pending && prePhaseMode && !(store.gameflow.phase === rf.PHASE_WORKING_DAY && store.gameflow.subphase === rf.SUBPHASE_CONFIRM_END_TURN && !isOnlyHumanLeft)">
 			<ActionAreaPrePhase :mode="prePhaseMode" @close="closePrePhase" />
 		</template>
-		<template v-else-if="!(store.gameflow.phase === rf.PHASE_WORKING_DAY && (personal.canPlay() || store.gameflow.subphase === rf.SUBPHASE_CONFIRM_END_TURN))">
+		<template v-else-if="!store.bailout.pending && !(store.gameflow.phase === rf.PHASE_WORKING_DAY && (personal.canPlay() || store.gameflow.subphase === rf.SUBPHASE_CONFIRM_END_TURN))">
 			<ExpertPanel @startPrePhase="startPrePhase" />
 		</template>
 	</div>

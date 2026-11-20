@@ -15,9 +15,47 @@ import { useModelStore } from "../stores/FCMstore.js"
 import { usePersonalStore } from "../stores/FCMpersonal"
 import i18n from "../i18n"
 
+// Only the front seat may be auto-declined; never pre-consume a later bot's choice.
+export function settleAutomaticBailoutClaims() {
+	const store = useModelStore()
+	let idx = rules.currentBailoutPlayer()
+	while (idx >= 0) {
+		const empty = !Object.keys(store.bailout.pool).some((id) => store.bailout.pool[id] > 0 && store.availableEmployees[id] > 0)
+		if (!empty && store.players[idx].displayName !== rf.BOT_NAME) break
+		rules.claimBailoutEmployee(idx, -1)
+		idx = rules.currentBailoutPlayer()
+	}
+}
+
+async function saveBailoutProgress(resumePhase = true, saveArgs = [false, false, false]) {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	personal.haltPlay = true
+	if (resumePhase && !store.bailout.pending) {
+		actionAllPlayerSkips()
+		if (store.gameflow.turnOrder.length === 0 || (store.gameflow.phase === rf.PHASE_TURN_ORDER && store.gameflow.turnOrder.length === 1)) await endCurrentPhase()
+	}
+	const saved = await IO.saveGameNormal(...saveArgs)
+	if (saved) startPlayerTurn(false)
+	else {
+		personal.haltPlay = true
+		// Retry persistence, never grant the card or resume the phase twice.
+		if (store.gameMessages.retrySave) store.gameMessages.retrySave = () => saveBailoutProgress(false, saveArgs)
+	}
+	return saved
+}
+
+export async function claimBailout(employeeId) {
+	if (!usePersonalStore().canPlay() || !rules.claimBailoutEmployee(rules.currentBailoutPlayer(), employeeId)) return false
+	settleAutomaticBailoutClaims()
+	return saveBailoutProgress()
+}
+
 export function currentPlayerObj() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	const claimant = rules.currentBailoutPlayer()
+	if (claimant >= 0) return store.players[claimant]
 	if (controller.isSimulPhase(store.gameflow.phase)) {
 		if (store.gameflow.turnOrder.includes(personal.pov)) return store.players[personal.pov]
 		else if (store.gameflow.turnOrder.length > 0) return store.players[store.gameflow.turnOrder[0]]
@@ -35,6 +73,8 @@ export function currentPlayerObj() {
 export function currentPlayerIndex() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	const claimant = rules.currentBailoutPlayer()
+	if (claimant >= 0) return claimant
 	if (controller.isSimulPhase(store.gameflow.phase)) return personal.pov
 	if (store.gameflow.turnOrder.length > 0) return store.gameflow.turnOrder[0]
 	else {
@@ -49,6 +89,8 @@ export function currentPlayerIndex() {
 
 export function getCurrentPlayersArray() {
 	const store = useModelStore()
+	const claimant = rules.currentBailoutPlayer()
+	if (claimant >= 0) return [store.players[claimant].displayName]
 	// Why is this using displayname?
 	if (!controller.isSimulPhase(store.gameflow.phase)) return [store.players[store.gameflow.turnOrder[0]].displayName]
 	let ret = []
@@ -1951,6 +1993,7 @@ export function chooseFridgeType(choice) {
 export async function endPlayerTurn(forced, isPointlessMove = false, extraPostData = undefined) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	if (store.bailout.pending) return
 	if (store.gameflow.phase === rf.PHASE_WORKING_DAY) consumeTemporaryWorker()
 	store.clearCoffeeHistoryInfo()
 	context.resetContextAndHighlights()
@@ -2083,6 +2126,9 @@ export async function endPlayerTurn(forced, isPointlessMove = false, extraPostDa
 		// (the AI just plays it again) and it burns one of the 20 rewind slots, so
 		// skip it. Matches the FcmBot suppression in FCM_IO.saveGameNormal.
 		const moverIsAi = store.players[playerIndex]?.name === rf.AI_NAME
+		// Dinner may have just installed the gift queue. Persist it under the
+		// same freeze/retry contract as a claim, without running dinner again.
+		if (store.bailout.pending) return saveBailoutProgress(false, [!moverIsAi, false, isPointlessMove, extraPostData])
 		await IO.saveGameNormal(!moverIsAi, false, isPointlessMove, extraPostData)
 		// In case it is your turn again right away, run startPlayerTurn
 		// If it isn't then you get returned from that function anyway
@@ -2150,6 +2196,7 @@ export async function endPlayerTurn(forced, isPointlessMove = false, extraPostDa
 // This just skips all possible players - NO PHASE CHANIGNG
 export function actionAllPlayerSkips() {
 	const store = useModelStore()
+	if (store.bailout.pending) return
 	// TO skips todo?
 
 	if (!isSimulPhase(store.gameflow.phase)) {
@@ -2234,6 +2281,7 @@ export function canSkipCurrentPlayer(playerIndex) {
 
 export async function endCurrentPhase() {
 	const store = useModelStore()
+	if (store.bailout.pending) return
 	store.clearCoffeeHistoryInfo()
 	const phase = store.gameflow.phase
 
@@ -2424,6 +2472,10 @@ export async function endCurrentPhase() {
 	// Skip auto-processing when transitioning out of restructuring;
 	// let saveGameNormal's response handler drive the OOB/turn-order
 	// flow so that intermediate rewind states are created properly.
+	// Dinner has already run and the next phase is installed. Pause here,
+	// never by re-entering WORKING_DAY (which would run dinner twice).
+	settleAutomaticBailoutClaims()
+	if (store.bailout.pending) return
 	if (phase !== rf.PHASE_RESTRUCTURING) {
 		actionAllPlayerSkips()
 
@@ -2479,6 +2531,16 @@ export function autoProcessTurnOrder() {
 export function startPlayerTurn(startingMidPhase) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
+	if (store.bailout.pending) {
+		// Old half-claimed saves may open on bots or a now-empty market.
+		// An involved client persists those deterministic declines via the same
+		// timestamp/mutex save path; spectators and replay never write.
+		if (personal.haltPlay || personal.pov < 0 || store.viewSettings.showReplay) return
+		const before = JSON.stringify(store.bailout.claims)
+		settleAutomaticBailoutClaims()
+		if (before !== JSON.stringify(store.bailout.claims)) return saveBailoutProgress()
+		return
+	}
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return
 
 	// tutorialAlwaysPrepare: prepare the turn even when personal.canPlay() is false.
