@@ -477,6 +477,21 @@ body.notes #notesBox {
 	width: 90%;
 }
 
+.chatUser {
+	position: absolute;
+	top: 2px;
+	left: 5px;
+	font-size: 11px;
+	font-style: italic;
+	opacity: 0.75;
+}
+
+.chatMarker {
+	display: inline-block;
+	vertical-align: middle;
+	margin-left: 4px;
+}
+
 .chatentry {
 	margin: 5px;
 	border: #000 1px solid;

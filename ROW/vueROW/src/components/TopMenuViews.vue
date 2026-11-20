@@ -35,6 +35,22 @@ function closePanels() {
 	})
 }
 
+function playerByName(name) {
+	return (store.state?.players ?? []).find((player) => player.name === name)
+}
+
+function playerStyle(name) {
+	const player = playerByName(name)
+	if (!player) return {}
+	const colour = player.color.toLowerCase()
+	return { backgroundColor: colour, color: colour === "yellow" || colour === "white" ? "black" : "white", padding: "0 4px", border: "1px solid black" }
+}
+
+function playerMarkerStyle(name) {
+	const player = playerByName(name)
+	return player ? { backgroundColor: player.color.toLowerCase() } : {}
+}
+
 async function sendChat() {
 	if (!chatMessage.value || sendingChat.value) return
 	sendingChat.value = true
@@ -143,9 +159,16 @@ async function castVoteFor(topic) {
 		</transition>
 		<transition name="fade">
 			<div v-if="store.viewSettings.showChat" class="panel chatPanel" role="region" :aria-label="t('panels.chatTitle')" tabindex="-1" @keydown.esc.stop.prevent="closePanels">
+				<div class="chatUser">{{ personal.name }}</div>
 				<h3>{{ t('panels.chatTitle') }}</h3>
 				<div ref="chatList" class="chatList">
-					<div v-for="(m, i) in store.chatData" :key="i">{{ m[0] }}: {{ m[2] }}</div>
+					<div v-for="(m, i) in store.chatData" :key="i" class="chatentry">
+						<div class="header">
+							<span class="author" :style="playerStyle(m[0])">{{ m[0] }}</span>
+							<span v-if="playerByName(m[0])" class="chatMarker" :style="playerMarkerStyle(m[0])"></span>
+						</div>
+						<div class="messageBody">{{ m[2] }}</div>
+					</div>
 				</div>
 				<div>
 					<textarea v-model="chatMessage" rows="3" cols="60" maxlength="5000"></textarea>
@@ -194,7 +217,13 @@ async function castVoteFor(topic) {
 	overflow-y: auto;
 	box-sizing: border-box;
 }
+.chatUser { position: absolute; top: 2px; left: 5px; font-size: 11px; font-style: italic; opacity: 0.75; }
 .chatList { max-height: 160px; overflow-y: auto; background: white; margin-bottom: 6px; }
+.chatentry { margin: 5px; border: #000 1px solid; text-align: left; padding: 5px; }
+.chatentry .header { margin-bottom: 4px; border-bottom: #000 1px solid; }
+.chatentry .author { font-weight: bold; }
+.chatentry .messageBody { overflow: auto; white-space: pre-wrap; }
+.chatMarker { display: inline-block; width: 10px; height: 10px; border: 1px solid #333; border-radius: 50%; vertical-align: middle; margin-left: 4px; }
 .missing { color: #b00000; font-weight: bold; }
 .voteBlock { margin: 6px 0; }
 .voteSummary { font-size: 13px; margin: 3px 0; }

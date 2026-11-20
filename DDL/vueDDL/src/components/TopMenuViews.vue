@@ -30,6 +30,17 @@ function toggleNotes() {
 	store.viewSettings.showNotes = !store.viewSettings.showNotes
 }
 
+function playerIndexByName(name) {
+	return store.players.findIndex((player) => player.name === name || player.displayName === name)
+}
+
+function playerStyle(name) {
+	const index = playerIndexByName(name)
+	if (index < 0) return {}
+	const player = store.players[index]
+	return { backgroundColor: personal.getCorrectedColourHex(player.colour), color: player.colour === rf.YELLOW ? "black" : "white" }
+}
+
 function sendChatMessage() {
 	if (chatMessage.value === "") return
 	const now = Math.round(new Date().getTime() / 1000)
@@ -124,6 +135,7 @@ function localCastVote(topic) {
 
 	<!-- CHAT -->
 	<div id="wholeChat" v-if="store.viewSettings.showChat">
+		<div class="chatUser">{{ personal.name }}</div>
 		<div id="chatBox">
 			<h2>{{ $t("topMenuViews.chat.title") }}</h2>
 			<div><textarea rows="6" v-model="chatMessage"></textarea></div>
@@ -131,7 +143,7 @@ function localCastVote(topic) {
 		</div>
 		<div id="messageList">
 			<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
-				<div class="header"><span class="bold">{{ message[0] }}</span><span class="date">{{ new Date(message[1] * 1000).toLocaleString() }}</span></div>
+				<div class="header"><span class="bold" :style="playerStyle(message[0])">{{ message[0] }}</span><span v-if="playerIndexByName(message[0]) >= 0" class="chatMarker chatMarkerSwatch" :style="playerStyle(message[0])"></span><span class="date">{{ new Date(message[1] * 1000).toLocaleString() }}</span></div>
 				<div class="messageBody">{{ message[2] }}</div>
 			</div>
 		</div>
@@ -177,6 +189,9 @@ function localCastVote(topic) {
 .playerAidImage { width: 100%; max-width: 700px; border: 1px solid #333; }
 #wholeChat { position: absolute; left: 2px; top: 62px; width: 450px; z-index: 9999; border: 2px solid black; background-color: #d4eafd; overflow-y: scroll; padding-bottom: 10px; text-align: center; max-height: 80vh; }
 #chatBox textarea { width: 90%; }
+.chatUser { position: absolute; top: 2px; left: 5px; font-size: 11px; font-style: italic; opacity: 0.75; }
+.chatMarker { display: inline-block; width: 18px; height: 18px; object-fit: contain; vertical-align: middle; margin-left: 4px; }
+.chatMarkerSwatch { width: 13px; height: 13px; border: 1px solid #333; }
 .chatentry { margin: 5px; border: #000 1px solid; text-align: left; padding: 5px; background-color: #d4eafd; }
 .chatentry .header { margin-bottom: 7px; border-bottom: #000 1px solid; }
 .chatentry .header .date { font-size: 0.7em; font-style: italic; float: right; }

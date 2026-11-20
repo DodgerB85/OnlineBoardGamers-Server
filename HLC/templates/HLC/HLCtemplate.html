@@ -189,6 +189,7 @@
                                 data-game-over="{% translate 'Game over' %}"></span>
                         </div>
                         <div id="wholeChat">
+                          <div class="chatUser">{% if user.is_authenticated %}{{ user.username }}{% endif %}</div>
                           <div id="chatBox">
                             <h2>{% translate "Send a message" %}</h2>
                             <div>

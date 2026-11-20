@@ -68,6 +68,20 @@ function parseMessage(message) {
 	return message
 }
 
+function playerIndexByName(name) {
+	return store.players.findIndex((player) => player.name === name || player.displayName === name)
+}
+
+function playerNameClass(name) {
+	const index = playerIndexByName(name)
+	return index < 0 ? "bold" : "mainEntryPlayer mainEntryPlayer" + personal.getCorrectedColour(store.players[index].colour)
+}
+
+function playerMarkerSrc(name) {
+	const index = playerIndexByName(name)
+	return index < 0 ? "" : view.getImage("bus" + personal.getCorrectedColour(store.players[index].colour))
+}
+
 function updateHistoryHeight() {
 	const el = document.getElementById("history")
 	if (!el) return
@@ -192,6 +206,7 @@ function localCastVote(topic) {
 	<!-- CHAT -->
 	<transition name="fade">
 		<div id="wholeChat" v-if="store.topMenuViews.showChat">
+			<div class="chatUser">{{ personal.name }}</div>
 			<div id="chatBox">
 				<h2>{{ $t('topMenuViews.chatTitle') }}</h2>
 				<div><textarea rows="6" name="chatMessage" id="chatMessage" v-model="chatMessage"></textarea></div>
@@ -200,7 +215,8 @@ function localCastVote(topic) {
 			<div id="messageList">
 				<div class="chatentry" v-for="(message, index) in store.chatData" v-bind:key="index">
 					<div class="header">
-						<span class="bold">{{ message[0] }}</span>
+						<span :class="playerNameClass(message[0])">{{ message[0] }}</span>
+						<img v-if="playerIndexByName(message[0]) >= 0" class="chatMarker" :src="playerMarkerSrc(message[0])" :alt="message[0]" />
 						<span class="date">
 							{{ funcs.timestampToString((personal.gameCreationTimestamp + message[1]) * 1000) }}
 						</span>
@@ -309,6 +325,24 @@ function localCastVote(topic) {
 
 #chatBox textarea {
 	width: 90%;
+}
+
+.chatUser {
+	position: absolute;
+	top: 2px;
+	left: 5px;
+	font-size: 11px;
+	font-style: italic;
+	opacity: 0.75;
+}
+
+.chatMarker {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	object-fit: contain;
+	vertical-align: middle;
+	margin-left: 4px;
 }
 
 .chatentry {

@@ -4313,7 +4313,14 @@ var View = function (model) {
 		var div = $('<div class="chatentry" >')
 		var header = $('<div class="header"/>')
 		header.append($('<span class="date">').text(Log.giveFormattedDate(message.timestamp) + " "))
-		header.append($('<span class="bold">').text(message.name))
+		header.append(Log.getPlayerSpan(message.name).addClass("bold chatPlayerName"))
+		var playerIndex = this.model && this.model.players ? this.model.players.map(function (p) { return p.name }).indexOf(message.name) : -1
+		if (playerIndex >= 0) {
+			var marker = Log.getPlayerTokenFromColour(this.model.players[playerIndex].colour)
+			marker.addClass("chatMarker")
+			marker.css({ height: "18px", width: "18px" })
+			header.append(marker)
+		}
 		div.append(header)
 		var body = $('<div class="body">')
 		String(message.message).split(/=-NEWLINE-=|\n/).forEach(function (line, i) {

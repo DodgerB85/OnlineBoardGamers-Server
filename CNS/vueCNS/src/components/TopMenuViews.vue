@@ -61,6 +61,20 @@ function parseMessage(message) {
 	return message
 }
 
+function playerIndexByName(name) {
+	return store.players.findIndex((player) => player.name === name || player.displayName === name)
+}
+
+function playerNameClass(name) {
+	const index = playerIndexByName(name)
+	return index < 0 ? "bold" : "mainEntryPlayer mainEntryPlayer" + personal.getCorrectedColour(store.players[index].colour)
+}
+
+function playerMarkerStyle(name) {
+	const index = playerIndexByName(name)
+	return index < 0 ? {} : { backgroundColor: personal.getCorrectedColourHex(store.players[index].colour) }
+}
+
 function sendChatMessage() {
 	if (chatMessage.value === "") return
 	let newEntry = [personal.name, Math.round(new Date().getTime() / 1000 - personal.gameCreationTimestamp), chatMessage.value]
@@ -273,6 +287,7 @@ function localCastVote(topic) {
 	<!-- CHAT -->
 	<transition name="fade">
 		<div id="wholeChat" v-if="store.topMenuViews.showChat">
+			<div class="chatUser">{{ personal.name }}</div>
 			<div id="chatBox">
 				<h2>{{ $t("topMenuViews.chatTitle") }}</h2>
 				<div>
@@ -283,7 +298,8 @@ function localCastVote(topic) {
 			<div id="messageList">
 				<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
 					<div class="header">
-						<span class="bold">{{ message[0] }}</span>
+						<span :class="playerNameClass(message[0])">{{ message[0] }}</span>
+						<span v-if="playerIndexByName(message[0]) >= 0" class="chatMarker chatMarkerSwatch" :style="playerMarkerStyle(message[0])"></span>
 						<span class="date">
 							{{ funcs.timestampToString((personal.gameCreationTimestamp + message[1]) * 1000) }}
 						</span>
@@ -671,6 +687,30 @@ function localCastVote(topic) {
 
 #chatBox textarea {
 	width: 90%;
+}
+
+.chatUser {
+	position: absolute;
+	top: 2px;
+	left: 5px;
+	font-size: 11px;
+	font-style: italic;
+	opacity: 0.75;
+}
+
+.chatMarker {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	object-fit: contain;
+	vertical-align: middle;
+	margin-left: 4px;
+}
+
+.chatMarkerSwatch {
+	width: 13px;
+	height: 13px;
+	border: 1px solid #333;
 }
 
 .chatentry {

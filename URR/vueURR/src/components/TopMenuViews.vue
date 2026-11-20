@@ -77,6 +77,12 @@ function getDeleteVotes(returnPlayers = false) {
 	return returnPlayers ? players : votes
 }
 
+function playerStyle(name) {
+	const index = view.playerIndexByName(store, name)
+	if (index < 0) return {}
+	return { backgroundColor: personal.getCorrectedColourHex(store.players[index].colour), color: "white", padding: "0 4px", border: "1px solid black" }
+}
+
 function localCastVote(topic) {
 	IO.castVote(topic)
 }
@@ -122,6 +128,7 @@ function localCastVote(topic) {
 	<!-- CHAT -->
 	<transition name="fade">
 	<div id="wholeChat" v-if="store.viewSettings.showChat" role="region" :aria-label="$t('chat.aria')">
+		<div class="chatUser">{{ personal.name }}</div>
 		<div id="chatBox">
 			<h2>{{ $t("chat.title") }}</h2>
 			<p v-if="store.gameMessages.chatErrorText" class="errorText" role="alert">{{ store.gameMessages.chatErrorText }}</p>
@@ -130,7 +137,7 @@ function localCastVote(topic) {
 		</div>
 		<div id="messageList">
 			<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
-				<div class="header"><span class="bold">{{ message[0] }}</span><PlayerMarker v-if="view.playerIndexByName(store, message[0]) >= 0" class="chatMarker" :index="view.playerIndexByName(store, message[0])" /><span class="date">{{ new Date(message[1] * 1000).toLocaleString() }}</span></div>
+				<div class="header"><span class="bold" :style="playerStyle(message[0])">{{ message[0] }}</span><PlayerMarker v-if="view.playerIndexByName(store, message[0]) >= 0" class="chatMarker" :index="view.playerIndexByName(store, message[0])" /><span class="date">{{ new Date(message[1] * 1000).toLocaleString() }}</span></div>
 				<div class="messageBody">{{ message[2] }}</div>
 			</div>
 		</div>
@@ -212,6 +219,14 @@ function localCastVote(topic) {
 }
 #chatBox { text-align: center; }
 #chatBox textarea { width: 90%; }
+.chatUser {
+	position: absolute;
+	top: 2px;
+	left: 5px;
+	font-size: 11px;
+	font-style: italic;
+	opacity: 0.75;
+}
 #notesBox textarea, #bugReport textarea { max-width: 90%; box-sizing: border-box; }
 @media (max-width: 1050px) { .actionsLineButton { min-height: 40px; } }
 .chatentry {
