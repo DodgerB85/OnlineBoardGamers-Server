@@ -2137,7 +2137,7 @@ export function verifySingleStackAction(stackActionData) {
  * Most actions we can defer to eg pickupRes_core to handle the action
  * But MOVING trans is recreated here to skip out the waypoints along the way.
  */
-export function performSingleStackAction(stackActionData, swapIDs, moveData = {}) {
+export function performSingleStackAction(stackActionData, swapIDs, moveData = null) {
 	const store = useModelStore()
 
 	// Always try to swapIDs, if possible?

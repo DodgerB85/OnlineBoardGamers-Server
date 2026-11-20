@@ -1,12 +1,12 @@
-// Run with: node --test tests/rnb_electricity_fuel.test.cjs
-const assert = require("node:assert/strict")
-const { readFileSync } = require("node:fs")
-const { join } = require("node:path")
-const { test } = require("node:test")
-const { runInNewContext } = require("node:vm")
+// Run with: npm test
+import assert from "node:assert/strict"
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
+import { test } from "vitest"
+import { runInNewContext } from "node:vm"
 
 test("explicit carried fuel leaves the board preference to default choices", () => {
-	const source = readFileSync(join(__dirname, "../RNB/vueRNB/src/js/RNBelectricity.js"), "utf8")
+	const source = readFileSync(join(import.meta.dirname, "RNBelectricity.js"), "utf8")
 	const first = source.indexOf("export function getCarriedFuelOnTile")
 	const last = source.indexOf("// Player hook", first)
 	const rf = { RES_TRUNKS: 0, RES_BOARDS: 1 }

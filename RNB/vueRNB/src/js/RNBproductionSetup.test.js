@@ -1,12 +1,12 @@
-// Run with: node --test tests/rnb_powered_mine.test.cjs
-const assert = require("node:assert/strict")
-const { readFileSync } = require("node:fs")
-const { join } = require("node:path")
-const { test } = require("node:test")
-const { runInNewContext } = require("node:vm")
+// Run with: npm test
+import assert from "node:assert/strict"
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
+import { test } from "vitest"
+import { runInNewContext } from "node:vm"
 
 function fixture() {
-	const root = join(__dirname, "../RNB/vueRNB/src/js")
+	const root = import.meta.dirname
 	const produceSource = readFileSync(join(root, "RNBproduce.js"), "utf8")
 	const setupSource = readFileSync(join(root, "RNBproductionSetup.js"), "utf8")
 	const extract = (source, name) => source.match(new RegExp("(function " + name + "\\([\\s\\S]*?\\n\\})"))[1]
