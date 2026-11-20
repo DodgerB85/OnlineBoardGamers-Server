@@ -1490,6 +1490,18 @@ def _handle_rnb_propose_trade(request, currentGame, presenter, raw_data, trade_d
 
 
 def _handle_rnb_accept_trade(request, currentGame, presenter, raw_data, trade_data, jsonData):
+    db_latest_update = currentGame.latestUpdate
+    latest_update = jsonData.get("latestUpdate", 0)
+    if str(latest_update) != str(db_latest_update):
+        message = (
+            f"SYNC ERROR IN: RNB acceptTrade - gameID: {currentGame.id} - User: {request.user.username} - JSON_LU: {latest_update} "
+            f"- DB_LU: {db_latest_update} -- JSON_turn: {jsonData.get('turn', 'N/A')} -- DB_turn: {currentGame.turn} "
+            f"-- JSON_phase: {jsonData.get('phase', 'N/A')} -- DB_phase: {currentGame.phase} "
+            f"-- currentP: {', '.join(presenter.getArrayOfIsCurrentPlayers())}"
+        )
+        SN_sendAdminErrorMessage(message)
+        return JsonResponse({"syncError": True}, safe=False)
+
     nameToUse = request.user.username
     if is_game_admin(request.user):
         nameToUse = jsonData.get("BKSN", nameToUse)

@@ -9,7 +9,7 @@
 		"preview": "vite preview",
 		"lint": "eslint . --fix",
 		"format": "prettier --write \"src/\"",
-		"test": "vitest run"
+		"test": "vitest run && node --test tests"
 	},
 	"dependencies": {
 		"pako": "^3.0.1",

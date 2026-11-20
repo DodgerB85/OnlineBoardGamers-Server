@@ -2552,7 +2552,11 @@ export async function acceptTrade(tradeEntry) {
 		})
 		if (!response.ok) throw new Error("Network response was not ok")
 		const data = await response.json()
-		if (data.syncError) return
+		if (data.syncError) {
+			store.gameMessages.actionError = t("io.olderVersion")
+			await checkForLatestData()
+			return
+		}
 		if (data.tradeError) {
 			store.gameMessages.actionError = data.tradeError
 			// A stale offer is removed server-side; refresh it and tell the other clients

@@ -53,6 +53,9 @@ globalThis.window.initData = {
 }
 function makeElementStub() {
 	return {
+		getContext: () => ({ isPointInPath: () => true }),
+		getTotalLength: () => 100,
+		getPointAtLength: (t) => ({ x: t, y: 0 }),
 		style: {},
 		classList: { add: () => {}, remove: () => {}, contains: () => false },
 		setAttribute: () => {},
@@ -81,6 +84,7 @@ globalThis.document = globalThis.document || {
 }
 globalThis.window.document = globalThis.window.document || globalThis.document
 globalThis.alert = globalThis.alert || (() => {})
+globalThis.Path2D = globalThis.Path2D || class Path2D {}
 globalThis.msgpack = globalThis.msgpack || {
 	encode: (value) => new TextEncoder().encode(JSON.stringify(value)),
 	decode: (buffer) => JSON.parse(new TextDecoder().decode(buffer)),
@@ -110,6 +114,7 @@ const skip = setupError ? `Run 'npm install' in RNB/vueRNB first (${setupError.m
 function setupTwoHexMap() {
 	setActivePinia(createPinia())
 	const store = useModelStore()
+	store.mapData.displaySettings.trackStyle = 2
 	store.mapData.hexData.splice(0)
 	store.mapData.edgeData.splice(0)
 	const hex1 = hd.createActualHex([0, 0, 0], 0, rf.PASTURE_1)
