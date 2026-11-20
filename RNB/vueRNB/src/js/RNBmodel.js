@@ -383,11 +383,13 @@ export async function initLoadGame(gameDataB64) {
 			store.gameflow.turnOrder = store.gameflow.turnOrder.filter((idx) => !hasPlayerActedInPhaseThisTurn(idx, store.gameflow.phase))
 		}
 
-		// KICKSTART: a main/simul phase with no current players is only valid as a transient
-		// state mid-saveStackMove. Seeing it on reload means the phase never advanced, so drive
-		// it forward now via processStacks + persist the result. Skip if a transactionID is set,
-		// since the transaction recovery block in initGame already handles that case.
-		if (store.gameflow.turnOrder.length === 0 && personal.pov >= 0 && !window.initData.transactionID) {
+		// KICKSTART: a main/simul phase is only valid mid-saveStackMove when its queue
+		// matches the history. If the server still names a player who already acted (or
+		// the filtered queue is empty), the phase never advanced - drive it forward now
+		// via processStacks + persist the result. Skip if a transactionID is set, since
+		// the transaction recovery block in initGame already handles that case.
+		const turnOrderNames = store.gameflow.turnOrder.map((idx) => store.players[idx]?.name).filter(Boolean)
+		if (turnOrderNeedsKickstart(window.initData.currentPlayers, turnOrderNames) && personal.pov >= 0 && !window.initData.transactionID) {
 			IO.processStacks(window.initData.allStackData || [])
 			await IO.saveAndUpdateNotifictionsAfterStack(false)
 		}
@@ -1253,6 +1255,16 @@ export function addHistory(event, playerIndex, timeOffset, params) {
 		}
 	}
 	store.history.push([event, playerIndex, time, util.deepCloneValue(params)])
+}
+
+// The server's turn-order queue can lag behind the history when a save applied a
+// move but failed to advance the queue. If it still names a player who is no longer
+// in the history-filtered order, the client must run the kickstart so its next save
+// repairs the server's current player. An empty queue is also a kickstart case.
+export function turnOrderNeedsKickstart(serverTurnOrder, localTurnOrder) {
+	if (localTurnOrder.length === 0) return true
+	const localNames = new Set(localTurnOrder)
+	return (serverTurnOrder || []).some((name) => !localNames.has(name))
 }
 
 // Presets stay in moveDataJSON for a couple of phases, so a player who has

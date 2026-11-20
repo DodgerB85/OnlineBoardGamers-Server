@@ -1415,6 +1415,7 @@ export async function reloadGameData(updatingFromWSAndCanPlay = false) {
 		stack.resetStackControlData()
 		const wasInPrePhase = store.gameflow.phase >= rf.PRE_PHASE_OFFSET
 		let storedActionStackCopy = []
+		let turnOrderNeedsRepair = false
 		if (data.finishedGame) funcs.importRNBmodel(data.gameDataB64, false)
 		else {
 			// If updating from WS, AND mid play, Store the action stack and undo points, then reset, then reload
@@ -1436,9 +1437,12 @@ export async function reloadGameData(updatingFromWSAndCanPlay = false) {
 
 			// A player who already has this main phase in the turn's history has finished it.
 			// Drop them from the turn order so a stale preset/save cannot give them a second phase.
+			const turnOrderBeforeHistoryFilter = store.gameflow.turnOrder.map((idx) => store.players[idx]?.name).filter(Boolean)
 			if (rf.MAIN_PHASES.includes(store.gameflow.phase)) {
 				store.gameflow.turnOrder = store.gameflow.turnOrder.filter((idx) => !model.hasPlayerActedInPhaseThisTurn(idx, store.gameflow.phase))
 			}
+			const turnOrderAfterHistoryFilter = store.gameflow.turnOrder.map((idx) => store.players[idx]?.name).filter(Boolean)
+			turnOrderNeedsRepair = model.turnOrderNeedsKickstart(turnOrderBeforeHistoryFilter, turnOrderAfterHistoryFilter)
 		}
 
 		personal.secondsToNextKickout = data.secondsToNextKickout
@@ -1477,11 +1481,11 @@ export async function reloadGameData(updatingFromWSAndCanPlay = false) {
 			await saveAndUpdateNotifictionsAfterStack(false)
 		}
 
-		// KICKSTART: a main/simul phase with no current players (turnOrder rebuilt from the imported
-		// gameData) is only valid mid-saveStackMove. Seeing it on a WS reload means the phase never
-		// advanced, so drive it forward now. Skip if a transactionID is set (handled above).
-		// Skip if game is already over - no need to process stacks or save
-		if (!data.transactionID && personal.pov >= 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER && store.gameflow.turnOrder.length === 0 && (controller.isSimulPhase() || controller.isMainPhaseAndPseudoSimul())) {
+		// KICKSTART: a main/simul phase with no current players, or a queue that still names
+		// a player already filtered out by the history, is only valid mid-saveStackMove.
+		// Seeing it on a WS reload means the phase never advanced, so drive it forward now.
+		// Skip if a transactionID is set (handled above) or the game is already over.
+		if (!data.transactionID && personal.pov >= 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER && (store.gameflow.turnOrder.length === 0 || turnOrderNeedsRepair) && (controller.isSimulPhase() || controller.isMainPhaseAndPseudoSimul())) {
 			const allStackData = data.allStackData || []
 			store.allStackData = allStackData
 			processStacks(allStackData)

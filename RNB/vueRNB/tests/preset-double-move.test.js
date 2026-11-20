@@ -172,3 +172,14 @@ test("an already-acted player's stored preset is not previewed on reload", { ski
 	assert.equal(store.history.length, historyLength, "loading adds no duplicate movement history")
 	assert.equal(store.actionStack.length, 0, "the stale preset is not performed")
 })
+
+test("a server turn order that still names an acted player needs a kickstart", { skip: skip }, () => {
+	// Game 37468: the server queue still had gregged and Amifux after both had
+	// production history, so the filtered client queue was only [BlackM] and the
+	// old "length === 0" check never repaired the server's current player.
+	assert.equal(model.turnOrderNeedsKickstart(["gregged", "Amifux", "BlackM"], ["BlackM"]), true)
+	assert.equal(model.turnOrderNeedsKickstart(["gregged", "Amifux", "BlackM"], ["gregged", "BlackM"]), true)
+	assert.equal(model.turnOrderNeedsKickstart(["gregged", "Amifux", "BlackM"], ["gregged", "Amifux", "BlackM"]), false)
+	assert.equal(model.turnOrderNeedsKickstart(["gregged"], ["gregged", "BlackM"]), false, "a server-omitted player is not re-added")
+	assert.equal(model.turnOrderNeedsKickstart([], []), true)
+})
