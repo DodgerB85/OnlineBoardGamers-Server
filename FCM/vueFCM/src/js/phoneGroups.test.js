@@ -17,6 +17,20 @@ function game(opts = ['50']) {
 
 describe('phone four-way click anchor — production SFC chain', () => {
  const directions=[[1,0],[0,1],[-1,0],[0,-1]]
+ it('production TV picker shows only three numbered antennas while phone 6.5 remains selectable',async()=>{
+  const s=board(rf.TV_ANNOUNCER);controller.selectMarketer(rf.TV_ANNOUNCER,false)
+  const ui=await mountMapAction()
+  try{
+   const choices=()=>nodes(ui.root,n=>String(n.props.class).includes('campaignChoiceImg'))
+   const tvChoices=choices().filter(n=>String(n.props.src).includes('antenna'))
+   expect(tvChoices.map(n=>n.props.alt)).toEqual([3.5,4.5,5.5]);expect(tvChoices).toHaveLength(3)
+   tvChoices[2].props.onClick();await nextTick();expect(s.context.campaign).toBe(42)
+   const phone=choices().find(n=>String(n.props.src).includes('marketing_phone_65_v1'))
+   expect(phone).toBeDefined();phone.props.onClick();await nextTick();expect(s.context.campaign).toBe(30)
+   expect(ui.errors).toEqual([])
+  }finally{ui.app.unmount()}
+ })
+
  it('a new marketer default phone selection resets stale four-way orientation before any card click',()=>{
   const s=board(rf.TELEMARKETER);s.context.rotation=3;s.context.rotated=true
   controller.selectMarketer(rf.TELEMARKETER,false)
@@ -131,7 +145,7 @@ describe('new phone rules', () => {
   expect(ids.map(rules.campaignSortKey)).toEqual([6.5,6.5,6.5,7.5,7.5,7.5,8.5,8.5,8.5,9.5,9.5,9.5])
   expect(s.availableMilestones).not.toContain(rf.FIRST_TELEMARKETER_USED)
   expect(s.availableMilestones).toContain(rf.FIRST_TV_ANNOUNCER_USED)
-  expect(s.availableMarketingCampaigns.filter(n=>rf.MARKETING_CAMPAIGNS[n].type === rf.TV_CHANNEL)).toEqual([28,29])
+  expect(s.availableMarketingCampaigns.filter(n=>rf.MARKETING_CAMPAIGNS[n].type === rf.TV_CHANNEL)).toEqual([28,29,42])
  })
 })
 function board(marketer) {
@@ -416,7 +430,7 @@ describe('phone save and replay compatibility', () => {
   expect(funcs.importFCMmodel(encoded,false,includeContext)).not.toBe(-9999)
   expect(s.mediaLine.rulesVersion).toBe(1); expect(s.mediaLine.phoneGroups).toEqual(locks)
   expect(s.campaigns[0]).toMatchObject({number:39, good:rf.PIZZA, duration:2})
-  expect(s.availableMarketingCampaigns.filter(n=>n>=39)).toEqual([])
+  expect(s.availableMarketingCampaigns.filter(n=>n>=39&&n<=41)).toEqual([])
   expect(s.availableMilestones).not.toContain(rf.FIRST_TELEMARKETER_USED)
   expect(rules.campaignSortKey(40)).toBe(9.5)
   if(includeContext) {
@@ -440,7 +454,7 @@ describe('phone save and replay compatibility', () => {
   const s=game(); const newer=funcs.exportFCMmodel(false,false); let old=decode(newer); old=old.filter(v=>!(Array.isArray(v)&&v[0]===-rf.SO_MEDIA_LINE))
   expect(funcs.importFCMmodel(encode(old),false,false)).not.toBe(-9999)
   expect(s.mediaLine.rulesVersion).toBe(0); expect(rules.campaignSortKey(31)).toBe(6.6)
-  expect(s.availableMarketingCampaigns.filter(n=>n>=30)).toEqual([30,31,32,33,34,35])
+  expect(s.availableMarketingCampaigns.filter(n=>rf.PHONE_CAMPAIGNS.includes(n))).toEqual([30,31,32,33,34,35])
   expect(s.availableMilestones).toContain(rf.FIRST_TELEMARKETER_USED)
   funcs.importFCMmodel(newer,false,false); expect(s.mediaLine.rulesVersion).toBe(1)
  })
@@ -465,7 +479,7 @@ describe('phone save and replay compatibility', () => {
   const s=game([rf.SO_DRAFT_MODULE_BREAKER]); expect(s.gameflow.phase).toBe(rf.PHASE_SETUP_MODULES)
   const draftSave=funcs.exportFCMmodel(false,false), draftData=decode(draftSave)
   const slot=draftData.find(v=>Array.isArray(v)&&v[0]===-rf.SO_MEDIA_LINE)
-  expect(slot).toBeTruthy(); expect(slot[1]).toBe(3); expect(slot[7]).toBe(1); expect(s.startingOptions.mediaLine).toBe(false)
+  expect(slot).toBeTruthy(); expect(slot[1]).toBe(3); expect(slot[7]).toBe(1); expect(slot).toHaveLength(9); expect(s.startingOptions.mediaLine).toBe(false)
   // Reload during drafting: the revision must survive before the module is active.
   s.mediaLine.rulesVersion=0
   expect(funcs.importFCMmodel(draftSave,false,false)).not.toBe(-9999)
@@ -557,7 +571,7 @@ describe('real replay snapshots', () => {
  })
  it('legacy replay setup retains six phones and its milestone', () => {
   const s=game(); s.mediaLine.rulesVersion=0; replay.resetDataForReplay()
-  expect(s.availableMarketingCampaigns.filter(n=>n>=30)).toEqual([30,31,32,33,34,35])
+  expect(s.availableMarketingCampaigns.filter(n=>rf.PHONE_CAMPAIGNS.includes(n))).toEqual([30,31,32,33,34,35])
   expect(s.availableMilestones).toContain(rf.FIRST_TELEMARKETER_USED)
  })
 })

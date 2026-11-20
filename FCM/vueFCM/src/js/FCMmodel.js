@@ -556,7 +556,7 @@ export function setupKetchupExpansion(playerNumber) {
 	if (store.startingOptions.mediaLine) {
 		store.availableEmployees[rf.TELEMARKETER] = 6
 		store.availableEmployees[rf.TV_ANNOUNCER] = 6
-		store.availableMarketingCampaigns.push(28, 29, ...rf.PHONE_CAMPAIGNS.slice(0, store.mediaLine.rulesVersion === 1 ? 12 : 6))
+		store.availableMarketingCampaigns.push(...rf.TV_CAMPAIGNS, ...rf.PHONE_CAMPAIGNS.slice(0, store.mediaLine.rulesVersion === 1 ? 12 : 6))
 		if (store.startingOptions.useMilestones) {
 			if (store.mediaLine.rulesVersion === 0) store.availableMilestones.push(rf.FIRST_TELEMARKETER_USED)
 			store.availableMilestones.push(rf.FIRST_TV_ANNOUNCER_USED)

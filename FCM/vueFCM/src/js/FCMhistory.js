@@ -145,7 +145,7 @@ export function setupHistoryHighlight(action, entry3, entry_id) {
 		}
 		if (campaignNumber <= 16 || rf.PHONE_CAMPAIGNS.includes(campaignNumber)) {
 			for (let i = 0; i < height; i++) for (let j = 0; j < width; j++) squares.push(highlightIndex + j + rf.ssW * i)
-		} else if (campaignNumber === 28 || campaignNumber === 29) {
+		} else if (rf.TV_CAMPAIGNS.includes(campaignNumber)) {
 			// Media Line mod: TV channel - highlight the picked houses
 			for (let h = 0; h < entry3[1].length; h++) pushHouseFootprint(entry3[1][h], squares)
 		} else if (campaignNumber >= 25 && campaignNumber <= 27) {

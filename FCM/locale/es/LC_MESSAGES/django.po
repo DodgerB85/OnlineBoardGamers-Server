@@ -2354,3 +2354,51 @@ msgstr "Todos los jugadores comparten 8 marcadores OUT. Cada colocación gasta u
 #. Senior Business Developer concise player help.
 msgid "The first player to use a Senior Business Developer gains its milestone and may add 1 map tile, as with the Lobbyist milestone. Other modules combine normally; house, garden and tile supplies follow the applicable base and module rules."
 msgstr "El primer jugador que lo use obtiene su hito y puede añadir 1 loseta al mapa, como con el hito del Lobista. Compatible con otros módulos; las reservas de casas, jardines y losetas siguen las reglas básicas y de módulos aplicables."
+
+#. Concise Media Line player help.
+msgid "Telemarketers may place phone or lower-level advertising."
+msgstr ""
+"Los Teleoperadores pueden colocar publicidad telefónica o de nivel inferior."
+
+#. Concise Media Line player help.
+msgid ""
+"Select one group at a time, with the same good and duration (1–3 rounds). "
+"Phones: four groups, 6.5 / 7.5 / 8.5 / 9.5, with 3 cards each, 12 cards in "
+"total. Placement is allowed on the tile containing the restaurant entrance "
+"and the tiles above, below, left and right, 5 tiles in total."
+msgstr ""
+"Elige un grupo cada vez, con el mismo producto y duración (1–3 rondas). "
+"Teléfonos: cuatro grupos, 6.5 / 7.5 / 8.5 / 9.5, con 3 cartas cada uno, 12 "
+"cartas en total. Se permite colocar en la loseta de la entrada del "
+"restaurante y las losetas de arriba, abajo, izquierda y derecha, 5 losetas "
+"en total."
+
+#. Concise Media Line player help.
+msgid ""
+"TV Announcers may place TV, phone or lower-level advertising, and publish "
+"headlines."
+msgstr ""
+"Los Locutores de TV pueden colocar publicidad televisiva, telefónica o de "
+"nivel inferior y publicar titulares."
+
+#. Concise Media Line player help.
+msgid ""
+"Headlines are a special ability of TV Announcers. Each working employee "
+"chooses once per round: at the next round’s dinner, all city goods’ unit "
+"prices change by ±5. Changes can stack or cancel."
+msgstr ""
+"Los titulares son una habilidad especial de los Locutores de TV. Cada "
+"empleado en activo elige una vez por ronda: en la cena de la siguiente "
+"ronda, los precios unitarios de todos los productos de la ciudad cambian ±5."
+" Los cambios se suman o compensan."
+
+#. Concise Media Line player help.
+msgid ""
+"TV channels may carry the same good for the same duration (1–4 rounds). TV "
+"has 3 channels, numbered 3.5/4.5/5.5. Choose 5 houses within 2 tiles of the "
+"tile containing the restaurant entrance for TV marketing."
+msgstr ""
+"Los canales de TV pueden anunciar el mismo producto durante el mismo tiempo "
+"(1–4 rondas). TV tiene 3 canales, numerados 3.5/4.5/5.5. Elige 5 casas a una"
+" distancia de hasta 2 losetas de la loseta de la entrada del restaurante "
+"para marketing televisivo."

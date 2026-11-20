@@ -205,22 +205,19 @@ const tvAntennaDisplays = computed(() => {
 			const chip = width * 0.55
 			const chipBg = FOOD_CHIP_COLOURS[c.good]
 			const slot = res.filter((a) => a.house === house).length
-			// One antenna centred; two sit snugly side by side on centre (+/-0.35sq)
-			const cx = hx + (slot === 0 ? 1 : 1.35) * sqSize
-			if (slot === 1) {
-				const first = res.find((a) => a.house === house)
-				first.x = hx + 0.65 * sqSize - half
-				first.chipX = hx + 0.65 * sqSize - chip / 2 // keep its chip on the new top point
-			}
+			// Keep the original 1/2-antenna layout; three use a centred 2x2 grid.
+			const count = store.campaigns.filter((tv) => rf.TV_CAMPAIGNS.includes(tv.number) && tv.houses.includes(house)).length
+			const cx = hx + (count === 1 ? 1 : 0.65 + (slot % 2) * 0.7) * sqSize
+			const cy = hy + (count > 2 ? Math.floor(slot / 2) - 0.5 : 0) * sqSize
 			res.push({
 				house,
-				src: view.getImage(c.number === 28 ? "antenna35" : "antenna45"),
+				src: view.getImage(`campaign_${c.number}`),
 				x: cx - half,
-				y: hy - half,
+				y: cy - half,
 				width,
 				duration: c.duration,
 				chipX: cx - chip / 2,
-				chipY: hy - half - chip / 2,
+				chipY: cy - half - chip / 2,
 				chipSize: chip,
 				chipBg,
 				chipText: chipTextColour(chipBg),
@@ -976,7 +973,7 @@ function clickedMap(event) {
 /* Media Line TV channel antennas - above houses, below clickable layers */
 .boardAntennaImg {
 	position: absolute;
-	z-index: 12;
+	z-index: 13; /* Above house numbers (12), below duration chips (14). */
 	height: auto;
 }
 

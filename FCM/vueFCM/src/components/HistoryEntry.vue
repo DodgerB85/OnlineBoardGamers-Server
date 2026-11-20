@@ -291,7 +291,7 @@ const computedEntry3 = computed(() => {
 		ret.campaignNumber = param[0]
 		// Media Line mod: B-line campaigns display their billboard-style sort key (3.5/4.5/6.5...)
 		ret.campaignDisplayNumber = rules.campaignSortKey(ret.campaignNumber)
-		const isTV = ret.campaignNumber === 28 || ret.campaignNumber === 29
+		const isTV = rf.TV_CAMPAIGNS.includes(ret.campaignNumber)
 		const campaignIndex = funcs.importIndex(param[1]) // OR ROUTE IF HAWKER, HOUSE NUMBERS IF TV
 		const campaignGoodEntry = param[2]
 		// Media Line mod: a non-default marketer is logged last as [employee]
