@@ -203,16 +203,15 @@ export async function sendChatMessage(newEntry) {
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
-		if (!data.chatData) {
-			store.gameMessages.errorText = t("io.webmasterProblem")
-			return
-		}
+		if (!data.chatData) return false
 		store.chatData = funcs.decompressChatData(data.chatData)
 		if (personal.liveWS) WS.WEBwebSocket.send("NEWCHATTS" + String(personal.gameID)) //+ String(result.latestUpdate));
-		store.viewSettings.showLoader = false
+		return true
 	} catch (error) {
 		console.error("Error sending chat:", error)
-		store.gameMessages.errorText = t("io.chatError")
+		return false
+	} finally {
+		store.viewSettings.showLoader = false
 	}
 }
 

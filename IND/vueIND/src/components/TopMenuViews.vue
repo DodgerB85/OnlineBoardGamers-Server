@@ -17,6 +17,8 @@ const personal = usePersonalStore()
 import i18n from "../i18n"
 
 const chatMessage = ref("")
+const sendingChat = ref(false)
+const chatErrorText = ref("")
 const bugReportText = ref("")
 const submittingBug = ref(false)
 
@@ -79,17 +81,30 @@ function playerMarkerStyle(name) {
 	return index < 0 ? {} : { backgroundColor: personal.getCorrectedColourHex(store.players[index].colour) }
 }
 
-function sendChatMessage() {
-	if (chatMessage.value === "") return
+async function sendChatMessage() {
+	const message = chatMessage.value.trim()
+	if (message === "" || sendingChat.value) return
+	sendingChat.value = true
+	chatErrorText.value = ""
 	let time = Math.round(new Date().getTime() / 1000 - personal.gameCreationTimestamp)
 	if (store.chatData.length > 0) {
 		for (let i = 0; i < store.chatData.length; i++) {
 			time -= store.chatData[i][1]
 		}
 	}
-	let newEntry = [personal.name, time, chatMessage.value]
-	IO.sendChatMessage([...newEntry])
-	chatMessage.value = ""
+	let newEntry = [personal.name, time, message]
+	try {
+		if (await IO.sendChatMessage([...newEntry])) {
+			if (chatMessage.value.trim() === message) chatMessage.value = ""
+		} else {
+			chatErrorText.value = i18n.global.t("io.chatError")
+		}
+	} catch (error) {
+		console.error("Error sending chat:", error)
+		chatErrorText.value = i18n.global.t("io.chatError")
+	} finally {
+		sendingChat.value = false
+	}
 }
 function clearNotes() {
 	personal.notes = ""
@@ -242,8 +257,9 @@ function localCastVote(topic) {
 			<div class="chatUser">{{ personal.name }}</div>
 			<div id="chatBox">
 				<h2>{{ $t('topMenuViews.chatTitle') }}</h2>
+				<p v-if="chatErrorText" class="chatErrorText" role="alert">{{ chatErrorText }}</p>
 				<div><textarea rows="6" name="chatMessage" id="chatMessage" v-model="chatMessage"></textarea></div>
-				<div><button class="actionsLineButton" @click="sendChatMessage()">{{ $t('topMenuViews.send') }}</button></div>
+				<div><button class="actionsLineButton" :disabled="sendingChat || !chatMessage.trim()" @click="sendChatMessage()">{{ sendingChat ? $t('turnNudge.sending') : $t('topMenuViews.send') }}</button></div>
 			</div>
 			<div id="messageList">
 				<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
@@ -489,6 +505,12 @@ function localCastVote(topic) {
 
 #chatBox textarea {
 	width: 90%;
+}
+
+.chatErrorText {
+	color: darkred;
+	font-weight: bold;
+	margin: 4px;
 }
 
 .chatUser {

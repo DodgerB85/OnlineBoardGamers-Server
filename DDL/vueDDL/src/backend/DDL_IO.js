@@ -172,11 +172,13 @@ export async function sendChatMessage(newEntry) {
 		const data = await response.json()
 		store.chatData = funcs.decompressChatData(data.chatData, personal.gameCreationTimestamp)
 		if (personal.liveWS) WS.broadcastChatUpdate()
+		return true
 	} catch (error) {
 		console.error("Error sending chat:", error)
-		store.gameMessages.errorText = t("errors.sendChat")
+		return false
+	} finally {
+		store.viewSettings.showLoader = false
 	}
-	store.viewSettings.showLoader = false
 }
 
 export async function reloadChatData() {

@@ -1422,7 +1422,7 @@ export async function submitBug(bugContent) {
 export async function sendChatMessage(newEntry) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	if (personal.tutorial) return // Tutorial game is never persisted
+	if (personal.tutorial) return true // Tutorial game is never persisted
 	store.viewSettings.showGameLoader = true
 
 	/*function removeEmojis(str) {
@@ -1433,35 +1433,33 @@ export async function sendChatMessage(newEntry) {
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
-	fetch("/FCM/sendChatMessage/", {
-		method: "POST",
-		body: JSON.stringify({
-			action: "sendChatMessage",
-			player: personal.name,
-			gameID: personal.gameID,
-			//message: htmlEscape(message),
-			newEntry: newEntry,
-		}),
-		headers: { "X-CSRFToken": csrftoken },
-	})
-		.then((response) => response.json())
-		.then((result) => {
-			if (!result.chatData) {
-				store.gameMessages.errorText = i18n.global.t("FCM_IO.problemEmailWebmaster")
-				return
-			}
-			store.chatData = funcs.decompressChatData(result.chatData)
-
-			//if (personal.liveWS) WS.FCMwebSocket.send("NEWCHATTS" + String(personal.gameID)) //+ String(result.latestUpdate));
-			// NEW: Non-blocking Broadcast for Chat
-			if (personal.liveWS) WS.broadcastChatUpdate()
-
-			//V.reparseChatData()
-			store.viewSettings.showGameLoader = false
+	try {
+		const response = await fetch("/FCM/sendChatMessage/", {
+			method: "POST",
+			body: JSON.stringify({
+				action: "sendChatMessage",
+				player: personal.name,
+				gameID: personal.gameID,
+				//message: htmlEscape(message),
+				newEntry: newEntry,
+			}),
+			headers: { "X-CSRFToken": csrftoken },
 		})
-		.catch((error) => {
-			console.log("Error:", error)
-		})
+		if (!response.ok) throw new Error("Network response was not ok")
+		const result = await response.json()
+		if (!result.chatData) return false
+		store.chatData = funcs.decompressChatData(result.chatData)
+		//if (personal.liveWS) WS.FCMwebSocket.send("NEWCHATTS" + String(personal.gameID)) //+ String(result.latestUpdate));
+		// NEW: Non-blocking Broadcast for Chat
+		if (personal.liveWS) WS.broadcastChatUpdate()
+		//V.reparseChatData()
+		return true
+	} catch (error) {
+		console.log("Error:", error)
+		return false
+	} finally {
+		store.viewSettings.showGameLoader = false
+	}
 }
 
 export async function reloadChatData() {

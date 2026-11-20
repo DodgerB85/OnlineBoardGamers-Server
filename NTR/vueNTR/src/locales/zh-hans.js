@@ -5,7 +5,7 @@ export const zhHans = {
   views: { replay: '回放', hideReplay: '隐藏回放', replayAtBottom: '底部回放', generatingReplay: '生成回放中...', replayStep: '回放步骤' },
   history: { title: '历史', empty: '暂无历史', more: '更多条目' },
   replay: { title: '回放', first: '第一步', prev: '上一步', next: '下一步', last: '最后一步', showing: '正在显示:' },
-  footer: { chat: '聊天', chatPlaceholder: '输入消息...', send: '发送', version: '版本', players: '玩家', kickoutWarning: '踢出警告!' },
+  footer: { chat: '聊天', chatPlaceholder: '输入消息...', send: '发送', sendError: '发送聊天消息时出错', sending: '正在发送…', version: '版本', players: '玩家', kickoutWarning: '踢出警告!' },
   player: { you: ' (你)', missing: ' (缺席)', kicked: ' (被踢)', alliedMorale: '联军士气', frenchMorale: '法军士气', alliedTeam: '联军队伍', frenchTeam: '法军队伍' },
   action: { bgStats: '发布到 BG Stats', bgStatsCopy: '复制链接', bgStatsCopied: '链接已复制', bgStatsQr: '二维码', title: '行动', commandPoints: '指挥点数', selectUnits: '点击地图上的单位选择', selectedUnits: '已选单位', targetLocale: '目标地点', clickLocale: '点击地图上的地点', clear: '清除', executeMove: '执行移动', executeAttack: '执行攻击', executeReveal: '揭示单位', passTurn: '结束回合', confirmPass: '确定结束回合？这将结束你的阶段。', move: '移动', attack: '攻击', reveal: '揭示', special: '特殊行动', reorganize: '重组', forcedMarch: '强制行军', artillery: '炮兵轰击', alliedTurn: '联军回合', frenchTurn: '法军回合', waiting: '等待对手...', gameOver: '游戏结束' },
   map: { locale: '区域', capacity: '容量', resetView: '重置视图', allied: '联军', french: '法军', objective: '目标', fogged: '战争迷雾' },

@@ -8,15 +8,24 @@ const store = useModelStore()
 const personal = usePersonalStore()
 
 const chatMessage = ref('')
+const sendingChat = ref(false)
+const chatErrorText = ref('')
 const showChat = computed(() => store.viewSettings.showChat)
 
-function sendChat() {
-  if (!chatMessage.value.trim()) return
-  // Send via NTR_IO
-  import('../backend/NTR_IO').then(({ sendChatMessage }) => {
-    sendChatMessage(store.gameID, chatMessage.value)
-    chatMessage.value = ''
-  })
+async function sendChat() {
+  const message = chatMessage.value.trim()
+  if (!message || sendingChat.value) return
+  sendingChat.value = true
+  chatErrorText.value = ''
+  try {
+    const { sendChatMessage } = await import('../backend/NTR_IO')
+    await sendChatMessage(store.gameID, message)
+    if (chatMessage.value.trim() === message) chatMessage.value = ''
+  } catch {
+    chatErrorText.value = t('footer.sendError')
+  } finally {
+    sendingChat.value = false
+  }
 }
 
 function toggleChat() {
@@ -65,6 +74,7 @@ const chatEntries = computed(() => {
           <button @click="toggleChat" class="chatToggle">✕</button>
         </div>
         <div class="chatLog" ref="chatLog">
+          <p v-if="chatErrorText" class="chatErrorText" role="alert">{{ chatErrorText }}</p>
           <div v-for="(entry, idx) in chatEntries" :key="idx" class="chatEntry">
             <span class="chatTime">{{ new Date(entry[1]).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) }}</span>
             <span class="chatPlayer" :class="{ bot: playerIndexByName(entry[0]) < 0 && entry[0].includes('SHADOW') }" :style="playerStyle(entry[0])">{{ entry[0] }}</span>
@@ -74,7 +84,7 @@ const chatEntries = computed(() => {
         </div>
         <div class="chatInput">
           <input v-model="chatMessage" @keyup.enter="sendChat" :placeholder="t('footer.chatPlaceholder')" />
-          <button @click="sendChat">{{ t('footer.send') }}</button>
+          <button :disabled="sendingChat || !chatMessage.trim()" @click="sendChat">{{ sendingChat ? t('footer.sending') : t('footer.send') }}</button>
         </div>
       </div>
       <button v-else @click="toggleChat" class="chatButton">
@@ -176,6 +186,7 @@ const chatEntries = computed(() => {
 .chatPlayer { font-weight: bold; margin: 0 6px; display: inline-block; line-height: 1.2; vertical-align: middle; }
 .chatPlayer.bot { color: #e67e22; }
 .chatText { color: #ecf0f1; }
+.chatErrorText { color: #e74c3c; font-weight: bold; margin: 0 0 6px; }
 
 .chatInput {
   display: flex;

@@ -19,6 +19,8 @@ import i18n from "../i18n"
 const t = i18n.global.t
 
 const chatMessage = ref("")
+const sendingChat = ref(false)
+const chatErrorText = ref("")
 const submittingBug = ref(false)
 
 function toggleBug() {
@@ -44,11 +46,24 @@ function toggleNotes() {
 	store.topMenuViews.showNotes = !store.topMenuViews.showNotes
 }
 
-function sendChatMessage() {
-	if (chatMessage.value === "") return
-	let newEntry = [personal.name, Math.round(new Date().getTime() / 1000 - personal.gameCreationTimestamp), chatMessage.value]
-	IO.sendChatMessage([...newEntry])
-	chatMessage.value = ""
+async function sendChatMessage() {
+	const message = chatMessage.value.trim()
+	if (message === "" || sendingChat.value) return
+	sendingChat.value = true
+	chatErrorText.value = ""
+	let newEntry = [personal.name, Math.round(new Date().getTime() / 1000 - personal.gameCreationTimestamp), message]
+	try {
+		if (await IO.sendChatMessage([...newEntry])) {
+			if (chatMessage.value.trim() === message) chatMessage.value = ""
+		} else {
+			chatErrorText.value = t("io.chatError")
+		}
+	} catch (error) {
+		console.error("Error sending chat:", error)
+		chatErrorText.value = t("io.chatError")
+	} finally {
+		sendingChat.value = false
+	}
 }
 function clearNotes() {
 	personal.notes = ""
@@ -290,8 +305,9 @@ function localCastVote(topic) {
 			<div class="chatUser">{{ personal.name }}</div>
 			<div id="chatBox">
 				<h2>{{ $t("topMenuViews.chatTitle") }}</h2>
+				<p v-if="chatErrorText" class="chatErrorText" role="alert">{{ chatErrorText }}</p>
 				<div><textarea rows="6" name="chatMessage" id="chatMessage" v-model="chatMessage"></textarea></div>
-				<div><button class="actionsLineButton" @click="sendChatMessage">{{ $t("topMenuViews.send") }}</button></div>
+				<div><button class="actionsLineButton" :disabled="sendingChat || !chatMessage.trim()" @click="sendChatMessage">{{ sendingChat ? $t("turnNudge.sending") : $t("topMenuViews.send") }}</button></div>
 			</div>
 			<div id="messageList">
 				<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
@@ -669,6 +685,12 @@ function localCastVote(topic) {
 
 #chatBox textarea {
 	width: 90%;
+}
+
+.chatErrorText {
+	color: darkred;
+	font-weight: bold;
+	margin: 4px;
 }
 
 .chatUser {

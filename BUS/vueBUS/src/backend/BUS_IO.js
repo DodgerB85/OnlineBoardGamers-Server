@@ -133,16 +133,15 @@ export async function sendChatMessage(newEntry) {
 			throw new Error("Network response was not ok")
 		}
 		const data = await response.json()
-		if (!data.chatData) {
-			failLoader(() => sendChatMessage(newEntry), i18n.global.t("io.webmasterProblem"))
-			return
-		}
+		if (!data.chatData) return false
 		store.chatData = funcs.decompressChatData(data.chatData)
 		if (personal.liveWS) WS.BUSwebSocket.send("NEWCHATTS" + String(personal.gameID)) //+ String(result.latestUpdate));
-		clearLoader()
+		return true
 	} catch (error) {
 		console.error("Error sending chat:", error)
-		failLoader(() => sendChatMessage(newEntry), i18n.global.t("io.chatError"))
+		return false
+	} finally {
+		clearLoader()
 	}
 }
 

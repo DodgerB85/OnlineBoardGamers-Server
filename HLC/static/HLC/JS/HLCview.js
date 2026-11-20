@@ -4195,17 +4195,34 @@ var View = function (model) {
 
 		$("#wholeChat").fadeIn(400)
 
-		$("#chatBox button")
+		var $sendButton = $("#chatBox button")
+		function syncChatSendButton() {
+			$sendButton.prop("disabled", String($("#chatMessage").val() || "").trim().length === 0)
+		}
+		$("#chatMessage").off("input.chat").on("input.chat", syncChatSendButton)
+		syncChatSendButton()
+		$("#chatErrorText").text("")
+
+		$sendButton
 			.off()
 			.on("click", { view: this }, function (e) {
 				var v = e.data.view
-				var message = $("#chatMessage").val()
+				var message = String($("#chatMessage").val() || "").trim()
 
-				if (message != undefined && message.length > 0 && global.name != undefined) {
-					$("#chatMessage").val("")
-					addMessageToDisplay.call(this, { timestamp: new Date().getTime(), message: message, name: global.name }, true)
-					IO.postMessage(message, global.name)
-				}
+				if (message.length === 0 || global.name == undefined || $sendButton.prop("disabled")) return
+				$sendButton.prop("disabled", true).text(gettext("Sending…"))
+				$("#chatErrorText").text("")
+				IO.postMessage(message, global.name).then(function (ok) {
+					if (ok) {
+						$("#chatMessage").val("")
+						addMessageToDisplay.call(v, { timestamp: new Date().getTime(), message: message, name: global.name }, true)
+					} else {
+						$("#chatErrorText").text(gettext("Error sending chat message"))
+					}
+				}).finally(function () {
+					$sendButton.text(gettext("Send"))
+					syncChatSendButton()
+				})
 			})
 	}
 

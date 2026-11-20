@@ -11,6 +11,7 @@ const store = useModelStore();
 const personal = usePersonalStore();
 const text = ref("");
 const sending = ref(false);
+const chatErrorText = ref("");
 
 const SEAT_COLOURS = ["#8a5a2b", "#4a6fa5", "#b08a2e", "#3f7d4f"];
 
@@ -40,11 +41,12 @@ async function send() {
 	const message = text.value.trim();
 	if (!message || sending.value) return;
 	sending.value = true;
+	chatErrorText.value = "";
 	try {
 		await IO.sendChat(message);
 		text.value = "";
 	} catch {
-		store.gameMessages.errorText = "Could not send the message.";
+		chatErrorText.value = "Could not send the message.";
 	} finally {
 		sending.value = false;
 	}
@@ -59,10 +61,10 @@ async function send() {
 			<button type="button" class="utilityClose" @click="store.viewSettings.showChat = false" aria-label="Close chat">×</button>
 		</div>
 		<div id="chatBox">
-			<p v-if="store.gameMessages.errorText" class="errorText" role="alert">{{ store.gameMessages.errorText }}</p>
+			<p v-if="chatErrorText" class="errorText" role="alert">{{ chatErrorText }}</p>
 			<template v-if="canSend">
 				<div><textarea rows="6" v-model="text" aria-label="Chat message"></textarea></div>
-				<div><button type="button" class="actionsLineButton" :disabled="sending || !text.trim()" @click="send">{{ sending ? "Sending..." : "Send" }}</button></div>
+				<div><button type="button" class="actionsLineButton" :disabled="sending || !text.trim()" @click="send">{{ sending ? "Sending…" : "Send" }}</button></div>
 			</template>
 			<p v-else class="spectatorNote">Spectators can read the chat but cannot send messages.</p>
 		</div>

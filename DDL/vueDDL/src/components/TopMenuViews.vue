@@ -17,6 +17,8 @@ const store = useModelStore()
 const personal = usePersonalStore()
 
 const chatMessage = ref("")
+const sendingChat = ref(false)
+const chatErrorText = ref("")
 const bugReportText = ref("")
 const submittingBug = ref(false)
 
@@ -41,13 +43,26 @@ function playerStyle(name) {
 	return { backgroundColor: personal.getCorrectedColourHex(player.colour), color: player.colour === rf.YELLOW ? "black" : "white" }
 }
 
-function sendChatMessage() {
-	if (chatMessage.value === "") return
+async function sendChatMessage() {
+	const message = chatMessage.value.trim()
+	if (message === "" || sendingChat.value) return
+	sendingChat.value = true
+	chatErrorText.value = ""
 	const now = Math.round(new Date().getTime() / 1000)
 	const last = store.chatData.length > 0 ? store.chatData[0][1] : now
-	const newEntry = [personal.name, Math.max(0, now - last), chatMessage.value]
-	IO.sendChatMessage(newEntry)
-	chatMessage.value = ""
+	const newEntry = [personal.name, Math.max(0, now - last), message]
+	try {
+		if (await IO.sendChatMessage(newEntry)) {
+			if (chatMessage.value.trim() === message) chatMessage.value = ""
+		} else {
+			chatErrorText.value = t("errors.sendChat")
+		}
+	} catch (error) {
+		console.error("Error sending chat:", error)
+		chatErrorText.value = t("errors.sendChat")
+	} finally {
+		sendingChat.value = false
+	}
 }
 
 function clearNotes() {
@@ -138,8 +153,9 @@ function localCastVote(topic) {
 		<div class="chatUser">{{ personal.name }}</div>
 		<div id="chatBox">
 			<h2>{{ $t("topMenuViews.chat.title") }}</h2>
+			<p v-if="chatErrorText" class="chatErrorText" role="alert">{{ chatErrorText }}</p>
 			<div><textarea rows="6" v-model="chatMessage"></textarea></div>
-			<div><button class="actionsLineButton" @click="sendChatMessage">{{ $t("topMenuViews.chat.send") }}</button></div>
+			<div><button class="actionsLineButton" :disabled="sendingChat || !chatMessage.trim()" @click="sendChatMessage">{{ sendingChat ? $t("nudge.sending") : $t("topMenuViews.chat.send") }}</button></div>
 		</div>
 		<div id="messageList">
 			<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">
@@ -189,6 +205,7 @@ function localCastVote(topic) {
 .playerAidImage { width: 100%; max-width: 700px; border: 1px solid #333; }
 #wholeChat { position: absolute; left: 2px; top: 62px; width: 450px; z-index: 9999; border: 2px solid black; background-color: #d4eafd; overflow-y: scroll; padding-bottom: 10px; text-align: center; max-height: 80vh; }
 #chatBox textarea { width: 90%; }
+.chatErrorText { color: darkred; font-weight: bold; margin: 4px; }
 .chatUser { position: absolute; top: 2px; left: 5px; font-size: 13px; font-weight: bold; opacity: 0.75; }
 .chatMarker { display: inline-block; width: 18px; height: 18px; object-fit: contain; vertical-align: middle; margin-left: 4px; }
 .chatMarkerSwatch { width: 13px; height: 13px; border: 1px solid #333; }

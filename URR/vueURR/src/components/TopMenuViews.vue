@@ -28,11 +28,12 @@ function toggleNotes() {
 }
 
 async function sendChatMessage() {
-	if (chatMessage.value === "") return
+	const message = chatMessage.value.trim()
+	if (message === "" || store.viewSettings.isSendingChat) return
 	const latestMessageTime = store.chatData[0]?.[1] ?? personal.gameCreationTimestamp
 	let time = Math.round(new Date().getTime() / 1000 - latestMessageTime)
-	let newEntry = [personal.name, time, chatMessage.value]
-	if (await IO.sendChatMessage([...newEntry]) && chatMessage.value === newEntry[2]) chatMessage.value = ""
+	let newEntry = [personal.name, time, message]
+	if (await IO.sendChatMessage([...newEntry]) && chatMessage.value.trim() === message) chatMessage.value = ""
 }
 
 function clearNotes() {
@@ -80,7 +81,7 @@ function getDeleteVotes(returnPlayers = false) {
 function playerStyle(name) {
 	const index = view.playerIndexByName(store, name)
 	if (index < 0) return {}
-	return { backgroundColor: personal.getCorrectedColourHex(store.players[index].colour), color: "white", padding: "0 4px", border: "1px solid black" }
+	return { backgroundColor: personal.getCorrectedColourHex(store.players[index].colour), color: "black", padding: "0 4px", border: "1px solid black" }
 }
 
 function localCastVote(topic) {
@@ -133,7 +134,7 @@ function localCastVote(topic) {
 			<h2>{{ $t("chat.title") }}</h2>
 			<p v-if="store.gameMessages.chatErrorText" class="errorText" role="alert">{{ store.gameMessages.chatErrorText }}</p>
 			<div><textarea rows="6" v-model="chatMessage" :aria-label="$t('chat.messageAria')"></textarea></div>
-			<div><button class="actionsLineButton" :disabled="store.viewSettings.isSendingChat || !chatMessage" @click="sendChatMessage">{{ store.viewSettings.isSendingChat ? $t('chat.sending') : $t('chat.send') }}</button></div>
+			<div><button class="actionsLineButton" :disabled="store.viewSettings.isSendingChat || !chatMessage.trim()" @click="sendChatMessage">{{ store.viewSettings.isSendingChat ? $t('chat.sending') : $t('chat.send') }}</button></div>
 		</div>
 		<div id="messageList">
 			<div class="chatentry" v-for="(message, index) in store.chatData" :key="index">

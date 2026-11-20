@@ -71,6 +71,8 @@ export const en = {
     chat: 'Chat',
     chatPlaceholder: 'Type a message...',
     send: 'Send',
+    sendError: 'Error sending chat message',
+    sending: 'Sending…',
     version: 'Version',
     players: 'players',
     kickoutWarning: 'Kickout warning!',

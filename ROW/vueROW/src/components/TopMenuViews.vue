@@ -14,6 +14,7 @@ const personal = usePersonalStore()
 
 const chatMessage = ref("")
 const chatList = ref(null)
+const chatErrorText = ref("")
 const bugReport = ref("")
 const sendingChat = ref(false)
 const savingNotes = ref(false)
@@ -52,10 +53,11 @@ function playerMarkerStyle(name) {
 }
 
 async function sendChat() {
-	if (!chatMessage.value || sendingChat.value) return
+	if (!chatMessage.value.trim() || sendingChat.value) return
 	sendingChat.value = true
+	chatErrorText.value = ""
 	try {
-		const returned = await sendChatMessage(personal.gameID, [personal.name, Date.now(), chatMessage.value])
+		const returned = await sendChatMessage(personal.gameID, [personal.name, Date.now(), chatMessage.value.trim()])
 		const parsed = decompress(returned)
 		if (Array.isArray(parsed)) store.chatData.splice(0, store.chatData.length, ...parsed)
 		chatMessage.value = ""
@@ -63,7 +65,7 @@ async function sendChat() {
 		await nextTick()
 		if (chatList.value) chatList.value.scrollTop = chatList.value.scrollHeight
 	} catch {
-		store.gameMessages.errorText = t("error.sendingChat")
+		chatErrorText.value = t("error.sendingChat")
 	} finally {
 		sendingChat.value = false
 	}
@@ -161,6 +163,7 @@ async function castVoteFor(topic) {
 			<div v-if="store.viewSettings.showChat" class="panel chatPanel" role="region" :aria-label="t('panels.chatTitle')" tabindex="-1" @keydown.esc.stop.prevent="closePanels">
 				<div class="chatUser">{{ personal.name }}</div>
 				<h3>{{ t('panels.chatTitle') }}</h3>
+				<p v-if="chatErrorText" class="chatErrorText" role="alert">{{ chatErrorText }}</p>
 				<div ref="chatList" class="chatList">
 					<div v-for="(m, i) in store.chatData" :key="i" class="chatentry">
 						<div class="header">
@@ -172,7 +175,7 @@ async function castVoteFor(topic) {
 				</div>
 				<div>
 					<textarea v-model="chatMessage" rows="3" cols="60" maxlength="5000"></textarea>
-					<button class="actionsLineButton" :disabled="sendingChat || !chatMessage" @click="sendChat">{{ t('panels.send') }}</button>
+					<button class="actionsLineButton" :disabled="sendingChat || !chatMessage.trim()" @click="sendChat">{{ sendingChat ? t('actionArea.turnNudge.sending') : t('panels.send') }}</button>
 				</div>
 			</div>
 		</transition>
@@ -218,6 +221,7 @@ async function castVoteFor(topic) {
 	box-sizing: border-box;
 }
 .chatUser { position: absolute; top: 2px; left: 5px; font-size: 13px; font-weight: bold; opacity: 0.75; }
+.chatErrorText { color: darkred; font-weight: bold; margin: 4px; }
 .chatList { max-height: 160px; overflow-y: auto; background: white; margin-bottom: 6px; }
 .chatentry { margin: 5px; border: #000 1px solid; text-align: left; padding: 5px; }
 .chatentry .header { margin-bottom: 4px; border-bottom: #000 1px solid; display: flex; align-items: center; }

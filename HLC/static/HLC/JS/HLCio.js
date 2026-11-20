@@ -837,7 +837,7 @@ var IO = {
 		showLoader()
 		var csrftoken = getCookie("csrftoken")
 
-		fetch("/HLC/chat/", {
+		return fetch("/HLC/chat/", {
 			method: "POST",
 			body: JSON.stringify({
 				action: "addMessage",
@@ -847,9 +847,11 @@ var IO = {
 			}),
 			headers: { "X-CSRFToken": csrftoken },
 		})
-			.then((response) => response.json())
+			.then((response) => {
+				if (!response.ok) throw new Error("Network response was not ok")
+				return response.json()
+			})
 			.then((result) => {
-				hideLoader()
 				var d = new Date().getTime()
 				var m = { m: htmlEscape(message), p: player, t: d }
 				if (IO.chat != undefined) {
@@ -857,9 +859,14 @@ var IO = {
 					IO.chat.child("message").set(m)
 				}
 				if (global.liveWS) HLCwebSocket.send("NEWCHATTS" + String(global.gameID))
+				return true
 			})
 			.catch((error) => {
 				console.log("Error:", error)
+				return false
+			})
+			.finally(() => {
+				hideLoader()
 			})
 	},
 

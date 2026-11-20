@@ -486,6 +486,16 @@ body.notes #notesBox {
 	opacity: 0.75;
 }
 
+.chatErrorText {
+	color: darkred;
+	font-weight: bold;
+	margin: 4px;
+}
+
+.chatErrorText:empty {
+	display: none;
+}
+
 .chatMarker {
 	display: inline-block;
 	vertical-align: middle;

@@ -192,6 +192,7 @@
                           <div class="chatUser">{% if user.is_authenticated %}{{ user.username }}{% endif %}</div>
                           <div id="chatBox">
                             <h2>{% translate "Send a message" %}</h2>
+                            <p id="chatErrorText" class="chatErrorText" role="alert"></p>
                             <div>
                               <textarea rows="6" name="chatMessage" id="chatMessage"></textarea>
                             </div>
