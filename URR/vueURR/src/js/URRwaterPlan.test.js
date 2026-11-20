@@ -4,6 +4,7 @@ import { createGame, applyAction } from "./URRgame.js"
 import { currentWaterFrame } from "./URRwater.js"
 import { getAutomaticAction } from "./URRrules.js"
 import { previewWaterPlan } from "./URRwaterPlan.js"
+import { buildWaterPlanPlayback } from "./URRwaterPlayback.js"
 import * as rf from "./URRreference.js"
 
 function routingGame() {
@@ -53,6 +54,19 @@ test("A plan cannot include another player's downstream routing decision", () =>
 	assert.throws(() => previewWaterPlan(game, [{ area: "printed-3-4", amount: 2 }, { area: "printed-4-4", amount: 1 }]))
 })
 
+test("The queued plan can be previewed without changing the position", () => {
+	const game = routingGame()
+	const before = structuredClone(game)
+	const actions = previewWaterPlan(game, [{ area: "printed-3-4", amount: 2 }, { area: "printed-4-5", amount: 1 }])
+	const script = buildWaterPlanPlayback(game, actions)
+	assert.deepEqual(game, before)
+	const pump = script.steps.find((step) => step.type === "pump")
+	assert.equal(pump.amount, 2)
+	assert.deepEqual(pump.path, ["printed-3-5", "printed-3-4"])
+	assert.equal(script.steps.at(-1).type, "preview")
+	assert.ok(script.steps.at(-1).wet.includes("printed-4-5"))
+	assert.equal(script.board.areas.find((area) => area.id === "printed-4-5").irrigatedBy, null)
+})
 
 test("Allocating all water to land and a terminal pump can finish with returned water preserved", () => {
 	const game = routingGame()

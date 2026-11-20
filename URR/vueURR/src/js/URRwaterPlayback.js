@@ -24,21 +24,8 @@ function canalPath(board, from, to) {
 	throw new Error(t("waterPlayback.noCanalPath"))
 }
 
-export function buildWaterPlayback(history, snapshots, completionIndex) {
-	const selected = snapshots.slice(0, completionIndex + 1)
-	const completed = selected.at(-1)
-	if (!completed || completed.rain.outflow === null || completed.rain.step === "routing") throw new Error(t("waterPlayback.notComplete"))
-	let startIndex = completionIndex
-	while (startIndex > 0) {
-		const before = selected[startIndex - 1]
-		const after = selected[startIndex]
-		if ([rf.PHASE_DEVELOPMENT, rf.PHASE_SETTLEMENT].includes(before.gameflow.phase) && (after.gameflow.phase === rf.PHASE_RAINY_SEASON || after.gameflow.turn > before.gameflow.turn || after.gameflow.phase === rf.PHASE_GAME_OVER)) break
-		startIndex--
-	}
-	if (startIndex === 0) throw new Error(t("waterPlayback.noStart"))
-	const game = JSON.parse(JSON.stringify(selected[startIndex]))
-	for (const area of game.board.areas) area.irrigatedBy = null
-	game.rain = { step: "routing", outflow: null, harvestOrder: [] }
+// Both replay and preview use the same recorder, so their steps and text cannot drift.
+export function createWaterRecorder(game) {
 	const board = JSON.parse(JSON.stringify(game.board))
 	const steps = []
 	const waitingWater = new Map()
@@ -68,8 +55,38 @@ export function buildWaterPlayback(history, snapshots, completionIndex) {
 			outflow: t("waterPlayback.outflow", { amount: event.amount }),
 		}
 		const path = event.from && event.to && ["pump", "canal", "irrigate", "return"].includes(event.type) ? canalPath(board, event.from, event.to) : [event.from, event.to].filter(Boolean)
-		steps.push({ ...event, path, waitingWater: [...waitingWater].map(([area, amount]) => ({ area, amount })), text: descriptions[event.type], wet: game.board.areas.filter((area) => area.irrigatedBy !== null).map((area) => area.id) })
+		steps.push({ ...event, path, waitingWater: [...waitingWater].map(([area, amount]) => ({ area, amount })), wet: game.board.areas.filter((area) => area.irrigatedBy !== null).map((area) => area.id), text: descriptions[event.type] })
 	}
+	return { record, steps, board }
+}
+
+function findRoutingStart(snapshots, endIndex) {
+	let startIndex = endIndex
+	while (startIndex > 0) {
+		const before = snapshots[startIndex - 1]
+		const after = snapshots[startIndex]
+		if ([rf.PHASE_DEVELOPMENT, rf.PHASE_SETTLEMENT].includes(before.gameflow.phase) && (after.gameflow.phase === rf.PHASE_RAINY_SEASON || after.gameflow.turn > before.gameflow.turn || after.gameflow.phase === rf.PHASE_GAME_OVER)) break
+		startIndex--
+	}
+	if (startIndex === 0) throw new Error(t("waterPlayback.noStart"))
+	return startIndex
+}
+
+// A reservoir with no canal play passes all its water straight downstream.
+function removeEmptyReservoirSplits(steps) {
+	for (let index = steps.length - 2; index >= 0; index--) {
+		if (steps[index].type === "reservoir" && steps[index + 1].type === "release" && steps[index].to === steps[index + 1].from) steps.splice(index, 2)
+	}
+}
+
+export function buildWaterPlayback(history, snapshots, completionIndex) {
+	const completed = snapshots[completionIndex]
+	if (!completed || completed.rain.outflow === null || completed.rain.step === "routing") throw new Error(t("waterPlayback.notComplete"))
+	const startIndex = findRoutingStart(snapshots, completionIndex)
+	const game = JSON.parse(JSON.stringify(snapshots[startIndex]))
+	for (const area of game.board.areas) area.irrigatedBy = null
+	game.rain = { step: "routing", outflow: null, harvestOrder: [] }
+	const { record, steps, board } = createWaterRecorder(game)
 	let finished = water.startWaterRouting(game, record)
 	for (let index = startIndex + 1; index <= completionIndex; index++) {
 		const action = historyAction(history[index])
@@ -77,11 +94,21 @@ export function buildWaterPlayback(history, snapshots, completionIndex) {
 		else if (action?.type === "advanceWater") finished = water.advanceWaterRouting(game, record)
 	}
 	if (!finished || game.rain.routing.outflow !== completed.rain.outflow) throw new Error(t("waterPlayback.noAllDecisions"))
-	// A reservoir with no canal play passes all its water straight downstream.
-	for (let index = steps.length - 2; index >= 0; index--) {
-		if (steps[index].type === "reservoir" && steps[index + 1].type === "release" && steps[index].to === steps[index + 1].from) steps.splice(index, 2)
-	}
+	removeEmptyReservoirSplits(steps)
 	const wet = game.board.areas.filter((area) => area.irrigatedBy !== null).map((area) => area.id)
 	steps.push({ type: "complete", path: [], wet, waitingWater: [], text: wet.length === 1 ? t("waterPlayback.completeOne", { count: wet.length, outflow: game.rain.routing.outflow }) : t("waterPlayback.completeMany", { count: wet.length, outflow: game.rain.routing.outflow }) })
+	return { board, steps }
+}
+
+export function buildWaterPlanPlayback(game, actions) {
+	const simulation = JSON.parse(JSON.stringify(game))
+	const { record, steps, board } = createWaterRecorder(simulation)
+	for (const action of actions) {
+		if (action.type === "allocateWater") water.allocateWater(simulation, action, record)
+		else if (action.type === "advanceWater") water.advanceWaterRouting(simulation, record)
+	}
+	removeEmptyReservoirSplits(steps)
+	const wet = simulation.board.areas.filter((area) => area.irrigatedBy !== null).map((area) => area.id)
+	steps.push({ type: "preview", path: [], wet, waitingWater: [], text: t("waterPlayback.previewEnd") })
 	return { board, steps }
 }

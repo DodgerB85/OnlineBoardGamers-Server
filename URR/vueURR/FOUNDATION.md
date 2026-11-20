@@ -21,6 +21,7 @@ Rules reference: [Ur, 1830 BC rulebook](../Ur1830Rules.md). The client implement
 - Maintenance liquidation and revolution resolution, including throne-preserving sales and compulsory harvest distribution after revolution.
 - Barahshum's between-turn canal exchange and Calah's free waterwork exchange.
 - Rainy-season routing through the printed rivers and waterworks, reachable land irrigation, harvest distribution or storage, region-based price changes, and final scoring. First Akkadians' income and grant are handled separately as specified by the rules.
+- Completed water flow replays from the last-rainy-season bar on the map as well as from the history entry. The map replay draws the recorded route over the current board. During routing, the queued plan can be simulated without submitting it; during settlement or development, the next rainy season can be previewed with the viewer choosing every destination, with a warning when the real decision belongs to another player.
 
 Returned water remains in separate batches with its pump traversal history and originating reservoir, so returning a batch does not mark untouched water as having visited those pumps. Era changes apply before a purchased card's maintenance funding is checked. Settlement controls also allow queuing the newly purchased land for an immediate sale in the same turn.
 
