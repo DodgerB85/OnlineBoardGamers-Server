@@ -68,10 +68,16 @@ const waitingFor = computed(() => {
 	if (store.gameflow.turnOrder.length === 0) return ""
 	return controller.getCurrentPlayersArray().filter(Boolean).join(", ")
 })
-const timedOutPlayerIndex = computed(() => (store.gameflow.turnOrder.length > 0 ? store.gameflow.turnOrder[0] : -1))
+const timedOutPlayerIndex = computed(() => {
+	// Gift nights have their own queue: the server marks the front claimant
+	// current, not turnOrder[0] of the suspended phase.
+	const claimant = rules.currentBailoutPlayer()
+	if (claimant >= 0) return claimant
+	return store.gameflow.turnOrder.length > 0 ? store.gameflow.turnOrder[0] : -1
+})
 // The kickout panel and its buttons act on the timed-out player, not on the
 // viewer: in simul phases personal.pov can still be in the turn order, so
-// currentPlayerObj() would name the viewer while the actions hit turnOrder[0].
+// currentPlayerObj() would name the viewer while the actions hit the target.
 const kickoutTargetObj = computed(() => (timedOutPlayerIndex.value >= 0 ? store.players[timedOutPlayerIndex.value] : currentPlayerObj.value))
 const unionOrganizerPlacementRequired = computed(() => rules.unionOrganizerPlacementRequired(controller.currentPlayerIndex()))
 
@@ -464,7 +470,7 @@ function skipModuleAndEndTurn() {
 		</template>
 
 		<div v-if="store.context.action !== rf.ACT_CONFIRM_RESIGN">
-			<template v-if="personal.kickoutRequired > 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER && store.gameflow.turnOrder[0] !== personal.pov">
+			<template v-if="personal.kickoutRequired > 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER && timedOutPlayerIndex !== personal.pov">
 				<div v-if="personal.kickoutRequired == 1" id="kickoutDiv">
 					<i18n-t keypath="actionArea.playerUsedAllKickoutTime" tag="div" scope="global">
 						<template #name><b>{{ kickoutTargetObj.name }}</b></template>

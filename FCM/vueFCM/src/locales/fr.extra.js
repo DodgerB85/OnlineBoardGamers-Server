@@ -16,7 +16,7 @@ export default {
 		"bailoutTitle": "La ville renfloue la banque !",
 		"bailoutOrder": "Ordre de choix du cadeau",
 		"bailoutWaiting": "Au tour de {name}. Les autres joueurs doivent attendre.",
-		"bailoutBody": "Choisissez un employé marketing de niveau 2 gratuit (premier arrivé, premier servi). Le cadeau ne compte pas comme une embauche – l'employé rejoint votre plage et est payé comme tout autre employé.",
+		"bailoutBody": "Choisissez dans l'ordre du tour un employé marketing de niveau 2 gratuit. Le cadeau ne compte pas comme une embauche – l'employé rejoint votre plage et est payé comme tout autre employé.",
 		"bailoutNothingLeft": "Plus rien à réclamer.",
 		"bailoutDecline": "Refuser le cadeau",
 		"bgStats": "Publier dans BG Stats",

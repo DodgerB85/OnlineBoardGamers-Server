@@ -607,8 +607,8 @@ export function exportFCMmodel(forGameOver, includeContext, historyCutoff) {
 	temp.push(
 		store.campaigns.map((c) => {
 			const entry = [c.number]
-			// Media Line mod phone tokens (30-35) are stored like standard ones;
-			// TV channels (28-29) have no token, so their chosen houses are stored
+			// Media Line mod phone tokens (30-41) are stored like standard ones;
+			// TV channels have no token, so their chosen houses are stored
 			// instead: [number, good, duration, ...houses]
 			if (phone.isPhone(c.number) || c.number <= 16) {
 				entry.push(exportIndex(c.index), c.good)
@@ -892,8 +892,8 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	store.campaigns.splice(0)
 	store.campaigns = inputArr[IMPORT_INDEX].map((c) => {
 		const num = c[0]
-		// Media Line mod: phone tokens (30-35) use the standard layout; TV
-		// channels (28-29) carry [number, good, duration, ...houses] instead
+		// Media Line mod: phone tokens use the standard layout; TV channels
+		// carry [number, good, duration, ...houses] instead
 		const isStandard = num <= 16 || phone.isPhone(num)
 		const isTV = rf.TV_CAMPAIGNS.includes(num)
 

@@ -106,6 +106,23 @@ it.each([4,6])('last card finishes the no-stock remainder with %i players and co
 it('bot removal during a gift queue preserves the suspended phase turn order',async()=>{
  setup('training',4);s.players[1].displayName=s.players[2].displayName=rf.BOT_NAME;const bot=await import('../js/FCMbot');bot.removeBotPlayers();expect(s.gameflow.turnOrder).toEqual([0,1,2,3]);expect(s.bailout.claims).toEqual({})
 })
+it('pass-kickout declines the front claimant, not turnOrder[0]',async()=>{
+ setup('simul');p.pov=2;await controller.claimBailout(rf.CAMPAIGN_MANAGER)
+ expect(s.bailout.claims[2]).toBe(rf.CAMPAIGN_MANAGER);expect(controller.currentPlayerIndex()).toBe(0)
+ p.pov=1;p.kickoutRequired=2;await nextTick()
+ const pass=all(root,n=>n.type==='button'&&n.props.id==='passKickoutButton')[0]
+ expect(pass).toBeDefined();expect(String(pass.text)).toContain('"name":"P0"')
+ await pass.props.onClick();await nextTick()
+ expect(s.bailout.claims).toEqual({2:rf.CAMPAIGN_MANAGER,0:-1});expect(rules.currentBailoutPlayer()).toBe(1)
+ expect(posts).toHaveLength(2);expect(posts[1].nextPlayer).toEqual(['P1'])
+ expect(s.players[2].beach.filter(e=>e===rf.CAMPAIGN_MANAGER)).toHaveLength(1)
+})
+it('an AI seat auto-declines its gift instead of stalling the queue',async()=>{
+ setup('simul');s.players[2].displayName=rf.AI_NAME
+ await controller.startPlayerTurn(false);await nextTick()
+ expect(s.bailout.claims).toEqual({2:-1});expect(rules.currentBailoutPlayer()).toBe(0)
+ expect(posts).toHaveLength(1);expect(posts[0].nextPlayer).toEqual(['P0'])
+})
 it('refresh resumes an old snapshot whose front seats are consecutive bots',async()=>{
  setup('training',4);s.players[0].displayName=s.players[1].displayName=rf.BOT_NAME
  await controller.startPlayerTurn(false);await nextTick();expect(s.bailout.claims).toEqual({0:-1,1:-1});expect(rules.currentBailoutPlayer()).toBe(2);expect(posts).toHaveLength(1);expect(posts[0].nextPlayer).toEqual(['P2'])

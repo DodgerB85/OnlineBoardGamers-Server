@@ -72,11 +72,13 @@ export function generateCleanupDefaultMove(playerIndex) {
 	return playerObj.resources.slice(10)
 }
 
-export function passKickout() {
+export async function passKickout() {
     const store = useModelStore()
     const personal = usePersonalStore()
 	personal.kickoutRequired = 0
+	if (store.bailout.pending) return controller.declineCurrentBailoutClaim()
 	let timedOutPlayerIndex = store.gameflow.turnOrder[0]
+	if (!Number.isInteger(timedOutPlayerIndex) || !store.players[timedOutPlayerIndex]) return
 	const targetName = store.players[timedOutPlayerIndex].name
 
 	if (!controller.isSimulPhase()) {
@@ -137,25 +139,34 @@ export function passKickout() {
 	personal.pov = savedPov
 }
 
-export async function actionPlayerKickout() {
+export async function actionPlayerKickout(targetIndex) {
     const store = useModelStore()
     const personal = usePersonalStore()
-	const timedOutPlayerIndex = store.gameflow.turnOrder[0]
-	if (personal.kickoutRequired !== 2) return
+	const claimant = rules.currentBailoutPlayer()
+	const timedOutPlayerIndex = claimant >= 0 ? claimant : Number.isInteger(targetIndex) && targetIndex >= 0 ? targetIndex : store.gameflow.turnOrder[0]
+	if (personal.kickoutRequired !== 2 || !Number.isInteger(timedOutPlayerIndex) || !store.players[timedOutPlayerIndex]) return
 
 	personal.kickoutRequired = 0
-	let player = store.players[timedOutPlayerIndex]
+	const player = store.players[timedOutPlayerIndex]
+	// A recorded vote or a failed request is not a kick: never mark the seat
+	// bot-like or write kickout history until the server confirms it.
+	const result = await IO.kickout(timedOutPlayerIndex)
+	if (!result || result.voteCast) return
 	model.addHistory(rf.HIST_KICKOUT, [timedOutPlayerIndex, personal.pov], personal.pov, 0)
 	makeBot(player)
-
-	let result = await IO.kickout(timedOutPlayerIndex)
-	if (result && result.voteCast) return
 
 	// Count remaining human players
 	const botCount = store.players.filter((p) => p.displayName === rf.BOT_NAME).length
 	if (botCount >= store.players.length - 1) {
 		model.endGame()
 		await IO.saveGameNormal(false, false, false)
+		return
+	}
+
+	// A kicked claimant gets the neutral default gift move, then the queue
+	// advances without waiting for the missing seat.
+	if (store.bailout.pending) {
+		await controller.declineCurrentBailoutClaim()
 		return
 	}
 

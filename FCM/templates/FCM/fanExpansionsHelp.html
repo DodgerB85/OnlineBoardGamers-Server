@@ -242,13 +242,13 @@
             <img class="helpEmployeeImg" src="{% static 'FCM/images/e_tv_announcer.jpg' %}" alt="{% trans 'TV Announcer' %}" width="145" height="225" />
             <br />
             {% if phone_language|slice:':2' == 'zh' %}
-              {% static 'FCM/images/media_line_range_three_phones_v4_zh.png' as media_range_image %}
+              {% static 'FCM/images/media_line_range_three_phones_v4_zh.jpg' as media_range_image %}
             {% else %}
-              {% static 'FCM/images/media_line_range_three_phones_v4_en.png' as media_range_image %}
+              {% static 'FCM/images/media_line_range_three_phones_v4_en.jpg' as media_range_image %}
             {% endif %}
             <figure id="media-line-range" class="media-line-range-figure" style="margin:16px 0">
-              <a class="media-line-range-fullsize" href="{{ media_range_image }}" target="_blank" rel="noopener" title="{% if phone_language|slice:':2' == 'zh' %}点击查看原图{% else %}Open full-size diagram{% endif %}">
-                <img id="media-line-range-diagram" src="{{ media_range_image }}" width="2320" height="1320" style="display:block;width:100%;max-width:100%;height:auto;border:1px solid #b4a38b;border-radius:6px;box-sizing:border-box" loading="lazy" alt="{% if phone_language|slice:':2' == 'zh' %}电话与电视的板块范围：三种电话放置与电视选房示例{% else %}Phone and TV tile ranges: three phone placements and TV house selection{% endif %}" />
+              <a class="media-line-range-fullsize" href="{{ media_range_image }}" target="_blank" rel="noopener" title="{% translate 'Open full-size diagram' %}">
+                <img id="media-line-range-diagram" src="{{ media_range_image }}" width="2320" height="1320" style="display:block;width:100%;max-width:100%;height:auto;border:1px solid #b4a38b;border-radius:6px;box-sizing:border-box" loading="lazy" alt="{% translate 'Phone and TV tile ranges: three phone placements and TV house selection' %}" />
               </a>
             </figure>
             <ul>

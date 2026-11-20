@@ -117,13 +117,35 @@ def _fcm_bailout_next_player(game_data, starting_options):
         return None
     try:
         data = json.loads(safe_gzip_decompress(bytearray(base64.b64decode(game_data))).decode("utf-8"))
+        if not isinstance(data, list):
+            return None
         tile_slot = rfFCM.SO_LOBBYISTS in starting_options or rfFCM.SO_SENIOR_BUSINESS_DEVELOPER in starting_options
         players = data[int(tile_slot)]
-        for slot in data[-2:]:
-            if isinstance(slot, dict) and slot.get("pending") and "order" in slot and "claims" in slot:
+        # The trailing module slots are Labor Market, Stadium, Second Bailout and
+        # Media Line. Looking at the last four also survives a later slot.
+        for slot in data[-4:]:
+            if isinstance(slot, dict):
+                if not (slot.get("pending") and "order" in slot and isinstance(slot.get("claims"), dict)):
+                    continue
                 order, claims = slot["order"], {int(k): v for k, v in slot["claims"].items()}
-            elif isinstance(slot, list) and len(slot) == 3 and all(isinstance(x, list) for x in slot) and all(isinstance(i, int) for i in slot[0]) and all(isinstance(i, int) for i in slot[1] + slot[2]):
-                order, claims = slot[0], dict(zip(slot[2][::2], slot[2][1::2]))
+            elif (
+                isinstance(slot, list)
+                and len(slot) == 3
+                and all(isinstance(x, list) for x in slot)
+                and 0 < len(slot[0]) <= len(players)
+                and all(isinstance(i, int) and 0 <= i < len(players) for i in slot[0])
+                and len(set(slot[0])) == len(slot[0])
+                and len(slot[1]) % 2 == 0
+                and len(slot[2]) % 2 == 0
+                and all(isinstance(i, int) for i in slot[1] + slot[2])
+            ):
+                order = slot[0]
+                claims = dict(zip(slot[2][::2], slot[2][1::2]))
+                pool = dict(zip(slot[1][::2], slot[1][1::2]))
+                if len(claims) * 2 != len(slot[2]) or len(pool) * 2 != len(slot[1]):
+                    continue
+                if any(seat not in order for seat in claims) or any(value != -1 and value not in pool for value in claims.values()):
+                    continue
             else:
                 continue
             for seat in order:

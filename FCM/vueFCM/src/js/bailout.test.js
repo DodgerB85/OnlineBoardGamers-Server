@@ -2,8 +2,8 @@
  * Second Bailout mod tests:
  * 1. First break unchanged; second break injects $300 x players and opens the
  *    claim night; third break ends the game.
- * 2. Claims grant one L2 marketer to the beach (not a hire), first come first
- *    served; declining is final; the last claim closes the night.
+ * 2. Claims grant one L2 marketer to the beach (not a hire) in turn order;
+ *    declining is final; the last claim closes the night.
  * 3. Wire-format persistence of the bailout state.
  */
 /* global pako */
@@ -228,7 +228,7 @@ describe("claim night", () => {
 		expect(store.players[0].beach).toEqual([])
 	})
 
-	it("first come first served: the market runs out across players", () => {
+	it("in turn order: the market runs out across players", () => {
 		const store = openClaimNight(2)
 		store.bailout.pool[rf.CAMPAIGN_MANAGER] = 1
 		store.availableEmployees[rf.CAMPAIGN_MANAGER] = 1

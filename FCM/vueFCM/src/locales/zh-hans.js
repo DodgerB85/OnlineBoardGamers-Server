@@ -30,7 +30,7 @@ export default {
 		"bailoutTitle": "城市出手救市！",
 		"bailoutOrder": "赠送员工领取顺序",
 		"bailoutWaiting": "当前轮到 {name} 领取，其他玩家请等待。",
-		"bailoutBody": "免费选择一名二级营销员工（先挑先得）。赠送不算雇佣——员工进入您的休假区，并像其他员工一样正常领工资。",
+		"bailoutBody": "按回合顺序免费选择一名二级营销员工。赠送不算雇佣——员工进入您的休假区，并像其他员工一样正常领工资。",
 		"bailoutNothingLeft": "已经没有可领的员工了。",
 		"bailoutDecline": "放弃赠送",
 		"thanks": "谢谢！",

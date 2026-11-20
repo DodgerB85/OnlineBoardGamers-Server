@@ -2065,3 +2065,11 @@ msgstr ""
 "TV-Kanäle können die gleiche Ware für die gleiche Dauer bewerben (1–4 "
 "Runden). TV hat 3 Kanäle, nummeriert 3.5/4.5/5.5. Für TV-Marketing 5 Häuser "
 "innerhalb von 2 Plättchen vom Plättchen mit dem Restauranteingang wählen."
+
+#. Media Line help diagram accessibility.
+msgid "Open full-size diagram"
+msgstr "Vollständiges Diagramm öffnen"
+
+#. Media Line help diagram accessibility.
+msgid "Phone and TV tile ranges: three phone placements and TV house selection"
+msgstr "Telefon- und TV-Plättchenbereiche: drei Telefonplatzierungen und TV-Hausauswahl"

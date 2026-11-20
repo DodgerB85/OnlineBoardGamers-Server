@@ -2211,3 +2211,11 @@ msgid ""
 "tile containing the restaurant entrance for TV marketing."
 msgstr ""
 "电视频道可以放置同商品、同时长（1—4回合），电视有3频道，为3.5/4.5/5.5。可选择餐厅入口所在板块距离2板块内的5个房子进行电视营销"
+
+#. Media Line help diagram accessibility.
+msgid "Open full-size diagram"
+msgstr "点击查看原图"
+
+#. Media Line help diagram accessibility.
+msgid "Phone and TV tile ranges: three phone placements and TV house selection"
+msgstr "电话与电视的板块范围：三种电话放置与电视选房示例"

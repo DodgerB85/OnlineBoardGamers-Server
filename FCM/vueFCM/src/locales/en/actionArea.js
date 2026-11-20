@@ -75,7 +75,7 @@
     bailoutTitle: "The city bails the bank out!",
     bailoutOrder: "Gift claim order",
     bailoutWaiting: "Current claimant: {name}. Other players must wait.",
-    bailoutBody: "Choose one free L2 marketing employee (first come, first served). The gift does not count as hiring - the employee joins your beach and is paid like any other employee.",
+    bailoutBody: "Choose one free L2 marketing employee in turn order. The gift does not count as hiring - the employee joins your beach and is paid like any other employee.",
     bailoutNothingLeft: "Nothing left to claim.",
     bailoutDecline: "Decline the gift",
 

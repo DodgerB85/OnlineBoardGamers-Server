@@ -68,11 +68,13 @@ def rendered_section(lang):
 class PhoneHelpTests(unittest.TestCase):
     def test_range_diagram_language_assets_and_real_template_order(self):
         from PIL import Image
+        titles={'en':'Open full-size diagram','zh-hans':'点击查看原图','de':'Vollständiges Diagramm öffnen','es':'Abrir el diagrama a tamaño completo','fr':'Ouvrir le diagramme en taille réelle','it':'Apri il diagramma a dimensione intera'}
         for lang in LANGS:
             html,_=rendered_section(lang)
-            filename='media_line_range_three_phones_v4_' + ('zh' if lang=='zh-hans' else 'en') + '.png'
+            filename='media_line_range_three_phones_v4_' + ('zh' if lang=='zh-hans' else 'en') + '.jpg'
             self.assertIn(filename,html)
-            self.assertNotIn('media_line_range_three_phones_v4_' + ('en' if lang=='zh-hans' else 'zh') + '.png',html)
+            self.assertNotIn('media_line_range_three_phones_v4_' + ('en' if lang=='zh-hans' else 'zh') + '.jpg',html)
+            self.assertIn('title="' + titles[lang] + '"',html)
             self.assertLess(html.index('<h2'),html.index('<p>'))
             self.assertLess(html.index('<p>'),html.index('e_telemarketer'))
             self.assertLess(html.index('e_tv_announcer'),html.index('<figure'))
@@ -80,6 +82,7 @@ class PhoneHelpTests(unittest.TestCase):
             self.assertIn('target="_blank" rel="noopener"',html)
             with Image.open(ROOT/'FCM/static/FCM/images'/filename) as image:
                 self.assertEqual(image.size,(2320,1320))
+                self.assertEqual(image.format,'JPEG')
 
     def test_tv_art_generator_is_portable_and_only_generates_third_channel(self):
         import subprocess

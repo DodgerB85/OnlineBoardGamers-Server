@@ -445,7 +445,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 	if (personal.tutorial) {
 		store.viewSettings.showGameLoader = false
 		personal.haltPlay = false
-		return
+		return true
 	}
 
 	//let phase = store.gameflow.phase
@@ -630,13 +630,13 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 						//if (store.gameflow.phase === rf.PHASE_GAME_OVER) return
 					}
 
-				await saveGameNormal(false, false, false)
+				const resaved = await saveGameNormal(false, false, false)
 				// In case it is your turn again right away, run startPlayerTurn
 				// If it isn't then you get returned from that function anyway
 				if (rf.SUPER_USERS.includes(personal.name)) personal.pov = -1
 				controller.startPlayerTurn(false)
 
-				return
+				return resaved
 				}
 			}
 		}
@@ -709,7 +709,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 					// Resubmit your move data to trigger end of phase
 					await saveSimulMove(sideData[personal.pov][3])
 					controller.startPlayerTurn()
-					return
+					return true // saveSimulMove owns its retry/error UI
 				}
 				if (playerIndexesToNotify.length > 0) {
 					for (let i = 0; i < playerIndexesToNotify.length; i++) {

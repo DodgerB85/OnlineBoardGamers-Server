@@ -16,7 +16,7 @@ export default {
 		"bailoutTitle": "¡La ciudad rescata al banco!",
 		"bailoutOrder": "Orden para reclamar el regalo",
 		"bailoutWaiting": "Ahora elige {name}. Los demás deben esperar.",
-		"bailoutBody": "Elige un empleado de marketing de nivel 2 gratis (por orden de llegada). El regalo no cuenta como contratación: el empleado se une a tu playa y cobra como cualquier otro empleado.",
+		"bailoutBody": "Elige por orden de turno un empleado de marketing de nivel 2 gratis. El regalo no cuenta como contratación: el empleado se une a tu playa y cobra como cualquier otro empleado.",
 		"bailoutNothingLeft": "No queda nada que reclamar.",
 		"bailoutDecline": "Rechazar el regalo",
 		"bgStats": "Publicar en BG Stats",

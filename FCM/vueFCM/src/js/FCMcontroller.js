@@ -21,7 +21,8 @@ export function settleAutomaticBailoutClaims() {
 	let idx = rules.currentBailoutPlayer()
 	while (idx >= 0) {
 		const empty = !Object.keys(store.bailout.pool).some((id) => store.bailout.pool[id] > 0 && store.availableEmployees[id] > 0)
-		if (!empty && store.players[idx].displayName !== rf.BOT_NAME) break
+		const automatic = store.players[idx].displayName === rf.BOT_NAME || store.players[idx].displayName === rf.AI_NAME
+		if (!empty && !automatic) break
 		rules.claimBailoutEmployee(idx, -1)
 		idx = rules.currentBailoutPlayer()
 	}
@@ -47,6 +48,15 @@ async function saveBailoutProgress(resumePhase = true, saveArgs = [false, false,
 
 export async function claimBailout(employeeId) {
 	if (!usePersonalStore().canPlay() || !rules.claimBailoutEmployee(rules.currentBailoutPlayer(), employeeId)) return false
+	settleAutomaticBailoutClaims()
+	return saveBailoutProgress()
+}
+
+// A timed-out or kicked claimant gets the neutral default move: decline the
+// gift, then persist it so the queue cannot wait on a missing seat.
+export async function declineCurrentBailoutClaim() {
+	const store = useModelStore()
+	if (!store.bailout.pending || !rules.claimBailoutEmployee(rules.currentBailoutPlayer(), -1)) return false
 	settleAutomaticBailoutClaims()
 	return saveBailoutProgress()
 }

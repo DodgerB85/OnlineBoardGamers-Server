@@ -2070,3 +2070,11 @@ msgstr ""
 "tours). La TV a 3 chaînes, numérotées 3.5/4.5/5.5. Choisissez 5 maisons à "
 "une distance maximale de 2 tuiles de la tuile de l’entrée du restaurant pour"
 " le marketing télévisé."
+
+#. Media Line help diagram accessibility.
+msgid "Open full-size diagram"
+msgstr "Ouvrir le diagramme en taille réelle"
+
+#. Media Line help diagram accessibility.
+msgid "Phone and TV tile ranges: three phone placements and TV house selection"
+msgstr "Portées des tuiles téléphone et TV : trois placements de téléphone et sélection des maisons TV"

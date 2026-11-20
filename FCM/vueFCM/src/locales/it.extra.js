@@ -16,7 +16,7 @@ export default {
 		"bailoutTitle": "La città salva la banca!",
 		"bailoutOrder": "Ordine di scelta del regalo",
 		"bailoutWaiting": "Ora sceglie {name}. Gli altri giocatori devono aspettare.",
-		"bailoutBody": "Scegli un dipendente marketing di livello 2 gratuito (primo arrivato, primo servito). Il regalo non conta come assunzione: il dipendente si unisce alla tua spiaggia e viene pagato come qualsiasi altro dipendente.",
+		"bailoutBody": "Scegli in ordine di turno un dipendente marketing di livello 2 gratuito. Il regalo non conta come assunzione: il dipendente si unisce alla tua spiaggia e viene pagato come qualsiasi altro dipendente.",
 		"bailoutNothingLeft": "Non resta più nulla da riscattare.",
 		"bailoutDecline": "Rifiuta il regalo",
 		"bgStats": "Pubblica in BG Stats",

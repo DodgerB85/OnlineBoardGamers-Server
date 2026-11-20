@@ -2223,3 +2223,11 @@ msgstr ""
 "turni). La TV ha 3 canali, numerati 3.5/4.5/5.5. Scegli 5 case entro 2 "
 "tessere dalla tessera dell’ingresso del ristorante per il marketing "
 "televisivo."
+
+#. Media Line help diagram accessibility.
+msgid "Open full-size diagram"
+msgstr "Apri il diagramma a dimensione intera"
+
+#. Media Line help diagram accessibility.
+msgid "Phone and TV tile ranges: three phone placements and TV house selection"
+msgstr "Portate delle tessere telefono e TV: tre posizionamenti del telefono e selezione delle case TV"

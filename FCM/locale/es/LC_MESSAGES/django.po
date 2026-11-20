@@ -2402,3 +2402,11 @@ msgstr ""
 "(1–4 rondas). TV tiene 3 canales, numerados 3.5/4.5/5.5. Elige 5 casas a una"
 " distancia de hasta 2 losetas de la loseta de la entrada del restaurante "
 "para marketing televisivo."
+
+#. Media Line help diagram accessibility.
+msgid "Open full-size diagram"
+msgstr "Abrir el diagrama a tamaño completo"
+
+#. Media Line help diagram accessibility.
+msgid "Phone and TV tile ranges: three phone placements and TV house selection"
+msgstr "Rangos de losetas de teléfono y TV: tres colocaciones de teléfono y selección de casas de TV"

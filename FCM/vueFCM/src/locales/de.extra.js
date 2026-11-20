@@ -16,7 +16,7 @@ export default {
 		"bailoutTitle": "Die Stadt rettet die Bank!",
 		"bailoutOrder": "Reihenfolge der Geschenke",
 		"bailoutWaiting": "Jetzt wählt {name}. Alle anderen müssen warten.",
-		"bailoutBody": "Wähle einen kostenlosen Marketing-Mitarbeiter der Stufe 2 (wer zuerst kommt, mahlt zuerst). Das Geschenk zählt nicht als Einstellung – der Mitarbeiter kommt an deinen Strand und wird wie jeder andere Mitarbeiter bezahlt.",
+		"bailoutBody": "Wähle in Zugreihenfolge einen kostenlosen Marketing-Mitarbeiter der Stufe 2. Das Geschenk zählt nicht als Einstellung – der Mitarbeiter kommt an deinen Strand und wird wie jeder andere Mitarbeiter bezahlt.",
 		"bailoutNothingLeft": "Nichts mehr zu holen.",
 		"bailoutDecline": "Geschenk ablehnen",
 		"bgStats": "An BG Stats senden",

@@ -189,7 +189,7 @@ function localCastVote(topic) {
 .playerAidImage { width: 100%; max-width: 700px; border: 1px solid #333; }
 #wholeChat { position: absolute; left: 2px; top: 62px; width: 450px; z-index: 9999; border: 2px solid black; background-color: #d4eafd; overflow-y: scroll; padding-bottom: 10px; text-align: center; max-height: 80vh; }
 #chatBox textarea { width: 90%; }
-.chatUser { position: absolute; top: 2px; left: 5px; font-size: 11px; font-style: italic; opacity: 0.75; }
+.chatUser { position: absolute; top: 2px; left: 5px; font-size: 13px; font-weight: bold; opacity: 0.75; }
 .chatMarker { display: inline-block; width: 18px; height: 18px; object-fit: contain; vertical-align: middle; margin-left: 4px; }
 .chatMarkerSwatch { width: 13px; height: 13px; border: 1px solid #333; }
 .chatentry { margin: 5px; border: #000 1px solid; text-align: left; padding: 5px; background-color: #d4eafd; }
@@ -197,6 +197,9 @@ function localCastVote(topic) {
 .chatentry .header .date { font-size: 0.7em; font-style: italic; float: right; }
 .chatentry .header .bold { font-weight: bold; }
 .chatentry .messageBody { overflow: auto; white-space: pre-wrap; }
+.chatentry .header { display: flex; align-items: center; }
+.chatentry .header .bold { line-height: 1.2; }
+.chatentry .header .date { margin-left: auto; float: none; }
 #rewindPanel { position: absolute; background-color: white; border: 2px solid #333; padding: 8px; width: 400px; top: 60px; left: 440px; font-size: 14px; z-index: 10000; color: #333; }
 .topMenuItem { display: inline-block; width: 62px; height: 55px; cursor: pointer; text-align: center; }
 .topMenuItem img { width: 38px; height: 38px; }
