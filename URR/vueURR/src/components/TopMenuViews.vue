@@ -223,8 +223,8 @@ function localCastVote(topic) {
 	position: absolute;
 	top: 2px;
 	left: 5px;
-	font-size: 11px;
-	font-style: italic;
+	font-size: 13px;
+	font-weight: bold;
 	opacity: 0.75;
 }
 #notesBox textarea, #bugReport textarea { max-width: 90%; box-sizing: border-box; }
@@ -242,6 +242,9 @@ function localCastVote(topic) {
 .chatentry .header .date { font-size: 0.7em; font-style: italic; float: right; }
 .chatentry .header .bold { font-weight: bold; }
 .chatentry .messageBody { overflow: auto; white-space: pre-wrap; }
+.chatentry .header { display: flex; align-items: center; }
+.chatentry .header .bold { line-height: 1.2; }
+.chatentry .header .date { margin-left: auto; float: none; }
 #rewindPanel {
 	position: absolute;
 	background-color: black;

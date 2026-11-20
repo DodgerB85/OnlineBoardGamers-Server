@@ -481,8 +481,8 @@ body.notes #notesBox {
 	position: absolute;
 	top: 2px;
 	left: 5px;
-	font-size: 11px;
-	font-style: italic;
+	font-size: 13px;
+	font-weight: bold;
 	opacity: 0.75;
 }
 
@@ -504,14 +504,20 @@ body.notes #notesBox {
 }
 
 .chatentry .header {
+	display: flex;
+	align-items: center;
 	margin-bottom: 7px;
 	border-bottom: #000 1px solid;
+}
+
+.chatentry .header .chatPlayerName {
+	line-height: 1.2;
 }
 
 .chatentry .header .date {
 	font-size: 0.7em;
 	font-style: italic;
-	float: right;
+	margin-left: auto;
 }
 
 .chatentry .header .bold {

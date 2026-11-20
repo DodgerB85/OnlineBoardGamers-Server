@@ -4312,8 +4312,9 @@ var View = function (model) {
 	function addMessageToDisplay(message, pre) {
 		var div = $('<div class="chatentry" >')
 		var header = $('<div class="header"/>')
-		header.append($('<span class="date">').text(Log.giveFormattedDate(message.timestamp) + " "))
-		header.append(Log.getPlayerSpan(message.name).addClass("bold chatPlayerName"))
+		var nameSpan = Log.getPlayerSpan(message.name).addClass("bold chatPlayerName")
+		nameSpan.css({ padding: "1px 4px" })
+		header.append(nameSpan)
 		var playerIndex = this.model && this.model.players ? this.model.players.map(function (p) { return p.name }).indexOf(message.name) : -1
 		if (playerIndex >= 0) {
 			var marker = Log.getPlayerTokenFromColour(this.model.players[playerIndex].colour)
@@ -4321,6 +4322,7 @@ var View = function (model) {
 			marker.css({ height: "18px", width: "18px" })
 			header.append(marker)
 		}
+		header.append($('<span class="date">').text(Log.giveFormattedDate(message.timestamp) + " "))
 		div.append(header)
 		var body = $('<div class="body">')
 		String(message.message).split(/=-NEWLINE-=|\n/).forEach(function (line, i) {

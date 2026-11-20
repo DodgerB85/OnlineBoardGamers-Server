@@ -441,8 +441,8 @@ function hidePopup() {
 	position: absolute;
 	top: 2px;
 	left: 5px;
-	font-size: 11px;
-	font-style: italic;
+	font-size: 13px;
+	font-weight: bold;
 	opacity: 0.75;
 }
 
@@ -484,6 +484,26 @@ function hidePopup() {
 .chatentry .messageBody {
 	overflow: auto;
 	white-space: pre-wrap;
+}
+
+.chatentry .header {
+	display: flex;
+	align-items: center;
+}
+
+.chatentry .header .mainEntryPlayer {
+	margin: 0;
+	padding: 1px 4px;
+	line-height: 1.2;
+}
+
+.chatentry .header .bold {
+	line-height: 1.2;
+}
+
+.chatentry .header .date {
+	margin-left: auto;
+	float: none;
 }
 
 .chatentry .header {

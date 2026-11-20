@@ -151,7 +151,7 @@ const chatEntries = computed(() => {
   border-bottom: 1px solid #34495e;
 }
 
-.chatUser { font-size: 0.7rem; color: #95a5a6; margin-right: auto; }
+.chatUser { font-size: 0.85rem; font-weight: bold; color: #95a5a6; margin-right: auto; }
 .chatMarker { display: inline-block; width: 10px; height: 10px; margin: 0 6px 0 0; border: 1px solid #fff; border-radius: 50%; vertical-align: middle; }
 
 .chatToggle {
@@ -173,7 +173,7 @@ const chatEntries = computed(() => {
 }
 
 .chatTime { color: #7f8c8d; font-size: 0.7rem; }
-.chatPlayer { font-weight: bold; margin: 0 6px; }
+.chatPlayer { font-weight: bold; margin: 0 6px; display: inline-block; line-height: 1.2; vertical-align: middle; }
 .chatPlayer.bot { color: #e67e22; }
 .chatText { color: #ecf0f1; }
 

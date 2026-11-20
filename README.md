@@ -100,7 +100,7 @@ Everything runs in source-code mode: the game pages load their JS from the match
 MySQL is published on 3307 if you want to connect a client.
 
 ## Tests
-Backend tests use Django's unittest runner: `python manage.py test tests.test_<name>`. The Vue clients for FCM, IND, ROW and KFW have vitest tests: run `npm test` in the game's `vue<GAME>` folder. See [docs/UNIT_TESTS.md](docs/UNIT_TESTS.md) for details.
+Backend tests use Django's unittest runner: `python manage.py test tests.test_<name>`. The Vue clients for FCM, IND, ROW, KFW and RNB have frontend tests: run `npm test` in the game's `vue<GAME>` folder. See [docs/UNIT_TESTS.md](docs/UNIT_TESTS.md) for details.
 
 ## Deployment
 Deployments are done manually by running a batch script to do a git pull / collectstatic / etc.

@@ -19,6 +19,7 @@ from RNB.views import (
     _append_trade_history,
     _delete_pending_moves,
     _get_rnb_home_location,
+    _handle_rnb_accept_trade,
     _remove_matching_trades,
     _rnb_player_has_transporter_on_home,
     _rnb_trade_option_enabled,
@@ -113,6 +114,22 @@ class RNBTradeRulesTests(unittest.TestCase):
     def test_trade_option_gate(self):
         self.assertTrue(_rnb_trade_option_enabled(SimpleNamespace(startingOptions=json.dumps([rfRNB.SO_TRADE]))))
         self.assertFalse(_rnb_trade_option_enabled(SimpleNamespace(startingOptions=json.dumps([rfRNB.SO_BOMBS]))))
+
+    def test_stale_trade_accept_is_rejected_before_any_change(self):
+        game = SimpleNamespace(id=7, latestUpdate="1000", turn=2, phase=rfRNB.PHASE_WONDER_TO)
+        presenter = SimpleNamespace(getArrayOfIsCurrentPlayers=lambda: ["p0", "p1"])
+        request = SimpleNamespace(user=SimpleNamespace(username="p1"))
+        with patch("RNB.views.SN_sendAdminErrorMessage") as send:
+            response = _handle_rnb_accept_trade(
+                request,
+                game,
+                presenter,
+                self.raw_data,
+                {"playerTrades": []},
+                {"latestUpdate": "999", "turn": 2, "phase": rfRNB.PHASE_WONDER_TO, "tradeEntry": [0, 1, [0], [1], "pending"]},
+            )
+        self.assertTrue(json.loads(response.content)["syncError"])
+        send.assert_called_once()
 
     def test_stale_accept_removes_only_the_matching_trade(self):
         trade_data = {

@@ -217,11 +217,11 @@ async function castVoteFor(topic) {
 	overflow-y: auto;
 	box-sizing: border-box;
 }
-.chatUser { position: absolute; top: 2px; left: 5px; font-size: 11px; font-style: italic; opacity: 0.75; }
+.chatUser { position: absolute; top: 2px; left: 5px; font-size: 13px; font-weight: bold; opacity: 0.75; }
 .chatList { max-height: 160px; overflow-y: auto; background: white; margin-bottom: 6px; }
 .chatentry { margin: 5px; border: #000 1px solid; text-align: left; padding: 5px; }
-.chatentry .header { margin-bottom: 4px; border-bottom: #000 1px solid; }
-.chatentry .author { font-weight: bold; }
+.chatentry .header { margin-bottom: 4px; border-bottom: #000 1px solid; display: flex; align-items: center; }
+.chatentry .author { font-weight: bold; line-height: 1.2; }
 .chatentry .messageBody { overflow: auto; white-space: pre-wrap; }
 .chatMarker { display: inline-block; width: 10px; height: 10px; border: 1px solid #333; border-radius: 50%; vertical-align: middle; margin-left: 4px; }
 .missing { color: #b00000; font-weight: bold; }

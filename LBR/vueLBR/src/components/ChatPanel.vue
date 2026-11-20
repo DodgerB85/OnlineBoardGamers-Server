@@ -100,7 +100,7 @@ async function send() {
 .chatHeading { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 12px; background: #d4eafd; border-bottom: 1px solid #adc2d0; }
 .chatHeading h2 { font-size: 20px; }
 .chatHeading button { font-size: 26px; border: 0; background: none; cursor: pointer; padding: 5px; }
-.chatUser { font-size: 11px; font-style: italic; opacity: 0.75; }
+.chatUser { font-size: 13px; font-weight: bold; opacity: 0.75; }
 #messageList { padding: 0 6px; }
 .chatMarker { display: inline-block; vertical-align: middle; margin-left: 4px; border-radius: 50%; }
 .chatentry {
@@ -111,9 +111,9 @@ async function send() {
 	padding: 5px;
 	background-color: #d4eafd;
 }
-.chatentry .header { margin-bottom: 7px; border-bottom: #000 1px solid; }
-.chatentry .author { font-weight: bold; }
-.chatentry .header .date { font-size: 0.7em; font-style: italic; float: right; }
+.chatentry .header { margin-bottom: 7px; border-bottom: #000 1px solid; display: flex; align-items: center; }
+.chatentry .author { font-weight: bold; line-height: 1.2; }
+.chatentry .header .date { font-size: 0.7em; font-style: italic; float: none; margin-left: auto; }
 .chatentry .messageBody { overflow: auto; white-space: pre-wrap; }
 .spectatorNote, .empty { font-size: 14px; opacity: 0.8; }
 .errorText {
