@@ -4,7 +4,7 @@ from django.apps import apps as django_apps
 from django.test import TestCase
 
 import Lobby.sharedFunctions.constants as rf
-from Lobby.migrationHelpers import clear_active_votes, convert_kickout_vote_targets
+from Lobby.migrationHelpers import convert_kickout_vote_targets
 from Lobby.models import Game, GamePlayer, User
 
 
@@ -55,6 +55,26 @@ class GamePlayerVotesTests(TestCase):
 
         voter.refresh_from_db()
         self.assertNotIn(rf.KICKOUT_VOTE_TOPIC, voter.votesJSON)
+
+    def test_get_game_player_resolves_each_reference(self):
+        presenter = self.game.presenter()
+        expected = self.game_players[1]
+
+        self.assertEqual(presenter.getGamePlayer(self.players[1]).pk, expected.pk)
+        self.assertEqual(presenter.getGamePlayer(expected).pk, expected.pk)
+        self.assertEqual(presenter.getGamePlayer(self.players[1].username).pk, expected.pk)
+        self.assertIsNone(presenter.getGamePlayer(User.objects.create_user("vote-outsider-2", password="pw")))
+
+    def test_process_kickout_vote_uses_the_gameplayer_target(self):
+        presenter = self.game.presenter()
+        voter = self.game_players[0]
+        target = self.game_players[2]
+
+        result = presenter.processKickoutVote(self.players[0], target)
+
+        self.assertTrue(result["voteCast"])
+        voter.refresh_from_db()
+        self.assertEqual(voter.votesJSON[rf.KICKOUT_VOTE_TOPIC][0], target.pk)
 
     def test_legacy_username_kickout_vote_is_read(self):
         presenter = self.game.presenter()
@@ -110,15 +130,6 @@ class GamePlayerVotesTests(TestCase):
 
         for gp in self.game.players.all():
             self.assertEqual(gp.votesJSON, {})
-
-    def test_migration_clears_legacy_active_votes(self):
-        self.game.activeVotes = {"rewind_consent_votes": {self.players[0].username: 2}}
-        self.game.save(update_fields=["activeVotes"])
-
-        clear_active_votes(django_apps, None)
-
-        self.game.refresh_from_db()
-        self.assertIsNone(self.game.activeVotes)
 
     def test_migration_converts_legacy_kickout_target_to_game_player_id(self):
         voter = self.game_players[0]

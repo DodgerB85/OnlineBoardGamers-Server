@@ -521,9 +521,10 @@ def _processBUSturn(request):
         live_current_usernames = set(
             currentGame.players.filter(is_current=True, is_missing=False, is_kicked=False).values_list("player__username", flat=True)
         )
-        target_user = presenter.resolveKickoutUser(seat=jsonData.get("kickedSeat"), username=jsonData.get("kickedName"))
-        if target_user is None:
+        target_gp = presenter.resolveGamePlayer(seat=jsonData.get("kickedSeat"), username=jsonData.get("kickedName"))
+        if target_gp is None or target_gp.player is None:
             return JsonResponse({"error": gettext("This player is not eligible for kickout.")}, status=400)
+        target_user = target_gp.player
         target_username = target_user.username
         target_on_turn = not live_current_usernames or target_username in live_current_usernames
         if not target_on_turn or presenter.kickoutRequired() != 2:
@@ -532,7 +533,7 @@ def _processBUSturn(request):
         # Voting layer: 3p+ games need a majority vote to kick, unless the
         # requester's own vote for this target is more than 2 days old.
         # If the vote is only recorded, return straight away without kicking.
-        kickout_vote_result = presenter.processKickoutVote(request.user, target_username)
+        kickout_vote_result = presenter.processKickoutVote(request.user, target_gp)
         if kickout_vote_result["voteCast"]:
             currentGame.save()
             return JsonResponse(kickout_vote_result, safe=False)

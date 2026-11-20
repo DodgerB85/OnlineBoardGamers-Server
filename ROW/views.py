@@ -218,32 +218,32 @@ def _processROWturn(request):
         if not participant and not is_game_admin(request.user):
             return JsonResponse({"error": gettext("Only another active player can initiate kickout.")}, status=403)
 
-        target_username = jsonData["kickedName"]
-        target_gp = currentGame.players.filter(player__username=target_username).first()
-        if target_username == request.user.username or target_gp is None or target_gp.is_missing or target_gp.is_kicked:
+        # Seat index is the stable identity; the name is a stale-tab fallback.
+        target_gp = presenter.resolveGamePlayer(seat=jsonData.get("kickedSeat"), username=jsonData.get("kickedName"))
+        if target_gp is None or target_gp.player is None or target_gp.player == request.user or target_gp.is_missing or target_gp.is_kicked:
             return JsonResponse({"error": gettext("Invalid kickout target")}, status=400)
 
         # Mirror URR/BUS: only the player actually on turn can be kicked, and
         # only when the server itself says the timer expired. A dialog left open
         # on a client can outlive the move that reset the clock.
-        live_current_usernames = set(
-            currentGame.players.filter(is_current=True, is_missing=False, is_kicked=False).values_list("player__username", flat=True)
+        live_current_ids = set(
+            currentGame.players.filter(is_current=True, is_missing=False, is_kicked=False).values_list("pk", flat=True)
         )
-        target_on_turn = not live_current_usernames or target_username in live_current_usernames
+        target_on_turn = not live_current_ids or target_gp.pk in live_current_ids
         if not target_on_turn or presenter.kickoutRequired() != 2:
             return JsonResponse({"error": gettext("This player is not eligible for kickout.")}, status=400)
 
-        kickout_vote_result = presenter.processKickoutVote(request.user, target_username)
+        kickout_vote_result = presenter.processKickoutVote(request.user, target_gp)
         if kickout_vote_result["voteCast"]:
             currentGame.save()
             return JsonResponse(kickout_vote_result, safe=False)
 
-        was_current = target_username in live_current_usernames
-        _missingPlayer = User.objects.get(username=target_username)
+        was_current = target_gp.pk in live_current_ids
+        _missingPlayer = target_gp.player
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
-        if was_current or not live_current_usernames:
+        if was_current or not live_current_ids:
             _promoteNextCurrentPlayer(currentGame, presenter)
 
         # Cannot rewind past a kickout.

@@ -33,11 +33,8 @@ class UrrEndGameTests(TestCase):
             rewindData='["old"]',
             rewindTempData='["temp"]',
             kickoutFlexiData='["flex"]',
-            activeVotes={"kickout": {"a": ["b", 1]}},
             autoMoves="x",
             playerTradeData="x",
-            playersPreMoveData="x",
-            FCMplayersMoveData="x",
             currentPlayersInTurnOrder=["a"],
             serverCurrentPlayerNamesInTurnOrder=[user.username for user in self.users],
             transactionID="tx",
@@ -66,11 +63,8 @@ class UrrEndGameTests(TestCase):
         self.assertEqual(self.game.rewindData, "")
         self.assertEqual(self.game.rewindTempData, "")
         self.assertEqual(self.game.kickoutFlexiData, "")
-        self.assertIsNone(self.game.activeVotes)
         self.assertIsNone(self.game.autoMoves)
         self.assertEqual(self.game.playerTradeData, "")
-        self.assertEqual(self.game.playersPreMoveData, "")
-        self.assertEqual(self.game.FCMplayersMoveData, "")
         self.assertIsNone(self.game.currentPlayersInTurnOrder)
         self.assertIsNone(self.game.serverCurrentPlayerNamesInTurnOrder)
         self.assertEqual(self.game.transactionID, "")

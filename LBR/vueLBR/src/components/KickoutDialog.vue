@@ -30,7 +30,7 @@ async function confirmKickout() {
 	submitting.value = true;
 	confirming.value = false;
 	try {
-		await IO.kickout(model.actorUsername());
+		await IO.kickout(model.actorUsername(), model.actorSeat());
 	} catch (error) {
 		store.gameMessages.errorText = error.message || "Could not start the kickout.";
 	} finally {

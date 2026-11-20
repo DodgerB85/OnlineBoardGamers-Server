@@ -167,6 +167,7 @@ class LBRAITakeoverTests(TestCase):
                 "gameID": self.game.id,
                 "latestUpdate": self.game.latestUpdate,
                 "kickedName": ai_gp.player.username,
+                "kickedSeat": ai_gp.seat_order,
             },
             content_type="application/json",
         )

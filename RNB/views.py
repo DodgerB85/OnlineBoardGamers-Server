@@ -1204,6 +1204,11 @@ def _processRNBturn(request):
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
+        # Seat index is the stable identity; the name is a stale-tab fallback.
+        target_gp = presenter.resolveGamePlayer(seat=jsonData.get("kickedSeat"), username=jsonData.get("kickedName"))
+        if target_gp is None or target_gp.player is None:
+            return JsonResponse({"error": gettext("Invalid kickout target")}, status=400)
+
         # Voting layer: 3p+ games need a majority vote to kick, unless the
         # requester's own vote for this target is more than 2 days old.
         # If the vote is only recorded, return straight away without kicking.
@@ -1212,12 +1217,12 @@ def _processRNBturn(request):
         if is_game_admin(request.user):
             pov_name = jsonData.get("BKSN", request.user.username)
             voter = currentGame.players.filter(player__username=pov_name).first() or request.user
-        kickout_vote_result = presenter.processKickoutVote(voter, jsonData["kickedName"])
+        kickout_vote_result = presenter.processKickoutVote(voter, target_gp)
         if kickout_vote_result["voteCast"]:
             currentGame.save()
             return JsonResponse(kickout_vote_result, safe=False)
 
-        _missingPlayer = User.objects.get(username=jsonData["kickedName"])
+        _missingPlayer = target_gp.player
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)

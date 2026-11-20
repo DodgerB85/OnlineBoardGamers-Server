@@ -370,24 +370,22 @@ def _processCNSturn(request):
         if latest_update != "9999999999999" and latest_update != str(currentGame.latestUpdate):  # and not jsonData["ignoreSync"]:
             return JsonResponse({"syncError": True}, safe=False)
 
-        target_user = presenter.resolveKickoutUser(seat=jsonData.get("kickedSeat"), username=jsonData.get("kickedName"))
-        if target_user is None:
+        target_gp = presenter.resolveGamePlayer(seat=jsonData.get("kickedSeat"), username=jsonData.get("kickedName"))
+        if target_gp is None or target_gp.player is None:
             return JsonResponse({"error": gettext("This player is not eligible for kickout.")}, status=400)
 
         # Voting layer: 3p+ games need a majority vote to kick, unless the
         # requester's own vote for this target is more than 2 days old.
         # If the vote is only recorded, return straight away without kicking.
-        kickout_vote_result = presenter.processKickoutVote(request.user, target_user.username)
+        kickout_vote_result = presenter.processKickoutVote(request.user, target_gp)
         if kickout_vote_result["voteCast"]:
             currentGame.save()
             return JsonResponse(kickout_vote_result, safe=False)
 
-        _missingPlayer = target_user
-        missing_gp = currentGame.players.filter(player=_missingPlayer).first()
-        if missing_gp:
-            missing_gp.is_missing = True
-            missing_gp.is_kicked = True
-            missing_gp.save()
+        _missingPlayer = target_gp.player
+        target_gp.is_missing = True
+        target_gp.is_kicked = True
+        target_gp.save()
         presenter.checkForHostChange(_missingPlayer)
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1

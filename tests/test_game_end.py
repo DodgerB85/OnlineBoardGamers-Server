@@ -64,11 +64,8 @@ def _dirty_game_and_players(game_code, with_moves=True):
         rewindData='["abc"]',
         rewindTempData="abc",
         kickoutFlexiData="{}",
-        activeVotes={"someone": "y"},
         autoMoves="34:8",
         playerTradeData="dirty",
-        playersPreMoveData="dirty",
-        FCMplayersMoveData="dirty",
         creator=playerA,
         host=playerA,
     )
@@ -149,11 +146,8 @@ class GameEndCleanupTests(TestCase):
         self.assertEqual(game.rewindData, "")
         self.assertEqual(game.rewindTempData, "")
         self.assertEqual(game.kickoutFlexiData, "")
-        self.assertIsNone(game.activeVotes)
         self.assertIsNone(game.autoMoves)
         self.assertEqual(game.playerTradeData, "")
-        self.assertEqual(game.playersPreMoveData, "")
-        self.assertEqual(game.FCMplayersMoveData, "")
         self.assertIsNone(game.currentPlayersInTurnOrder)
         self.assertIsNone(game.serverCurrentPlayerNamesInTurnOrder)
         self.assertEqual(game.transactionID, "")
@@ -206,7 +200,6 @@ class VotesClearedOnGameEndTests(TestCase):
     def _finished_game(self, game_code="FCM"):
         game, playerA, playerB = _dirty_game_and_players(game_code)
         game.gameStatus = "FINISHED"
-        game.activeVotes = None
         game.save()
         return game, playerA, playerB
 
@@ -218,7 +211,6 @@ class VotesClearedOnGameEndTests(TestCase):
                 self.assertFalse(game.presenter().castVote(topic, playerA, 0))
 
         game.refresh_from_db()
-        self.assertIsNone(game.activeVotes, "A late vote re-created activeVotes on a FINISHED game")
         player_votes = [gp.votesJSON for gp in game.players.all() if isinstance(gp.votesJSON, dict)]
         self.assertFalse(any(self.rf.REWIND_CONSENT_VOTE_TOPIC in votes for votes in player_votes))
         self.assertFalse(any(self.rf.KICKOUT_VOTE_TOPIC in votes for votes in player_votes))
@@ -242,11 +234,10 @@ class VotesClearedOnGameEndTests(TestCase):
         gp = game.players.get(player=playerA)
         self.assertEqual(gp.votesJSON[self.rf.REWIND_CONSENT_VOTE_TOPIC], 2)
 
-    def test_fcm_save_that_finishes_game_does_not_rewrite_active_votes(self):
+    def test_fcm_save_that_finishes_game_does_not_rewrite_votes(self):
         """
         End-to-end reproduction of the reported FIELD CHECK FAILED:
-        an FCM saveNormal with status=FINISHED left
-        activeVotes={'rewind_consent_votes': {...all zeros...}} on a finished game.
+        an FCM saveNormal with status=FINISHED left vote data on a finished game.
         """
         OLD_TILES = [3, 3, 0, 2, 8, 1, 9, 0, 7, 1, 1, 0, 10, 1, 19, 1, 2, 0]
         game = Game.objects.create(
@@ -256,7 +247,6 @@ class VotesClearedOnGameEndTests(TestCase):
             gameStatus="ACTIVE",
             gameData="STATE",
             startingMap=json.dumps(OLD_TILES, separators=(",", ":")),
-            activeVotes={"rewind_consent_votes": {self.user.username: 1, self.rival.username: 0}},
             rewindData=json.dumps(["AAAA", "BBBB"], separators=(",", ":")),
         )
         for idx, player in enumerate([self.user, self.rival]):
@@ -292,10 +282,6 @@ class VotesClearedOnGameEndTests(TestCase):
 
         game.refresh_from_db()
         self.assertEqual(game.gameStatus, "FINISHED")
-        self.assertIsNone(
-            game.activeVotes,
-            f"FCM rewrote vote data onto a finished game: {game.activeVotes}",
-        )
         self.assertFalse(any(isinstance(gp.votesJSON, dict) and gp.votesJSON for gp in game.players.all()))
         self.assertEqual(game.rewindData, "")
 

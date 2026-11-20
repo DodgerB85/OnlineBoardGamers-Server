@@ -274,12 +274,17 @@ class GamePresenter:
         remaining_players = self.gameObj.players.filter(is_missing=False, is_ai=False).count()
         return (remaining_players + 1) // 2
 
-    def _getVoterGp(self, voter):
+    def getGamePlayer(self, value):
+        """Resolve a participant from a GamePlayer, User, or legacy username."""
         from Lobby.models import GamePlayer
 
-        if isinstance(voter, GamePlayer):
-            return voter if voter.game_id == self.gameObj.id else None
-        return self.gameObj.players.filter(player=voter).first()
+        if isinstance(value, GamePlayer):
+            return value if value.game_id == self.gameObj.id else None
+        if value is None:
+            return None
+        if isinstance(value, str):
+            return self.gameObj.players.filter(player__username=value).select_related("player").first()
+        return self.gameObj.players.filter(player=value).select_related("player").first()
 
     def castKickoutVote(self, voter_gp, target_gp):
         if not voter_gp or not target_gp or voter_gp.game_id != self.gameObj.id or target_gp.game_id != self.gameObj.id:
@@ -320,16 +325,17 @@ class GamePresenter:
         _, votes = self._getKickoutVoteRows()
         return sum(1 for voter_id, (target_id, _) in votes.items() if voter_id in valid_voters and target_id == target_gp_id)
 
-    def processKickoutVote(self, voter, target_username):
+    def processKickoutVote(self, voter, target):
         """Voting layer for kickouts.
 
-        Returns a dict. If ``voteCast`` is True the vote was recorded and the
-        kickout must NOT proceed; otherwise the kickout may proceed immediately
+        ``target`` is resolved from a GamePlayer (preferred), or a legacy User or
+        username. Returns a dict. If ``voteCast`` is True the vote was recorded and
+        the kickout must NOT proceed; otherwise the kickout may proceed immediately
         (majority reached, 2-player game, or a stale 2-day-old own vote).
         """
         threshold = self.getKickoutVoteThreshold()
-        voter_gp = self._getVoterGp(voter)
-        target_gp = self.gameObj.players.filter(player__username=target_username).first()
+        voter_gp = self.getGamePlayer(voter)
+        target_gp = self.getGamePlayer(target)
 
         if not voter_gp or not target_gp:
             # A stale tab can name a player who is no longer here. Record nothing
@@ -364,7 +370,7 @@ class GamePresenter:
             gp.is_missing = True
             gp.is_current = False
             gp.save()
-        self._dropFromServerCurrentPlayers(user.username)
+        self._dropFromServerCurrentPlayers(gp)
 
     def addKickedPlayer(self, user):
         """Mark a player as kicked"""
@@ -373,18 +379,20 @@ class GamePresenter:
             gp.is_kicked = True
             gp.is_current = False
             gp.save()
-        self._dropFromServerCurrentPlayers(user.username)
+        self._dropFromServerCurrentPlayers(gp)
 
-    def _dropFromServerCurrentPlayers(self, username):
-        # is_current is cleared above, so the turn-order copy must lose this name too;
-        # otherwise the lobby lights up everyone's move and kickout charges flexi time
-        # to a player nobody can name.
-        gp = self.gameObj.players.filter(player__username=username).first()
-        if gp and gp.remainingTurnOrder is not None:
+    def _dropFromServerCurrentPlayers(self, gp):
+        # is_current is cleared first, so the turn-order copy must lose this seat
+        # too; otherwise the lobby lights up everyone's move and kickout charges
+        # flexi time to a player nobody can name.
+        if gp is None:
+            return
+        if gp.remainingTurnOrder is not None:
             gp.remainingTurnOrder = None
             gp.save(update_fields=["remainingTurnOrder"])
+        username = gp.player.username if gp.player else ""
         current = self.gameObj.serverCurrentPlayerNamesInTurnOrder or []
-        if username in current:
+        if username and username in current:
             self.gameObj.serverCurrentPlayerNamesInTurnOrder = [name for name in current if name != username]
             self.gameObj.save()
 
@@ -562,15 +570,10 @@ class GamePresenter:
         self.gameObj.rewindData = ""
         self.gameObj.rewindTempData = ""
         self.gameObj.kickoutFlexiData = ""
-        self.gameObj.activeVotes = None
         # TGZ and RNB
         self.gameObj.autoMoves = None
         # AQY
         self.gameObj.playerTradeData = ""
-        # IND
-        self.gameObj.playersPreMoveData = ""
-        # FCM
-        self.gameObj.FCMplayersMoveData = ""
         # HLC
         self.gameObj.currentPlayersInTurnOrder = None  # Check this doesn't crash game load if game ended
         # RNB
@@ -1411,28 +1414,15 @@ class INDpresenter(GamePresenter):
     def getOrScaffoldAllPreMoveData(self):
         """Rows are [name, phases, timestamp, moveData]; storage is per GamePlayer."""
         game_players = list(self.gameObj.players.select_related("player").order_by("seat_order"))
-        old_rows = []
-        if self.gameObj.playersPreMoveData:
-            try:
-                old_rows = json.loads(self.gameObj.playersPreMoveData)
-                if not isinstance(old_rows, list):
-                    old_rows = []
-            except (TypeError, ValueError):
-                old_rows = []
 
         rows = []
-        for index, gp in enumerate(game_players):
-            old_row = old_rows[index] if index < len(old_rows) and isinstance(old_rows[index], list) else None
-            display_name = gp.player.username if gp.player else (old_row[0] if old_row else f"Seat {gp.seat_order}")
+        for gp in game_players:
+            display_name = gp.player.username if gp.player else f"Seat {gp.seat_order}"
             state = gp.moveDataJSON if isinstance(gp.moveDataJSON, dict) else None
             if state and "phases" in state and "data" in state:
                 phases = state["phases"]
                 time_value = gp.currentMoveTime
                 move_data = state.get("data", [])
-            elif old_row and len(old_row) >= 4:
-                phases = old_row[1]
-                time_value = str(old_row[2]) if old_row[2] else ""
-                move_data = old_row[3]
             else:
                 phases = [-1]
                 time_value = ""
@@ -1479,8 +1469,6 @@ class INDpresenter(GamePresenter):
 
     def clearAllPreMoveData(self):
         self.gameObj.players.update(moveDataJSON=None, currentMoveTime="")
-        self.gameObj.playersPreMoveData = ""
-        self.gameObj.save(update_fields=["playersPreMoveData"])
 
     def doesPlayerHavePreMove(self, name):
         playerMoveDataArr = next((row for row in self.getOrScaffoldAllPreMoveData() if row[0] == name), None)
@@ -2277,38 +2265,20 @@ class FCMpresenter(GamePresenter):
     # This always ensures you get a valid array return.
     # The row shape is kept for the client: [name, phases, timestamp, moveData].
     def getOrScaffoldAllMoveData(self):
-        from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
-
         game_players = list(self.gameObj.players.select_related("player").order_by("seat_order"))
-        old_rows = []
-        if self.gameObj.FCMplayersMoveData:
-            try:
-                old_rows = json.loads(self.gameObj.FCMplayersMoveData)
-                if not isinstance(old_rows, list):
-                    old_rows = []
-            except (TypeError, ValueError):
-                old_rows = []
-        if old_rows and len(old_rows) != len(game_players):
-            SN_sendAdminErrorMessage(f"Invalid number of players - getOrScaffoldAllMoveData - FCM pres {self.gameObj.id}")
 
         rows = []
-        for index, gp in enumerate(game_players):
-            old_row = old_rows[index] if index < len(old_rows) and isinstance(old_rows[index], list) else None
-            display_name = gp.player.username if gp.player else (old_row[0] if old_row else f"Seat {gp.seat_order}")
+        for gp in game_players:
+            display_name = gp.player.username if gp.player else f"Seat {gp.seat_order}"
             state = gp.moveDataJSON if isinstance(gp.moveDataJSON, dict) else None
             if state and "phases" in state and "data" in state:
                 phases = state["phases"]
                 time_value = gp.currentMoveTime
                 move_data = state.get("data", [])
             else:
-                if old_row and len(old_row) >= 4:
-                    phases = old_row[1]
-                    time_value = str(old_row[2]) if old_row[2] else ""
-                    move_data = old_row[3]
-                else:
-                    phases = [-99] if gp.is_missing else [-1]
-                    time_value = ""
-                    move_data = []
+                phases = [-99] if gp.is_missing else [-1]
+                time_value = ""
+                move_data = []
             rows.append([display_name, phases, time_value, move_data])
         return rows
 
@@ -2474,8 +2444,6 @@ class FCMpresenter(GamePresenter):
 
     def clearAllMoveDataV2(self):
         self.gameObj.players.update(moveDataJSON=None, currentMoveTime="")
-        self.gameObj.FCMplayersMoveData = ""
-        self.gameObj.save(update_fields=["FCMplayersMoveData"])
 
     def getJsonMoveResponseV2(self, notRequiedPlayerNames):
         playersMoveDataArr = self.getOrScaffoldAllMoveData()
@@ -2610,7 +2578,6 @@ class FCMpresenter(GamePresenter):
         self.gameObj.rewindData = ""
         self.gameObj.rewindTempData = ""
         self.gameObj.kickoutFlexiData = ""
-        self.gameObj.activeVotes = None
         self.gameObj.gameStatus = "FINISHED"
 
         winner_gp = self.resolveGamePlayer(winnerSeat, _winnerUsername)
@@ -3050,8 +3017,6 @@ class KFWpresenter(GamePresenter):
         self.gameObj.rewindData = ""
         self.gameObj.rewindTempData = ""
         self.gameObj.KFWserverData = ""
-        self.gameObj.KFWplayersHiddenData = ""
-        self.gameObj.KFWplayersMoveData = ""
         self.gameObj.kickoutFlexiData = ""
         self.gameObj.gameStatus = "FINISHED"
 
@@ -3151,8 +3116,6 @@ class KFWpresenter(GamePresenter):
             gp.currentMoveTime = ""
             gp.currentMoveData = ""
         GamePlayer.objects.bulk_update(all_players_gp_sorted, ["moveDataJSON", "currentMoveTime", "currentMoveData"])
-        self.gameObj.KFWplayersHiddenData = ""
-        self.gameObj.KFWplayersMoveData = ""
         self.gameObj.KFWserverData = json.dumps([meeple_bag, skills_bag])
 
         self.gameObj.save()
@@ -3196,26 +3159,14 @@ class KFWpresenter(GamePresenter):
     def getAllHiddenDataRows(self):
         """Return [[name, [meeples], [skills], [history]], ...] in seat order."""
         game_players = list(self.gameObj.players.select_related("player").order_by("seat_order"))
-        old_rows = []
-        if self.gameObj.KFWplayersHiddenData:
-            try:
-                old_rows = json.loads(self.gameObj.KFWplayersHiddenData)
-                if not isinstance(old_rows, list):
-                    old_rows = []
-            except (TypeError, ValueError):
-                old_rows = []
 
         rows = []
-        for index, gp in enumerate(game_players):
-            old_row = old_rows[index] if index < len(old_rows) and isinstance(old_rows[index], list) else None
-            display_name = gp.player.username if gp.player else (old_row[0] if old_row else f"Seat {gp.seat_order}")
+        for gp in game_players:
+            display_name = gp.player.username if gp.player else f"Seat {gp.seat_order}"
             state = gp.moveDataJSON if isinstance(gp.moveDataJSON, dict) else None
             hidden = state.get("hidden") if state else None
             if not (isinstance(hidden, list) and len(hidden) >= 3):
-                if old_row and len(old_row) >= 4:
-                    hidden = old_row[1:4]
-                else:
-                    hidden = [[0, 0, 0, 0], [0, 0, 0], []]
+                hidden = [[0, 0, 0, 0], [0, 0, 0], []]
             rows.append([display_name, hidden[0], hidden[1], hidden[2]])
         return rows
 
@@ -3234,25 +3185,11 @@ class KFWpresenter(GamePresenter):
     def getAllMoveDataRows(self):
         """Return [[name, timestamp, data], ...] in seat order."""
         game_players = list(self.gameObj.players.select_related("player").order_by("seat_order"))
-        old_rows = []
-        if self.gameObj.KFWplayersMoveData:
-            try:
-                old_rows = json.loads(self.gameObj.KFWplayersMoveData)
-                if not isinstance(old_rows, list):
-                    old_rows = []
-            except (TypeError, ValueError):
-                old_rows = []
 
         rows = []
-        for index, gp in enumerate(game_players):
-            old_row = old_rows[index] if index < len(old_rows) and isinstance(old_rows[index], list) else None
-            display_name = gp.player.username if gp.player else (old_row[0] if old_row else f"Seat {gp.seat_order}")
-            time_value = gp.currentMoveTime
-            move_value = gp.currentMoveData
-            if not time_value and not move_value and old_row and len(old_row) >= 3:
-                time_value = str(old_row[1]) if old_row[1] else ""
-                move_value = old_row[2] or ""
-            rows.append([display_name, time_value, move_value])
+        for gp in game_players:
+            display_name = gp.player.username if gp.player else f"Seat {gp.seat_order}"
+            rows.append([display_name, gp.currentMoveTime, gp.currentMoveData])
         return rows
 
     #####################################################################
@@ -3372,8 +3309,6 @@ class KFWpresenter(GamePresenter):
 
     def clearAllMoveData(self):
         self.gameObj.players.update(currentMoveTime="", currentMoveData="")
-        self.gameObj.KFWplayersMoveData = ""
-        self.gameObj.save(update_fields=["KFWplayersMoveData"])
 
     # TODO mvoe to general?
     def getCurrentSimulPlayers(self):

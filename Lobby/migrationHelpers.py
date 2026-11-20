@@ -50,11 +50,9 @@ def unescape_game_text(apps, schema_editor):
 def migrate_fcm_move_data(apps, schema_editor):
     """Copy the old FCM move array into the per-seat GamePlayer fields.
 
-    The old field is intentionally left in place for one release. The presenter
-    reads it as a fallback for seats that were not copied (for example, a game
-    with a mismatched row count). Run this in a quiet window, or immediately
-    after the new code is live, so the old code cannot write the old field
-    after the copy.
+    Used by migration 0002 immediately before the old column is dropped. Rows
+    that already have per-seat data are left alone so a re-run cannot clobber a
+    newer move.
     """
     Game = apps.get_model("Lobby", "Game")
     GamePlayer = apps.get_model("Lobby", "GamePlayer")
@@ -91,11 +89,9 @@ def migrate_fcm_move_data(apps, schema_editor):
 def migrate_ind_pre_move_data(apps, schema_editor):
     """Copy the old IND pre-move array into the per-seat GamePlayer fields.
 
-    The old field is intentionally left in place for one release. The presenter
-    reads it as a fallback for seats that were not copied (for example, a game
-    with a mismatched row count). Run this in a quiet window, or immediately
-    after the new code is live, so the old code cannot write the old field
-    after the copy.
+    Used by migration 0002 immediately before the old column is dropped. Rows
+    that already have per-seat data are left alone so a re-run cannot clobber a
+    newer move.
     """
     Game = apps.get_model("Lobby", "Game")
     GamePlayer = apps.get_model("Lobby", "GamePlayer")
@@ -132,11 +128,9 @@ def migrate_ind_pre_move_data(apps, schema_editor):
 def migrate_kfw_player_data(apps, schema_editor):
     """Copy the old KFW per-player arrays into GamePlayer fields.
 
-    The old fields are intentionally left in place for one release. The
-    presenter reads them as a fallback for seats that were not copied (for
-    example, a game with a mismatched row count). Run this in a quiet window,
-    or immediately after the new code is live, so the old code cannot write
-    the old fields after the copy.
+    Used by migration 0002 immediately before the old columns are dropped.
+    Seats that already have per-player data are left alone so a re-run cannot
+    clobber a newer move.
     """
     Game = apps.get_model("Lobby", "Game")
     GamePlayer = apps.get_model("Lobby", "GamePlayer")
@@ -183,12 +177,6 @@ def migrate_kfw_player_data(apps, schema_editor):
                     gp.save(update_fields=["moveDataJSON"])
             elif hidden_rows:
                 print(f"KFW hidden migration: game {game.id} has {len(hidden_rows)} rows for {len(game_players)} seats; skipped")
-
-
-def clear_active_votes(apps, schema_editor):
-    """Existing votes are intentionally dropped; votes now live on GamePlayer."""
-    Game = apps.get_model("Lobby", "Game")
-    Game.objects.update(activeVotes=None)
 
 
 def backfill_flexi_seconds(apps, schema_editor):

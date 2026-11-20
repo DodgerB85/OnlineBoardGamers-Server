@@ -67,27 +67,32 @@ class KFWIssue53Tests(TestCase):
 
         GamePlayer.objects.bulk_create(
             [
-                GamePlayer(game=self.game, player=self.player_one, seat_order=0),
-                GamePlayer(game=self.game, player=self.player_two, seat_order=1),
-                GamePlayer(game=self.game, player=self.player_three, seat_order=2),
+                GamePlayer(
+                    game=self.game,
+                    player=self.player_one,
+                    seat_order=0,
+                    moveDataJSON={"hidden": [[0, 0, 0, 0], [0, 0, 0], []]},
+                    currentMoveTime="1710000000001",
+                    currentMoveData="prebuild-a",
+                ),
+                GamePlayer(
+                    game=self.game,
+                    player=self.player_two,
+                    seat_order=1,
+                    moveDataJSON={"hidden": [[0, 0, 0, 0], [0, 0, 0], []]},
+                    currentMoveTime="1710000000002",
+                    currentMoveData="prebuild-b",
+                ),
+                GamePlayer(
+                    game=self.game,
+                    player=self.player_three,
+                    seat_order=2,
+                    moveDataJSON={"hidden": [[0, 0, 0, 0], [0, 0, 0], []]},
+                    currentMoveTime="1710000000003",
+                    currentMoveData="prebuild-c",
+                ),
             ]
         )
-
-        self.game.KFWplayersHiddenData = json.dumps(
-            [
-                [self.player_one.username, [0, 0, 0, 0], [0, 0, 0], []],
-                [self.player_two.username, [0, 0, 0, 0], [0, 0, 0], []],
-                [self.player_three.username, [0, 0, 0, 0], [0, 0, 0], []],
-            ]
-        )
-        self.game.KFWplayersMoveData = json.dumps(
-            [
-                [self.player_one.username, "1710000000001", "prebuild-a"],
-                [self.player_two.username, "1710000000002", "prebuild-b"],
-                [self.player_three.username, "1710000000003", "prebuild-c"],
-            ]
-        )
-        self.game.save(update_fields=["KFWplayersHiddenData", "KFWplayersMoveData"])
 
     @patch("Lobby.presenters.GamePresenter.sendYourTurnNotification")
     def test_save_game_phase_ends_when_all_village_prebuilds_are_already_submitted(self, _mock_notify):
@@ -264,13 +269,16 @@ class KFWKickoutVoteTests(TestCase):
         self.client.force_login(self.players[0])
 
     def kickout(self, target=None, latest_update=None):
+        player = target or self.players[2]
+        seat = self.game.players.get(player=player).seat_order
         return self.client.post(
             reverse("KFW:processKFWturn"),
             data=json.dumps(
                 {
                     "action": "kickout",
                     "gameID": self.game.id,
-                    "kickedName": (target or self.players[2]).username,
+                    "kickedName": player.username,
+                    "kickedSeat": seat,
                     "latestUpdate": latest_update or self.game.latestUpdate,
                 }
             ),

@@ -363,10 +363,17 @@ export async function kickout() {
 	const personal = usePersonalStore()
 	store.viewSettings.showLoader = true
 	const kickedPlayerObj = controller.timedOutPlayerObj()
+	const kickedPlayerIndex = store.gameflow.turnOrder[0]
 	try {
 		const response = await fetch("/URR/processURRturn/", {
 			method: "POST",
-			body: JSON.stringify({ action: "kickout", gameID: personal.gameID, kickedName: kickedPlayerObj.name, latestUpdate: personal.latestUpdate }),
+			body: JSON.stringify({
+				action: "kickout",
+				gameID: personal.gameID,
+				kickedName: kickedPlayerObj.name,
+				kickedSeat: kickedPlayerIndex,
+				latestUpdate: personal.latestUpdate,
+			}),
 			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
 		})
 		const data = await response.json()

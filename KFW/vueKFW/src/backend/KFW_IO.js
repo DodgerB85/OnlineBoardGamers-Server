@@ -1011,6 +1011,7 @@ export async function kickout() {
 		action: "kickout",
 		gameID: personal.gameID,
 		kickedName: controller.currentPlayerObj().name,
+		kickedSeat: controller.currentPlayerIndex(),
 		latestUpdate: personal.latestUpdate,
 	}
 

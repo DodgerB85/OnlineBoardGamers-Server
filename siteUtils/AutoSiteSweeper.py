@@ -189,8 +189,6 @@ for game in finished_games:
         field_check_issues.append(f"rewindTempData='{game.rewindTempData[:50]}...'")
     if game.kickoutFlexiData != "":
         field_check_issues.append(f"kickoutFlexiData='{game.kickoutFlexiData[:50]}...'")
-    if game.activeVotes is not None:
-        field_check_issues.append(f"activeVotes={game.activeVotes}")
     if game.transactionID != "":
         field_check_issues.append(f"transactionID='{game.transactionID[:50]}...'")
 
@@ -199,10 +197,6 @@ for game in finished_games:
         field_check_issues.append(f"autoMoves={game.autoMoves}")
     if game.playerTradeData != "":
         field_check_issues.append(f"playerTradeData='{game.playerTradeData[:50]}...'")
-    if game.playersPreMoveData != "":
-        field_check_issues.append(f"playersPreMoveData='{game.playersPreMoveData[:50]}...'")
-    if game.FCMplayersMoveData != "":
-        field_check_issues.append(f"FCMplayersMoveData='{game.FCMplayersMoveData[:50]}...'")
     if game.currentPlayersInTurnOrder is not None:
         field_check_issues.append(f"currentPlayersInTurnOrder={game.currentPlayersInTurnOrder}")
     if game.serverCurrentPlayerNamesInTurnOrder is not None:
@@ -231,12 +225,9 @@ for game in finished_games:
             game.rewindData = ""
             game.rewindTempData = ""
             game.kickoutFlexiData = ""
-            game.activeVotes = None
             game.transactionID = ""
             game.autoMoves = None
             game.playerTradeData = ""
-            game.playersPreMoveData = ""
-            game.FCMplayersMoveData = ""
             game.currentPlayersInTurnOrder = None
             game.serverCurrentPlayerNamesInTurnOrder = None
             game.save()

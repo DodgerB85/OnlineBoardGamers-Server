@@ -46,7 +46,6 @@ class FcmPassKickoutTest(TestCase):
             maxPlayers=2,
             kickoutDuration=200,
             latestUpdate=timed_out_latest_update(),
-            FCMplayersMoveData="",
             kickoutFlexiData="",
         )
         GamePlayer.objects.create(game=self.game, player=self.alice, seat_order=0, is_current=True)
@@ -127,7 +126,8 @@ class FcmPassKickoutTest(TestCase):
         )
 
         self.assertTrue(body.get("syncError"), body)
-        self.assertEqual(self.game.FCMplayersMoveData, "", "a rejected save must not store the move")
+        alice_move = self.game.players.get(player=self.alice).moveDataJSON
+        self.assertIn(alice_move, (None, []), "a rejected save must not store the move")
 
     def test_kickout_must_be_required(self):
         # no kickout is due on a fresh latestUpdate, so skipping is refused

@@ -18,7 +18,21 @@ class UrrKickoutTests(TestCase):
         self.client.force_login(self.players[0])
 
     def kickout(self, player=None, latest_update=None):
-        return self.client.post(reverse("URR:processURRturn"), json.dumps({"action": "kickout", "gameID": self.game.id, "kickedName": (player or self.players[2]).username, "latestUpdate": latest_update or self.game.latestUpdate}), content_type="application/json")
+        target = player or self.players[2]
+        seat = self.game.players.get(player=target).seat_order
+        return self.client.post(
+            reverse("URR:processURRturn"),
+            json.dumps(
+                {
+                    "action": "kickout",
+                    "gameID": self.game.id,
+                    "kickedName": target.username,
+                    "kickedSeat": seat,
+                    "latestUpdate": latest_update or self.game.latestUpdate,
+                }
+            ),
+            content_type="application/json",
+        )
 
     @patch("Lobby.presenters.GamePresenter.kickoutRequired", return_value=2)
     def test_votes_are_visible_without_game_version_change(self, kickout_required):
@@ -32,6 +46,29 @@ class UrrKickoutTests(TestCase):
         self.assertIn("secondsToNextKickout", data)
         self.game.refresh_from_db()
         self.assertFalse(self.game.players.get(player=self.players[2]).is_kicked)
+
+    @patch("Lobby.presenters.GamePresenter.kickoutRequired", return_value=2)
+    def test_seat_wins_over_a_stale_name(self, kickout_required):
+        target = self.players[2]
+        seat = self.game.players.get(player=target).seat_order
+
+        response = self.client.post(
+            reverse("URR:processURRturn"),
+            json.dumps(
+                {
+                    "action": "kickout",
+                    "gameID": self.game.id,
+                    "kickedName": self.players[1].username,
+                    "kickedSeat": seat,
+                    "latestUpdate": self.game.latestUpdate,
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertTrue(response.json()["voteCast"])
+        votes = json.loads(response.json()["votesData"])
+        self.assertEqual(votes[self.players[0].username][0], target.username)
 
     @patch("Lobby.presenters.GamePresenter.kickoutRequired", return_value=1)
     def test_cannot_kick_during_flex_time(self, kickout_required):

@@ -77,18 +77,24 @@ class FcmGameAdminTest(TestCase):
             gameStatus="ACTIVE",
             gameData="STATE-0",
             startingMap="",
-            FCMplayersMoveData=json.dumps(
-                [
-                    ["alice", [3, 4], 12345, [[1], [2], 0]],
-                    ["bob", [5], 12345, [[], [], 0]],
-                ]
-            ),
         )
 
         alice = User.objects.create_user("alice", "alice@example.com", "pw")
         bob = User.objects.create_user("bob", "bob@example.com", "pw")
-        GamePlayer.objects.create(game=game, player=alice, seat_order=0)
-        GamePlayer.objects.create(game=game, player=bob, seat_order=1)
+        GamePlayer.objects.create(
+            game=game,
+            player=alice,
+            seat_order=0,
+            currentMoveTime="12345",
+            moveDataJSON={"phases": [3, 4], "data": [[1], [2], 0]},
+        )
+        GamePlayer.objects.create(
+            game=game,
+            player=bob,
+            seat_order=1,
+            currentMoveTime="12345",
+            moveDataJSON={"phases": [5], "data": [[], [], 0]},
+        )
 
         self.client.force_login(admin)
         response = self.client.post(

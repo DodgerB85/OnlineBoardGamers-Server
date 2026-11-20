@@ -1562,9 +1562,12 @@ def _processTurn(request):
         # requester's own vote for this target is more than 2 days old.
         # If the vote is only recorded, return straight away without kicking.
         # Only apply when the client signals it understands voteCast responses.
-        _missingPlayer = _resolve_kickout_user(presenter, jsonData)
+        target_gp = presenter.resolveGamePlayer(seat=jsonData.get("kickedSeat"), username=jsonData.get("kickedName"))
+        if target_gp is None or target_gp.player is None:
+            raise Http404(gettext("Player not found"))
+        _missingPlayer = target_gp.player
         if jsonData.get("supportsVoting"):
-            kickout_vote_result = presenter.processKickoutVote(request.user, _missingPlayer.username)
+            kickout_vote_result = presenter.processKickoutVote(request.user, target_gp)
             if kickout_vote_result["voteCast"]:
                 currentGame.save()
                 return JsonResponse(kickout_vote_result, safe=False)

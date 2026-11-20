@@ -398,9 +398,6 @@ class BaseGame(models.Model):
     # ARRAY OF INTS / SUBARRS. (Except legacy FCM games perhaps).
     startingOptions = models.CharField(max_length=255, blank=True)
 
-    ####### THESE ITEMS ONLY EXIST IN THIS GENERAL GAME MODEL
-    activeVotes = models.JSONField(default=dict, blank=True, null=True)
-
     class Meta:
         abstract = True
 
@@ -470,17 +467,11 @@ class Game(BaseGame):
     # TODO, only used in AQY. Remove from the Game model at some point.
     playerTradeData = models.TextField(blank=True)
 
-    # TODO, only used in IND. Remove from the Game model at some point.
-    playersPreMoveData = models.TextField(blank=True)
-
     # FCM-specific fields
-    FCMplayersMoveData = models.TextField(blank=True)
     FCMnotificationSuppression = models.CharField(max_length=30, blank=False, default="000000")
 
     # KFW-specific fields
     KFWserverData = models.TextField(blank=True, default=json.dumps([[40, 40, 40, 0], [16, 16, 16]]))
-    KFWplayersHiddenData = models.TextField(blank=True)
-    KFWplayersMoveData = models.TextField(blank=True)
 
     tournamentGame = models.BooleanField(blank=False, default=False)
     externalTournamentGame = models.BooleanField(blank=False, default=False)

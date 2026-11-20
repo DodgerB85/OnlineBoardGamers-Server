@@ -462,15 +462,21 @@ def _processWEBturn(request):
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": "12345"}, safe=False)
 
+        # Resolve the target from the stable seat index; the name is only a
+        # fallback for a stale tab.
+        target_gp = presenter.resolveGamePlayer(seat=jsonData.get("kickedSeat"), username=jsonData.get("kickedName"))
+        if target_gp is None or target_gp.player is None:
+            return JsonResponse({"error": gettext("Invalid kickout target")}, status=400)
+
         # Voting layer: 3p+ games need a majority vote to kick, unless the
         # requester's own vote for this target is more than 2 days old.
         # If the vote is only recorded, return straight away without kicking.
-        kickout_vote_result = presenter.processKickoutVote(request.user, jsonData["kickedName"])
+        kickout_vote_result = presenter.processKickoutVote(request.user, target_gp)
         if kickout_vote_result["voteCast"]:
             currentGame.save()
             return JsonResponse(kickout_vote_result, safe=False)
 
-        _missingPlayer = User.objects.get(username=jsonData["kickedName"])
+        _missingPlayer = target_gp.player
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)

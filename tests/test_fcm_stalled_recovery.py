@@ -40,7 +40,6 @@ class FcmStalledRecoveryTest(TestCase):
             phase=PHASE_PAYDAY,
             maxPlayers=2,
             kickoutDuration=200,
-            FCMplayersMoveData="",
             kickoutFlexiData="",
         )
         self.alice_gp = GamePlayer.objects.create(game=self.game, player=self.alice, seat_order=0)

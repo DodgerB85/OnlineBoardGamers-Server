@@ -226,13 +226,14 @@ export async function loadRewind() {
 	if (data.missingPlayers) store.missingPlayers = data.missingPlayers;
 }
 
-export async function kickout(target) {
+export async function kickout(target, targetSeat) {
 	const store = useModelStore();
 	const data = await postJson(`${API_BASE}processLBRturn/`, {
 		action: "kickout",
 		gameID: store.gameID,
 		latestUpdate: store.latestUpdate,
 		kickedName: target,
+		kickedSeat: targetSeat,
 	});
 	if (!data) return null;
 	if (data.syncError) {

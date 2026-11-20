@@ -430,7 +430,8 @@ export async function kickoutPlayer(kickedName) {
 	const personal = usePersonalStore()
 	if (personal.gameID < 0 || !kickedName) return
 	try {
-		const result = await kickout(personal.gameID, kickedName, personal.latestUpdate)
+		const seatNames = Array.isArray(window.initData?.playerNames) ? window.initData.playerNames : []
+		const result = await kickout(personal.gameID, kickedName, personal.latestUpdate, seatNames.indexOf(kickedName))
 		if (result.syncError) {
 			store.gameMessages.errorText = i18n.global.t("error.olderVersion")
 			await reloadFromServer()

@@ -205,7 +205,15 @@ class DDLTests(TestCase):
             }
         )
         self.assertEqual(save.status_code, 403)
-        kick = self.post_turn({"action": "kickout", "gameID": self.game.id, "kickedName": "ddl0", "latestUpdate": self.game.latestUpdate})
+        kick = self.post_turn(
+            {
+                "action": "kickout",
+                "gameID": self.game.id,
+                "kickedName": "ddl0",
+                "kickedSeat": self.game.players.get(player__username="ddl0").seat_order,
+                "latestUpdate": self.game.latestUpdate,
+            }
+        )
         self.assertEqual(kick.status_code, 403)
 
     def test_kickout_requires_an_active_player_and_the_current_target(self):
@@ -215,10 +223,26 @@ class DDLTests(TestCase):
         self.game.save()
 
         self.client.force_login(self.users[1])
-        self_kick = self.post_turn({"action": "kickout", "gameID": self.game.id, "kickedName": "ddl1", "latestUpdate": self.game.latestUpdate})
+        self_kick = self.post_turn(
+            {
+                "action": "kickout",
+                "gameID": self.game.id,
+                "kickedName": "ddl1",
+                "kickedSeat": self.game.players.get(player__username="ddl1").seat_order,
+                "latestUpdate": self.game.latestUpdate,
+            }
+        )
         self.assertEqual(self_kick.status_code, 403)
 
-        not_current = self.post_turn({"action": "kickout", "gameID": self.game.id, "kickedName": "ddl2", "latestUpdate": self.game.latestUpdate})
+        not_current = self.post_turn(
+            {
+                "action": "kickout",
+                "gameID": self.game.id,
+                "kickedName": "ddl2",
+                "kickedSeat": self.game.players.get(player__username="ddl2").seat_order,
+                "latestUpdate": self.game.latestUpdate,
+            }
+        )
         self.assertEqual(not_current.status_code, 400)
 
     def test_kickout_reports_the_missing_player(self):
@@ -228,7 +252,15 @@ class DDLTests(TestCase):
         # A single vote executes the kickout when the threshold is one.
         self.client.force_login(self.users[1])
         with patch.object(DDLpresenter, "processKickoutVote", return_value={"voteCast": False}):
-            response = self.post_turn({"action": "kickout", "gameID": self.game.id, "kickedName": "ddl0", "latestUpdate": self.game.latestUpdate})
+            response = self.post_turn(
+                {
+                    "action": "kickout",
+                    "gameID": self.game.id,
+                    "kickedName": "ddl0",
+                    "kickedSeat": self.game.players.get(player__username="ddl0").seat_order,
+                    "latestUpdate": self.game.latestUpdate,
+                }
+            )
         data = response.json()
         self.assertIn("ddl0", data["missingPlayers"])
         self.assertTrue(GamePlayer.objects.get(game=self.game, player=self.users[0]).is_kicked)

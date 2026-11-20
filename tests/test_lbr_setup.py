@@ -281,6 +281,7 @@ class LBRTurnTests(TestCase):
                 "gameID": self.game.id,
                 "latestUpdate": self.game.latestUpdate,
                 "kickedName": target,
+                "kickedSeat": self.game.players.get(player__username=target).seat_order,
             },
             content_type="application/json",
         )
@@ -310,6 +311,7 @@ class LBRTurnTests(TestCase):
                 "gameID": self.game.id,
                 "latestUpdate": self.game.latestUpdate,
                 "kickedName": target,
+                "kickedSeat": self.game.players.get(player__username=target).seat_order,
             },
             content_type="application/json",
         )
@@ -333,6 +335,7 @@ class LBRTurnTests(TestCase):
                 "gameID": self.game.id,
                 "latestUpdate": self.game.latestUpdate,
                 "kickedName": target,
+                "kickedSeat": self.game.players.get(player__username=target).seat_order,
             },
             content_type="application/json",
         )

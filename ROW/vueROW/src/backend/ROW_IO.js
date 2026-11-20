@@ -139,8 +139,8 @@ export async function castVote(gameID, topic, choice = true) {
 }
 
 /** Vote to kick out (or actually kick out) the timed-out player. */
-export async function kickout(gameID, kickedName, latestUpdate) {
-	const response = await post("/ROW/processROWturn/", { action: "kickout", gameID, kickedName, latestUpdate })
+export async function kickout(gameID, kickedName, latestUpdate, kickedSeat) {
+	const response = await post("/ROW/processROWturn/", { action: "kickout", gameID, kickedName, kickedSeat, latestUpdate })
 	if (!response.ok) {
 		const body = await response.json().catch(() => ({}))
 		throw new Error(body.error || "Network response was not ok")

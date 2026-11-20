@@ -174,11 +174,15 @@ def _processURRturn(request):
 
     elif jsonData["action"] == "kickout":
         participant = currentGame.players.filter(player=request.user, is_missing=False, is_kicked=False).exists()
-        target_is_current = currentGame.players.filter(player__username=jsonData["kickedName"], is_current=True, is_missing=False, is_kicked=False).exists()
+        # Seat index is the stable identity; the name is a stale-tab fallback.
+        target_gp = presenter.resolveGamePlayer(seat=jsonData.get("kickedSeat"), username=jsonData.get("kickedName"))
+        if target_gp is None or target_gp.player is None:
+            return JsonResponse({"error": gettext("Invalid kickout target")}, status=400)
+        target_is_current = target_gp.is_current and not target_gp.is_missing and not target_gp.is_kicked
         # A legacy row can be current while already kicked; allow that so the
         # kickout can repair the game instead of refusing forever.
-        legacy_kicked_current = currentGame.players.filter(player__username=jsonData["kickedName"], is_current=True, is_kicked=True).exists()
-        if not participant or request.user.username == jsonData["kickedName"]:
+        legacy_kicked_current = target_gp.is_current and target_gp.is_kicked
+        if not participant or target_gp.player == request.user:
             return JsonResponse({"error": gettext("Only another active player can initiate kickout.")}, status=403)
         if not (target_is_current or legacy_kicked_current) or presenter.kickoutRequired() != 2:
             return JsonResponse({"error": gettext("This player is not eligible for kickout.")}, status=400)
@@ -187,18 +191,19 @@ def _processURRturn(request):
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
-        kickout_vote_result = presenter.processKickoutVote(request.user, jsonData["kickedName"])
+        kickout_vote_result = presenter.processKickoutVote(request.user, target_gp)
         if kickout_vote_result["voteCast"]:
             currentGame.save()
             return JsonResponse(kickout_vote_result, safe=False)
 
-        _missingPlayer = User.objects.get(username=jsonData["kickedName"])
+        _missingPlayer = target_gp.player
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
         # addMissingPlayer/addKickedPlayer no-op when the flags are already set,
         # so a legacy row can still claim the turn; clear it explicitly.
-        currentGame.players.filter(player__username=jsonData["kickedName"]).update(is_current=False)
+        target_gp.is_current = False
+        target_gp.save(update_fields=["is_current"])
 
         # Cannot rewind past a kickout
         currentGame.rewindData = ""

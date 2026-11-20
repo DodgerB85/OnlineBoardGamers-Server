@@ -674,10 +674,16 @@ def _processHLCturn(request):
             print(f"* * * * * HLC: Sync Error Kickout Vote {jsonData['gameID']}")
             return JsonResponse({"syncError": True}, safe=False)
 
+        # Resolve the target from the stable seat index; the name is only a
+        # fallback for a stale tab.
+        target_gp = presenter.resolveGamePlayer(seat=jsonData.get("kickedSeat"), username=jsonData.get("kickedName"))
+        if target_gp is None or target_gp.player is None:
+            return JsonResponse({"error": gettext("Invalid kickout target")}, status=400)
+
         # Voting layer: 3p+ games need a majority vote to kick, unless the
         # requester's own vote for this target is more than 2 days old.
         # If the vote is only recorded, return straight away without kicking.
-        kickout_vote_result = presenter.processKickoutVote(request.user, jsonData["kickedName"])
+        kickout_vote_result = presenter.processKickoutVote(request.user, target_gp)
         if kickout_vote_result["voteCast"]:
             currentGame.save()
             return JsonResponse(kickout_vote_result, safe=False)
@@ -700,7 +706,10 @@ def _processHLCturn(request):
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
 
-        _missingPlayer = User.objects.get(username=jsonData["kickedName"])
+        target_gp = presenter.resolveGamePlayer(seat=jsonData.get("kickedSeat"), username=jsonData.get("kickedName"))
+        if target_gp is None or target_gp.player is None:
+            return JsonResponse({"error": gettext("Invalid kickout target")}, status=400)
+        _missingPlayer = target_gp.player
         presenter.addMissingPlayer(_missingPlayer)
         presenter.addKickedPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)

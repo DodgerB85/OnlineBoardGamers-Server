@@ -173,13 +173,25 @@ class ROWGameFlowTests(TestCase):
 
         # The creator is not on turn, so they are not eligible.
         response = self._post_turn(
-            {"action": "kickout", "gameID": game.id, "latestUpdate": game.latestUpdate, "kickedName": "creator"}
+            {
+                "action": "kickout",
+                "gameID": game.id,
+                "latestUpdate": game.latestUpdate,
+                "kickedName": "creator",
+                "kickedSeat": GamePlayer.objects.get(game=game, player=self.creator).seat_order,
+            }
         )
         self.assertEqual(response.status_code, 400)
 
         # The current player is eligible once the timer has expired.
         response = self._post_turn(
-            {"action": "kickout", "gameID": game.id, "latestUpdate": game.latestUpdate, "kickedName": "row-other"}
+            {
+                "action": "kickout",
+                "gameID": game.id,
+                "latestUpdate": game.latestUpdate,
+                "kickedName": "row-other",
+                "kickedSeat": GamePlayer.objects.get(game=game, player=other).seat_order,
+            }
         )
         self.assertEqual(response.status_code, 200)
         game.refresh_from_db()

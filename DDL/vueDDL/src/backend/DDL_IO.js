@@ -256,7 +256,13 @@ export async function kickout() {
 	try {
 		const response = await fetch("/DDL/processDDLturn/", {
 			method: "POST",
-			body: JSON.stringify({ action: "kickout", gameID: personal.gameID, kickedName: kickedPlayerObj.name, latestUpdate: personal.latestUpdate }),
+			body: JSON.stringify({
+				action: "kickout",
+				gameID: personal.gameID,
+				kickedName: kickedPlayerObj.name,
+				kickedSeat: controller.currentPlayerIndex(),
+				latestUpdate: personal.latestUpdate,
+			}),
 			headers: { "X-CSRFToken": funcs.getCookie("csrftoken") },
 		})
 		if (!response.ok) throw new Error("Network response was not ok")

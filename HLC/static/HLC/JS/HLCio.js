@@ -483,6 +483,7 @@ var IO = {
 				action: "kickout",
 				gameID: global.gameID,
 				kickedName: global.playerToKickName,
+				kickedSeat: M.players.map((item) => item.originalName).indexOf(global.playerToKickName),
 				latestUpdate: global.latestUpdate,
 			}),
 			headers: { "X-CSRFToken": csrftoken },
@@ -524,6 +525,7 @@ var IO = {
 			nextPlayer: nextPlayersArr,
 			gameID: global.gameID,
 			kickedName: kickedName,
+			kickedSeat: model.players.map((item) => item.originalName).indexOf(kickedName),
 			latestUpdate: global.latestUpdate,
 			status: "ACTIVE",
 		}
