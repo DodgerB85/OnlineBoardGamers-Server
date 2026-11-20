@@ -55,6 +55,15 @@ const incomingTradeNames = computed(() =>
 	store.context.tradeRelevantIncoming.map((entry) => store.players[entry[0]]?.displayName).filter(Boolean)
 )
 
+const tradeClearedPresetsThisTurn = computed(() => {
+	for (let index = store.history.length - 1; index >= 0; index--) {
+		const entry = store.history[index]
+		if (entry[0] === rf.HIST_NEW_TURN) break
+		if (entry[0] === rf.HIST_PLAYER_TRADE && entry[3][3] === true) return true
+	}
+	return false
+})
+
 function copyBgStatsLink() {
 	// Clipboard permission can be refused; the QR code below is the fallback.
 	navigator.clipboard.writeText(bgStatsUrl.value).then(() => {
@@ -196,8 +205,8 @@ function finishActionsAndEndTurn(event = null) {
 }
 
 function localEndPlayerTurn() {
-	// The server drops trades involving whoever submits, so do not end the turn with one waiting
-	if (incomingTradeNames.value.length > 0) {
+	// Only hold a live turn where the player can answer the offer.
+	if (store.gameflow.phase === rf.PHASE_WONDER_TO && incomingTradeNames.value.length > 0) {
 		store.gameMessages.actionError = t("trade.answerBeforeEndTurn")
 		return
 	}
@@ -719,6 +728,9 @@ const getGameOverReason = computed(() => {
 		<span v-if="incomingTradeNames.length > 0 && !rf.PHASE_WONDERS.includes(store.gameflow.phase)" class="donkeyWarningSpan">
 			{{ $t("trade.offerWaiting", { names: incomingTradeNames.join(", ") }) }}
 		</span>
+		<div v-if="personal.pov >= 0 && !store.viewSettings.showReplay && tradeClearedPresetsThisTurn" class="donkeyWarningSpan" role="status">
+			{{ $t("trade.presetsCleared") }}
+		</div>
 
 		<!-- ALWAYS SHOWS GAME END-->
 		<template v-if="store.gameflow.phase === rf.PHASE_GAME_OVER">

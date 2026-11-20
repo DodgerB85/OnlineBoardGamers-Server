@@ -76,8 +76,8 @@ export function getPlantChoices(playerIndex) {
 		if (electricity.findFreeFuelOnTile(hexID, bldg.location[2])) continue
 		const transporters = model
 			.getTransportersByPlayerIndexAndHexID(playerIndex, hexID)
-			.filter((t) => electricity.findFuelOnTransporterOnTile(t.id, hexID))
-			.map((t) => ({ id: t.id, type: electricity.findFuelOnTransporterOnTile(t.id, hexID).type }))
+			.map((t) => ({ id: t.id, fuel: electricity.getCarriedFuelOnTile(t, hexID) }))
+			.filter((t) => t.fuel.length > 0)
 		if (transporters.length === 0) continue
 		choices.push({
 			bldgID: bldg.id,
@@ -102,8 +102,8 @@ export function dropPlayersWithoutChoices() {
 }
 
 // A second pull from a mine on a newly powered tile
-function addExtraMineOutput(mine) {
-	const result = produce.addBuildingOutputResourcesToGame_core(mine.id, -1, 9, false, true)
+function addExtraMineOutput(mine, forPreTurn, forcedOutput = -1) {
+	const result = produce.addBuildingOutputResourcesToGame_core(mine.id, forcedOutput, 9, forPreTurn, true)
 	return result.length > 0 ? result[0][1] : -1
 }
 
@@ -137,8 +137,8 @@ export function updateSetupHighlights() {
 	for (const choice of getPlantChoices(playerIndex)) {
 		store.context.buildingIDsToHighlight.push(choice.bldgID)
 		for (const transporter of choice.transporters) {
-			store.context.resourceIDsToHighlight.push(electricity.findFuelOnTransporterOnTile(transporter.id, choice.hexID).id)
-			store.context.transporterIDsToHighlight.push(transporter.id)
+			for (const res of transporter.fuel) context.addResourceToHighlight(res.id)
+			context.addTransporterToHighlight(transporter.id)
 		}
 	}
 }
@@ -188,8 +188,8 @@ export function clickedSetupResource(transporterID, resID) {
 		recordSetupAction(playerIndex, [{ hexID, active: !model.getManagerActivation(playerIndex, hexID) }], [])
 		return
 	}
-	const choice = getPlantChoices(playerIndex).find((c) => c.hexID === hexID && c.transporters.some((t) => t.id === transporterID))
-	if (choice) recordSetupAction(playerIndex, [], [{ bldgID: choice.bldgID, transporterID }])
+	const choice = getPlantChoices(playerIndex).find((c) => c.hexID === hexID && c.transporters.some((t) => t.id === transporterID && t.fuel.some((res) => res.id === resID)))
+	if (choice) recordSetupAction(playerIndex, [], [{ bldgID: choice.bldgID, transporterID, fuelID: resID }])
 }
 
 // Clicking the plant burns wood from the first of your transporters that carries some
@@ -229,24 +229,28 @@ export function applyProductionSetup(playerIndex, managerChoices, plantChoices) 
 	const plantEntries = []
 	const fuelEntries = []
 	const extraOutputs = []
+	const forPreTurn = store.gameflow.phase >= rf.PRE_PHASE_OFFSET
 	for (const choice of plantChoices || []) {
 		decisions.plants[choice.bldgID] = choice.transporterID
 		if (choice.transporterID < 0) continue
 		const bldg = model.getBuildingByID(choice.bldgID)
 		if (!bldg) continue
 		const poweredBefore = [...(store.context.poweredHexIDs || [])]
-		const fuelEntry = electricity.firePowerPlantFromTransporter(choice.bldgID, choice.transporterID)
+		const fuelEntry = electricity.firePowerPlantFromTransporter(choice.bldgID, choice.transporterID, choice.fuelID)
 		if (!fuelEntry) continue
 		const plantID = stack.getBldgIDtoUse(bldg)
-		plantEntries.push([plantID, stack.getTransIDtoUse(model.getTransporterByID(choice.transporterID))])
+		const plantEntry = [plantID, stack.getTransIDtoUse(model.getTransporterByID(choice.transporterID))]
+		if (choice.fuelID !== undefined) plantEntry.push(stack.getResIDtoUse(model.getResByID(fuelEntry[2])))
+		plantEntries.push(plantEntry)
 		fuelEntries.push(fuelEntry)
 		// Mines already produced (before conflict): add their missing second output (and record which plant caused it).
 		// Other primaries produce after the setup and are doubled then.
 		for (const hexID of store.context.poweredHexIDs || []) {
 			if (poweredBefore.includes(hexID)) continue
 			for (const primary of model.getAllInGameBuildings().filter((b) => b.location[1] === hexID && b.type === rf.BLDG_MINE)) {
-				const outputRes = addExtraMineOutput(primary)
-				if (outputRes !== -1) extraOutputs.push([plantID, stack.getBldgIDtoUse(primary), stack.compressLocation(primary.location), outputRes])
+				const outputRes = addExtraMineOutput(primary, forPreTurn)
+				// A preset reserves a draw. The first live draw can change what is still in the bag.
+				if (outputRes !== -1) extraOutputs.push([plantID, stack.getBldgIDtoUse(primary), stack.compressLocation(primary.location), forPreTurn ? -1 : outputRes])
 			}
 		}
 	}
@@ -256,10 +260,14 @@ export function applyProductionSetup(playerIndex, managerChoices, plantChoices) 
 	return [rf.STACK_PRODUCTION_SETUP, managerEntries, plantEntries, fuelEntries, extraOutputs]
 }
 
-// Re-apply a recorded setup action (other players' stack processing, pre-move
-// loading and replay). Recorded extra outputs are forced so random mine pulls match.
-export function performSetupStackAction(stackAction, playerIndex) {
+// Pending moves resolve their extra draws against the current bag. Replay uses recorded draws.
+export function performSetupStackAction(stackAction, playerIndex, moveData = null) {
 	const store = useModelStore()
+	const forPreTurn = moveData !== null && store.gameflow.phase >= rf.PRE_PHASE_OFFSET
+	// Older presets recorded a concrete draw even though they were saved before the turn began.
+	const isOlderPreset = Number.isInteger(moveData?.knownFinalHistoryidx) &&
+		moveData.knownFinalHistoryidx < store.history.findLastIndex((entry) => entry[0] === rf.HIST_NEW_TURN && entry[3][0] === store.gameflow.turn)
+	const resolvedOutputs = []
 	if (!store.gameflow.productionDecisions) store.gameflow.productionDecisions = {}
 	const decisions = getDecisionsForPlayer(playerIndex)
 	if (!decisions.managers) decisions.managers = {}
@@ -269,20 +277,31 @@ export function performSetupStackAction(stackAction, playerIndex) {
 		decisions.managers[hexID] = active
 		model.setManagerActivation(playerIndex, hexID, active)
 	}
-	for (const [bldgID, transporterID] of stackAction[2] || []) {
+	for (const [bldgID, transporterID, fuelID] of stackAction[2] || []) {
 		decisions.plants[bldgID] = transporterID
-		const fired = electricity.firePowerPlantFromTransporter(bldgID, transporterID)
+		const poweredBefore = [...store.context.poweredHexIDs]
+		const fired = electricity.firePowerPlantFromTransporter(bldgID, transporterID, fuelID)
 		// The plant may already be working from tile fuel now; in that case the
 		// pre-production output was already doubled and these extras must not be added.
 		if (!fired) continue
-		for (const [plantID, primaryID, , outputRes] of stackAction[4] || []) {
+		for (const [plantID, primaryID, location, outputRes] of stackAction[4] || []) {
 			if (plantID !== bldgID) continue
 			const primary = model.getBuildingByID(primaryID)
 			if (!primary) continue
-			if (primary.type === rf.BLDG_MINE) produce.addBuildingOutputResourcesToGame_core(primaryID, outputRes, 9)
-			else model.addResourceToGame_core(outputRes, primary.location, 9)
+			if (primary.type === rf.BLDG_MINE) {
+				if (moveData && poweredBefore.includes(primary.location[1])) continue
+				const [gold, iron] = primary.remainingMineContent
+				const available = (outputRes === rf.RES_GOLD && gold > 0) || (outputRes === rf.RES_IRON && iron > 0)
+				const forcedOutput = moveData && (forPreTurn || isOlderPreset || !available) ? -1 : outputRes
+				const drawn = addExtraMineOutput(primary, forPreTurn, forcedOutput)
+				if (drawn !== -1) resolvedOutputs.push([plantID, primaryID, location, drawn])
+			} else {
+				model.addResourceToGame_core(outputRes, primary.location, 9)
+				resolvedOutputs.push([plantID, primaryID, location, outputRes])
+			}
 		}
 	}
+	if (moveData && !forPreTurn) stackAction[4] = resolvedOutputs
 
 	if (!store.gameflow.productionDecisions[store.gameflow.turn]) store.gameflow.productionDecisions[store.gameflow.turn] = {}
 	store.gameflow.productionDecisions[store.gameflow.turn][playerIndex] = decisions

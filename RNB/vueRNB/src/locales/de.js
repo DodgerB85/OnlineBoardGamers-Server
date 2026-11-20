@@ -340,6 +340,7 @@ export default {
 		skipConflictPhase: "Konfliktphase überspringen",
 	},
 	trade: {
+		presetsCleared: "Ein Handel wurde angenommen. Deshalb wurden alle ausstehenden voreingestellten Züge gelöscht.",
 		button: "Handeln",
 		incomingTrades: "Eingehende Angebote:",
 		offers: "bietet:",

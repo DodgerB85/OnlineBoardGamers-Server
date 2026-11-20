@@ -1561,12 +1561,6 @@ def _handle_rnb_accept_trade(request, currentGame, presenter, raw_data, trade_da
     for rid in requested_res_ids:
         all_resources[rid][1] = list(proposer_home)
 
-    _append_trade_history(currentGame, raw_data, proposer_idx, acceptor_idx, offered_res_ids, requested_res_ids)
-    _delete_pending_moves_for_player(currentGame, proposer_idx)
-    _delete_pending_moves_for_player(currentGame, acceptor_idx)
-
-    currentGame.gameData = _compress_rnb_gamedata(raw_data)
-
     _remove_matching_trades(trade_data, proposer_idx, acceptor_idx, offered_res_ids, requested_res_ids)
 
     _cancel_trades_for_player(trade_data, proposer_idx)
@@ -1579,7 +1573,11 @@ def _handle_rnb_accept_trade(request, currentGame, presenter, raw_data, trade_da
     newVer = (int(oldVer) % 1000) + 1
     currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-    currentGame.save()
+    with transaction.atomic():
+        presets_cleared = _delete_pending_moves(currentGame)
+        _append_trade_history(currentGame, raw_data, proposer_idx, acceptor_idx, offered_res_ids, requested_res_ids, presets_cleared)
+        currentGame.gameData = _compress_rnb_gamedata(raw_data)
+        currentGame.save()
 
     _broadcast_trade_update(currentGame.id)
 
@@ -1662,7 +1660,7 @@ def _cancel_all_trades_on_turn_submit(currentGame, player_name):
             currentGame.save()
 
 
-def _append_trade_history(currentGame, raw_data, proposer_idx, acceptor_idx, offered_res_ids, requested_res_ids):
+def _append_trade_history(currentGame, raw_data, proposer_idx, acceptor_idx, offered_res_ids, requested_res_ids, presets_cleared):
     """Record the accepted trade in the game history, using the same per-entry delta the client stores."""
     if len(raw_data) <= 4 or not isinstance(raw_data[4], list):
         return
@@ -1670,23 +1668,22 @@ def _append_trade_history(currentGame, raw_data, proposer_idx, acceptor_idx, off
     for entry in raw_data[4]:
         if isinstance(entry, list) and len(entry) > 2 and isinstance(entry[2], (int, float)) and not isinstance(entry[2], bool):
             elapsed -= entry[2]
-    raw_data[4].append([RNB_HIST_PLAYER_TRADE, proposer_idx, elapsed, [acceptor_idx, list(offered_res_ids), list(requested_res_ids)]])
+    trade_details = [acceptor_idx, list(offered_res_ids), list(requested_res_ids)]
+    if presets_cleared:
+        trade_details.append(True)
+    raw_data[4].append([RNB_HIST_PLAYER_TRADE, proposer_idx, elapsed, trade_details])
 
 
-def _delete_pending_moves_for_player(currentGame, player_index):
-    """A trade changes a player's goods, so their queued pre-set moves can no longer be trusted."""
-    presenter = cast("RNBpresenter", currentGame.presenter())
-    all_names = presenter.getAllPlayersOrderedySeatInArray(False, True)
-    if player_index < 0 or player_index >= len(all_names):
-        return
-    gp_player = currentGame.players.only("moveDataJSON").filter(player__username=all_names[player_index]).first()
-    if not gp_player or not gp_player.moveDataJSON:
-        return
-    pending_moves = [move for move in gp_player.moveDataJSON if move.get("status") == "pending"]
-    if not pending_moves:
-        return
-    gp_player.moveDataJSON = [move for move in gp_player.moveDataJSON if move.get("status") != "pending"]
-    gp_player.save(update_fields=["moveDataJSON"])
+def _delete_pending_moves(currentGame):
+    presets_cleared = False
+    for game_player in currentGame.players.only("moveDataJSON"):
+        moves = game_player.moveDataJSON or []
+        kept_moves = [move for move in moves if move.get("status") != "pending"]
+        if len(kept_moves) != len(moves):
+            game_player.moveDataJSON = kept_moves
+            game_player.save(update_fields=["moveDataJSON"])
+            presets_cleared = True
+    return presets_cleared
 
 
 def doSaveRewind(currentGame, jsonData):

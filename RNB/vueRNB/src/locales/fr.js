@@ -340,6 +340,7 @@ export default {
 		skipConflictPhase: "Passer la phase de conflit",
 	},
 	trade: {
+		presetsCleared: "Un échange a été accepté. Tous les coups programmés en attente ont été annulés.",
 		button: "Échanger",
 		incomingTrades: "Échanges entrants :",
 		offers: "propose :",

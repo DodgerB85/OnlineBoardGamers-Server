@@ -5,7 +5,7 @@ import os
 import sys
 import unittest
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -17,27 +17,13 @@ django.setup()
 from RNB import RNBconstants as rfRNB
 from RNB.views import (
     _append_trade_history,
-    _delete_pending_moves_for_player,
+    _delete_pending_moves,
     _get_rnb_home_location,
     _remove_matching_trades,
     _rnb_player_has_transporter_on_home,
     _rnb_trade_option_enabled,
     _rnb_validate_trade_resources,
 )
-
-
-class _FakePlayers:
-    def __init__(self, game_player):
-        self.game_player = game_player
-
-    def only(self, *_fields):
-        return self
-
-    def filter(self, **_lookups):
-        return self
-
-    def first(self):
-        return self.game_player
 
 
 class RNBTradeRulesTests(unittest.TestCase):
@@ -83,26 +69,31 @@ class RNBTradeRulesTests(unittest.TestCase):
         resources = [[0, [-1, 2], 1]]
         self.assertFalse(_rnb_validate_trade_resources(resources, [0], [5], transporters, 0))
 
-    def test_trade_history_entry_gets_the_relative_time(self):
+    def test_trade_history_records_relative_time_and_whether_presets_were_cleared(self):
         raw_data = [[], [], [], [], [[2, 0, 10, [5]]]]
         game = SimpleNamespace(created=str(1_700_000_000_000))
         with patch("RNB.views.time.time", return_value=1_700_000_100):
-            _append_trade_history(game, raw_data, 0, 1, [5], [6])
-        self.assertEqual(raw_data[4][-1], [41, 0, 90, [1, [5], [6]]])
+            _append_trade_history(game, raw_data, 0, 1, [5], [6], presets_cleared=False)
+            _append_trade_history(game, raw_data, 0, 1, [5], [6], presets_cleared=True)
+        self.assertEqual(raw_data[4][-2:], [[41, 0, 90, [1, [5], [6]]], [41, 0, 0, [1, [5], [6], True]]])
 
-    def test_pending_presets_are_dropped_but_current_moves_are_kept(self):
-        game_player = SimpleNamespace(
-            moveDataJSON=[
-                {"status": "pending", "turn": 2},
-                {"status": "current", "turn": 1},
-                {"status": "pending", "turn": 3},
-            ],
-            save=lambda **_kwargs: None,
-        )
-        presenter = SimpleNamespace(getAllPlayersOrderedySeatInArray=lambda *_args: ["p0", "p1"])
-        game = SimpleNamespace(presenter=lambda: presenter, players=_FakePlayers(game_player))
-        _delete_pending_moves_for_player(game, 1)
-        self.assertEqual(game_player.moveDataJSON, [{"status": "current", "turn": 1}])
+    def test_pending_presets_are_dropped_for_every_player_but_current_moves_are_kept(self):
+        pending_move = {"status": "pending", "turn": 2}
+        current_move = {"status": "current", "turn": 1}
+        game_players = [
+            SimpleNamespace(moveDataJSON=[pending_move, current_move], save=Mock()),
+            SimpleNamespace(moveDataJSON=[pending_move], save=Mock()),
+            SimpleNamespace(moveDataJSON=[pending_move], save=Mock()),
+            SimpleNamespace(moveDataJSON=None, save=Mock()),
+        ]
+        game = SimpleNamespace(players=SimpleNamespace(only=lambda *fields: game_players))
+
+        self.assertTrue(_delete_pending_moves(game))
+        self.assertEqual([player.moveDataJSON for player in game_players], [[current_move], [], [], None])
+        self.assertFalse(_delete_pending_moves(game))
+        for player in game_players[:3]:
+            player.save.assert_called_once_with(update_fields=["moveDataJSON"])
+        game_players[3].save.assert_not_called()
 
     def test_both_players_need_a_transporter_on_their_home_tile(self):
         self.assertTrue(_rnb_player_has_transporter_on_home(self.raw_data, 0, [5]))

@@ -340,6 +340,7 @@ export default {
 		skipConflictPhase: "Salta la fase di conflitto",
 	},
 	trade: {
+		presetsCleared: "È stato accettato uno scambio, quindi tutte le mosse preimpostate in sospeso sono state cancellate.",
 		button: "Scambia",
 		incomingTrades: "Scambi in arrivo:",
 		offers: "offre:",

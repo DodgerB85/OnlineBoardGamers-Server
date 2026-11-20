@@ -2105,8 +2105,7 @@ export function processMainMoveStacks(allStackData) {
 			rf.doAdminAlrt(`Decompress failed for ${nextData.username} turn: ${nextData.turn} phase: ${nextData.phase}`)
 			return false
 		}
-		//let result = stack.verifyAndPerformStack(importedStack, true, nextData)
-		let result = stack.verifyAndPerformStack(importedStack, true)
+		let result = stack.verifyAndPerformStack(importedStack, true, nextData)
 		// If there is an error here, break and notify the player
 		if (result.verified === false) {
 			rf.doAdminConsolLg(`Error processing stack for ${nextData.username} turn: ${nextData.turn} phase: ${nextData.phase}`)

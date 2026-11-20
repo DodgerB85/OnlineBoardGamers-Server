@@ -6,7 +6,6 @@ import * as map from "../js/RNBmap"
 //import * as vec from "../js/RNBvector"
 //import * as util from "../js/RNButil"
 import * as model from "../js/RNBmodel"
-import * as loc from "../js/RNBlocation"
 //import * as loc from "../js/RNBlocation"
 //import * as controller from "../js/RNBcontroller"
 
@@ -207,12 +206,7 @@ const getComputedTransporterResources = computed(() => {
 })
 
 // MANAGEMENT: a carried manager switched off for this production
-const isManagerSwitchedOff = computed(() => {
-	const t = props.transporterObjProp
-	if (store.gameflow.phase !== rf.PHASE_PRODUCTION_SETUP_TO && !rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase)) return false
-	if (!loc.isAnyHexLocation(t.location)) return false
-	return model.getManagerActivation(t.ownerIndex, t.location[1]) === false
-})
+const isManagerSwitchedOff = computed(() => model.isCarriedManagerSwitchedOff(props.transporterObjProp))
 
 // Computed property for transporter resOnTransporters
 const getComputedTransporterFollowerResources = computed(() => {

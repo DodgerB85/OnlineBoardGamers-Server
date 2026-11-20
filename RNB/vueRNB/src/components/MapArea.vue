@@ -135,10 +135,12 @@ const vPlop = {
 
 function hexClicked(hex) {
 	rf.doAdminConsolLg(JSON.stringify(hex))
-	if (![rf.ACT_SELECT_WATER_FOR_NEW_TRANSPORTER, rf.ACT_SELECT_INPUT_RESOURCES_FOR_SEC_PRODUCTION, rf.ACT_CHOOSE_BUILDING_TO_UPGRADE, rf.ACT_REMOVE_EXCESS_TRANSPORTERS, rf.ACT_REMOVE_EXCESS_TRANSPORTERS_FOR_DONKEY].includes(store.context.action)) {
-		if (store.gameflow.phase !== rf.PHASE_CHOOSE_HOME_TILE) context.resetContextAndHighlights()
-	}
 	store.mapData.zoomData.hexID = hex.hexID
+	if (productionSetup.isSetupMode()) return
+	if (![rf.ACT_SELECT_WATER_FOR_NEW_TRANSPORTER, rf.ACT_SELECT_INPUT_RESOURCES_FOR_SEC_PRODUCTION, rf.ACT_CHOOSE_BUILDING_TO_UPGRADE, rf.ACT_REMOVE_EXCESS_TRANSPORTERS, rf.ACT_REMOVE_EXCESS_TRANSPORTERS_FOR_DONKEY].includes(store.context.action)) {
+		if (rf.PHASE_PRODUCTIONS.includes(store.gameflow.phase)) highlight.deselectTransporter()
+		else if (store.gameflow.phase !== rf.PHASE_CHOOSE_HOME_TILE) context.resetContextAndHighlights()
+	}
 }
 
 function getNewHexOptionFill(mousover) {

@@ -262,7 +262,7 @@ export default {
 		noMoveSet: "No Move Set",
 	},
 	productionSetup: {
-		hint: "Click to fire a plant or switch a manager off/on.",
+		hint: "Click a highlighted manager to switch it on or off, or click highlighted wood or a power plant to fire it.",
 		summary: "Plants: {fired} fired, {plants} not fired. Managers: {managersOn} on, {managersOff} off.",
 		done: "Setup done",
 	},
@@ -348,6 +348,7 @@ export default {
 	trade: {
 		offerWaiting: "Trade offer from {names} is waiting. Accept or reject it in the Wonder phase.",
 		answerBeforeEndTurn: "You have a trade offer waiting. Accept or reject it in the Wonder phase before ending your turn.",
+		presetsCleared: "A trade was accepted, so all pending preset moves were cleared.",
 		button: "Trade",
 		incomingTrades: "Incoming Trades:",
 		offers: "offers:",
