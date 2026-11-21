@@ -1917,23 +1917,10 @@ export function allLandVertexBucketsWithoutRoadsAdjacentTo(hexID, bucketIds) {
 	return res
 }
 
-// A power line may only cross a river boundary when a bridge exists on that
-// boundary. A bridge merges the two bank buckets of a hex, so we check whether
-// the two corner nodes of the river side now sit in the same current bucket on
-// either hex (i.e. a bridge has physically connected the two banks).
-export function riverCrossingAllowed(hexA, sideA, hexB, sideB) {
-	function banksConnected(hex, side) {
-		const corners = hex.cornerNodeIds?.[side]
-		if (!corners) return false
-		const [n0, n1] = corners
-		if (n0 === -1 || n1 === -1) return false
-		return hex.bucketIdsCurrent[hex.nodeBucketIds[n0]] === hex.bucketIdsCurrent[hex.nodeBucketIds[n1]]
-	}
-	return banksConnected(hexA, sideA) || banksConnected(hexB, sideB)
-}
-
-// Power lines function like roads, but can be built on land, sea or polders,
-// and may only cross a river where a bridge already exists on that boundary.
+// Power lines function like roads, but can be built on land, sea or polders.
+// A river edge has one lane per bank; building on a bank does not cross the
+// river. The bucket-level network in RNBelectricity decides whether the two
+// banks connect, so a bridge is required only for the power to cross.
 export function allVertexBucketsWithoutPowerLinesAdjacentTo(hexID, bucketIds) {
 	const store = useModelStore()
 	const hex = model.getHexByID(hexID)
@@ -1947,8 +1934,6 @@ export function allVertexBucketsWithoutPowerLinesAdjacentTo(hexID, bucketIds) {
 		const otherHex = model.getHexByID(otherHexId)
 		// Both hexes must be buildable (land, sea or polder - never void)
 		if (!rf.TERR_ANY.includes(hex.currentTerrain) || !rf.TERR_ANY.includes(otherHex.currentTerrain)) continue
-		// Rivers may only be crossed where a bridge exists on the boundary
-		if (edge.hasRiver && !riverCrossingAllowed(hex, side, otherHex, (side + 3) % 6)) continue
 		const otherSide = (side + 3) % 6
 		// CITY: a city side joined to a river side is gated per bank (each power line
 		// slot needs that bank's moat bridge); other city sides need the centre bridge

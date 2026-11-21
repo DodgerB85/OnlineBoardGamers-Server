@@ -11,6 +11,7 @@ Electricity
 - Tile fuel is consumed before the mines pull; a transporter can fuel a plant during the setup phase.
 - The power network is bucket-level: river banks only connect through a bridge, and a city is one power node (BGG 808497).
 - Free tile fuel and carried fuel only use the plant's own side of a river; a city sawmill keeps its trunks.
+- Power-line build highlighting mirrors roads on river edges: each bank is a separate lane, so a line can be laid on a bank without a bridge; the bucket network still requires a bridge for the power to cross.
 - Power-line build/verify and setup replay now check bridges, transporter ownership and extra mine output shape.
 - Removed the unused pendingTransporterFuel path.
 

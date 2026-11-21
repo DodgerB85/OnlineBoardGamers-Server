@@ -321,6 +321,52 @@ test("city side joined to a river: a bank bridge alone makes the edge wall-eligi
 	assert.ok(store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_WALL), "wall still offered after the road")
 })
 
+test("a power line highlights the joining river bank without needing a bridge", { skip: skip }, () => {
+	setActivePinia(createPinia())
+	const store = useModelStore()
+	store.players.splice(0)
+	store.players.push({ name: "A", displayName: "", colour: 0, RnD: [0, 0, 0, 0, 0, 0, 0, 0] })
+	store.gameflow.turn = 1
+	store.gameflow.phase = rf.PHASE_BUILDING_TO
+	store.gameflow.turnOrder = [0]
+	store.gameflow.fullTurnOrder = [0]
+	store.mapData.hexData.splice(0)
+	store.mapData.edgeData.splice(0)
+
+	const river = hd.createActualHex([0, 0, 0], 0, rf.PASTURE_RIVER_STRAIGHT)
+	river.hexID = 0
+	store.mapData.hexData.push(river)
+	let land = null
+	let side = -1
+	for (const [dx, dy, dz] of [
+		[1, -1, 0],
+		[1, 0, -1],
+		[0, 1, -1],
+		[-1, 1, 0],
+		[-1, 0, 1],
+		[0, -1, 1],
+	]) {
+		const candidateSide = hd.getJoiningSide(river.coord, [dx, dy, dz])
+		if (river.sideRiverVertexIds[candidateSide] < 0) continue
+		land = hd.createActualHex([dx, dy, dz], 0, rf.PASTURE_RIVER_STRAIGHT)
+		land.hexID = 1
+		store.mapData.hexData.push(land)
+		map.addNewEdge([0, 1])
+		side = candidateSide
+		break
+	}
+	assert.ok(land, "found a river-side neighbour")
+	const edge = store.mapData.edgeData[0]
+	assert.equal(edge.hasRiver, true, "the shared edge is crossed by the river")
+	assert.deepEqual(edge.hasPowerLine, [false, false], "one lane per bank")
+	const cornerSide = edge.edgeHexIDs[0] === 0 ? [0, 1] : [1, 0]
+	const cornerNode = river.cornerNodeIds[side][cornerSide[0]]
+	assert.ok(cornerNode >= 0, "the bank corner node exists")
+	const riverBucket = river.bucketIdsInitial[river.nodeBucketIds[cornerNode]]
+	const options = map.allVertexBucketsWithoutPowerLinesAdjacentTo(0, [riverBucket])
+	assert.ok(options.some(([hexID]) => hexID === 1), "the joining bank of the neighbouring tile is highlighted")
+})
+
 test("power line to/from a city requires the moat bridge", { skip: skip }, () => {
 	const { store } = setupCityMap()
 	store.gameOptions.useElectricity = true

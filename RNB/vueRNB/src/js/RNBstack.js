@@ -1683,8 +1683,6 @@ export function verifySingleStackAction(stackActionData) {
 		const toHexSide = (fromHexSide + 3) % 6
 		const edgeData = store.mapData.edgeData[fromHex.edgeLookup[fromHexSide]]
 		if (!edgeData) return 5
-		// A power line may only cross a river where a bridge has merged the banks.
-		if (edgeData.hasRiver && !map.riverCrossingAllowed(fromHex, fromHexSide, toHex, toHexSide)) return 5
 		const flipped = edgeData.edgeHexIDs[1] === fromHexID
 		const hexIds = flipped ? [toHexID, fromHexID] : [fromHexID, toHexID]
 		const hexSides = flipped ? [toHexSide, fromHexSide] : [fromHexSide, toHexSide]
