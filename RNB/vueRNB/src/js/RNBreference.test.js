@@ -33,3 +33,18 @@ test("city production order follows the &c list", () => {
 		assert.ok(rf.cityProductionOrderIndex(order[i - 1]) < rf.cityProductionOrderIndex(order[i]), `${order[i - 1]} before ${order[i]}`)
 	}
 })
+
+test("setup conflicts stay on this turn; only the next production conflict rolls over", () => {
+	// The setup panel lists this turn's production, movement, building, wonder,
+	// then next turn's production. Movement/building/wonder conflicts are this turn.
+	assert.equal(rf.getPrePhaseConflictTurn(2, rf.PHASE_PRODUCTION_SETUP_TO, 4), 2, "movement conflict")
+	assert.equal(rf.getPrePhaseConflictTurn(2, rf.PHASE_PRODUCTION_SETUP_TO, 8), 2, "building conflict")
+	assert.equal(rf.getPrePhaseConflictTurn(2, rf.PHASE_PRODUCTION_SETUP_TO, 12), 2, "wonder conflict")
+	assert.equal(rf.getPrePhaseConflictTurn(2, rf.PHASE_PRODUCTION_SETUP_TO, 16), 3, "next production conflict")
+	// A +16 offset on a row (an older list built from setup+4) is not an extra turn.
+	assert.equal(rf.getPrePhaseConflictTurn(2, rf.PHASE_PRODUCTION_SETUP_TO, 20), 2, "offset movement conflict")
+	// Normal main-phase lists keep their existing turn maths.
+	assert.equal(rf.getPrePhaseConflictTurn(2, rf.PHASE_PRODUCTION_TO, 4), 2)
+	assert.equal(rf.getPrePhaseConflictTurn(2, rf.PHASE_PRODUCTION_TO, 16), 3)
+	assert.equal(rf.getPrePhaseConflictTurn(2, rf.PHASE_WONDER_TO, 16), 3)
+})

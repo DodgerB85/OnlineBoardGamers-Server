@@ -202,6 +202,16 @@ export function getBaseConflictPhase(phase) {
 	//doAdminAlrt(`getBaseConflictPhase() Error with ${phase}`)
 }
 
+// Turn of a listed pre-phase conflict. Setup is outside the 0-15 cycle, so only
+// its final production conflict is next turn; any +16 offset on the other rows
+// is not a real turn (the list may count them either way).
+export function getPrePhaseConflictTurn(currentTurn, currentPhase, futureUnboundedConflictPhaseNum) {
+	if (currentPhase === PHASE_PRODUCTION_SETUP_TO) {
+		return currentTurn + (futureUnboundedConflictPhaseNum % 16 === PHASE_CONFLICT_PRODUCTION_DECISION ? 1 : 0)
+	}
+	return currentTurn + Math.floor(futureUnboundedConflictPhaseNum / 16)
+}
+
 /** ACTIONS */
 export const ACT_NONE = -1
 export const ACT_BUILD_BRIDGE = 0

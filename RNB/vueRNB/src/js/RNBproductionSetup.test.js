@@ -81,6 +81,27 @@ test("preset production defers the extra mine draw and saves the live result for
 	assert.equal(rolls.length, 0)
 })
 
+test("setup mode is active in the production pre-phase when setup choices are pending", () => {
+	const source = readFileSync(join(import.meta.dirname, "RNBproductionSetup.js"), "utf8")
+	const first = source.indexOf("export function isSetupMode")
+	const last = source.indexOf("export function updateSetupHighlights", first)
+	const rf = { PRE_PHASE_PRODUCTION: 103, PHASE_PRODUCTION_SETUP_TO: 17 }
+	const store = { gameflow: { phase: rf.PRE_PHASE_PRODUCTION, turnOrder: [] }, context: { productionSetupPending: true } }
+	const personal = { canPlay: () => true, pov: 0, trainingGame: false, soloGame: false }
+	const isSetupMode = runInNewContext(source.slice(first, last).replaceAll("export function", "function") + "isSetupMode", {
+		rf,
+		useModelStore: () => store,
+		usePersonalStore: () => personal,
+	})
+
+	assert.equal(isSetupMode(), true, "the pre-phase asks for manager and plant fuel choices")
+
+	store.gameflow.phase = rf.PHASE_PRODUCTION_SETUP_TO
+	store.gameflow.turnOrder = [0]
+	personal.pov = 1
+	assert.equal(isSetupMode(), false, "a player outside the live setup turn order cannot act")
+})
+
 test("setup hint and summary only mention the modules that have a choice", () => {
 	const source = readFileSync(join(import.meta.dirname, "RNBproductionSetup.js"), "utf8")
 	const first = source.indexOf("export function setupSummary")

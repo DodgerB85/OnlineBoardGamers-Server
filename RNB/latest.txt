@@ -27,6 +27,16 @@ Debug / scenario editing
 - CHEAT: Bridge no longer needs a selected transporter (fixes "transporterID not found: -1") and records a CUSTOM_ADD_BRIDGE history entry.
 - CUSTOM_ADD_BRIDGE is rebuilt on import and replay, and the bridge is present in the whole-model hex data used by undo/reset.
 
+Pre-setting
+- Players not in the setup turn order now get the normal pre-phase panel with this turn's Production, Movement, Building and Wonder.
+- Setup is out of the 0-15 phase cycle; the panel special-cases those four phases and treats this turn's production as current.
+- Current-turn production previews skip the wonder brick, turn increment and mine pull, starting from the real setup state.
+- Production from setup has no conflict of its own and can be preset immediately. The movement conflict SET then appears; after that the movement preset, and so on, in order.
+- Ending the pre-set production saves the movement conflict chosen in its "Before Movement phase" panel together with the production move.
+- Conflicts set from setup stay on this turn (only the next production conflict rolls over), so the saved movement conflict is shown as set.
+- The conflict save keeps the turn/phase that opened the panel, so a live reload cannot change the key; the saved preset stays visible in the panel.
+- Previewing and cancel-redoing from setup no longer advance the turn.
+
 Save/replay
 - productionDecisions, working power plants and the setup stack action round-trip; powered buckets are recomputed from the working plants on load.
 - Replay resets production capacities at production start and applies the setup action before the player's production actions.

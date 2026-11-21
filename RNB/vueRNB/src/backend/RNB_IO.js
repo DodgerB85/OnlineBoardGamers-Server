@@ -774,9 +774,30 @@ export async function savePrePhaseConflict() {
 	personal.haltPlay = true
 	store.viewSettings.showLoader = true
 
+	// A live reload can close the conflict panel while its Save button is still
+	// in flight in the DOM. Never save a preset from a phase that is no longer a
+	// pre-phase conflict.
+	if (!rf.ALL_PRE_PHASE_CONFLICTS.includes(store.gameflow.phase)) {
+		personal.haltPlay = false
+		store.viewSettings.showLoader = false
+		return
+	}
+
 	let conflictPresetData = ""
-	const savingPhase = store.gameflow.phase - rf.PRE_PHASE_OFFSET
-	const savingTurn = store.gameflow.turn
+	// Derive the conflict's real phase/turn from the row that opened the panel.
+	// A live reload can reset the visible pre-phase numbers while it is open.
+	const unboundedConflict = store.gameflow.futureUnboundedConflictPhaseNum
+	const savingPhase = rf.getBaseConflictPhase(unboundedConflict % 16)
+	const baseTurn = store.actualGameState.turn >= 0 ? store.actualGameState.turn : store.gameflow.turn
+	const basePhase = store.actualGameState.phase >= 0 ? store.actualGameState.phase : store.gameflow.currentPhase
+	const savingTurn = rf.getPrePhaseConflictTurn(baseTurn, basePhase, unboundedConflict)
+	const savedConflictPreset = [store.conflictPreset.conflictDecision, store.conflictPreset.prayingDecision, store.conflictPreset.turnOrderDecision]
+
+	if (!Number.isInteger(unboundedConflict) || savingPhase < 0) {
+		personal.haltPlay = false
+		store.viewSettings.showLoader = false
+		return
+	}
 
 	// If editing the CURRENT conflict section and choosing to call conflict,
 	// process it as an actual conflict call instead of saving a preset
@@ -790,7 +811,7 @@ export async function savePrePhaseConflict() {
 	let conflictPresetMove = {
 		turn: savingTurn,
 		phase: savingPhase,
-		conflictPreset: [store.conflictPreset.conflictDecision, store.conflictPreset.prayingDecision, store.conflictPreset.turnOrderDecision],
+		conflictPreset: savedConflictPreset,
 	}
 	// Now reset the conflict choices
 	view.resetConflictPreferences()
@@ -834,7 +855,18 @@ export async function savePrePhaseConflict() {
 		if (data.savedConflictPreset) {
 			funcs.importRNBmodel(data.gameDataB64, false)
 			personal.currentMoveData = data.currentMoveData
-			personal.allMyMoveData = data.allMyMoveData
+			personal.allMyMoveData = data.allMyMoveData || []
+			// The server accepted the save. If its move list was read before this
+			// preset was stored (or filters it), keep the saved preset visible.
+			if (!personal.allMyMoveData.some((entry) => entry.turn === savingTurn && entry.phase === savingPhase)) {
+				personal.allMyMoveData.push({
+					turn: savingTurn,
+					phase: savingPhase,
+					status: "pending",
+					username: BKSN,
+					conflictPreset: savedConflictPreset,
+				})
+			}
 			personal.gameDataB64 = data.gameDataB64
 			store.viewSettings.showLoader = false
 			loadCurrentMove()
@@ -1139,7 +1171,8 @@ export async function cancelPresetMoves(turn, futureUnboundedMainPhaseNum) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 
-	const phase = futureUnboundedMainPhaseNum % 16
+	// 17 is out of the 0-15 sequence and must not wrap to 1.
+	const phase = futureUnboundedMainPhaseNum === rf.PHASE_PRODUCTION_SETUP_TO ? rf.PHASE_PRODUCTION_SETUP_TO : futureUnboundedMainPhaseNum % 16
 
 	personal.haltPlay = true
 	store.viewSettings.showLoader = true
@@ -2443,16 +2476,19 @@ export function saveActualGameState() {
 	store.stackControl.previewingPhase = futureUnboundedMainPhaseNum
 }
 */
-// Pre-phase previews: run the start of the next turn's production, including this player's preset setup choice.
-// deferForSetup: when presetting production with a setup choice still to make, stop before primaries produce
-// (as in the real setup phase); productionSetup.finishPresetSetup runs them once the choices are made.
-export function simulateProductionStart(deferForSetup = false) {
+// Pre-phase previews: run the start of production, including this player's preset
+// setup choice. advanceTurn is false when previewing the current turn from setup.
+// deferForSetup: when presetting production with a setup choice still to make, stop
+// before primaries produce; productionSetup.finishPresetSetup runs them afterwards.
+export function simulateProductionStart(deferForSetup = false, advanceTurn = true) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	// At end of wonder phase, add a neutral brick
-	wonder.addBrickToWonder_core(8, [])
-	store.gameflow.turn++
-	produce.doMineProduction(false, [], true)
+	if (advanceTurn) {
+		// At end of wonder phase, add a neutral brick
+		wonder.addBrickToWonder_core(8, [])
+		store.gameflow.turn++
+		produce.doMineProduction(false, [], true)
+	}
 	model.resetBuildingsAfterProduction()
 	const turnRequired = store.gameflow.turn
 	const setupData = personal.allMyMoveData.find((entry) => entry.phase === rf.PHASE_PRODUCTION_SETUP_TO && entry.turn === turnRequired)
@@ -2488,6 +2524,7 @@ export async function cancelPreviewAndRedo() {
 	saveActualGameState()
 	resetGameStateToLoadedPreMove()
 	store.gameflow.currentPhase = store.gameflow.phase
+	const fromSetup = store.gameflow.currentPhase === rf.PHASE_PRODUCTION_SETUP_TO
 	store.gameflow.phase = futureMainPhaseNum + rf.PRE_PHASE_OFFSET
 	store.gameflow.futureUnboundedMainPhaseNum = phase
 	let processingPhase = store.gameflow.currentPhase
@@ -2500,7 +2537,7 @@ export async function cancelPreviewAndRedo() {
 	let moveFound = true
 	while (moveFound && processingPhase !== futureMainPhaseNum) {
 		if (rf.PHASE_PRODUCTIONS.includes(processingPhase)) {
-			simulateProductionStart()
+			simulateProductionStart(false, !(fromSetup && processingPhase === rf.PHASE_PRODUCTION_TO))
 		}
 
 		moveFound = false
@@ -2524,7 +2561,7 @@ export async function cancelPreviewAndRedo() {
 	}
 
 	if (rf.PHASE_PRODUCTIONS.includes(futureMainPhaseNum)) {
-		simulateProductionStart(true)
+		simulateProductionStart(true, !(fromSetup && futureMainPhaseNum === rf.PHASE_PRODUCTION_TO))
 	}
 	// Save remainingMoves so the intermediate phase processing above is not undone
 	// This may fix allowing too many moves?

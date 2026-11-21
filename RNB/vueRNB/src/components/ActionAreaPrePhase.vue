@@ -60,11 +60,20 @@ const setDisplayAreas = computed(() => {
 			prePhaseConflictPanel: true,
 		}
 	}
-	// Production setup: only offer cancelling a loaded preset (production cannot be preset from here)
+	// Production setup: the player not in the setup turn order can pre-set their
+	// manager / power plant choices and this turn's production.
 	if (store.gameflow.phase === rf.PHASE_PRODUCTION_SETUP_TO) {
+		if (store.gameflow.turnOrder.includes(personal.pov)) {
+			return {
+				loadedStackMove: store.stackControl.loadedPreMove,
+				prePhasePanel: false,
+				prePhaseConflictPanel: false,
+			}
+		}
+		const acted = model.hasPlayerActedInPhaseThisTurn(personal.pov, rf.PHASE_PRODUCTION_SETUP_TO)
 		return {
-			loadedStackMove: store.gameflow.turnOrder.includes(personal.pov) && store.stackControl.loadedPreMove,
-			prePhasePanel: false,
+			loadedStackMove: false,
+			prePhasePanel: !personal.haltPlay && !acted,
 			prePhaseConflictPanel: false,
 		}
 	}
@@ -122,6 +131,11 @@ const setDisplayAreas = computed(() => {
 
 const getUnboundedFutureMainPhases = computed(() => {
 	let currentPhase = store.gameflow.phase
+	// Setup is out of the 0-15 production/movement/building/wonder cycle: its next
+	// four phases are this turn's production, movement, building and wonder.
+	if (currentPhase === rf.PHASE_PRODUCTION_SETUP_TO) {
+		return [rf.PHASE_PRODUCTION_TO, rf.PHASE_MOVEMENT_TO, rf.PHASE_BUILDING_TO, rf.PHASE_WONDER_TO, rf.PHASE_PRODUCTION_TO + 16]
+	}
 	let firstEntry
 	if (rf.MAIN_PHASES.includes(currentPhase)) {
 		firstEntry = currentPhase + 4
@@ -135,8 +149,7 @@ const getUnboundedFutureMainPhases = computed(() => {
 })
 
 function isPrephaseConflictSet(futureUnboundedConflictPhaseNum) {
-	const additionalTurns = Math.floor(futureUnboundedConflictPhaseNum / 16)
-	const turnRequired = store.gameflow.turn + additionalTurns
+	const turnRequired = rf.getPrePhaseConflictTurn(store.gameflow.turn, store.gameflow.phase, futureUnboundedConflictPhaseNum)
 
 	const conflictPhaseNum = futureUnboundedConflictPhaseNum % 16
 	const decisionPhase = rf.getBaseConflictPhase(conflictPhaseNum)
@@ -146,8 +159,7 @@ function isPrephaseConflictSet(futureUnboundedConflictPhaseNum) {
 }
 
 function getPrephaseConflictText(futureUnboundedConflictPhaseNum) {
-	const additionalTurns = Math.floor(futureUnboundedConflictPhaseNum / 16)
-	const turnRequired = store.gameflow.turn + additionalTurns
+	const turnRequired = rf.getPrePhaseConflictTurn(store.gameflow.turn, store.gameflow.phase, futureUnboundedConflictPhaseNum)
 
 	const conflictPhaseNum = futureUnboundedConflictPhaseNum % 16
 	const decisionPhase = rf.getBaseConflictPhase(conflictPhaseNum)
@@ -227,8 +239,32 @@ function changePrephaseConflictDecision(futureUnboundedConflictPhaseNum) {
 	store.gameflow.currentPhase = store.gameflow.phase
 	store.gameflow.phase = decisionPhase + rf.PRE_PHASE_OFFSET
 	store.gameflow.futureUnboundedConflictPhaseNum = futureUnboundedConflictPhaseNum
-	const additionalTurns = Math.floor(futureUnboundedConflictPhaseNum / 16)
-	store.gameflow.turn += additionalTurns
+	store.gameflow.turn = rf.getPrePhaseConflictTurn(store.gameflow.turn, store.gameflow.currentPhase, futureUnboundedConflictPhaseNum)
+
+	// Open on the saved choices when changing an existing preset, not on the last
+	// conflict's choices.
+	view.resetConflictPreferences()
+	const existingPreset = personal.allMyMoveData.find((entry) => entry.phase === decisionPhase && entry.turn === store.gameflow.turn)
+	if (existingPreset && existingPreset.conflictPreset) {
+		store.conflictPreset.conflictDecision = existingPreset.conflictPreset[0]
+		store.conflictPreset.prayingDecision = existingPreset.conflictPreset[1]
+		store.conflictPreset.turnOrderDecision = existingPreset.conflictPreset[2]
+	}
+}
+
+function loadSetupConflictPreferences(futureUnboundedMainPhaseNum) {
+	// The pre-phase conflict panel edits the conflict that follows this main
+	// phase. Load any preset already saved there so End Turn keeps it.
+	const conflictUnbounded = futureUnboundedMainPhaseNum + 1
+	const decisionPhase = rf.getBaseConflictPhase(conflictUnbounded % 16)
+	const turnRequired = rf.getPrePhaseConflictTurn(store.gameflow.turn, store.gameflow.currentPhase, conflictUnbounded)
+	view.resetConflictPreferences()
+	const existing = personal.allMyMoveData.find((entry) => entry.turn === turnRequired && entry.phase === decisionPhase)
+	if (existing && existing.conflictPreset) {
+		store.conflictPreset.conflictDecision = existing.conflictPreset[0]
+		store.conflictPreset.prayingDecision = existing.conflictPreset[1]
+		store.conflictPreset.turnOrderDecision = existing.conflictPreset[2]
+	}
 }
 
 function presetMainPhase(futureUnboundedMainPhaseNum, event = null) {
@@ -236,6 +272,7 @@ function presetMainPhase(futureUnboundedMainPhaseNum, event = null) {
 	const futureMainPhaseNum = futureUnboundedMainPhaseNum % 16
 	IO.resetGameStateToLoadedPreMove()
 	store.gameflow.currentPhase = store.gameflow.phase
+	const fromSetup = store.gameflow.currentPhase === rf.PHASE_PRODUCTION_SETUP_TO
 	store.gameflow.phase = futureMainPhaseNum + rf.PRE_PHASE_OFFSET
 	store.gameflow.futureUnboundedMainPhaseNum = futureUnboundedMainPhaseNum
 	let processingPhase = store.gameflow.currentPhase
@@ -250,7 +287,7 @@ function presetMainPhase(futureUnboundedMainPhaseNum, event = null) {
 	let moveFound = true
 	while (moveFound && processingPhase !== futureMainPhaseNum) {
 		if (rf.PHASE_PRODUCTIONS.includes(processingPhase)) {
-			IO.simulateProductionStart()
+			IO.simulateProductionStart(false, !(fromSetup && processingPhase === rf.PHASE_PRODUCTION_TO))
 		}
 
 		moveFound = false
@@ -278,8 +315,9 @@ function presetMainPhase(futureUnboundedMainPhaseNum, event = null) {
 
 	// If at the START of prod pre phase, do pre prod now
 	if (rf.PHASE_PRODUCTIONS.includes(futureMainPhaseNum)) {
-		IO.simulateProductionStart(true)
+		IO.simulateProductionStart(true, !(fromSetup && futureMainPhaseNum === rf.PHASE_PRODUCTION_TO))
 	}
+	if (fromSetup) loadSetupConflictPreferences(futureUnboundedMainPhaseNum)
 	controller.startPlayerMainPhasePreTurn()
 }
 
@@ -294,6 +332,7 @@ function previewPresetPhase(futureUnboundedMainPhaseNum, event = null) {
 	const futureMainPhaseNum = futureUnboundedMainPhaseNum % 16
 	IO.resetGameStateToLoadedPreMove()
 	store.gameflow.currentPhase = store.gameflow.phase
+	const fromSetup = store.gameflow.currentPhase === rf.PHASE_PRODUCTION_SETUP_TO
 	store.gameflow.phase = futureMainPhaseNum + rf.PRE_PHASE_OFFSET
 	store.gameflow.futureUnboundedMainPhaseNum = futureUnboundedMainPhaseNum
 	let processingPhase = store.gameflow.currentPhase
@@ -306,7 +345,7 @@ function previewPresetPhase(futureUnboundedMainPhaseNum, event = null) {
 	let moveFound = true
 	while (moveFound && processingPhase !== futureMainPhaseNum) {
 		if (rf.PHASE_PRODUCTIONS.includes(processingPhase)) {
-			IO.simulateProductionStart()
+			IO.simulateProductionStart(false, !(fromSetup && processingPhase === rf.PHASE_PRODUCTION_TO))
 		}
 
 		moveFound = false
@@ -330,13 +369,14 @@ function previewPresetPhase(futureUnboundedMainPhaseNum, event = null) {
 	}
 
 	if (rf.PHASE_PRODUCTIONS.includes(futureMainPhaseNum)) {
-		IO.simulateProductionStart()
+		IO.simulateProductionStart(false, !(fromSetup && futureMainPhaseNum === rf.PHASE_PRODUCTION_TO))
 	}
 	let turnRequired = store.gameflow.turn
 	const prePhaseData = personal.allMyMoveData.find((entry) => entry.phase === futureMainPhaseNum && entry.turn === turnRequired)
 	if (prePhaseData) {
 		stack.attemptToLoadWholeCurrentMoveStack(prePhaseData, futureMainPhaseNum)
 	}
+	if (fromSetup) loadSetupConflictPreferences(futureUnboundedMainPhaseNum)
 	store.stackControl.previewingPhase = futureUnboundedMainPhaseNum
 }
 
@@ -351,12 +391,15 @@ function canCancelPreMove(futureUnboundedMainPhaseNum) {
 }
 
 function canSetPreMove(futureUnboundedMainPhaseNum) {
-	if (!hasSetImmediateConflictPhase.value) return false
-	// If you have set an immdiate conflict response, and it is in conflict phases, you
 	const futureMainPhaseNum = futureUnboundedMainPhaseNum % 16
+	// Production from setup has no conflict of its own; the movement conflict is
+	// set separately and is only needed before presetting movement.
+	const isSetupProduction = store.gameflow.phase === rf.PHASE_PRODUCTION_SETUP_TO && futureMainPhaseNum === rf.PHASE_PRODUCTION_TO
+	if (!isSetupProduction && !hasSetImmediateConflictPhase.value) return false
 	// If it's already set, don't offer a preset
 	let turnRequiredForCurrentPhase = model.getCorrectTurnForPhasePreseet(store.gameflow.turn, store.gameflow.phase, futureMainPhaseNum)
 	if (personal.allMyMoveData.some((entry) => entry.phase === futureMainPhaseNum && entry.turn === turnRequiredForCurrentPhase)) return false
+	if (isSetupProduction) return true
 	// If this is the FIRST future phase, then because we know it isn't already set, we can set it
 	let previousMainPhase = store.gameflow.phase
 	while (!rf.MAIN_PHASES.includes(previousMainPhase) && previousMainPhase > 0) previousMainPhase--
@@ -372,20 +415,32 @@ function canSetPreMove(futureUnboundedMainPhaseNum) {
 
 function allowSettingImmediateConflictPhase(futureUnboundedConflictPhaseNum) {
 	const conflictPhaseNum = futureUnboundedConflictPhaseNum % 16
+	const setupPhase = store.gameflow.phase === rf.PHASE_PRODUCTION_SETUP_TO
+	const baseConflict = setupPhase ? rf.PHASE_CONFLICT_MOVEMENT_DECISION : rf.getBaseConflictPhase(store.gameflow.phase)
 
-	if (!hasSetImmediateConflictPhase.value && conflictPhaseNum === rf.getBaseConflictPhase(store.gameflow.phase)) return true
+	// From setup, preset production before its following movement conflict.
+	if (setupPhase) {
+		const productionPreset = personal.allMyMoveData.some((entry) => entry.phase === rf.PHASE_PRODUCTION_TO && entry.turn === store.gameflow.turn)
+		if (!productionPreset) return false
+	}
+
+	if (!hasSetImmediateConflictPhase.value && conflictPhaseNum === baseConflict) return true
 	const decisionPhase = rf.getBaseConflictPhase(conflictPhaseNum)
-	const remainder = Math.floor(futureUnboundedConflictPhaseNum / 16)
 	let turnRequired = store.gameflow.turn
-	if (conflictPhaseNum === 0) turnRequired += remainder
+	if (setupPhase) {
+		turnRequired = rf.getPrePhaseConflictTurn(store.gameflow.turn, store.gameflow.phase, futureUnboundedConflictPhaseNum)
+	} else {
+		const remainder = Math.floor(futureUnboundedConflictPhaseNum / 16)
+		if (conflictPhaseNum === 0) turnRequired += remainder
+	}
 	// If it's already set, don't offer a preset
 	if (personal.allMyMoveData.some((entry) => entry.phase === decisionPhase && entry.turn === turnRequired)) return false
 	// If this is the FIRST future phase, then because we know it isn't already set, we can set it
-	if (turnRequired === store.gameflow.turn + 1 && conflictPhaseNum === (rf.getBaseConflictPhase(store.gameflow.phase) + 4) % 16) return true
+	if (turnRequired === store.gameflow.turn + 1 && conflictPhaseNum === (baseConflict + 4) % 16) return true
 	// Rewind-wipe fallback: if all presets were wiped and player is not in turn order,
 	// allow setting the immediate conflict phase
 	if (personal.allMyMoveData.length === 0 && !store.gameflow.turnOrder.includes(personal.pov)) {
-		const expectedImmediate = rf.MAIN_PHASES.includes(store.gameflow.phase) ? store.gameflow.phase + 1 : rf.getBaseConflictPhase(store.gameflow.phase)
+		const expectedImmediate = store.gameflow.phase === rf.PHASE_PRODUCTION_SETUP_TO ? rf.PHASE_CONFLICT_MOVEMENT_DECISION : rf.MAIN_PHASES.includes(store.gameflow.phase) ? store.gameflow.phase + 1 : rf.getBaseConflictPhase(store.gameflow.phase)
 		if (futureUnboundedConflictPhaseNum === expectedImmediate) return true
 	}
 	return false
@@ -393,6 +448,11 @@ function allowSettingImmediateConflictPhase(futureUnboundedConflictPhaseNum) {
 
 // NB - you MUST set conflict before ending turn. BUT a rewind will remove everything.
 const hasSetImmediateConflictPhase = computed(() => {
+	// Setup is followed by production, whose conflict is already resolved. The next
+	// conflict is the movement decision, set as usual for the production preset.
+	if (store.gameflow.phase === rf.PHASE_PRODUCTION_SETUP_TO) {
+		return personal.allMyMoveData.some((entry) => entry.phase === rf.PHASE_CONFLICT_MOVEMENT_DECISION && entry.turn === store.gameflow.turn)
+	}
 	let turnRequired = store.gameflow.turn
 	if (store.gameflow.phase === rf.PHASE_WONDER_TO) turnRequired++
 	// Set from main phase
@@ -446,7 +506,7 @@ const hasSetImmediateConflictPhase = computed(() => {
 			<template v-if="expanded">
 				<template v-for="(futureUnboundedMainPhaseNum, idx) in getUnboundedFutureMainPhases" :key="idx">
 					<hr />
-					<template v-if="idx !== 0 || (idx === 0 && rf.MAIN_PHASES.includes(store.gameflow.phase)) || (idx === 0 && rf.PHASE_CONFLICT_DECISIONS.includes(store.gameflow.phase)) || (idx === 0 && rf.PHASE_CONFLICT_PRAYINGS.includes(store.gameflow.phase)) || (idx === 0 && rf.PHASE_CONFLICT_TURN_ORDERS.includes(store.gameflow.phase) && store.gameflow.turnOrder.includes(personal.pov))">
+					<template v-if="idx !== 0 || (idx === 0 && rf.MAIN_PHASES.includes(store.gameflow.phase) && store.gameflow.phase !== rf.PHASE_PRODUCTION_SETUP_TO) || (idx === 0 && rf.PHASE_CONFLICT_DECISIONS.includes(store.gameflow.phase)) || (idx === 0 && rf.PHASE_CONFLICT_PRAYINGS.includes(store.gameflow.phase)) || (idx === 0 && rf.PHASE_CONFLICT_TURN_ORDERS.includes(store.gameflow.phase) && store.gameflow.turnOrder.includes(personal.pov))">
 						{{ view.phaseStr((futureUnboundedMainPhaseNum - 3) % 16) }}:
 						<span v-if="!isPrephaseConflictSet(futureUnboundedMainPhaseNum - 3)">
 							{{ getPrephaseConflictText(futureUnboundedMainPhaseNum - 3) }}
