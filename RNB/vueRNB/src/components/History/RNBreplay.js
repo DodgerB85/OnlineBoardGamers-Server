@@ -185,6 +185,8 @@ async function resetDataForReplay() {
 
 	funcs.importMapOnly(mapData, true)
 	map.applyTrainTracksFromMap(trainTracks)
+	// importMapOnly rebuilds polders as dry; derive them from the brick count like every frame import does
+	wonder.syncPoldersToBrickCount()
 
 	// Reset gameflow
 	store.gameflow.turn = 1
@@ -697,6 +699,7 @@ function replayStackMoveLand(stackAction, playerIndex) {
 			console.error("from location:", JSON.stringify(transporterObj.location))
 			console.error("remainingMoves:", transporterObj.remainingMoves)
 			console.error("toHexID:", toHexID, "toBucket:", toBucket, "geeseDropped:", geeseDropped)
+			console.error("toHex terrain:", model.getHexByID(toHexID).currentTerrain, "base terrain:", model.getHexByID(toHexID).baseTerrain, "usePolders:", store.gameOptions.usePolders)
 			console.error("pathfind.locations.length:", pathfind.locations.length)
 			console.error("pathfind.locations:", JSON.stringify(pathfind.locations))
 			console.error("pathfind.cost:", JSON.stringify(pathfind.cost))
