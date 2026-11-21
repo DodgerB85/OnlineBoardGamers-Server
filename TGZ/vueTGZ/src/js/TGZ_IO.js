@@ -88,6 +88,7 @@ export async function replaceExternalTournamentPlayer() {
 		kickedName: kickedName,
 	}
 	postData.nextPlayer = store.players[store.gameflow.turnOrder[0]].name // USED > goes to currentPlayers
+	postData.nextPlayerSeats = [store.gameflow.turnOrder[0]]
 
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
 		alert(t("io.gameOver"))
@@ -149,12 +150,14 @@ export async function saveGame(saveRewind) {
 		saveRewind: saveRewind,
 	}
 	if (window.initData.gameData === "") postData.mapTiles = [...store.mapTiles]
-	if (store.gameflow.turnOrder.length > 0)
+	if (store.gameflow.turnOrder.length > 0) {
 		postData.nextPlayer = store.players[store.gameflow.turnOrder[0]].name // USED > goes to currentPlayers
-	else {
+		postData.nextPlayerSeats = [store.gameflow.turnOrder[0]]
+	} else {
 		// THIS IS JUST AN EMERGENCY CHECK ??
 		store.gameflow.turnOrder.push(0)
 		postData.nextPlayer = store.players[store.gameflow.turnOrder[0]].name
+		postData.nextPlayerSeats = [store.gameflow.turnOrder[0]]
 		postData.data = funcs.exportModel()
 	}
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
@@ -476,6 +479,7 @@ async function updateDataFromLoadRewind() {
 				action: "updateDataFromLoadRewind",
 				turn: store.gameflow.turn,
 				nextPlayer: store.players[store.gameflow.turnOrder[0]].name, // USED > goes to currentPlayers
+				nextPlayerSeats: [store.gameflow.turnOrder[0]],
 				gameID: personal.gameID,
 				phase: store.gameflow.phase,
 				gameData: funcs.exportModel(false),

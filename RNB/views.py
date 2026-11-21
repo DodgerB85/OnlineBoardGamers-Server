@@ -413,7 +413,7 @@ def _processRNBturn(request):
             currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
             # NO! This sets ALL POSSIBLE player to is_current, which triggers emails.
-            presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], acting_username=nameToUse, old_latest_update=oldVer)
+            presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], acting_username=nameToUse, old_latest_update=oldVer, current_player_seats=jsonData.get("allIsCurrentPlayerSeats"))
             _validateTurnOrderTransition(
                 presenter.getRemainingTurnOrderNames(),
                 jsonData["allRemainingPlayersInTurnOrder"],
@@ -424,7 +424,7 @@ def _processRNBturn(request):
                 jsonData["phase"],
                 "saveStackMove",
             )
-            presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
+            presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"], seats=jsonData.get("allRemainingPlayerSeats"))
             remaining_players = presenter.getRemainingTurnOrderNames()
 
             # Set transaction lock for client-side recovery
@@ -656,7 +656,7 @@ def _processRNBturn(request):
         # So save your move, and return all moves for immediate client-side verification
         print(f"SAVING PHASE: {savingPhase}")
         if savingPhase in rfRNB.PHASE_CONFLICT_DECISIONS:
-            presenter.reduceCurrentPlayersUsingArray(jsonData["clientNextPlayerNames"])
+            presenter.reduceCurrentPlayersUsingArray(jsonData["clientNextPlayerNames"], current_player_seats=jsonData.get("clientNextPlayerSeats"))
 
             response_data = {
                 "secondsToNextKickout": presenter.getSecondsToNextKickout(),
@@ -702,7 +702,7 @@ def _processRNBturn(request):
             newVer = (int(db_latest_update) % 1000) + 1
             currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-            presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]], acting_username=nameToUse, old_latest_update=oldVer)
+            presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]], acting_username=nameToUse, old_latest_update=oldVer, current_player_seats=(jsonData.get("allRemainingPlayerSeats") or [])[:1])
             _validateTurnOrderTransition(
                 presenter.getRemainingTurnOrderNames(),
                 jsonData["allRemainingPlayersInTurnOrder"],
@@ -713,7 +713,7 @@ def _processRNBturn(request):
                 jsonData["phase"],
                 "saveConflictMove(praying/TO)",
             )
-            presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
+            presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"], seats=jsonData.get("allRemainingPlayerSeats"))
 
             # NO NOTIFICATIONS - COULD BE MORE STACK TO PROCESS
 
@@ -786,7 +786,7 @@ def _processRNBturn(request):
         newVer = (int(db_latest_update) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]], acting_username=nameToUse, old_latest_update=oldVer)
+        presenter.setCurrentPlayersFromArrInTurnOrder([jsonData["nextSinglePlayerUsername"]], acting_username=nameToUse, old_latest_update=oldVer, current_player_seats=(jsonData.get("allRemainingPlayerSeats") or [])[:1])
         _validateTurnOrderTransition(
             presenter.getRemainingTurnOrderNames(),
             jsonData["allRemainingPlayersInTurnOrder"],
@@ -797,7 +797,7 @@ def _processRNBturn(request):
             jsonData["phase"],
             "saveConflictMove(TO)",
         )
-        presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
+        presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"], seats=jsonData.get("allRemainingPlayerSeats"))
 
         # NO NOTIFICATIONS - COULD BE MORE STACK TO PROCESS
 
@@ -902,8 +902,8 @@ def _processRNBturn(request):
         newVer = (int(db_latest_update) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], acting_username=nameToUse, old_latest_update=oldVer)
-        presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], acting_username=nameToUse, old_latest_update=oldVer, current_player_seats=jsonData.get("allIsCurrentPlayerSeats"))
+        presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"], seats=jsonData.get("allRemainingPlayerSeats"))
 
         # Next, we can clear out old data
         PclearPastMoveData(currentGame)
@@ -1125,8 +1125,8 @@ def _processRNBturn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
-        presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], current_player_seats=jsonData.get("allIsCurrentPlayerSeats"))
+        presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"], seats=jsonData.get("allRemainingPlayerSeats"))
 
         gameDataB64 = jsonData["gameDataB64"]
         # raw_binary = base64.b64decode(gameDataStr)
@@ -1768,8 +1768,8 @@ def performSaveGame(request, currentGame, jsonData):
     newVer = (int(db_latest_update) % 1000) + 1
     currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-    presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], acting_username=request.user.username, old_latest_update=oldVer)
-    presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
+    presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], acting_username=request.user.username, old_latest_update=oldVer, current_player_seats=jsonData.get("allIsCurrentPlayerSeats"))
+    presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"], seats=jsonData.get("allRemainingPlayerSeats"))
 
     # SAVE BEFORE NOTIFICATIONS
     currentGame.save()

@@ -78,6 +78,11 @@ function playersForCurrentPhase(store) {
   return playersOnSide(store, store.phase === rf.PHASE_ALLIED_TURN ? rf.SIDE_ALLIED : rf.SIDE_FRENCH)
 }
 
+function playersForCurrentPhaseSeats(store) {
+  const side = store.phase === rf.PHASE_ALLIED_TURN ? rf.SIDE_ALLIED : rf.SIDE_FRENCH
+  return store.players.map((player, seat) => (player.side === side ? seat : -1)).filter(seat => seat >= 0)
+}
+
 // Saves are serialised: a second action handed in while the first request is in
 // flight would otherwise post the same latestUpdate and be rejected as stale.
 export function saveGame({ status = 'ACTIVE', winner = [], winnerSeats = [], finalPositions = [] } = {}) {
@@ -97,6 +102,7 @@ async function doSaveGame({ status, winner, winnerSeats, finalPositions }) {
     turn: store.turn,
     phase: store.phase,
     nextPlayer: status === 'FINISHED' ? [] : playersForCurrentPhase(store),
+    nextPlayerSeats: status === 'FINISHED' ? [] : playersForCurrentPhaseSeats(store),
     status,
     saveRewind: status !== 'FINISHED',
   }

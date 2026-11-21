@@ -35,6 +35,54 @@ class TurnOrderTests(TestCase):
         self.assertIsNone(self.game_players[2].remainingTurnOrder)
         self.assertEqual(presenter.getRemainingTurnOrderNames(), [self.players[1].username, self.players[0].username])
 
+    def test_setter_prefers_seats_over_conflicting_names(self):
+        presenter = self.game.presenter()
+
+        presenter.setCurrentPlayersFromArrInTurnOrder([self.players[0].username], current_player_seats=[2])
+
+        for gp in self.game_players:
+            gp.refresh_from_db()
+        self.assertIsNone(self.game_players[0].remainingTurnOrder)
+        self.assertFalse(self.game_players[0].is_current)
+        self.assertEqual(self.game_players[2].remainingTurnOrder, 1)
+        self.assertTrue(self.game_players[2].is_current)
+        self.assertEqual(presenter.getRemainingTurnOrderNames(), [self.players[2].username])
+
+    def test_renamed_player_is_current_from_the_seat_not_the_stale_name(self):
+        presenter = self.game.presenter()
+        stale_name = self.players[1].username
+        self.players[1].username = "turn-renamed"
+        self.players[1].save(update_fields=["username"])
+
+        presenter.setCurrentPlayersFromArrInTurnOrder([stale_name], current_player_seats=[1])
+
+        self.game_players[1].refresh_from_db()
+        self.assertEqual(self.game_players[1].remainingTurnOrder, 1)
+        self.assertTrue(self.game_players[1].is_current)
+        self.assertEqual(presenter.getRemainingTurnOrderNames(), ["turn-renamed"])
+
+    def test_server_setter_prefers_seats_over_conflicting_names(self):
+        presenter = self.game.presenter()
+
+        presenter.setServerCurrentPlayerNamesInTurnOrder([self.players[0].username], seats=[2])
+
+        for gp in self.game_players:
+            gp.refresh_from_db()
+        self.assertIsNone(self.game_players[0].remainingTurnOrder)
+        self.assertEqual(self.game_players[2].remainingTurnOrder, 1)
+        self.assertEqual(self.game.serverCurrentPlayerNamesInTurnOrder, [self.players[2].username])
+
+    def test_reduce_current_players_uses_seats(self):
+        presenter = self.game.presenter()
+        self.game.players.filter(pk__in=[self.game_players[0].pk, self.game_players[1].pk]).update(is_current=True)
+
+        presenter.reduceCurrentPlayersUsingArray([self.players[0].username], current_player_seats=[1])
+
+        self.game_players[0].refresh_from_db()
+        self.game_players[1].refresh_from_db()
+        self.assertFalse(self.game_players[0].is_current)
+        self.assertTrue(self.game_players[1].is_current)
+
     def test_empty_setter_clears_positions(self):
         presenter = self.game.presenter()
         presenter.setCurrentPlayersFromArrInTurnOrder([self.players[1].username])

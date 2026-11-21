@@ -843,7 +843,7 @@ def _processTurn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], current_player_seats=jsonData.get("nextPlayerSeats"))
 
         # Update module selections
         currentGame.startingMap = jsonData["tiles"]
@@ -859,7 +859,7 @@ def _processTurn(request):
 
         # Send Notifications - MODULE SELECTION
         if len(jsonData["nextPlayer"]) > 0:
-            playerListToNotify = jsonData["nextPlayer"]
+            playerListToNotify = presenter.getArrayOfIsCurrentPlayers()
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if "FcmBot" in playerListToNotify:
@@ -918,7 +918,7 @@ def _processTurn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], current_player_seats=jsonData.get("nextPlayerSeats"))
 
         # Update module selections
         starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
@@ -941,7 +941,7 @@ def _processTurn(request):
 
         # Send Notifications - MODULE SELECTION
         if len(jsonData["nextPlayer"]) > 0:
-            playerListToNotify = jsonData["nextPlayer"]
+            playerListToNotify = presenter.getArrayOfIsCurrentPlayers()
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if "FcmBot" in playerListToNotify:
@@ -1194,7 +1194,12 @@ def _processTurn(request):
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         # First, save the currentPlayers from the jsonData
-        presenter.setCurrentPlayersFromArrInTurnOrder([bailout_next] if bailout_next else jsonData["nextPlayer"], acting_username=nameToUse, old_latest_update=oldVer)
+        presenter.setCurrentPlayersFromArrInTurnOrder(
+            [bailout_next] if bailout_next else jsonData["nextPlayer"],
+            acting_username=nameToUse,
+            old_latest_update=oldVer,
+            current_player_seats=None if bailout_next else jsonData.get("nextPlayerSeats"),
+        )
 
         # Before sending notifications, update the currentPlayers
         # If saving into phase 2/7/9, then update for simul players
@@ -1512,12 +1517,12 @@ def _processTurn(request):
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         # WHY WAS THIS COMMENTED OUT????
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], current_player_seats=jsonData.get("nextPlayerSeats"))
         currentGame.save()
 
         # Send notification s
         if not jsonData["noNotification"] and len(jsonData["nextPlayer"]) > 0 and jsonData["phase"] != rfFCM.PHASE_GAME_OVER:
-            playerListToNotify = jsonData["nextPlayer"]
+            playerListToNotify = presenter.getArrayOfIsCurrentPlayers()
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if "FcmBot" in playerListToNotify:
@@ -1712,7 +1717,7 @@ def _processTurn(request):
 
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], current_player_seats=jsonData.get("nextPlayerSeats"))
         currentGame.gameData = jsonData["data"]
         currentGame.rewindTempData = ""
 
@@ -1723,7 +1728,7 @@ def _processTurn(request):
 
         # Send Notifications
         if len(jsonData["nextPlayer"]) > 0:
-            playerListToNotify = jsonData["nextPlayer"]
+            playerListToNotify = presenter.getArrayOfIsCurrentPlayers()
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if "FcmBot" in playerListToNotify:

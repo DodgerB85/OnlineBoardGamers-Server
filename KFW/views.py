@@ -269,7 +269,7 @@ def _processKFWturn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], acting_username=request.user.username, old_latest_update=oldVer)
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], acting_username=request.user.username, old_latest_update=oldVer, current_player_seats=jsonData.get("nextPlayerSeats"))
 
         # If it is boat collection phase, and there is a submitted village, then that player has no pending tiles
         if currentGame.phase == 1 or currentGame.phase == 2 and not presenter.isTrainingGame():
@@ -647,7 +647,7 @@ def _processKFWturn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], current_player_seats=jsonData.get("nextPlayerSeats"))
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -658,7 +658,7 @@ def _processKFWturn(request):
         # Send Notifications
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         if jsonData["nextPlayer"] != "" and 102 not in loadedStartingOptions:
-            playerListToNotify = jsonData["nextPlayer"]
+            playerListToNotify = presenter.getArrayOfIsCurrentPlayers()
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if "KfwBot" in playerListToNotify:

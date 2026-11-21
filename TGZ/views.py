@@ -237,10 +237,10 @@ def _processTGZturn(request):
         return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
     # Helper function to update current players
-    def set_current_players(next_player_str, acting_username=None, old_latest_update=None):
+    def set_current_players(next_player_str, acting_username=None, old_latest_update=None, next_player_seats=None):
         """Update current players for Game model"""
         next_usernames = [name.strip() for name in next_player_str.split(",") if name.strip()] if next_player_str else []
-        presenter.setCurrentPlayersFromArrInTurnOrder(next_usernames, acting_username=acting_username, old_latest_update=old_latest_update)
+        presenter.setCurrentPlayersFromArrInTurnOrder(next_usernames, acting_username=acting_username, old_latest_update=old_latest_update, current_player_seats=next_player_seats)
 
     if action == "setAutoPass":
         playerIndex = jsonData["playerNumber"]
@@ -332,7 +332,7 @@ def _processTGZturn(request):
         # Change host to TGZ tourney admin (works for both models)
         currentGame.host = tourney_admin
 
-        set_current_players(jsonData["nextPlayer"])
+        set_current_players(jsonData["nextPlayer"], next_player_seats=jsonData.get("nextPlayerSeats"))
 
         # Delete Rewind Data
         currentGame.rewindData = ""
@@ -418,7 +418,7 @@ def _processTGZturn(request):
         newLatestUpdate = str((int(time.time()) * 1000) + newVer)
         currentGame.latestUpdate = newLatestUpdate
 
-        set_current_players(jsonData["nextPlayer"], acting_username=request.user.username, old_latest_update=oldVer)
+        set_current_players(jsonData["nextPlayer"], acting_username=request.user.username, old_latest_update=oldVer, next_player_seats=jsonData.get("nextPlayerSeats"))
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -446,7 +446,7 @@ def _processTGZturn(request):
             # Send Notifications
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
             if jsonData["nextPlayer"] != "" and jsonData["nextPlayer"] != "TgzBot" and jsonData["status"] != "FINISHED" and 102 not in loadedStartingOptions:
-                playerListToNotify = jsonData["nextPlayer"].split(",")
+                playerListToNotify = presenter.getArrayOfIsCurrentPlayers()
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
 
@@ -577,7 +577,7 @@ def _processTGZturn(request):
     elif action == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        set_current_players(jsonData["nextPlayer"])
+        set_current_players(jsonData["nextPlayer"], next_player_seats=jsonData.get("nextPlayerSeats"))
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -588,7 +588,7 @@ def _processTGZturn(request):
         # Send Notifications
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         if jsonData["nextPlayer"] != "" and jsonData["nextPlayer"] != "TgzBot" and 102 not in loadedStartingOptions:
-            playerListToNotify = jsonData["nextPlayer"].split(",")
+            playerListToNotify = presenter.getArrayOfIsCurrentPlayers()
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:

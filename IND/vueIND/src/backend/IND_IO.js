@@ -84,19 +84,23 @@ export async function saveGame(saveRewind, saveContext = false) {
 	// SHOULD BE NON-SIMUL
 	if (store.gameflow.turnOrder.length > 0) {
 		postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name] // USED > goes to currentPlayers
+		postData.nextPlayerSeats = [store.gameflow.turnOrder[0]]
 	} else if (store.gameflow.phase !== rf.PHASE_MERGER_BIDDING) {
 		// THIS IS JUST AN EMERGENCY CHECK
 		store.gameflow.turnOrder.push(0)
 		postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name]
+		postData.nextPlayerSeats = [store.gameflow.turnOrder[0]]
 		console.error("IND save: empty turn order outside merger bidding; re-exporting")
 		postData.data = funcs.exportModel()
 	}
 	if (store.gameflow.phase === rf.PHASE_MERGER_BIDDING) {
 		if (store.ongoingVars.bidTurnOrder.length > 0) {
 			postData.nextPlayer = [store.players[store.ongoingVars.bidTurnOrder[0]].name]
+			postData.nextPlayerSeats = [store.ongoingVars.bidTurnOrder[0]]
 		} else {
 			console.error(`CP() Error - Bidding. S.O.bTO: ${store.ongoingVars.bidTurnOrder}`)
 			postData.nextPlayer = []
+			postData.nextPlayerSeats = []
 		}
 	}
 
@@ -461,6 +465,7 @@ async function updateDataFromLoadRewind() {
 				action: "updateDataFromLoadRewind",
 				turn: store.gameflow.turn,
 				nextPlayer: [store.players[store.gameflow.turnOrder[0]].name], // USED > goes to currentPlayers
+				nextPlayerSeats: [store.gameflow.turnOrder[0]],
 				gameID: personal.gameID,
 				phase: store.gameflow.phase,
 				gameData: funcs.exportModel(),

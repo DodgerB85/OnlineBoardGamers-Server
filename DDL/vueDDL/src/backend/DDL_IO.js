@@ -27,11 +27,12 @@ export function getNextCurrentPlayers() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	if (!store.players.length || !store.gameflow.turnOrder.length) {
-		return { allIsCurrentPlayers: [], allRemainingPlayersInTurnOrder: [] }
+		return { allIsCurrentPlayers: [], allRemainingPlayersInTurnOrder: [], allIsCurrentPlayerSeats: [], allRemainingPlayerSeats: [] }
 	}
 	const allRemainingPlayersInTurnOrder = store.gameflow.turnOrder.map((idx) => store.players[idx].name)
 	const allIsCurrentPlayers = [allRemainingPlayersInTurnOrder[0]]
-	return { allIsCurrentPlayers, allRemainingPlayersInTurnOrder }
+	const allRemainingPlayerSeats = [...store.gameflow.turnOrder]
+	return { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, allIsCurrentPlayerSeats: allRemainingPlayerSeats.slice(0, 1), allRemainingPlayerSeats }
 }
 
 function buildTournamentData() {
@@ -66,7 +67,7 @@ async function performSave(saveRewind = true, options = {}) {
 	personal.haltPlay = true
 	store.viewSettings.showLoader = true
 
-	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder } = getNextCurrentPlayers()
+	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, allIsCurrentPlayerSeats, allRemainingPlayerSeats } = getNextCurrentPlayers()
 
 	const postData = {
 		action: "saveGame",
@@ -79,6 +80,8 @@ async function performSave(saveRewind = true, options = {}) {
 		saveRewind: saveRewind,
 		allIsCurrentPlayers,
 		allRemainingPlayersInTurnOrder,
+		allIsCurrentPlayerSeats,
+		allRemainingPlayerSeats,
 		noNotify: options.noNotify === true,
 	}
 
@@ -460,7 +463,7 @@ export async function loadRewind() {
 async function updateDataFromLoadRewind() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder } = getNextCurrentPlayers()
+	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, allIsCurrentPlayerSeats, allRemainingPlayerSeats } = getNextCurrentPlayers()
 	try {
 		const response = await fetch("/DDL/processDDLturn/", {
 			method: "POST",
@@ -469,6 +472,8 @@ async function updateDataFromLoadRewind() {
 				turn: store.gameflow.turn,
 				allIsCurrentPlayers,
 				allRemainingPlayersInTurnOrder,
+				allIsCurrentPlayerSeats,
+				allRemainingPlayerSeats,
 						gameID: personal.gameID,
 				phase: store.gameflow.phase,
 				gameData: model.exportGameData(),

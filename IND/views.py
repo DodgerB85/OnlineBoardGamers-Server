@@ -293,7 +293,7 @@ def _processINDturn(request):
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         nextPlayer = jsonData.get("nextPlayer", [])
-        presenter.setCurrentPlayersFromArrInTurnOrder(nextPlayer, acting_username=request.user.username, old_latest_update=oldVer)
+        presenter.setCurrentPlayersFromArrInTurnOrder(nextPlayer, acting_username=request.user.username, old_latest_update=oldVer, current_player_seats=jsonData.get("nextPlayerSeats"))
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -313,7 +313,7 @@ def _processINDturn(request):
             # Send Notifications
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
             if len(nextPlayer) > 0 and nextPlayer[0] != "IndBot" and jsonData["status"] != "FINISHED" and 102 not in loadedStartingOptions:
-                playerListToNotify = [player.strip() for player in nextPlayer]
+                playerListToNotify = presenter.getArrayOfIsCurrentPlayers()
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
                 # Also remove the player if it is R&D phase and they have a pre move
@@ -462,7 +462,7 @@ def _processINDturn(request):
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
         nextPlayer = jsonData.get("nextPlayer", [])
-        presenter.setCurrentPlayersFromArrInTurnOrder(nextPlayer)
+        presenter.setCurrentPlayersFromArrInTurnOrder(nextPlayer, current_player_seats=jsonData.get("nextPlayerSeats"))
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -473,7 +473,7 @@ def _processINDturn(request):
         # Send Notifications
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         if len(nextPlayer) > 0 and nextPlayer[0] != "IndBot" and 102 not in loadedStartingOptions:
-            playerListToNotify = nextPlayer
+            playerListToNotify = presenter.getArrayOfIsCurrentPlayers()
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if len(playerListToNotify) > 0:

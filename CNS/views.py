@@ -179,7 +179,7 @@ def _processCNSturn(request):
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], acting_username=request.user.username, old_latest_update=oldVer)
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], acting_username=request.user.username, old_latest_update=oldVer, current_player_seats=jsonData.get("nextPlayerSeats"))
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -199,7 +199,7 @@ def _processCNSturn(request):
             # Send Notifications
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
             if len(jsonData["nextPlayer"]) > 0 and jsonData["status"] != "FINISHED" and rf.SO_TRAINING_GAME not in loadedStartingOptions:
-                playerListToNotify = jsonData["nextPlayer"]
+                playerListToNotify = presenter.getArrayOfIsCurrentPlayers()
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
                 if "CnsBot" in playerListToNotify:
@@ -328,10 +328,7 @@ def _processCNSturn(request):
 
         # Update current players
         next_player_usernames = jsonData["nextPlayer"] if jsonData["nextPlayer"] else []
-        currentGame.players.exclude(is_kicked=True).update(is_current=False)
-        if next_player_usernames:
-            for username in next_player_usernames:
-                currentGame.players.filter(player__username=username, is_kicked=False).update(is_current=True)
+        presenter.setCurrentPlayersFromArrInTurnOrder(next_player_usernames, current_player_seats=jsonData.get("nextPlayerSeats"))
 
         currentGame.gameData = jsonData["gameData"]
 
@@ -343,7 +340,7 @@ def _processCNSturn(request):
         # Send Notifications
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         if len(jsonData["nextPlayer"]) > 0 and rf.SO_TRAINING_GAME not in loadedStartingOptions:
-            playerListToNotify = jsonData["nextPlayer"]
+            playerListToNotify = presenter.getArrayOfIsCurrentPlayers()
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if "CnsBot" in playerListToNotify:

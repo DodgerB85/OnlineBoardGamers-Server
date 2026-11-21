@@ -130,6 +130,7 @@ export async function unlockTurn(type) {
 		latestUpdate: personal.latestUpdate,
 		action: action,
 		nextPlayer: controller.getCurrentPlayersArray(),
+		nextPlayerSeats: controller.getCurrentPlayerSeatsArray(),
 		gameID: personal.gameID,
 	}
 
@@ -282,6 +283,7 @@ export async function saveInProgressMap() {
 	//store.gameflow.currentPlayer = store.gameflow.turnOrder[0]
 
 	let nextPlayer = [controller.currentPlayerObj().name]
+	let nextPlayerSeats = [controller.currentPlayerIndex()]
 
 	// Check whether to move into placing restos
 	let nextPhase = false
@@ -308,6 +310,7 @@ export async function saveInProgressMap() {
 		action: "saveInProgressMap", // USED
 		data: funcs.exportFCMmodel(false, false), // USED
 		nextPlayer: nextPlayer, // USED > goes to currentPlayers
+		nextPlayerSeats: nextPlayerSeats, // USED > goes to currentPlayers
 		gameID: personal.gameID, // USED
 		tiles: map.getOriginalTiles(false),
 	}
@@ -355,6 +358,7 @@ export async function saveModuleSelection(moduleIndex) {
 	store.gameflow.turnOrder.push(store.gameflow.turnOrder.shift())
 
 	let nextPlayer = [controller.currentPlayerObj().name]
+	let nextPlayerSeats = [controller.currentPlayerIndex()]
 
 	let SM = 999
 	if (moduleIndex !== 999) SM = rules.getAvailableModules()[moduleIndex]
@@ -393,6 +397,7 @@ export async function saveModuleSelection(moduleIndex) {
 		action: "saveModuleSelection",
 		data: funcs.exportFCMmodel(false, false),
 		nextPlayer: nextPlayer,
+		nextPlayerSeats: nextPlayerSeats,
 		gameID: personal.gameID,
 		SM: SM,
 		phase: store.gameflow.phase,
@@ -454,6 +459,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 	if (!phase && phase !== 0) alert(i18n.global.t("alerts.missingPhase", { phase }))
 
 	let nextPlayer = [controller.currentPlayerObj().name]
+	let nextPlayerSeats = [controller.currentPlayerIndex()]
 	// If you are saving FROM non simul, and next phase IS simul, construct the whole list
 	if (!store.bailout.pending && controller.isSimulPhase(phase)) {
 		// Check if simul phase is being reset, eg rewind / resign / kick
@@ -469,6 +475,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 		for (let i = 0; i < store.gameflow.turnOrder.length; i++) {
 			nextPlayer.push(store.players[store.gameflow.turnOrder[i]].name)
 		}
+		nextPlayerSeats = [...store.gameflow.turnOrder]
 	}
 
 	let BKSN = ""
@@ -499,6 +506,7 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 		saveRewind: saveRewind,
 		BKSN: BKSN,
 		nextPlayer: nextPlayer,
+		nextPlayerSeats: nextPlayerSeats,
 		checksum: restartAnySimulPhase,
 		gameData: gameData,
 		IPM: isPointlessMove,
@@ -1262,10 +1270,12 @@ export async function updateDataFromLoadRewind() {
 	}
 
 	let nextPlayer = [controller.currentPlayerObj().name]
+	let nextPlayerSeats = [controller.currentPlayerIndex()]
 	let phase = store.gameflow.phase
 	// Simul Next Player
 	if (phase == rf.PHASE_SETUP_RESERVE || phase == rf.PHASE_RESTRUCTURING || ((phase == rf.PHASE_CLEAN_UP || phase == rf.PHASE_PAYDAY) && !store.startingOptions.strictPaydayFridge)) {
 		nextPlayer = []
+		nextPlayerSeats = store.players.map((_, index) => index)
 		//let u = _.uniq(store.gameflow.ready);
 		for (let i = 0; i < store.players.length; i++) {
 			nextPlayer.push(store.players[i].name)
@@ -1280,6 +1290,7 @@ export async function updateDataFromLoadRewind() {
 			action: "updateDataFromLoadRewind",
 			turn: store.gameflow.turn,
 			nextPlayer: nextPlayer,
+			nextPlayerSeats: nextPlayerSeats,
 			gameID: personal.gameID,
 			phase: store.gameflow.phase,
 			data: funcs.exportFCMmodel(false, false),

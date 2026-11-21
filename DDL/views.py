@@ -241,8 +241,8 @@ def _processDDLturn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"])
-        presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], current_player_seats=jsonData.get("allIsCurrentPlayerSeats"))
+        presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData["allRemainingPlayersInTurnOrder"], seats=jsonData.get("allRemainingPlayerSeats"))
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -354,8 +354,11 @@ def performSaveDDLGame(request, currentGame, jsonData):
     newVer = (int(db_latest_update) % 1000) + 1
     currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-    presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], acting_username=nameToUse, old_latest_update=oldVer)
-    presenter.setServerCurrentPlayerNamesInTurnOrder(jsonData.get("allRemainingPlayersInTurnOrder") or jsonData.get("allIsCurrentPlayers") or [])
+    presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["allIsCurrentPlayers"], acting_username=nameToUse, old_latest_update=oldVer, current_player_seats=jsonData.get("allIsCurrentPlayerSeats"))
+    presenter.setServerCurrentPlayerNamesInTurnOrder(
+        jsonData.get("allRemainingPlayersInTurnOrder") or jsonData.get("allIsCurrentPlayers") or [],
+        seats=jsonData.get("allRemainingPlayerSeats") or jsonData.get("allIsCurrentPlayerSeats"),
+    )
 
     # SAVE BEFORE NOTIFICATIONS
     currentGame.save()
@@ -376,7 +379,7 @@ def performSaveDDLGame(request, currentGame, jsonData):
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         allIsCurrentPlayers = jsonData["allIsCurrentPlayers"]
         if len(allIsCurrentPlayers) > 0 and rf.SO_TRAINING_GAME not in loadedStartingOptions and not jsonData.get("noNotify"):
-            playerListToNotify = [p.strip() for p in allIsCurrentPlayers if p.strip() not in {request.user.username, "DdlBot"}]
+            playerListToNotify = [p.strip() for p in presenter.getArrayOfIsCurrentPlayers() if p.strip() not in {request.user.username, "DdlBot"}]
             if len(playerListToNotify) > 0:
                 presenter.sendYourTurnNotification("DDL", playerListToNotify, currentGame.id, presenter.getGameName(), currentGame, oldVer)
 

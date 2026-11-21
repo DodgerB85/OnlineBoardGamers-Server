@@ -60,6 +60,8 @@ export async function saveGame(payload) {
 		status: payload.status,
 		allIsCurrentPlayers: payload.allIsCurrentPlayers,
 		allRemainingPlayersInTurnOrder: payload.allRemainingPlayersInTurnOrder,
+		allIsCurrentPlayerSeats: payload.allIsCurrentPlayerSeats,
+		allRemainingPlayerSeats: payload.allRemainingPlayerSeats,
 		saveRewind: payload.saveRewind ?? true,
 		winnerUsername: payload.winner,
 		finalPositions: payload.finalPositions,
@@ -120,6 +122,8 @@ export async function updateDataFromLoadRewind(payload) {
 		gameData: JSON.stringify(payload.gameData),
 		allIsCurrentPlayers: payload.allIsCurrentPlayers,
 		allRemainingPlayersInTurnOrder: payload.allRemainingPlayersInTurnOrder,
+		allIsCurrentPlayerSeats: payload.allIsCurrentPlayerSeats,
+		allRemainingPlayerSeats: payload.allRemainingPlayerSeats,
 	})
 	if (!response.ok) throw new Error("Network response was not ok")
 	return response.json()

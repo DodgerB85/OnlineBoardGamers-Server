@@ -321,7 +321,7 @@ def _processBUSturn(request):
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
         # Set current players via presenter
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], acting_username=request.user.username, old_latest_update=oldVer)
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], acting_username=request.user.username, old_latest_update=oldVer, current_player_seats=jsonData.get("nextPlayerSeats"))
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -350,7 +350,7 @@ def _processBUSturn(request):
             # Send Notifications
             starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
             if len(jsonData["nextPlayer"]) > 0 and jsonData["status"] != "FINISHED" and 102 not in starting_options:
-                playerListToNotify = jsonData["nextPlayer"]
+                playerListToNotify = presenter.getArrayOfIsCurrentPlayers()
                 if "BusBot" in playerListToNotify:
                     playerListToNotify.remove("BusBot")
                 if request.user.username in playerListToNotify:
@@ -464,7 +464,7 @@ def _processBUSturn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], current_player_seats=jsonData.get("nextPlayerSeats"))
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -475,7 +475,7 @@ def _processBUSturn(request):
         # Send Notifications
         starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         if len(jsonData["nextPlayer"]) > 0 and 102 not in starting_options:
-            playerListToNotify = jsonData["nextPlayer"]
+            playerListToNotify = presenter.getArrayOfIsCurrentPlayers()
             if "BusBot" in playerListToNotify:
                 playerListToNotify.remove("BusBot")
             if request.user.username in playerListToNotify:

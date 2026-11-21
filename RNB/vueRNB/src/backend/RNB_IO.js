@@ -85,7 +85,7 @@ export async function saveGame(saveRewind, saveContext = false) {
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
-	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, pendingPlayersArr } = getNextCurrentPlayers()
+	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, allIsCurrentPlayerSeats, allRemainingPlayerSeats, pendingPlayersArr } = getNextCurrentPlayers()
 
 	let gameDataB64 = funcs.exportRNBmodel(false)
 	if (saveContext) {
@@ -106,6 +106,8 @@ export async function saveGame(saveRewind, saveContext = false) {
 		BKSN: BKSN,
 		allIsCurrentPlayers: allIsCurrentPlayers,
 		allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
+		allIsCurrentPlayerSeats: allIsCurrentPlayerSeats,
+		allRemainingPlayerSeats: allRemainingPlayerSeats,
 		pendingPlayersArr: pendingPlayersArr,
 	}
 
@@ -183,6 +185,8 @@ export function getNextCurrentPlayers() {
 	//const personal = usePersonalStore()
 	let allIsCurrentPlayers = []
 	let allRemainingPlayersInTurnOrder = []
+	let allIsCurrentPlayerSeats = []
+	let allRemainingPlayerSeats = []
 	let pendingPlayers = []
 
 	if (store.players.length === 1) {
@@ -193,6 +197,8 @@ export function getNextCurrentPlayers() {
 		return {
 			allIsCurrentPlayers: allIsCurrentPlayers,
 			allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
+			allIsCurrentPlayerSeats: [0],
+			allRemainingPlayerSeats: [0],
 			pendingPlayersArr: pendingPlayers,
 		}
 	}
@@ -202,6 +208,8 @@ export function getNextCurrentPlayers() {
 		return {
 			allIsCurrentPlayers: allIsCurrentPlayers,
 			allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
+			allIsCurrentPlayerSeats: [],
+			allRemainingPlayerSeats: [],
 			pendingPlayersArr: pendingPlayers,
 		}
 
@@ -210,6 +218,8 @@ export function getNextCurrentPlayers() {
 		return {
 			allIsCurrentPlayers: [store.players[store.gameflow.turnOrder[0]].name],
 			allRemainingPlayersInTurnOrder: [store.players[store.gameflow.turnOrder[0]].name],
+			allIsCurrentPlayerSeats: [store.gameflow.turnOrder[0]],
+			allRemainingPlayerSeats: [store.gameflow.turnOrder[0]],
 			pendingPlayersArr: [],
 		}
 	}
@@ -223,17 +233,22 @@ export function getNextCurrentPlayers() {
 				pendingPlayers.push(store.players[store.gameflow.turnOrder[i]].name)
 				allIsCurrentPlayers.push(store.players[store.gameflow.turnOrder[i]].name)
 				allRemainingPlayersInTurnOrder.push(store.players[store.gameflow.turnOrder[i]].name)
+				allIsCurrentPlayerSeats.push(store.gameflow.turnOrder[i])
+				allRemainingPlayerSeats.push(store.gameflow.turnOrder[i])
 			}
 		}
 	} else if (controller.isMainPhaseAndPseudoSimul()) {
 		allIsCurrentPlayers.push(store.players[store.gameflow.turnOrder[0]].name)
 		allRemainingPlayersInTurnOrder.push(store.players[store.gameflow.turnOrder[0]].name)
+		allIsCurrentPlayerSeats.push(store.gameflow.turnOrder[0])
+		allRemainingPlayerSeats.push(store.gameflow.turnOrder[0])
 		// start at the SECOND player in turnOrder
 		let startingIndex = 1
 		for (let i = startingIndex; i < store.gameflow.turnOrder.length; i++) {
 			if (store.players[store.gameflow.turnOrder[i]].displayName !== rf.BOT_NAME) {
 				pendingPlayers.push(store.players[store.gameflow.turnOrder[i]].name)
 				allRemainingPlayersInTurnOrder.push(store.players[store.gameflow.turnOrder[i]].name)
+				allRemainingPlayerSeats.push(store.gameflow.turnOrder[i])
 			}
 		}
 	}
@@ -241,6 +256,8 @@ export function getNextCurrentPlayers() {
 	return {
 		allIsCurrentPlayers: allIsCurrentPlayers,
 		allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
+		allIsCurrentPlayerSeats: allIsCurrentPlayerSeats,
+		allRemainingPlayerSeats: allRemainingPlayerSeats,
 		pendingPlayersArr: pendingPlayers,
 	}
 }
@@ -336,7 +353,7 @@ export async function saveStackMove(saveRewind = true, overrideBKSN = null, over
 	}
 	productionSetup.dropPlayersWithoutChoices()
 
-	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, pendingPlayersArr } = getNextCurrentPlayers()
+	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, allIsCurrentPlayerSeats, allRemainingPlayerSeats, pendingPlayersArr } = getNextCurrentPlayers()
 
 	let gameDataB64 = funcs.exportRNBmodel(false)
 	let actionStack = ""
@@ -384,6 +401,8 @@ export async function saveStackMove(saveRewind = true, overrideBKSN = null, over
 
 	postData.allIsCurrentPlayers = allIsCurrentPlayers
 	postData.allRemainingPlayersInTurnOrder = allRemainingPlayersInTurnOrder
+	postData.allIsCurrentPlayerSeats = allIsCurrentPlayerSeats
+	postData.allRemainingPlayerSeats = allRemainingPlayerSeats
 	postData.pendingPlayersArr = pendingPlayersArr
 
 	// Use this to kickPass another player and remove their flexi time
@@ -575,13 +594,20 @@ export async function saveConflictMove(saveRewind = true, overrideBKSN = null, o
 	let BKSN = overrideBKSN !== null ? overrideBKSN : (personal.pov >= 0 ? store.players[personal.pov].name : personal.name)
 	const effectivePov = overridePlayerIndex !== null ? overridePlayerIndex : personal.pov
 	let clientNextPlayerNames = []
+	let clientNextPlayerSeats = []
 	// Decision is simul, so add everyone who hasn't moved
 	if (rf.PHASE_CONFLICT_DECISIONS.includes(store.gameflow.phase)) {
 		for (let i = 0; i < store.gameflow.turnOrder.length; i++) {
-			if (store.gameflow.turnOrder[i] !== effectivePov && store.players[store.gameflow.turnOrder[i]].displayName !== rf.BOT_NAME) clientNextPlayerNames.push(store.players[store.gameflow.turnOrder[i]].name)
+			if (store.gameflow.turnOrder[i] !== effectivePov && store.players[store.gameflow.turnOrder[i]].displayName !== rf.BOT_NAME) {
+				clientNextPlayerNames.push(store.players[store.gameflow.turnOrder[i]].name)
+				clientNextPlayerSeats.push(store.gameflow.turnOrder[i])
+			}
 		}
 	} else if (rf.PHASE_CONFLICT_PRAYINGS.concat(rf.PHASE_CONFLICT_TURN_ORDERS).includes(store.gameflow.phase)) {
-		if (store.gameflow.turnOrder.length > 0) clientNextPlayerNames.push(store.players[store.gameflow.turnOrder[0]].name)
+		if (store.gameflow.turnOrder.length > 0) {
+			clientNextPlayerNames.push(store.players[store.gameflow.turnOrder[0]].name)
+			clientNextPlayerSeats.push(store.gameflow.turnOrder[0])
+		}
 	}
 
 	const nextSinglePlayerUsername = store.gameflow.turnOrder.length > 0 ? store.players[store.gameflow.turnOrder[0]].name : ""
@@ -592,8 +618,11 @@ export async function saveConflictMove(saveRewind = true, overrideBKSN = null, o
 	// page-loading clients rebuild a broken turn order (initLoadGame), which can let a
 	// wrong player take the phase. Conflict phases stay single-player as before.
 	let allRemainingPlayersInTurnOrder = [nextSinglePlayerUsername]
+	let allRemainingPlayerSeats = store.gameflow.turnOrder.length > 0 ? [store.gameflow.turnOrder[0]] : []
 	if (rf.MAIN_PHASES.includes(store.gameflow.phase)) {
-		allRemainingPlayersInTurnOrder = getNextCurrentPlayers().allRemainingPlayersInTurnOrder
+		const next = getNextCurrentPlayers()
+		allRemainingPlayersInTurnOrder = next.allRemainingPlayersInTurnOrder
+		allRemainingPlayerSeats = next.allRemainingPlayerSeats
 	}
 
 	let postData = {
@@ -608,8 +637,10 @@ export async function saveConflictMove(saveRewind = true, overrideBKSN = null, o
 		conflictPresetData: conflictPresetData,
 		saveRewind: saveRewind,
 		clientNextPlayerNames: clientNextPlayerNames,
+		clientNextPlayerSeats: clientNextPlayerSeats,
 		nextSinglePlayerUsername: nextSinglePlayerUsername,
 		allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
+		allRemainingPlayerSeats: allRemainingPlayerSeats,
 	}
 
 	// Use this to kickPass another player and remove their flexi time
@@ -1007,7 +1038,7 @@ export async function saveAndUpdateNotifictionsAfterStack(currentPlayerNeedsToFi
 
 	let csrftoken = funcs.getCookie("csrftoken")
 
-	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, pendingPlayersArr } = getNextCurrentPlayers()
+	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, allIsCurrentPlayerSeats, allRemainingPlayerSeats, pendingPlayersArr } = getNextCurrentPlayers()
 
 	let gameDataB64 = funcs.exportRNBmodel(false)
 	personal.gameDataB64 = gameDataB64
@@ -1050,6 +1081,8 @@ export async function saveAndUpdateNotifictionsAfterStack(currentPlayerNeedsToFi
 
 	postData.allIsCurrentPlayers = allIsCurrentPlayers
 	postData.allRemainingPlayersInTurnOrder = allRemainingPlayersInTurnOrder
+	postData.allIsCurrentPlayerSeats = allIsCurrentPlayerSeats
+	postData.allRemainingPlayerSeats = allRemainingPlayerSeats
 	postData.pendingPlayersArr = pendingPlayersArr
 	postData.currentPlayerNeedsToFixMove = currentPlayerNeedsToFixMove
 	postData.transactionID = personal.transactionID
@@ -1272,7 +1305,7 @@ async function updateDataFromLoadRewind() {
 	store.viewSettings.showLoader = true
 	let csrftoken = funcs.getCookie("csrftoken")
 
-	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, pendingPlayersArr } = getNextCurrentPlayers()
+	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, allIsCurrentPlayerSeats, allRemainingPlayerSeats, pendingPlayersArr } = getNextCurrentPlayers()
 
 	let gameDataB64 = funcs.exportRNBmodel(false)
 
@@ -1284,6 +1317,8 @@ async function updateDataFromLoadRewind() {
 				turn: store.gameflow.turn,
 				allIsCurrentPlayers: allIsCurrentPlayers, // USED > goes to currentPlayers
 				allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
+				allIsCurrentPlayerSeats: allIsCurrentPlayerSeats,
+				allRemainingPlayerSeats: allRemainingPlayerSeats,
 				pendingPlayersArr: pendingPlayersArr,
 				gameID: personal.gameID,
 				phase: store.gameflow.phase,

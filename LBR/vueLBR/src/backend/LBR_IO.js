@@ -72,6 +72,7 @@ async function doSaveGame() {
 	const game = store.game;
 	const status = game.gameOver ? "FINISHED" : "ACTIVE";
 	const nextPlayer = status === "FINISHED" ? [] : [store.playerNames[currentActor(game)]];
+	const nextPlayerSeats = status === "FINISHED" ? [] : [currentActor(game)];
 	const postData = {
 		action: "saveGame",
 		gameID: store.gameID,
@@ -80,6 +81,7 @@ async function doSaveGame() {
 		turn: game.turnNumber,
 		phase: phaseOf(game),
 		nextPlayer,
+		nextPlayerSeats,
 		status,
 		saveRewind: status !== "FINISHED",
 		checkName: personal.name,

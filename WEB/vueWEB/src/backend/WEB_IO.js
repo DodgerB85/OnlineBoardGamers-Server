@@ -135,10 +135,12 @@ export async function saveGame(saveRewind, saveContext = false) {
 	// SHOULD BE NON-SIMUL
 	if (store.gameflow.turnOrder.length > 0) {
 		postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name] // USED > goes to currentPlayers
+		postData.nextPlayerSeats = [store.gameflow.turnOrder[0]]
 	} else {
 		// THIS IS JUST AN EMERGENCY CHECK
 		store.gameflow.turnOrder.push(0)
 		postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name]
+		postData.nextPlayerSeats = [store.gameflow.turnOrder[0]]
 		alert("RE-EXPORT")
 		postData.data = funcs.exportWEBmodel()
 	}
@@ -424,6 +426,7 @@ async function updateDataFromLoadRewind() {
 	let csrftoken = funcs.getCookie("csrftoken")
 	// IF AT THE END OF NON-SIMUL PHASE, SET UP NEXT PLAYER
 	let nextPlayer = [store.players[store.gameflow.turnOrder[0]].name]
+	let nextPlayerSeats = [store.gameflow.turnOrder[0]]
 
 	let exportedModel = funcs.exportWEBmodel(false, false)
 	if (store.gameflow.phase === rf.PHASE_MID_ACTIONS) exportedModel = funcs.exportWEBmodel(true, false)
@@ -435,6 +438,7 @@ async function updateDataFromLoadRewind() {
 				action: "updateDataFromLoadRewind",
 				turn: store.gameflow.turn,
 				nextPlayer: nextPlayer, // USED > goes to currentPlayers
+				nextPlayerSeats: nextPlayerSeats,
 				gameID: personal.gameID,
 				phase: store.gameflow.phase,
 				gameData: exportedModel,

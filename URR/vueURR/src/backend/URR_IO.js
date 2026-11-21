@@ -33,19 +33,24 @@ export function getNextCurrentPlayers() {
 		return {
 			allIsCurrentPlayers: [personal.name],
 			allRemainingPlayersInTurnOrder: [personal.name],
+			allIsCurrentPlayerSeats: [store.gameflow.turnOrder[0]],
+			allRemainingPlayerSeats: [store.gameflow.turnOrder[0]],
 		}
 	}
 
 	const allIsCurrentPlayers = []
+	let allIsCurrentPlayerSeats = []
 	if (store.gameflow.turnOrder.length > 0) {
 		const currentPlayer = store.players[store.gameflow.turnOrder[0]]
 		// One remaining player persists bot moves so concurrent clients do not race.
 		const actingPlayer = currentPlayer.isMissing ? store.players[controller.botTurnPlayerIndex()] : currentPlayer
 		if (!actingPlayer) throw new Error(t("io.noActivePlayer"))
 		allIsCurrentPlayers.push(actingPlayer.name)
+		allIsCurrentPlayerSeats = [controller.botTurnPlayerIndex() >= 0 && currentPlayer.isMissing ? controller.botTurnPlayerIndex() : store.gameflow.turnOrder[0]]
 	}
-	const allRemainingPlayersInTurnOrder = store.gameflow.turnOrder.filter(idx => !store.players[idx].isMissing).map((idx) => store.players[idx].name)
-	return { allIsCurrentPlayers, allRemainingPlayersInTurnOrder }
+	const remainingSeats = store.gameflow.turnOrder.filter((idx) => !store.players[idx].isMissing)
+	const allRemainingPlayersInTurnOrder = remainingSeats.map((idx) => store.players[idx].name)
+	return { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, allIsCurrentPlayerSeats, allRemainingPlayerSeats: remainingSeats }
 }
 
 export async function saveGame(saveRewind = true) {
@@ -69,7 +74,7 @@ export async function saveGame(saveRewind = true) {
 		// The App.vue fallback retries the abandoned seat on the next load.
 		console.error("Unable to resolve inactive seats:", error)
 	}
-	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder } = getNextCurrentPlayers()
+	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, allIsCurrentPlayerSeats, allRemainingPlayerSeats } = getNextCurrentPlayers()
 
 	let postData = {
 		action: "saveGame",
@@ -84,6 +89,8 @@ export async function saveGame(saveRewind = true) {
 		saveRewind: saveRewind,
 		allIsCurrentPlayers: allIsCurrentPlayers,
 		allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
+		allIsCurrentPlayerSeats: allIsCurrentPlayerSeats,
+		allRemainingPlayerSeats: allRemainingPlayerSeats,
 	}
 
 	console.log("Saving data....")
@@ -544,7 +551,7 @@ export async function loadRewind() {
 async function updateDataFromLoadRewind() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
-	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder } = getNextCurrentPlayers()
+	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, allIsCurrentPlayerSeats, allRemainingPlayerSeats } = getNextCurrentPlayers()
 	try {
 		const response = await fetch("/URR/processURRturn/", {
 			method: "POST",
@@ -553,6 +560,8 @@ async function updateDataFromLoadRewind() {
 				turn: store.gameflow.turn,
 				allIsCurrentPlayers: allIsCurrentPlayers,
 				allRemainingPlayersInTurnOrder: allRemainingPlayersInTurnOrder,
+				allIsCurrentPlayerSeats: allIsCurrentPlayerSeats,
+				allRemainingPlayerSeats: allRemainingPlayerSeats,
 				gameID: personal.gameID,
 				phase: store.gameflow.phase,
 				gameDataCompressed: funcs.exportURRmodel(store.gameflow.phase === rf.PHASE_GAME_OVER),

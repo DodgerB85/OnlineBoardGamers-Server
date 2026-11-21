@@ -56,11 +56,14 @@ export async function saveGame(saveRewind) {
 		saveRewind: saveRewind,
 		nextPlayer: [], // USED > goes to currentPlayers
 	}
-	if (store.gameflow.turnOrder.length > 0) postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name]
-	else if (store.gameflow.gameEnded === 0) {
+	if (store.gameflow.turnOrder.length > 0) {
+		postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name]
+		postData.nextPlayerSeats = [store.gameflow.turnOrder[0]]
+	} else if (store.gameflow.gameEnded === 0) {
 		alert(i18n.global.t("io.zeroToLength"))
 		store.gameflow.turnOrder.push(0)
 		postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name]
+		postData.nextPlayerSeats = [store.gameflow.turnOrder[0]]
 		postData.data = funcs.exportBUSmodel(false)
 	}
 
@@ -371,6 +374,7 @@ async function updateDataFromLoadRewind() {
 				action: "updateDataFromLoadRewind",
 				turn: store.gameflow.turn,
 				nextPlayer: [store.players[store.gameflow.turnOrder[0]].name], // USED > goes to currentPlayers
+				nextPlayerSeats: [store.gameflow.turnOrder[0]],
 				gameID: personal.gameID,
 				phase: store.gameflow.phase,
 				gameData: funcs.exportBUSmodel(false),

@@ -117,20 +117,24 @@ export async function saveGame(saveRewind, saveContext = false, deleteMoves = fa
 	if (window.initData.gameData === "") postData.mapTiles = [...store.mapData.seed]
 
 	// SHOULD BE NON-SIMUL
-	if (store.gameflow.turnOrder.length > 0)
+	if (store.gameflow.turnOrder.length > 0) {
 		postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name] // USED > goes to currentPlayers
-	else {
+		postData.nextPlayerSeats = [store.gameflow.turnOrder[0]]
+	} else {
 		// THIS IS JUST AN EMERGENCY CHECK ??
 		store.gameflow.turnOrder.push(0)
 		postData.nextPlayer = [store.players[store.gameflow.turnOrder[0]].name]
+		postData.nextPlayerSeats = [store.gameflow.turnOrder[0]]
 		rf.doAdminAlrt("RE-EXPORT")
 		postData.data = funcs.exportModel()
 	}
 
 	if (controller.isSimulPhase(store.gameflow.phase)) {
 		const filteredNames = store.players.filter((player) => player.displayName != rf.BOT_NAME).map((player) => player.displayName)
+		const nonBotSeats = store.players.map((player, index) => (player.displayName != rf.BOT_NAME ? index : null)).filter((index) => index !== null)
 
 		postData.nextPlayer = filteredNames //.join(",")
+		postData.nextPlayerSeats = nonBotSeats
 	}
 
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
@@ -232,6 +236,7 @@ export async function sendNotification(name) {
 		status: "ACTIVE",
 		gameID: personal.gameID,
 		nextPlayer: [name],
+		nextPlayerSeats: [store.players.findIndex((player) => player.name === name)],
 	}
 
 	try {
@@ -1028,6 +1033,7 @@ async function updateDataFromLoadRewind() {
 				action: "updateDataFromLoadRewind",
 				turn: store.gameflow.turn,
 				nextPlayer: [store.players[store.gameflow.turnOrder[0]].name], // USED > goes to currentPlayers
+				nextPlayerSeats: [store.gameflow.turnOrder[0]],
 				gameID: personal.gameID,
 				phase: store.gameflow.phase,
 				gameData: funcs.exportModel(),

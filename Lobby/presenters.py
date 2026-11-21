@@ -429,27 +429,43 @@ class GamePresenter:
     def getAiPlayerUsernames(self):
         return set(self.gameObj.players.filter(is_ai=True, player__isnull=False).values_list("player__username", flat=True))
 
-    def _setRemainingTurnOrder(self, names):
+    def _resolveTurnOrderGamePlayers(self, names, seats=None):
+        """Match a turn-order payload to GamePlayers; seats win over legacy names."""
+        players = list(self.gameObj.players.select_related("player"))
+        by_seat = {gp.seat_order: gp for gp in players if gp.player}
+        by_name = {gp.player.username: gp for gp in players if gp.player}
+        names = names if isinstance(names, (list, tuple)) else []
+        seats = seats if isinstance(seats, (list, tuple)) else []
+        resolved = []
+        seen = set()
+        for index in range(max(len(names), len(seats))):
+            seat = seats[index] if index < len(seats) else None
+            if isinstance(seat, str) and seat.isdigit():
+                seat = int(seat)
+            gp = by_seat.get(seat) if isinstance(seat, int) else None
+            if gp is None and index < len(names):
+                gp = by_name.get(names[index])
+            if gp and not (gp.is_kicked and not gp.is_ai) and gp.pk not in seen:
+                resolved.append(gp)
+                seen.add(gp.pk)
+        return resolved
+
+    def _setRemainingTurnOrderGps(self, game_players):
         """Set each player's 1-based position in the current turn order; clear the rest."""
         from Lobby.models import GamePlayer
 
-        names = names or []
-        players = list(self.gameObj.players.select_related("player"))
-        by_username = {gp.player.username: gp for gp in players if gp.player}
-        positions = {}
-        for position, name in enumerate(names, start=1):
-            gp = by_username.get(name)
-            if gp:
-                positions[gp.pk] = position
-
+        positions = {gp.pk: position for position, gp in enumerate(game_players or [], start=1)}
         to_update = []
-        for gp in players:
+        for gp in self.gameObj.players.select_related("player"):
             value = positions.get(gp.pk)
             if gp.remainingTurnOrder != value:
                 gp.remainingTurnOrder = value
                 to_update.append(gp)
         if to_update:
             GamePlayer.objects.bulk_update(to_update, ["remainingTurnOrder"])
+
+    def _setRemainingTurnOrder(self, names, seats=None):
+        self._setRemainingTurnOrderGps(self._resolveTurnOrderGamePlayers(names, seats))
 
     def getRemainingTurnOrderNames(self):
         """Turn-order queue as usernames, ordered by GamePlayer.remainingTurnOrder."""
@@ -468,7 +484,7 @@ class GamePresenter:
                 return legacy
         return self.gameObj.serverCurrentPlayerNamesInTurnOrder or []
 
-    def setServerCurrentPlayerNamesInTurnOrder(self, playersInTurnOrderArray):
+    def setServerCurrentPlayerNamesInTurnOrder(self, playersInTurnOrderArray, seats=None):
         if self.gameObj.maxPlayers == 1:
             solo_gp = self.gameObj.players.first()
             if solo_gp and solo_gp.player:
@@ -478,17 +494,17 @@ class GamePresenter:
                 return
         # A stale client saves before it drops a just-kicked player from its own turn order,
         # so filter here too or the queue names a turn no is_current flag backs.
-        kicked_usernames = set(self.gameObj.players.filter(is_kicked=True, is_ai=False).values_list("player__username", flat=True))
-        playersInTurnOrderArray = [name for name in (playersInTurnOrderArray or []) if name not in kicked_usernames]
-        self._setRemainingTurnOrder(playersInTurnOrderArray)
-        self.gameObj.serverCurrentPlayerNamesInTurnOrder = playersInTurnOrderArray
+        game_players = self._resolveTurnOrderGamePlayers(playersInTurnOrderArray, seats)
+        self._setRemainingTurnOrderGps(game_players)
+        self.gameObj.serverCurrentPlayerNamesInTurnOrder = [gp.player.username for gp in game_players]
         self.gameObj.save()
 
-    def setCurrentPlayersFromArrInTurnOrder(self, current_players_array, acting_username=None, old_latest_update=None):
+    def setCurrentPlayersFromArrInTurnOrder(self, current_players_array, acting_username=None, old_latest_update=None, current_player_seats=None):
         """Set current players by updating is_current on GamePlayer instances"""
         record_player_availability_for_turn_change(self.gameObj, acting_username, old_latest_update)
         record_hot_streak(self.gameObj, acting_username)
-        if not current_players_array or len(current_players_array) == 0:
+        has_turn_order = bool(current_players_array) or bool(current_player_seats)
+        if not has_turn_order:
             # SOLO GAME FAILSAFE: If maxPlayers==1, the only player must ALWAYS be isCurrent
             if self.gameObj.maxPlayers == 1:
                 solo_gp = self.gameObj.players.first()
@@ -509,12 +525,10 @@ class GamePresenter:
             self.gameObj.save()
             return
 
-        # The client saves before it drops a just-kicked player from its own turn order,
-        # so a kicked name can arrive here - keeping it would leave the turn-order copy
-        # claiming a turn that no is_current flag backs.
-        kicked_usernames = set(self.gameObj.players.filter(is_kicked=True).values_list("player__username", flat=True))
-        cleaned_players_array = [name for name in current_players_array if name not in kicked_usernames]
-        self._setRemainingTurnOrder(cleaned_players_array)
+        # Seats are the stable identity; names remain the stale-tab fallback.
+        current_gps = self._resolveTurnOrderGamePlayers(current_players_array, current_player_seats)
+        cleaned_players_array = [gp.player.username for gp in current_gps]
+        self._setRemainingTurnOrderGps(current_gps)
         self.gameObj.serverCurrentPlayerNamesInTurnOrder = cleaned_players_array
         if self.gameObj.gameCode == "HLC":
             # Keep HLC's own queue in step with the authoritative server queue even
@@ -525,11 +539,12 @@ class GamePresenter:
 
         to_update = []
         game_players = self.gameObj.players.exclude(is_kicked=True, is_ai=False).select_related("player")
+        current_ids = {gp.pk for gp in current_gps}
 
         for gp in game_players:
             if gp.player:
                 was_current = gp.is_current
-                gp.is_current = gp.player.username in cleaned_players_array
+                gp.is_current = gp.pk in current_ids
                 # SOLO GAME FAILSAFE: If maxPlayers==1, the only player must ALWAYS be isCurrent
                 if self.gameObj.maxPlayers == 1:
                     gp.is_current = True
@@ -547,17 +562,18 @@ class GamePresenter:
     # for example player A makes a simul move that isn't picked up by player B, then player A
     # will rempve themselves from is_current, and then when B sunmits thinking player A needs to move,
     # it won't "reset" them as needing to move
-    def reduceCurrentPlayersUsingArray(self, current_players_array):
+    def reduceCurrentPlayersUsingArray(self, current_players_array, current_player_seats=None):
         from Lobby.models import GamePlayer
 
         # SOLO GAME FAILSAFE: Never reduce the solo player's isCurrent
         if self.gameObj.maxPlayers == 1:
             return
 
+        current_ids = {gp.pk for gp in self._resolveTurnOrderGamePlayers(current_players_array, current_player_seats)}
         game_players_active = self.gameObj.players.exclude(is_missing=True).select_related("player")
         for gp in game_players_active:
             # Only keep players who are currently active, AND are in the current_players_array
-            gp.is_current = gp.is_current and gp.player.username in current_players_array
+            gp.is_current = gp.is_current and gp.pk in current_ids
 
         GamePlayer.objects.bulk_update(game_players_active, ["is_current"])
 

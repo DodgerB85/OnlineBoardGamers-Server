@@ -50,6 +50,13 @@ class TournamentLifecycleTests(TestCase):
 
     def post_turn(self, game, user, **payload):
         game.refresh_from_db()
+        if "nextPlayer" in payload:
+            seats = {
+                gp.player.username: gp.seat_order
+                for gp in game.players.select_related("player")
+                if gp.player
+            }
+            payload["nextPlayerSeats"] = [seats[name] for name in payload["nextPlayer"] if name in seats]
         self.client.force_login(user)
         response = self.client.post(
             reverse("IND:processINDturn"),

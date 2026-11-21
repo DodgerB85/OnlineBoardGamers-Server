@@ -108,6 +108,7 @@ var IO = {
 
 		var i = 0
 		var nextPlayer = []
+		var nextPlayerSeats = []
 		/* CURRENT PLAYER MUST HAVE BEEN UPDATED */
 
 		// IF AT THE END OF NON-SIMUL PHASE, SET UP NEXT PLAYER
@@ -125,11 +126,16 @@ var IO = {
 					for (i = 0; i < model.gameFlow.turnOrder.length; i++) {
 						nextPlayer.push(model.players[model.gameFlow.turnOrder[i]].name)
 					}
-				} else nextPlayer = [model.players[model.gameFlow.turnOrder[0]].name]
+					nextPlayerSeats = [...model.gameFlow.turnOrder]
+				} else {
+					nextPlayer = [model.players[model.gameFlow.turnOrder[0]].name]
+					nextPlayerSeats = [model.gameFlow.turnOrder[0]]
+				}
 			}
 			// Otherwise, it is not a new phase.
 			else {
 				nextPlayer = [model.players[model.gameFlow.turnOrder[0]].name]
+				nextPlayerSeats = [model.gameFlow.turnOrder[0]]
 			}
 			turn = model.gameFlow.turn
 			phase = model.gameFlow.phase
@@ -137,11 +143,16 @@ var IO = {
 			// Set up very first current players
 			if (turn === 0) {
 				nextPlayer = []
+				nextPlayerSeats = []
 				for (i = 0; i < global.players.length; i++) {
 					nextPlayer.push(global.players[i])
+					nextPlayerSeats.push(i)
 				}
 			}
-			if (M.trainingGame) nextPlayer = [model.players[model.gameFlow.turnOrder[0]].name]
+			if (M.trainingGame) {
+				nextPlayer = [model.players[model.gameFlow.turnOrder[0]].name]
+				nextPlayerSeats = [model.gameFlow.turnOrder[0]]
+			}
 
 			global.currentPlayers = nextPlayer
 		} else if (saveOnly === true) {
@@ -156,6 +167,7 @@ var IO = {
 			data: compressObjectToDB(model.export()), // USED
 			turn: turn, // USED
 			nextPlayer: nextPlayer, // USED > goes to currentPlayers
+			nextPlayerSeats: nextPlayerSeats, // USED > stable seat identity
 			phase: phase, // USED
 			status: "ACTIVE", // USED - only if FINISHED
 			gameID: global.gameID, // USED
@@ -525,6 +537,9 @@ var IO = {
 			turn: turn,
 			phase: phase,
 			nextPlayer: nextPlayersArr,
+			nextPlayerSeats: (nextPlayersArr || [])
+				.map((name) => model.players.findIndex((player) => player.name === name || player.originalName === name))
+				.filter((index) => index >= 0),
 			gameID: global.gameID,
 			kickedName: kickedName,
 			kickedSeat: model.players.map((item) => item.originalName).indexOf(kickedName),
@@ -755,23 +770,31 @@ var IO = {
 		var i = 0
 		// IF AT THE END OF NON-SIMUL PHASE, SET UP NEXT PLAYER
 		var nextPlayer = []
+		var nextPlayerSeats = []
 		if (!Rules.isSimulPhase() && model.gameFlow.turnOrder.length === 0) {
 			model = C.moveToNextPhase()
 			if (model.gameFlow.phase === PHASE_BUILD_FACTORY) {
 				for (i = 0; i < model.gameFlow.unalteredTurnOrder.length; i++) {
 					nextPlayer.push(global.players[model.gameFlow.unalteredTurnOrder[i]])
 				}
-			} else nextPlayer = [model.players[model.gameFlow.turnOrder[0]].name]
+				nextPlayerSeats = [...model.gameFlow.unalteredTurnOrder]
+			} else {
+				nextPlayer = [model.players[model.gameFlow.turnOrder[0]].name]
+				nextPlayerSeats = [model.gameFlow.turnOrder[0]]
+			}
 		}
 		// Otherwise, it is not a new phase.
 		else {
 			nextPlayer = [model.players[model.gameFlow.turnOrder[0]].name]
+			nextPlayerSeats = [model.gameFlow.turnOrder[0]]
 		}
 		// if not trainng, and it is now building factory, enable everyone
 		if (!model.trainingGame && (model.gameFlow.phase === PHASE_BUILD_FACTORY || model.gameFlow.turn === 0)) {
 			nextPlayer = []
+			nextPlayerSeats = []
 			for (i = 0; i < model.gameFlow.unalteredTurnOrder.length; i++) {
 				nextPlayer.push(model.players[model.gameFlow.unalteredTurnOrder[i]].name)
+				nextPlayerSeats.push(model.gameFlow.unalteredTurnOrder[i])
 			}
 		}
 
@@ -784,6 +807,7 @@ var IO = {
 				action: "updateDataFromLoadRewind",
 				turn: model.gameFlow.turn,
 				nextPlayer: nextPlayer,
+				nextPlayerSeats: nextPlayerSeats,
 				gameID: global.gameID,
 				phase: model.gameFlow.phase,
 				data: compressObjectToDB(M.export()),

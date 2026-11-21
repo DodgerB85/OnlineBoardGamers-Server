@@ -209,7 +209,7 @@ def _processWEBturn(request):
         newVer = (int(db_latest_update) % 1000) + 1
         currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
 
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], acting_username=request.user.username, old_latest_update=oldVer)
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], acting_username=request.user.username, old_latest_update=oldVer, current_player_seats=jsonData.get("nextPlayerSeats"))
 
         # SAVE BEFORE NOTIFICATIONS
         currentGame.save()
@@ -228,7 +228,7 @@ def _processWEBturn(request):
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
             current_players = presenter.getArrayOfIsCurrentPlayers()
             if len(current_players) > 0 and jsonData["status"] != "FINISHED" and 102 not in loadedStartingOptions:
-                playerListToNotify = [player.strip() for player in current_players]
+                playerListToNotify = [player.strip() for player in presenter.getArrayOfIsCurrentPlayers()]
                 if request.user.username in playerListToNotify:
                     playerListToNotify.remove(request.user.username)
                 if "WebBot" in playerListToNotify:
@@ -414,7 +414,7 @@ def _processWEBturn(request):
     elif jsonData["action"] == "updateDataFromLoadRewind":
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
-        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"])
+        presenter.setCurrentPlayersFromArrInTurnOrder(jsonData["nextPlayer"], current_player_seats=jsonData.get("nextPlayerSeats"))
         currentGame.gameData = jsonData["gameData"]
 
         newVer = (int(currentGame.latestUpdate) % 1000) + 1
@@ -426,7 +426,7 @@ def _processWEBturn(request):
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         next_players = jsonData["nextPlayer"]
         if len(jsonData["nextPlayer"]) > 0 and 102 not in loadedStartingOptions:
-            playerListToNotify = next_players
+            playerListToNotify = presenter.getArrayOfIsCurrentPlayers()
             if request.user.username in playerListToNotify:
                 playerListToNotify.remove(request.user.username)
             if "WebBot" in playerListToNotify:

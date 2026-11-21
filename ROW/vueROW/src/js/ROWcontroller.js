@@ -220,6 +220,7 @@ export async function rewind() {
 		// player from the remaining seats before writing the position back.
 		const g = store.getGame()
 		const ended = g.isEnded()
+		const seatNames = Array.isArray(window.initData?.playerNames) ? window.initData.playerNames : g.state.players.map((p) => p.name)
 		const allOrder = g.state.playerOrder.length > 0 ? g.state.playerOrder : g.state.players.map((p) => p.name)
 		const available = allOrder.filter((p) => !store.missingPlayers.includes(p))
 		let current = g.currentPlayer
@@ -236,6 +237,8 @@ export async function rewind() {
 			gameData: model.savedPayload(),
 			allIsCurrentPlayers: [current],
 			allRemainingPlayersInTurnOrder: rotated,
+			allIsCurrentPlayerSeats: [seatNames.indexOf(current)].filter((index) => index >= 0),
+			allRemainingPlayerSeats: rotated.map((name) => seatNames.indexOf(name)).filter((index) => index >= 0),
 		})
 		if (result.syncError) {
 			store.gameMessages.rewindErrorText = i18n.global.t("error.olderVersion")
@@ -288,6 +291,8 @@ export async function persistTurn() {
 			saveRewind: true,
 			winner: ended ? finalGroups[0] : undefined,
 			finalPositions: ended ? finalPositionsFor(finalGroups, seatNames) : undefined,
+			allIsCurrentPlayerSeats: [seatNames.indexOf(current)].filter((index) => index >= 0),
+			allRemainingPlayerSeats: rotated.map((name) => seatNames.indexOf(name)).filter((index) => index >= 0),
 		})
 		if (result.syncError) {
 			store.gameMessages.errorText = i18n.global.t("error.olderVersion")

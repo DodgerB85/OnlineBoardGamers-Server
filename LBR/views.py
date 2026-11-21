@@ -224,6 +224,7 @@ def performSaveGame(request, currentGame, jsonData, presenter):
         turn=jsonData["turn"],
         phase=jsonData["phase"],
         next_player_usernames=jsonData.get("nextPlayer", []),
+        next_player_seats=jsonData.get("nextPlayerSeats", []),
         acting_username=request.user.username,
         check_name=validated_actor_name(request, jsonData.get("checkName"), currentGame),
         status=jsonData.get("status"),
@@ -251,6 +252,7 @@ def save_lbr_state(
     turn,
     phase,
     next_player_usernames,
+    next_player_seats=None,
     acting_username,
     check_name,
     status,
@@ -291,6 +293,7 @@ def save_lbr_state(
         next_player_usernames,
         acting_username=acting_username if track_availability else None,
         old_latest_update=old_ver,
+        current_player_seats=next_player_seats,
     )
 
     # SAVE BEFORE NOTIFICATIONS

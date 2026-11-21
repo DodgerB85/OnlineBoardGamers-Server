@@ -112,6 +112,15 @@ export function getCurrentPlayersArray() {
 	return ret
 }
 
+/** Seat indexes matching getCurrentPlayersArray, used as the stable wire identity. */
+export function getCurrentPlayerSeatsArray() {
+	const store = useModelStore()
+	const claimant = rules.currentBailoutPlayer()
+	if (claimant >= 0) return [claimant]
+	if (!controller.isSimulPhase(store.gameflow.phase)) return [store.gameflow.turnOrder[0]]
+	return [...store.gameflow.turnOrder]
+}
+
 export function chooseTemporaryWorkerRoles(roles) {
 	const store = useModelStore()
 	const playerIndex = currentPlayerIndex()
