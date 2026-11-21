@@ -8,6 +8,7 @@ import * as loc from "../js/RNBlocation.js"
 import * as wonder from "../js/RNBwonder.js"
 import * as util from "../js/RNButil.js"
 import * as atelier from "../js/RNBatelier.js"
+import * as jumpstart from "../js/RNBjumpstart.js"
 
 import { useModelStore } from "../stores/RNBstore.js"
 const store = useModelStore()
@@ -117,7 +118,7 @@ const getFullTurnOrderArray = computed(() => {
 					<thead>
 						<tr>
 							<th rowspan="2"><b>{{ $t("playerTable.player") }}</b></th>
-							<th :colspan="store.gameOptions.useArt ? 4 : 3"><b>{{ $t("playerTable.wealthPoints") }}</b></th>
+							<th :colspan="3 + (store.gameOptions.useArt ? 1 : 0) + (store.gameOptions.useJumpStart ? 1 : 0)"><b>{{ $t("playerTable.wealthPoints") }}</b></th>
 							<th v-if="!props.minimiseInfoForMainScreen" colspan="3" style="text-align: center">
 								<b>{{ $t("playerTable.transports") }}</b>
 							</th>
@@ -145,6 +146,7 @@ const getFullTurnOrderArray = computed(() => {
 							<th style="text-align: center">{{ $t("playerTable.goods") }}</th>
 							<th style="text-align: center">{{ $t("playerTable.wonder") }}</th>
 							<th v-if="store.gameOptions.useArt" style="text-align: center">{{ $t("playerTable.art") }}</th>
+							<th v-if="store.gameOptions.useJumpStart" style="text-align: center">{{ $t("playerTable.jumpstart") }}</th>
 							<th style="text-align: center">{{ $t("playerTable.total") }}</th>
 							<template v-if="!props.minimiseInfoForMainScreen">
 								<!-- These are the sub-headers for Transports -->
@@ -172,6 +174,7 @@ const getFullTurnOrderArray = computed(() => {
 									<div v-if="atelier.countDistinctShows(playerIndex) > 0 && (hoveredResearch === 'art' + playerIndex || longPressedResearch === 'art' + playerIndex)" class="researchTooltip"><b>{{ $t("playerTable.shows") }}</b> {{ artShowsTooltip(playerIndex) }}</div>
 								</div>
 							</td>
+							<td v-if="store.gameOptions.useJumpStart">{{ -jumpstart.bidForPlayer(playerIndex) }}</td>
 							<td>{{ wonder.getPlayerTotalScore(playerIndex) }}</td>
 
 							<!-- TRANSPORTERS-->

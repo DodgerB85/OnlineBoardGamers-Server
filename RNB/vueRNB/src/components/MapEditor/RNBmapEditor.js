@@ -190,6 +190,10 @@ export function compressMapForDB() {
 		additionalData.TP = computedHexes.value.filter((h) => h.trainTrackSegments.length).map((h) => [h.coord[0], h.coord[1], h.trainTrackSegments.flat(2).map(r2)])
 	}
 
+	// Scenario setup: recommended modules and &c Jumpstart piles
+	if (store.mapData.setupData.RM?.length) additionalData.RM = [...store.mapData.setupData.RM]
+	if (store.mapData.setupData.JS?.length) additionalData.JS = JSON.parse(JSON.stringify(store.mapData.setupData.JS))
+
 	res.push(additionalData)
 
 	return res

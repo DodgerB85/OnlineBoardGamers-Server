@@ -408,6 +408,16 @@ function localCastVote(topic) {
 
 			<h2>{{ $t("topMenuViews.mapTitle", { name: personal.mapName }) }}</h2>
 			<h3 class="mapDescriptionH">{{ personal.mapDescription }}</h3>
+			<div class="moduleIcons">
+				<img v-for="[value, name, icon] in rf.MODULES.filter((m) => store.gameOptions[m[3]])" :key="value" :src="rf.moduleIconUrl(icon)" :title="name" :alt="name" />
+			</div>
+			<!-- &c Jumpstart preset piles from the map -->
+			<div v-if="store.gameOptions.useJumpStart && store.mapData.setupData.JS" class="jsMapPiles">
+				<div v-for="(pile, pileIdx) in store.mapData.setupData.JS" :key="pileIdx" class="jsMapPile">
+					<b>{{ $t("jumpstart.homePick", { ordinal: view.getOrdinal(pileIdx + 1) }) }}:</b>
+					<img v-for="(resType, idx) in pile" :key="idx" :src="view.getImage('res_' + resType)" />
+				</div>
+			</div>
 			<template v-if="personal.soloGame">
 				<br />
 				<a class="viewHighScoresBtn" :href="'/RNB/highscores/map/' + store.mapData.setupData.UK + '/'" target="_blank">{{ $t("topMenu.viewHighscores") }}</a>
@@ -424,6 +434,31 @@ function localCastVote(topic) {
 </template>
 
 <style scoped>
+.moduleIcons {
+	display: flex;
+	justify-content: center;
+	gap: 6px;
+}
+.jsMapPiles {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 4px 16px;
+	margin-top: 6px;
+}
+.jsMapPile {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+.jsMapPile img {
+	width: 24px;
+	height: 24px;
+}
+.moduleIcons img {
+	width: 32px;
+	height: 32px;
+}
 .singleHexDiv {
 	position: relative;
 	display: inline-block;

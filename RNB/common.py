@@ -60,6 +60,21 @@ def normalize_rnb_map(raw):
     return json.dumps(data, separators=(",", ":"))
 
 
+def jumpstart_map_error(starting_map, starting_options, max_players):
+    """&c Jumpstart needs preset piles (JS key) for exactly this player count, or 3+ players to build piles."""
+    if rfRNB.SO_JUMP_START not in starting_options:
+        return None
+    setup = json.loads(starting_map)[-1] if starting_map else None
+    piles = setup.get("JS") if isinstance(setup, dict) else None
+    if piles:
+        if len(piles) != max_players:
+            return gettext("Jumpstart on this map needs exactly %(count)s players.") % {"count": len(piles)}
+        return None
+    if max_players < 3:
+        return gettext("Jumpstart needs at least 3 players on maps without preset piles.")
+    return None
+
+
 @login_required()
 def create_rnb_game(
     request,
@@ -207,6 +222,10 @@ def create_rnb_game(
     starting_map = normalize_rnb_map(starting_map)
     if starting_map is None:
         messages.error(request, gettext("That map data is invalid or too large."))
+        return HttpResponseRedirect(reverse("createRNBpage"))
+    jumpstart_error = jumpstart_map_error(starting_map, starting_options, max_players)
+    if jumpstart_error:
+        messages.error(request, jumpstart_error)
         return HttpResponseRedirect(reverse("createRNBpage"))
 
     with transaction.atomic():

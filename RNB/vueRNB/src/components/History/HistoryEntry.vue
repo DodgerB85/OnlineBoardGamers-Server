@@ -7,6 +7,7 @@ import * as model from "../../js/RNBmodel.js"
 import * as loc from "../../js/RNBlocation"
 import * as stack from "../../js/RNBstack"
 import * as atelier from "../../js/RNBatelier"
+import * as jumpstart from "../../js/RNBjumpstart"
 import i18n from "../../i18n"
 //import * as map from "../../js/RNBmap"
 
@@ -152,6 +153,8 @@ const computedEntry3 = computed(() => {
 		ret.resGfxs.push("res_" + rf.RES_STONE)
 		// 2 geese
 		for (let i = 0; i < 2; i++) ret.resGfxs.push("res_" + rf.RES_GOOSE)
+		// &c Jumpstart pile
+		for (const resType of jumpstart.pileForPlayer(entry[1])) ret.resGfxs.push("res_" + resType)
 	} else if (entry[0] === rf.HIST_PRE_PRODUCTION_MINES) {
 		// NOTE: IN A DEPARTURE FROM THE NORM, THIS DOESN'T NEED TO RECREATE ANY REPLAY STUFF
 		// IN THE REPLAY, JUST RUN THE PRODUCTION FUNCTIONS AGAIN, AND YOU SHOULD GET THE SAME RESULT
@@ -1461,6 +1464,38 @@ const computedEntry3 = computed(() => {
 					<img class="buildingProductionSummaryImg" :src="view.getImage(computedEntry3.homeTileGfx)" />
 					<img v-for="(transporterGfx, idx) in computedEntry3.transporterGfxs" :key="idx" class="buildingProductionTransporterImg" :src="view.getImage(transporterGfx)" />
 					<img v-for="(resGfx, idx) in computedEntry3.resGfxs" :key="idx" class="resourceProductionSummaryImg" :src="view.getImage(resGfx)" />
+				</div>
+			</div>
+		</div>
+	</template>
+
+	<!-- &c JUMPSTART -->
+	<template v-if="entry[0] === rf.HIST_JUMPSTART_ADD_GOOD || entry[0] === rf.HIST_JUMPSTART_BID">
+		<div class="log mainEntry">
+			<div class="header">
+				<span>{{ funcs.timestampToString(entry[2]) }}</span>
+			</div>
+			<div class="container">
+				<span class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[1]].colour)">{{ personal.getHistoryName(entry[1]) }}</span>
+				<template v-if="entry[0] === rf.HIST_JUMPSTART_ADD_GOOD">
+					{{ " " + $t("jumpstart.histAddsGood", { pile: entry[3][0] + 1 }) }}
+					<img class="resourceProductionSummaryImg" :src="view.getImage('res_' + entry[3][1])" />
+				</template>
+				<template v-else>{{ " " + $t("jumpstart.histBids", { pile: entry[3][0] + 1, amount: entry[3][1] }) }}</template>
+			</div>
+		</div>
+	</template>
+	<template v-if="entry[0] === rf.HIST_JUMPSTART_RESULT">
+		<div class="log mainEntry">
+			<div class="header">
+				<span>{{ funcs.timestampToString(entry[2]) }}</span>
+			</div>
+			<div class="container">
+				<b>{{ $t("jumpstart.histResult") }}</b>
+				<div v-for="(pile, pileIdx) in entry[3][0]" :key="pileIdx">
+					{{ pileIdx + 1 }}:
+					<span v-if="entry[3][1][pileIdx] !== -1" class="mainEntryPlayer" :class="'mainEntryPlayer' + personal.getCorrectedColour(store.players[entry[3][1][pileIdx]].colour)">{{ personal.getHistoryName(entry[3][1][pileIdx]) }} (-{{ entry[3][2][pileIdx] }})</span>
+					<img v-for="(resType, idx) in pile" :key="idx" class="resourceProductionSummaryImg" :src="view.getImage('res_' + resType)" />
 				</div>
 			</div>
 		</div>

@@ -40,6 +40,8 @@ export function phaseStr(phase) {
 	if (phase === rf.PHASE_WONDER_TO) return t("phases.wonder")
 
 	if (phase === rf.PHASE_CHOOSE_HOME_TILE) return t("phases.chooseHomeTile")
+	if (phase === rf.PHASE_JUMPSTART_PILES) return t("phases.jumpstartPiles")
+	if (phase === rf.PHASE_JUMPSTART_BIDDING) return t("phases.jumpstartBidding")
 
 	if (phase === rf.PHASE_GAME_OVER) return t("phases.gameOver")
 

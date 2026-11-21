@@ -292,6 +292,8 @@ function clearMap() {
 	context.resetContextAndHighlights()
 	funcs.clearMap()
 	store.CUSTOM_RULES.splice(0)
+	// Drop the old map's setup data (RM / JS piles) so a new map starts clean
+	store.mapData.setupData = {}
 	canReplaceMap.value = false
 	if (hexPileSelectionAreaRef.value && hexPileSelectionAreaRef.value.resetIsVerified) {
 		hexPileSelectionAreaRef.value.resetIsVerified()

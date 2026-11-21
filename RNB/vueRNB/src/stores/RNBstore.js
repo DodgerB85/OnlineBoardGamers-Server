@@ -195,6 +195,8 @@ export const useModelStore = defineStore("store", () => {
 		// MANAGEMENT + ELECTRICITY: per-turn production choices made in player order.
 		// { [turn]: { [playerIndex]: { managers: { [hexID]: bool }, plants: { [bldgID]: transporterID } } } }
 		productionDecisions: {},
+		// &c Jumpstart: piles of goods (pile index = home tile choice order), who holds each pile and for how much
+		jumpstart: { piles: [], owners: [], prices: [], firstBidder: 0 },
 	})
 
 	// Setting a pre-move alters gameflow.phase

@@ -2,6 +2,7 @@ import * as rf from "../../js/RNBreference"
 import * as funcs from "../../js/RNBfuncs"
 import * as map from "../../js/RNBmap"
 import * as model from "../../js/RNBmodel"
+import * as jumpstart from "../../js/RNBjumpstart"
 //import * as controller from "../../js/RNBcontroller"
 import * as context from "../../js/RNBcontext"
 import * as hd from "../../js/RNBhex"
@@ -256,6 +257,7 @@ export const HIST_CONFLICT_TURN_ORDER = 6
 		if (store.computedHistory[i][0] === rf.HIST_NEW_TURN) replayNewTurn(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_NO_CONFLICT) replayNoConflict(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_ADD_CUSTOM_SCENARIO_ELEMENTS) replayAddCustomScenarioElements(i, store.computedHistory[i][1], store.computedHistory[i][3])
+		else if (store.computedHistory[i][0] === rf.HIST_JUMPSTART_RESULT) jumpstart.applyJumpstartResult(store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_CHOOSE_HOME_TILE) replayChooseHomeTile(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_PRE_PRODUCTION) replayPreProduction(i, store.computedHistory[i][1], store.computedHistory[i][3])
 		else if (store.computedHistory[i][0] === rf.HIST_PRE_PRODUCTION_MINES) replayPreProductionMines(i, store.computedHistory[i][1], store.computedHistory[i][3])

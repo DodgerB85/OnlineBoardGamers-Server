@@ -798,6 +798,8 @@ export function exportRNBmodel(forGameOver) {
 		tempGameflow.push(JSON.parse(JSON.stringify(store.gameflow.productionDecisions || {}))) // 7 - &c production setup choices
 		// 8 - power plants working this turn (fuelled at wonder end / production setup, used at production start)
 		tempGameflow.push([store.context.powerPlantsFueledTurn, electricity.getAllPowerPlants().filter((b) => b.powerActive === true).map((b) => [b.id, b.powerFuelType])])
+		// 9 - &c Jumpstart piles / bids, only while still in the pre-game Jumpstart phases
+		if (rf.PHASE_JUMPSTARTS.includes(store.gameflow.phase)) tempGameflow.push(JSON.parse(JSON.stringify(store.gameflow.jumpstart)))
 		temp.push(JSON.parse(JSON.stringify(tempGameflow)))
 
 		// 7 - ongoingVars
@@ -990,6 +992,7 @@ export function importRNBmodel(input, forGameOver) {
 		if (inputModel[6].length > 6 && Array.isArray(inputModel[6][6]) && inputModel[6][6].length > 0) store.gameflow.newWonderPrayingOrder = JSON.parse(JSON.stringify(inputModel[6][6]))
 		store.gameflow.productionDecisions = {}
 		if (inputModel[6].length > 7) store.gameflow.productionDecisions = JSON.parse(JSON.stringify(inputModel[6][7]))
+		if (inputModel[6].length > 9) store.gameflow.jumpstart = JSON.parse(JSON.stringify(inputModel[6][9]))
 
 		// Repair legacy conflict arrays that can carry -1 placeholders
 		// (players dropped from the turn order during an earlier conflict without praying)
