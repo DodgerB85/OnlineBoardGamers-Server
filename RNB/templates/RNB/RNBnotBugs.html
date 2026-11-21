@@ -1,32 +1,109 @@
-{% extends "Lobby/layout.html" %}
+{% extends "Lobby/help_shell.html" %}
 {% load static %}
 {% load i18n %}
-{% block head %}
-  <link href="{% static 'Lobby/CSS/help.css' %}" rel="stylesheet">
-{% endblock head %}
-{% block body %}
-  <div class="page">
-    {% include "Lobby/messages.html" %}
-    <div class="page-header">
-      <h1 class="page-title">{% translate "Not bugs" %}</h1>
-    </div>
-    <div class="card section" id="RNBhelpPage">
-      - You cannot drop a boat into a docked location from a river location
-      - You cannot drop a boat into a docked location from a sea hex
-      <br />
-      <br />
-      TODO
-      =====
-      - high scores by name page
-      - Split up lots of res on hex
-      NOT bugs
-      Please check to make sure you have an actual bug, and aren’t just experiencing a quirk of the rules!
-      If you are unable to move a transporter then there should be more information in the Zoom Area.
-      All phases
-      ========
-      You can move goods around on the same tile during any phase.
-      Production
-      - According to the rules, a transporter that is carrying another transporter may NOT interact with any buildings.
+{% block title %}{% translate "Roads & Boats Rules Quirks" %} | Online Board Gamers{% endblock title %}
+{% block description %}
+  <meta name="description"
+        content="{% translate "Roads & Boats rules quirks that are not bugs: docking boats, moving goods on the same tile, and transporters carrying transporters." %}">
+{% endblock description %}
+{% block page_title %}
+  {% translate "Known Rules Quirks" %}
+{% endblock page_title %}
+{% block page_action %}
+  <a class="button button-ghost button-sm"
+     href="{% url 'RNB:RNBhelp' %}">&#8592; {% trans "Help" %}</a>
+{% endblock page_action %}
+{% block content %}
+  <div class="callout callout-info">
+    {% blocktranslate trimmed %}
+      Before reporting a bug, please check that you have not run into one of the deliberate rules quirks below.
+      In most cases the game is following the Roads &amp; Boats rules exactly.
+    {% endblocktranslate %}
+  </div>
+  <div class="card section">
+    <h2>{% translate "Boats, rivers and docks" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% blocktranslate trimmed %}
+          Dropping a boat (a water transporter) is more restricted than dropping goods. A docked location is one
+          particular shore &mdash; the coastline between a land tile and the sea tile the boat came from &mdash; so
+          these drops are not allowed:
+        {% endblocktranslate %}
+      </p>
+      <ul>
+        <li>{% translate "A boat in a river cannot unload another boat into a docked location." %}</li>
+        <li>{% translate "A boat in open sea cannot unload another boat into a docked location." %}</li>
+      </ul>
+      <p>
+        {% blocktranslate trimmed %}
+          This follows the rules: a boat in a river may unload another boat only in that same river,
+          and a boat on a shore may unload another boat only on that same shore.
+          Goods are not affected &mdash; you can still ferry goods normally.
+          To unload a boat, move the carrying transporter to the river or shore where you want the boat to end up,
+          then unload it there.
+        {% endblocktranslate %}
+      </p>
     </div>
   </div>
-{% endblock body %}
+  <div class="card section">
+    <h2>{% translate "Moving goods on the same tile" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% blocktranslate trimmed %}
+          You can pick up and drop goods anywhere within a single tile during any main phase.
+          This is deliberate: a tile is divided into areas and can hold many transporters, buildings and goods,
+          and shuffling goods locally saves pointless pick-up/drop micro-management.
+        {% endblocktranslate %}
+      </p>
+      <p>
+        {% translate "It only works within one tile. Goods still have to be carried to another tile by a transporter, and moving a transporter to another tile still costs movement." %}
+      </p>
+    </div>
+  </div>
+  <div class="card section">
+    <h2>{% translate "Transporters carrying transporters" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% blocktranslate trimmed %}
+          While one transporter carries another, neither may carry anything else. In the Production phase this means
+          the carrying transporter cannot interact with a building: a loaded transporter is cargo, not a worker.
+        {% endblocktranslate %}
+      </p>
+      <p>
+        {% blocktranslate trimmed %}
+          A transporter that is being carried cannot act at all, so select the transporter that is carrying it instead.
+          If you need the loaded transporter for production, unload it at the start of a later Movement phase.
+        {% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+  <div class="card section">
+    <h2>{% translate "When a transporter cannot move" %}</h2>
+    <div class="help-qa">
+      <p>
+        {% blocktranslate trimmed %}
+          Click the transporter or its tile and check the Zoom Area. It lists every transporter on the tile,
+          its remaining moves, and whether it has already moved, which usually explains the problem straight away.
+        {% endblocktranslate %}
+      </p>
+      <p>
+        {% blocktranslate trimmed %}
+          The usual reasons are that the transporter has no moves left, or that you have picked up a good or
+          transporter that has itself already moved this phase. Loading and unloading does not give a
+          transporter fresh movement.
+        {% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+  <div class="card section">
+    <h2>{% translate "Further Help" %}</h2>
+    <p>
+      <b>{% translate "For any questions / comments / suggestions, please contact" %}</b>
+      <img id="contactEmailImg"
+           src="{% static 'Lobby/email.png' %}"
+           alt="Email Address"
+           width="400"
+           height="30" />
+    </p>
+  </div>
+{% endblock content %}
