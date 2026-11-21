@@ -1,6 +1,7 @@
+from django.http import HttpResponse
 from django.test import RequestFactory, TestCase
 
-from Lobby.middleware import ForceTrailingSlashMiddleware
+from Lobby.middleware import AuthPageHeadersMiddleware, ForceTrailingSlashMiddleware
 
 
 class TestForceTrailingSlashMiddleware(TestCase):
@@ -54,3 +55,18 @@ class TestForceTrailingSlashMiddleware(TestCase):
         response = self.middleware(request)
         self.assertEqual(response.status_code, 301)
         self.assertEqual(response["Location"], "/index/")
+
+
+class TestAuthPageHeadersMiddleware(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.middleware = AuthPageHeadersMiddleware(get_response=lambda r: HttpResponse())
+
+    def test_login_uses_same_origin_referrer_policy(self):
+        response = self.middleware(self.factory.get("/login/"))
+        self.assertEqual(response["Referrer-Policy"], "same-origin")
+        self.assertIn("noindex", response["X-Robots-Tag"])
+
+    def test_non_auth_page_has_no_referrer_policy(self):
+        response = self.middleware(self.factory.get("/"))
+        self.assertNotIn("Referrer-Policy", response)

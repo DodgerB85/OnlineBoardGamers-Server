@@ -166,9 +166,11 @@ the new environment value is loaded. If they differ, Telegram messages stop.
 - The lockout counters use Django's cache. The project does not currently
   configure a shared cache, so with multiple web workers each worker has its
   own counter; configure Redis/Memcached before relying on a global limit.
-- Auth pages send `Referrer-Policy: no-referrer` and `X-Robots-Tag: noindex,
-  nofollow`. All responses get a small CSP for framing/object/base restrictions
-  and a Permissions-Policy disabling camera, microphone and geolocation.
+- Auth pages send `Referrer-Policy: same-origin` and `X-Robots-Tag: noindex,
+  nofollow`. Do not use `no-referrer` here: browsers then send `Origin: null` on
+  form POSTs, which Django's CSRF origin check rejects. All responses get a small
+  CSP for framing/object/base restrictions and a Permissions-Policy disabling
+  camera, microphone and geolocation.
 
 ## Data and request safeguards
 

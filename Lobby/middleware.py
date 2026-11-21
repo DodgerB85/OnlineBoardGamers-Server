@@ -50,7 +50,8 @@ class AuthPageHeadersMiddleware:
         if "Permissions-Policy" not in response:
             response["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         if request.path.startswith(self.AUTH_PREFIXES):
-            response["Referrer-Policy"] = "no-referrer"
+            # no-referrer makes browsers send Origin: null on POSTs, which Django's CSRF check rejects.
+            response["Referrer-Policy"] = "same-origin"
             response["X-Robots-Tag"] = "noindex, nofollow"
         return response
 
