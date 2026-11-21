@@ -1,30 +1,36 @@
-Implemented the &c production decisions in vueRNB source. No dist build was run or touched.
-What changed
-- Production setup step (RNBproductionSetup.js, ProductionSetupPanel.vue, ActionArea.vue)
-- At the start of each player's production turn, before they can act, the current player announces:
-- whether each transported manager on a tile with a secondary producer is active
-- whether to fire an unfuelled power plant using wood from one of their transporters
-- The panel only appears when the relevant module is enabled and there is actually a decision to make.
-- Decisions are stored as the first action in the production stack (STACK_PRODUCTION_SETUP), so pre-set production moves carry them and they are re-verified when loaded. Invalid pre-sets fail normally and the player redoes them.
-- Manager choices adjust secondary-producer capacity without losing conversions already used.
-- Electricity
-- Added firePowerPlantFromTransporter(): consumes a board/trunk from the chosen transporter, activates the plant, and recalculates the powered network.
-- If the plant wasn't already powered when primaries produced, the missing second primary output is added at the announcement and recorded in history so replay matches.
-- Power-line indicators are now red when unpowered, yellow when powered in both the main map and zoom panel. The line base is dark so the indicator is visible either way.
-- Management
-- Removed the old store-level managerActivation placeholder and replaced it with per-turn gameflow.productionDecisions.
-- Loose managers remain always active; transported managers default active but can be switched off by their owner.
-- Capacity is recalculated correctly when activation changes mid-production.
-- Art
-- Verified artwork scoring is derived from saved players/resources (artShownAt, artBestShownHere) and therefore survives saves; scoring uses 1 + distinct shows as before.
-- Fixed unattended atelier auto-production so it uses its full capacity (2 when a manager is active), not just one recipe.
-- Building info now shows the atelier as six input → output recipe rows instead of pretending it only makes wood carvings.
-- Replay now resets production capacities at production start, matching live play.
-- Save/replay compatibility
-- productionDecisions is stored in gameflow and exported/imported with a fallback for older saves.
-- Replay applies the setup action before the player's production actions.
+Implemented the &c production decisions and the electricity/management audit fixes in vueRNB source. No dist build was run or touched.
+
+Production setup
+- Separate main phase 17 (ordered as 2.5), after the production conflict/turn order and before production.
+- In turn order, each player with a choice announces transported managers and transporter fuel.
+- Choices are stored in STACK_PRODUCTION_SETUP; pre-set production saves them as a separate setup move and replay applies them before production.
+- Players with nothing to choose are skipped; production capacities are recalculated after the choices.
+
+Electricity
+- Power plant: 3 stone, 1 board/trunk per turn, board first, one fuel per plant, no effect on secondary producers or reproduction.
+- Tile fuel is consumed before the mines pull; a transporter can fuel a plant during the setup phase.
+- The power network is bucket-level: river banks only connect through a bridge, and a city is one power node (BGG 808497).
+- Free tile fuel and carried fuel only use the plant's own side of a river; a city sawmill keeps its trunks.
+- Power-line build/verify and setup replay now check bridges, transporter ownership and extra mine output shape.
+- Removed the unused pendingTransporterFuel path.
+
+Management
+- MBA (Coast) is a shore/river building, not an open-sea building.
+- Managers: one effect per tile, direct managers always active, carried managers decided by their transporter owner, all secondary producers on the tile doubled (both city buildings), never consumed.
+- Full &c city production order is applied to auto-secondary production: sawmill, power plant, paper mill, coal burner, mint, stock, raft factory, wagon factory, rowboat factory, truck factory, steamer factory, airport, MBA, bomb factory, atelier; research last. Replays of old city games may recompute a different auto-production order than the original save.
+- City bomb destroys both unstrengthened buildings; strengthened buildings survive.
+- City order is applied to auto-secondary production and the sawmill/plant trunk conflict. A transporter can fuel a plant with its own wood, but cannot reserve a tile board that the plant auto-consumed.
+- Production-setup panel strings added for de, es, fr, it and zh-hans.
+
+Save/replay
+- productionDecisions, working power plants and the setup stack action round-trip; powered buckets are recomputed from the working plants on load.
+- Replay resets production capacities at production start and applies the setup action before the player's production actions.
+- Old saves that relied on hex-level power across an unbridged river now follow the bucket rule: the far bank is not powered.
+
 Verification
-- ESLint passes on all changed RNB files (remaining errors are pre-existing in MapArea.vue/RNBstack.js).
-- A throwaway Vite build to a temp directory succeeded; the temp output was deleted and RNB/static/RNB/RNBvuedist was not touched.
-- The BGG link returns 403 to automated fetch, so I could not read the thread itself; the implementation follows the order you quoted.
-Known limit: decisions are applied when each player's production turn starts. An earlier player can therefore still take a primary before a later player announces/fires a connected plant; the later player's extra powered output is added then. Strict simultaneous announcement would require a server-side decision round. This is marked as a shortcut: in RNBproductionSetup.js.
+- RNB frontend tests: vitest + node suites pass. A throwaway Vite build to a temp directory succeeded; the temp output was deleted and RNB/static/RNB/RNBvuedist was not touched.
+- Pre-existing ESLint errors remain in RNBmap.js, RNBmodel.js, RNBstack.js and MapArea.vue; the changed logic adds none.
+
+Timing
+- Matches the BGG rulings: managers after turn order in player order (thread 3758406), MBA activation at the start of the phase (thread 3240376), and the electricity/mines order (thread 3715801).
+- shortcut: mines still pull at the end of the wonder phase before conflict, so a transporter-fired plant adds the missing second mine draw at announcement time. Upgrade if power must be decided before the mine draw.

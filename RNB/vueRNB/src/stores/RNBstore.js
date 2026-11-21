@@ -244,7 +244,8 @@ export const useModelStore = defineStore("store", () => {
 
 		// Electricity vars
 		buildingPowerLine: false, // True while the player is placing power line segments
-		poweredHexIDs: [], // Hexes energised this production phase by a working power plant
+		poweredBucketKeys: [], // Bucket nodes energised this production phase by a working power plant
+		poweredHexIDs: [], // Hexes with a powered bucket (map colour only)
 		powerPlantsFueledTurn: -1, // Turn the power plants were last fuelled for (idempotency guard)
 		productionSetupPending: false, // &c: block production actions until managers/plant fuel are announced
 

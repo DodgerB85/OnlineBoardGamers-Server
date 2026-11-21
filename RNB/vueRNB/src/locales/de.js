@@ -507,6 +507,11 @@ export default {
 		implementation: "Online-Board-Gamers-Umsetzung von DodgerB & vraid. Mit Genehmigung.",
 		menuIcons: "Menüsymbole von {link}",
 	},
+	productionSetup: {
+		hint: "Klicke auf einen hervorgehobenen Manager, um ihn ein- oder auszuschalten, oder auf hervorgehobenes Holz oder ein Kraftwerk, um es zu befeuern.",
+		summary: "Kraftwerke: {fired} befeuert, {plants} nicht befeuert. Manager: {managersOn} an, {managersOff} aus.",
+		done: "Vorbereitung fertig",
+	},
 	phases: {
 		conflictProductionDecision: "Konfliktentscheidung: Produktion",
 		conflictProductionPraying: "Konfliktgebet: Produktion",

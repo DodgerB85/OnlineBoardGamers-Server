@@ -1244,6 +1244,15 @@ export function removeBuildingByID(buildingID) {
 	// To do: should only be transp facs, so shouldn't be any res in bldg loc, otherwise move them to tile
 }
 
+// &c City: one bomb destroys both buildings; strengthened buildings survive.
+export function removeBombedBuildings(buildingID) {
+	const building = getBuildingByID(buildingID)
+	if (!building || building.strengthened) return
+	const hex = getHexByID(building.location[1])
+	const targets = hex.hexTerrainID === rf.CITY ? getAllInGameBuildings().filter((b) => b.location[1] === hex.hexID && !b.strengthened) : [building]
+	for (const target of targets) removeBuildingByID(target.id)
+}
+
 export function addHistory(event, playerIndex, timeOffset, params) {
 	const personal = usePersonalStore()
 	const store = useModelStore()

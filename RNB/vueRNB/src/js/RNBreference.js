@@ -625,6 +625,15 @@ export const BLDG_MBA_COAST = 76
 export const BLDG_MBA_DESERT = 77
 export const ALL_MBA_BUILDINGS = [BLDG_MBA_WOODS, BLDG_MBA_MOUNTAIN, BLDG_MBA_ROCK, BLDG_MBA_PASTURE, BLDG_MBA_COAST, BLDG_MBA_DESERT]
 
+// &c City: unattended goods shared by the two buildings are used in this order.
+// "Cart factory" is the wagon factory. Research follows the buildings in RNBproduce.
+export const CITY_PRODUCTION_ORDER = [BLDG_SAWMILL, BLDG_POWER_PLANT, BLDG_PAPERMILL, BLDG_COAL_BURNER, BLDG_MINT, BLDG_STOCK_EXCHANGE, BLDG_RAFT_FACTORY, BLDG_WAGON_FACTORY, BLDG_ROWBOAT_FACTORY, BLDG_TRUCK_FACTORY, BLDG_STEAMER_FACTORY, BLDG_AEROPORT, ...ALL_MBA_BUILDINGS, BLDG_BOMB_FACTORY, BLDG_ATELIER]
+
+export function cityProductionOrderIndex(buildingType) {
+	const idx = CITY_PRODUCTION_ORDER.indexOf(buildingType)
+	return idx === -1 ? CITY_PRODUCTION_ORDER.length : idx
+}
+
 // PSEUDO BUILDINGS - only to generate options in build phase
 export const BLDG_PSEUDO_INDEX = 100 // Check if greater than this for P-B
 export const BLDG_PSEUDO_RESHAFT_MINE = 101
@@ -3853,8 +3862,9 @@ export const BUILDING_STATS = [
 		building: BLDG_MBA_COAST,
 		bldg_name: "MBA (Coast)",
 		bldg_name_summary: "MBA (Coast)",
-		// Coast / Sea / River - valid on sea tiles (and shores that become sea-adjacent)
-		isValidTerrain: terrainIsType([TERR_SEA]),
+		// Coast: a shore tile of the sea or a river. Open sea is reserved for the
+		// oil rig and pearl fishery; only those have an explicit sea exception.
+		isValidTerrain: terrainIsShoreForBuilding,
 		cost: [RES_BOARDS, RES_BOARDS],
 		inputRes: [[RES_GOLD]],
 		outputRes: [RES_MANAGER],

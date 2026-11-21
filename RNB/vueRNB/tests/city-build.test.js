@@ -166,6 +166,25 @@ function setupCityMap() {
 	return { store }
 }
 
+test("a city bomb destroys both unstrengthened buildings; a strengthened one survives", { skip: skip }, () => {
+	const { store } = setupCityMap()
+	store.ALL_BUILDINGS.push(
+		{ id: 0, type: rf.BLDG_SAWMILL, location: [rf.LOCATION_BUCKET, 0, 0], uniqueID: "saw" },
+		{ id: 1, type: rf.BLDG_PAPERMILL, location: [rf.LOCATION_BUCKET, 0, 0], uniqueID: "paper" }
+	)
+	model.removeBombedBuildings(0)
+	assert.equal(store.ALL_BUILDINGS.filter((b) => b.location[0] !== rf.LOCATION_OOB).length, 0, "both city buildings are destroyed")
+
+	store.ALL_BUILDINGS.push(
+		{ id: 2, type: rf.BLDG_SAWMILL, location: [rf.LOCATION_BUCKET, 0, 0], uniqueID: "saw2" },
+		{ id: 3, type: rf.BLDG_PAPERMILL, location: [rf.LOCATION_BUCKET, 0, 0], uniqueID: "paper2", strengthened: true }
+	)
+	model.removeBombedBuildings(2)
+	const remaining = store.ALL_BUILDINGS.filter((b) => b.location[0] !== rf.LOCATION_OOB)
+	assert.equal(remaining.length, 1, "only the strengthened building survives")
+	assert.equal(remaining[0].type, rf.BLDG_PAPERMILL)
+})
+
 test("on a fresh city: bridge and bridge+road offered, standalone road and wall are not", { skip: skip }, () => {
 	const { store } = setupCityMap()
 

@@ -278,7 +278,7 @@ test("a powered quarry produces one marble, then a normal stone", skip, () => {
 	for (let i = 0; i < 3; i++) model.addResourceToGame_core(rf.RES_STONE, quarryLocation, 9)
 
 	store.gameOptions.useElectricity = true
-	store.context.poweredHexIDs = [0]
+	store.context.poweredBucketKeys = [`0:${bucketID}`]
 	produce.addBuildingOutputResourcesToGame_core(0, -1, 9)
 
 	const onHex = store.ALL_RESOURCES.filter((r) => r.location[1] === 0)

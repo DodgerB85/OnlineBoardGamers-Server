@@ -507,6 +507,11 @@ export default {
 		implementation: "Online Board Gamers 实现：DodgerB 与 vraid。已获授权。",
 		menuIcons: "菜单图标来自 {link}",
 	},
+	productionSetup: {
+		hint: "点击高亮的管理者以开启或关闭，或点击高亮的木材或发电厂来点火。",
+		summary: "发电厂：{fired} 已点火，{plants} 未点火。管理者：{managersOn} 开启，{managersOff} 关闭。",
+		done: "准备完成",
+	},
 	phases: {
 		conflictProductionDecision: "冲突决定：生产",
 		conflictProductionPraying: "冲突祈祷：生产",

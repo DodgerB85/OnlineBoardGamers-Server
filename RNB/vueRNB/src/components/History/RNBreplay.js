@@ -922,12 +922,12 @@ function replayStackBombBuilding(stackAction) {
 	const hexID = stackAction[3]
 	// Remove an accessible bomb (it may be on the tile or another of the player's transporters)
 	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
-	// Remove only the targeted non-strengthened building
+	// Remove the targeted non-strengthened building; in a city both fall.
 	const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
 	let targetBldg = undefined
 	if (stackAction[5] !== undefined) targetBldg = model.getBuildingByID(stackAction[5], "bomb replay")
 	if (!targetBldg) targetBldg = buildingsOnHex.find((b) => b.type === buildingType && !b.strengthened)
-	if (targetBldg && !targetBldg.strengthened) model.removeBuildingByID(targetBldg.id)
+	if (targetBldg && !targetBldg.strengthened) model.removeBombedBuildings(targetBldg.id)
 }
 
 function replayStackStrengthenBuilding(stackAction) {

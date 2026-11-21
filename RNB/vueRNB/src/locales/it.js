@@ -507,6 +507,11 @@ export default {
 		implementation: "Realizzazione Online Board Gamers di DodgerB & vraid. Con autorizzazione.",
 		menuIcons: "Icone del menu da {link}",
 	},
+	productionSetup: {
+		hint: "Fai clic su un manager evidenziato per attivarlo o disattivarlo, oppure su legname evidenziato o su una centrale per alimentarla.",
+		summary: "Centrali: {fired} alimentate, {plants} non alimentate. Manager: {managersOn} attivi, {managersOff} inattivi.",
+		done: "Preparazione completata",
+	},
 	phases: {
 		conflictProductionDecision: "Decisione di conflitto: Produzione",
 		conflictProductionPraying: "Preghiera di conflitto: Produzione",

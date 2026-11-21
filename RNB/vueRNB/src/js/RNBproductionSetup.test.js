@@ -35,7 +35,8 @@ function fixture() {
 		rf, model, useModelStore: () => store, usePersonalStore: () => ({}),
 		Math: { random: () => { rolls.push(0.1); return 0.1 } },
 		electricity: {
-			isHexPowered: (id) => store.context.poweredHexIDs.includes(id),
+			getLocationPowerNodeKey: (location) => `${location[1]}:${location[2] ?? 0}`,
+			isLocationPowered: (location) => store.context.poweredHexIDs.includes(location[1]),
 			firePowerPlantFromTransporter: () => { store.context.poweredHexIDs = [15]; return [1, [13], 4] },
 		},
 		stack: { getBldgIDtoUse: (b) => b.id, getTransIDtoUse: (t) => t.id, compressLocation: (location) => [location[1]] },
@@ -44,6 +45,7 @@ function fixture() {
 	const reset = (bag, { preview = false, powered = false } = {}) => {
 		mine.remainingMineContent = [...bag]
 		store.gameflow.phase = preview ? 103 : 17
+		store.context.poweredBucketKeys = powered ? ["15:0"] : []
 		store.context.poweredHexIDs = powered ? [15] : []
 		outputs.length = 0
 		rolls.length = 0

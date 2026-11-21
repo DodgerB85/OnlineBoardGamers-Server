@@ -1375,8 +1375,9 @@ export function clickedBombOption(buildingID) {
 	let errorFlag = model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], true)
 	if (errorFlag !== 0) return
 	model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
-	// A bomb destroys exactly one building; strengthened buildings survive
-	model.removeBuildingByID(buildingObj.id)
+	// A bomb destroys the targeted building; in a city it destroys both
+	// unstrengthened buildings. Strengthened buildings survive.
+	model.removeBombedBuildings(buildingObj.id)
 	// Add to stack (the building identifier keeps city targets unambiguous on replay)
 	let stackAction = [rf.STACK_BOMB_BUILDING, stack.getTransIDtoUse(transporterObj), buildingObj.type, hexID, bucketID, stack.getBldgIDtoUse(buildingObj)]
 	stack.addItemToStack({
@@ -1920,9 +1921,11 @@ export function allLandVertexBucketsWithoutRoadsAdjacentTo(hexID, bucketIds) {
 // boundary. A bridge merges the two bank buckets of a hex, so we check whether
 // the two corner nodes of the river side now sit in the same current bucket on
 // either hex (i.e. a bridge has physically connected the two banks).
-function riverCrossingAllowed(hexA, sideA, hexB, sideB) {
+export function riverCrossingAllowed(hexA, sideA, hexB, sideB) {
 	function banksConnected(hex, side) {
-		const [n0, n1] = hex.cornerNodeIds[side]
+		const corners = hex.cornerNodeIds?.[side]
+		if (!corners) return false
+		const [n0, n1] = corners
 		if (n0 === -1 || n1 === -1) return false
 		return hex.bucketIdsCurrent[hex.nodeBucketIds[n0]] === hex.bucketIdsCurrent[hex.nodeBucketIds[n1]]
 	}

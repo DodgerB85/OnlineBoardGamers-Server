@@ -1196,7 +1196,7 @@ export function importRNBmodel(input, forGameOver) {
 		let targetBldg = undefined
 		if (buildingRef !== undefined) targetBldg = model.getBuildingByID(buildingRef, "bomb rebuild")
 		if (!targetBldg) targetBldg = bldgsOnHex.find((b) => b.type === buildingType && !b.strengthened)
-		if (targetBldg && !targetBldg.strengthened) model.removeBuildingByID(targetBldg.id)
+		if (targetBldg && !targetBldg.strengthened) model.removeBombedBuildings(targetBldg.id)
 	}
 	for (const [buildingType, hexID] of strengthenedBuildings) {
 		const bldgsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID) && b.type === buildingType)

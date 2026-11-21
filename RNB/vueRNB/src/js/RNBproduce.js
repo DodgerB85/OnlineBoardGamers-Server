@@ -31,8 +31,8 @@ export function addBuildingOutputResourcesToGame_core(buildingID, forcedOutputRe
 	const { type, location, remainingMineContent, id } = building
 
 	// ELECTRICITY: A powered primary producer produces twice as much. The powered
-	// hex set is deterministic, so this also doubles output correctly in replay.
-	const isPoweredPrimary = !ignorePower && store.gameOptions.useElectricity && model.isPrimaryProducer(building) && electricity.isHexPowered(location[1])
+	// bucket set is deterministic, so this also doubles output correctly in replay.
+	const isPoweredPrimary = !ignorePower && store.gameOptions.useElectricity && model.isPrimaryProducer(building) && electricity.isLocationPowered(location)
 
 	// Art & The Atelier: a quarry with 3+ stone on its tile and no marble yet produces
 	// marble instead of stone. Pure board-state function, so replay is deterministic.
@@ -175,7 +175,7 @@ export function doMineProduction(performingFromReplay, histEntry = [], forPreTur
 			// Record output - a powered mine may pull twice. The first pull is marked
 			// with a trailing -3 powered flag so history can show the electricity symbol.
 			const compressedLocation = stack.compressLocation(building.location)
-			const powered = store.gameOptions.useElectricity && electricity.isHexPowered(building.location[1])
+			const powered = store.gameOptions.useElectricity && electricity.isLocationPowered(building.location)
 			for (let k = 0; k < mineInfos.length; k++) {
 				const mineInfo = mineInfos[k]
 				const poweredFlag = powered && k === 0 ? -3 : undefined
@@ -234,7 +234,7 @@ export function doPrimaryProduction(performingFromReplay, histEntry = []) {
 			// ELECTRICITY: mark powered primaries (their output was doubled) with -3 at
 			// index 2 so history can show the electricity symbol. Index 2 is unused for
 			// non-mine primaries, so it is safe.
-			const powered = store.gameOptions.useElectricity && electricity.isHexPowered(building.location[1])
+			const powered = store.gameOptions.useElectricity && electricity.isLocationPowered(building.location)
 			const entry = [building.id, [...compressedLocation]]
 			if (powered) entry.push(-3)
 			// Art & The Atelier: mark a quarry that produced marble with -4 at index 3
@@ -413,7 +413,12 @@ function doAutoAtelierProduction(bldg, hexID, bucketID, prePhase, ignoreHistory)
 
 export function doAutoSecondaryProduction(prePhase, ignoreHistory) {
 	const store = useModelStore()
-	const secondaryBuildings = model.getAllInGameBuildings().filter(model.isSecondaryProducer)
+	// &c City: shared unattended goods are used in the printed priority order
+	// (sawmill, power plant, paper mill, ... MBA, bomb factory, atelier).
+	const secondaryBuildings = model
+		.getAllInGameBuildings()
+		.filter(model.isSecondaryProducer)
+		.sort((a, b) => rf.cityProductionOrderIndex(a.type) - rf.cityProductionOrderIndex(b.type) || a.id - b.id)
 	// Make an history array entry for sec producers in PRE phase
 	// Also find all unreachable locations by anyone for auto-produce
 	let allReachableLocations = []
@@ -425,8 +430,7 @@ export function doAutoSecondaryProduction(prePhase, ignoreHistory) {
 	}
 	const secondaryBuildingsReachableIDs = secondaryBuildings.filter((a) => util.includesArray(allReachableLocations, a.location)).map((a) => a.id)
 	// Pre-phase, only produce if there's no transporters reaching the bldg
-	for (const i of util.indicesOf(model.getAllInGameBuildings(), model.isSecondaryProducer)) {
-		let bldg = model.getAllInGameBuildings()[i]
+	for (const bldg of secondaryBuildings) {
 		const bldgLocation = bldg.location
 		if (bldgLocation[0] !== rf.LOCATION_BUCKET) {
 			rf.doAdminAlrt("do auto sec prod: why is there a building not in a bucket?")

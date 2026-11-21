@@ -18,6 +18,7 @@ export function clearDataForGameReload() {
 	// pre-phase preview can't suppress fuelling (or its history entry) on the real turn.
 	store.context.powerPlantsFueledTurn = -1
 	store.context.poweredHexIDs.splice(0)
+	store.context.poweredBucketKeys.splice(0)
 	store.context.productionSetupPending = false
 	store.gameflow.productionDecisions = {}
 	// stack control

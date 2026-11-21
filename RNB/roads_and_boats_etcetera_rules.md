@@ -1,5 +1,7 @@
 ### &c Expansion Rules
 
+> **Online timing rulings.** Managers are announced at the start of the production phase, after turn order is established, in player order (https://boardgamegeek.com/thread/3758406). The power/fuel and mine-output interaction follows https://boardgamegeek.com/thread/3715801.
+
 ### Electricity
 You can use electricity to improve the production of primary producers. A primary producer that is connected to a working power plant produces two goods per turn instead of one. To provide power to a producer, you have to build power lines, a power station, and provide the power plant with trunks/boards to burn.
 

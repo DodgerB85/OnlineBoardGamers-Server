@@ -1058,8 +1058,20 @@ export function verifySingleStackAction(stackActionData) {
 		for (const [bldgID, transporterID, fuelID] of stackAction[2] || []) {
 			const bldg = model.getBuildingByID(bldgID)
 			if (!bldg || bldg.type !== rf.BLDG_POWER_PLANT) return 11
+			const transporter = model.getTransporterByID(transporterID)
+			if (!transporter || transporter.ownerIndex !== playerIndex) return 13
 			if (bldg.powerActive === true) continue
-			if (!electricity.findFuelOnTransporterOnTile(transporterID, bldg.location[1], fuelID)) return 12
+			if (!electricity.findFuelOnTransporterOnTile(transporterID, bldg.location[1], fuelID, bldg.location[2])) return 12
+		}
+		const plantIDs = new Set((stackAction[2] || []).map(([id]) => id))
+		for (const [plantID, primaryID, location, outputRes] of stackAction[4] || []) {
+			if (!plantIDs.has(plantID)) return 14
+			const primary = model.getBuildingByID(primaryID)
+			if (!primary || !model.isPrimaryProducer(primary)) return 15
+			if (!Array.isArray(location) || !util.arraysEqual(location, compressLocation(primary.location))) return 16
+			if (primary.type === rf.BLDG_MINE) {
+				if (![-1, rf.RES_GOLD, rf.RES_IRON, rf.RES_PSEUDO_MINE].includes(outputRes)) return 17
+			} else if (typeof outputRes !== "number" || outputRes < 0 || outputRes >= rf.RES_UPPER_LIMIT) return 17
 		}
 		return 0
 	}
@@ -1667,8 +1679,12 @@ export function verifySingleStackAction(stackActionData) {
 		const fromHex = model.getHexByID(fromHexID)
 		const toHex = model.getHexByID(toHexID)
 		const fromHexSide = hd.getJoiningSide(fromHex.coord, toHex.coord)
+		if (fromHexSide < 0) return 5
 		const toHexSide = (fromHexSide + 3) % 6
 		const edgeData = store.mapData.edgeData[fromHex.edgeLookup[fromHexSide]]
+		if (!edgeData) return 5
+		// A power line may only cross a river where a bridge has merged the banks.
+		if (edgeData.hasRiver && !map.riverCrossingAllowed(fromHex, fromHexSide, toHex, toHexSide)) return 5
 		const flipped = edgeData.edgeHexIDs[1] === fromHexID
 		const hexIds = flipped ? [toHexID, fromHexID] : [fromHexID, toHexID]
 		const hexSides = flipped ? [toHexSide, fromHexSide] : [fromHexSide, toHexSide]
@@ -2851,12 +2867,12 @@ export function performSingleStackAction(stackActionData, swapIDs, moveData = nu
 		const hexID = stackAction[3]
 		// Remove an accessible bomb (it may be on the tile or another of the player's transporters)
 		model.removeResourcesFromGameUsingTransporter(transporterID, [rf.RES_BOMB], false)
-		// Remove the targeted non-strengthened building only
+		// Remove the targeted non-strengthened building; in a city both fall.
 		const buildingsOnHex = model.getAllInGameBuildings().filter((b) => loc.isSpecificHexLocation(b.location, hexID))
 		let targetBldg = undefined
 		if (stackAction[5] !== undefined) targetBldg = model.getBuildingByID(stackAction[5], "bomb apply")
 		if (!targetBldg) targetBldg = buildingsOnHex.find((b) => b.type === buildingType && !b.strengthened)
-		if (targetBldg && !targetBldg.strengthened) model.removeBuildingByID(targetBldg.id)
+		if (targetBldg && !targetBldg.strengthened) model.removeBombedBuildings(targetBldg.id)
 	}
 	// STRENGTHEN BUILDING
 	else if (action === rf.STACK_STRENGTHEN_BUILDING) {

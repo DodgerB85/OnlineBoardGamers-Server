@@ -15,6 +15,11 @@
  * Mines are pulled before conflict, so a plant fired here adds the missing second
  * mine output. Other primaries produce after this phase and are doubled normally.
  * Legacy games recorded the setup inside production, after all primaries produced.
+ *
+ * shortcut: mines are still pulled before conflict; a plant fired here adds the
+ * second mine draw at announcement time. Upgrade if power must be decided before
+ * the mine draw. Rulings: boardgamegeek.com/thread/3758406 (managers after turn
+ * order) and boardgamegeek.com/thread/3715801 (electricity/mines).
  */
 
 import { useModelStore } from "../stores/RNBstore.js"
@@ -76,7 +81,7 @@ export function getPlantChoices(playerIndex) {
 		if (electricity.findFreeFuelOnTile(hexID, bldg.location[2])) continue
 		const transporters = model
 			.getTransportersByPlayerIndexAndHexID(playerIndex, hexID)
-			.map((t) => ({ id: t.id, fuel: electricity.getCarriedFuelOnTile(t, hexID) }))
+			.map((t) => ({ id: t.id, fuel: electricity.getCarriedFuelOnTile(t, hexID, bldg.location[2]) }))
 			.filter((t) => t.fuel.length > 0)
 		if (transporters.length === 0) continue
 		choices.push({
@@ -165,7 +170,9 @@ export function clickedSetupTransporter(transporterID) {
 	const store = useModelStore()
 	if (!store.context.transporterIDsToHighlight.includes(transporterID)) return
 	const hexID = model.getTransporterByID(transporterID).location[1]
-	const wood = electricity.findFuelOnTransporterOnTile(transporterID, hexID)
+	const plantChoice = getPlantChoices(controller.currentPlayerIndex()).find((c) => c.hexID === hexID && c.transporters.some((t) => t.id === transporterID))
+	const plantBucketID = plantChoice ? model.getBuildingByID(plantChoice.bldgID).location[2] : undefined
+	const wood = electricity.findFuelOnTransporterOnTile(transporterID, hexID, undefined, plantBucketID)
 	const manager = model.resourcesOnTransport(transporterID).find((r) => r.type === rf.RES_MANAGER)
 	const res = wood && store.context.resourceIDsToHighlight.includes(wood.id) ? wood : manager
 	if (res) clickedSetupResource(transporterID, res.id)
@@ -235,8 +242,8 @@ export function applyProductionSetup(playerIndex, managerChoices, plantChoices) 
 		if (choice.transporterID < 0) continue
 		const bldg = model.getBuildingByID(choice.bldgID)
 		if (!bldg) continue
-		const poweredBefore = [...(store.context.poweredHexIDs || [])]
-		const fuelEntry = electricity.firePowerPlantFromTransporter(choice.bldgID, choice.transporterID, choice.fuelID)
+		const poweredBefore = new Set(store.context.poweredBucketKeys || [])
+		const fuelEntry = electricity.firePowerPlantFromTransporter(choice.bldgID, choice.transporterID, choice.fuelID, playerIndex)
 		if (!fuelEntry) continue
 		const plantID = stack.getBldgIDtoUse(bldg)
 		const plantEntry = [plantID, stack.getTransIDtoUse(model.getTransporterByID(choice.transporterID))]
@@ -245,13 +252,12 @@ export function applyProductionSetup(playerIndex, managerChoices, plantChoices) 
 		fuelEntries.push(fuelEntry)
 		// Mines already produced (before conflict): add their missing second output (and record which plant caused it).
 		// Other primaries produce after the setup and are doubled then.
-		for (const hexID of store.context.poweredHexIDs || []) {
-			if (poweredBefore.includes(hexID)) continue
-			for (const primary of model.getAllInGameBuildings().filter((b) => b.location[1] === hexID && b.type === rf.BLDG_MINE)) {
-				const outputRes = addExtraMineOutput(primary, forPreTurn)
-				// A preset reserves a draw. The first live draw can change what is still in the bag.
-				if (outputRes !== -1) extraOutputs.push([plantID, stack.getBldgIDtoUse(primary), stack.compressLocation(primary.location), forPreTurn ? -1 : outputRes])
-			}
+		for (const primary of model.getAllInGameBuildings().filter((b) => b.type === rf.BLDG_MINE)) {
+			const powerKey = electricity.getLocationPowerNodeKey(primary.location)
+			if (!powerKey || poweredBefore.has(powerKey) || !electricity.isLocationPowered(primary.location)) continue
+			const outputRes = addExtraMineOutput(primary, forPreTurn)
+			// A preset reserves a draw. The first live draw can change what is still in the bag.
+			if (outputRes !== -1) extraOutputs.push([plantID, stack.getBldgIDtoUse(primary), stack.compressLocation(primary.location), forPreTurn ? -1 : outputRes])
 		}
 	}
 
@@ -279,8 +285,8 @@ export function performSetupStackAction(stackAction, playerIndex, moveData = nul
 	}
 	for (const [bldgID, transporterID, fuelID] of stackAction[2] || []) {
 		decisions.plants[bldgID] = transporterID
-		const poweredBefore = [...store.context.poweredHexIDs]
-		const fired = electricity.firePowerPlantFromTransporter(bldgID, transporterID, fuelID)
+		const poweredBefore = new Set(store.context.poweredBucketKeys || [])
+		const fired = electricity.firePowerPlantFromTransporter(bldgID, transporterID, fuelID, playerIndex)
 		// The plant may already be working from tile fuel now; in that case the
 		// pre-production output was already doubled and these extras must not be added.
 		if (!fired) continue
@@ -289,7 +295,13 @@ export function performSetupStackAction(stackAction, playerIndex, moveData = nul
 			const primary = model.getBuildingByID(primaryID)
 			if (!primary) continue
 			if (primary.type === rf.BLDG_MINE) {
-				if (moveData && poweredBefore.includes(primary.location[1])) continue
+				// Live moves use the bucket network; replay trusts the recorded draw
+				// so older games with hex-level power data still replay exactly.
+				if (moveData) {
+					const powerKey = electricity.getLocationPowerNodeKey(primary.location)
+					if (powerKey && poweredBefore.has(powerKey)) continue
+					if (!electricity.isLocationPowered(primary.location)) continue
+				}
 				const [gold, iron] = primary.remainingMineContent
 				const available = (outputRes === rf.RES_GOLD && gold > 0) || (outputRes === rf.RES_IRON && iron > 0)
 				const forcedOutput = moveData && (forPreTurn || isOlderPreset || !available) ? -1 : outputRes

@@ -507,6 +507,11 @@ export default {
 		implementation: "Implémentation Online Board Gamers par DodgerB & vraid. Avec autorisation.",
 		menuIcons: "Icônes de menu de {link}",
 	},
+	productionSetup: {
+		hint: "Cliquez sur un manager surligné pour l'activer ou le désactiver, ou sur du bois surligné ou une centrale pour l'alimenter.",
+		summary: "Centrales : {fired} alimentées, {plants} non alimentées. Managers : {managersOn} actifs, {managersOff} inactifs.",
+		done: "Préparation terminée",
+	},
 	phases: {
 		conflictProductionDecision: "Décision de conflit : Production",
 		conflictProductionPraying: "Prière de conflit : Production",

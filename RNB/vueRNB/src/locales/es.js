@@ -507,6 +507,11 @@ export default {
 		implementation: "Implementación de Online Board Gamers por DodgerB & vraid. Con permiso.",
 		menuIcons: "Iconos de menú de {link}",
 	},
+	productionSetup: {
+		hint: "Haz clic en un gerente resaltado para activarlo o desactivarlo, o en madera resaltada o una central eléctrica para encenderla.",
+		summary: "Centrales: {fired} encendidas, {plants} sin encender. Gerentes: {managersOn} activos, {managersOff} inactivos.",
+		done: "Preparación lista",
+	},
 	phases: {
 		conflictProductionDecision: "Decisión de conflicto: Producción",
 		conflictProductionPraying: "Rezo de conflicto: Producción",
