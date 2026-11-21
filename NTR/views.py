@@ -194,6 +194,7 @@ def performSaveGame(request, currentGame, jsonData, presenter):
             jsonData.get("winner", []),
             jsonData.get("finalPositions", []),
             jsonData["gameID"],
+            winnerSeats=jsonData.get("winnerSeats"),
         )
 
     else:

@@ -253,7 +253,7 @@ class NTRTurnTests(TestCase):
             "saveRewind": True,
         }
 
-    def finish_payload(self, winner, final_positions):
+    def finish_payload(self, winner, final_positions, winner_seats=None):
         payload = self.save_payload(self.game.latestUpdate, "final position")
         payload.update(
             {
@@ -263,6 +263,7 @@ class NTRTurnTests(TestCase):
                 "nextPlayer": [],
                 "saveRewind": False,
                 "winner": winner,
+                "winnerSeats": winner_seats or [],
                 "finalPositions": final_positions,
             }
         )
@@ -312,7 +313,7 @@ class NTRTurnTests(TestCase):
 
         response = self.client.post(
             reverse("NTR:processNTRturn"),
-            self.finish_payload([winner_username], [0, 1]),
+            self.finish_payload([winner_username], [0, 1], winner_seats=[0]),
             content_type="application/json",
         )
 
@@ -326,7 +327,7 @@ class NTRTurnTests(TestCase):
     def test_draw_finishes_without_a_winner(self):
         response = self.client.post(
             reverse("NTR:processNTRturn"),
-            self.finish_payload([], [0, 1]),
+            self.finish_payload([], [0, 1], winner_seats=[]),
             content_type="application/json",
         )
 
@@ -351,7 +352,7 @@ class NTRTurnTests(TestCase):
         request = RequestFactory().get("/")
         request.user = self.creator
         with patch("django_q.tasks.async_task"):
-            game.presenter().endGame(request, ["team0", "team1"], [2, 3, 0, 1], game.id)
+            game.presenter().endGame(request, ["stale-a", "stale-b"], [2, 3, 0, 1], game.id, winnerSeats=[2, 3])
 
         game.refresh_from_db()
         self.assertEqual(game.gameStatus, "FINISHED")

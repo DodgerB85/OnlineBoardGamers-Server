@@ -380,6 +380,7 @@ def performSaveROWGame(request, currentGame, jsonData):
             jsonData["finalPositions"],
             (jsonData.get("tournamentData") if jsonData.get("tournamentData") else []),
             jsonData["gameID"],
+            winnerSeats=jsonData.get("winnerSeats"),
         )
     else:
         loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []

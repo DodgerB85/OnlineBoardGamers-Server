@@ -80,12 +80,12 @@ function playersForCurrentPhase(store) {
 
 // Saves are serialised: a second action handed in while the first request is in
 // flight would otherwise post the same latestUpdate and be rejected as stale.
-export function saveGame({ status = 'ACTIVE', winner = [], finalPositions = [] } = {}) {
-  saveQueue = saveQueue.then(() => doSaveGame({ status, winner, finalPositions }))
+export function saveGame({ status = 'ACTIVE', winner = [], winnerSeats = [], finalPositions = [] } = {}) {
+  saveQueue = saveQueue.then(() => doSaveGame({ status, winner, winnerSeats, finalPositions }))
   return saveQueue
 }
 
-async function doSaveGame({ status, winner, finalPositions }) {
+async function doSaveGame({ status, winner, winnerSeats, finalPositions }) {
   const store = useModelStore()
   if (!store.gameID) return
 
@@ -102,6 +102,7 @@ async function doSaveGame({ status, winner, finalPositions }) {
   }
   if (status === 'FINISHED') {
     postData.winner = winner
+    postData.winnerSeats = winnerSeats
     postData.finalPositions = finalPositions
   }
 

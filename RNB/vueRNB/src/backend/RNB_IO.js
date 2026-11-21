@@ -112,6 +112,7 @@ export async function saveGame(saveRewind, saveContext = false) {
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
 		postData.status = "FINISHED" // USED
 		postData.winnerUsername = store.players[store.gameflow.fullTurnOrder[0]].name
+		postData.winnerSeat = store.gameflow.fullTurnOrder[0]
 		postData.saveRewind = false
 		postData.data = funcs.exportRNBmodel(true)
 		postData.finalPositions = [...store.gameflow.fullTurnOrder]
@@ -1027,6 +1028,7 @@ export async function saveAndUpdateNotifictionsAfterStack(currentPlayerNeedsToFi
 	if (store.gameflow.phase === rf.PHASE_GAME_OVER) {
 		postData.status = "FINISHED"
 		postData.winnerUsername = store.players[store.gameflow.fullTurnOrder[0]].name
+		postData.winnerSeat = store.gameflow.fullTurnOrder[0]
 		postData.saveRewind = false
 		postData.data = funcs.exportRNBmodel(true)
 		postData.finalPositions = [...store.gameflow.fullTurnOrder]

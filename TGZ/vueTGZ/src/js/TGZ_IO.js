@@ -179,11 +179,13 @@ export async function saveGame(saveRewind) {
 
 		postData.tournamentData = [...tournamentData]
 		postData.winner = store.players[overshootObj[0][1]].name // USED
+		postData.winnerSeat = overshootObj[0][1]
 		postData.saveRewind = false
 
 		let finalPositionsNames = []
 		for (let i = 0; i < overshootObj.length; i++) finalPositionsNames.push(store.players[overshootObj[i][1]].name)
 		postData.finalPositions = finalPositionsNames
+		postData.finalPositionsSeats = overshootObj.map((entry) => entry[1])
 
 		//  If finished external tournament game, add data to store in flexi-time
 		if (personal.externalTournamentGame) {

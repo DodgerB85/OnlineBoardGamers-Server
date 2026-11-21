@@ -249,6 +249,7 @@ class LBRTurnTests(TestCase):
                 "nextPlayer": [],
                 "saveRewind": False,
                 "winner": [self.seat_names[0]],
+                "winnerSeats": [0],
                 "finalPositions": [0, 1],
             }
         )
@@ -351,6 +352,7 @@ class LBRTurnTests(TestCase):
                 "nextPlayer": [],
                 "saveRewind": False,
                 "winner": [self.seat_names[0]],
+                "winnerSeats": [0],
                 "finalPositions": [0, 1],
             }
         )

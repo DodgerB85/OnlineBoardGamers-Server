@@ -129,6 +129,25 @@ class GamePresenter:
         gp = self.resolveGamePlayer(seat, username)
         return gp.player if gp and gp.player else None
 
+    def winnerNamesForSeats(self, winnerSeats, fallback=None):
+        """Current usernames for winning seats, or the legacy name(s) as fallback."""
+        seats = winnerSeats if isinstance(winnerSeats, (list, tuple)) else []
+        names_by_seat = self.getSeatNameMap()
+        names = [names_by_seat[seat] for seat in seats if seat in names_by_seat]
+        if names:
+            return names
+        if fallback is None:
+            return []
+        return [fallback] if isinstance(fallback, str) else list(fallback)
+
+    def markWinnerNames(self, winnerNames):
+        by_name = {gp.player.username: gp for gp in self.gameObj.players.select_related("player") if gp.player}
+        for name in winnerNames:
+            gp = by_name.get(name)
+            if gp and not gp.winner:
+                gp.winner = True
+                gp.save(update_fields=["winner"])
+
     def buildFinalPositions(self, usernames):
         """Convert an ordered list of usernames to the notification/replay shape."""
         ordinals = ["1st - Congratulations!", "2nd", "3rd", "4th", "5th", "6th"]
@@ -781,11 +800,9 @@ class CNSpresenter(GamePresenter):
         self.gameObj.kickoutFlexiData = ""
         self.gameObj.gameStatus = "FINISHED"
 
-        winner_gp = self.resolveGamePlayer(winnerSeat, _winner)
-        if winner_gp:
-            winner_gp.winner = True
-            winner_gp.save()
-        winner_username = winner_gp.player.username if winner_gp and winner_gp.player else _winner
+        winner_names = self.winnerNamesForSeats([winnerSeat] if winnerSeat is not None else None, _winner)
+        self.markWinnerNames(winner_names)
+        winner_username = winner_names[0] if winner_names else _winner
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
@@ -841,20 +858,16 @@ class WEBpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from django_q.tasks import async_task
 
-        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
         names = self.getAllPlayersOrderedySeatInArray(True)
-        winnerNamesArray = []
-        for playerIndex in _winner:
-            winner_user = User.objects.get(username=names[playerIndex])
-            winner_gp = self.gameObj.players.filter(player=winner_user).first()
-            if winner_gp:
-                winner_gp.winner = True
-                winner_gp.save()
-            winnerNamesArray.append(names[playerIndex])
+        winnerNamesArray = self.winnerNamesForSeats(
+            _winner if isinstance(_winner, (list, tuple)) else None,
+            _winner if isinstance(_winner, str) else None,
+        )
+        self.markWinnerNames(winnerNamesArray)
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
@@ -938,20 +951,16 @@ class AQYpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from django_q.tasks import async_task
 
-        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
         names = self.getAllPlayersOrderedySeatInArray(True)
-        winnerNamesArray = []
-        for playerIndex in _winner:
-            winner_user = User.objects.get(username=names[playerIndex])
-            winner_gp = self.gameObj.players.filter(player=winner_user).first()
-            if winner_gp:
-                winner_gp.winner = True
-                winner_gp.save()
-            winnerNamesArray.append(names[playerIndex])
+        winnerNamesArray = self.winnerNamesForSeats(
+            _winner if isinstance(_winner, (list, tuple)) else None,
+            _winner if isinstance(_winner, str) else None,
+        )
+        self.markWinnerNames(winnerNamesArray)
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
@@ -1191,10 +1200,9 @@ class AQYpresenter(GamePresenter):
 
 
 class TGZpresenter(GamePresenter):
-    def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
+    def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID, winnerSeat=None, finalPositionsSeats=None):
         from django_q.tasks import async_task
 
-        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import (
             SF_M_ProcessAnyTournamentEndGame,
         )
@@ -1206,18 +1214,18 @@ class TGZpresenter(GamePresenter):
         self.gameObj.kickoutFlexiData = ""
         self.gameObj.gameStatus = "FINISHED"
 
-        winner_user = User.objects.get(username=_winnerUsername)
-        winner_gp = self.gameObj.players.filter(player=winner_user).first()
-        if winner_gp:
-            winner_gp.winner = True
-            winner_gp.save()
+        winner_names = self.winnerNamesForSeats([winnerSeat] if winnerSeat is not None else None, _winnerUsername)
+        self.markWinnerNames(winner_names)
+        winner_username = winner_names[0] if winner_names else _winnerUsername
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
 
-        # Convert _finalPositions from simple list to list of lists format
+        final_positions = self.namesForSeats(finalPositionsSeats, _finalPositions) if finalPositionsSeats else _finalPositions
+
+        # Convert final_positions from simple list to list of lists format
         convertedFinalPositions = []
-        for pos, username in enumerate(_finalPositions):
+        for pos, username in enumerate(final_positions):
             if pos == 0:
                 posText = "1st - Congratulations!"
             elif pos == 1:
@@ -1242,7 +1250,7 @@ class TGZpresenter(GamePresenter):
                 request,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
-                [_winnerUsername],
+                [winner_username],
                 _tournamentData,
             )
         if self.gameObj.relatedMiniTournament:
@@ -1250,7 +1258,7 @@ class TGZpresenter(GamePresenter):
                 request,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
-                [_winnerUsername],
+                [winner_username],
                 _tournamentData,
             )
 
@@ -1298,10 +1306,9 @@ class TGZpresenter(GamePresenter):
 
 
 class INDpresenter(GamePresenter):
-    def endGame(self, request, _winnerUseranme, _finalPositions, _tournamentData, _gameID):
+    def endGame(self, request, _winnerUseranme, _finalPositions, _tournamentData, _gameID, winnerSeat=None):
         from django_q.tasks import async_task
 
-        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import (
             # TODO: get this working
             SF_M_ProcessAnyTournamentEndGame,
@@ -1310,11 +1317,9 @@ class INDpresenter(GamePresenter):
         self.clearGeneralDataOnGameEndWithoutSave()
         self.clearAllPreMoveData()
 
-        winner_user = User.objects.get(username=_winnerUseranme)
-        winner_gp = self.gameObj.players.filter(player=winner_user).first()
-        if winner_gp:
-            winner_gp.winner = True
-            winner_gp.save()
+        winner_names = self.winnerNamesForSeats([winnerSeat] if winnerSeat is not None else None, _winnerUseranme)
+        self.markWinnerNames(winner_names)
+        winner_username = winner_names[0] if winner_names else _winnerUseranme
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
@@ -1353,7 +1358,7 @@ class INDpresenter(GamePresenter):
                 request,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
-                [_winnerUseranme],
+                [winner_username],
                 _tournamentData,
             )
 
@@ -1362,7 +1367,7 @@ class INDpresenter(GamePresenter):
                 request,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
-                [_winnerUseranme],
+                [winner_username],
                 _tournamentData,
             )
 
@@ -1612,10 +1617,9 @@ class RNBpresenter(GamePresenter):
 
         return not currentPlayersList or loggedInPlayerUsername in currentPlayersList or currentPlayersList[0] in rf.SHADOW_USERNAMES
 
-    def endGame(self, request, _winnerUseranme, _finalPositions, _tournamentData, _gameID, _winningPlayerScore):
+    def endGame(self, request, _winnerUseranme, _finalPositions, _tournamentData, _gameID, _winningPlayerScore, winnerSeat=None):
         from django_q.tasks import async_task
 
-        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import (
             # TODO: get this working
             SF_M_ProcessAnyTournamentEndGame,
@@ -1623,11 +1627,9 @@ class RNBpresenter(GamePresenter):
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
-        winner_user = User.objects.get(username=_winnerUseranme)
-        winner_gp = self.gameObj.players.filter(player=winner_user).first()
-        if winner_gp:
-            winner_gp.winner = True
-            winner_gp.save()
+        winner_names = self.winnerNamesForSeats([winnerSeat] if winnerSeat is not None else None, _winnerUseranme)
+        self.markWinnerNames(winner_names)
+        winner_username = winner_names[0] if winner_names else _winnerUseranme
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
@@ -1684,7 +1686,7 @@ class RNBpresenter(GamePresenter):
                     request,
                     self.gameObj.relatedMainTournament,
                     self.gameObj,
-                    [_winnerUseranme],
+                    [winner_username],
                     _tournamentData,
                 )
 
@@ -1693,7 +1695,7 @@ class RNBpresenter(GamePresenter):
                     request,
                     self.gameObj.relatedMiniTournament,
                     self.gameObj,
-                    [_winnerUseranme],
+                    [winner_username],
                     _tournamentData,
                 )
 
@@ -1825,7 +1827,6 @@ class URRpresenter(GamePresenter):
     def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
         from django_q.tasks import async_task
 
-        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
@@ -1840,15 +1841,7 @@ class URRpresenter(GamePresenter):
             if names:
                 group_names.append(names)
         winner_usernames = group_names[0] if group_names else ([_winnerUsername] if isinstance(_winnerUsername, str) else list(_winnerUsername or []))
-
-        for username in winner_usernames:
-            winner_user = User.objects.filter(username=username).first()
-            if not winner_user:
-                continue
-            winner_gp = self.gameObj.players.filter(player=winner_user).first()
-            if winner_gp:
-                winner_gp.winner = True
-                winner_gp.save()
+        self.markWinnerNames(winner_usernames)
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
@@ -1916,22 +1909,13 @@ class DDLpresenter(GamePresenter):
             playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
             self._sendStartGameNotification(request, playerListToNotify)
 
-    def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
+    def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID, winnerSeats=None):
         from django_q.tasks import async_task
-
-        from Lobby.models import User
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
-        winner_usernames = _winnerUsername if isinstance(_winnerUsername, (list, tuple)) else [_winnerUsername]
-        for username in winner_usernames:
-            winner_user = User.objects.filter(username=username).first()
-            if not winner_user:
-                continue
-            winner_gp = self.gameObj.players.filter(player=winner_user).first()
-            if winner_gp:
-                winner_gp.winner = True
-                winner_gp.save()
+        winner_usernames = self.winnerNamesForSeats(winnerSeats, _winnerUsername)
+        self.markWinnerNames(winner_usernames)
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
@@ -1999,10 +1983,9 @@ class ROWpresenter(GamePresenter):
             playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username not in (request.user.username, "RowAI")]
             self._sendStartGameNotification(request, playerListToNotify)
 
-    def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID):
+    def endGame(self, request, _winnerUsername, _finalPositions, _tournamentData, _gameID, winnerSeats=None):
         from django_q.tasks import async_task
 
-        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
@@ -2015,22 +1998,10 @@ class ROWpresenter(GamePresenter):
         if positions and not isinstance(positions[0], (list, tuple)):
             positions = [positions]
 
-        winners = _winnerUsername if isinstance(_winnerUsername, (list, tuple)) else [_winnerUsername]
-        winners = [username for username in winners if username and username not in missing]
-        if not winners and positions:
-            for seatPos in positions[0]:
-                if isinstance(seatPos, int) and 0 <= seatPos < len(names) and names[seatPos] not in missing:
-                    winners = [names[seatPos]]
-                    break
-
-        winnerNamesArray = []
-        for username in winners:
-            winner_user = User.objects.get(username=username)
-            winner_gp = self.gameObj.players.filter(player=winner_user).first()
-            if winner_gp:
-                winner_gp.winner = True
-                winner_gp.save()
-            winnerNamesArray.append(username)
+        seat_winners = winnerSeats if isinstance(winnerSeats, (list, tuple)) and winnerSeats else (positions[0] if positions else None)
+        winnerNamesArray = self.winnerNamesForSeats(seat_winners, _winnerUsername)
+        winnerNamesArray = [username for username in winnerNamesArray if username and username not in missing]
+        self.markWinnerNames(winnerNamesArray)
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
@@ -2761,27 +2732,26 @@ class HLCpresenter(GamePresenter):
 
             self._sendStartGameNotification(request, playerListToNotify)
 
-    def endGame(self, request, _winner, _finalPositions, _gameID):
+    def endGame(self, request, _winner, _finalPositions, _gameID, winnerSeat=None, finalPositionsSeats=None):
         from django_q.tasks import async_task
 
-        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
         self.clearAllMoveData()
 
-        winner_user = User.objects.get(username=_winner)
-        winner_gp = self.gameObj.players.filter(player=winner_user).first()
-        if winner_gp:
-            winner_gp.winner = True
-            winner_gp.save()
+        winner_names = self.winnerNamesForSeats([winnerSeat] if winnerSeat is not None else None, _winner)
+        self.markWinnerNames(winner_names)
+        winner_username = winner_names[0] if winner_names else _winner
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
 
-        # Convert _finalPositions from simple list to list of lists format
+        final_positions = self.namesForSeats(finalPositionsSeats, _finalPositions) if finalPositionsSeats else _finalPositions
+
+        # Convert final_positions from simple list to list of lists format
         convertedFinalPositions = []
-        for pos, username in enumerate(_finalPositions):
+        for pos, username in enumerate(final_positions):
             if pos == 0:
                 posText = "1st - Congratulations!"
             elif pos == 1:
@@ -2808,7 +2778,7 @@ class HLCpresenter(GamePresenter):
                 request,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
-                [_winner],
+                [winner_username],
                 convertedFinalPositions,
             )
 
@@ -2817,7 +2787,7 @@ class HLCpresenter(GamePresenter):
                 request,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
-                [_winner],
+                [winner_username],
                 convertedFinalPositions,
             )
 
@@ -3010,7 +2980,6 @@ class KFWpresenter(GamePresenter):
     def endGame(self, request, _winner, _finalPositions, _gameID):
         from django_q.tasks import async_task
 
-        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
@@ -3022,14 +2991,11 @@ class KFWpresenter(GamePresenter):
         self.gameObj.gameStatus = "FINISHED"
 
         names = self.getAllPlayersOrderedySeatInArray(True)
-        winnerNamesArray = []
-        for playerIndex in _winner:
-            winner_user = User.objects.get(username=names[playerIndex])
-            winner_gp = self.gameObj.players.filter(player=winner_user).first()
-            if winner_gp:
-                winner_gp.winner = True
-                winner_gp.save()
-            winnerNamesArray.append(names[playerIndex])
+        winnerNamesArray = self.winnerNamesForSeats(
+            _winner if isinstance(_winner, (list, tuple)) else None,
+            _winner if isinstance(_winner, str) else None,
+        )
+        self.markWinnerNames(winnerNamesArray)
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
@@ -3647,21 +3613,16 @@ class NTRpresenter(GamePresenter):
             playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
             self._sendStartGameNotification(request, playerListToNotify)
 
-    def endGame(self, request, _winnerUsernames, _finalPositions, _gameID):
+    def endGame(self, request, _winnerUsernames, _finalPositions, _gameID, winnerSeats=None):
         from django_q.tasks import async_task
 
-        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
         # A team game has one winner per player on the winning side; a draw has none.
-        for username in _winnerUsernames:
-            winner_user = User.objects.get(username=username)
-            winner_gp = self.gameObj.players.filter(player=winner_user).first()
-            if winner_gp:
-                winner_gp.winner = True
-                winner_gp.save()
+        winner_usernames = self.winnerNamesForSeats(winnerSeats, _winnerUsernames)
+        self.markWinnerNames(winner_usernames)
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
@@ -3671,9 +3632,9 @@ class NTRpresenter(GamePresenter):
         convertedFinalPositions = []
         for pos, seatPos in enumerate(_finalPositions):
             username = seatNames[seatPos]
-            if not _winnerUsernames:
+            if not winner_usernames:
                 posText = "Draw"
-            elif pos == 0 and len(_winnerUsernames) > 1:
+            elif pos == 0 and len(winner_usernames) > 1:
                 posText = "Joint 1st - Congratulations!"
             elif pos == 0:
                 posText = "1st - Congratulations!"
@@ -3696,10 +3657,10 @@ class NTRpresenter(GamePresenter):
 
         # Tournament rows: first row is the (joint) winning group, later rows are
         # [username, tiebreak] pairs - a draw shares the first row.
-        finalPositionRows = [list(_winnerUsernames)] if _winnerUsernames else [seatNames]
+        finalPositionRows = [list(winner_usernames)] if winner_usernames else [seatNames]
         for seatPos in _finalPositions:
             username = seatNames[seatPos]
-            if username not in _winnerUsernames:
+            if username not in winner_usernames:
                 finalPositionRows.append([username, 0])
 
         if self.gameObj.relatedMainTournament:
@@ -3707,7 +3668,7 @@ class NTRpresenter(GamePresenter):
                 request,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
-                _winnerUsernames,
+                winner_usernames,
                 finalPositionRows,
             )
         if self.gameObj.relatedMiniTournament:
@@ -3715,7 +3676,7 @@ class NTRpresenter(GamePresenter):
                 request,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
-                _winnerUsernames,
+                winner_usernames,
                 finalPositionRows,
             )
 
@@ -3761,20 +3722,15 @@ class LBRpresenter(GamePresenter):
             ]
             self._sendStartGameNotification(request, playerListToNotify)
 
-    def endGame(self, request, _winnerUsernames, _finalPositions, _gameID):
+    def endGame(self, request, _winnerUsernames, _finalPositions, _gameID, winnerSeats=None):
         from django_q.tasks import async_task
 
-        from Lobby.models import User
         from Lobby.sharedFunctions.sharedFunctions import SF_M_ProcessAnyTournamentEndGame
 
         self.clearGeneralDataOnGameEndWithoutSave()
 
-        for username in _winnerUsernames:
-            winner_user = User.objects.get(username=username)
-            winner_gp = self.gameObj.players.filter(player=winner_user).first()
-            if winner_gp:
-                winner_gp.winner = True
-                winner_gp.save()
+        winner_usernames = self.winnerNamesForSeats(winnerSeats, _winnerUsernames)
+        self.markWinnerNames(winner_usernames)
 
         self.gameObj.save()
         self.markPlayersPendingFinish(request)
@@ -3783,10 +3739,10 @@ class LBRpresenter(GamePresenter):
         convertedFinalPositions = []
         for pos, seatPos in enumerate(_finalPositions):
             username = seatNames[seatPos]
-            if not _winnerUsernames:
+            if not winner_usernames:
                 posText = "Draw"
-            elif username in _winnerUsernames:
-                posText = "Joint 1st - Congratulations!" if len(_winnerUsernames) > 1 else "1st - Congratulations!"
+            elif username in winner_usernames:
+                posText = "Joint 1st - Congratulations!" if len(winner_usernames) > 1 else "1st - Congratulations!"
             elif pos == 1:
                 posText = "2nd"
             elif pos == 2:
@@ -3807,10 +3763,10 @@ class LBRpresenter(GamePresenter):
             request.user.username,
         )
 
-        finalPositionRows = [list(_winnerUsernames)] if _winnerUsernames else [seatNames]
+        finalPositionRows = [list(winner_usernames)] if winner_usernames else [seatNames]
         for seatPos in _finalPositions:
             username = seatNames[seatPos]
-            if username not in _winnerUsernames:
+            if username not in winner_usernames:
                 finalPositionRows.append([username, 0])
 
         if self.gameObj.relatedMainTournament:
@@ -3818,7 +3774,7 @@ class LBRpresenter(GamePresenter):
                 request,
                 self.gameObj.relatedMainTournament,
                 self.gameObj,
-                _winnerUsernames,
+                winner_usernames,
                 finalPositionRows,
             )
         if self.gameObj.relatedMiniTournament:
@@ -3826,6 +3782,6 @@ class LBRpresenter(GamePresenter):
                 request,
                 self.gameObj.relatedMiniTournament,
                 self.gameObj,
-                _winnerUsernames,
+                winner_usernames,
                 finalPositionRows,
             )

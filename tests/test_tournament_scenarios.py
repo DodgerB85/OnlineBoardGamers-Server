@@ -78,10 +78,12 @@ class TournamentLifecycleTests(TestCase):
     def finish_game(self, game, winner):
         seats = list(game.players.select_related("player").order_by("seat_order"))
         ordered = sorted(seats, key=lambda seat: (seat.player != winner, seat.is_missing, seat.seat_order))
+        winner_seat = next(seat.seat_order for seat in seats if seat.player == winner)
         self.post_turn(
             game, winner, action="save", data=game.gameData, turn=10, phase=10,
             status="FINISHED", nextPlayer=[], saveRewind=False,
-            winner=winner.username, finalPositions=[seat.seat_order for seat in ordered],
+            winner=winner.username, winnerSeat=winner_seat,
+            finalPositions=[seat.seat_order for seat in ordered],
             tournamentData=[[winner.username]] + [[seat.player.username, 100 - index] for index, seat in enumerate(ordered[1:])],
         )
         game.refresh_from_db()

@@ -104,6 +104,7 @@ export async function saveGame(saveRewind, saveContext = false) {
 		postData.status = "FINISHED" // USED
 		//let finalRes = [...store.gameflow.fullTurnOrder]
 		postData.winner = store.players[store.gameflow.fullTurnOrder[0]].name // NAME
+		postData.winnerSeat = store.gameflow.fullTurnOrder[0]
 		postData.saveRewind = false
 		postData.data = funcs.exportModel(false, true)
 

@@ -87,6 +87,7 @@ async function doSaveGame() {
 	if (status === "FINISHED") {
 		const standings = game.standings || { rows: [], winners: [] };
 		postData.winner = standings.winners.map((seat) => store.playerNames[seat]);
+		postData.winnerSeats = standings.winners;
 		postData.finalPositions = standings.rows.map((row) => row.seat);
 	}
 

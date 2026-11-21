@@ -305,6 +305,7 @@ def _processINDturn(request):
                 jsonData["finalPositions"],
                 (jsonData.get("tournamentData") if jsonData.get("tournamentData") else []),
                 jsonData["gameID"],
+                winnerSeat=jsonData.get("winnerSeat"),
             )
 
         # Only notify if game still running

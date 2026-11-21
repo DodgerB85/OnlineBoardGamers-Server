@@ -433,6 +433,8 @@ def _processTGZturn(request):
                 jsonData["finalPositions"],
                 jsonData["tournamentData"],
                 jsonData["gameID"],
+                winnerSeat=jsonData.get("winnerSeat"),
+                finalPositionsSeats=jsonData.get("finalPositionsSeats"),
             )
             if "externalTournamentGame" in jsonData and jsonData["externalTournamentGame"] is True:
                 currentGame.kickoutFlexiData = ""

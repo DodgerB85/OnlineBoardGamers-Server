@@ -159,7 +159,7 @@ RNB adds one more layer: during multi-step "stack" moves the game holds a `trans
   - waits (`WAITING` for invites, `AVAILABLE`/`PRIVATE` open games) in the lobby lists.
 - **Joining**: `joinGame` / `checkJoinGame` in `Lobby/views.py` handle join/leave/decline/kick actions from the lobby lists; joining a `WAITING` game that reaches `maxPlayers` starts it. Before joining, a popup warns once (and can be confirmed away) when the creator's tracked play hours clash with the joiner's.
 - **Playing**: see above. Kickout logic (`SF_kickoutRequired`, pace strings in `sharedRefs`) flags idle players; pace is a constant (`Lobby/sharedFunctions/constants.py`, e.g. `KICKOUT_1_DAY`).
-- **Finishing**: the client submits final positions; the presenter records winners, stats and the end-game notification. Rematch prefills the create page via `createXXXpage/<gameID>/`.
+- **Finishing**: the client submits final positions as seat indexes and sends `winnerSeat`/`winnerSeats` (plus `finalPositionsSeats` where it historically sent names). The presenter resolves current usernames through `GamePlayer` before marking winners, sending the end notification and feeding the tournament progression arrays, which keep their existing name-shaped layout. Name fields remain the fallback for a stale bundled client.
 
 ## Notifications
 

@@ -479,6 +479,8 @@ def _processHLCturn(request):
                 jsonData["winner"],
                 jsonData["finalPositions"],
                 jsonData["gameID"],
+                winnerSeat=jsonData.get("winnerSeat"),
+                finalPositionsSeats=jsonData.get("finalPositionsSeats"),
             )
         else:
             loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
@@ -750,6 +752,8 @@ def _processHLCturn(request):
                 jsonData["winner"],
                 jsonData["finalPositions"],
                 jsonData["gameID"],
+                winnerSeat=jsonData.get("winnerSeat"),
+                finalPositionsSeats=jsonData.get("finalPositionsSeats"),
             )
         else:
             # Send Notifications

@@ -923,6 +923,7 @@ def _processRNBturn(request):
                 (jsonData.get("tournamentData") if jsonData.get("tournamentData") else []),
                 jsonData["gameID"],
                 jsonData["winningPlayerScore"],
+                winnerSeat=jsonData.get("winnerSeat"),
             )
 
         # Only notify if game still running
@@ -1781,6 +1782,7 @@ def performSaveGame(request, currentGame, jsonData):
             (jsonData.get("tournamentData") if jsonData.get("tournamentData") else []),
             jsonData["gameID"],
             jsonData["winningPlayerScore"],
+            winnerSeat=jsonData.get("winnerSeat"),
         )
 
     # Only notify if game still running

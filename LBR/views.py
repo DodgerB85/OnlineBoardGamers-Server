@@ -229,6 +229,7 @@ def performSaveGame(request, currentGame, jsonData, presenter):
         status=jsonData.get("status"),
         winner=jsonData.get("winner", []),
         final_positions=jsonData.get("finalPositions", []),
+        winner_seats=jsonData.get("winnerSeats", []),
         save_rewind=jsonData.get("saveRewind"),
         request=request,
     )
@@ -257,6 +258,7 @@ def save_lbr_state(
     final_positions,
     save_rewind,
     request,
+    winner_seats=None,
     track_availability=True,
     schedule_next_ai=True,
     keep_ai_claim=False,
@@ -295,7 +297,7 @@ def save_lbr_state(
     current_game.save()
 
     if status == "FINISHED":
-        presenter.endGame(request, winner, final_positions, current_game.id)
+        presenter.endGame(request, winner, final_positions, current_game.id, winnerSeats=winner_seats)
     else:
         loadedStartingOptions = json.loads(current_game.startingOptions) if current_game.startingOptions else []
         current_players = presenter.getArrayOfIsCurrentPlayers()

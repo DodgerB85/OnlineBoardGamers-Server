@@ -164,11 +164,13 @@ var IO = {
 		if (model.gameEnded > 0) {
 			callData.status = "FINISHED" // USED
 			callData.winner = global.winner // USED
+			callData.winnerSeat = model.gameFlow.unalteredTurnOrder[0]
 			let finalPositions = []
 			for (let i = 0; i < model.gameFlow.unalteredTurnOrder.length; i++) {
 				finalPositions.push(model.players[model.gameFlow.unalteredTurnOrder[i]].name)
 			}
 			callData.finalPositions = finalPositions
+			callData.finalPositionsSeats = [...model.gameFlow.unalteredTurnOrder]
 			callData.deleteMoves = "true" // USED
 			callData.saveRewind = false
 		}
@@ -532,12 +534,14 @@ var IO = {
 		if (model.gameEnded > 0) {
 			callData.status = "FINISHED" // USED
 			callData.winner = global.winner // USED
+			callData.winnerSeat = M.players.findIndex((p) => p.name === global.winner)
 			callData.deleteMoves = "true" // USED
 			let finalPositions = []
 			for (let i = 0; i < M.players.length; i++) {
 				finalPositions.push(M.players[i].name)
 			}
 			callData.finalPositions = finalPositions
+			callData.finalPositionsSeats = M.players.map((_, i) => i)
 		}
 
 		var csrftoken = getCookie("csrftoken")

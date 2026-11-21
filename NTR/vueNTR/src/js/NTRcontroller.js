@@ -291,7 +291,7 @@ function afterAction() {
   store.finishedGame = true
   store.victory = victory
   const finish = buildFinishPayload(victory)
-  IO.saveGame({ status: 'FINISHED', winner: finish.winner, finalPositions: finish.finalPositions })
+  IO.saveGame({ status: 'FINISHED', winner: finish.winner, winnerSeats: finish.winnerSeats, finalPositions: finish.finalPositions })
 }
 
 // The server marks winners by username and orders the result by seat index.
@@ -301,13 +301,14 @@ function buildFinishPayload(victory) {
 
   if (victory.winner === 'draw') {
     // Nobody is marked as a winner; every seat shares the result.
-    return { winner: [], finalPositions: seats.map(({ seat }) => seat) }
+    return { winner: [], winnerSeats: [], finalPositions: seats.map(({ seat }) => seat) }
   }
 
   const winners = seats.filter(({ player }) => player.side === victory.winner)
   const losers = seats.filter(({ player }) => player.side !== victory.winner)
   return {
     winner: winners.map(({ player }) => player.username),
+    winnerSeats: winners.map(({ seat }) => seat),
     finalPositions: [...winners, ...losers].map(({ seat }) => seat),
   }
 }

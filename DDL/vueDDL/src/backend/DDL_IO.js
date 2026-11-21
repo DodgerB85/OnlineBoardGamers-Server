@@ -91,6 +91,7 @@ async function performSave(saveRewind = true, options = {}) {
 		postData.status = "FINISHED"
 		postData.saveRewind = false
 		postData.winnerUsername = store.gameflow.winnerNames
+		postData.winnerSeats = store.gameflow.finalPositions?.[0] || []
 		postData.finalPositions = store.gameflow.finalPositions
 		postData.tournamentData = buildTournamentData()
 	}
