@@ -146,6 +146,10 @@ export const PHASE_LOOKBACK_AMOUNT = 2 // EXT use only. If you are in phase X, k
 
 export const PHASE_GAME_OVER = 19
 export const PHASE_CHOOSE_HOME_TILE = 20
+// &c Jumpstart: build goods piles (only when the map has no JS piles), then bid on them, then choose home tiles in pile order
+export const PHASE_JUMPSTART_PILES = 21
+export const PHASE_JUMPSTART_BIDDING = 22
+export const PHASE_JUMPSTARTS = [PHASE_JUMPSTART_PILES, PHASE_JUMPSTART_BIDDING]
 
 // Pre phase for pre-sets
 export const PRE_PHASE_OFFSET = 100
@@ -323,6 +327,25 @@ export const HIST_NO_WONDER_ACTIONS = 37
 
 export const HIST_GAME_END = 40
 export const HIST_PLAYER_TRADE = 41
+// &c Jumpstart
+export const HIST_JUMPSTART_ADD_GOOD = 50 // [pileIdx, resType]
+export const HIST_JUMPSTART_BID = 51 // [pileIdx, amount]
+export const HIST_JUMPSTART_RESULT = 52 // [piles, owners, prices]
+export const JUMPSTART_GOODS_PER_PLAYER = 5
+export const JUMPSTART_MIN_RAISE = 5
+
+// &c modules: [starting option value, name, lobby icon, store.gameOptions key]
+export const MODULES = [
+	[0, "Electricity", "RNB_electricity", "useElectricity"],
+	[1, "Management", "RNB_management", "useManagement"],
+	[2, "Art", "RNB_art", "useArt"],
+	[3, "Trade", "RNB_trade", "useTrade"],
+	[4, "Fundamental Research", "RNB_fundamentalResearch", "useFundamentalResearch"],
+	[5, "Planes", "RNB_planes", "usePlanes"],
+	[6, "Bombs", "RNB_bombs", "useBombs"],
+	[7, "Jumpstart", "RNB_jumpStart", "useJumpStart"],
+]
+export const moduleIconUrl = (icon) => "/static/Lobby/images/startingOptions/" + icon + ".svg"
 
 export const MAX_PLAYER_TRADES = 5
 

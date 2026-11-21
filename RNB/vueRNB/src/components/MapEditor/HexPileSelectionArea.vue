@@ -22,6 +22,7 @@ import * as view from "../../js/RNBview"
 import * as ME from "./RNBmapEditor.js"
 import * as context from "../../js/RNBcontext"
 import * as funcs from "../../js/RNBfuncs"
+import ScenarioOptions from "./ScenarioOptions.vue"
 //import * as stack from "../../js/RNBstack"
 
 import { ref, reactive, computed } from "vue"
@@ -120,6 +121,7 @@ function saveMap() {
 				context.resetContextAndHighlights()
 				funcs.clearMap()
 				store.CUSTOM_RULES.splice(0)
+				store.mapData.setupData = {}
 				mapName.value = ""
 				mapDescription.value = ""
 				isVerified.value = false
@@ -185,6 +187,7 @@ function deleteMap() {
 				fetchExistingMaps()
 				funcs.clearMap()
 				store.CUSTOM_RULES.splice(0)
+				store.mapData.setupData = {}
 				mapName.value = ""
 				mapDescription.value = ""
 				isVerified.value = false
@@ -274,6 +277,8 @@ const errorText = computed(() => {
 
 	// Need min size
 	if (store.mapData.hexData.length < props.playerCount * 3) return t("mapEditor.mapTooSmall")
+	// &c Jumpstart preset piles: one per player
+	if (store.mapData.setupData.JS && store.mapData.setupData.JS.length !== props.playerCount) return t("mapEditor.jumpstartPileCount", { count: props.playerCount })
 	// Can't have disconnected areas - check if all hexes are in one connected component
 	if (store.mapData.hexData.length > 0) {
 		const visited = new Set()
@@ -456,6 +461,8 @@ const errorText = computed(() => {
 
 			<!-- Map Stats Section-->
 		</div>
+
+		<ScenarioOptions />
 
 		<!-- Message Display Area -->
 		<div v-if="saveMessage" class="messageDisplay" :class="messageType">

@@ -12,6 +12,7 @@ import * as context from "./RNBcontext.js"
 import * as stack from "./RNBstack.js"
 import * as Bot from "./RNBbot.js"
 import * as atelier from "./RNBatelier.js"
+import * as jumpstart from "./RNBjumpstart.js"
 
 import { useModelStore } from "../stores/RNBstore.js"
 import { usePersonalStore } from "../stores/RNBpersonal.js"
@@ -357,9 +358,9 @@ export function getHeldResourcesScore(playerIndex) {
 	return score
 }
 
-// Total score = wonder points + held-resource points + Art & The Atelier artwork points
+// Total score = wonder points + held-resource points + Art & The Atelier artwork points - &c Jumpstart bid
 export function getPlayerTotalScore(playerIndex) {
-	return getPlayerWonderPoints(playerIndex) + getHeldResourcesScore(playerIndex) + atelier.scoreArtwork(playerIndex)
+	return getPlayerWonderPoints(playerIndex) + getHeldResourcesScore(playerIndex) + atelier.scoreArtwork(playerIndex) - jumpstart.bidForPlayer(playerIndex)
 }
 
 export function getPlayerWonderPoints(playerIndex) {

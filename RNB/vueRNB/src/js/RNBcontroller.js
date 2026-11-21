@@ -17,6 +17,7 @@ import * as context from "./RNBcontext"
 import * as stack from "./RNBstack"
 import * as wonder from "./RNBwonder"
 import * as Bot from "./RNBbot"
+import * as jumpstart from "./RNBjumpstart"
 import i18n from "../i18n"
 
 import * as IO from "../backend/RNB_IO.js"
@@ -94,6 +95,7 @@ export function isStrictTOphase() {
 	if (personal.trainingGame) return true
 	if (personal.soloGame) return true
 	if (store.gameflow.phase === rf.PHASE_CHOOSE_HOME_TILE) return true
+	if (rf.PHASE_JUMPSTARTS.includes(store.gameflow.phase)) return true
 	if (rf.PHASE_CONFLICT_PRAYINGS.includes(store.gameflow.phase)) return true
 	if (rf.PHASE_CONFLICT_TURN_ORDERS.includes(store.gameflow.phase)) return true
 	return false
@@ -428,6 +430,13 @@ export async function endPlayerTurn(overridePlayerName = null, overridePlayerInd
 	store.context.resIDsInWonderBrick.splice(0)
 
 	const effectivePlayerIndex = overridePlayerIndex !== null ? overridePlayerIndex : currentPlayerIndex()
+
+	if (rf.PHASE_JUMPSTARTS.includes(store.gameflow.phase)) {
+		jumpstart.endJumpstartTurn(effectivePlayerIndex)
+		await IO.saveGame(true, false)
+		startPlayerTurn()
+		return
+	}
 
 	if (store.gameflow.phase === rf.PHASE_CHOOSE_HOME_TILE) {
 		store.gameflow.turnOrder.shift()

@@ -74,6 +74,7 @@ function copyBgStatsLink() {
 
 import FailedStackEntry from "./Utils/FailedStackEntry.vue"
 import ActionAreaPrePhase from "./ActionAreaPrePhase.vue"
+import JumpstartPanel from "./JumpstartPanel.vue"
 import ConflictDecisionPanel from "./ConflictDecisionPanel.vue"
 
 function chosenStartTileIsPolder() {
@@ -827,6 +828,7 @@ const getGameOverReason = computed(() => {
 
 		<!-- Always add this component - it self selects to display inside the component -->
 		<ActionAreaPrePhase />
+		<JumpstartPanel />
 		<!-- CURRENT PLAYER ONLY-->
 		<template v-if="personal.canPlay() && !store.stackControl.previewingPhase">
 			<!-- CHOOSE START TILE -->

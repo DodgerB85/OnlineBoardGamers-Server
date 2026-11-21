@@ -68,6 +68,8 @@ function validateOptions(change) {
 		}
 	} else if (GAME_TYPE_OPTIONS.indexOf(change) !== -1) {
 		validateGameType(change)
+	} else if (change == "useJumpStart") {
+		updateMapPlayerCountWarning()
 	}
 }
 
@@ -120,6 +122,12 @@ function updateMapPlayerCountWarning() {
 	if (mapSelect.value) {
 		try {
 			const selectedMap = JSON.parse(mapSelect.value)
+			const jsWarning = jumpstartWarning(selectedMap.hexData)
+			if (jsWarning) {
+				warningSpan.textContent = jsWarning
+				warningSpan.style.display = "inline-block"
+				return
+			}
 			if (selectedMap.playerCount && String(selectedMap.playerCount) !== numberOfPlayers) {
 				warningSpan.textContent = "Caution: This map is designed for " + selectedMap.playerCount + " players but you have selected " + numberOfPlayers + " players"
 				warningSpan.style.display = "inline-block"
@@ -198,6 +206,61 @@ function selectPlayers() {
 // Map selection functions
 let loadedMaps = [] // Store maps globally for re-sorting
 
+// Module starting-option values (a map's RM key lists recommended ones) -> [label, lobby icon]
+const MODULE_INFO = {
+	0: ["Electricity", "RNB_electricity"],
+	1: ["Management", "RNB_management"],
+	2: ["Art", "RNB_art"],
+	3: ["Trade", "RNB_trade"],
+	4: ["Fundamental Research", "RNB_fundamentalResearch"],
+	5: ["Planes", "RNB_planes"],
+	6: ["Bombs", "RNB_bombs"],
+	7: ["Jumpstart", "RNB_jumpStart"],
+}
+
+// The last hexData entry is the keyed setup data (UK, HM, RM, JS, ...)
+function mapSetup(hexData) {
+	const last = Array.isArray(hexData) ? hexData[hexData.length - 1] : null
+	return last && !Array.isArray(last) ? last : {}
+}
+
+function recommendedModules(hexData) {
+	return mapSetup(hexData).RM || []
+}
+
+// &cetera scenarios = verified maps that come with designer-recommended modules
+function passesMapFilters(map) {
+	const etcOnly = document.getElementById("etceteraToggle")
+	return !(etcOnly && etcOnly.checked) || (map.isVerified && recommendedModules(map.hexData).length > 0)
+}
+
+function moduleIconsHTML(hexData) {
+	return recommendedModules(hexData)
+		.filter((value) => MODULE_INFO[value])
+		.map((value) => `<img class="mapModuleIcon" src="/static/Lobby/images/startingOptions/${MODULE_INFO[value][1]}.svg" title="${MODULE_INFO[value][0]}" alt="${MODULE_INFO[value][0]}">`)
+		.join("")
+}
+
+// Selecting a map with RM ticks exactly its recommended modules; maps without RM leave the boxes alone
+function applyRecommendedModules(hexData) {
+	const rm = recommendedModules(hexData)
+	if (rm.length === 0) return
+	for (const value of Object.keys(MODULE_INFO)) {
+		const checkbox = document.querySelector(`.myCheckbox[value="${value}"]`)
+		if (checkbox) checkbox.checked = rm.includes(parseInt(value, 10))
+	}
+}
+
+// Jumpstart: preset piles (JS) need their exact player count, otherwise 3+ players build piles
+function jumpstartWarning(hexData) {
+	if (!document.getElementById("useJumpStart").checked) return ""
+	const numberOfPlayers = parseInt(document.getElementById("playerNumber").value, 10)
+	const piles = mapSetup(hexData).JS
+	if (piles && piles.length !== numberOfPlayers) return "Jumpstart on this map needs exactly " + piles.length + " players"
+	if (!piles && numberOfPlayers < 3) return "Jumpstart needs at least 3 players on maps without preset piles"
+	return ""
+}
+
 function loadMaps() {
 	const isVerifiedToggle = document.getElementById("isVerifiedToggle")
 	const isVerified = isVerifiedToggle.checked ? "true" : "all"
@@ -244,7 +307,7 @@ function populateMapDropdown(maps, preserveMapValue = null) {
 	const matchingMaps = []
 	const nonMatchingMaps = []
 
-	maps.forEach((map) => {
+	maps.filter(passesMapFilters).forEach((map) => {
 		if (map.playerCount == numberOfPlayers) {
 			matchingMaps.push(map)
 		} else {
@@ -342,7 +405,10 @@ function onMapSelectionChange() {
 				mapInfoDisplay.style.display = "block"
 				selectedMapName.textContent = selectedMap.name
 				selectedMapDescription.textContent = selectedMap.description || "No description available"
+				const modules = moduleIconsHTML(selectedMap.hexData)
+				document.getElementById("selectedMapModules").innerHTML = modules ? "Recommended modules: " + modules : ""
 			}
+			applyRecommendedModules(selectedMap.hexData)
 
 			// 4. Show the map preview
 			mapPreviewPlaceholder.style.display = "none"
@@ -667,7 +733,7 @@ function updateGallerySelection() {
 function renderMapGallery() {
 	const grid = document.getElementById("galleryGrid")
 	if (!grid) return
-	const maps = loadedMaps.filter((map) => galleryPlayerFilter === null || map.playerCount === galleryPlayerFilter)
+	const maps = loadedMaps.filter((map) => (galleryPlayerFilter === null || map.playerCount === galleryPlayerFilter) && passesMapFilters(map))
 	const playerCountOrder = [2, 3, 4, 5, 6, 1]
 	maps.sort((a, b) => {
 		const orderA = playerCountOrder.indexOf(a.playerCount)
@@ -680,7 +746,9 @@ function renderMapGallery() {
 		.map((map) => {
 			const playerText = map.playerCount === 1 ? "Solo" : map.playerCount + "p"
 			const label = escapeGalleryHTML(`${map.name} (${playerText})${map.isVerified ? " \u2713" : ""}`)
-			return `<div class="galleryMapTile" data-uniqueid="${map.uniqueID}" title="${label}"><div class="galleryMapThumb">${buildMapThumbnailSVG(map.hexData)}</div><div class="galleryMapLabel">${label}</div></div>`
+			const modules = moduleIconsHTML(map.hexData)
+			const modulesHTML = modules ? `<div class="galleryMapModules">${modules}</div>` : ""
+			return `<div class="galleryMapTile" data-uniqueid="${map.uniqueID}" title="${label}"><div class="galleryMapThumb">${buildMapThumbnailSVG(map.hexData)}</div><div class="galleryMapLabel">${label}</div>${modulesHTML}</div>`
 		})
 		.join("")
 	updateGallerySelection()

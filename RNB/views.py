@@ -278,6 +278,8 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
             returnData["notes"] = ""
 
         returnData["displayNames"] = displayNames
+        # &c Jumpstart: the player who suggested the game (the creator) adds the first good
+        returnData["creatorName"] = currentGame.creator.username if currentGame.creator else ""
 
     return render(request, "RNB/showRNBgame.html", returnData)
 
@@ -1924,6 +1926,10 @@ def _valid_rnb_map(map_data, player_count):
     if not isinstance(map_data, list) or not map_data or not isinstance(map_data[-1], dict):
         return False
     if not isinstance(player_count, int) or not 1 <= player_count <= 6:
+        return False
+    # &c Jumpstart preset piles: one list of goods per player
+    piles = map_data[-1].get("JS")
+    if piles is not None and (not isinstance(piles, list) or len(piles) != player_count or not all(isinstance(p, list) and all(isinstance(g, int) for g in p) for p in piles)):
         return False
     try:
         if len(json.dumps(map_data, separators=(",", ":"))) > MAX_RNB_MAP_BYTES:

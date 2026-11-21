@@ -51,6 +51,7 @@ import * as context from "./RNBcontext.js"
 import * as stack from "./RNBstack.js"
 import * as highlight from "./RNBhighlight.js"
 import * as view from "./RNBview.js"
+import * as jumpstart from "./RNBjumpstart.js"
 import i18n from "../i18n"
 
 export async function initGame() {
@@ -295,6 +296,7 @@ export async function initNewGame() {
 	personal.haltPlay = true
 	store.mapData.externalMapData = [...window.initData.startingMap]
 	funcs.importStartingMap(window.initData.startingMap)
+	jumpstart.setupJumpstart()
 
 	if (store.mapData.setupData.RS) {
 		for (let i = 0; i < store.players.length; i++) {
@@ -805,6 +807,9 @@ export function setupStartTileForPlayerIndex_core(playerIndex, hexID, bucketID) 
 
 	// CR extra boards
 	if (store.CUSTOM_RULES.includes(rf.CR_START_WITH_ONE_EXTRA_BOARDS)) addResourceToGame_core(rf.RES_BOARDS, loc.setBucketLocation(hexID, bucketID), 9)
+
+	// &c Jumpstart pile won in the auction
+	for (const resType of jumpstart.pileForPlayer(playerIndex)) addResourceToGame_core(resType, loc.setBucketLocation(hexID, bucketID), 9)
 }
 
 export function addHomeMarkerToGame(playerIndex, bucketLocation) {

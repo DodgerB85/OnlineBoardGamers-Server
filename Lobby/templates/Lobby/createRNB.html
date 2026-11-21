@@ -315,6 +315,12 @@
                         <button type="button" class="tab tablinks active" id="mapListTab" onclick="showMapDisplay('list');">{% translate "List Display" %}</button>
                         <button type="button" class="tab tablinks" id="mapGalleryTab" onclick="showMapDisplay('gallery');">{% translate "Gallery Display" %}</button>
                     </div>
+                    <div class="mapFilterToggle" style="margin-bottom:8px">
+                        <label class="check-label">
+                            <input type="checkbox" id="isVerifiedToggle" onchange="clearMapSelection(); loadMaps();">
+                            {% translate "Verified maps only" %}
+                        </label>
+                    </div>
                     <div id="mapListView">
                         <div class="form-row">
                             <label class="form-label" for="mapSelection">{% translate "Select Map" %}</label>
@@ -323,12 +329,6 @@
                                 <select name="mapSelection" id="mapSelection" onchange="onMapSelectionChange();" oninvalid="this.setCustomValidity('{% translate "Please Select a Map" %}')" oninput="this.setCustomValidity('')" required style="width:100%">
                                     <option value="">{% translate "Select Map (sorted by player count)" %}</option>
                                 </select>
-                                <div class="mapFilterToggle" style="margin-top:8px">
-                                    <label class="check-label">
-                                        <input type="checkbox" id="isVerifiedToggle" onchange="clearMapSelection(); loadMaps();">
-                                        {% translate "Verified maps only" %}
-                                    </label>
-                                </div>
                             </div>
                         </div>
                         <div style="margin-top:8px">

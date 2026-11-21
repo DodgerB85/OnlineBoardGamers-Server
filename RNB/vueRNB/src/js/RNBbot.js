@@ -5,6 +5,7 @@ import * as model from "./RNBmodel"
 import * as wonder from "./RNBwonder"
 import * as context from "./RNBcontext.js"
 import * as productionSetup from "./RNBproductionSetup.js"
+import * as jumpstart from "./RNBjumpstart.js"
 import { useModelStore } from "../stores/RNBstore.js"
 import { usePersonalStore } from "../stores/RNBpersonal"
 
@@ -85,6 +86,13 @@ export async function actionPlayerKickout() {
 			return
 		} else {
 			store.actionStack.splice(0)
+
+			// Jumpstart: the kicked player adds/bids nothing; play moves on without them
+			if (rf.PHASE_JUMPSTARTS.includes(store.gameflow.phase)) {
+				jumpstart.endJumpstartTurn(timedOutPlayerIndex)
+				await IO.saveGame(false, false)
+				return
+			}
 			/*store.conflictPreset.conflictDecision = rf.CONFLICT_DECISION_NO_CONFLICT
 			store.conflictPreset.prayingDecision = rf.CONFLICT_PRAYING_CASH_IN
 			store.conflictPreset.turnOrderDecision = rf.CONFLICT_TURN_ORDER_EARLIEST*/
