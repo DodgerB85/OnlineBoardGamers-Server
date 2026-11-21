@@ -371,7 +371,7 @@ function updatePassIfOutbid() {
 							</span>
 						</div>
 					</div>
-					<p v-else class="mergerBidWinP">{{ $t('merger.youWillWin') }}</p>
+					<p v-else-if="store.context.selectedMergerBid > 0" class="mergerBidWinP">{{ $t('merger.youWillWin') }}</p>
 				</div>
 
 				<!-- Actions Footer -->
