@@ -20,7 +20,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
-from Lobby.sharedFunctions.permissions import can_act_in_game
+from Lobby.sharedFunctions.permissions import can_act_in_game, latest_update_ok, validated_actor_name
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -151,7 +151,7 @@ def _processCNSturn(request):
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
-        if latest_update != "9999999999999" and latest_update != str(currentGame.latestUpdate):
+        if not latest_update_ok(request, latest_update, currentGame.latestUpdate, currentGame.gameData):
             return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
@@ -163,7 +163,7 @@ def _processCNSturn(request):
                 currentGame,
                 currentGame.latestUpdate,
                 int(time.time()) * 1000,
-                jsonData["checkName"],
+                validated_actor_name(request, jsonData.get("checkName"), currentGame),
                 currentGame.kickoutDuration,
             )
         else:
@@ -277,7 +277,7 @@ def _processCNSturn(request):
         )
 
     elif jsonData["action"] == "loadRewind":
-        if latest_update != "9999999999999" and latest_update != str(currentGame.latestUpdate):
+        if not latest_update_ok(request, latest_update, currentGame.latestUpdate, currentGame.gameData):
             return JsonResponse({"syncError": True}, safe=False)
 
         if len(currentGame.rewindData) == 0:
@@ -367,7 +367,7 @@ def _processCNSturn(request):
         )
 
     elif jsonData["action"] == "kickout":
-        if latest_update != "9999999999999" and latest_update != str(currentGame.latestUpdate):  # and not jsonData["ignoreSync"]:
+        if not latest_update_ok(request, latest_update, currentGame.latestUpdate, currentGame.gameData):  # and not jsonData["ignoreSync"]:
             return JsonResponse({"syncError": True}, safe=False)
 
         target_gp = presenter.resolveGamePlayer(seat=jsonData.get("kickedSeat"), username=jsonData.get("kickedName"))
@@ -451,6 +451,7 @@ def _sendChatMessage(request):
             return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
         new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
+        currentChatData = currentChatData[:500]
 
         json_string = json.dumps(currentChatData)
         compressed_data = gzip.compress(json_string.encode("utf-8"))

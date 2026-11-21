@@ -19,7 +19,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
-from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin
+from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin, validated_actor_name
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -306,12 +306,7 @@ def performSaveURRGame(request, currentGame, jsonData):
         SN_sendAdminErrorMessage(message)
         return JsonResponse({"syncError": True}, safe=False)
 
-    nameToUse = request.user.username
-    if is_game_admin(request.user):
-        nameToUse = jsonData.get("BKSN", nameToUse)
-    check_name = jsonData.get("checkName", "")
-    if check_name:
-        nameToUse = check_name
+    nameToUse = validated_actor_name(request, jsonData.get("checkName") or jsonData.get("BKSN"), currentGame)
 
     previous_game_data = currentGame.gameData
     currentGame.gameData = jsonData["gameData"]
@@ -437,6 +432,7 @@ def _sendChatMessageURR(request):
             return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
         new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
+        currentChatData = currentChatData[:500]
         currentGame.chatData = _compressGenericChat(currentChatData)
 
         currentGame.presenter().addChatNotifications(currentGame.presenter().getAllPlayersOrderedySeatInArray(False, True))

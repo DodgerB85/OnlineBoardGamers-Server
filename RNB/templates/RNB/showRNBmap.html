@@ -1,3 +1,4 @@
+{% load script_json %}
 {% load static %}
 {% load i18n %}
 {% get_current_language as LANGUAGE_CODE %}
@@ -24,7 +25,7 @@ var initData = {};
 ///////////////////////
 initData.locale = "{{ LANGUAGE_CODE|default:'en-gb' }}";
 initData.showMapOnly = true;
-initData.startingMap = {{ startingMap|safe }};
+initData.startingMap = {{ startingMap|script_json }};
 initData.gameID = {{ gameID }};
 initData.gameName = "{{ gameName | escapejs }}";
 initData.mapName = "{{ mapName | escapejs }}"

@@ -1,3 +1,4 @@
+{% load script_json %}
 {% load static %}
 {% load i18n %}
 <!DOCTYPE html>
@@ -303,14 +304,14 @@
                     <script>
     var global = {};
     global.gameCreationTimestamp = {{ gameCreationTimestamp }};
-    global.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
-    global.deleteVotesData = {{ deleteVotesData | safe }};
-    global.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
+    global.KickoutFlexiDataArray = {{KickoutFlexiDataArray|script_json}};
+    global.deleteVotesData = {{ deleteVotesData |script_json }};
+    global.statsExcludeVotesData = {{ statsExcludeVotesData |script_json }};
 
     global.votedToDelete = false;
     global.votedToExclude = false;
 
-    {% if allPlayerListBySeat %}global.players = {{ allPlayerListBySeat | safe }};{% endif %}
+    {% if allPlayerListBySeat %}global.players = {{ allPlayerListBySeat |script_json }};{% endif %}
 
 
     {% if user.is_authenticated %}
@@ -358,7 +359,7 @@
     {% if now %}global.now = {{ now }};{% endif %}
 
     {% if currentPlayers %}
-    global.currentPlayers = {{ currentPlayers | safe }};
+    global.currentPlayers = {{ currentPlayers |script_json }};
     {% else %}
     global.currentPlayers = [];
     {% endif %}
@@ -389,7 +390,7 @@
     global.kickoutRequired = {{kickoutRequired}};
     {% endif %}
 
-    global.kickoutVotesData = {{ kickoutVotesData | safe }};
+    global.kickoutVotesData = {{ kickoutVotesData |script_json }};
     global.kickoutVoteThreshold = {{ kickoutVoteThreshold }};
 
     {% if liveNotification %}

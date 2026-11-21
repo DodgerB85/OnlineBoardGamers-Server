@@ -1,4 +1,5 @@
 {% extends "Lobby/layout.html" %}
+{% load script_json %}
 {% load static i18n compress %}
 {% block head %}
     
@@ -260,7 +261,7 @@
     setupData.gamePace = {{ gamePace }};
     setupData.kickoutDuration = "{{ kickoutDuration }}";
     setupData.playerNumber = {{ playerNumber }};
-    setupData.playerNames = {{ playerNames | safe }};
+    setupData.playerNames = {{ playerNames |script_json }};
     setupData.startingOptions = {{ startingOptions }};
     initGameCreation(true, setupData);
     {% else %}

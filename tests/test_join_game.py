@@ -7,6 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from Lobby.models import Game, GamePlayer, User
+import Lobby.sharedFunctions.constants as rf
 from Lobby.sharedFunctions.availability import JOIN_WARNING_MIN_MOVES
 from Lobby.sharedFunctions.sharedFunctions import SF_kickoutRequired
 
@@ -181,6 +182,8 @@ class JoinGameTests(TestCase):
 
     def test_only_creator_can_delete_training_game(self):
         game = self._game()
+        game.startingOptions = json.dumps([rf.SO_TRAINING_GAME])
+        game.save(update_fields=["startingOptions"])
 
         self._post({"gameID": game.id, "action": "deleteTrgGame"})
         self.assertTrue(Game.objects.filter(id=game.id).exists())
@@ -188,6 +191,30 @@ class JoinGameTests(TestCase):
         self.client.force_login(self.creator)
         self._post({"gameID": game.id, "action": "deleteTrgGame"})
         self.assertFalse(Game.objects.filter(id=game.id).exists())
+
+    def test_creator_cannot_delete_a_regular_game(self):
+        game = self._game()
+        self.client.force_login(self.creator)
+
+        self._post({"gameID": game.id, "action": "deleteTrgGame"})
+
+        self.assertTrue(Game.objects.filter(id=game.id).exists())
+
+    def test_active_game_cannot_be_joined(self):
+        game = self._game(gameStatus="ACTIVE")
+        playing(game, self.creator)
+
+        self._post({"gameID": game.id, "source": "ajax", "action": ""})
+
+        self.assertFalse(game.players.filter(player=self.joiner).exists())
+
+    def test_private_game_can_be_joined_by_link(self):
+        game = self._game(gameStatus="PRIVATE")
+        playing(game, self.creator)
+
+        self._post({"gameID": game.id, "source": "ajax", "action": ""})
+
+        self.assertTrue(game.players.filter(player=self.joiner).exists())
 
 
 class StartGameKickoutTimerTests(TestCase):

@@ -1,3 +1,4 @@
+{% load script_json %}
 {% load static %}
 {% load i18n %}
 {% get_current_language as LANGUAGE_CODE %}
@@ -404,17 +405,17 @@
   initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
   initData.myZoomLevel = {{ myZoomLevel }};
   initData.startingOptions = {{startingOptions}};
-  initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
-  initData.playerNames = {{ allPlayerListBySeat | safe }};
-  initData.currentPlayers = {{ currentPlayers | safe }};
+  initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|script_json}};
+  initData.playerNames = {{ allPlayerListBySeat |script_json }};
+  initData.currentPlayers = {{ currentPlayers |script_json }};
   initData.preferredRNBoptions = {{ preferredRNBoptions }};
-  initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
-  initData.deleteVotesData = {{ deleteVotesData | safe }};
+  initData.statsExcludeVotesData = {{ statsExcludeVotesData |script_json }};
+  initData.deleteVotesData = {{ deleteVotesData |script_json }};
   initData.pov = {{ pov }};
-  initData.startingMap = {{ startingMap|safe }};
+  initData.startingMap = {{ startingMap|script_json }};
   initData.turn = {{turn}};
-  initData.deleteVotesData = {{ deleteVotesData | safe }};
-  initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
+  initData.deleteVotesData = {{ deleteVotesData |script_json }};
+  initData.statsExcludeVotesData = {{ statsExcludeVotesData |script_json }};
 
   // Finished Game
   initData.finishedGame = {{finishedGame|lower}};
@@ -436,12 +437,12 @@
   {% endif %}
 
   ///////////////////////
-  initData.kickoutVotesData = {{ kickoutVotesData | default:'{}' | safe }};
+  initData.kickoutVotesData = {{ kickoutVotesData | default:'{}' | script_json }};
   initData.kickoutVoteThreshold = {{ kickoutVoteThreshold | default:'0' }};
   {% if involvedPlayer %}
-  initData.currentMoveData = {{ currentMoveData | safe }};
-  initData.allMyMoveData = {{ allMyMoveData|safe  }};
-  initData.allStackData = {{ allStackData|safe  }};
+  initData.currentMoveData = {{ currentMoveData |script_json }};
+  initData.allMyMoveData = {{ allMyMoveData|script_json  }};
+  initData.allStackData = {{ allStackData|script_json  }};
   initData.statsExcludedGame = {{ statsExcludedGame|lower }};
   initData.secondsToNextKickout = {{ secondsToNextKickout }};
   initData.trade = '{{ trade }}';

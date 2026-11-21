@@ -19,7 +19,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
-from Lobby.sharedFunctions.permissions import can_act_in_game
+from Lobby.sharedFunctions.permissions import can_act_in_game, latest_update_ok, validated_actor_name
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -63,7 +63,6 @@ def showWEBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     )
     if isinstance(result, HttpResponseRedirect):
         return result
-    print(result)
     currentGame = result["game"]
     presenter = result["presenter"]
     all_players = result["all_players"]
@@ -151,7 +150,7 @@ def _processWEBturn(request):
 
     if jsonData["action"] == "simpleSave":
         # Check if old version is older than DB version, and if so, return
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
+        if not latest_update_ok(request, jsonData["latestUpdate"], currentGame.latestUpdate, currentGame.gameData):
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             current_players = ", ".join(presenter.getArrayOfIsCurrentPlayers())
@@ -198,7 +197,7 @@ def _processWEBturn(request):
         currentGame.turn = jsonData["turn"]
         currentGame.phase = jsonData["phase"]
 
-        check_name = jsonData.get("checkName", request.user.username)
+        check_name = validated_actor_name(request, jsonData.get("checkName"), currentGame)
         SF_updateFlexiTime(
             currentGame,
             db_latest_update,
@@ -292,7 +291,7 @@ def _processWEBturn(request):
 
     elif jsonData["action"] == "saveEndGame":
         # Check if old version is older than DB version, and if so, return
-        if latest_update != "9999999999999" and str(latest_update) != str(currentGame.latestUpdate):
+        if not latest_update_ok(request, latest_update, currentGame.latestUpdate, currentGame.gameData):
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = (
@@ -603,6 +602,7 @@ def _sendChatMessage(request):
             return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
         new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
+        currentChatData = currentChatData[:500]
 
         json_string = json.dumps(currentChatData)
         compressed_data = gzip.compress(json_string.encode("utf-8"))

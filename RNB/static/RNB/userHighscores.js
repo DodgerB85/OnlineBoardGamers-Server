@@ -156,9 +156,11 @@ function autocomplete(inp) {
             var arr = data.users || [];
             
             b = document.createElement("DIV");
-            b.innerHTML += "<input type='hidden' value='" + arr[0] + "'>"
             for (i = 0; i < arr.length; i++) {
-                b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>"
+                var hidden = document.createElement("input");
+                hidden.type = "hidden";
+                hidden.value = arr[i];
+                b.appendChild(hidden);
             }
             /*execute a function when someone clicks on the item value (DIV element):*/
             b.addEventListener("click", function(e) {

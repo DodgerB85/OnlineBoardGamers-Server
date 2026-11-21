@@ -1,3 +1,4 @@
+{% load script_json %}
 {% load static %}
 {% load i18n %}
 {% get_current_language as LANGUAGE_CODE %}
@@ -142,12 +143,12 @@
     initData.myZoomLevel = {{ myZoomLevel }};
     initData.startingOptions = {{ startingOptions|safe }};
     initData.preferredURRoptions = {{ preferredURRoptions|default:"[-1]"|safe }};
-    initData.KickoutFlexiDataArray = {{ KickoutFlexiDataArray|safe }};
-    initData.playerNames = {{ allPlayerListBySeat|safe }};
-    initData.missingPlayers = {{ missingPlayers|safe }};
-    initData.currentPlayers = {{ currentPlayers|safe }};
-    initData.statsExcludeVotesData = {{ statsExcludeVotesData|safe }};
-    initData.deleteVotesData = {{ deleteVotesData|safe }};
+    initData.KickoutFlexiDataArray = {{ KickoutFlexiDataArray|script_json }};
+    initData.playerNames = {{ allPlayerListBySeat|script_json }};
+    initData.missingPlayers = {{ missingPlayers|script_json }};
+    initData.currentPlayers = {{ currentPlayers|script_json }};
+    initData.statsExcludeVotesData = {{ statsExcludeVotesData|script_json }};
+    initData.deleteVotesData = {{ deleteVotesData|script_json }};
     initData.pov = {{ pov }};
     initData.turn = {{ turn }};
     initData.phase = {{ phase }};
@@ -167,7 +168,7 @@
     initData.chatNotification = {{ chatNotification|lower }};
     {% endif %}
 
-    initData.kickoutVotesData = {{ kickoutVotesData|default:'{}'|safe }};
+    initData.kickoutVotesData = {{ kickoutVotesData|default:'{}'|script_json }};
     initData.kickoutVoteThreshold = {{ kickoutVoteThreshold|default:'0' }};
     {% if involvedPlayer %}
     initData.statsExcludedGame = {{ statsExcludedGame|lower }};

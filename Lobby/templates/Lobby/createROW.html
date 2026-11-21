@@ -1,4 +1,5 @@
 {% extends "Lobby/layout.html" %}
+{% load script_json %}
 {% load static i18n compress %}
 {% block head %}
     {% compress js %}
@@ -271,7 +272,7 @@
         document.getElementById("pace").value = "{{ gamePace }}";
         document.getElementById("kickoutDuration").value = "{{ kickoutDuration }}";
         document.getElementById("playerNumber").value = "{{ playerNumber }}";
-        var names = {{ playerNames|safe }};
+        var names = {{ playerNames|script_json }};
         for (var i = 0; i < names.length; i++) {
             var input = document.getElementById("player" + (i + 2));
             if (input) input.value = names[i];

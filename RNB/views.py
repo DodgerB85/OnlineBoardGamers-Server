@@ -29,7 +29,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
-from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin, is_site_admin
+from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin, is_site_admin, validated_actor_name
 
 # from django.urls import reverse
 # from django.db.models import Q
@@ -44,7 +44,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 from Lobby.presenters import rnbPhaseOrder
 
 from . import RNBconstants as rfRNB
-from .common import create_rnb_game
+from .common import MAX_RNB_MAP_BYTES, create_rnb_game, parse_rnb_map
 from .models import RNBmap, RNBMapScore
 from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 
@@ -102,18 +102,21 @@ def showRNBmap(request, game_id=0):
     settings_debug = config("RNB_USE_SOURCE_CODE", default=False, cast=bool)
 
     # Get map data from the game
-    startingMap = json.loads(currentGame.startingMap) if currentGame.startingMap else []
+    startingMap = parse_rnb_map(currentGame.startingMap)
 
     mapName = "[No Name]"
     mapDescription = "[No description]"
     playerCount = 0
-    uniqueID = startingMap[-1].get("UK", -1)
+    uniqueID = startingMap[-1].get("UK", -1) if startingMap and isinstance(startingMap[-1], dict) else -1
 
     if uniqueID >= 0:
-        currentMap = RNBmap.objects.get(uniqueID=uniqueID)
-        mapName = currentMap.name
-        mapDescription = currentMap.description
-        playerCount = currentMap.playerCount
+        try:
+            currentMap = RNBmap.objects.get(uniqueID=uniqueID)
+            mapName = currentMap.name
+            mapDescription = currentMap.description
+            playerCount = currentMap.playerCount
+        except RNBmap.DoesNotExist:
+            pass
 
     showPlayerCountWarning = playerCount != currentGame.maxPlayers
 
@@ -195,11 +198,11 @@ def showRNBgame(request, game_id=1, spoilerFree=False, replayStep=1):
     elif currentGame.phase in rfRNB.ALL_PHASE_CONFLICTS:
         currentPlayersArr = json.dumps(presenter.getArrayOfIsCurrentPlayers())
 
-    startingMap = json.loads(currentGame.startingMap) if currentGame.startingMap else []
+    startingMap = parse_rnb_map(currentGame.startingMap)
 
     mapName = "[No map name found]"
     mapDescription = "[No map description found]"
-    uniqueID = startingMap[-1].get("UK", -1) if startingMap else -1
+    uniqueID = startingMap[-1].get("UK", -1) if startingMap and isinstance(startingMap[-1], dict) else -1
 
     if uniqueID >= 0:
         try:
@@ -353,12 +356,7 @@ def _processRNBturn(request):
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
-        nameToUse = request.user.username
-        if is_game_admin(request.user):
-            nameToUse = jsonData["BKSN"]
-        check_name = jsonData.get("checkName", "")
-        if check_name:
-            nameToUse = check_name
+        nameToUse = validated_actor_name(request, jsonData.get("checkName") or jsonData.get("BKSN"), currentGame)
 
         # Remove flex time
         SF_updateFlexiTime(
@@ -634,12 +632,7 @@ def _processRNBturn(request):
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"syncError": True}, safe=False)
 
-        nameToUse = request.user.username
-        if is_game_admin(request.user):
-            nameToUse = jsonData["BKSN"]
-        check_name = jsonData.get("checkName", "")
-        if check_name:
-            nameToUse = check_name
+        nameToUse = validated_actor_name(request, jsonData.get("checkName") or jsonData.get("BKSN"), currentGame)
 
         # Remove flex time
         SF_updateFlexiTime(
@@ -1762,7 +1755,7 @@ def performSaveGame(request, currentGame, jsonData):
     currentGame.turn = jsonData["turn"]
     currentGame.phase = jsonData["phase"]
 
-    check_name = jsonData.get("checkName", request.user.username)
+    check_name = validated_actor_name(request, jsonData.get("checkName"), currentGame)
     SF_updateFlexiTime(
         currentGame,
         db_latest_update,
@@ -1891,6 +1884,7 @@ def _sendChatMessageRNB(request):
             return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
         new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
+        currentChatData = currentChatData[:500]
 
         json_string = json.dumps(currentChatData)
         compressed_data = gzip.compress(json_string.encode("utf-8"))
@@ -1924,6 +1918,19 @@ def saveZoomRNB(request):
     return shared_save_zoom(request, "RNB")
 
 
+def _valid_rnb_map(map_data, player_count):
+    if not isinstance(map_data, list) or not map_data or not isinstance(map_data[-1], dict):
+        return False
+    if not isinstance(player_count, int) or not 1 <= player_count <= 6:
+        return False
+    try:
+        if len(json.dumps(map_data, separators=(",", ":"))) > MAX_RNB_MAP_BYTES:
+            return False
+    except (TypeError, ValueError):
+        return False
+    return True
+
+
 @login_required
 def saveRNBmap(request):
     """
@@ -1941,6 +1948,9 @@ def saveRNBmap(request):
         map_data = data.get("mapData", [])
         map_playerCount = data.get("playerCount", 2)
         map_isVerified = data.get("isVerified", False) if is_site_admin(request.user) else False
+
+        if not _valid_rnb_map(map_data, map_playerCount):
+            return JsonResponse({"error": "Invalid or oversized map data"}, status=400)
 
         # Validate required fields
         # if not map_name:
@@ -1995,6 +2005,9 @@ def replaceRNBmap(request):
         map_data = data.get("mapData", [])
         map_playerCount = data.get("playerCount", 2)
         map_isVerified = data.get("isVerified", False)
+
+        if not _valid_rnb_map(map_data, map_playerCount):
+            return JsonResponse({"error": "Invalid or oversized map data"}, status=400)
 
         # Find the existing map
         existing_map = RNBmap.objects.get(id=map_id)

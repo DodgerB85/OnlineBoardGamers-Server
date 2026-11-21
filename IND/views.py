@@ -19,7 +19,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, GamePlayer, User
-from Lobby.sharedFunctions.permissions import can_act_in_game
+from Lobby.sharedFunctions.permissions import can_act_in_game, validated_actor_name
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_updateFlexiTime,
@@ -277,7 +277,7 @@ def _processINDturn(request):
                 currentGame,
                 currentGame.latestUpdate,
                 int(time.time()) * 1000,
-                jsonData["checkName"],
+                validated_actor_name(request, jsonData.get("checkName"), currentGame),
                 currentGame.kickoutDuration,
             )
         else:
@@ -689,6 +689,7 @@ def _sendChatMessage(request):
             return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
         new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
+        currentChatData = currentChatData[:500]
 
         json_string = json.dumps(currentChatData)
         compressed_data = gzip.compress(json_string.encode("utf-8"))

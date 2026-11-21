@@ -220,6 +220,8 @@ Source is authoritative; never hand-edit `*vuedist`. HTML shells are Django temp
 
 - Settings: `OnlineBoardGamers/settings.py` — app list, middleware, `Q_CLUSTER`, per-game `*_USE_SOURCE_CODE` flags (serve source instead of built dist while developing, e.g. `FCM_USE_SOURCE_CODE`, `RNB_USE_SOURCE_CODE`).
 - Config comes from `.env` via `python-decouple` (`config(...)`): DB credentials, `ADMIN_DB_KEY`, email/dicord tokens. Production runs on PythonAnywhere with MySQL; local dev can use the sqlite or docker-compose (MySQL 9) paths.
+- Production security, HTTPS, secrets and the deliberately accepted exceptions are documented in [SECURITY.md](SECURITY.md). In particular: Cloudflare terminates HTTPS with Full (Strict); PythonAnywhere has Force HTTPS off; Django's `SECURE_SSL_REDIRECT` must be off for PythonAnywhere + Cloudflare, or the two redirect layers loop.
+- `SECRET_KEY_PRODUCTION` (production) and `SEECRET_KEY_HOME_SERVER` (development; typo is intentional) are separate keys. `TELEGRAM_WEBHOOK_SECRET` is optional but must be registered with Telegram when set.
 - Dev workflow: `A_Run_All_Servers.bat` starts Django + the Vue dev servers for active workspaces; games run at `http://localhost:8000`.
 - Tests: root `/tests/` package, run with `manage.py test`; see [UNIT_TESTS.md](UNIT_TESTS.md).
 

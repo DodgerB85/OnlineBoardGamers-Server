@@ -1,3 +1,4 @@
+{% load script_json %}
 {% load static %}
 {% load i18n %}
 {% get_current_language as LANGUAGE_CODE %}
@@ -83,7 +84,7 @@
   initData.currentPlayers = ["{{ playerName|escapejs }}", "{{ tutorName|escapejs }}"];
   initData.startingOptions = {{ startingOptions|safe }};
   initData.startingOptionsHTML = "";
-  initData.startingMap = {{ startingMap|safe }};
+  initData.startingMap = {{ startingMap|script_json }};
 
   // Nothing below is used by the tutorial, but initGame/TopMenu read them
   initData.myZoomLevel = 200;

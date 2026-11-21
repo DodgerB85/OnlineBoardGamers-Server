@@ -1,3 +1,4 @@
+{% load script_json %}
 {% load static %}
 {% load i18n %}
 {% get_current_language as LANGUAGE_CODE %}
@@ -112,10 +113,10 @@
   initData.gameData = '{{ gameData|escapejs }}';
   initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
   initData.myZoomLevel = {{ myZoomLevel }};
-  initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
+  initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|script_json}};
   initData.latestUpdate = {{ latestUpdateLiteral }};
-  initData.deleteVotesData = {{ deleteVotesData | safe }};
-  initData.statsExcludeVotesData = {{ statsExcludeVotesData | safe }};
+  initData.deleteVotesData = {{ deleteVotesData |script_json }};
+  initData.statsExcludeVotesData = {{ statsExcludeVotesData |script_json }};
   
   {% if spoilerFree %}
   initData.spoilerFree = true;
@@ -131,7 +132,7 @@
   initData.bgStatsEnabled = {{ bgStatsEnabled|default:0 }};
   {% endif %}
 
-  initData.kickoutVotesData = {{ kickoutVotesData | default:'{}' | safe }};
+  initData.kickoutVotesData = {{ kickoutVotesData | default:'{}' | script_json }};
   initData.kickoutVoteThreshold = {{ kickoutVoteThreshold | default:'0' }};
 
   ///////////////////////
@@ -164,7 +165,7 @@
   {% if displayNames %}
   initData.displayNames = JSON.parse('{{ displayNames|escapejs }}');
   {% endif %}
-  initData.playerNames = {{ allPlayerListBySeat | safe }};
+  initData.playerNames = {{ allPlayerListBySeat |script_json }};
   {% endif %}
   {% endif %}
   </script>

@@ -4,8 +4,9 @@ import copy
 import json
 import math
 import time
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
+from django.utils.html import escape
 from django.utils.translation import gettext, gettext_lazy
 
 import AQY.AQYconstants as rfAQY
@@ -137,19 +138,20 @@ def SR_getTournamentWinnerHTML(tournamentStatus, winnersData):
         winnersData = json.loads(winnersData)
         winnerHTML = "<B>" + gettext("1st:") + " </B>"
         for index, player in enumerate(winnersData[0]):
-            winnerHTML += '<B><a href="/profile/' + player + '">' + player + "</a></B>"
+            safe_player = escape(player)
+            winnerHTML += '<B><a href="/profile/' + quote(player, safe="") + '">' + safe_player + "</a></B>"
             if index + 1 != len(winnersData[0]):
                 winnerHTML += ", "
         if len(winnersData) >= 2:
             winnerHTML += "<BR/><B>" + gettext("2nd:") + " </B>"
             for index, player in enumerate(winnersData[1]):
-                winnerHTML += '<a href="/profile/' + player + '">' + player + "</a>"
+                winnerHTML += '<a href="/profile/' + quote(player, safe="") + '">' + escape(player) + "</a>"
                 if index + 1 != len(winnersData[1]):
                     winnerHTML += ", "
         if len(winnersData) >= 3 and len(winnersData[2]) > 0:
             winnerHTML += "<BR/><B>" + gettext("3rd:") + " </B>"
             for index, player in enumerate(winnersData[2]):
-                winnerHTML += '<a href="/profile/' + player + '">' + player + "</a>"
+                winnerHTML += '<a href="/profile/' + quote(player, safe="") + '">' + escape(player) + "</a>"
                 if index + 1 != len(winnersData[2]):
                     winnerHTML += ", "
 

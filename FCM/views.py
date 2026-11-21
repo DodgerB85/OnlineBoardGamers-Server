@@ -28,6 +28,7 @@ from Lobby.gameViewHelpers import (
 )
 from Lobby.models import Game, GamePlayer, Profile, User
 from Lobby.sharedFunctions.permissions import is_game_admin, is_site_admin
+from Lobby.sharedFunctions.rateLimit import is_rate_limited
 from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
@@ -1914,6 +1915,7 @@ def _sendChatMessage(request):
             return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
         new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
+        currentChatData = currentChatData[:500]
 
         json_string = json.dumps(currentChatData, separators=(",", ":"))
         compressed_data = gzip.compress(json_string.encode("utf-8"))
@@ -2153,6 +2155,8 @@ def load_rewind_data(currentGame):
 @require_POST
 def nudgeTourneyAdmins(request):
     # Webhook lives in .env; callers post {content} with no CSRF header.
+    if is_rate_limited(f"nudgeTourneyAdmins:{request.user.id}", 5, 600):
+        return JsonResponse({"error": "Too many nudges"}, status=429)
     origin = request.headers.get("Origin") or request.headers.get("Referer", "")
     if origin:
         origin_host = (urlparse(origin).hostname or "").lower()

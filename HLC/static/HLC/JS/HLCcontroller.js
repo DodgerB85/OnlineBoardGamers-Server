@@ -567,7 +567,7 @@ $(".piece").on("click", function (e) {
 		var index = this.model.players.map((item) => item.colour).indexOf(colour)
 		// Then correct colour
 		colour = getCorrectedColour(colour)
-		span = "<span class='playerName" + String(colour) + "'> " + this.model.players[index].name + " </span>"
+		span = "<span class='playerName" + String(colour) + "'> " + escapeHTML(this.model.players[index].name) + " </span>"
 		return span
 	}
 

@@ -175,10 +175,15 @@ function autocomplete(inp) {
 							/*create a DIV element for each matching element:*/
 							b = document.createElement("DIV")
 							/*make the matching letters bold:*/
-							b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>"
-							b.innerHTML += arr[i].substr(val.length)
+							var strong = document.createElement("strong")
+							strong.textContent = arr[i].substr(0, val.length)
+							b.appendChild(strong)
+							b.appendChild(document.createTextNode(arr[i].substr(val.length)))
 							/*insert a input field that will hold the current array item's value:*/
-							b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>"
+							var hidden = document.createElement("input")
+							hidden.type = "hidden"
+							hidden.value = arr[i]
+							b.appendChild(hidden)
 							/*execute a function when someone clicks on the item value (DIV element):*/
 							b.addEventListener("click", function (e) {
 								/*insert the value for the autocomplete text field:*/
@@ -315,7 +320,9 @@ async function invitePlayerMT(e) {
 function displayInvitedPlayersMT() {
 	let span = document.getElementById("invitedPlayersSpanMT")
 	let invitedPlayers = global.invitedPlayersArr.join(", ")
-	span.innerHTML = "<br/>Invited Players: " + invitedPlayers
+	span.textContent = ""
+	span.appendChild(document.createElement("br"))
+	span.appendChild(document.createTextNode("Invited Players: " + invitedPlayers))
 
 	let hiddenInput = document.getElementById("invtedPlayersListMT")
 	hiddenInput.value = JSON.stringify(global.invitedPlayersArr)

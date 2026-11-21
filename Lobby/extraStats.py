@@ -9,6 +9,7 @@ import msgpack
 from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import render
 from lzstring import LZString
 
@@ -16,6 +17,8 @@ import Lobby.sharedFunctions.constants as rf
 from Lobby.models import Game
 from Lobby.sharedFunctions.sharedRefs import SR_GAMES_CODES_AND_NAMES_CHOICES
 from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
+from Lobby.sharedFunctions.loginThrottle import client_ip
+from Lobby.sharedFunctions.rateLimit import is_rate_limited
 
 logger = logging.getLogger(__name__)
 
@@ -199,6 +202,8 @@ def synthetic_fcm_stats():
 
 
 def extra_stats(request):
+    if is_rate_limited(f"extraStats:{client_ip(request)}", 10, 60):
+        return HttpResponse(status=429)
     stats = cache.get("extra_game_stats_v1")
     if stats is None:
         stats = collect_extra_stats()

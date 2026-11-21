@@ -62,6 +62,16 @@ Never cut:
 - `gettext` on user-facing strings.
 - the closest existing test when you touch a covered flow.
 
+## Security — accepted decisions
+`docs/SECURITY.md` is the operational security reference. These are deliberate owner decisions, not bugs; do not "fix" them without asking:
+- chat is open to any authenticated user, including spectators, with entry/length caps only;
+- private games are unlisted, not invite-only: anyone with the link may join while the game is not `ACTIVE`/`FINISHED`;
+- registration/login deliberately reveal an already-registered email and an inactive account; password reset stays generic;
+- existing weak passwords are not force-reset; the policy applies on the next change/reset;
+- QuickSetup and docker-compose defaults are development-only, never production;
+- game rules are client-side by design (see the "dumb server" rule above); the server enforces persistence, permission, mutex, stale-write and payload checks.
+Production HTTPS uses Cloudflare only: Full (Strict) + Always Use HTTPS, PythonAnywhere Force HTTPS off, and Django `SECURE_SSL_REDIRECT` off on PythonAnywhere + Cloudflare. Do not add a second redirect layer.
+
 ## Build and test traps
 Prefer JPG for image assets when possible; compression saves space.
 Frontend source is `<GAME>/vue<GAME>/src`. `<GAME>/static/<GAME>/<GAME>vuedist` is build output: never edit it by hand, and never include dist/build output in a commit.

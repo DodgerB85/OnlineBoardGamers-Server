@@ -1825,10 +1825,9 @@ def SN_sendWebhooks(profile, messageText, urlText, urlRaw):
                     # requests.post(url)
                     session.post(tg_url, timeout=10)
 
-            except requests.exceptions.RequestException as e:
-                SN_sendAdminErrorMessage(f"Webhook failed ({w_type}): {e} User: {profile.user.username}")
-                # Log the specific webhook failure without stopping the loop
-                print(f"Webhook failed ({w_type}): {e}")
+            except requests.exceptions.RequestException:
+                SN_sendAdminErrorMessage(f"Webhook failed ({w_type}) for user {profile.user.username}")
+                print(f"Webhook failed ({w_type}) for user {profile.user.username}")
 
 
 def SN_sendDiscordDM(discordID, message_text, urlText, urlRaw):

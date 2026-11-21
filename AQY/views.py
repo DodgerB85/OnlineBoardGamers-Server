@@ -21,7 +21,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
-from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin
+from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin, latest_update_ok, validated_actor_name
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_updateFlexiTime,
@@ -167,7 +167,7 @@ def _processAQYturn(request):
 
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
-        if latest_update != "9999999999999" and latest_update != str(currentGame.latestUpdate):
+        if not latest_update_ok(request, latest_update, currentGame.latestUpdate, currentGame.gameData):
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = (
@@ -190,7 +190,7 @@ def _processAQYturn(request):
                 currentGame,
                 currentGame.latestUpdate,
                 int(time.time()) * 1000,
-                jsonData["checkName"],
+                validated_actor_name(request, jsonData.get("checkName"), currentGame),
                 currentGame.kickoutDuration,
             )
         else:
@@ -350,7 +350,7 @@ def _processAQYturn(request):
     ################### PRE TURN
     elif jsonData["action"] == "preTurn":
         # Check if old version is older than DB version, and if so, return
-        if latest_update != "9999999999999" and latest_update != str(currentGame.latestUpdate):
+        if not latest_update_ok(request, latest_update, currentGame.latestUpdate, currentGame.gameData):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
@@ -378,7 +378,7 @@ def _processAQYturn(request):
     ################### END PRE TURN
 
     elif jsonData["action"] == "proposeTrade":
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
+        if not latest_update_ok(request, jsonData["latestUpdate"], currentGame.latestUpdate, currentGame.gameData):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
@@ -467,7 +467,7 @@ def _processAQYturn(request):
         )
 
     elif jsonData["action"] == "acceptTrade":
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
+        if not latest_update_ok(request, jsonData["latestUpdate"], currentGame.latestUpdate, currentGame.gameData):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
@@ -613,7 +613,7 @@ def _processAQYturn(request):
         )
 
     elif jsonData["action"] == "rejectTrade":
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
+        if not latest_update_ok(request, jsonData["latestUpdate"], currentGame.latestUpdate, currentGame.gameData):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
@@ -639,7 +639,7 @@ def _processAQYturn(request):
         )
 
     elif jsonData["action"] == "markPromiseComplete":
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
+        if not latest_update_ok(request, jsonData["latestUpdate"], currentGame.latestUpdate, currentGame.gameData):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
@@ -688,7 +688,7 @@ def _processAQYturn(request):
         )
 
     elif jsonData["action"] == "saveSimulMove":
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
+        if not latest_update_ok(request, jsonData["latestUpdate"], currentGame.latestUpdate, currentGame.gameData):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
@@ -753,7 +753,7 @@ def _processAQYturn(request):
         return JsonResponse(response, safe=False)
 
     elif jsonData["action"] == "kickstartGame":
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
+        if not latest_update_ok(request, jsonData["latestUpdate"], currentGame.latestUpdate, currentGame.gameData):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
@@ -818,7 +818,7 @@ def _processAQYturn(request):
         )
 
     elif jsonData["action"] == "loadRewind":
-        if latest_update != "9999999999999" and latest_update != str(currentGame.latestUpdate):
+        if not latest_update_ok(request, latest_update, currentGame.latestUpdate, currentGame.gameData):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
@@ -916,7 +916,7 @@ def _processAQYturn(request):
         )
 
     elif jsonData["action"] == "kickout":
-        if latest_update != "9999999999999" and latest_update != str(currentGame.latestUpdate):  # and not jsonData["ignoreSync"]:
+        if not latest_update_ok(request, latest_update, currentGame.latestUpdate, currentGame.gameData):  # and not jsonData["ignoreSync"]:
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             message = (
@@ -1086,6 +1086,7 @@ def _sendChatMessage(request):
             return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
         new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
+        currentChatData = currentChatData[:500]
 
         json_string = json.dumps(currentChatData)
         compressed_data = gzip.compress(json_string.encode("utf-8"))

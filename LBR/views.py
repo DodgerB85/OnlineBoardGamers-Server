@@ -19,7 +19,7 @@ from Lobby.gameViewHelpers import (
     shared_save_zoom,
 )
 from Lobby.models import Game, User
-from Lobby.sharedFunctions.permissions import can_act_in_game
+from Lobby.sharedFunctions.permissions import can_act_in_game, validated_actor_name
 from Lobby.sharedFunctions.safeCompression import safe_gzip_decompress
 from Lobby.sharedFunctions.sharedFunctions import SF_updateFlexiTime
 from Lobby.sharedFunctions.sharedNotifications import SN_sendAdminErrorMessage
@@ -225,7 +225,7 @@ def performSaveGame(request, currentGame, jsonData, presenter):
         phase=jsonData["phase"],
         next_player_usernames=jsonData.get("nextPlayer", []),
         acting_username=request.user.username,
-        check_name=jsonData.get("checkName", request.user.username),
+        check_name=validated_actor_name(request, jsonData.get("checkName"), currentGame),
         status=jsonData.get("status"),
         winner=jsonData.get("winner", []),
         final_positions=jsonData.get("finalPositions", []),
@@ -500,6 +500,7 @@ def _sendChatMessage(request):
 
         new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
+        currentChatData = currentChatData[:500]
 
         compressed_data = gzip.compress(json.dumps(currentChatData).encode("utf-8"))
         currentGame.chatData = base64.b64encode(compressed_data).decode("utf-8")

@@ -25,7 +25,7 @@ from Lobby.gameViewHelpers import (
 # from django.utils import translation
 # fore change comment
 from Lobby.models import Game, Profile, User
-from Lobby.sharedFunctions.permissions import can_act_in_game
+from Lobby.sharedFunctions.permissions import can_act_in_game, latest_update_ok, validated_actor_name
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_updateFlexiTime,
@@ -239,6 +239,7 @@ def _sendChatMessage(request):
             return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
         new_entry[0] = request.user.username
         currentChatData.insert(0, new_entry)
+        currentChatData = currentChatData[:500]
 
         # save chat data.
         compressedChatData = LZS.compressToEncodedURIComponent(json.dumps(currentChatData))
@@ -283,7 +284,7 @@ def _processBUSturn(request):
     if jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
         currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
+        if not latest_update_ok(request, jsonData["latestUpdate"], currentGame.latestUpdate, currentGame.gameData):
             turn = jsonData.get("turn", "N/A")  # Get the value for 'turn' or 'N/A' if not present
             phase = jsonData.get("phase", "N/A")  # Get the value for 'phase' or 'N/A' if not present
             gameID = jsonData["gameID"]
@@ -303,7 +304,7 @@ def _processBUSturn(request):
                 currentGame,
                 currentGame.latestUpdate,
                 int(time.time()) * 1000,
-                jsonData["checkName"],
+                validated_actor_name(request, jsonData.get("checkName"), currentGame),
                 currentGame.kickoutDuration,
             )
         else:
@@ -499,7 +500,7 @@ def _processBUSturn(request):
 
     elif jsonData["action"] == "saveGameDataAfterKickout":
         currentPlayersArr = presenter.getArrayOfIsCurrentPlayers()
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):  # and not jsonData["ignoreSync"]:
+        if not latest_update_ok(request, jsonData["latestUpdate"], currentGame.latestUpdate, currentGame.gameData):  # and not jsonData["ignoreSync"]:
             turn = jsonData.get("turn", "N/A")
             phase = jsonData.get("phase", "N/A")
             message = (

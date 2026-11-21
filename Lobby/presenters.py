@@ -10,6 +10,7 @@ import random
 import time
 
 from django.urls import reverse
+from django.utils.html import escape
 from django.utils.translation import gettext
 
 import FCM.FCMconstants as rfFCM
@@ -2528,11 +2529,11 @@ class FCMpresenter(GamePresenter):
         for player, vote_value in rewindConsentVotes.items():
             if player != self.gameObj.host.username:
                 if vote_value == 0:
-                    rewindHTML += "<span style='background-color:red'>" + player + ": " + gettext("No Permission") + "</span><BR/>"
+                    rewindHTML += "<span style='background-color:red'>" + escape(player) + ": " + gettext("No Permission") + "</span><BR/>"
                 elif vote_value == 1:
-                    rewindHTML += "<span style='background-color:green'>" + player + ": " + gettext("Single Permission") + "</span><BR/>"
+                    rewindHTML += "<span style='background-color:green'>" + escape(player) + ": " + gettext("Single Permission") + "</span><BR/>"
                 elif vote_value == 2:
-                    rewindHTML += "<span style='background-color:green'>" + player + ": " + gettext("Permanent Permission") + "</span><BR/>"
+                    rewindHTML += "<span style='background-color:green'>" + escape(player) + ": " + gettext("Permanent Permission") + "</span><BR/>"
         return rewindHTML
 
     def getRewindHostPossible(self):
@@ -2988,11 +2989,11 @@ class HLCpresenter(GamePresenter):
         for player, vote_value in rewindConsentVotes.items():
             if player != self.gameObj.host.username:
                 if vote_value == 0:
-                    rewindHTML += "<span style='background-color:red'>" + player + ": " + gettext("No Permission") + "</span><BR/>"
+                    rewindHTML += "<span style='background-color:red'>" + escape(player) + ": " + gettext("No Permission") + "</span><BR/>"
                 elif vote_value == 1:
-                    rewindHTML += "<span style='background-color:green'>" + player + ": " + gettext("Single Permission") + "</span><BR/>"
+                    rewindHTML += "<span style='background-color:green'>" + escape(player) + ": " + gettext("Single Permission") + "</span><BR/>"
                 elif vote_value == 2:
-                    rewindHTML += "<span style='background-color:green'>" + player + ": " + gettext("Permanent Permission") + "</span><BR/>"
+                    rewindHTML += "<span style='background-color:green'>" + escape(player) + ": " + gettext("Permanent Permission") + "</span><BR/>"
         return rewindHTML
 
     def actionRewindAlterConsent(self):

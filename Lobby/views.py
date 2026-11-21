@@ -52,6 +52,7 @@ from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.encoding import force_bytes, force_str
 from django.utils.formats import date_format
+from django.utils.html import escape
 from django.utils.http import (
     url_has_allowed_host_and_scheme,
     urlsafe_base64_decode,
@@ -71,7 +72,9 @@ from FCM.common import buildFCMstartingOptions
 from Lobby.sharedFunctions.availability import availability_join_warning_hours
 from Lobby.sharedFunctions.db_mutex import db_mutex
 from Lobby.sharedFunctions.loginThrottle import (
+    LOGIN_ACCOUNT_FAILURE_KEY,
     LOGIN_FAILURE_KEY,
+    account_failure_key,
     clear_failures,
     client_ip,
     failure_key as make_failure_key,
@@ -204,6 +207,7 @@ ALLOWED_SPECIAL_USERS = [
 
 # Constants
 API_TOKEN = config("TELEGRAM_OBG_BOT_TOKEN", default="BOT_TOKEN", cast=str)
+TELEGRAM_WEBHOOK_SECRET = config("TELEGRAM_WEBHOOK_SECRET", default="", cast=str)
 BOT_URL = f"https://api.telegram.org/bot{API_TOKEN}/"
 
 
@@ -224,12 +228,14 @@ def send_telegram_msg(chat_id, text):
         if response.status_code != 200:
             logger.error(f"Telegram API error {response.status_code}: {response.text}")
     except Exception as e:
-        print(f"Failed to send Telegram message: {e}")
+        print(f"Failed to send Telegram message: {type(e).__name__}")
 
 
 @csrf_exempt
 def telegram_bot_response(request):
     if request.method == "POST":
+        if TELEGRAM_WEBHOOK_SECRET and request.headers.get("X-Telegram-Bot-Api-Secret-Token") != TELEGRAM_WEBHOOK_SECRET:
+            return HttpResponse("Forbidden", status=403)
         try:
             data = json.loads(request.body.decode("utf-8"))
             if "message" not in data:
@@ -270,7 +276,7 @@ def telegram_bot_response(request):
             return HttpResponse("OK", status=200)
 
         except Exception as e:
-            print(f"WEBHOOK ERROR: {e}")
+            print(f"WEBHOOK ERROR: {type(e).__name__}")
             return HttpResponse("OK")  # Return 200 to prevent Telegram from retrying on error
 
     return HttpResponse("Forbidden", status=403)
@@ -742,7 +748,7 @@ def feedback(request):
             return redirect("/")
         feedback_text = request.POST.get("feedback", "")
         category = request.POST.get("category", "")
-        if not feedback_text.strip():
+        if not feedback_text.strip() or len(feedback_text) > 5000 or len(category) > 100:
             messages.error(request, gettext("Please enter some feedback."))
             return render(request, "Lobby/feedback.html")
 
@@ -790,9 +796,10 @@ def feedback(request):
 
 
 def handler404(request, exception):
-    if not request.path.endswith("/") and not request.path.startswith("/nextGame"):
-        print("Adding trailing slash to 404 URL: " + request.path)
-        return HttpResponsePermanentRedirect(request.path + "/")
+    path = "/" + request.path.lstrip("/")
+    if not path.endswith("/") and not path.startswith("/nextGame"):
+        print("Adding trailing slash to 404 URL: " + path)
+        return HttpResponsePermanentRedirect(path + "/")
     data = exception.args
     exceptionData = data[0]
     # views raise the translated text, so match both the source and translated strings
@@ -806,16 +813,6 @@ def handler404(request, exception):
         message += f"Path: {request.path} [{request.method}]\n"
         message += f"User: {request.user.username if request.user.is_authenticated else 'Anonymous'}\n"
 
-        # --- ADD THIS: Capture POST Data ---
-        if request.method == "POST":
-            try:
-                # If it's JSON (like your FCM data)
-                body_data = json.loads(request.body)
-                message += f"POST Data: {json.dumps(body_data, indent=2)}\n"
-            except Exception:
-                # Fallback for non-JSON or malformed data
-                message += f"Raw Body (Partial): {request.body[:500]!r}\n"
-
         if exception.args:
             message += f"Exception Detail: {exception.args[0]}\n"
 
@@ -827,7 +824,7 @@ def handler404(request, exception):
         if request.user.is_authenticated:
             message += "Email: " + request.user.email + "\n"
 
-        if request.user.is_authenticated and not game_missing:
+        if request.user.is_authenticated and not game_missing and not is_rate_limited(f"handler404:{client_ip(request)}:{request.path}", 3, 600):
             requests.post(
                 f"https://discord.com/api/webhooks/{config('WEBHOOK_ALL_ADMIN_REPORTS')}",
                 data={"content": message},
@@ -1006,8 +1003,6 @@ def csrf_failure(request, reason=""):
     # logger.warning(log_message)
 
     logger.warning(f"CSRF failure: User: {username}, Redirect from: {redirect_url}, Reason: {reason}")
-    logger.debug(f"Request META: {request.META}")
-    logger.debug(f"CSRF Cookie: {request.COOKIES.get('csrftoken')}")
 
     messages.error(
         request,
@@ -1662,7 +1657,8 @@ def login_view(request):
 
         # shortcut: per-process cache; move to a shared cache if multiple web workers are added.
         failure_key = make_failure_key(LOGIN_FAILURE_KEY, request, username)
-        if is_locked(failure_key):
+        account_key = account_failure_key(LOGIN_ACCOUNT_FAILURE_KEY, username)
+        if is_locked(failure_key) or is_locked(account_key):
             messages.error(request, gettext("Too many failed sign-in attempts. Please wait 15 minutes and try again."))
             return render(request, "Lobby/login.html")
 
@@ -1671,6 +1667,7 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             clear_failures(failure_key)
+            clear_failures(account_key)
             login(request, user)
             request.session.modified = True  # Force session save
 
@@ -1716,6 +1713,7 @@ def login_view(request):
             return response
         else:
             record_failure(failure_key)
+            record_failure(account_key)
             try:
                 user = User.objects.get(username=request.POST["username"])
                 if not user.is_active:
@@ -3506,7 +3504,7 @@ def joinGame(request, gameType):
 
     # Delete Training Game // Can never really fail
     if currentGame and action == "deleteTrgGame":
-        if request.user == currentGame.creator:
+        if request.user == currentGame.creator and (currentGame.presenter().isTrainingGame() or currentGame.maxPlayers == 1):
             currentGame.delete()
             messages.success(request, ("Game Deleted"))
             return JsonResponse(["Ok"], safe=False)
@@ -3620,6 +3618,10 @@ def checkJoinGame(request, gameType, gameID):
 
     all_players_list = [gp.player for gp in currentGame.players.exclude(is_kicked=True) if gp.player]
     invited_players_list = list(currentGame.invitedPlayers.all())
+
+    if currentGame.gameStatus not in ("AVAILABLE", "WAITING", "PRIVATE"):
+        messages.error(request, gettext("This game is no longer open for joining."))
+        errorFound = True
 
     # Check that if the game is WAITING, you are in the invites, OR there is a blank space
     if currentGame.gameStatus == "WAITING" and request.user not in invited_players_list and (len(invited_players_list) + len(all_players_list)) >= currentGame.maxPlayers:
@@ -3765,6 +3767,11 @@ def checkJoinGame(request, gameType, gameID):
     try:
         with transaction.atomic():
             selectedGameForJoin = Game.objects.select_for_update().get(id=gameID)
+            if selectedGameForJoin.gameStatus not in ("AVAILABLE", "WAITING", "PRIVATE"):
+                messages.error(request, gettext("This game is no longer open for joining."))
+                if ajaxReturn:
+                    return JsonResponse({"listToShow": "AVAILABLE"})
+                return
             # Re-verify count inside the lock to prevent double-joining
             current_count = selectedGameForJoin.players.count()
             # For Game model games, create a GamePlayer
@@ -3853,7 +3860,7 @@ def deleteGame(request, gameCode):
 
     # Delete Training Game // Can never really fail
     if jsonData["action"] == "deleteTrgGame":
-        if request.user == currentGame.creator:
+        if request.user == currentGame.creator and (currentGame.presenter().isTrainingGame() or currentGame.maxPlayers == 1):
             gameStatus = currentGame.gameStatus
             currentGame.delete()
             return JsonResponse(
@@ -3877,11 +3884,12 @@ def deleteGame(request, gameCode):
                 if request.user.is_authenticated:
                     message += "Email: " + request.user.email + "\n"
 
-                requests.post(
-                    f"https://discord.com/api/webhooks/{config('WEBHOOK_ALL_ADMIN_REPORTS')}",
-                    data={"content": message},
-                    timeout=5,
-                )
+                if not is_rate_limited(f"deleteGameHack:{request.user.id}", 3, 600):
+                    requests.post(
+                        f"https://discord.com/api/webhooks/{config('WEBHOOK_ALL_ADMIN_REPORTS')}",
+                        data={"content": message},
+                        timeout=5,
+                    )
             except Exception as e:
                 print(f"Discord webhook failed (delete game alert): {e}")
 
@@ -3894,7 +3902,7 @@ def autoCompleteUsername(request):
         jsonData = json.loads(request.body)
         partialString = jsonData["partialString"]
 
-        if not isinstance(partialString, str) or len(partialString) < 2:
+        if not isinstance(partialString, str) or len(partialString) < 2 or len(partialString) > 100:
             return JsonResponse({"matchList": []}, safe=False)
 
         matchObjects = User.objects.filter(username__icontains=partialString).order_by("username")[:20]
@@ -3966,7 +3974,10 @@ def testWebhook(request):
         if len(notification[2]) != 0:
             message += "<@" + notification[2] + ">\n"
         message += gettext("This is a test message from Online Board Gamers")
-        requests.post("" + notification[1], data={"content": message}, timeout=5)
+        try:
+            requests.post("" + notification[1], data={"content": message}, timeout=5)
+        except requests.exceptions.RequestException:
+            return JsonResponse({"errorMessage": gettext("Webhook test failed"), "type": 0})
         return JsonResponse({"response": "ok", "type": 0})
 
     if notification[0] == "Slack":
@@ -3993,7 +4004,10 @@ def testWebhook(request):
         payload = {"text": message, "link_names": 1}  # Enables @mentions
 
         # Send via POST (your existing method works fine)
-        requests.post(notification[1], json=payload, timeout=5)
+        try:
+            requests.post(notification[1], json=payload, timeout=5)
+        except requests.exceptions.RequestException:
+            return JsonResponse({"errorMessage": gettext("Webhook test failed"), "type": 1})
 
         return JsonResponse({"response": "ok", "type": 1})
 
@@ -4001,7 +4015,10 @@ def testWebhook(request):
         TOKEN = config("TELEGRAM_OBG_BOT_TOKEN", default="BOT_TOKEN", cast=str)
         message = "This is a test message from Online Board Gamers"
         url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={notification[2]}&text={message}"
-        requests.post(url, timeout=5)
+        try:
+            requests.post(url, timeout=5)
+        except requests.exceptions.RequestException:
+            return JsonResponse({"errorMessage": gettext("Webhook test failed"), "type": 1})
         return JsonResponse({"response": "ok", "type": 1})
 
     if notification[0] == "Other":
@@ -5045,12 +5062,12 @@ def sendAdminMessage(request):
         data = json.loads(request.body.decode("utf-8"))
         message = data.get("message")
 
-        if message:
+        if isinstance(message, str) and message.strip() and len(message) <= 2000:
             SN_sendAdminErrorMessage(message)
             return JsonResponse({"status": "success"}, status=200)
         else:
             return JsonResponse(
-                {"status": "error", "message": "Missing message or webhook URL"},
+                {"status": "error", "message": "Missing or invalid message"},
                 status=400,
             )
     except json.JSONDecodeError:
@@ -5063,7 +5080,7 @@ def sendAdminMessage(request):
 def BGH_API(request, options):
     if not re.fullmatch(r"[A-Za-z0-9_,.-]{1,100}", options):
         return JsonResponse({"error": "Invalid options"}, status=400)
-    url = "http://api.boardgamehelpers.com/api/FoodChainMagnate/GenerateMap/" + options
+    url = "https://api.boardgamehelpers.com/api/FoodChainMagnate/GenerateMap/" + options
     response = requests.get(url, timeout=10)
     data = response.json()
     final_dictionary = {}
@@ -5128,6 +5145,9 @@ def MiniTournament(request, Mini_Tournament_id):
             Mini_Tournament = Tournament.objects.get(id=Mini_Tournament_id, tournamentCategory="Mini")
         except Tournament.DoesNotExist:
             raise Http404(gettext("Tournament does not exist")) from None
+        if Mini_Tournament.tournamentStatus not in ("OP", "PR"):
+            messages.error(request, gettext("This tournament is no longer open for signup."))
+            return HttpResponseRedirect(reverse("MiniTournament", kwargs={"Mini_Tournament_id": Mini_Tournament_id}))
         # First check if it is a person declining an invite
         if "declineInvite" in request.POST and request.POST["declineInvite"] == "true":
             Mini_Tournament = Tournament.objects.get(id=Mini_Tournament_id, tournamentCategory="Mini")
@@ -5148,7 +5168,7 @@ def MiniTournament(request, Mini_Tournament_id):
         startTournament = False
         with transaction.atomic():
             Mini_Tournament = Tournament.objects.select_for_update().get(id=Mini_Tournament_id, tournamentCategory="Mini")
-            joinAccepted = Mini_Tournament.startingPlayers.count() < Mini_Tournament.maxTournamentPlayers
+            joinAccepted = Mini_Tournament.tournamentStatus in ("OP", "PR") and Mini_Tournament.startingPlayers.count() < Mini_Tournament.maxTournamentPlayers
             if joinAccepted:
                 Mini_Tournament.startingPlayers.add(request.user)
                 Mini_Tournament.save()
@@ -5259,7 +5279,7 @@ def MiniTournament(request, Mini_Tournament_id):
                 winnerHTML += "s"
             winnerHTML += ": "
             for index, name in enumerate(winnersData):
-                winnerHTML += "<B>" + name + "</B>"
+                winnerHTML += "<B>" + escape(name) + "</B>"
                 if index + 1 != len(winnersData):
                     winnerHTML += ", "
         returnData.update(
@@ -5304,6 +5324,8 @@ def _sendMTchatMessage(request):
 
     MT_ID = jsonData["MT_ID"]
     new_entry = jsonData["newEntry"]
+    if not isinstance(new_entry, list) or len(new_entry) < 2 or not isinstance(new_entry[1], str) or len(new_entry[1]) > 2000:
+        return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
     new_entry.insert(0, request.user.username)
 
     currentMT = Tournament.objects.get(id=MT_ID, tournamentCategory="Mini")
@@ -5315,6 +5337,7 @@ def _sendMTchatMessage(request):
         unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
         currentChatData = json.loads(unzipped)
     currentChatData.insert(0, new_entry)
+    currentChatData = currentChatData[:500]
 
     json_string = json.dumps(currentChatData, separators=(",", ":"))
     compressed_data = gzip.compress(json_string.encode("utf-8"))
@@ -6196,7 +6219,7 @@ def MainTournament(request, Main_Tournament_id):
                 winnerHTML += "s"
             winnerHTML += ": "
             for index, name in enumerate(winnersData):
-                winnerHTML += "<B>" + name + "</B>"
+                winnerHTML += "<B>" + escape(name) + "</B>"
                 if index + 1 != len(winnersData):
                     winnerHTML += ", "
 
@@ -6255,6 +6278,8 @@ def _sendMainTchatMessage(request):
 
     MainT_ID = jsonData["MainT_ID"]
     new_entry = jsonData["newEntry"]
+    if not isinstance(new_entry, list) or len(new_entry) < 2 or not isinstance(new_entry[1], str) or len(new_entry[1]) > 2000:
+        return JsonResponse({"error": gettext("Invalid chat entry")}, status=400)
     new_entry.insert(0, request.user.username)
 
     currentMainT = Tournament.objects.get(id=MainT_ID, tournamentCategory="Main")
@@ -6266,6 +6291,7 @@ def _sendMainTchatMessage(request):
         unzipped = safe_gzip_decompress(compressed_data).decode("utf-8")
         currentChatData = json.loads(unzipped)
     currentChatData.insert(0, new_entry)
+    currentChatData = currentChatData[:500]
 
     json_string = json.dumps(currentChatData, separators=(",", ":"))
     compressed_data = gzip.compress(json_string.encode("utf-8"))

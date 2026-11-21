@@ -1,3 +1,4 @@
+{% load script_json %}
 {% load static %}
 {% load i18n %}
 {% get_current_language as LANGUAGE_CODE %}
@@ -106,10 +107,10 @@
   initData.gameData3 = '{{ gameData3|escapejs }}';
   initData.gameCreationTimestamp = {{ gameCreationTimestamp }};
   initData.myZoomLevel = {{ myZoomLevel }};
-  initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|safe}};
+  initData.KickoutFlexiDataArray = {{KickoutFlexiDataArray|script_json}};
   initData.startingOptions = {{startingOptions}};
-  initData.playerNames = {{ allPlayerListBySeat | safe }};
-  initData.currentPlayers = {{ currentPlayers | safe }};
+  initData.playerNames = {{ allPlayerListBySeat |script_json }};
+  initData.currentPlayers = {{ currentPlayers |script_json }};
   initData.preferredKFWoptions = {{ preferredKFWoptions }};
   initData.pov = {{ pov }};
   initData.move = "{{move}}";
@@ -136,7 +137,7 @@
   {% endif %}
   {% endif %}
 
-  initData.kickoutVotesData = {{ kickoutVotesData | default:'{}' | safe }};
+  initData.kickoutVotesData = {{ kickoutVotesData | default:'{}' | script_json }};
   initData.kickoutVoteThreshold = {{ kickoutVoteThreshold | default:'0' }};
 
   ///////////////////////
@@ -154,7 +155,7 @@
   {% if displayNames %}
   initData.displayNames = JSON.parse('{{ displayNames|escapejs }}');
   {% endif %}
-  initData.playerNames = {{ allPlayerListBySeat | safe }};
+  initData.playerNames = {{ allPlayerListBySeat |script_json }};
   {% endif %}
   {% endif %}
   </script>

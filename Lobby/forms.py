@@ -6,6 +6,8 @@ from django.contrib.auth.forms import (
     SetPasswordForm,
     UserCreationForm,
 )
+from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy
 
 from Lobby.sharedFunctions.constants import RESERVED_USERNAMES_CASEFOLD
@@ -22,6 +24,12 @@ class UsernameValidationMixin:
         username = (self.cleaned_data.get("username") or "").strip()
         if not username:
             raise forms.ValidationError(gettext_lazy("Enter a username"))
+        try:
+            UnicodeUsernameValidator()(username)
+        except ValidationError:
+            raise forms.ValidationError(
+                gettext_lazy("Enter a valid username. Letters, digits and @/./+/-/_ only.")
+            ) from None
         if username.casefold() in RESERVED_USERNAMES_CASEFOLD:
             raise forms.ValidationError(gettext_lazy("That username is reserved"))
         taken = User.objects.filter(username__iexact=username)

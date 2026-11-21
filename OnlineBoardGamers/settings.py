@@ -43,7 +43,7 @@ SESSION_COOKIE_AGE = 30 * 24 * 60 * 60
 
 
 if not DEBUG:
-    SECURE_SSL_REDIRECT = False  # Handled by cloudflare
+    SECURE_SSL_REDIRECT = not TESTING  # Redirect direct HTTP origin hits; Cloudflare handles the public domain.
     # Cloudflare terminates TLS and forwards the original scheme.
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
@@ -150,6 +150,7 @@ MIDDLEWARE = [
     # This MUST come first
     # 1. Always let security handle SSL/headers first
     "django.middleware.security.SecurityMiddleware",
+    "Lobby.middleware.AuthPageHeadersMiddleware",
     "Lobby.middleware.ForceTrailingSlashMiddleware",
     "Lobby.middleware.AdminLoginThrottleMiddleware",
     # This must come before Authentication and CsrfView
@@ -322,21 +323,21 @@ else:
 # ]
 
 AUTH_PASSWORD_VALIDATORS = [
-    # {
-    #    'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    # },
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
         "OPTIONS": {
-            "min_length": 5,
+            "min_length": 8,
         },
     },
-    # {
-    #    'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    # },
-    # {
-    #    'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    # },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
 ]
 
 
@@ -442,7 +443,7 @@ LOGGING = {
             "formatter": "standard",
         },
         "general_log_file": {
-            "level": "DEBUG",
+            "level": "INFO",
             "class": "logging.handlers.RotatingFileHandler",
             "filename": os.path.join(LOG_DIR, "general.log"),
             "maxBytes": 11 * 1024 * 1024,  # 1 MB per file

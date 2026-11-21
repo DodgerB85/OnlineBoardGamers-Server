@@ -158,7 +158,7 @@ var Log = {
 			}
 		} else if (action == this.RESIGN) {
 			if (param != undefined && param.length == 1) {
-				res.append('<div class="rewind">' + interpolate(gettext("%(resignedPlayer)s Resigns"), { resignedPlayer: param[0] }, true) + "</div>")
+				res.append('<div class="rewind">' + interpolate(gettext("%(resignedPlayer)s Resigns"), { resignedPlayer: escapeHTML(param[0]) }, true) + "</div>")
 			}
 		} else if (action === this.RESEARCH) {
 			resDiv = $("<div></div>")
@@ -742,13 +742,13 @@ var Log = {
 		var index = M.players.map((item) => item.name).indexOf(name)
 		if (index === -1) index = M.players.map((item) => item.originalName).indexOf(name)
 		// The player may not be in the model at all (eg a log entry for a player who has gone)
-		if (index === -1) return $("<span></span>").append(String(name))
+		if (index === -1) return $("<span></span>").append(escapeHTML(String(name)))
 		var colour = getCorrectedColour(M.players[index].colour)
 
 		var span = $("<span></span>")
 
-		if (M.trainingGame && M.players[index].displayName != undefined) span.append(M.players[index].displayName)
-		else span.append(M.players[index].name)
+		if (M.trainingGame && M.players[index].displayName != undefined) span.append(escapeHTML(M.players[index].displayName))
+		else span.append(escapeHTML(M.players[index].name))
 		if (colour === RED) span.css({ "background-color": "#A12529" })
 		if (colour === GREEN) span.css({ "background-color": "#456334" })
 		if (colour === PURPLE) span.css({ "background-color": "#51365F" })

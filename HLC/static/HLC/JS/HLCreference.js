@@ -1,3 +1,9 @@
+function escapeHTML(value) {
+	return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) {
+		return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+	})
+}
+
 const TL_IDX = 4 // tech level index - of mainlines & dealerships
 
 const MW_IDX = 5 // Market Window Index - consists of [-1,-1,-1] = [M board selling square loc, rotation, size]

@@ -20,7 +20,7 @@ from Lobby.gameViewHelpers import (
     shared_save_notes,
 )
 from Lobby.models import Game, User
-from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin
+from Lobby.sharedFunctions.permissions import can_act_in_game, is_game_admin, latest_update_ok
 from Lobby.sharedFunctions.sharedFunctions import (
     SF_updateFlexiTime,
 )
@@ -28,6 +28,20 @@ from Lobby.sharedFunctions.sharedNotifications import (
     SN_sendAdminErrorMessage,
     SN_sendFactoryAlertNotification,
 )
+
+MAX_HLC_LZ_INPUT = 1_000_000
+MAX_HLC_LZ_OUTPUT = 8_000_000
+
+
+def safe_lz_decompress(value):
+    """Bound LZString input/output so a small payload cannot expand without limit."""
+    if not value or len(value) > MAX_HLC_LZ_INPUT:
+        return None
+    text = lzstring.LZString().decompressFromEncodedURIComponent(value)
+    if text and len(text) > MAX_HLC_LZ_OUTPUT:
+        return None
+    return text
+
 
 if TYPE_CHECKING:
     from Lobby.presenters import HLCpresenter
@@ -94,12 +108,14 @@ def _processHLCturn(request):
             return JsonResponse({"error": gettext("Payload too large")}, status=413)
 
     if jsonData["action"] == "turn0move":
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
+        if not latest_update_ok(request, jsonData["latestUpdate"], currentGame.latestUpdate, currentGame.gameData):
             return JsonResponse({"syncError": True}, safe=False)
         # save move data
         nameToUse = request.user.username
         if "kickedPlayerName" in jsonData:
-            nameToUse = jsonData["kickedPlayerName"]
+            target_gp = currentGame.players.filter(player__username=jsonData["kickedPlayerName"]).first()
+            if target_gp and (target_gp.is_missing or target_gp.is_kicked):
+                nameToUse = jsonData["kickedPlayerName"]
 
         presenter.updateSingleMove(nameToUse, jsonData["content"])
         moveResponse = presenter.getMoveResponse("turn0move")
@@ -116,7 +132,7 @@ def _processHLCturn(request):
         else:
             # open up the game data.
             x = lzstring.LZString()
-            raw_game_data = x.decompressFromEncodedURIComponent(currentGame.gameData or "{}")
+            raw_game_data = safe_lz_decompress(currentGame.gameData or "{}")
             if raw_game_data and len(raw_game_data) > 8_000_000:
                 return JsonResponse({"error": gettext("Payload too large")}, status=413)
             # Fallback to "{}" if decompression returns None
@@ -128,7 +144,7 @@ def _processHLCturn(request):
             for i in range(currentGame.maxPlayers):
                 move_data_raw = all_gps[i].currentMoveData if i < len(all_gps) else ""
 
-                decompressed_move = x.decompressFromEncodedURIComponent(move_data_raw or "")
+                decompressed_move = safe_lz_decompress(move_data_raw or "")
                 if decompressed_move and len(decompressed_move) > 8_000_000:
                     return JsonResponse({"error": gettext("Payload too large")}, status=413)
                 # Fallback to "{}" if decompression fails
@@ -182,11 +198,15 @@ def _processHLCturn(request):
         name = jsonData["name"]
         if name == "BotKickStarter":
             name = jsonData["BKSN"]
+        if name != request.user.username and not is_game_admin(request.user):
+            target_gp = currentGame.players.filter(player__username=name).first()
+            if not target_gp or not (target_gp.is_missing or target_gp.is_kicked):
+                name = request.user.username
 
         # Use a fallback string if decompression returns None
-        incoming_data = LZS.decompressFromEncodedURIComponent(jsonData["data"]) or "{}"
-        db_data = LZS.decompressFromEncodedURIComponent(currentGame.gameData) or "[]"
-        other_data = LZS.decompressFromEncodedURIComponent(jsonData["other"]) or "[]"
+        incoming_data = safe_lz_decompress(jsonData["data"]) or "{}"
+        db_data = safe_lz_decompress(currentGame.gameData) or "[]"
+        other_data = safe_lz_decompress(jsonData["other"]) or "[]"
         if max(len(incoming_data), len(db_data), len(other_data)) > 8_000_000:
             return JsonResponse({"error": gettext("Payload too large")}, status=413)
         incomingFactoryDataRaw = json.loads(incoming_data)
@@ -276,7 +296,7 @@ def _processHLCturn(request):
                 break
             # THIS WILL ALWAYS BE TRUE ONCE, AS NOW CURRENT PLAYER IS FIRST
             if presenter.hasMoveData(currentPlayersList[0]):
-                moveData = json.loads(LZS.decompressFromEncodedURIComponent(presenter.getSingleMoveForName(currentPlayersList[0]) or "") or "[]")
+                moveData = json.loads(safe_lz_decompress(presenter.getSingleMoveForName(currentPlayersList[0]) or "") or "[]")
                 FDBE = moveData[0]
                 FCIATT = moveData[1]
                 FCNATT = moveData[2]
@@ -419,7 +439,7 @@ def _processHLCturn(request):
 
     elif jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate):
+        if not latest_update_ok(request, jsonData["latestUpdate"], currentGame.latestUpdate, currentGame.gameData):
             return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
@@ -670,7 +690,7 @@ def _processHLCturn(request):
         )
 
     elif jsonData["action"] == "kickout":
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate) and not jsonData["ignoreSync"]:
+        if not latest_update_ok(request, jsonData["latestUpdate"], currentGame.latestUpdate, currentGame.gameData) and not jsonData["ignoreSync"]:
             print(f"* * * * * HLC: Sync Error Kickout Vote {jsonData['gameID']}")
             return JsonResponse({"syncError": True}, safe=False)
 
@@ -697,7 +717,7 @@ def _processHLCturn(request):
         )
 
     elif jsonData["action"] == "saveAfterKickout":
-        if str(jsonData["latestUpdate"]) != "9999999999999" and str(jsonData["latestUpdate"]) != str(currentGame.latestUpdate) and not jsonData["ignoreSync"]:
+        if not latest_update_ok(request, jsonData["latestUpdate"], currentGame.latestUpdate, currentGame.gameData) and not jsonData["ignoreSync"]:
             print(f"* * * * * HLC: Sync Error Kickout Save {jsonData['gameID']}")
             return JsonResponse({"syncError": True}, safe=False)
 

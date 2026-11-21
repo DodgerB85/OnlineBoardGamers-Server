@@ -1,5 +1,4 @@
 {% load i18n %}
-{% autoescape off %}
     {% if game == "FCM" %}
         {% url "FCM:showFCMgame" gameID as the_url %}
     {% elif game == "HLC" %}
@@ -49,4 +48,3 @@ Please do not reply to this email.<br />
 To contact me please use: OnlineBoardGamers@gmail.com<br />
 <br />
 {% endblocktranslate %}
-{% endautoescape %}

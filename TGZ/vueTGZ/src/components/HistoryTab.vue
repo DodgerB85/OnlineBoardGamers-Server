@@ -141,11 +141,11 @@ function downloadHistoryAsPDF() {
 				html += `${tribeImg(s[1])} ${refFuncs.escapeHtml(store.players[s[1]].displayName)}: ${s[2]} / ${s[3]} (${s[2] - s[3]})<br>`
 			}
 		} else if (action === rf.HIST_REWIND) {
-			html += `<i>${t("historyPdf.rewoundBy", { name: store.players[data[0]].name })}</i>`
+			html += `<i>${t("historyPdf.rewoundBy", { name: refFuncs.escapeHtml(store.players[data[0]].name) })}</i>`
 		} else if (action === rf.HIST_RESIGN) {
-			html += `<i>${t("historyPdf.resigns", { name: data[0] })}</i>`
+			html += `<i>${t("historyPdf.resigns", { name: refFuncs.escapeHtml(data[0]) })}</i>`
 		} else if (action === rf.HIST_KICKOUT) {
-			html += `<i>${t("historyPdf.kickedOut", { name: data[0] })}</i>`
+			html += `<i>${t("historyPdf.kickedOut", { name: refFuncs.escapeHtml(data[0]) })}</i>`
 		} else {
 			html += t("historyPdf.action", { action: action })
 		}

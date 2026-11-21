@@ -108,6 +108,14 @@ Deployments are done manually by running a batch script to do a git pull / colle
 ## Production
 PA runs the Django server; there's a qcluster for async tasks (not currently used due technical limitations on PA that I'm in the process of working around), and the scripts in ./siteUtils generally run once a day to perform upkeep / notification emails.
 
+Production is PythonAnywhere behind Cloudflare. Security, secrets, HTTPS and accepted risks are documented in [docs/SECURITY.md](docs/SECURITY.md). The critical deployment points:
+
+- Cloudflare SSL/TLS mode is **Full (Strict)**, with **Always Use HTTPS** on.
+- PythonAnywhere uses a Cloudflare Origin Certificate and has **Force HTTPS off**.
+- Django must **not** enforce `SECURE_SSL_REDIRECT` on PythonAnywhere + Cloudflare; Cloudflare is the single redirect layer. See the doc before deploying the current setting.
+- Health checks and uptime monitors must use `https://`, not `http://`.
+- The live `.env` needs `DEBUG=False`, `LOCAL_USER=False`, a long random `SECRET_KEY_PRODUCTION`, and (recommended) a registered `TELEGRAM_WEBHOOK_SECRET`.
+
 ## License
 This project is licensed under a custom **Source Available** license. 
 - ✅ **Private Use:** Permitted.

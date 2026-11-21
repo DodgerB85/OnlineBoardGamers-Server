@@ -28,6 +28,38 @@ from . import RNBconstants as rfRNB
 from .models import RNBmap
 
 
+MAX_RNB_MAP_BYTES = 2_000_000
+
+
+def parse_rnb_map(raw):
+    """Return a stored RNB map as a list, or [] if it is absent/invalid."""
+    if not raw:
+        return []
+    try:
+        data = json.loads(raw)
+    except (TypeError, ValueError):
+        return []
+    return data if isinstance(data, list) else []
+
+
+def normalize_rnb_map(raw):
+    """Validate and normalise a client-supplied RNB map for storage.
+
+    Returns "" for an empty map, or None when the data is malformed/too large.
+    """
+    if not raw:
+        return ""
+    if not isinstance(raw, str) or len(raw) > MAX_RNB_MAP_BYTES:
+        return None
+    try:
+        data = json.loads(raw)
+    except (TypeError, ValueError):
+        return None
+    if not isinstance(data, list):
+        return None
+    return json.dumps(data, separators=(",", ":"))
+
+
 @login_required()
 def create_rnb_game(
     request,
@@ -171,6 +203,11 @@ def create_rnb_game(
                 starting_options.append(option_value)
 
         all_players.append(request.user)
+
+    starting_map = normalize_rnb_map(starting_map)
+    if starting_map is None:
+        messages.error(request, gettext("That map data is invalid or too large."))
+        return HttpResponseRedirect(reverse("createRNBpage"))
 
     with transaction.atomic():
         new_game = Game(

@@ -883,7 +883,7 @@ async function generateBGHmap() {
         document.getElementById('nbPathSystems').innerHTML = String(nbIndependentPathSystems);
         document.getElementById('nbNeighbourhoods').innerHTML = String(nbIndependentNeighbourhoods);
 
-        document.getElementById('BGHnameSpan').innerHTML = '"' + data["map_type_name"] + '"';
+        document.getElementById('BGHnameSpan').textContent = '"' + data["map_type_name"] + '"';
         document.getElementById('BGHnameSpan').style.display = 'inline-block'
 
 

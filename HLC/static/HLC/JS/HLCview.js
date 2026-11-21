@@ -98,7 +98,7 @@ var View = function (model) {
 			if (this.model.gameEnded === 2) $("#actions").append(gettext("Game ended by Factory Expansions"))
 			if (this.model.gameEnded === 3) $("#actions").append(gettext("Game ended by King of the Hill"))
 			$("#actions").append("<BR/><BR/>")
-			$("#actions").append("Winner: " + this.model.players[this.model.gameFlow.turnOrder[0]].name)
+			$("#actions").append("Winner: " + escapeHTML(this.model.players[this.model.gameFlow.turnOrder[0]].name))
 
 			if (global.name === this.model.players[this.model.gameFlow.turnOrder[0]].name) {
 				$("#actions").append("<h1>CONGRATULATIONS!</h1>")
@@ -216,8 +216,8 @@ var View = function (model) {
 			if (colour === BLUE) playerDiv.css({ "background-color": "#3474A9" })
 			if (colour === YELLOW) playerDiv.css({ "background-color": "#C28727" })
 
-			if (this.model.trainingGame && this.model.players[num].displayName != undefined) playerDiv.append(this.model.players[num].displayName)
-			else playerDiv.append(this.model.players[num].name)
+			if (this.model.trainingGame && this.model.players[num].displayName != undefined) playerDiv.append(escapeHTML(this.model.players[num].displayName))
+			else playerDiv.append(escapeHTML(this.model.players[num].name))
 			playerDiv.append('<BR/><span class="moneySpan">$' + this.model.players[num].money + "</span> G: " + this.model.players[num].gantt + " (+" + Rules.getNumberOfPlanningOffices(this.model.players[num]) + ")")
 			playerDiv.on("click", function () {
 				var playerNumber = parseInt(this.id.slice(9))
@@ -4519,7 +4519,7 @@ var View = function (model) {
 		}
 		$("#reserve").append("Flex-Times: ")
 		for (let i = 0; i < M.players.length; i++) {
-			$("#reserve").append(M.players[i].name + ": " + getFlexiTimeString(M.players[i].name))
+			$("#reserve").append(escapeHTML(M.players[i].name) + ": " + getFlexiTimeString(M.players[i].name))
 			$("#reserve").append("&nbsp;&nbsp;&nbsp;")
 		}
 
