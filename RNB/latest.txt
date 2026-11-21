@@ -21,7 +21,11 @@ Management
 - Full &c city production order is applied to auto-secondary production: sawmill, power plant, paper mill, coal burner, mint, stock, raft factory, wagon factory, rowboat factory, truck factory, steamer factory, airport, MBA, bomb factory, atelier; research last. Replays of old city games may recompute a different auto-production order than the original save.
 - City bomb destroys both unstrengthened buildings; strengthened buildings survive.
 - City order is applied to auto-secondary production and the sawmill/plant trunk conflict. A transporter can fuel a plant with its own wood, but cannot reserve a tile board that the plant auto-consumed.
-- Production-setup panel strings added for de, es, fr, it and zh-hans.
+- Production-setup panel strings added for de, es, fr, it and zh-hans; the hint and summary only mention a module when it is enabled and the current player has a choice for it.
+
+Debug / scenario editing
+- CHEAT: Bridge no longer needs a selected transporter (fixes "transporterID not found: -1") and records a CUSTOM_ADD_BRIDGE history entry.
+- CUSTOM_ADD_BRIDGE is rebuilt on import and replay, and the bridge is present in the whole-model hex data used by undo/reset.
 
 Save/replay
 - productionDecisions, working power plants and the setup stack action round-trip; powered buckets are recomputed from the working plants on load.

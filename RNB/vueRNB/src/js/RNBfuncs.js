@@ -1081,6 +1081,8 @@ export function importRNBmodel(input, forGameOver) {
 							[toLocation[1], toLocation[2]],
 						])
 					}
+				} else if (customEntry[0] === rf.CUSTOM_ADD_BRIDGE) {
+					newBridges.push([customEntry[1], [...customEntry[2]]])
 				}
 			}
 			// Auto-research needs to be done here

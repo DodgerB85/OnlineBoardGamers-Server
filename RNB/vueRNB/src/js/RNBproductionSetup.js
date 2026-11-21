@@ -155,14 +155,36 @@ export function isUnfiredPlant(bldgID) {
 	return electricity.isPowerPlant(bldg) && bldg.powerActive !== true
 }
 
-// One line for the action area, so declining is visible too
+// One line for the action area, so declining is visible too. Only mention a
+// module when it is enabled and this player actually has something to decide.
 export function setupSummary() {
+	const store = useModelStore()
 	const playerIndex = controller.currentPlayerIndex()
-	const managers = getManagerChoices(playerIndex)
-	const plants = getPlantChoices(playerIndex).length
-	const fired = Object.keys(getDecisionsForPlayer(playerIndex).plants ?? {}).length
+	const managementEnabled = store.gameOptions.useManagement
+	const electricityEnabled = store.gameOptions.useElectricity
+	const managers = managementEnabled ? getManagerChoices(playerIndex) : []
+	const plants = electricityEnabled ? getPlantChoices(playerIndex).length : 0
+	const fired = electricityEnabled ? Object.keys(getDecisionsForPlayer(playerIndex).plants ?? {}).length : 0
 	const managersOff = managers.filter((c) => !model.getManagerActivation(playerIndex, c.hexID)).length
-	return { plants, fired, managersOn: managers.length - managersOff, managersOff }
+	return {
+		showPlants: electricityEnabled && plants + fired > 0,
+		showManagers: managementEnabled && managers.length > 0,
+		plants,
+		fired,
+		managersOn: managers.length - managersOff,
+		managersOff,
+	}
+}
+
+export function setupHintKey() {
+	const summary = setupSummary()
+	if (summary.showManagers && summary.showPlants) return "productionSetup.hint"
+	if (summary.showManagers) return "productionSetup.hintManagers"
+	if (summary.showPlants) return "productionSetup.hintElectricity"
+	const store = useModelStore()
+	if (store.gameOptions.useManagement) return "productionSetup.hintManagers"
+	if (store.gameOptions.useElectricity) return "productionSetup.hintElectricity"
+	return "productionSetup.hint"
 }
 
 // Clicking the transporter: fire the plant with its wood, else switch its manager

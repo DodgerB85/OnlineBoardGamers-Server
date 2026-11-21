@@ -81,6 +81,44 @@ test("preset production defers the extra mine draw and saves the live result for
 	assert.equal(rolls.length, 0)
 })
 
+test("setup hint and summary only mention the modules that have a choice", () => {
+	const source = readFileSync(join(import.meta.dirname, "RNBproductionSetup.js"), "utf8")
+	const first = source.indexOf("export function setupSummary")
+	const last = source.indexOf("export function clickedSetupTransporter", first)
+	let managers = []
+	let plants = []
+	const store = { gameOptions: { useManagement: true, useElectricity: false } }
+	const api = runInNewContext(source.slice(first, last).replaceAll("export function", "function") + "({setupSummary, setupHintKey})", {
+		useModelStore: () => store,
+		controller: { currentPlayerIndex: () => 0 },
+		getManagerChoices: () => managers,
+		getPlantChoices: () => plants,
+		getDecisionsForPlayer: () => ({ plants: {} }),
+		model: { getManagerActivation: () => true },
+	})
+
+	managers = [{ hexID: 1 }]
+	assert.equal(api.setupHintKey(), "productionSetup.hintManagers")
+	assert.deepEqual({ ...api.setupSummary() }, { showPlants: false, showManagers: true, plants: 0, fired: 0, managersOn: 1, managersOff: 0 })
+
+	store.gameOptions.useManagement = false
+	store.gameOptions.useElectricity = true
+	managers = []
+	plants = [{ bldgID: 1 }]
+	assert.equal(api.setupHintKey(), "productionSetup.hintElectricity")
+	assert.deepEqual({ ...api.setupSummary() }, { showPlants: true, showManagers: false, plants: 1, fired: 0, managersOn: 0, managersOff: 0 })
+
+	// Both modules on: only the player's actual choices are mentioned.
+	store.gameOptions.useManagement = true
+	managers = []
+	assert.equal(api.setupHintKey(), "productionSetup.hintElectricity")
+	managers = [{ hexID: 1 }]
+	plants = []
+	assert.equal(api.setupHintKey(), "productionSetup.hintManagers")
+	plants = [{ bldgID: 1 }]
+	assert.equal(api.setupHintKey(), "productionSetup.hint")
+})
+
 test("old presets redraw in live play and skip mines already powered or empty", () => {
 	const { rf, mine, outputs, rolls, reset, playSetup } = fixture()
 	const oldPreset = () => [rf.STACK_PRODUCTION_SETUP, [], [[1, 3]], [], [[1, 0, [15], rf.RES_GOLD]]]

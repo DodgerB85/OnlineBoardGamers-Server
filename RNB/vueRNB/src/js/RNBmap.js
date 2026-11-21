@@ -1080,9 +1080,17 @@ export function clickedBridgeOption(entry) {
 		addBridgeToMap(hexID, entry[1], true)
 		highlight.updateAllHighlightsForTransporterMode()
 	} else {
-		addBridgeToMap(hexID, entry[1], false)
+		// CHEAT: no transporter or resources. Record it as a custom scenario item
+		// so the bridge survives save, import and replay.
+		addCheatBridge(hexID, entry[1])
 		store.context.eligibleBridgesToBuild.splice(0)
 	}
+}
+
+function addCheatBridge(hexID, bridgeArr) {
+	addBridgeToMap_core(hexID, -1, bridgeArr, false)
+	model.addHistory(rf.HIST_ADD_CUSTOM_SCENARIO_ELEMENTS, -1, 0, [[rf.CUSTOM_ADD_BRIDGE, hexID, [...bridgeArr]]])
+	context.createUndoPoint()
 }
 
 // CITY: the two moat-bank nodes on the given side (25% and 75% along the side),

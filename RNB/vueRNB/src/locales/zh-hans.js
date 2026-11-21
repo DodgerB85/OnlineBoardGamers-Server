@@ -509,7 +509,10 @@ export default {
 	},
 	productionSetup: {
 		hint: "点击高亮的管理者以开启或关闭，或点击高亮的木材或发电厂来点火。",
-		summary: "发电厂：{fired} 已点火，{plants} 未点火。管理者：{managersOn} 开启，{managersOff} 关闭。",
+		hintManagers: "点击高亮的管理者以开启或关闭。",
+		hintElectricity: "点击高亮的木材或发电厂来点火。",
+		summaryPlants: "发电厂：{fired} 已点火，{plants} 未点火。",
+		summaryManagers: "管理者：{managersOn} 开启，{managersOff} 关闭。",
 		done: "准备完成",
 	},
 	phases: {

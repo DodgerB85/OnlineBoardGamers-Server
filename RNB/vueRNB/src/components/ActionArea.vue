@@ -55,6 +55,8 @@ const incomingTradeNames = computed(() =>
 	store.context.tradeRelevantIncoming.map((entry) => store.players[entry[0]]?.displayName).filter(Boolean)
 )
 
+const productionSetupSummary = computed(() => productionSetup.setupSummary())
+
 const tradeClearedPresetsThisTurn = computed(() => {
 	for (let index = store.history.length - 1; index >= 0; index--) {
 		const entry = store.history[index]
@@ -986,9 +988,11 @@ const getGameOverReason = computed(() => {
 
 			<!-- PRODUCTION SETUP: the setup phase, or a production preset before primaries produce. Choices are made on the map -->
 			<div v-if="productionSetup.isSetupMode() && store.context.action !== rf.ACT_CONFIRM_END_TURN && store.context.action !== rf.ACT_CONFIRM_RESIGN">
-				{{ $t("productionSetup.hint") }}
+				{{ $t(productionSetup.setupHintKey()) }}
 				<br />
-				{{ $t("productionSetup.summary", productionSetup.setupSummary()) }}
+				<template v-if="productionSetupSummary.showPlants">{{ $t("productionSetup.summaryPlants", productionSetupSummary) }}</template>
+				<template v-if="productionSetupSummary.showPlants && productionSetupSummary.showManagers"><br /></template>
+				<template v-if="productionSetupSummary.showManagers">{{ $t("productionSetup.summaryManagers", productionSetupSummary) }}</template>
 				<br />
 				<br />
 				<button class="actionsLineButton" @click="IO.resetGameStateToLoadedPreMove()" v-if="rf.ALL_PRE_PHASE_MAIN_PHASES.includes(store.gameflow.phase)">{{ $t("common.cancel") }}</button>

@@ -509,7 +509,10 @@ export default {
 	},
 	productionSetup: {
 		hint: "Haz clic en un gerente resaltado para activarlo o desactivarlo, o en madera resaltada o una central eléctrica para encenderla.",
-		summary: "Centrales: {fired} encendidas, {plants} sin encender. Gerentes: {managersOn} activos, {managersOff} inactivos.",
+		hintManagers: "Haz clic en un gerente resaltado para activarlo o desactivarlo.",
+		hintElectricity: "Haz clic en madera resaltada o en una central eléctrica para encenderla.",
+		summaryPlants: "Centrales: {fired} encendidas, {plants} sin encender.",
+		summaryManagers: "Gerentes: {managersOn} activos, {managersOff} inactivos.",
 		done: "Preparación lista",
 	},
 	phases: {

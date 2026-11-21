@@ -509,7 +509,10 @@ export default {
 	},
 	productionSetup: {
 		hint: "Klicke auf einen hervorgehobenen Manager, um ihn ein- oder auszuschalten, oder auf hervorgehobenes Holz oder ein Kraftwerk, um es zu befeuern.",
-		summary: "Kraftwerke: {fired} befeuert, {plants} nicht befeuert. Manager: {managersOn} an, {managersOff} aus.",
+		hintManagers: "Klicke auf einen hervorgehobenen Manager, um ihn ein- oder auszuschalten.",
+		hintElectricity: "Klicke auf hervorgehobenes Holz oder ein Kraftwerk, um es zu befeuern.",
+		summaryPlants: "Kraftwerke: {fired} befeuert, {plants} nicht befeuert.",
+		summaryManagers: "Manager: {managersOn} an, {managersOff} aus.",
 		done: "Vorbereitung fertig",
 	},
 	phases: {

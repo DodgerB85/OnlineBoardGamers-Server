@@ -359,6 +359,7 @@ export const CUSTOM_ADD_TRANSPORTER = 3
 export const CUSTOM_ALL_PLAYERS_PRE_RESEARCHED = 4
 export const CUSTOM_ADD_ROAD = 5
 export const CUSTOM_ADD_POWER_LINE = 6
+export const CUSTOM_ADD_BRIDGE = 7
 
 //export const CUSTOM_SET_MAP = 9
 

@@ -426,6 +426,8 @@ function replayAddCustomScenarioElements(_historyIndex, _playerIndex, entry3) {
 				const toLocation = stack.decompressLocation(toLoc)
 				map.addPowerLineToMap_core([fromLocation[1], fromLocation[2]], [toLocation[1], toLocation[2]], -1, false)
 			}
+		} else if (action === rf.CUSTOM_ADD_BRIDGE) {
+			map.addBridgeToMap_core(entry3[i][1], -1, entry3[i][2], false)
 		} else if (action === rf.CUSTOM_ALL_PLAYERS_PRE_RESEARCHED) {
 			for (const playerObj of store.players) {
 				for (const researchIdx of entry3[i][1]) {

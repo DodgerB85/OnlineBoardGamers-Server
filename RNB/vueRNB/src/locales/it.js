@@ -509,7 +509,10 @@ export default {
 	},
 	productionSetup: {
 		hint: "Fai clic su un manager evidenziato per attivarlo o disattivarlo, oppure su legname evidenziato o su una centrale per alimentarla.",
-		summary: "Centrali: {fired} alimentate, {plants} non alimentate. Manager: {managersOn} attivi, {managersOff} inattivi.",
+		hintManagers: "Fai clic su un manager evidenziato per attivarlo o disattivarlo.",
+		hintElectricity: "Fai clic su legname evidenziato o su una centrale per alimentarla.",
+		summaryPlants: "Centrali: {fired} alimentate, {plants} non alimentate.",
+		summaryManagers: "Manager: {managersOn} attivi, {managersOff} inattivi.",
 		done: "Preparazione completata",
 	},
 	phases: {

@@ -166,6 +166,25 @@ function setupCityMap() {
 	return { store }
 }
 
+test("CHEAT bridge records a custom scenario history entry without a transporter", { skip: skip }, () => {
+	const { store } = setupCityMap()
+	store.context.action = rf.ACT_BUILD_BRIDGE
+	store.context.selectedTransporterIDforTM = -1
+	const city = store.mapData.hexData[0]
+	const bridgeArr = city.bridges[0]
+	map.clickedBridgeOption([0, [...bridgeArr]])
+
+	assert.ok(
+		city.builtBridges.some((b) => b[0] === bridgeArr[0] && b[1] === bridgeArr[1]),
+		"the bridge was built"
+	)
+	const entry = store.history[store.history.length - 1]
+	assert.equal(entry[0], rf.HIST_ADD_CUSTOM_SCENARIO_ELEMENTS)
+	assert.equal(entry[3][0][0], rf.CUSTOM_ADD_BRIDGE)
+	assert.equal(entry[3][0][1], 0)
+	assert.deepEqual(entry[3][0][2], bridgeArr)
+})
+
 test("a city bomb destroys both unstrengthened buildings; a strengthened one survives", { skip: skip }, () => {
 	const { store } = setupCityMap()
 	store.ALL_BUILDINGS.push(

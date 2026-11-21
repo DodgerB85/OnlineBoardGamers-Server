@@ -509,7 +509,10 @@ export default {
 	},
 	productionSetup: {
 		hint: "Cliquez sur un manager surligné pour l'activer ou le désactiver, ou sur du bois surligné ou une centrale pour l'alimenter.",
-		summary: "Centrales : {fired} alimentées, {plants} non alimentées. Managers : {managersOn} actifs, {managersOff} inactifs.",
+		hintManagers: "Cliquez sur un manager surligné pour l'activer ou le désactiver.",
+		hintElectricity: "Cliquez sur du bois surligné ou sur une centrale pour l'alimenter.",
+		summaryPlants: "Centrales : {fired} alimentées, {plants} non alimentées.",
+		summaryManagers: "Managers : {managersOn} actifs, {managersOff} inactifs.",
 		done: "Préparation terminée",
 	},
 	phases: {

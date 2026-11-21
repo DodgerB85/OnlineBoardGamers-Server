@@ -263,7 +263,10 @@ export default {
 	},
 	productionSetup: {
 		hint: "Click a highlighted manager to switch it on or off, or click highlighted wood or a power plant to fire it.",
-		summary: "Plants: {fired} fired, {plants} not fired. Managers: {managersOn} on, {managersOff} off.",
+		hintManagers: "Click a highlighted manager to switch it on or off.",
+		hintElectricity: "Click highlighted wood or a power plant to fire it.",
+		summaryPlants: "Plants: {fired} fired, {plants} not fired.",
+		summaryManagers: "Managers: {managersOn} on, {managersOff} off.",
 		done: "Setup done",
 	},
 	conflict: {
