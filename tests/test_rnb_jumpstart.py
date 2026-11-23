@@ -17,6 +17,7 @@ from RNB.common import jumpstart_map_error
 from RNB.views import _valid_rnb_map
 
 PRESET_3P = json.dumps([[0, 0, 0, 1], {"UK": 1, "JS": [[6, 6], [2, 0], [7, 5]]}])
+PRESET_6P = json.dumps([[0, 0, 0, 1], {"UK": 3, "JS": [[6], [6], [6], [6], [6], [6]]}])
 NO_PILES = json.dumps([[0, 0, 0, 1], {"UK": 2}])
 JS = [rfRNB.SO_JUMP_START]
 
@@ -29,6 +30,11 @@ class RNBJumpstartTests(unittest.TestCase):
         self.assertIsNone(jumpstart_map_error(PRESET_3P, JS, 3))
         self.assertIsNotNone(jumpstart_map_error(PRESET_3P, JS, 2))
         self.assertIsNotNone(jumpstart_map_error(PRESET_3P, JS, 4))
+
+    def test_six_player_preset_piles(self):
+        self.assertIsNone(jumpstart_map_error(PRESET_6P, JS, 6))
+        self.assertIsNotNone(jumpstart_map_error(PRESET_6P, JS, 5))
+        self.assertIsNotNone(jumpstart_map_error(PRESET_6P, JS, 4))
 
     def test_variant_needs_three_players(self):
         self.assertIsNotNone(jumpstart_map_error(NO_PILES, JS, 2))

@@ -1105,12 +1105,12 @@ export function verifySingleStackAction(stackActionData) {
 			rf.doAdminAlrt(`1 - Transporter not found for train ride`)
 			return 1
 		}
-		if (!rf.LAND_TRANSPORTERS.includes(transporterObj.type) && transporterObj.type !== rf.EXHIBITION_TRANSPORTER) return 2
+		if (!rf.LAND_TRANSPORTERS.includes(transporterObj.type) && !rf.WATER_TRANSPORTERS.includes(transporterObj.type) && transporterObj.type !== rf.PLANE && transporterObj.type !== rf.EXHIBITION_TRANSPORTER) return 2
 
 		const fromHexID = fromBucketLocation[1]
 		const fromBucketID = fromBucketLocation[2]
-		const currentBucket = loc.convertLocationToBucket(transporterObj.location)
-		if (currentBucket[1] !== fromHexID || currentBucket[2] !== fromBucketID) return 2
+		const startBuckets = train.getTransporterTrackBuckets(transporterObj)
+		if (!startBuckets.some(([hexID, bucketID]) => hexID === fromHexID && bucketID === fromBucketID)) return 2
 		if (transporterObj.remainingMoves <= 0) return 3
 		if (transporterObj.movedThisTurn) return 3
 		if (model.doesTransporterHaveAlreadyMovedResource(movingTransporterID)) return 3
@@ -1123,8 +1123,9 @@ export function verifySingleStackAction(stackActionData) {
 		if (toHexID === fromHexID) return 5
 		if (!train.getTrackConnectedHexIDs(fromHexID).includes(toHexID)) return 5
 		if (!train.isBucketOnTrack(toHexID, toBucketID)) return 5
-		// Land transporters cannot end their turn on a water tile
-		if (rf.TERR_ACTS_LIKE_WATER.includes(model.getHexByID(toHexID).currentTerrain)) return 5
+		// Land transporters cannot end on a sea track; a ship on a land track must
+		// have a dock or a river to get off into.
+		if (!train.getTrainDestinationLocation(transporterObj, toHexID, toBucketID)) return 5
 
 		// The fare must exist and be payable from the start tile or the transporter
 		const fareRes = model.getResByID(fareResID)

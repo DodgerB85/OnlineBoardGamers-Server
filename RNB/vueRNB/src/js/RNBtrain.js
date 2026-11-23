@@ -62,13 +62,67 @@ export function isBucketOnTrack(hexID, bucketID) {
 	return getTrackBucketsInHex(hexID).includes(bucketID)
 }
 
-// shortcut: rivers, docks and being carried by another transporter all end the
-// ride before it starts. Upgrade to per-bank river handling if ship boarding lands.
-function getTransporterTrackBucket(transporterObj) {
+// Every track bucket the transporter can board from. A river vessel can use a
+// track on either bank of its hex; a docked ship uses the bucket its dock faces.
+export function getTransporterTrackBuckets(transporterObj) {
 	const location = transporterObj.location
-	if (!(loc.isBucketLocation(location) || loc.isLandVertexLocation(location) || loc.isSeaVertexLocation(location))) return null
-	const bucketLocation = loc.convertLocationToBucket(location)
-	return [bucketLocation[1], bucketLocation[2]]
+	if (loc.isDockedLocation(location)) {
+		const hex = model.getHexByID(location[1])
+		const initialBucketID = loc.getBucketIDadjacentToDockedLocation(location)
+		const bucketID = hex.bucketIdsCurrent[initialBucketID]
+		return bucketID >= 0 ? [[location[1], bucketID]] : []
+	}
+	if (loc.isBucketLocation(location) || loc.isLandVertexLocation(location) || loc.isSeaVertexLocation(location)) {
+		const bucketLocation = loc.convertLocationToBucket(location)
+		return bucketLocation.length >= 3 ? [[bucketLocation[1], bucketLocation[2]]] : []
+	}
+	if (loc.isRiverBucketLocation(location) || loc.isRiverVertexLocation(location)) {
+		return getTrackBucketsInHex(location[1]).map((bucketID) => [location[1], bucketID])
+	}
+	return []
+}
+
+function getDockLocationForTrackBucket(hexID, bucketID) {
+	const hex = model.getHexByID(hexID)
+	const locations = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation([rf.LOCATION_BUCKET, hexID, bucketID], false)
+	return locations.find((entry) => loc.isDockedLocation(entry) && hex.bucketIdsCurrent[loc.getBucketIDadjacentToDockedLocation(entry)] === bucketID) ?? null
+}
+
+function getRiverIDForTrackBucket(hexID, bucketID) {
+	const hex = model.getHexByID(hexID)
+	if (!hex || !hex.riverVertexRiverIds) return null
+	for (let i = 0; i < hex.riverVertexRiverIds.length; i++) {
+		const riverID = hex.riverVertexRiverIds[i]
+		if (riverID < 0) continue
+		const locations = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation([rf.LOCATION_RIVER_VERTEX, hexID, i], false)
+		const reachesBucket = locations.some(
+			(entry) => (loc.isBucketLocation(entry) && entry[2] === bucketID) || (loc.isLandVertexLocation(entry) && loc.getBucketIDfromAnyHexIDandVertex(entry[1], entry[2]) === bucketID)
+		)
+		if (reachesBucket) return riverID
+	}
+	return null
+}
+
+// Where a rider gets off. Sea/wet polder: sea vertex (ships and planes only).
+// Land/river tile: a ship docks or gets off in the river; planes, caravans and
+// land transporters use the land vertex. Blocks sea tracks for land transporters.
+export function getTrainDestinationLocation(transporterObj, hexID, bucketID) {
+	const hex = model.getHexByID(hexID)
+	if (!hex) return null
+	const isShip = rf.WATER_TRANSPORTERS.includes(transporterObj.type)
+	const isPlane = transporterObj.type === rf.PLANE
+	if (rf.TERR_ACTS_LIKE_WATER.includes(hex.currentTerrain)) {
+		if (!isShip && !isPlane) return null
+		return [rf.LOCATION_SEA_VERTEX, hexID, loc.getSeaVertexForNewTransporterFromHexIDandBucketID(hexID, bucketID)]
+	}
+	if (isShip) {
+		const dock = getDockLocationForTrackBucket(hexID, bucketID)
+		if (dock) return loc.getFinalLocationForDockingTransporterID(dock, transporterObj.id)
+		const riverID = getRiverIDForTrackBucket(hexID, bucketID)
+		if (riverID !== null) return [rf.LOCATION_RIVER_VERTEX, hexID, loc.getRiverVertexForNewTransporterFromHexIDandBucketID(hexID, riverID)]
+		return null
+	}
+	return [rf.LOCATION_LAND_VERTEX, hexID, loc.getAnyVertexInHexIDbucketID(hexID, bucketID)]
 }
 
 // shortcut: pseudo mine goods (28) are not tokens to spend
@@ -137,10 +191,12 @@ export function getTrainDestinations(transporterID) {
 	const destinations = []
 	for (const hexID of connected) {
 		if (hexID === fromHexID) continue
-		const hex = model.getHexByID(hexID)
-		// shortcut: land transporters cannot end their turn on a water tile
-		if (rf.TERR_ACTS_LIKE_WATER.includes(hex.currentTerrain)) continue
-		for (const bucketID of getTrackBucketsInHex(hexID)) destinations.push([hexID, bucketID])
+		for (const bucketID of getTrackBucketsInHex(hexID)) {
+			// A sea/wet polder track is only usable by ships and planes; a ship on a
+			// land track may only get off at a dock or in a river.
+			if (!getTrainDestinationLocation(transporterObj, hexID, bucketID)) continue
+			destinations.push([hexID, bucketID])
+		}
 	}
 	return destinations
 }
@@ -150,15 +206,25 @@ export function canTransporterUseTrain(transporterID) {
 	const store = useModelStore()
 	if (!rf.PHASE_MOVEMENTS.includes(store.gameflow.phase)) return false
 	const transporterObj = model.getTransporterByID(transporterID)
-	// Art: caravans walk on land but sit outside LAND_TRANSPORTERS (land cap), so allow them explicitly
-	if (!transporterObj || !(rf.LAND_TRANSPORTERS.includes(transporterObj.type) || transporterObj.type === rf.EXHIBITION_TRANSPORTER)) return false
+	// Land transporters, ships and planes may use a train. Caravans walk on land
+	// but sit outside LAND_TRANSPORTERS (land cap), so allow them explicitly.
+	if (
+		!transporterObj ||
+		!(
+			rf.LAND_TRANSPORTERS.includes(transporterObj.type) ||
+			rf.WATER_TRANSPORTERS.includes(transporterObj.type) ||
+			transporterObj.type === rf.PLANE ||
+			transporterObj.type === rf.EXHIBITION_TRANSPORTER
+		)
+	)
+		return false
 	if (transporterObj.remainingMoves <= 0) return false
 	if (transporterObj.movedThisTurn) return false
 	// No preliminary movement: the fare must already be aboard or on the tile
 	if (model.doesTransporterHaveAlreadyMovedResource(transporterID)) return false
 	if (model.doesTransporterHaveAlreadyMovedTransporter(transporterID)) return false
-	const trackBucket = getTransporterTrackBucket(transporterObj)
-	if (!trackBucket || !isBucketOnTrack(trackBucket[0], trackBucket[1])) return false
+	const trackBuckets = getTransporterTrackBuckets(transporterObj)
+	if (!trackBuckets.some(([hexID, bucketID]) => isBucketOnTrack(hexID, bucketID))) return false
 	if (getTrainDestinations(transporterID).length === 0) return false
 	if (!findTrainFare(transporterID)) return false
 	return true
@@ -181,9 +247,13 @@ export function performTrainRide_core(transporterID, toBucketLocation, fareRes, 
 	const toHexID = toBucketLocation[1]
 	const toBucket = toBucketLocation[2]
 
+	const toLocation = getTrainDestinationLocation(transporterObj, toHexID, toBucket)
+	if (!toLocation) {
+		rf.doAdminAlrt(`train: no valid destination for transporter ${transporterID} at hex ${toHexID} bucket ${toBucket}`)
+		return
+	}
 	if (fareRes) fareRes.location = loc.setOOBlocation()
 
-	const toLocation = [rf.LOCATION_LAND_VERTEX, toHexID, loc.getAnyVertexInHexIDbucketID(toHexID, toBucket)]
 	transporterObj.location = toLocation
 	transporterObj.rawTransporterXY = map.getTransporterPositionFromLocation(toLocation, stats, transporterID)
 	transporterObj.remainingMoves = 0
@@ -226,7 +296,13 @@ export function takeTrain(transporterID, toHexID, toBucketID, fareRes) {
 	}
 
 	// Snapshot the payload BEFORE the fare is consumed, so verify sees the pre-move state
-	const fromBucketLocation = loc.convertLocationToBucket(transporterObj.location)
+	const trackBuckets = getTransporterTrackBuckets(transporterObj)
+	const fromTrackBucket = trackBuckets.find(([hexID, bucketID]) => isBucketOnTrack(hexID, bucketID))
+	if (!fromTrackBucket) {
+		rf.doAdminAlrt(`takeTrain: transporter ${transporterID} is not on the track`)
+		return
+	}
+	const fromBucketLocation = [rf.LOCATION_BUCKET, fromTrackBucket[0], fromTrackBucket[1]]
 	const toBucketLocation = [rf.LOCATION_BUCKET, toHexID, toBucketID]
 	const transporterOntrans = model.transportersOnTransporter(transporterID)
 	const resourcesOnTransporter = model.resourcesOnTransport(transporterID)

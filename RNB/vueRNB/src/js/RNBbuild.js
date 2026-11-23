@@ -78,8 +78,13 @@ export function setEligibleItemsToBuild(playerIndex, transporterID) {
 
 		// NB if we are a boat at sea, edges are NOT included yet. So we need to find the edges, and check there is land the other side
 		let resIncreaseDueBuildingFromWater = 0
+		const isOnPolder = rf.TERR_IS_POLDER.includes(hexObj.currentTerrain)
 		if (loc.isWaterVertexLocation(transporterLocation)) {
 			reachableEdgeIDs = reachableEdgeIDs.concat(map.getEdgeIDsToBuildWallFromWaterHexID(hexID))
+			resIncreaseDueBuildingFromWater = 2
+		} else if (isOnPolder) {
+			// Polder rule: building or demolishing a wall from a polder costs +2 even
+			// in the land phase, as if built from the sea.
 			resIncreaseDueBuildingFromWater = 2
 		}
 		for (let i = 0; i < reachableEdgeIDs.length; i++) {

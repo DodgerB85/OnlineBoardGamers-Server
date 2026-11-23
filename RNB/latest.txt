@@ -1,4 +1,4 @@
-Implemented the &c production decisions and the electricity/management audit fixes in vueRNB source. No dist build was run or touched.
+Implemented the &c production decisions and the electricity/management audit fixes in vueRNB source. The RNBvuedist was rebuilt for local testing.
 
 Production setup
 - Separate main phase 17 (ordered as 2.5), after the production conflict/turn order and before production.
@@ -22,6 +22,32 @@ Management
 - City bomb destroys both unstrengthened buildings; strengthened buildings survive.
 - City order is applied to auto-secondary production and the sawmill/plant trunk conflict. A transporter can fuel a plant with its own wood, but cannot reserve a tile board that the plant auto-consumed.
 - Production-setup panel strings added for de, es, fr, it and zh-hans; the hint and summary only mention a module when it is enabled and the current player has a choice for it.
+
+Trains
+- Planes may board and leave trains; ships may use sea tracks and get off at sea, a dock or in a river.
+- Sea tracks are valid train destinations; a ship ending at a sea track stays on a sea vertex, so it cannot dock in the same round.
+- Land transporters still cannot end on a sea track. A ship boarding from a dock or river uses the track bucket on its own bank.
+- Train verification and replay use the same destination rules.
+
+Polders
+- Any land tile next to a polder is shore, even when the polder is drained.
+- Building or demolishing a wall from a polder costs the +2 stone/boards even in the land phase.
+- MBA (Coast) may be built on a polder that is shore; land-locked polders still cannot host it.
+
+Planes
+- A river-shore landing is blocked only by buildings or unattended geese on that river tile; a building on the next tile along the river no longer blocks it.
+
+Trade
+- The trade panel now only appears during the real wonder phase, not while pre-setting it.
+
+Tests
+- Added plane, management, train/sea-track/dock/river, polder-shore/wall, city duplicate/bomb and &c building-stat coverage.
+- Full suite: 23 vitest + 110 node tests; 24 backend RNB trade/phase/jumpstart tests.
+
+Lobby / create page
+- The &c teaser now has a "Click here to play" link to createRNBpage; the countdown and grey cover are gone.
+- createRNBpage now has the full &c checkbox set, recommended-module map filter, gallery module icons, jumpstart warnings and rematch checkbox restoration.
+- createRNBpage2, its template and its JS were removed; mini-tournament creation accepts the same &c options.
 
 Debug / scenario editing
 - CHEAT: Bridge no longer needs a selected transporter (fixes "transporterID not found: -1") and records a CUSTOM_ADD_BRIDGE history entry.

@@ -18,7 +18,8 @@ const tradeYourResIDs = ref([])
 const tradeTheirResIDs = ref([])
 
 const isTradeEnabled = computed(() => {
-	return rf.PHASE_WONDERS.includes(store.gameflow.phase) && !personal.soloGame && store.gameOptions.useTrade
+	// Trading happens during the real wonder phase, not while pre-setting it.
+	return store.gameflow.phase === rf.PHASE_WONDER_TO && !personal.soloGame && store.gameOptions.useTrade
 })
 
 const isTrainingMode = computed(() => personal.trainingGame && !personal.soloGame)

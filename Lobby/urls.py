@@ -133,8 +133,6 @@ urlpatterns = [
         views.createRNBminiTournament,
         name="createRNBminiTournament",
     ),
-    path("createRNBpage2/", views.createRNBpage2, name="createRNBpage2"),
-    path("createRNBpage2/<int:gameID>/", views.createRNBpage2, name="createRNBpage2"),
     path("createURRpage/", views.createURRpage, name="createURRpage"),
     path("createURRpage/<int:gameID>/", views.createURRpage, name="createURRpage"),
     path("createDDLpage/", views.createDDLpage, name="createDDLpage"),

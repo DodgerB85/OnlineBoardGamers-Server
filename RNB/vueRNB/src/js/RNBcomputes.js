@@ -29,7 +29,7 @@ export const computedToXY = computed(() => {
 // Round each interior joint of a polyline with a quadratic Bezier (control point = the joint).
 // Bends use as much of each straight piece as possible (an edge-centre-edge crossing becomes one
 // arc); ends and junctions keep their exact positions.
-// Copied in Lobby/static/Lobby/createRNB2.js (map preview) - keep both in sync.
+// Copied in Lobby/static/Lobby/createRNB.js (map preview) - keep both in sync.
 function smoothPolylinePath(points, fmt, free) {
 	// No river or city on the tile: one smooth arc edge-to-edge, leaving the centre anchor alone
 	if (free && points.length > 2) {

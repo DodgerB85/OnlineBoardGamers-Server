@@ -144,6 +144,40 @@ function setupLandSeaMap() {
 	return { store, edge: store.mapData.edgeData[0], sea }
 }
 
+// Two sea tiles linked by a sea track.
+function setupSeaTrainMap() {
+	setActivePinia(createPinia())
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	personal.soloGame = false
+	personal.trainingGame = true
+	personal.pov = 0
+	store.players.splice(0)
+	store.players.push({ name: "A", displayName: "", colour: 0, RnD: [0, 0, 0, 0, 0, 0, 0, 0] })
+	store.players.push({ name: "B", displayName: "", colour: 1, RnD: [0, 0, 0, 0, 0, 0, 0, 0] })
+	store.gameflow.turn = 1
+	store.gameflow.phase = rf.PHASE_MOVEMENT_TO
+	store.gameflow.turnOrder = [0, 1]
+	store.gameflow.fullTurnOrder = [0, 1]
+	store.mapData.hexData.splice(0)
+	store.mapData.edgeData.splice(0)
+	store.ALL_RESOURCES.splice(0)
+	store.ALL_BUILDINGS.splice(0)
+	store.ALL_TRANSPORTERS.splice(0)
+	store.actionStack.splice(0)
+	store.history.splice(0)
+	const sea0 = hd.createActualHex([0, 0, 0], 0, rf.SEA_1)
+	sea0.hexID = 0
+	store.mapData.hexData.push(sea0)
+	const sea1 = hd.createActualHex([0, 1, -1], 0, rf.SEA_1)
+	sea1.hexID = 1
+	store.mapData.hexData.push(sea1)
+	map.addNewEdge([0, 1])
+	hd.updateAllHexRawXY()
+	assert.equal(map.addTrainTrackToMap_core([0, 0], [1, 0]), true, "sea track")
+	return { store, startBucket: train.getTrackBucketsInHex(0)[0], toBucket: train.getTrackBucketsInHex(1)[0] }
+}
+
 test("train track builds, compresses to TN and reloads", { skip: skip }, () => {
 	const { store, edge } = setupTwoHexMap()
 	assert.deepEqual(edge.hasTrainTrack, [false], "new edge starts without a track")
@@ -534,4 +568,161 @@ test("train tracks survive a whole-turn reset", { skip: skip }, async () => {
 	assert.deepEqual(reloaded.hasTrainTrack, [true], "the track is re-applied from the map definition")
 	assert.equal(store.gameOptions.useTrains, true, "trains are still enabled after the reset")
 	assert.ok(train.isTrainsEnabled(), "the ride is still available after the reset")
+})
+
+test("sea tracks carry ships and planes; land transporters cannot end there", { skip: skip }, () => {
+	// Ship on a sea track: can board and gets off on a sea stopping vertex.
+	const shipMap = setupSeaTrainMap()
+	model.addTransporterToGame(0, rf.RAFT, [rf.LOCATION_BUCKET, 0, shipMap.startBucket], true)
+	model.addResourceToGame_core(rf.RES_BOARDS, [rf.LOCATION_BUCKET, 0, shipMap.startBucket], 9)
+	assert.equal(train.canTransporterUseTrain(0), true, "a ship on a sea track can ride")
+	assert.ok(train.getTrainDestinations(0).some(([hexID, bucketID]) => hexID === 1 && bucketID === shipMap.toBucket), "the other sea tile is a destination")
+	const shipFare = train.findTrainFare(0)
+	train.takeTrain(0, 1, shipMap.toBucket, shipFare)
+	assert.equal(loc.isSeaVertexLocation(model.getTransporterByID(0).location), true, "the ship gets off on the sea")
+
+	// Plane on the same sea track.
+	const planeMap = setupSeaTrainMap()
+	model.addTransporterToGame(0, rf.PLANE, [rf.LOCATION_BUCKET, 0, planeMap.startBucket], true)
+	model.addResourceToGame_core(rf.RES_BOARDS, [rf.LOCATION_BUCKET, 0, planeMap.startBucket], 9)
+	assert.equal(train.canTransporterUseTrain(0), true, "a plane on a sea track can ride")
+	const planeFare = train.findTrainFare(0)
+	train.takeTrain(0, 1, planeMap.toBucket, planeFare)
+	assert.equal(loc.isSeaVertexLocation(model.getTransporterByID(0).location), true, "the plane gets off on the sea")
+
+	// Land transporter on a land track into a sea tile must not be offered the sea.
+	setupLandSeaMap()
+	assert.equal(map.addTrainTrackToMap_core([0, 0], [1, 0]), true)
+	const landBucket = train.getTrackBucketsInHex(0)[0]
+	model.addTransporterToGame(0, rf.DONKEY, [rf.LOCATION_BUCKET, 0, landBucket], true)
+	model.addResourceToGame_core(rf.RES_BOARDS, [rf.LOCATION_BUCKET, 0, landBucket], 9)
+	assert.ok(!train.getTrainDestinations(0).some(([hexID]) => hexID === 1), "a land transporter cannot end on the sea track")
+})
+
+test("another client verifies a ship's sea-track ride", { skip: skip }, () => {
+	const shipMap = setupSeaTrainMap()
+	model.addTransporterToGame(0, rf.RAFT, [rf.LOCATION_BUCKET, 0, shipMap.startBucket], true)
+	model.addResourceToGame_core(rf.RES_BOARDS, [rf.LOCATION_BUCKET, 0, shipMap.startBucket], 9)
+	const fare = train.findTrainFare(0)
+	const stackAction = {
+		action: rf.STACK_TAKE_TRAIN,
+		historyEntry: [rf.STACK_TAKE_TRAIN, 0, [...stack.compressLocation([rf.LOCATION_BUCKET, 0, shipMap.startBucket])], [...stack.compressLocation([rf.LOCATION_BUCKET, 1, shipMap.toBucket])], [fare.id], fare.id],
+		playerIndex: 0,
+	}
+	assert.equal(stack.verifySingleStackAction(stackAction), 0, "the sea-track ride verifies")
+	stack.performSingleStackAction(stackAction, false)
+	assert.equal(loc.isSeaVertexLocation(model.getTransporterByID(0).location), true, "the ship lands on the sea")
+})
+
+test("a carrier takes its carried transporter on one fare; the carried one cannot board alone", { skip: skip }, () => {
+	const { store, startBucket } = setupTrainRideMap()
+	const donkey = model.getTransporterByID(0)
+	store.ALL_TRANSPORTERS.push({ id: 1, type: rf.RAFT, uniqueID: "00033000001", location: [rf.LOCATION_TRANSPORTER, donkey.id], remainingMoves: 3, ownerIndex: 0, movedThisTurn: false, justPickedUpFromLocation: [], rawTransporterXY: [0, 0] })
+	const fare = train.findTrainFare(0)
+	assert.equal(train.canTransporterUseTrain(0), true, "the carrier can ride")
+	assert.equal(train.canTransporterUseTrain(1), false, "the carried transporter cannot board by itself")
+	train.takeTrain(0, 2, train.getTrackBucketsInHex(2)[0], fare)
+	assert.equal(donkey.location[1], 2, "the carrier moves")
+	assert.deepEqual(model.getTransporterByID(1).location, [rf.LOCATION_TRANSPORTER, donkey.id], "the carried transporter stays loaded")
+	assert.equal(model.getResByID(fare.id).location[0], rf.LOCATION_OOB, "only one fare is spent")
+	assert.deepEqual(store.actionStack[0].historyEntry[4], [-1, 1], "the payload records the carried transporter")
+})
+
+test("a plane can take a land track", { skip: skip }, () => {
+	const { store, startBucket } = setupTrainRideMap()
+	store.ALL_TRANSPORTERS.splice(0)
+	model.addTransporterToGame(0, rf.PLANE, [rf.LOCATION_BUCKET, 0, startBucket], true)
+	model.addResourceToGame_core(rf.RES_BOARDS, [rf.LOCATION_BUCKET, 0, startBucket], 9)
+	assert.equal(train.canTransporterUseTrain(0), true, "a plane on a land track can ride")
+	const fare = train.findTrainFare(0)
+	train.takeTrain(0, 2, train.getTrackBucketsInHex(2)[0], fare)
+	assert.equal(loc.isLandVertexLocation(model.getTransporterByID(0).location), true, "the plane gets off on land")
+})
+
+test("a docked ship can use a land track and get off at a dock", { skip: skip }, () => {
+	setActivePinia(createPinia())
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	personal.soloGame = false
+	personal.trainingGame = true
+	personal.pov = 0
+	store.players.splice(0)
+	store.players.push({ name: "A", displayName: "", colour: 0, RnD: [0, 0, 0, 0, 0, 0, 0, 0] })
+	store.players.push({ name: "B", displayName: "", colour: 1, RnD: [0, 0, 0, 0, 0, 0, 0, 0] })
+	store.gameflow.turn = 1
+	store.gameflow.phase = rf.PHASE_MOVEMENT_TO
+	store.gameflow.turnOrder = [0, 1]
+	store.gameflow.fullTurnOrder = [0, 1]
+	store.mapData.hexData.splice(0)
+	store.mapData.edgeData.splice(0)
+	store.ALL_RESOURCES.splice(0)
+	store.ALL_BUILDINGS.splice(0)
+	store.ALL_TRANSPORTERS.splice(0)
+	store.actionStack.splice(0)
+	store.history.splice(0)
+
+	const land0 = hd.createActualHex([0, 0, 0], 0, rf.PASTURE_1)
+	land0.hexID = 0
+	const land1 = hd.createActualHex([0, 1, -1], 0, rf.PASTURE_1)
+	land1.hexID = 1
+	const sea0 = hd.createActualHex([1, -1, 0], 0, rf.SEA_1)
+	sea0.hexID = 2
+	const sea1 = hd.createActualHex([1, 0, -1], 0, rf.SEA_1)
+	sea1.hexID = 3
+	store.mapData.hexData.push(land0, land1, sea0, sea1)
+	map.addNewEdge([0, 1])
+	map.addNewEdge([0, 2])
+	map.addNewEdge([1, 3])
+	hd.updateAllHexRawXY()
+	assert.equal(map.addTrainTrackToMap_core([0, 0], [1, 0]), true, "land track")
+	const fromBucket = train.getTrackBucketsInHex(0)[0]
+	const toBucket = train.getTrackBucketsInHex(1)[0]
+
+	const dockSide = land0.hexLookup.indexOf(2)
+	const dock = loc.setDockedLocation(0, dockSide, rf.BANK_NONE, 0)
+	store.ALL_TRANSPORTERS.push({ id: 0, type: rf.RAFT, uniqueID: "00033000000", location: dock, remainingMoves: 3, ownerIndex: 0, movedThisTurn: false, justPickedUpFromLocation: [], rawTransporterXY: [0, 0] })
+	model.addResourceToGame_core(rf.RES_BOARDS, [rf.LOCATION_BUCKET, 0, fromBucket], 9)
+	assert.equal(train.canTransporterUseTrain(0), true, "a docked ship can board the land track")
+	assert.ok(train.getTrainDestinations(0).some(([hexID]) => hexID === 1), "the other land tile with a dock is a destination")
+	const fare = train.findTrainFare(0)
+	train.takeTrain(0, 1, toBucket, fare)
+	assert.equal(loc.isDockedLocation(model.getTransporterByID(0).location), true, "the ship gets off at a dock")
+})
+
+test("a ship in a river can use the track to reach the sea", { skip: skip }, () => {
+	const { store, sea, riverHex, side } = setupSeaRiverPair()
+	store.players.push({ name: "A", displayName: "", colour: 0, RnD: [0, 0, 0, 0, 0, 0, 0, 0] })
+	store.gameflow.phase = rf.PHASE_MOVEMENT_TO
+	store.gameflow.turnOrder = [0]
+	store.gameflow.fullTurnOrder = [0]
+	const seaBucket = sea.bucketIdsInitial[0]
+	const fromBanks = riverHex.cornerNodeIds[side].map((node) => riverHex.bucketIdsInitial[riverHex.nodeBucketIds[node]])
+	assert.equal(map.addTrainTrackToMap_core([1, seaBucket], [0, fromBanks[0]]), true, "track from the sea onto the river bank")
+	const riverID = riverHex.riverVertexRiverIds.find((id) => id >= 0)
+	const riverVertex = loc.getRiverVertexForNewTransporterFromHexIDandBucketID(riverHex.hexID, riverID)
+	store.ALL_TRANSPORTERS.push({ id: 0, type: rf.RAFT, uniqueID: "00033000000", location: [rf.LOCATION_RIVER_VERTEX, riverHex.hexID, riverVertex], remainingMoves: 3, ownerIndex: 0, movedThisTurn: false, justPickedUpFromLocation: [], rawTransporterXY: [0, 0] })
+	model.addResourceToGame_core(rf.RES_BOARDS, [rf.LOCATION_BUCKET, riverHex.hexID, fromBanks[0]], 9)
+	assert.equal(train.canTransporterUseTrain(0), true, "a ship in a river can board the track")
+	assert.ok(train.getTrainDestinations(0).some(([hexID]) => hexID === sea.hexID), "the sea is a destination")
+	const fare = train.findTrainFare(0)
+	train.takeTrain(0, sea.hexID, seaBucket, fare)
+	assert.equal(loc.isSeaVertexLocation(model.getTransporterByID(0).location), true, "the ship gets off on the sea")
+})
+
+test("a ship can ride from the sea into a river", { skip: skip }, () => {
+	const { store, sea, riverHex, side } = setupSeaRiverPair()
+	store.players.push({ name: "A", displayName: "", colour: 0, RnD: [0, 0, 0, 0, 0, 0, 0, 0] })
+	store.gameflow.phase = rf.PHASE_MOVEMENT_TO
+	store.gameflow.turnOrder = [0]
+	store.gameflow.fullTurnOrder = [0]
+	const seaBucket = sea.bucketIdsInitial[0]
+	const toBanks = riverHex.cornerNodeIds[side].map((node) => riverHex.bucketIdsInitial[riverHex.nodeBucketIds[node]])
+	assert.equal(map.addTrainTrackToMap_core([1, seaBucket], [0, toBanks[0]]), true, "track from the sea onto the river bank")
+	model.addTransporterToGame(0, rf.RAFT, [rf.LOCATION_BUCKET, sea.hexID, seaBucket], true)
+	model.addResourceToGame_core(rf.RES_BOARDS, [rf.LOCATION_BUCKET, sea.hexID, seaBucket], 9)
+	assert.ok(train.getTrainDestinations(0).some(([hexID]) => hexID === riverHex.hexID), "the river is a destination")
+	const fare = train.findTrainFare(0)
+	train.takeTrain(0, riverHex.hexID, toBanks[0], fare)
+	const destination = model.getTransporterByID(0).location
+	assert.ok(loc.isRiverVertexLocation(destination) || loc.isDockedLocation(destination), "the ship gets off in the river or at its dock")
 })

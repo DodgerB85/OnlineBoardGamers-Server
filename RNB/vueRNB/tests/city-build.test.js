@@ -94,7 +94,7 @@ globalThis.msgpack = globalThis.msgpack || {
 	decode: (buffer) => JSON.parse(new TextDecoder().decode(buffer)),
 }
 
-let rf, hd, map, build, model, graph, stack, useModelStore, usePersonalStore, createPinia, setActivePinia, setupError
+let rf, hd, map, build, model, graph, stack, produce, useModelStore, usePersonalStore, createPinia, setActivePinia, setupError
 try {
 	await import("../src/pakoLib.js")
 	;({ createPinia, setActivePinia } = await import("pinia"))
@@ -105,6 +105,7 @@ try {
 	model = await import("../src/js/RNBmodel.js")
 	graph = await import("../src/js/RNBgraph.js")
 	stack = await import("../src/js/RNBstack.js")
+	produce = await import("../src/js/RNBproduce.js")
 	;({ useModelStore } = await import("../src/stores/RNBstore.js"))
 	;({ usePersonalStore } = await import("../src/stores/RNBpersonal.js"))
 } catch (error) {
@@ -183,6 +184,42 @@ test("CHEAT bridge records a custom scenario history entry without a transporter
 	assert.equal(entry[3][0][0], rf.CUSTOM_ADD_BRIDGE)
 	assert.equal(entry[3][0][1], 0)
 	assert.deepEqual(entry[3][0][2], bridgeArr)
+})
+
+test("a city can hold the same building twice", { skip: skip }, () => {
+	const { store } = setupCityMap()
+	store.ALL_BUILDINGS.push({ id: 0, type: rf.BLDG_SAWMILL, location: [rf.LOCATION_BUCKET, 0, 0], uniqueID: "saw" })
+	for (let i = 0; i < 2; i++) model.addResourceToGame_core(rf.RES_BOARDS, [rf.LOCATION_BUCKET, 0, 0], 0)
+	const options = build.getEligibleMainBuildingsToBuildWithTransporterID(0)[0]
+	assert.ok(options.includes(rf.BLDG_SAWMILL), "the second sawmill is still offered in the other city slot")
+})
+
+test("a city uses shared unattended goods in the printed production order", { skip: skip }, () => {
+	const { store } = setupCityMap()
+	store.ALL_TRANSPORTERS.splice(0)
+	store.ALL_RESOURCES.splice(0)
+	store.ALL_BUILDINGS.splice(0)
+	const papermill = rf.BUILDING_STATS.find((b) => b.building === rf.BLDG_PAPERMILL)
+	const coalBurner = rf.BUILDING_STATS.find((b) => b.building === rf.BLDG_COAL_BURNER)
+	store.ALL_BUILDINGS.push(
+		{ id: 0, type: rf.BLDG_COAL_BURNER, location: [rf.LOCATION_BUCKET, 0, 0], remainingConversions: coalBurner.maxConversions },
+		{ id: 1, type: rf.BLDG_PAPERMILL, location: [rf.LOCATION_BUCKET, 0, 0], remainingConversions: papermill.maxConversions }
+	)
+	model.addResourceToGame_core(rf.RES_TRUNKS, [rf.LOCATION_BUCKET, 0, 0], 9)
+	model.addResourceToGame_core(rf.RES_BOARDS, [rf.LOCATION_BUCKET, 0, 0], 9)
+	produce.doAutoSecondaryProduction(false, true)
+	assert.equal(store.ALL_RESOURCES.filter((r) => r.type === rf.RES_PAPER).length, 1, "the paper mill gets the shared trunk + board first")
+	assert.equal(store.ALL_RESOURCES.filter((r) => r.type === rf.RES_FUEL).length, 0, "the coal burner gets nothing after the paper mill")
+})
+
+test("a bomb on the tile can destroy a building without being carried", { skip: skip }, () => {
+	const { store } = setupCityMap()
+	store.ALL_BUILDINGS.push({ id: 0, type: rf.BLDG_SAWMILL, location: [rf.LOCATION_BUCKET, 0, 0], uniqueID: "saw" })
+	model.addResourceToGame_core(rf.RES_BOMB, [rf.LOCATION_BUCKET, 0, 0], 0)
+	store.context.selectedTransporterIDforTM = 0
+	map.clickedBombOption(0)
+	assert.equal(store.ALL_BUILDINGS[0].location[0], rf.LOCATION_OOB, "the building is destroyed")
+	assert.equal(store.ALL_RESOURCES.find((r) => r.type === rf.RES_BOMB).location[0], rf.LOCATION_OOB, "the bomb is spent")
 })
 
 test("a city bomb destroys both unstrengthened buildings; a strengthened one survives", { skip: skip }, () => {

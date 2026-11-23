@@ -2687,68 +2687,6 @@ def createRNBpage(request, gameID=0):
 
 
 @login_required
-def createRNBpage2(request, gameID=0):
-    experienced = SF_hasRequiredExperience(request, "RNB", Game)
-    # Get settings debug flag for RNB map rendering
-    settings_debug = config("RNB_USE_SOURCE_CODE", default=False, cast=bool)
-
-    # Handle query parameters for solo map play
-    if request.method != "POST" and gameID == 0:
-        context = {"experienced": experienced, "settingsDebug": settings_debug}
-
-        # Check for map and players query parameters
-        map_id = request.GET.get("map")
-        players = request.GET.get("players")
-
-        if map_id and players == "1":
-            # Set up for solo play with selected map
-            context.update(
-                {
-                    "fillData": True,
-                    "gamePace": 30,  # Default pace
-                    "playerNumber": 1,  # Solo play
-                    "playerNames": [],  # No additional players
-                    "kickoutDuration": 100,  # Default kickout duration
-                    "startingOptions": [],  # No special starting options
-                    "selectedMapId": map_id,  # Pass uniqueID for matching
-                }
-            )
-
-        return render(request, "Lobby/createRNB2.html", context)
-    elif request.method != "POST" and gameID != 0:
-        # Extract the data from gameID and return template with all data
-        try:
-            currentGame = Game.objects.get(id=gameID, gameCode="RNB")
-        except Game.DoesNotExist:
-            raise Http404(gettext("Game does not exist")) from None
-        # presenter = currentGame.presenter()
-        all_players = currentGame.players.exclude(player=request.user).select_related("player")
-        playerNames = [gp.player.username for gp in all_players if gp.player]
-
-        loadedStartingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
-
-        messages.success(request, (gettext("Game creation for rematch")))
-        return render(
-            request,
-            "Lobby/createRNB2.html",
-            {
-                "fillData": True,
-                "gameName": currentGame.presenter().getGameName(),
-                "gameDescription": currentGame.gameDescription,
-                "gamePace": currentGame.gamePace,
-                "playerNumber": currentGame.maxPlayers,
-                "playerNames": playerNames,
-                "kickoutDuration": currentGame.kickoutDuration,
-                "startingOptions": loadedStartingOptions,
-                "experienced": experienced,
-                "settingsDebug": settings_debug,
-            },
-        )
-
-    return HttpResponse(status=204)  # No Content
-
-
-@login_required
 def createURRpage(request, gameID=0):
     experienced = SF_hasRequiredExperience(request, "URR", Game)
     if request.method != "POST" and gameID == 0:
@@ -5993,12 +5931,33 @@ def createRNBminiTournament(request):
         )
 
     # Now it is a POST response
+    from RNB import RNBconstants as rfRNB
+
     startingOptions = []
     if "useSoloMineRules" in request.POST:
         startingOptions.append(int(request.POST["useSoloMineRules"]))
+    for checkbox_name, option_value in (
+        ("useElectricity", rfRNB.SO_ELECTRICITY),
+        ("useManagement", rfRNB.SO_MANAGEMENT),
+        ("useArt", rfRNB.SO_ART),
+        ("useTrade", rfRNB.SO_TRADE),
+        ("useFundamentalResearch", rfRNB.SO_FUNDAMENTAL_RESEARCH),
+        ("usePlanes", rfRNB.SO_PLANES),
+        ("useBombs", rfRNB.SO_BOMBS),
+        ("useJumpStart", rfRNB.SO_JUMP_START),
+    ):
+        if checkbox_name in request.POST:
+            startingOptions.append(option_value)
 
     # RNB needs a board, so the tournament carries the chosen map
     startingMap = request.POST.get("mapData", "")
+
+    from RNB.common import jumpstart_map_error
+
+    jumpstart_error = jumpstart_map_error(startingMap, startingOptions, int(request.POST["playersPerGameMT"]))
+    if jumpstart_error:
+        messages.error(request, jumpstart_error)
+        return HttpResponseRedirect(reverse("createRNBminiTournament"))
 
     invitedPlayers = json.loads(request.POST["invtedPlayersListMT"]) if request.POST["invtedPlayersListMT"] else []
 

@@ -45,8 +45,7 @@ def messages(response):
 # dropping a seat or a game-type checkbox for one game.
 CREATE_PAGE_FIELDS = {
     "createFCMpage": {"seats": [2, 3, 4, 5, 6], "seat_rows": [3, 4, 5, 6], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"], "extras": ['id="fcmAI"']},
-    "createRNBpage": {"seats": [2, 3, 4, 5, 6], "seat_rows": [2, 3, 4, 5, 6], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"], "extras": ['<option value="1">', 'id="useSoloMineRules"']},
-    "createRNBpage2": {"seats": [2, 3, 4, 5, 6], "seat_rows": [2, 3, 4, 5, 6], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"], "extras": ['<option value="1">', 'id="useSoloMineRules"']},
+    "createRNBpage": {"seats": [2, 3, 4, 5, 6], "seat_rows": [2, 3, 4, 5, 6], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"], "extras": ['<option value="1">', 'id="useSoloMineRules"', 'id="useElectricity"', 'id="useManagement"', 'id="useArt"', 'id="useTrade"', 'id="useFundamentalResearch"', 'id="usePlanes"', 'id="useBombs"', 'id="useJumpStart"', 'id="etceteraToggle"']},
     "createHLCpage": {"seats": [2, 3, 4, 5], "seat_rows": [3, 4, 5], "game_types": ["trainingGame", "privateGame", "experiencedGame"]},
     "createTGZpage": {"seats": [2, 3, 4, 5], "seat_rows": [3, 4, 5], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"], "submit": "registerbtn"},
     "createINDpage": {"seats": [2, 3, 4, 5], "seat_rows": [3, 4, 5], "game_types": ["trainingGame", "privateGame", "learningGame", "experiencedGame"]},
@@ -172,6 +171,13 @@ class AllGamesCreationTests(TestCase):
                     self.assertIn(f'id="selPlayer{row}"', body, f"{page} selPlayer{row}")
                 for game_type in fields["game_types"]:
                     self.assertIn(f'id="{game_type}"', body, f"{page} {game_type}")
+
+    def test_rnb_mini_tournament_page_has_expansion_options(self):
+        response = self.client.get(reverse("createRNBminiTournament"))
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        for checkbox in ("useElectricity", "useManagement", "useArt", "useTrade", "useFundamentalResearch", "usePlanes", "useBombs", "useJumpStart", "etceteraToggle"):
+            self.assertIn(f'id="{checkbox}"', body, checkbox)
 
     def test_fcm_missing_kickout_falls_back_to_one_day(self):
         # A create page whose kickout select lost its value must still create

@@ -3,7 +3,7 @@
 {% block head %}
     <link href="{% static 'Lobby/CSS/lobby_new.css' %}?v=20" rel="stylesheet" />
     <style>
-        /* RNB &Cetera release teaser - remove after launch */
+        /* RNB &Cetera release banner */
         .new-game-teaser { text-align: center; margin-bottom: 14px; }
         .new-game-teaser-box { position: relative; display: inline-block; line-height: 0; }
         .new-game-teaser-box img {
@@ -13,14 +13,7 @@
             object-fit: cover;
             border-radius: 8px;
         }
-        .new-game-teaser-box::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.55);
-            border-radius: 8px;
-        }
-        .new-game-teaser-timer {
+        .new-game-teaser-link {
             position: absolute;
             inset: 0;
             z-index: 1;
@@ -34,6 +27,7 @@
             font-weight: 700;
             line-height: 1.2;
             text-align: center;
+            text-decoration: none;
             overflow-wrap: anywhere;
             text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000;
         }
@@ -129,14 +123,12 @@
         </div>
         <!-- hidden map editor forms (required by Lobby.js) -->
         {% include 'Lobby/map_editor_forms.html' %}
-        <!-- RNB &Cetera countdown - remove after launch -->
+        <!-- RNB &Cetera release banner -->
         <div class="new-game-teaser">
             <div class="new-game-teaser-box">
                 <img src="{% static 'RNB/images/cetera-box.jpg' %}"
                      alt="Roads &amp; Boats: &amp;Cetera" />
-                <span class="new-game-teaser-timer"
-                      id="newGameCountdown"
-                      data-done="{% translate "Coming ASAP! (Stuck at work)" %}"></span>
+                <a class="new-game-teaser-link" href="{% url 'createRNBpage' %}">{% translate "Click here to play" %}</a>
             </div>
         </div>
         <div class="tabs">
@@ -491,30 +483,6 @@
                 var panel = document.getElementById("availableGamesListView");
                 if (panel) panel.scrollIntoView({ behavior: "smooth", block: "start" });
             });
-        })();
-
-        /* RNB &Cetera countdown - remove after launch */
-        (function () {
-            var el = document.getElementById("newGameCountdown");
-            if (!el) return;
-            var release = Date.UTC(2026, 10, 23, 16, 0, 0); /* 24 Nov 2026, 00:00 Hong Kong (UTC+8) */
-            var timer;
-            function tick() {
-                var distance = release - Date.now();
-                if (distance < 0) {
-                    el.textContent = el.dataset.done;
-                    clearInterval(timer);
-                    return;
-                }
-                var s = Math.floor(distance / 1000);
-                var days = Math.floor(s / 86400);
-                var hours = Math.floor((s % 86400) / 3600);
-                var minutes = Math.floor((s % 3600) / 60);
-                var seconds = s % 60;
-                el.textContent = (days > 0 ? days + "d " : "") + hours + "h " + minutes + "m " + seconds + "s";
-            }
-            timer = setInterval(tick, 1000);
-            tick();
         })();
 
         var global = {};

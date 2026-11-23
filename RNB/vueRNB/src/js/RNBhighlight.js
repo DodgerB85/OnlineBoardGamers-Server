@@ -261,7 +261,7 @@ export function updateAllHighlightsForTransporterMode() {
 			return
 		}
 
-		// Offer the ride whenever a land transporter sits on a live track.
+		// Offer the ride whenever a transporter sits on a live track.
 		// While the mode is on, the same bubble becomes the way back out.
 		store.context.trainModeSelectionActive = train.canTransporterUseTrain(transporterID)
 		// Trains: a selected mode skips normal movement - the ride is the whole action
@@ -279,7 +279,14 @@ export function updateAllHighlightsForTransporterMode() {
 				}
 				// Step 2: good picked - offer the tiles the ride can reach
 				store.context.action = rf.ACT_TM_TAKE_TRAIN
-				const destinations = train.getTrainDestinations(transporterID).map(([hexID, bucketID]) => [rf.LOCATION_LAND_VERTEX, hexID, loc.getAnyVertexInHexIDbucketID(hexID, bucketID)])
+				const destinations = train.getTrainDestinations(transporterID).map(([hexID, bucketID]) => {
+					// Sea tracks are clicked on a sea vertex. Docks/rivers are clicked on a
+					// land vertex in the track bucket; takeTrain re-derives the dock/river.
+					if (rf.TERR_ACTS_LIKE_WATER.includes(model.getHexByID(hexID).currentTerrain)) {
+						return [rf.LOCATION_SEA_VERTEX, hexID, loc.getSeaVertexForNewTransporterFromHexIDandBucketID(hexID, bucketID)]
+					}
+					return [rf.LOCATION_LAND_VERTEX, hexID, loc.getAnyVertexInHexIDbucketID(hexID, bucketID)]
+				})
 				highlightLocations(destinations)
 				// The mode carries over to another selected transporter, as plane modes do
 				highlightEligibleTransportersForTransporterPickup(store.context.selectedTransporterIDforTM)

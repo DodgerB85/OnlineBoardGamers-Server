@@ -528,16 +528,8 @@ export function canPlaneLandOnTile(_planeObj, location) {
 	if (!hex) return false
 	// Must be land or sea terrain (not rivers, which are already excluded by location type)
 	if (loc.isLandVertexLocation(location) && !rf.TERR_ANY_LAND.includes(hex.currentTerrain)) return false
+	// A building or unattended goose anywhere on the river tile blocks both shores.
 	if (tileHasPlaneLandingBlocker(hexID)) return false
-	// River rule: for each side that has a river, check the opposite-shore hex
-	// (only applies to land vertices, not sea)
-	if (loc.isLandVertexLocation(location) && hex.sideRiverVertexIds) {
-		for (let s = 0; s < hex.sideRiverVertexIds.length; s++) {
-			if (hex.sideRiverVertexIds[s] === -1) continue
-			const neighbour = hex.hexLookup ? hex.hexLookup[s] : -1
-			if (neighbour >= 0 && tileHasPlaneLandingBlocker(neighbour)) return false
-		}
-	}
 	return true
 }
 
@@ -760,8 +752,13 @@ export function getHexShoreSides(hexId) {
 		let result = []
 		for (let i = 0; i < 6; i++) {
 			let neighbour = hex.hexLookup[i]
-			if (neighbour >= 0 && getHexByID(neighbour).currentTerrain === rf.TERR_SEA) {
-				result.push(i)
+			if (neighbour >= 0) {
+				const neighbourTerrain = getHexByID(neighbour).currentTerrain
+				// Polder rule: any land tile adjacent to a polder is shore, even when
+				// the polder is currently drained.
+				if (neighbourTerrain === rf.TERR_SEA || rf.TERR_IS_POLDER.includes(neighbourTerrain)) {
+					result.push(i)
+				}
 			}
 		}
 		return result

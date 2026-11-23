@@ -58,6 +58,21 @@
             margin-top: 12px;
         }
 
+        .mapModuleIcon {
+            width: 24px;
+            height: 24px;
+            vertical-align: middle;
+            margin: 0 2px;
+        }
+
+        .galleryMapModules {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2px;
+            padding-top: 4px;
+        }
+
         .galleryMapTile {
             width: 300px;
             border: 1px solid var(--color-border);
@@ -305,8 +320,63 @@
                                 <div class="opt-help">{% translate "Use solo rules; mines produce whatever they have more of, or gold if contents are equal" %}</div>
                             </div>
                         </label>
+                        <label class="check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useElectricity" name="useElectricity" value="0">
+                            <div>
+                                <div>{% translate "Electricity" %}</div>
+                                <div class="opt-help">{% translate "Expansion content" %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useManagement" name="useManagement" value="1">
+                            <div>
+                                <div>{% translate "Management" %}</div>
+                                <div class="opt-help">{% translate "Expansion content" %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useArt" name="useArt" value="2">
+                            <div>
+                                <div>{% translate "Art" %}</div>
+                                <div class="opt-help">{% translate "Expansion content" %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useTrade" name="useTrade" value="3">
+                            <div>
+                                <div>{% translate "Trade" %}</div>
+                                <div class="opt-help">{% translate "Expansion content" %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useFundamentalResearch" name="useFundamentalResearch" value="4">
+                            <div>
+                                <div>{% translate "Fundamental Research" %}</div>
+                                <div class="opt-help">{% translate "Expansion content" %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="usePlanes" name="usePlanes" value="5">
+                            <div>
+                                <div>{% translate "Planes" %}</div>
+                                <div class="opt-help">{% translate "Expansion content" %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useBombs" name="useBombs" value="6">
+                            <div>
+                                <div>{% translate "Bombs" %}</div>
+                                <div class="opt-help">{% translate "Expansion content" %}</div>
+                            </div>
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox" id="useJumpStart" name="useJumpStart" value="7">
+                            <div>
+                                <div>{% translate "Jump Start" %}</div>
+                                <div class="opt-help">{% translate "Expansion content" %}</div>
+                            </div>
+                        </label>
                     </div>
-                    <div style="padding:10px 0 0"><b>&c coming SOON&trade;</b></div>
                 </div>
 
                 <div class="card" style="grid-column:1 / -1">
@@ -315,10 +385,14 @@
                         <button type="button" class="tab tablinks active" id="mapListTab" onclick="showMapDisplay('list');">{% translate "List Display" %}</button>
                         <button type="button" class="tab tablinks" id="mapGalleryTab" onclick="showMapDisplay('gallery');">{% translate "Gallery Display" %}</button>
                     </div>
-                    <div class="mapFilterToggle" style="margin-bottom:8px">
+                    <div class="mapFilterToggle" style="margin-bottom:8px;display:flex;gap:16px">
                         <label class="check-label">
                             <input type="checkbox" id="isVerifiedToggle" onchange="clearMapSelection(); loadMaps();">
                             {% translate "Verified maps only" %}
+                        </label>
+                        <label class="check-label">
+                            <input type="checkbox" id="etceteraToggle" onchange="clearMapSelection(); populateMapDropdown(loadedMaps); renderMapGallery();">
+                            {% translate "&cetera scenarios only" %}
                         </label>
                     </div>
                     <div id="mapListView">
@@ -335,6 +409,7 @@
                             <div id="mapInfoDisplay" style="display:none;margin-bottom:10px">
                                 <div style="font-weight:bold;font-size:16px;margin-bottom:5px" id="selectedMapName"></div>
                                 <div style="color:#666;font-size:14px;line-height:1.4;white-space:pre-line" id="selectedMapDescription"></div>
+                                <div style="font-size:14px;margin-top:4px" id="selectedMapModules"></div>
                             </div>
                             <div id="mapPreviewContainer" style="min-height:300px;border:1px solid #ccc;background-color:#f9f9f9;display:flex;align-items:center;justify-content:center">
                                 <div id="mapPreviewPlaceholder">{% translate "Select a map to preview" %}</div>

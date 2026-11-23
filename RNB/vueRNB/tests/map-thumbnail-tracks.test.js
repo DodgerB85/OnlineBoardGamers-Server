@@ -1,8 +1,7 @@
 /**
- * createRNBpage and createRNBpage2 share the same map-thumbnail builder. Both draw the editor's
- * saved TP geometry 1:1 when present; maps saved before TP existed fall back to TN and are drawn
- * centre-to-centre. The rail is black with a white dashed centre. Page 2 only adds the &c
- * checkboxes, so both builders are checked against the same expectations.
+ * The create-game page draws the editor's saved TP geometry 1:1 when present; maps saved
+ * before TP existed fall back to TN and are drawn centre-to-centre. The rail is black
+ * with a white dashed centre.
  *
  * Run with:
  *     node --test tests/map-thumbnail-tracks.test.js
@@ -34,7 +33,7 @@ function blackRails(svg) {
 	}))
 }
 
-for (const file of ["createRNB.js", "createRNB2.js"]) {
+for (const file of ["createRNB.js"]) {
 	const buildMapThumbnailSVG = await loadBuilder(file)
 
 	test(file + ": TN fallback draws a black centre-to-centre rail", () => {

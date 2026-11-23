@@ -88,7 +88,7 @@ globalThis.msgpack = globalThis.msgpack || {
 	decode: (buffer) => JSON.parse(new TextDecoder().decode(buffer)),
 }
 
-let rf, hd, map, build, model, useModelStore, usePersonalStore, createPinia, setActivePinia, setupError
+let rf, hd, map, build, model, wonder, useModelStore, usePersonalStore, createPinia, setActivePinia, setupError
 try {
 	await import("../src/pakoLib.js")
 	;({ createPinia, setActivePinia } = await import("pinia"))
@@ -97,6 +97,7 @@ try {
 	map = await import("../src/js/RNBmap.js")
 	build = await import("../src/js/RNBbuild.js")
 	model = await import("../src/js/RNBmodel.js")
+	wonder = await import("../src/js/RNBwonder.js")
 	;({ useModelStore } = await import("../src/stores/RNBstore.js"))
 	;({ usePersonalStore } = await import("../src/stores/RNBpersonal.js"))
 } catch (error) {
@@ -188,4 +189,86 @@ test("only a polder that touches water is shore enough for the clay pit and raft
 	const shore = setup(rf.POLDER_1, rf.TERR_POLDER_DRY, true).store.context.eligibleBuildingsToBuild
 	assert.ok(shore.includes(rf.BLDG_CLAY_PIT), "clay pit is offered on a polder next to the sea")
 	assert.ok(shore.includes(rf.BLDG_RAFT_FACTORY), "raft factory is offered on a polder next to the sea")
+})
+
+test("a land tile next to a polder is shore", { skip: skip }, () => {
+	const { store } = setup(rf.PASTURE_1, rf.TERR_PASTURE, false)
+	const polder = hd.createActualHex([0, 1, -1], 0, rf.POLDER_1)
+	polder.hexID = 1
+	polder.currentTerrain = rf.TERR_POLDER_DRY
+	store.mapData.hexData[1] = polder
+	build.setEligibleItemsToBuild(0, 0)
+	assert.ok(store.context.eligibleBuildingsToBuild.includes(rf.BLDG_CLAY_PIT), "clay pit on land next to a drained polder")
+	assert.ok(store.context.eligibleBuildingsToBuild.includes(rf.BLDG_RAFT_FACTORY), "raft factory on land next to a drained polder")
+})
+
+test("MBA (Coast) may be built on a polder that is shore, but not a land-locked one", { skip: skip }, () => {
+	const landLocked = setup(rf.POLDER_1, rf.TERR_POLDER_DRY, false)
+	landLocked.store.gameOptions.useManagement = true
+	landLocked.store.internalStartingOptions.push(rf.SO_MANAGEMENT)
+	build.setEligibleItemsToBuild(0, 0)
+	assert.ok(!landLocked.store.context.eligibleBuildingsToBuild.includes(rf.BLDG_MBA_COAST), "no Coast MBA on a land-locked polder")
+
+	const shore = setup(rf.POLDER_1, rf.TERR_POLDER_DRY, true)
+	shore.store.gameOptions.useManagement = true
+	shore.store.internalStartingOptions.push(rf.SO_MANAGEMENT)
+	build.setEligibleItemsToBuild(0, 0)
+	assert.ok(shore.store.context.eligibleBuildingsToBuild.includes(rf.BLDG_MBA_COAST), "Coast MBA on a polder next to the sea")
+})
+
+test("power lines can be built from a polder", { skip: skip }, () => {
+	const { store } = setup(rf.POLDER_1, rf.TERR_POLDER_DRY, true)
+	store.gameOptions.useElectricity = true
+	model.addResourceToGame_core(rf.RES_IRON, [rf.LOCATION_BUCKET, 0, 0], 0)
+	build.setEligibleItemsToBuild(0, 0)
+	assert.ok(store.context.eligibleBuildingsToBuild.includes(rf.BLDG_PSEUDO_POWER_LINE), "power line offered on a polder")
+})
+
+test("power lines can be built in the sea", { skip: skip }, () => {
+	const { store } = setup(rf.SEA_1, rf.TERR_SEA, false)
+	const sea = store.mapData.hexData[0]
+	const options = map.allVertexBucketsWithoutPowerLinesAdjacentTo(0, [sea.bucketIdsInitial[0]])
+	assert.ok(options.length > 0, "a sea tile can start a power line")
+})
+
+test("walls built or demolished from a polder keep the +2 surcharge in the land phase", { skip: skip }, () => {
+	const { store } = setup(rf.POLDER_1, rf.TERR_POLDER_DRY, false)
+	// Stand on the polder itself; the neighbouring pasture is across hex side 2.
+	store.ALL_TRANSPORTERS[0].location = [rf.LOCATION_BUCKET, 0, 0]
+	const edge = store.mapData.edgeData[0]
+	edge.wall = [0, -1]
+
+	function optionsWith(stone, boards) {
+		store.ALL_RESOURCES.splice(0)
+		for (let i = 0; i < stone; i++) model.addResourceToGame_core(rf.RES_STONE, [rf.LOCATION_BUCKET, 0, 0], 0)
+		for (let i = 0; i < boards; i++) model.addResourceToGame_core(rf.RES_BOARDS, [rf.LOCATION_BUCKET, 0, 0], 0)
+		store.context.eligibleBuildingsToBuild.splice(0)
+		build.setEligibleItemsToBuild(0, 0)
+		return store.context.eligibleBuildingsToBuild
+	}
+
+	assert.ok(!optionsWith(2, 6).includes(rf.BLDG_PSEUDO_WALL), "2 stone is not enough: 1 wall + 2 polder")
+	assert.ok(optionsWith(3, 6).includes(rf.BLDG_PSEUDO_WALL), "3 stone builds the wall from a polder")
+
+	edge.wall = [0, 1] // owned by another player, so the action is demolition
+	assert.ok(!optionsWith(0, 2).includes(rf.BLDG_PSEUDO_DEMOLISH_WALL), "2 boards is not enough: 1 wall + 2 polder")
+	assert.ok(optionsWith(0, 3).includes(rf.BLDG_PSEUDO_DEMOLISH_WALL), "3 boards demolishes the wall from a polder")
+})
+
+test("polder state flips on the first brick of each new wonder row", { skip: skip }, () => {
+	const { store } = setup(rf.POLDER_1, rf.TERR_POLDER_DRY, true)
+	store.gameOptions.usePolders = true
+	const polder = store.mapData.hexData[0]
+	store.wonderBricks.splice(0)
+	wonder.syncPoldersToBrickCount()
+	assert.equal(polder.currentTerrain, rf.TERR_POLDER_WET, "starts flooded")
+	store.wonderBricks.push(...Array(4).fill(8))
+	wonder.syncPoldersToBrickCount()
+	assert.equal(polder.currentTerrain, rf.TERR_POLDER_WET, "first row does not flip")
+	store.wonderBricks.push(8)
+	wonder.syncPoldersToBrickCount()
+	assert.equal(polder.currentTerrain, rf.TERR_POLDER_DRY, "second row flips to land")
+	store.wonderBricks.push(...Array(4).fill(8))
+	wonder.syncPoldersToBrickCount()
+	assert.equal(polder.currentTerrain, rf.TERR_POLDER_WET, "third row flips back to water")
 })
