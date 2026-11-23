@@ -284,8 +284,8 @@
                     </div>
                 </div>
 
-                <div class="card expert-options expertTGZoptions" id="expertOptions">
-                    <div class="card-header"><h2 class="card-title">{% translate "Expert Options" %}</h2></div>
+                <details class="card expert-options expertTGZoptions" id="expertOptions">
+                    <summary class="card-header"><h2 class="card-title">{% translate "Expert Options" %}</h2></summary>
                     <label class="check-label">
                         <input type="checkbox" onchange="validateExpertOptions(this)" class="myCheckbox" id="enableAdvancedOptions" name="enableAdvancedOptions" value="expert">
                         <div><div>{% translate "Enable Advanced Setup Options" %}</div></div>
@@ -504,7 +504,7 @@
                     </div>
                     <div style="margin-top:12px;font-size:13px;color:var(--color-muted)" class="expertSummarySpan" id="expertSummarygodsSpan"></div>
                     <div style="font-size:13px;color:var(--color-muted)" class="expertSummarySpan" id="expertSummaryVRSpan"></div>
-                </div>
+                </details>
                 {% endif %}
             </div>
 

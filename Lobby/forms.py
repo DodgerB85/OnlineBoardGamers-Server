@@ -117,6 +117,7 @@ class NewUserForm(UsernameValidationMixin, UserCreationForm):
         widget=forms.TextInput(
             attrs={
                 "class": "registerInput",
+                "autocomplete": "username",
                 "placeholder": gettext_lazy(
                     "Username - This will be your in-game Name"
                 ),
@@ -127,13 +128,15 @@ class NewUserForm(UsernameValidationMixin, UserCreationForm):
         max_length=200,
         help_text="",
         label=gettext_lazy("Email Address"),
-        widget=forms.TextInput(
+        widget=forms.EmailInput(
             attrs={
                 "class": "registerInput",
                 "placeholder": gettext_lazy(
                     "Email Address - Required for Account Activation"
                 ),
                 "id": "some_id",
+                "autocomplete": "email",
+                "inputmode": "email",
             }
         ),
         error_messages={
@@ -144,10 +147,14 @@ class NewUserForm(UsernameValidationMixin, UserCreationForm):
     password1 = forms.CharField(
         max_length=100,
         label=gettext_lazy("Password"),
+        help_text=gettext_lazy(
+            "At least 8 characters. Avoid common passwords or all numbers."
+        ),
         widget=forms.PasswordInput(
             attrs={
                 "class": "registerInput",
                 "placeholder": gettext_lazy("Password"),
+                "autocomplete": "new-password",
             }
         ),
     )
@@ -158,6 +165,7 @@ class NewUserForm(UsernameValidationMixin, UserCreationForm):
             attrs={
                 "class": "registerInput",
                 "placeholder": gettext_lazy("Confirm Password"),
+                "autocomplete": "new-password",
             }
         ),
     )

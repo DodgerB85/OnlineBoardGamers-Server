@@ -87,6 +87,7 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_fastSerializeGame,
     SF_getMiniTournamentCreationJsonReturn,
     SF_getRequiredExp,
+    SF_getExperiencedEligibleCodes,
     SF_hasRequiredExperience,
     SF_renameTournamentPlayer,
     SF_serializeGame,
@@ -1467,6 +1468,7 @@ def index(request):
         [],
         [],
     )
+    experienced_eligible_codes = SF_getExperiencedEligibleCodes(user)
     my_move_games_data = []
     current_chat = finished_chat = current_trade = False
     finished_games_count = 0  # Track finished games for early exit optimization
@@ -1526,6 +1528,7 @@ def index(request):
         player_context = {
             "all_game_players": all_game_players,
             "invited_users": list(game.invitedPlayers.all()),
+            "experienced_eligible_codes": experienced_eligible_codes,
         }
 
         try:
@@ -1626,7 +1629,9 @@ def index(request):
 
 
 def login_view(request):
+    next_url = request.GET.get("next", "")
     if request.method == "POST":
+        next_url = request.POST.get("next", "")
         # Attempt to sign user in
         # 1. SAFE DATA EXTRACTION
         username = request.POST.get("username", "").strip()
@@ -1653,14 +1658,14 @@ def login_view(request):
                 SN_sendAdminErrorMessage(content)
 
             messages.error(request, gettext("Username and password are required."))
-            return render(request, "Lobby/login.html")
+            return render(request, "Lobby/login.html", {"next": next_url})
 
         # shortcut: per-process cache; move to a shared cache if multiple web workers are added.
         failure_key = make_failure_key(LOGIN_FAILURE_KEY, request, username)
         account_key = account_failure_key(LOGIN_ACCOUNT_FAILURE_KEY, username)
         if is_locked(failure_key) or is_locked(account_key):
             messages.error(request, gettext("Too many failed sign-in attempts. Please wait 15 minutes and try again."))
-            return render(request, "Lobby/login.html")
+            return render(request, "Lobby/login.html", {"next": next_url})
 
         user = authenticate(request, username=username, password=password)
 
@@ -1721,7 +1726,7 @@ def login_view(request):
                         request,
                         (gettext("Account inactive - check your email for email verification, or contact the webmaster")),
                     )
-                    return render(request, "Lobby/login.html")
+                    return render(request, "Lobby/login.html", {"next": next_url})
             except User.DoesNotExist:
                 print("********** USER DOES NOT EXIST ERROR")
                 username = request.POST.get("username", "")
@@ -1734,21 +1739,21 @@ def login_view(request):
                     )
                 else:
                     messages.error(request, gettext("Invalid username / password"))
-                return render(request, "Lobby/login.html")
+                return render(request, "Lobby/login.html", {"next": next_url})
             except Exception as e:
                 print("********** OTHER EXCEPTION")
                 print(e)
                 logger.exception("Unexpected error during login:")
                 messages.error(request, gettext("Invalid username / password"))
-                return render(request, "Lobby/login.html")
+                return render(request, "Lobby/login.html", {"next": next_url})
     else:
-        response = render(request, "Lobby/login.html")
+        response = render(request, "Lobby/login.html", {"next": next_url})
         response["Cache-Control"] = "no-cache, no-store, must-revalidate"
         response["Pragma"] = "no-cache"
         response["Expires"] = "0"
         return response
 
-    return render(request, "Lobby/login.html")
+    return render(request, "Lobby/login.html", {"next": next_url})
 
 
 def logout_view(request):
@@ -3013,18 +3018,72 @@ def createFCMpage(request, gameID=None):
         )
 
 
+def _safe_next(request, value):
+    """Return value only when it is a safe local redirect target."""
+    if value and url_has_allowed_host_and_scheme(
+        value,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return value
+    return ""
+
+
+def _send_activation_email(request, user, next_url=""):
+    # shortcut: LocMemCache is per-process; use a shared cache if web workers are added.
+    if is_rate_limited("activation_email_global", 50, 3600):
+        logger.warning("Activation email global hourly limit reached")
+        return False
+
+    current_site = get_current_site(request)
+    subject = gettext("Activate Your Online Gaming Account")
+    emailText = render_to_string(
+        "Lobby/password/account_activation_email.txt",
+        {
+            "user": user,
+            "domain": current_site.domain,
+            "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+            "token": account_activation_token.make_token(user),
+            "next": next_url,
+        },
+    )
+    try:
+        send_mail(
+            subject,
+            emailText,
+            config("OBG_EMAIL_HOST_USER"),
+            [user.email],
+            fail_silently=False,
+        )
+        return True
+    except Exception as e:
+        logger.exception("Failed to send activation email for %s", user.username)
+        SN_sendAdminErrorMessage(
+            f"Failed to send activation email to username: {user.username} and email {user.email}: {str(e)}"
+        )
+        return False
+
+
 class registerView(View):
     form_class = NewUserForm
     template_name = "Lobby/register.html"
 
     def get(self, request, *args, **kwargs):
         form = self.form_class()
-        return render(request, self.template_name, {"form": form})
+        return render(
+            request,
+            self.template_name,
+            {"form": form, "next": _safe_next(request, request.GET.get("next", ""))},
+        )
 
     def post(self, request, *args, **kwargs):
+        next_url = _safe_next(
+            request,
+            request.POST.get("next") or request.GET.get("next", ""),
+        )
         if is_rate_limited(f"register:{client_ip(request)}", 5, 3600):
             messages.error(request, gettext("Too many sign-up attempts. Please try again later."))
-            return render(request, self.template_name, {"form": self.form_class()})
+            return render(request, self.template_name, {"form": self.form_class(), "next": next_url})
 
         form = self.form_class(request.POST)
         if form.is_valid():
@@ -3035,53 +3094,101 @@ class registerView(View):
             # Check if email taken
             if User.objects.filter(email=request.POST["email"]).exists():
                 messages.error(request, gettext("Email Address Already Registered"))
-                return render(request, self.template_name, {"form": form})
+                return render(request, self.template_name, {"form": form, "next": next_url})
             # Check if any case similar username exists
             if User.objects.filter(username__iexact=request.POST["username"]).exists():
                 messages.error(request, gettext("Username already taken"))
-                return render(request, self.template_name, {"form": form})
+                return render(request, self.template_name, {"form": form, "next": next_url})
             user = form.save(commit=False)
             user.is_active = False  # Deactivate account till it is confirmed
             try:
                 user.save()
             except IntegrityError:
                 messages.error(request, gettext("Username already taken"))
-                return render(request, self.template_name, {"form": form})
+                return render(request, self.template_name, {"form": form, "next": next_url})
 
-            current_site = get_current_site(request)
-            subject = gettext("Activate Your Online Gaming Account")
-            emailText = render_to_string(
-                "Lobby/password/account_activation_email.txt",
-                {
-                    "user": user,
-                    "domain": current_site.domain,
-                    "uid": urlsafe_base64_encode(force_bytes(user.pk)),
-                    "token": account_activation_token.make_token(user),
-                },
-            )
-            # user.email_user(subject, message)
-            try:
-                send_mail(
-                    subject,
-                    emailText,
-                    config("OBG_EMAIL_HOST_USER"),
-                    [user.email],
-                    fail_silently=False,
+            request.session["activation_email"] = user.email
+            request.session["activation_next"] = next_url
+
+            sent = _send_activation_email(request, user, next_url)
+            request.session["activation_send_failed"] = not sent
+            if sent:
+                messages.success(
+                    request,
+                    gettext(
+                        "Please check %(emailAddress)s to confirm your email address and complete registration"
+                    )
+                    % {"emailAddress": user.email},
                 )
-            except Exception as e:
-                adminMessage = f"Failed to send activation email to username: {user.username} and email {user.email}: {str(e)}"
-                print("****************************************************************************** EMAIL SIGNUP ERROR **************")
-                SN_sendAdminErrorMessage(adminMessage)
-                return HttpResponse("Invalid header found.")
-            message = gettext("Please check %(emailAddress)s to confirm your email address and complete registration") % {"emailAddress": user.email}
-            messages.success(request, (message))
-            return redirect("index")
+            return redirect("check_email")
 
-        return render(request, self.template_name, {"form": form})
+        return render(request, self.template_name, {"form": form, "next": next_url})
+
+
+def check_email(request):
+    email = request.GET.get("email", "").strip() or request.session.get("activation_email", "")
+    next_url = request.session.get("activation_next", "") or _safe_next(
+        request, request.GET.get("next", "")
+    )
+    if next_url:
+        request.session["activation_next"] = next_url
+    send_failed = request.session.get("activation_send_failed", False)
+
+    if request.method == "POST":
+        email = request.POST.get("email", "").strip()
+        if email:
+            request.session["activation_email"] = email
+
+        if not email:
+            messages.error(request, gettext("Enter the email address you used to register."))
+        elif not cache.add(f"resend_activation_cooldown:{email.lower()}", 1, 60):
+            messages.info(
+                request,
+                gettext("Please wait a minute before requesting another activation email."),
+            )
+        elif is_rate_limited(f"resend_activation:{client_ip(request)}", 5, 3600) or is_rate_limited(
+            f"resend_activation_email:{email.lower()}", 3, 3600
+        ):
+            messages.success(
+                request,
+                gettext("If that email address has an inactive account, a new activation email has been sent."),
+            )
+        else:
+            inactive_users = User.objects.filter(email__iexact=email, is_active=False)
+            sent = False
+            for user in inactive_users:
+                sent = _send_activation_email(request, user, next_url) or sent
+            send_failed = bool(inactive_users) and not sent
+            if send_failed:
+                # Allow an immediate retry when SMTP itself failed.
+                cache.delete(f"resend_activation_cooldown:{email.lower()}")
+            request.session["activation_send_failed"] = send_failed
+            if send_failed:
+                messages.error(
+                    request,
+                    gettext("We could not send the confirmation email. Use Resend to try again."),
+                )
+            else:
+                messages.success(
+                    request,
+                    gettext("If that email address has an inactive account, a new activation email has been sent."),
+                )
+        return render(
+            request,
+            "Lobby/password/check_email.html",
+            {"email": email, "next": next_url, "send_failed": send_failed},
+        )
+
+    return render(
+        request,
+        "Lobby/password/check_email.html",
+        {"email": email, "next": next_url, "send_failed": send_failed},
+    )
 
 
 class ActivateAccount(View):
     def get(self, request, uidb64, token, *args, **kwargs):
+        next_url = _safe_next(request, request.GET.get("next", ""))
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
@@ -3095,17 +3202,28 @@ class ActivateAccount(View):
             profile.save()
             user.save()
             login(request, user)
+            request.session.pop("activation_email", None)
+            request.session.pop("activation_next", None)
+            request.session.pop("activation_send_failed", None)
             messages.success(
                 request,
-                mark_safe(gettext("Your account has been activated<br/>Enable Email, Discord, and Slack notifications here on your profile, and then return to the Home Page to view games")),
+                gettext(
+                    "Your account is ready. Start a practice game or join an open game. You can set notifications anytime from your profile."
+                ),
             )
-            return redirect("profile")
-        else:
-            messages.warning(
-                request,
-                (gettext("The confirmation link was invalid, possibly because it has already been used. If you think your email client scanned the link, then try to log in anyway")),
-            )
+            if next_url:
+                return redirect(next_url)
             return redirect("index")
+
+        return render(
+            request,
+            "Lobby/password/activation_result.html",
+            {
+                "already_active": bool(user is not None and user.is_active),
+                "email": user.email if user is not None else "",
+                "next": next_url,
+            },
+        )
 
 
 def activate(request, uidb64, token):
@@ -3426,7 +3544,21 @@ def AllTournaments(request):
     )
 
 
-@login_required
+GAME_BOX_IMAGES = {
+    "FCM": "FCM/images/fcm-box.jpg",
+    "HLC": "HLC/images/hlc-box.jpg",
+    "BUS": "BUS/images/bus-box.jpg",
+    "TGZ": "TGZ/images/TGZ_box.jpg",
+    "CNS": "CNS/images/CNSbox.jpg",
+    "AQY": "AQY/images/AQYbox.jpg",
+    "IND": "IND/images/INDbox.jpg",
+    "KFW": "KFW/images/KFWbox.jpg",
+    "WEB": "WEB/images/WEBbox.jpg",
+    "RNB": "RNB/images/RNBbox.jpg",
+    "URR": "URR/images/ur-box.jpg",
+}
+
+
 def joinGameLink(request, joinGameLink):
     gameCode = None
     numbers = None
@@ -3457,13 +3589,34 @@ def joinGameLink(request, joinGameLink):
         return HttpResponseRedirect(reverse("index"))
 
     current_player_count = availableGame.players.exclude(is_kicked=True).count()
+    game_is_full = current_player_count >= availableGame.maxPlayers
+    game_is_open = availableGame.gameStatus in ("AVAILABLE", "WAITING", "PRIVATE") and not game_is_full
+    creator_name = availableGame.creator.username if availableGame.creator else gettext("Unknown Creator")
+    game_name = availableGame.gameName or f"[{creator_name}'s Game]"
 
-    if current_player_count >= availableGame.maxPlayers:
-        messages.error(request, (gettext("Sorry, the game is full")))
-        return HttpResponseRedirect(reverse("index"))
+    # The page is public so shared links keep their game-specific preview.
+    # Joining itself still requires an account.
+    if request.user.is_authenticated:
+        availableGamesListJson = [
+            SF_fastSerializeGame(
+                availableGame,
+                request.user,
+                SF_getExperiencedEligibleCodes(request.user),
+            )
+        ]
+    else:
+        availableGamesListJson = []
 
-    # Serialize the game objects using Django's serializer
-    availableGamesListJson = [SF_fastSerializeGame(availableGame, request.user)]
+    if availableGame.gameDescription:
+        preview_description = gettext("%(creator)s invited you to play %(game)s: %(description)s") % {
+            "creator": creator_name,
+            "game": game_name,
+            "description": availableGame.gameDescription,
+        }
+    else:
+        preview_description = gettext(
+            "%(creator)s invited you to play %(game)s on Online Board Gamers. Free, browser-based, turn-based."
+        ) % {"creator": creator_name, "game": game_name}
 
     return render(
         request,
@@ -3472,6 +3625,18 @@ def joinGameLink(request, joinGameLink):
             "availableGamesList": availableGamesListJson,
             "gameCode": gameCode,
             "gameID": numbers,
+            "gameName": game_name,
+            "gameCreator": creator_name,
+            "gameDescription": availableGame.gameDescription,
+            "gameBoxImage": GAME_BOX_IMAGES.get(gameCode, ""),
+            "gameStatus": availableGame.gameStatus,
+            "gamePlayers": current_player_count,
+            "gameMaxPlayers": availableGame.maxPlayers,
+            "gameIsOpen": game_is_open,
+            "gameIsFull": game_is_full,
+            "hideJoin": not game_is_open,
+            "watchGameURL": f"/{gameCode}/{numbers}/show/",
+            "previewDescription": preview_description,
         },
     )
 
@@ -3703,7 +3868,7 @@ def checkJoinGame(request, gameType, gameID):
                 (
                     mark_safe(
                         gettext(
-                            'Not enough Experience. Plese see <a class="linkOther" href="/help/#navGameType">Help</a><br/>Current Experience Requirements:<br/><br/>FCM: 2 Games<br/>HLC: 1 Game<br/>Bus: 1 Game<br/>TGZ: 2 Games<br/>Cannes:2 Games<br/>Antiquity:2 Games<br/><br/>You may start your own game <a class="linkOther" href="/newGames/">Here</a>'
+                            'Not enough Experience. Please see <a class="linkOther" href="/help/#navGameType">Help</a><br/>Current Experience Requirements:<br/><br/>FCM: 2 Games<br/>HLC: 1 Game<br/>Bus: 1 Game<br/>TGZ: 2 Games<br/>Cannes:2 Games<br/>Antiquity:2 Games<br/><br/>You may start your own game <a class="linkOther" href="/newGames/">Here</a>'
                         )
                     )
                 ),

@@ -21,7 +21,8 @@
   </td>
   <td class="col-status" data-label="{% translate "Created" %}"><span class="timeToConvertSpan">{{ game.created }}</span></td>
   <td class="col-cta" data-label="{% translate "Leave" %}">
-    <div class="buttonDiv Leave leaveDeclineLink waiting">{% translate "Leave" %}</div>
+    <button type="button"
+            class="buttonDiv Leave leaveDeclineLink waiting">{% translate "Leave" %}</button>
     <button class="copyGameLinkButtonInTable button-ghost button-sm"
             onclick="copyToClipboard('https://www.onlineboardgamers.com/join/{{ game.gameCode }}{{ game.gameID }}/', event)">
       {% translate "Copy Link" %}

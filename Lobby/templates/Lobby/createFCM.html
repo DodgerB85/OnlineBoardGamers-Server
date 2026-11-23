@@ -100,7 +100,7 @@
       <div class="card card-soft"
            style="border-left:3px solid var(--color-accent);
                   margin-bottom:16px">
-        <span style="font-size:14px">{% trans "New to Food Chain Magnate? For Rules, How to Play, and Game Guide, please see" %} <a href="{% url 'FCM:FCMhelp' %}">{% trans "Help" %}</a>.</span>
+        <span style="font-size:14px">{% trans "New to Food Chain Magnate? For Rules, How to Play, and Game Guide, please see" %} <a href="{% url 'FCM:FCMhelp' %}" target="_blank" rel="noopener">{% trans "Help" %}</a>.</span>
       </div>
       <form autocomplete="off"
             action="{% url 'createFCMminiTournament' %}"
@@ -466,7 +466,7 @@
       <div class="card card-soft"
            style="border-left:3px solid var(--color-accent);
                   margin-bottom:16px">
-        <span style="font-size:14px">{% trans "New to Food Chain Magnate? For Rules, How to Play, and Game Guide, please see" %} <a href="{% url 'FCM:FCMhelp' %}">{% trans "Help" %}</a>.</span>
+        <span style="font-size:14px">{% trans "New to Food Chain Magnate? For Rules, How to Play, and Game Guide, please see" %} <a href="{% url 'FCM:FCMhelp' %}" target="_blank" rel="noopener">{% trans "Help" %}</a>.</span>
       </div>
       <form autocomplete="off"
             action="{% url 'FCM:createFCMgame' %}"
@@ -750,10 +750,10 @@
               </label>
             </div>
           </div>
-          <div class="card expert-options">
-            <div class="card-header">
+          <details class="card expert-options">
+            <summary class="card-header">
               <h2 class="card-title">{% trans "Expert Options" %}</h2>
-            </div>
+            </summary>
             <div class="check-list">
               <label class="check-label">
                 <input type="checkbox"
@@ -1024,7 +1024,7 @@
                 </div>
               </label>
             </div>
-          </div>
+          </details>
         </div>
         <div class="card" id="nonExpertOptions">
           <div class="card-header">

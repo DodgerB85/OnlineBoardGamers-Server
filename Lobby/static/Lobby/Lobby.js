@@ -117,8 +117,12 @@ document.addEventListener("DOMContentLoaded", function () {
 				}),
 				headers: { "X-CSRFToken": csrftoken },
 			})
-				.then((response) => response.json())
+				.then((response) => {
+					if (handleExpiredSession(response)) return null
+					return response.json()
+				})
 				.then((result) => {
+					if (!result) return
 					if (result == "AVAILABLE") window.open("/index/available", "_self")
 				})
 				.catch((error) => {
@@ -473,7 +477,10 @@ document.addEventListener("DOMContentLoaded", function () {
 			if (document.hidden) stopLobbyPolling()
 			else startLobbyPolling()
 		})
-	} else if (global.joinGameLink) document.getElementById("availableGamesListView").style.display = "block"
+	} else if (global.joinGameLink) {
+		const availableListView = document.getElementById("availableGamesListView")
+		if (availableListView) availableListView.style.display = "block"
+	}
 }) // END INIT LOBBY
 
 /*async function checkLobbyUpdates() {
@@ -558,8 +565,12 @@ function joinGame(gameName, _gameID, confirmed) {
 		}),
 		headers: { "X-CSRFToken": csrftoken },
 	})
-		.then((response) => response.json())
+		.then((response) => {
+			if (handleExpiredSession(response)) return null
+			return response.json()
+		})
 		.then((result) => {
+			if (!result) return
 			//alert(JSON.stringify(result))
 			if (result.confirm_join) {
 				showJoinWarning(result.confirm_join, () => joinGame(gameName, _gameID, true))
@@ -577,6 +588,21 @@ function joinGame(gameName, _gameID, confirmed) {
 		.catch((error) => {
 			console.log("Error:", error)
 		})
+}
+
+function handleExpiredSession(response) {
+	const contentType = response.headers.get("content-type") || ""
+	if (response.redirected && response.url.includes("/login")) {
+		window.location.href =
+			"/login/?next=" + encodeURIComponent(window.location.pathname + window.location.search)
+		return true
+	}
+	if (!contentType.includes("application/json")) {
+		window.location.href =
+			"/login/?next=" + encodeURIComponent(window.location.pathname + window.location.search)
+		return true
+	}
+	return false
 }
 
 // Add TGZ info

@@ -21,26 +21,26 @@
       <div class="card section">
         <a class="button"
            style="display:block;text-align:center;margin-bottom:8px"
-           href="{% url 'google_login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">
-          {% include "Lobby/google_icon.html" %}{% translate "Login with Google" %}
+           href="{% url 'google_login' %}{% if next %}?next={{ next|urlencode }}{% endif %}">
+          {% include "Lobby/google_icon.html" %}{% translate "Continue with Google" %}
         </a>
         <a class="button"
            style="display:block;text-align:center"
-           href="{% url 'discord_login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">
-          {% include "Lobby/discord_icon.html" %}{% translate "Login with Discord" %}
+           href="{% url 'discord_login' %}{% if next %}?next={{ next|urlencode }}{% endif %}">
+          {% include "Lobby/discord_icon.html" %}{% translate "Continue with Discord" %}
         </a>
         <p style="text-align:center;color:var(--color-muted);margin:16px 0 12px;">{% translate "or" %}</p>
         <form action="{% url 'myLogin' %}" method="post" class="login-form">
           {% csrf_token %}
           <div class="form-row">
             <label for="id_username" class="form-label">{% translate "Username" %}: </label>
-            <input id="id_username" type="text" name="username" placeholder="{% translate "Username" %}" required>
+            <input id="id_username" type="text" name="username" placeholder="{% translate "Username" %}" autocomplete="username" required>
           </div>
           <div class="form-row">
             <label for="id_password" class="form-label">{% translate "Password" %}: </label>
-            <input id="id_password" type="password" name="password" placeholder="{% translate "Password" %}" required>
+            <input id="id_password" type="password" name="password" placeholder="{% translate "Password" %}" autocomplete="current-password" required>
           </div>
-          <input type="hidden" name="next" value="{{ request.GET.next }}" />
+          <input type="hidden" name="next" value="{{ next }}" />
           <div class="form-row" style="border-bottom:none;justify-content:center;gap:12px;">
             <a class="button" href="{% url 'password_reset' %}">{% translate "Forgot password?" %}</a>
             <button type="submit" class="button button-primary">{% translate "Login" %}</button>
@@ -54,7 +54,11 @@
         </p>
         <p style="font-size:14px;color:var(--color-muted);margin-top:14px;margin-bottom:0;">
           {% translate "No account yet?" %}
-          <a href="{% url 'register' %}">{% translate "Create a free account" %}</a>
+          <a href="{% url 'register' %}{% if next %}?next={{ next|urlencode }}{% endif %}">{% translate "Create a free account" %}</a>
+        </p>
+        <p class="form-footer-link" style="text-align:center">
+          {% translate "Need to activate your account?" %}
+          <a href="{% url 'check_email' %}{% if next %}?next={{ next|urlencode }}{% endif %}">{% translate "Resend the activation email" %}</a>.
         </p>
       </div>
     

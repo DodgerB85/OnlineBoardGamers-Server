@@ -21,8 +21,10 @@
   <td class="col-status" data-label="{% translate "Invited" %}"><span class="pill pill-accent">{% translate "Invited" %}</span></td>
   <td class="col-cta" data-label="{% translate "Accept / Decline" %}">
     <span class="timeToConvertSpan">{{ game.created }}</span><br>
-    <div class="buttonDiv Join availableLink">{% translate "Accept" %}</div>
-    <div class="buttonDiv Leave leaveDeclineLink invitations">{% translate "Decline" %}</div>
+    <button type="button"
+            class="buttonDiv Join availableLink">{% translate "Accept" %}</button>
+    <button type="button"
+            class="buttonDiv Leave leaveDeclineLink invitations">{% translate "Decline" %}</button>
     <input type="text" class="declineInputClass" id="{{ game.gameCode }}declineReason{{ game.gameID }}" placeholder="{% translate 'Reason (optional)' %}">
   </td>
 </tr>

@@ -436,6 +436,25 @@ body.authed #rightLinksLoggedIn .hamburger {
     line-height: 1;
 }
 
+#loginForm .mobileLoginButton {
+    display: none;
+}
+
+@media only screen and (max-width: 800px) {
+    #loginForm .inlineLoginForm {
+        display: none;
+    }
+
+    #loginForm .mobileLoginButton {
+        display: inline-flex;
+    }
+
+    #loginForm .loginSubmit {
+        height: 36px;
+        min-height: 36px;
+    }
+}
+
 /* centre the logged-out login row vertically within the taller guest bar */
 body.guest .topBar {
     display: flex;

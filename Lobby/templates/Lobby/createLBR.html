@@ -17,7 +17,7 @@
         {% include "Lobby/messages.html" %}
 
         <div class="card card-soft" style="border-left:3px solid var(--color-accent);margin-bottom:16px">
-            <span style="font-size:14px">{% translate "New to Land Between Rivers? For Rules, How to Play, and Game Guide, please see " %}<a href="{% url 'LBR:LBRhelp' %}">{% translate "Help" %}</a>.</span>
+            <span style="font-size:14px">{% translate "New to Land Between Rivers? For Rules, How to Play, and Game Guide, please see " %}<a href="{% url 'LBR:LBRhelp' %}" target="_blank" rel="noopener">{% translate "Help" %}</a>.</span>
         </div>
 
         <form id="gameCreationForm" autocomplete="off" action="{% url 'LBR:createLBRgame' %}" method="post">

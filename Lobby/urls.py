@@ -38,6 +38,7 @@ urlpatterns = [
     path("profileIND/", views.profileIND, name="profileIND"),
     path("profileRNB/", views.profileRNB, name="profileRNB"),
     path("register/", registerView.as_view(), name="register"),
+    path("register/check-email/", views.check_email, name="check_email"),
     path("choose-username/", views.choose_username, name="choose_username"),
     path("help/", views.lobbyHelp, name="lobbyHelp"),
     path("helpTournaments/", views.helpTournaments, name="helpTournaments"),

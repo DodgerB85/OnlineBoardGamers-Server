@@ -145,9 +145,76 @@
 
 /* Tabs sit flush on the games table, centered above it, so the accent
    heading row reads as a continuation of the tab strip. */
+.start-here {
+    border-left: 4px solid var(--color-accent);
+    margin-bottom: 16px;
+}
+.start-here-title {
+    margin: 0 0 6px;
+    font-size: 22px;
+}
+.start-here p {
+    margin: 0;
+    color: var(--color-ink-soft);
+}
+.start-here-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 14px 0 10px;
+}
+.start-here-hint {
+    font-size: 14px;
+    color: var(--color-muted) !important;
+}
+
+.invite-preview-grid {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.invite-preview-box {
+    width: 100%;
+    max-width: 180px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+}
+
+.invite-preview-description {
+    margin: 0 0 8px;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.invite-preview-meta {
+    margin: 0 0 14px;
+    color: var(--color-muted);
+    font-size: 14px;
+}
+
+@media (max-width: 640px) {
+    .invite-preview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .invite-preview-box {
+        max-width: 140px;
+    }
+}
+
 .lobby .tabs {
     margin: 0;
     justify-content: center;
+}
+#availableGamesListView {
+    scroll-margin-top: 72px;
+}
+@media (max-width: 1370px) {
+    #availableGamesListView {
+        scroll-margin-top: 116px;
+    }
 }
 .lobby .table-wrap {
     border-radius: 0 0 8px 8px;
@@ -533,6 +600,14 @@
     cursor: pointer;
     text-align: center;
     margin: 2px 0;
+    font-family: inherit;
+    line-height: inherit;
+}
+.buttonDiv.is-disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-soft);
 }
 
 .buttonDiv.Join {

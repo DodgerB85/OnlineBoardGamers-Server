@@ -1,21 +1,38 @@
 {% extends "Lobby/layout.html" %}
 {% load static i18n compress %}
+{% block title %}
+    {% translate "Join" %} {{ gameName }} | Online Board Gamers
+{% endblock title %}
 {% block description %}
-    <meta name="description"
-          content="{{ availableGamesList.0.gameName }} - {{ availableGamesList.0.gameDescription }}" />
+    <meta name="description" content="{{ previewDescription }}" />
 {% endblock description %}
 {% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock robots %}
+{% block og_image %}
+    {% if gameBoxImage %}
+        <meta property="og:image"
+              content="https://www.onlineboardgamers.com{% static gameBoxImage %}" />
+        <meta property="og:image:alt" content="{{ gameName }}" />
+    {% else %}
+        {{ block.super }}
+    {% endif %}
+{% endblock og_image %}
 {% block canonical %}
     <link rel="canonical"
           href="https://www.onlineboardgamers.com/join/{{ gameCode }}{{ gameID }}/" />
     <meta property="og:url"
           content="https://www.onlineboardgamers.com/join/{{ gameCode }}{{ gameID }}/" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Online Board Gamers" />
-    <meta property="og:image"
-          content="https://www.onlineboardgamers.com{% static 'Lobby/favicons/web-app-manifest-512x512.png' %}" />
-    <meta property="og:description"
-          content="{{ availableGamesList.0.gameName }} - {{ availableGamesList.0.gameDescription }}" />
+    <meta property="og:title"
+          content="{% translate "Join" %} {{ gameName }} | Online Board Gamers" />
+    <meta property="og:description" content="{{ previewDescription }}" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title"
+          content="{% translate "Join" %} {{ gameName }} | Online Board Gamers" />
+    <meta name="twitter:description" content="{{ previewDescription }}" />
+    {% if gameBoxImage %}
+        <meta name="twitter:image"
+              content="https://www.onlineboardgamers.com{% static gameBoxImage %}" />
+    {% endif %}
 {% endblock canonical %}
 {% block head %}
     <link href="{% static 'Lobby/CSS/lobby_new.css' %}?v=13" rel="stylesheet" />
@@ -29,57 +46,137 @@
     <div class="page join-link-page" id="lobbyPage">
         {% include 'Lobby/messages.html' %}
         {% include 'Lobby/map_editor_forms.html' %}
-        <div id="learningGameConfirmDiv">
-            {% blocktranslate trimmed %}
-              <b>Note:</b>
-              The creator has requested a Learning Game.
-              You will be expected to help / teach the other player.
-              This game will be excluded from stats.
-              Are you sure you want to join?
-            {% endblocktranslate %}
-            <br />
-            <div id="learningJoin" class="buttonDiv Join learningGameConfirmButtons">{% translate "Join" %}</div>
-            <div id="learningCancel"
-                 class="buttonDiv Leave learningGameConfirmButtons">{% translate "Cancel" %}</div>
-        </div>
-        {% include "Lobby/joinWarningDiv.html" %}
+        {% if user.is_authenticated %}
+            <div id="learningGameConfirmDiv">
+                {% blocktranslate trimmed %}
+                  <b>Note:</b>
+                  The creator has requested a Learning Game.
+                  You will be expected to help / teach the other player.
+                  This game will be excluded from stats.
+                  Are you sure you want to join?
+                {% endblocktranslate %}
+                <br />
+                <button type="button"
+                        id="learningJoin"
+                        class="buttonDiv Join learningGameConfirmButtons">{% translate "Join" %}</button>
+                <button type="button"
+                        id="learningCancel"
+                        class="buttonDiv Leave learningGameConfirmButtons">{% translate "Cancel" %}</button>
+            </div>
+            {% include "Lobby/joinWarningDiv.html" %}
+        {% endif %}
         <div class="page-header">
-            <h1 class="page-title">{% translate "The link allows you to join the following game:" %}</h1>
+            {% if user.is_authenticated %}
+                <h1 class="page-title">{% translate "Join" %} {{ gameName }}</h1>
+            {% else %}
+                <h1 class="page-title">
+                    {% blocktranslate %}{{ gameCreator }} invited you to play {{ gameName }}{% endblocktranslate %}
+                </h1>
+            {% endif %}
         </div>
-        <div id="availableGamesListView">
-            {% if availableGamesList %}
-                <div class="game-list">
-                    <div class="table-wrap">
-                        <table class="table gamesTable lobby-games-table">
-                            <thead>
-                                <tr class="headingRow">
-                                    <th></th>
-                                    <th>{% translate "Game Name" %}</th>
-                                    <th>{% translate "Players" %}</th>
-                                    <th>{% translate "Options" %}</th>
-                                    <th>{% translate "Created" %}</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for gameEntry in availableGamesList %}
-                                    {% include "Lobby/gameDisplay/availableGameRow.html" with game=gameEntry %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
+        {% if not user.is_authenticated %}
+            <div class="card section invite-preview">
+                <div class="invite-preview-grid">
+                    {% if gameBoxImage %}
+                        <img class="invite-preview-box"
+                             src="{% static gameBoxImage %}"
+                             alt="{{ gameName }}" />
+                    {% endif %}
+                    <div>
+                        <p class="invite-preview-description">{{ previewDescription }}</p>
+                        <p class="invite-preview-meta">
+                            {{ gamePlayers }}/{{ gameMaxPlayers }} {% translate "players" %} &middot; {{ gameCreator }}
+                            {% if gameIsFull %}
+                                &middot; <span class="pill pill-warn">{% translate "Game full" %}</span>
+                            {% elif gameStatus == "ACTIVE" %}
+                                &middot; <span class="pill pill-accent">{% translate "In progress" %}</span>
+                            {% elif gameStatus == "FINISHED" %}
+                                &middot; <span class="pill">{% translate "Finished" %}</span>
+                            {% elif gameStatus == "PRIVATE" %}
+                                &middot; <span class="pill">{% translate "Private game" %}</span>
+                            {% else %}
+                                &middot; <span class="pill pill-positive">{% translate "Open" %}</span>
+                            {% endif %}
+                        </p>
+                        {% if gameIsOpen %}
+                            <p>{% translate "You need a free account to join this game. Create one or log in, and you will come back here." %}</p>
+                            <div class="hero-actions">
+                                <a class="button button-primary"
+                                   href="{% url 'register' %}?next={{ request.path|urlencode }}">{% translate "Create a free account" %}</a>
+                                <a class="button"
+                                   href="{% url 'myLogin' %}?next={{ request.path|urlencode }}">{% translate "Log in" %}</a>
+                            </div>
+                            <div class="hero-actions" style="margin-top:10px">
+                                <a class="button button-ghost button-sm"
+                                   href="{% url 'google_login' %}?next={{ request.path|urlencode }}">
+                                    {% include "Lobby/google_icon.html" %}{% translate "Continue with Google" %}
+                                </a>
+                                <a class="button button-ghost button-sm"
+                                   href="{% url 'discord_login' %}?next={{ request.path|urlencode }}">
+                                    {% include "Lobby/discord_icon.html" %}{% translate "Continue with Discord" %}
+                                </a>
+                            </div>
+                        {% else %}
+                            <p>{% translate "This game is no longer open for joining." %}</p>
+                            {% if gameStatus == "ACTIVE" or gameStatus == "FINISHED" %}
+                                <a class="button button-primary" href="{{ watchGameURL }}">{% translate "Watch game" %}</a>
+                            {% endif %}
+                        {% endif %}
                     </div>
                 </div>
-            {% else %}
-                {% include "Lobby/empty.html" with message=_("No Available Games") %}
+            </div>
+        {% else %}
+            {% if not gameIsOpen %}
+                <div class="callout callout-warn">
+                    {% if gameIsFull %}
+                        {% translate "This game is full." %}
+                    {% elif gameStatus == "ACTIVE" %}
+                        {% translate "This game has already started." %}
+                    {% elif gameStatus == "FINISHED" %}
+                        {% translate "This game has finished." %}
+                    {% else %}
+                        {% translate "This game is no longer open for joining." %}
+                    {% endif %}
+                    {% if gameStatus == "ACTIVE" or gameStatus == "FINISHED" %}
+                        <a class="button button-sm" href="{{ watchGameURL }}">{% translate "Watch game" %}</a>
+                    {% endif %}
+                </div>
             {% endif %}
-            {% url "lobbyHelp" as the_url %}
-            <p class="join-help">
-                {% blocktranslate trimmed %}
-                    For icon explanations see
-                    <a href="{{ the_url }}">Help</a>
-                {% endblocktranslate %}
-            </p>
-        </div>
+            <div id="availableGamesListView">
+                {% if availableGamesList %}
+                    <div class="game-list">
+                        <div class="table-wrap">
+                            <table class="table gamesTable lobby-games-table">
+                                <thead>
+                                    <tr class="headingRow">
+                                        <th></th>
+                                        <th>{% translate "Game Name" %}</th>
+                                        <th>{% translate "Players" %}</th>
+                                        <th>{% translate "Options" %}</th>
+                                        <th>{% translate "Created" %}</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for gameEntry in availableGamesList %}
+                                        {% include "Lobby/gameDisplay/availableGameRow.html" with game=gameEntry hideJoin=hideJoin %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% else %}
+                    {% include "Lobby/empty.html" with message=_("No Available Games") %}
+                {% endif %}
+                {% url "lobbyHelp" as the_url %}
+                <p class="join-help">
+                    {% blocktranslate trimmed %}
+                        For icon explanations see
+                        <a href="{{ the_url }}">Help</a>.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+        {% endif %}
     </div>
     
     {% block script %}
@@ -87,6 +184,5 @@
 	var global = {}
 	global.joinGameLink = true
         </script>
-
     {% endblock script %}
 {% endblock body %}

@@ -49,6 +49,24 @@
         <div class="lobby-social">
             {% include "Lobby/socialButtons.html" %}
         </div>
+        <!-- START HERE -->
+        {% if currentCount == 0 and waitingCount == 0 and finishedCount == 0 %}
+            <div class="card start-here">
+                <h2 class="start-here-title">{% translate "Start here" %}</h2>
+                <p>{% translate "Games are turn-based; take a move now and come back later." %}</p>
+                <div class="start-here-actions">
+                    <a class="button button-primary" href="{% url 'newGamesPage' %}">{% translate "Practice solo" %}</a>
+                    <a class="button"
+                       id="startHereJoinAvailable"
+                       href="{% url 'indexListType' 'available' %}#availableGamesListView">{% translate "Join an open game" %}</a>
+                    <a class="button" href="{% url 'newGamesPage' %}">{% translate "Create a game and invite a friend" %}</a>
+                </div>
+                <p class="start-here-hint">
+                    {% translate "Practice solo: choose a game, then pick Create practice game. Want help learning? Create a Learning Game and an experienced player can join." %}
+                    <a href="{% url 'profile' %}">{% translate "Set up notifications" %}</a>.
+                </p>
+            </div>
+        {% endif %}
         {% if availableTournaments|length > 0 %}
             <div class="notice">
                 {% for game in availableTournaments %}
@@ -121,7 +139,6 @@
                       data-done="{% translate "Coming ASAP! (Stuck at work)" %}"></span>
             </div>
         </div>
-        <!-- TABS -->
         <div class="tabs">
             <button class="tab tablinks" id="available" data-tab="available">
                 <span class="tab-label">{% translate "Available" %}</span>
@@ -177,9 +194,12 @@
               Are you sure you want to join?
             {% endblocktranslate %}
             <br />
-            <div id="learningJoin" class="buttonDiv Join learningGameConfirmButtons">{% translate "Join" %}</div>
-            <div id="learningCancel"
-                 class="buttonDiv Leave learningGameConfirmButtons">{% translate "Cancel" %}</div>
+            <button type="button"
+                    id="learningJoin"
+                    class="buttonDiv Join learningGameConfirmButtons">{% translate "Join" %}</button>
+            <button type="button"
+                    id="learningCancel"
+                    class="buttonDiv Leave learningGameConfirmButtons">{% translate "Cancel" %}</button>
         </div>
         {% include "Lobby/joinWarningDiv.html" %}
         <!-- PANELS -->
@@ -459,11 +479,25 @@
     <!-- end lobby -->
     {% block script %}
         <script>
+        /* The start card should select the Available tab and scroll to the games,
+           rather than reloading the lobby. */
+        (function () {
+            var startJoin = document.getElementById("startHereJoinAvailable");
+            if (!startJoin) return;
+            startJoin.addEventListener("click", function (event) {
+                if (typeof show_gamesList !== "function") return;
+                event.preventDefault();
+                show_gamesList("available");
+                var panel = document.getElementById("availableGamesListView");
+                if (panel) panel.scrollIntoView({ behavior: "smooth", block: "start" });
+            });
+        })();
+
         /* RNB &Cetera countdown - remove after launch */
         (function () {
             var el = document.getElementById("newGameCountdown");
             if (!el) return;
-            var release = Date.UTC(2026, 10, 23, 14, 0, 0); /* 23 Nov 2026, 22:00 Hong Kong (UTC+8) */
+            var release = Date.UTC(2026, 10, 23, 16, 0, 0); /* 24 Nov 2026, 00:00 Hong Kong (UTC+8) */
             var timer;
             function tick() {
                 var distance = release - Date.now();

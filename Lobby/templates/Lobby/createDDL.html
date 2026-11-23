@@ -16,7 +16,7 @@
         {% include "Lobby/messages.html" %}
 
         <div class="card card-soft" style="border-left:3px solid var(--color-accent);margin-bottom:16px">
-            <span style="font-size:14px">{% translate "New to Duck Dealer? For Rules, How to Play, and Game Guide, please see " %}<a href="{% url 'DDL:DDLhelp' %}">{% translate "Help" %}</a>.</span>
+            <span style="font-size:14px">{% translate "New to Duck Dealer? For Rules, How to Play, and Game Guide, please see " %}<a href="{% url 'DDL:DDLhelp' %}" target="_blank" rel="noopener">{% translate "Help" %}</a>.</span>
         </div>
 
         <form id="gameCreationForm" autocomplete="off" action="{% url 'DDL:createDDLgame' %}" method="post">

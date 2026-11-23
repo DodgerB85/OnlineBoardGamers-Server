@@ -80,8 +80,10 @@
               href="{% static 'Lobby/favicons/site.webmanifest' %}?v=20261022b" />
         <meta name="theme-color" content="#19343c">
         <!-- Social Media (Open Graph) -->
+        {% block og_image %}
         <meta property="og:image"
               content="https://www.onlineboardgamers.com{% static 'Lobby/favicons/web-app-manifest-512x512.png' %}?v=20261022b" />
+        {% endblock og_image %}
         <meta property="og:type" content="website">
         {% if request.path|slice:":7" != "/reset/" and request.path|slice:":10" != "/activate/" %}
         <meta property="og:url" content="https://www.onlineboardgamers.com{{ request.path }}">
@@ -165,37 +167,54 @@
                 <!-- Not logged in TOP BAR -->
                 <div id="loginForm">
                     <div id="loginFormStack">
-                        {% if request.resolver_match.url_name == "index" or request.resolver_match.url_name == "privacy" or request.resolver_match.url_name == "terms" %}
-                            <a class="button button-primary loginSubmit"
-                               href="{% url 'myLogin' %}">{% translate "Log in" %}</a>
-                        {% else %}
-                            <form action="{% url 'myLogin' %}" method="post">
-                                {% csrf_token %}
-                                <input class="loginInput"
-                                       type="text"
-                                       name="username"
-                                       placeholder="{% translate " Username" %}"
-                                       required>
-                                <input class="loginInput"
-                                       type="password"
-                                       name="password"
-                                       placeholder="{% translate " Password" %}"
-                                       required>
-                                <input type="hidden" name="next" value="{{ request.GET.next }}" />
-                                <input class="button button-primary loginSubmit"
-                                       type="submit"
-                                       value="{% translate " Login" %}">
-                            </form>
-                        {% endif %}
-                        <div id="registerLink">
-                            <a class="topBarLink" href="{% url 'register' %}">
-                                <span id="registerLinkTextLong">{% translate "Register New Account" %}</span>
-                                <span id="registerLinkTextShort">{% translate "Register" %}</span>
-                            </a>|
-                            <a class="topBarLink"
-                               id="forgotPwdLink"
-                               href="{% url 'password_reset' %}">{% translate "Forgot Password?" %}</a>
-                        </div>
+                        {% with url_name=request.resolver_match.url_name %}
+                            {% if url_name == "myLogin" %}
+                                {# The login form is in the page body. #}
+                            {% elif url_name == "index" or url_name == "privacy" or url_name == "terms" %}
+                                <a class="button button-primary loginSubmit"
+                                   href="{% url 'myLogin' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">{% translate "Log in" %}</a>
+                            {% elif url_name == "joinGameLink" %}
+                                <a class="button button-primary loginSubmit"
+                                   href="{% url 'myLogin' %}?next={{ request.path|urlencode }}">{% translate "Log in" %}</a>
+                            {% elif url_name == "register" or url_name == "check_email" or url_name == "password_reset" or url_name == "password_reset_confirm" or url_name == "password_reset_complete" or url_name == "choose_username" or url_name == "activate" %}
+                                <a class="button button-primary loginSubmit"
+                                   href="{% url 'myLogin' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">{% translate "Log in" %}</a>
+                            {% else %}
+                                <form class="inlineLoginForm" action="{% url 'myLogin' %}" method="post">
+                                    {% csrf_token %}
+                                    <input class="loginInput"
+                                           type="text"
+                                           name="username"
+                                           aria-label="{% translate "Username" %}"
+                                           placeholder="{% translate " Username" %}"
+                                           autocomplete="username"
+                                           required>
+                                    <input class="loginInput"
+                                           type="password"
+                                           name="password"
+                                           aria-label="{% translate "Password" %}"
+                                           placeholder="{% translate " Password" %}"
+                                           autocomplete="current-password"
+                                           required>
+                                    <input type="hidden" name="next" value="{{ request.GET.next }}" />
+                                    <input class="button button-primary loginSubmit"
+                                           type="submit"
+                                           value="{% translate " Login" %}">
+                                </form>
+                                <a class="button button-primary loginSubmit mobileLoginButton"
+                                   href="{% url 'myLogin' %}">{% translate "Log in" %}</a>
+                            {% endif %}
+                            <div id="registerLink">
+                                <a class="topBarLink"
+                                   href="{% url 'register' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% elif url_name == 'joinGameLink' %}?next={{ request.path|urlencode }}{% endif %}">
+                                    <span id="registerLinkTextLong">{% translate "Register New Account" %}</span>
+                                    <span id="registerLinkTextShort">{% translate "Register" %}</span>
+                                </a>|
+                                <a class="topBarLink"
+                                   id="forgotPwdLink"
+                                   href="{% url 'password_reset' %}">{% translate "Forgot Password?" %}</a>
+                            </div>
+                        {% endwith %}
                     </div>
                     <a href="{% url 'index' %}">
                         <img id="logoLoggedOut"
@@ -326,6 +345,17 @@
             </div>
         </footer>
         <script src="{% static 'Lobby/js/tooltips.js' %}"></script>
+        {% if user.is_authenticated %}
+            <div id="createActionsLabels"
+                 hidden
+                 data-create="{% translate 'Create game now' %}"
+                 data-practice="{% translate 'Create practice game now' %}"
+                 data-hint="{% translate 'Uses the options below. Defaults are already selected.' %}"
+                 data-create-confirm="{% translate 'Create this game now with the options below? Defaults are already selected. Choose Cancel to change the options first.' %}"
+                 data-practice-confirm="{% translate 'Create this practice game now with the options below? Defaults are already selected. Choose Cancel to change the options first.' %}"
+                 data-review="{% translate 'Review options first' %}"></div>
+            <script src="{% static 'Lobby/js/createActions.js' %}?v=1"></script>
+        {% endif %}
         <script>
         document.addEventListener('DOMContentLoaded', function () {
             const hamburger = document.querySelector(".hamburger");

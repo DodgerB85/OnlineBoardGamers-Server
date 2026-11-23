@@ -143,12 +143,6 @@
         </div>
 
         <div id="profile-notifications" class="profile-tab-panel" role="tabpanel" aria-labelledby="profileTabNotifications">
-        <div class="card card-soft" style="margin-bottom: 16px;">
-            <p style="margin: 0; font-size: 16px; font-weight: 700;">
-                {% translate "Email sending has a cost to the site. If possible, please consider using another notification method (Telegram, Discord, Slack, Webhook) and turning all email notifications off. Thanks!" %}
-            </p>
-        </div>
-
         <div class="card" style="margin-bottom: 16px;">
             <div class="card-header">
                 <h2 class="card-title">{% translate "Webhooks" %}</h2>
@@ -275,6 +269,10 @@
                     </div>
                 </div>
             </div>
+
+        <p class="profile-email-cost-note">
+            {% translate "Email sending has a cost to the site. If possible, please consider using one of the notification methods above and turning all email notifications off. Thanks!" %}
+        </p>
 
         <form method="post" id="notificationForm">
             {% csrf_token %}

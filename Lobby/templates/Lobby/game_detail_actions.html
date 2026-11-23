@@ -1,0 +1,10 @@
+{% load i18n %}
+<div class="game-detail-actions">
+  <a class="button button-primary"
+     href="{% url create_url %}?practice=1">{% translate "Practice this game" %}</a>
+  <a class="button" href="{% url create_url %}">{% translate "Create a game" %}</a>
+  <a class="button button-ghost"
+     href="{% url help_url %}"
+     target="_blank"
+     rel="noopener">{% translate "Read rules" %}</a>
+</div>

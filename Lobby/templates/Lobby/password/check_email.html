@@ -1,0 +1,72 @@
+{% extends "Lobby/layout.html" %}
+{% block analytics %}{% endblock analytics %}
+{% load i18n %}
+{% load static %}
+{% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock robots %}
+{% block body %}
+  <div class="page page-narrow">
+    {% include 'Lobby/messages.html' %}
+    <div class="page-header">
+      <h1 class="page-title">{% translate "Check your email" %}</h1>
+    </div>
+    <div class="card section">
+      {% if send_failed %}
+        <div class="callout callout-warn">
+          {% if email %}
+            {% blocktranslate trimmed %}
+              We could not send the confirmation email to <strong>{{ email }}</strong>.
+              Use Resend below to try again.
+            {% endblocktranslate %}
+          {% else %}
+            {% translate "We could not send the confirmation email. Use Resend below to try again." %}
+          {% endif %}
+        </div>
+      {% elif email %}
+        <p>
+          {% blocktranslate trimmed %}
+            We have sent a confirmation link to <strong>{{ email }}</strong>.
+            Open it to activate your account.
+          {% endblocktranslate %}
+        </p>
+      {% else %}
+        <p>
+          {% translate "Enter the email address you used to register and we will send a new confirmation link." %}
+        </p>
+      {% endif %}
+      <p style="color:var(--color-muted);font-size:15px;line-height:1.5;">
+        {% translate "If the message does not arrive, check your spam folder and add" %}
+        <img id="contactEmailImg"
+             src="{% static 'Lobby/email.png' %}"
+             alt="{% translate "Email Address" %}"
+             width="400"
+             height="30"
+             style="display:block;margin:6px 0 0">
+        {% translate "to your safe senders list." %}
+      </p>
+      <form method="post" class="stacked-form">
+        {% csrf_token %}
+        <div class="form-row">
+          <label class="form-label" for="id_email">{% translate "Email address" %}</label>
+          <input id="id_email"
+                 type="email"
+                 name="email"
+                 value="{{ email }}"
+                 autocomplete="email"
+                 inputmode="email"
+                 required>
+        </div>
+        <div class="form-actions" style="justify-content:center">
+          <button class="button button-primary" type="submit">{% translate "Resend activation email" %}</button>
+        </div>
+      </form>
+      <p class="form-footer-link" style="text-align:center">
+        {% translate "Already activated?" %}
+        <a href="{% url 'myLogin' %}{% if next %}?next={{ next|urlencode }}{% endif %}">{% translate "Log in" %}</a>.
+      </p>
+      <p class="form-footer-link" style="text-align:center">
+        {% translate "Used the wrong email address?" %}
+        <a href="{% url 'contact' %}">{% translate "Contact us" %}</a>.
+      </p>
+    </div>
+  </div>
+{% endblock body %}

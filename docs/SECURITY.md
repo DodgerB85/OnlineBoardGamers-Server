@@ -190,6 +190,8 @@ the new environment value is loaded. If they differ, Telegram messages stop.
   save of an empty game, or for a game admin.
 - Rate limits cover registration, password reset, feedback, 404/admin alerts,
   tournament nudges, extra stats and the authenticated admin-message endpoint.
+  Activation-email resends have a 60-second cooldown, 3/hour per email address,
+  5/hour per IP and a 50/hour global send cap.
 
 ## Deliberate exceptions
 
@@ -198,7 +200,7 @@ These are owner decisions, not bugs. Do not change them without asking.
 | Accepted risk | Why | What still applies |
 |---|---|---|
 | Chat is open to any authenticated user, including spectators and non-members of a tournament. | Social/spectator use; the owner wants anyone to be able to chat. | Entry shape and length validation, a 500-entry cap and normal authentication. |
-| A private game can be joined by anyone with the link; "private" means unlisted, not invite-only. | The owner wants link sharing to work without an invite check. | Games in `ACTIVE` or `FINISHED` state reject joins; capacity and stale-write checks still apply. |
+| A private game can be joined by anyone with the link; "private" means unlisted, not invite-only. | The owner wants link sharing to work without an invite check. | Games in `ACTIVE` or `FINISHED` state reject joins; capacity and stale-write checks still apply. The join-link preview is public and noindex so shared links keep game-specific previews; joining still requires an authenticated account. |
 | Registration says when an email is already registered; login says when an account is inactive. | The owner wants clear account-status messages. | Registration is rate-limited per IP; login failures are rate-limited; password reset remains generic. |
 | Existing short or weak passwords are not forcibly reset. | Avoid disrupting existing accounts. | New passwords must meet the current policy; users are upgraded when they next change or reset. |
 | `TELEGRAM_WEBHOOK_SECRET` may be empty. | The secret is optional for deployments that have not registered one. | The path is unguessable and the check is recommended. If the variable is set, the header check is enforced. |

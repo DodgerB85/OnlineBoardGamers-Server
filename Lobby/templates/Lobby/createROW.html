@@ -19,7 +19,7 @@
         {% include "Lobby/messages.html" %}
 
         <div class="card card-soft" style="border-left:3px solid var(--color-accent);margin-bottom:16px">
-            <span style="font-size:14px">{% translate "New to Ranchers of the Old West? For Rules, How to Play, and Game Guide, please see " %}<a href="{% url 'ROW:ROWhelp' %}">{% translate "Help" %}</a>.</span>
+            <span style="font-size:14px">{% translate "New to Ranchers of the Old West? For Rules, How to Play, and Game Guide, please see " %}<a href="{% url 'ROW:ROWhelp' %}" target="_blank" rel="noopener">{% translate "Help" %}</a>.</span>
         </div>
 
         <form id="gameCreationForm" autocomplete="off" action="{% url 'ROW:createROWgame' %}" method="post">

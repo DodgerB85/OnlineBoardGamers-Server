@@ -20,7 +20,7 @@
         {% include "Lobby/messages.html" %}
 
         <div class="card card-soft" style="border-left:3px solid var(--color-accent);margin-bottom:16px">
-            <span style="font-size:14px">{% translate "New to UR: 1830 BC? For Rules, How to Play, and Game Guide, please see " %}<a href="{% url 'URR:URRhelp' %}">{% translate "Help" %}</a>.</span>
+            <span style="font-size:14px">{% translate "New to UR: 1830 BC? For Rules, How to Play, and Game Guide, please see " %}<a href="{% url 'URR:URRhelp' %}" target="_blank" rel="noopener">{% translate "Help" %}</a>.</span>
         </div>
 
         {% if MT_Creation %}

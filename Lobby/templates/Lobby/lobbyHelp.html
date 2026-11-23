@@ -60,81 +60,6 @@
     </div>
   </div>
   <div class="card section">
-    <h2>{% translate "Profile Setup" %}</h2>
-    <div class="help-qa">
-      <b><u>{% translate "What are the notifications?" %}</u></b>
-      <p>
-        {% blocktranslate trimmed %}
-          All games update live, so you can set whether you wish to hear a beep, bell, or nothing if a game has an update
-          whilst the game page is open.
-        {% endblocktranslate %}
-      </p>
-      <p>
-        {% blocktranslate trimmed %}
-          In addition, you can add email notifications, discord notifications, and slack notifications.
-          Notifications will be sent when it is your turn, when you are invited to a game, when a game finishes, etc.
-          You will also be notified when your turn is about to expire and you could be kicked out of a game.
-        {% endblocktranslate %}
-      </p>
-      <b><u>{% translate "Email Notifications" %}</u></b>
-      <p>
-        {% blocktranslate trimmed %}
-          It is recommended that you use discord / slack / telegram notifications.
-          The email system can occasionally have issues, but it is usually reliable.
-          Make sure you check your junk/spam folders to ensure emails are being delivered properly.
-          If you don't need email notifications, then please disable them, as they can lead to cost issues.
-          Some important emails will still be sent.
-        {% endblocktranslate %}
-      </p>
-      <b><u>{% translate "How can I add a Discord Notification?" %}</u></b>
-      <p>
-        {% blocktranslate trimmed %}
-          You can add Discord notifications to one of your servers, or an existing server where you have administrator
-          privileges.
-        {% endblocktranslate %}
-      </p>
-      <p>
-        {% blocktranslate trimmed %}
-          To set up your own free server,
-          <a href="https://support.discord.com/hc/en-us/articles/204849977-How-do-I-create-a-server-"
-             target="_blank">click here</a>.
-          To set up a webhook and find the URL to copy into your Online Board Gamers Profile,
-          <a href="https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks"
-             target="_blank">click here</a>.
-          Follow the guide to set up a webhook and "Copy Webhook URL". Then paste the link in to your profile on Online Board Gamers.
-          Note that Discord notifications have to be sent to a channel, not to your private messages.
-        {% endblocktranslate %}
-      </p>
-      <b><u>{% translate "How can I add a Slack Notification?" %}</u></b>
-      <p>
-        {% blocktranslate trimmed %}
-          Create a slack app and enable/create an incoming Webhook. Set it to post to a channel or your private messages. Then
-          paste the link in to your profile on Online Board Gamers.
-          For details on each step,
-          <a href="https://api.slack.com/messaging/webhooks" target="_blank">click here</a>.
-        {% endblocktranslate %}
-      </p>
-      <b><u>{% translate "How can I add a Telegram Notification?" %}</u></b>
-      <p>
-        {% blocktranslate trimmed %}
-          Start by initiating a chat with @OnlineBoardGamers_Bot using this link:
-        {% endblocktranslate %}
-      </p>
-      <p>
-        <a href="https://t.me/OnlineBoardGamers_Bot?start=OBG" target="_blank">https://t.me/OnlineBoardGamers_Bot?start=OBG</a>
-      </p>
-      <p>
-        {% blocktranslate trimmed %}
-          Send any message to the bot. Then you should be able to click the link in the reply from the bot to add Telegram notifications to your profile.
-          If this doesn't work, you can add your User ID to your profile page manually.
-          The easiest way to do this is to search for the "userinfobot" in the search bar on Telegram.
-          Say anything to it, such as "/start", or "hello", and it should reply with your details, starting with a 10 digit user ID.
-          Copy and paste this into your profile, and then add and test the webhook.
-        {% endblocktranslate %}
-      </p>
-    </div>
-  </div>
-  <div class="card section">
     <h2>{% translate "Lobby" %}</h2>
     <div class="help-qa">
       {% include 'Lobby/lobby_icons.html' %}
@@ -386,6 +311,81 @@
       <p>
         {% blocktranslate trimmed %}
           HLC always shows the current player's standard move time and remaining Flexi-Time as two separate timers.
+        {% endblocktranslate %}
+      </p>
+    </div>
+  </div>
+  <div class="card section">
+    <h2>{% translate "Notifications" %}</h2>
+    <div class="help-qa">
+      <b><u>{% translate "What are the notifications?" %}</u></b>
+      <p>
+        {% blocktranslate trimmed %}
+          All games update live, so you can set whether you wish to hear a beep, bell, or nothing if a game has an update
+          whilst the game page is open.
+        {% endblocktranslate %}
+      </p>
+      <p>
+        {% blocktranslate trimmed %}
+          In addition, you can add email notifications, discord notifications, and slack notifications.
+          Notifications will be sent when it is your turn, when you are invited to a game, when a game finishes, etc.
+          You will also be notified when your turn is about to expire and you could be kicked out of a game.
+        {% endblocktranslate %}
+      </p>
+      <b><u>{% translate "Email Notifications" %}</u></b>
+      <p>
+        {% blocktranslate trimmed %}
+          It is recommended that you use discord / slack / telegram notifications.
+          The email system can occasionally have issues, but it is usually reliable.
+          Make sure you check your junk/spam folders to ensure emails are being delivered properly.
+          If you don't need email notifications, then please disable them, as they can lead to cost issues.
+          Some important emails will still be sent.
+        {% endblocktranslate %}
+      </p>
+      <b><u>{% translate "How can I add a Discord Notification?" %}</u></b>
+      <p>
+        {% blocktranslate trimmed %}
+          You can add Discord notifications to one of your servers, or an existing server where you have administrator
+          privileges.
+        {% endblocktranslate %}
+      </p>
+      <p>
+        {% blocktranslate trimmed %}
+          To set up your own free server,
+          <a href="https://support.discord.com/hc/en-us/articles/204849977-How-do-I-create-a-server-"
+             target="_blank">click here</a>.
+          To set up a webhook and find the URL to copy into your Online Board Gamers Profile,
+          <a href="https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks"
+             target="_blank">click here</a>.
+          Follow the guide to set up a webhook and "Copy Webhook URL". Then paste the link in to your profile on Online Board Gamers.
+          Note that Discord notifications have to be sent to a channel, not to your private messages.
+        {% endblocktranslate %}
+      </p>
+      <b><u>{% translate "How can I add a Slack Notification?" %}</u></b>
+      <p>
+        {% blocktranslate trimmed %}
+          Create a slack app and enable/create an incoming Webhook. Set it to post to a channel or your private messages. Then
+          paste the link in to your profile on Online Board Gamers.
+          For details on each step,
+          <a href="https://api.slack.com/messaging/webhooks" target="_blank">click here</a>.
+        {% endblocktranslate %}
+      </p>
+      <b><u>{% translate "How can I add a Telegram Notification?" %}</u></b>
+      <p>
+        {% blocktranslate trimmed %}
+          Start by initiating a chat with @OnlineBoardGamers_Bot using this link:
+        {% endblocktranslate %}
+      </p>
+      <p>
+        <a href="https://t.me/OnlineBoardGamers_Bot?start=OBG" target="_blank">https://t.me/OnlineBoardGamers_Bot?start=OBG</a>
+      </p>
+      <p>
+        {% blocktranslate trimmed %}
+          Send any message to the bot. Then you should be able to click the link in the reply from the bot to add Telegram notifications to your profile.
+          If this doesn't work, you can add your User ID to your profile page manually.
+          The easiest way to do this is to search for the "userinfobot" in the search bar on Telegram.
+          Say anything to it, such as "/start", or "hello", and it should reply with your details, starting with a 10 digit user ID.
+          Copy and paste this into your profile, and then add and test the webhook.
         {% endblocktranslate %}
       </p>
     </div>

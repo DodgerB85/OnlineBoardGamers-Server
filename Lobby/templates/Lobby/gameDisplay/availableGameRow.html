@@ -60,10 +60,27 @@
       <span class="timeToConvertSpan">{{ game.created }}</span>
     </td>
     <td class="col-cta" data-label="{% translate "Join" %}">
-      {% if game.involvedPlayer %}
-        <div class="buttonDiv Leave leaveDeclineLink waiting">{% translate "Leave" %}</div>
+      {% if hideJoin %}
+        <span class="buttonDiv is-disabled">
+          {% if game.gameStatus == "ACTIVE" %}
+            {% translate "In progress" %}
+          {% elif game.gameStatus == "FINISHED" %}
+            {% translate "Finished" %}
+          {% else %}
+            {% translate "Full" %}
+          {% endif %}
+        </span>
+      {% elif game.involvedPlayer %}
+        <button type="button"
+                class="buttonDiv Leave leaveDeclineLink waiting">{% translate "Leave" %}</button>
+      {% elif game.experiencedGame and not game.userCanJoinExperienced %}
+        <span class="buttonDiv is-disabled"
+              title="{% blocktranslate with count=game.experiencedRequiredGames %}Requires {{ count }} finished games{% endblocktranslate %}">
+          {% blocktranslate with count=game.experiencedRequiredGames %}Requires {{ count }} finished games{% endblocktranslate %}
+        </span>
       {% else %}
-        <div class="buttonDiv Join availableLink">{% translate "Join" %}</div>
+        <button type="button"
+                class="buttonDiv Join availableLink">{% translate "Join" %}</button>
       {% endif %}
       <button class="copyGameLinkButtonInTable button-ghost button-sm"
               onclick="copyToClipboard('https://www.onlineboardgamers.com/join/{{ game.gameCode }}{{ game.gameID }}/', event); event.preventDefault();">

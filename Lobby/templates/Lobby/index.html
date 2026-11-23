@@ -111,16 +111,94 @@
       {% include "Lobby/messages.html" %}
       <section class="card hero">
         <div class="hero-text">
-          <h1 class="hero-title">{% translate "Online Board Gamers — play Splotter and other classic board games online, free, live, with friends or solo." %}</h1>
-          <p class="hero-sub">
-            {% translate "Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Antiquity, UR: 1830 BC, Indonesia, Bus, Cannes, Web, Roads & Boats and Keyflower — live updates, replays, stats, and regular tournaments." %}
-          </p>
-          <p class="hero-sub">
-            {% translate "Online Board Gamers is a free, browser-based platform for playing turn-based strategy board games with friends or solo. Create an account with a username and password, or sign in with Google or Discord to save your games, join tournaments and receive turn notifications." %}
+          <h1 class="hero-title">{% translate "Play Splotter board games online, free." %}</h1>
+          <p class="hero-sub">{% translate "Turn-based, rules-enforced, live updates. With friends or solo." %}</p>
+          <p class="hero-games">
+            {% translate "Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Antiquity, UR: 1830 BC, Indonesia, Bus, Cannes, Web, Roads & Boats and Keyflower." %}
           </p>
           <div class="hero-actions">
-            <a class="button button-primary" href="{% url 'register' %}">{% translate "Create a free account" %}</a>
-            <a class="button" href="{% url 'myLogin' %}">{% translate "Log in" %}</a>
+            <a class="button button-primary" href="{% url 'google_login' %}">
+              {% include "Lobby/google_icon.html" %}{% translate "Continue with Google" %}
+            </a>
+            <a class="button" href="{% url 'discord_login' %}">
+              {% include "Lobby/discord_icon.html" %}{% translate "Continue with Discord" %}
+            </a>
+            <a class="button button-ghost" href="{% url 'register' %}">{% translate "Use email instead" %}</a>
+          </div>
+          <p class="hero-login">
+            {% translate "Already have an account?" %}
+            <a href="{% url 'myLogin' %}">{% translate "Log in" %}</a>
+          </p>
+        </div>
+      </section>
+      <section class="board-loop" aria-label="{% translate "Games in play" %}">
+        <div class="board-loop-track" id="boardLoopTrack">
+          <figure class="board-slide">
+            <img src="{% static 'Lobby/images/boards/FCM.jpg' %}" alt="{% translate "Food Chain Magnate board" %}" loading="lazy">
+            <figcaption>{% translate "Food Chain Magnate" %}</figcaption>
+          </figure>
+          <figure class="board-slide">
+            <img src="{% static 'Lobby/images/boards/HLC.jpg' %}" alt="{% translate "Horseless Carriage board" %}" loading="lazy">
+            <figcaption>{% translate "Horseless Carriage" %}</figcaption>
+          </figure>
+          <figure class="board-slide">
+            <img src="{% static 'Lobby/images/boards/TGZ.jpg' %}" alt="{% translate "The Great Zimbabwe board" %}" loading="lazy">
+            <figcaption>{% translate "The Great Zimbabwe" %}</figcaption>
+          </figure>
+          <figure class="board-slide">
+            <img src="{% static 'Lobby/images/boards/AQY.jpg' %}" alt="{% translate "Antiquity board" %}" loading="lazy">
+            <figcaption>{% translate "Antiquity" %}</figcaption>
+          </figure>
+          <figure class="board-slide">
+            <img src="{% static 'Lobby/images/boards/URR.jpg' %}" alt="{% translate "UR: 1830 BC board" %}" loading="lazy">
+            <figcaption>{% translate "UR: 1830 BC" %}</figcaption>
+          </figure>
+          <figure class="board-slide">
+            <img src="{% static 'Lobby/images/boards/IND.jpg' %}" alt="{% translate "Indonesia board" %}" loading="lazy">
+            <figcaption>{% translate "Indonesia" %}</figcaption>
+          </figure>
+          <figure class="board-slide">
+            <img src="{% static 'Lobby/images/boards/BUS.jpg' %}" alt="{% translate "Bus board" %}" loading="lazy">
+            <figcaption>{% translate "Bus" %}</figcaption>
+          </figure>
+          <figure class="board-slide">
+            <img src="{% static 'Lobby/images/boards/CNS.jpg' %}" alt="{% translate "Cannes board" %}" loading="lazy">
+            <figcaption>{% translate "Cannes" %}</figcaption>
+          </figure>
+          <figure class="board-slide">
+            <img src="{% static 'Lobby/images/boards/WEB.jpg' %}" alt="{% translate "Web board" %}" loading="lazy">
+            <figcaption>{% translate "Web" %}</figcaption>
+          </figure>
+          <figure class="board-slide">
+            <img src="{% static 'Lobby/images/boards/RNB.jpg' %}" alt="{% translate "Roads & Boats board" %}" loading="lazy">
+            <figcaption>{% translate "Roads &amp; Boats" %}</figcaption>
+          </figure>
+          <figure class="board-slide">
+            <img src="{% static 'Lobby/images/boards/KFW.jpg' %}" alt="{% translate "Keyflower board" %}" loading="lazy">
+            <figcaption>{% translate "Keyflower" %}</figcaption>
+          </figure>
+        </div>
+      </section>
+      <section class="how-strip" aria-label="{% translate "How it works" %}">
+        <div class="how-step">
+          <span class="how-step-number">1</span>
+          <div>
+            <h2 class="how-step-title">{% translate "Create an account" %}</h2>
+            <p>{% translate "Continue with Google or Discord, or use your email." %}</p>
+          </div>
+        </div>
+        <div class="how-step">
+          <span class="how-step-number">2</span>
+          <div>
+            <h2 class="how-step-title">{% translate "Pick a game" %}</h2>
+            <p>{% translate "Practice solo, join an open game, or create your own." %}</p>
+          </div>
+        </div>
+        <div class="how-step">
+          <span class="how-step-number">3</span>
+          <div>
+            <h2 class="how-step-title">{% translate "Share the link or play solo" %}</h2>
+            <p>{% translate "Invite friends, or practice on your own. Take turns whenever it suits you." %}</p>
           </div>
         </div>
       </section>
@@ -171,7 +249,8 @@
           <details id="game-fcm">
             <summary>Food Chain Magnate</summary>
             <div class="flavour-body">
-              <p><a href="{% url 'FCM:FCMhelp' %}">{% translate "Food Chain Magnate rules &amp; help" %}</a></p>
+              {% include "Lobby/game_detail_actions.html" with create_url="createFCMpage" help_url="FCM:FCMhelp" %}
+              <p><a href="{% url 'FCM:FCMhelp' %}" target="_blank" rel="noopener">{% translate "Food Chain Magnate rules &amp; help" %}</a></p>
               <p>
                 {% translate "Build up your fast food empire by out advertising and out producing your opponents to win the match" %}
               </p>
@@ -191,7 +270,8 @@
           <details id="game-rnb">
             <summary>Roads &amp; Boats</summary>
             <div class="flavour-body">
-              <p><a href="{% url 'RNB:RNBhelp' %}">{% translate "Roads & Boats rules &amp; help" %}</a></p>
+              {% include "Lobby/game_detail_actions.html" with create_url="createRNBpage" help_url="RNB:RNBhelp" %}
+              <p><a href="{% url 'RNB:RNBhelp' %}" target="_blank" rel="noopener">{% translate "Roads & Boats rules &amp; help" %}</a></p>
               <p>
                 {% translate "Build your civilisation through logistics and transport - manage goods, roads, boats and more to outproduce your rivals" %}
               </p>
@@ -209,7 +289,8 @@
           <details id="game-hlc">
             <summary>Horseless Carriage</summary>
             <div class="flavour-body">
-              <p><a href="{% url 'HLC:HLChelp' %}">{% translate "Horseless Carriage rules &amp; help" %}</a></p>
+              {% include "Lobby/game_detail_actions.html" with create_url="createHLCpage" help_url="HLC:HLChelp" %}
+              <p><a href="{% url 'HLC:HLChelp' %}" target="_blank" rel="noopener">{% translate "Horseless Carriage rules &amp; help" %}</a></p>
               <p>
                 {% translate "Compete to build and sell the most vehicles - research and influence the market to forge your path to victory" %}
               </p>
@@ -227,7 +308,8 @@
           <details id="game-tgz">
             <summary>The Great Zimbabwe</summary>
             <div class="flavour-body">
-              <p><a href="{% url 'TGZ:TGZhelp' %}">{% translate "The Great Zimbabwe rules &amp; help" %}</a></p>
+              {% include "Lobby/game_detail_actions.html" with create_url="createTGZpage" help_url="TGZ:TGZhelp" %}
+              <p><a href="{% url 'TGZ:TGZhelp' %}" target="_blank" rel="noopener">{% translate "The Great Zimbabwe rules &amp; help" %}</a></p>
               <p>{% translate "Raise your monuments to establish your empire as having the best mythology" %}</p>
               <p>
                 {% blocktranslate trimmed %}
@@ -243,7 +325,8 @@
           <details id="game-ind">
             <summary>Indonesia</summary>
             <div class="flavour-body">
-              <p><a href="{% url 'IND:INDhelp' %}">{% translate "Indonesia rules &amp; help" %}</a></p>
+              {% include "Lobby/game_detail_actions.html" with create_url="createINDpage" help_url="IND:INDhelp" %}
+              <p><a href="{% url 'IND:INDhelp' %}" target="_blank" rel="noopener">{% translate "Indonesia rules &amp; help" %}</a></p>
               <p>{% translate "Ship your goods as efficiently as possible to dominate the economy!" %}</p>
               <p>
                 {% blocktranslate trimmed %}
@@ -259,7 +342,8 @@
           <details id="game-aqy">
             <summary>Antiquity</summary>
             <div class="flavour-body">
-              <p><a href="{% url 'AQY:AQYhelp' %}">{% translate "Antiquity rules &amp; help" %}</a></p>
+              {% include "Lobby/game_detail_actions.html" with create_url="createAQYpage" help_url="AQY:AQYhelp" %}
+              <p><a href="{% url 'AQY:AQYhelp' %}" target="_blank" rel="noopener">{% translate "Antiquity rules &amp; help" %}</a></p>
               <p>{% translate "Build up your cities to exploit the countryside and please your chosen Saint!" %}</p>
               <p>
                 {% blocktranslate trimmed %}
@@ -275,7 +359,8 @@
           <details id="game-urr">
             <summary>UR: 1830 BC</summary>
             <div class="flavour-body">
-              <p><a href="{% url 'URR:URRhelp' %}">{% translate "UR: 1830 BC rules &amp; help" %}</a></p>
+              {% include "Lobby/game_detail_actions.html" with create_url="createURRpage" help_url="URR:URRhelp" %}
+              <p><a href="{% url 'URR:URRhelp' %}" target="_blank" rel="noopener">{% translate "UR: 1830 BC rules &amp; help" %}</a></p>
               <p>{% translate "Control a dynasty in ancient Mesopotamia: trade land, build canals and waterworks, and profit from the rainy season." %}</p>
               <p>
                 {% blocktranslate trimmed %}
@@ -291,7 +376,8 @@
           <details id="game-bus">
             <summary>Bus</summary>
             <div class="flavour-body">
-              <p><a href="{% url 'BUS:BUShelp' %}">{% translate "Bus rules &amp; help" %}</a></p>
+              {% include "Lobby/game_detail_actions.html" with create_url="createBUSpage" help_url="BUS:BUShelp" %}
+              <p><a href="{% url 'BUS:BUShelp' %}" target="_blank" rel="noopener">{% translate "Bus rules &amp; help" %}</a></p>
               <p>
                 {% translate "Transport as many passengers as you can - but with a time altering clock in the mix, the outcome can be hard to predict!" %}
               </p>
@@ -309,7 +395,8 @@
           <details id="game-cns">
             <summary>Cannes</summary>
             <div class="flavour-body">
-              <p><a href="{% url 'CNS:CNShelp' %}">{% translate "Cannes rules &amp; help" %}</a></p>
+              {% include "Lobby/game_detail_actions.html" with create_url="createCNSpage" help_url="CNS:CNShelp" %}
+              <p><a href="{% url 'CNS:CNShelp' %}" target="_blank" rel="noopener">{% translate "Cannes rules &amp; help" %}</a></p>
               <p>{% translate "Shift your network of connections to produce and release movies in Cannes" %}</p>
               <p>
                 {% blocktranslate trimmed %}
@@ -325,7 +412,8 @@
           <details id="game-web">
             <summary>Web</summary>
             <div class="flavour-body">
-              <p><a href="{% url 'WEB:WEBhelp' %}">{% translate "Web rules &amp; help" %}</a></p>
+              {% include "Lobby/game_detail_actions.html" with create_url="createWEBpage" help_url="WEB:WEBhelp" %}
+              <p><a href="{% url 'WEB:WEBhelp' %}" target="_blank" rel="noopener">{% translate "Web rules &amp; help" %}</a></p>
               <p>{% translate "Connect servers up to computers to outscore and outmaneuver your opponents" %}</p>
               <p>
                 {% blocktranslate trimmed %}
@@ -341,7 +429,8 @@
           <details id="game-kfw">
             <summary>Keyflower</summary>
             <div class="flavour-body">
-              <p><a href="{% url 'KFW:KFWhelp' %}">{% translate "Keyflower rules &amp; help" %}</a></p>
+              {% include "Lobby/game_detail_actions.html" with create_url="createKFWpage" help_url="KFW:KFWhelp" %}
+              <p><a href="{% url 'KFW:KFWhelp' %}" target="_blank" rel="noopener">{% translate "Keyflower rules &amp; help" %}</a></p>
               <p>
                 {% translate "Bid for tiles and use actions with your workers. Build up your village to achieve the highest score at the end of Winter!" %}
               </p>
@@ -362,13 +451,13 @@
         <h2 class="section-title">{% translate "How Online Board Gamers works" %}</h2>
         <div class="card section">
           <p>
+            {% translate "Online Board Gamers is a free, browser-based platform for playing turn-based strategy board games with friends or solo." %}
+          </p>
+          <p>
             {% translate "Create a free account, start a game, and take your turns whenever it suits you. Games update live, so the other players see each move straight away — no downloads and no fixed play time." %}
           </p>
           <p>
             {% translate "Play with friends or start a solo practice game where you control every seat. Every game keeps a replay history, tracks your stats, and can be played asynchronously across days or in a single sitting." %}
-          </p>
-          <p>
-            {% translate "You can play Food Chain Magnate, Horseless Carriage, The Great Zimbabwe, Antiquity, UR: 1830 BC, Indonesia, Bus, Cannes, Web, Roads & Boats and Keyflower online for free. Each game has a dedicated help page covering the rules and the online interface." %}
           </p>
           <p>
             {% translate "Tournaments run regularly for Food Chain Magnate, Horseless Carriage, The Great Zimbabwe and other titles, with open brackets and community-run mini tournaments." %}
@@ -406,6 +495,16 @@
     </div>
     <script>
   (function () {
+    // Duplicate the board strip so the CSS loop is seamless.
+    var boardTrack = document.getElementById('boardLoopTrack');
+    if (boardTrack) {
+      Array.prototype.slice.call(boardTrack.children).forEach(function (slide) {
+        var clone = slide.cloneNode(true);
+        clone.setAttribute('aria-hidden', 'true');
+        boardTrack.appendChild(clone);
+      });
+    }
+
     // Only one game's <details> flavour text should be open at a time.
     var allDetails = document.querySelectorAll('.game-flavour details');
     allDetails.forEach(function (d) {

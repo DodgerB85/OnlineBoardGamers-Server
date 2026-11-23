@@ -1,0 +1,36 @@
+{% extends "Lobby/layout.html" %}
+{% block analytics %}{% endblock analytics %}
+{% load i18n %}
+{% block robots %}<meta name="robots" content="noindex, nofollow">{% endblock robots %}
+{% block body %}
+  <div class="page page-narrow">
+    {% include 'Lobby/messages.html' %}
+    <div class="page-header">
+      <h1 class="page-title">
+        {% if already_active %}
+          {% translate "Account already active" %}
+        {% else %}
+          {% translate "Activation link expired" %}
+        {% endif %}
+      </h1>
+    </div>
+    <div class="card section">
+      {% if already_active %}
+        <p>{% translate "Your account is already active. You can log in and start playing." %}</p>
+      {% else %}
+        <p>
+          {% translate "This activation link is invalid or has expired. Request a new confirmation email, then open the new link." %}
+        </p>
+      {% endif %}
+      <div class="hero-actions" style="margin-top:16px">
+        <a class="button button-primary"
+           href="{% url 'myLogin' %}{% if next %}?next={{ next|urlencode }}{% endif %}">{% translate "Log in" %}</a>
+        {% if not already_active %}
+          <a class="button"
+             href="{% url 'check_email' %}{% if email %}?email={{ email|urlencode }}{% endif %}">{% translate "Request a new link" %}</a>
+        {% endif %}
+        <a class="button button-ghost" href="{% url 'index' %}">{% translate "Home" %}</a>
+      </div>
+    </div>
+  </div>
+{% endblock body %}

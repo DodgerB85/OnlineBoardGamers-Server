@@ -1,5 +1,6 @@
 import json
 import time
+from collections import Counter
 
 # from django.template.loader import render_to_string
 # from django.contrib.sites.shortcuts import get_current_site
@@ -95,6 +96,23 @@ def SF_hasRequiredExperience(request, gameCode, gameModel):
     if exp >= SF_getRequiredExp(gameCode):
         experienced = True
     return experienced
+
+
+def SF_getExperiencedEligibleCodes(user):
+    """Return the game codes where user has enough finished games to join Experienced games."""
+    from Lobby.models import Game
+
+    if not user or not user.is_authenticated:
+        return set()
+
+    finished_codes = (
+        Game.objects.filter(gameStatus="FINISHED", players__player=user)
+        .exclude(players__player__username="SHADOW")
+        .values_list("gameCode", flat=True)
+        .distinct()
+    )
+    counts = Counter(finished_codes)
+    return {code for code, count in counts.items() if count >= SF_getRequiredExp(code)}
 
 
 def SF_getGameCreationJsonReturn(gameCode, gameID):
@@ -229,6 +247,13 @@ def SF_serializeGame(game, user, player_context):
     if 120 in startingOptionsArr:
         isExperiencedGame = True
 
+    experienced_eligible_codes = player_context.get("experienced_eligible_codes")
+    userCanJoinExperienced = (
+        game_code in experienced_eligible_codes
+        if experienced_eligible_codes is not None
+        else True
+    )
+
     startingOptionsHTML = ""
     if game_code == "FCM":
         startingOptionsHTML = SR_getFCMstartingOptionsHTML(startingOptionsArr)
@@ -302,6 +327,8 @@ def SF_serializeGame(game, user, player_context):
         "created": game.created,
         "learningGame": isLearningGame,
         "experiencedGame": isExperiencedGame,
+        "userCanJoinExperienced": userCanJoinExperienced,
+        "experiencedRequiredGames": SF_getRequiredExp(game_code),
         "maxPlayers": game.maxPlayers,
         "startingOptionsHTML": startingOptionsHTML,
         "pace": SR_gamePaceString(game.gamePace, game.kickoutDuration),
@@ -314,9 +341,12 @@ def SF_serializeGame(game, user, player_context):
     }
 
 
-def SF_fastSerializeGame(game, user):
+def SF_fastSerializeGame(game, user, experienced_eligible_codes=None):
     """Convenience wrapper: builds player context from DB, then serializes."""
-    return SF_serializeGame(game, user, SF_buildGamePlayerContext(game))
+    player_context = SF_buildGamePlayerContext(game)
+    if experienced_eligible_codes is not None:
+        player_context["experienced_eligible_codes"] = experienced_eligible_codes
+    return SF_serializeGame(game, user, player_context)
     # "currentPlayers": self.currentPlayers,
     # "kickoutRequiredNum": kickoutRequiredNum,
     # "remainingPlayers": remainingPlayers,
