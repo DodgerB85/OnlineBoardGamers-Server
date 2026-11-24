@@ -6,6 +6,7 @@ import * as highlight from "./RNBhighlight.js"
 import * as stack from "./RNBstack.js"
 import * as model from "./RNBmodel.js"
 import * as loc from "./RNBlocation.js"
+import * as util from "./RNButil.js"
 
 export function clearDataForGameReload() {
 	const store = useModelStore()
@@ -66,6 +67,43 @@ export function undoLastAction() {
 			store.mapData.zoomData.hexID = transporterObj.location[1]
 		}
 	}
+}
+
+const TWO_TRANSPORTER_ACTIONS = [rf.STACK_PICKUP_TRANSPORTER, rf.STACK_DROP_TRANSPORTER, rf.STACK_DROP_TRANSPORTER_JUST_PICKED_UP, rf.STACK_STEAL_RES]
+
+// Stack entries that involve the transporter. Merges in addItemToStack never mix transporters, so this set is exact
+export function stackEntriesForTransporter(transporterObj) {
+	const store = useModelStore()
+	const id = stack.getTransIDtoUse(transporterObj)
+	return store.actionStack.filter((e) => e.historyEntry[1] === id || (TWO_TRANSPORTER_ACTIONS.includes(e.action) && e.historyEntry[2] === id))
+}
+
+// Reset one transporter: replay the turn without its stack entries, using the same checks as turn processing.
+// Returns [] on success, or the blocking history entry (and leaves the game untouched) if a later action depended on it
+export function resetTransporter(transporterObj) {
+	const store = useModelStore()
+	const removed = stackEntriesForTransporter(transporterObj)
+	if (removed.length === 0) return []
+	const kept = util.deepCloneValue(store.actionStack.filter((e) => !removed.includes(e)))
+
+	const before = funcs.simpleExportWholeRNBmodel()
+	const undoBefore = [...store.undoPoints]
+
+	resetWholeTurn()
+	createUndoPoint()
+	for (const entry of kept) {
+		if (stack.verifySingleStackAction(entry) !== 0) {
+			funcs.simpleImportWholeRNBmodel(before)
+			store.undoPoints.splice(0, Infinity, ...undoBefore)
+			return util.deepCloneValue(entry.historyEntry)
+		}
+		stack.performSingleStackAction(entry, true)
+		// keep stack + history in step so each undo point matches what a live action would have left
+		store.actionStack.push(entry)
+		stack.syncStackHistory()
+		createUndoPoint()
+	}
+	return []
 }
 
 export function clearAllHighlights() {

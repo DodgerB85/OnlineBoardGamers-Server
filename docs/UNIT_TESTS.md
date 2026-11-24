@@ -64,9 +64,9 @@ Run `npm test` from `KFW/vueKFW/`. The Vitest suite covers the Farmers expansion
 Run `npm test` from `RNB/vueRNB/`. It runs both suites:
 
 - Vitest (`src/js/*.test.js`): production-setup preset draws, explicit carried fuel selection, and style-2 track offsets.
-- Node's test runner (`tests/*.test.js`): city and polder building, trains, presets, exhibitions/art, research, map thumbnails, and the transaction/preview regressions.
+- Node's test runner (`tests/*.test.js`): city and polder building, trains, presets, exhibitions/art, research, map thumbnails, resetting one transporter mid-turn, and the transaction/preview regressions.
 
-To run only the Node suite: `node --test tests`.
+To run only the Node suite: `node --test tests/*.test.js` (Node 22 does not accept a bare directory).
 
 ## LBR frontend checks
 

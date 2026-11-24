@@ -75,6 +75,7 @@ function copyBgStatsLink() {
 }
 
 import FailedStackEntry from "./Utils/FailedStackEntry.vue"
+import TransporterList from "./TransporterList.vue"
 import ActionAreaPrePhase from "./ActionAreaPrePhase.vue"
 import JumpstartPanel from "./JumpstartPanel.vue"
 import ConflictDecisionPanel from "./ConflictDecisionPanel.vue"
@@ -1155,6 +1156,7 @@ const getGameOverReason = computed(() => {
 					<button v-if="personal.trainingGame || personal.soloGame" @click="finishActionsAndEndTurn($event)" class="actionsLineButton">{{ $t("action.finishActionsEndTurn") }}</button>
 					<button v-else @click="finishActions(false, $event)" class="actionsLineButton">{{ $t("action.finishActions") }}</button>
 				</template>
+				<TransporterList />
 			</div>
 
 			<!-- BUILDING -->
