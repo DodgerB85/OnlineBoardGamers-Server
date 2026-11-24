@@ -455,13 +455,18 @@ $(".piece").on("click", function (e) {
 		}
 	}
 
-	this.actionResign = function (e) {
+	this.actionResign = async function (e) {
 		var c = e.data.controller
 		$("#actions").empty()
 		// Need to use global.pov otherwise resiginnign in turn order kicks out wrong person
-		// THIS JUST ADDS A LOG, AND CHANGES THE NAME / AUTOPLAY
-		IO.resign(c.model, c.currentPlayer().name)
+		// Wait for the server before swapping the seat to a bot: a client-only swap
+		// leaves the server queue naming a seat that no player can act for.
+		if (!(await IO.resign(c.model, c.currentPlayer().name))) {
+			c.startActions()
+			return
+		}
 
+		// THIS JUST ADDS A LOG, AND CHANGES THE NAME / AUTOPLAY
 		Bot.actionResign(c.model, global.pov)
 	}
 

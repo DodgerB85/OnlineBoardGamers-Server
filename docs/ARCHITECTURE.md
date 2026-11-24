@@ -94,7 +94,7 @@ Three overlapping powers, each repeated per game in its `views.py`:
 
 It grants no `is_site_admin` page above.
 
-Client-side footnote: HLC's template sets `global.superuser = true` for the literal username `BotKickStarter` (`HLC/templates/HLC/HLCtemplate.html`) — a hardcoded per-game name, unrelated to Django's `is_superuser`.
+Client-side footnote: HLC's template sets `global.superuser = true` for the literal username `BotKickStarter` (`HLC/templates/HLC/HLCtemplate.html`) — a hardcoded per-game name, unrelated to Django's `is_superuser`. HLC also exempts its `adminRepair` action from the standard write gate for that username: the client reconciles bot seats in the game data with the server's missing flags, drops bots from the live queue, and the server persists the repaired model/queue.
 
 ## Presenters
 

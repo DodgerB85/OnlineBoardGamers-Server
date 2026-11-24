@@ -14,6 +14,14 @@ var Bot = (function () {
 	var BOT = "__$$BOT==__"
 	var BOT_NAME = "HcBot"
 
+	self.setPlayerToBot = function (player) {
+		player.name = BOT_NAME
+		player.autoplay = true
+		if (player.money > 0) player.money *= -1
+		else player.money = -1
+		player.gantt = -1
+	}
+
 	self.correctTurnOrderForBots = function (model) {
 		// in sell, bots are passed in order
 		if (model.gameFlow.phase === PHASE_SELL) return
@@ -73,11 +81,7 @@ var Bot = (function () {
 			// Action the kick in game
 			M.log(Log.KICKOUT, [playerToKickObject.name])
 
-			playerToKickObject.name = BOT_NAME
-			playerToKickObject.autoplay = true
-			if (playerToKickObject.money > 0) playerToKickObject.money *= -1
-			else playerToKickObject.money = -1
-			playerToKickObject.gantt = -1
+			self.setPlayerToBot(playerToKickObject)
 
 			// Update global.currentPlayers to replace the kickout name with HcBot
 			// WHY???????
@@ -140,12 +144,7 @@ var Bot = (function () {
 		var player = model.players[playerNumber]
 		var resignName = player.name
 		model.log(Log.RESIGN, [resignName])
-		player.name = BOT_NAME
-		player.autoplay = true
-
-		if (player.money > 0) player.money *= -1
-		else player.money = -1
-		player.gantt = -1
+		self.setPlayerToBot(player)
 
 		var i = 0
 		var bot = BOT

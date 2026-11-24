@@ -99,7 +99,7 @@ def _processHLCturn(request):
 
     presenter = cast("HLCpresenter", currentGame.presenter())
 
-    if jsonData.get("action") not in ("load", "refreshChat") and not can_act_in_game(request.user, currentGame):
+    if jsonData.get("action") not in ("load", "refreshChat", "adminRepair") and not can_act_in_game(request.user, currentGame):
         return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
     for key in ("content", "data", "other"):
@@ -175,8 +175,11 @@ def _processHLCturn(request):
         _missingPlayer = User.objects.get(username=request.user.username)
         presenter.addMissingPlayer(_missingPlayer)
         presenter.checkForHostChange(_missingPlayer)
+        # The queue changed even though the game data did not, so bump the
+        # version and let the other clients reload the new current player.
+        newVer = (int(currentGame.latestUpdate) % 1000) + 1
+        currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
         currentGame.save()
-        # Response not used
         return JsonResponse(
             {
                 "latestUpdate": currentGame.latestUpdate,
@@ -230,7 +233,7 @@ def _processHLCturn(request):
 
         # IF YOU IN FIRST PLACE SERVER AND CLIENT, YOUR AC IS VALID, SO DON'T NEED TO CHECK
         # if jsonData["idx"] == 0 and currentPlayersList[0] == request.user.username:
-        if jsonData["idx"] == 0 and currentPlayersList[0] == name:
+        if jsonData["idx"] == 0 and currentPlayersList and currentPlayersList[0] == name:
             # ("Accepting ThisAC")
             DBgameDataRaw[0] = ThisAC.copy()
             DBavailableComponents = DBgameDataRaw[0].copy()
@@ -272,6 +275,14 @@ def _processHLCturn(request):
         currentPlayersList = currentPlayers
         while len(currentPlayersList) > 0 and currentPlayersList[0] == "HcBot":
             currentPlayersList.pop(0)
+
+        # A player who resigns is already out of the queue before this save
+        # arrives; their final factory still needs processing to end the phase.
+        if not currentPlayersList:
+            saving_gp = currentGame.players.filter(player__username=name).select_related("player").first()
+            if not saving_gp or not (saving_gp.is_missing or saving_gp.is_kicked):
+                return JsonResponse({"stored": True}, safe=False)
+            currentPlayersList = [name]
 
         # There can never be data in front of you.
         # Either you are first in TO, so it will process.
@@ -437,6 +448,60 @@ def _processHLCturn(request):
     # Now check the next player to see if there is any data
     ##################################################
 
+    elif jsonData["action"] == "adminRepair":
+        # BotKickStarter-only queue repair: the client reconciles its bot seats
+        # and sends the repaired model/queue; the server drops the live seats
+        # that the game data already treats as bots.
+        if request.user.username != "BotKickStarter":
+            return JsonResponse({"error": gettext("Not allowed")}, status=403)
+        if not latest_update_ok(request, jsonData["latestUpdate"], currentGame.latestUpdate, currentGame.gameData):
+            return JsonResponse({"syncError": True}, safe=False)
+
+        bot_seats = jsonData.get("botSeats") or []
+        if isinstance(bot_seats, list):
+            for seat in bot_seats:
+                try:
+                    seat = int(seat)
+                except (TypeError, ValueError):
+                    continue
+                gp = presenter.resolveGamePlayer(seat=seat)
+                if gp and gp.player and not gp.is_missing:
+                    presenter.addMissingPlayer(gp.player)
+                    presenter.checkForHostChange(gp.player)
+
+        currentGame.gameData = jsonData["data"]
+        currentGame.turn = jsonData["turn"]
+        currentGame.phase = jsonData["phase"]
+
+        presenter.clearAllMoveData()
+        presenter.clearKickoutVotes()
+
+        oldVer = currentGame.latestUpdate
+        newVer = (int(currentGame.latestUpdate) % 1000) + 1
+        currentGame.latestUpdate = str((int(time.time()) * 1000) + newVer)
+
+        presenter.setCurrentPlayersFromArrInTurnOrder(
+            jsonData.get("nextPlayer") or [],
+            acting_username=request.user.username,
+            old_latest_update=oldVer,
+            current_player_seats=jsonData.get("nextPlayerSeats"),
+        )
+        currentGame.save()
+
+        if currentGame.phase == 3:
+            currentPlayers = presenter.getCurrentPlayersInOrderArrHLC()
+        else:
+            currentPlayers = presenter.getArrayOfIsCurrentPlayers()
+
+        return JsonResponse(
+            {
+                "latestUpdate": currentGame.latestUpdate,
+                "currentPlayers": currentPlayers,
+                "gameData": currentGame.gameData,
+            },
+            safe=False,
+        )
+
     elif jsonData["action"] == "save":
         # Check if old version is older than DB version, and if so, return
         if not latest_update_ok(request, jsonData["latestUpdate"], currentGame.latestUpdate, currentGame.gameData):
@@ -565,6 +630,8 @@ def _processHLCturn(request):
                 "loadData": currentGame.gameData,
                 # Not used at the moment, in // comment
                 "currentPlayers": presenter.getCurrentPlayersHLC(),
+                # Keeps a BKS repair's server-missing view in step with the model.
+                "allPlayerListBySeat": presenter.getAllPlayersOrderedySeatInArray(),
                 # "secondsToNextKickout": presenter.getSecondsToNextKickout(),
                 # "specialData": specialData,
                 "latestUpdate": currentGame.latestUpdate,

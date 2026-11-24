@@ -15,25 +15,30 @@ var IO = {
 		var csrftoken = getCookie("csrftoken")
 		if (player == undefined) player = model.players[global.pov].name
 
-		fetch("/HLC/processHLCturn/", {
-			method: "POST",
-			// None of this is used - the player actioning the API must be the one resigning
-			body: JSON.stringify({
-				gameID: global.gameID,
-				action: "resign",
-				user: player,
-			}),
-			headers: { "X-CSRFToken": csrftoken },
-		})
-			.then((response) => response.json())
-			.then((result) => {
-				delete global.move
-				hideLoader()
+		try {
+			const response = await fetch("/HLC/processHLCturn/", {
+				method: "POST",
+				// None of this is used - the player actioning the API must be the one resigning
+				body: JSON.stringify({
+					gameID: global.gameID,
+					action: "resign",
+					user: player,
+				}),
+				headers: { "X-CSRFToken": csrftoken },
 			})
-			.catch((error) => {
-				console.log("Error:", error)
-				alert(gettext("Something went wrong. Please reload the page. If the problem persists, please contact the webmaster"))
-			})
+			if (!response.ok) throw new Error(`HTTP ${response.status}`)
+			const result = await response.json()
+			if (result.latestUpdate) global.latestUpdate = String(result.latestUpdate)
+			delete global.move
+			broadcastGameUpdate()
+			return true
+		} catch (error) {
+			console.log("Error:", error)
+			alert(gettext("Something went wrong. Please reload the page. If the problem persists, please contact the webmaster"))
+			return false
+		} finally {
+			hideLoader()
+		}
 	},
 
 	votedToDelete: async function () {
@@ -268,11 +273,129 @@ var IO = {
 				$("#actions").empty()
 				// Do this to update the top line info / green player highlights
 				global.currentPlayers = result.currentPlayers
+				if (result.allPlayerListBySeat) global.players = result.allPlayerListBySeat
 				await controller.reloadModel(loadDataString)
 			})
 			.catch((error) => {
 				console.log("Error:", error)
 			})
+	},
+
+	// BotKickStarter repair: the server queue and the client game data can drift
+	// apart when a resignation/kickout only reached one of them. Reconcile the
+	// bot seats, drop bots from the live queue, and persist the result.
+	repairStuckGame: async function () {
+		if (global.name !== "BotKickStarter" || global.openReplay || IO.repairing) return false
+		if (M.trainingGame || M.gameEnded > 0 || M.gameFlow.phase === PHASE_GAME_END_CHECK) return false
+
+		IO.repairing = true
+		try {
+			var serverNames = global.players || []
+			var botSeats = []
+			var needsRepair = false
+
+			for (var i = 0; i < M.players.length; i++) {
+				var serverBot = serverNames[i] === "HcBot" || serverNames[i] === "HlcBot"
+				var modelBot = M.players[i].autoplay === true || M.players[i].name === "HcBot"
+				if (serverBot && !modelBot) {
+					Bot.setPlayerToBot(M.players[i])
+					needsRepair = true
+				} else if (!serverBot && modelBot) {
+					botSeats.push(i)
+					needsRepair = true
+				}
+			}
+
+			var oldOrder = M.gameFlow.turnOrder.slice()
+			if (M.gameFlow.phase === PHASE_BUILD_FACTORY) {
+				M.gameFlow.turnOrder = M.gameFlow.turnOrder.filter(function (seat) {
+					return M.players[seat] && M.players[seat].autoplay !== true
+				})
+			} else {
+				while (M.gameFlow.turnOrder.length > 0 && M.players[M.gameFlow.turnOrder[0]].autoplay === true) {
+					M.gameFlow.turnOrder.shift()
+				}
+			}
+			if (M.gameFlow.turnOrder.join(",") !== oldOrder.join(",")) needsRepair = true
+			var realCurrentPlayers = (global.currentPlayers || []).filter(function (name) {
+				return name !== "HcBot" && name !== "HlcBot"
+			})
+			if (realCurrentPlayers.length === 0) needsRepair = true
+
+			if (!needsRepair) return false
+
+			var nextPlayer = []
+			var nextPlayerSeats = []
+
+			if (M.gameFlow.turn === 0) {
+				for (var seat = 0; seat < M.players.length; seat++) {
+					if (M.players[seat].autoplay !== true) {
+						nextPlayer.push(M.players[seat].name)
+						nextPlayerSeats.push(seat)
+					}
+				}
+			} else if (M.gameFlow.phase === PHASE_BUILD_FACTORY) {
+				if (M.gameFlow.turnOrder.length === 0) M = C.moveToNextPhase()
+				if (M.gameFlow.phase === PHASE_BUILD_FACTORY) {
+					for (var j = 0; j < M.gameFlow.turnOrder.length; j++) {
+						nextPlayer.push(M.players[M.gameFlow.turnOrder[j]].name)
+						nextPlayerSeats.push(M.gameFlow.turnOrder[j])
+					}
+				} else if (M.gameFlow.turnOrder.length > 0) {
+					nextPlayer = [M.players[M.gameFlow.turnOrder[0]].name]
+					nextPlayerSeats = [M.gameFlow.turnOrder[0]]
+				}
+			} else {
+				if (M.gameFlow.turnOrder.length === 0) M = C.moveToNextPhase()
+				if (M.gameFlow.phase === PHASE_BUILD_FACTORY) {
+					for (var k = 0; k < M.gameFlow.turnOrder.length; k++) {
+						nextPlayer.push(M.players[M.gameFlow.turnOrder[k]].name)
+						nextPlayerSeats.push(M.gameFlow.turnOrder[k])
+					}
+				} else if (M.gameFlow.turnOrder.length > 0) {
+					nextPlayer = [M.players[M.gameFlow.turnOrder[0]].name]
+					nextPlayerSeats = [M.gameFlow.turnOrder[0]]
+				}
+			}
+			if (M.gameFlow.turnOrder.length > 0) M.gameFlow.currentPlayer = M.gameFlow.turnOrder[0]
+
+			var csrftoken = getCookie("csrftoken")
+			showLoader()
+			const response = await fetch("/HLC/processHLCturn/", {
+				method: "POST",
+				body: JSON.stringify({
+					action: "adminRepair",
+					gameID: global.gameID,
+					latestUpdate: global.latestUpdate,
+					data: compressObjectToDB(M.export()),
+					turn: M.gameFlow.turn,
+					phase: M.gameFlow.phase,
+					nextPlayer: nextPlayer,
+					nextPlayerSeats: nextPlayerSeats,
+					botSeats: botSeats,
+				}),
+				headers: { "X-CSRFToken": csrftoken },
+			})
+			if (!response.ok) throw new Error(`HTTP ${response.status}`)
+			const result = await response.json()
+			if (result.syncError) {
+				alert(gettext("It appears you have an older version of the game. Please refresh the page"))
+				return false
+			}
+			global.latestUpdate = String(result.latestUpdate)
+			global.currentPlayers = result.currentPlayers || nextPlayer
+			V.render()
+			C.startActions()
+			broadcastGameUpdate()
+			return true
+		} catch (error) {
+			console.log("Error:", error)
+			alert(gettext("Could not repair the game. Please reload the page."))
+			return false
+		} finally {
+			hideLoader()
+			IO.repairing = false
+		}
 	},
 
 	saveFactoryWithoutEndingTurn: function () {
@@ -652,50 +775,6 @@ var IO = {
 			})
 	},
 
-	resign: function (model, player, callback, context) {
-		if (model.allowSurrender == true) {
-			showLoader()
-			var csrftoken = getCookie("csrftoken")
-			if (player == undefined) player = model.players[global.pov].name
-
-			fetch("/HLC/processTurn/", {
-				method: "POST",
-				// None of this is used - the player actioning the API must be the one resigning
-				body: JSON.stringify({
-					gameID: global.gameID,
-					action: "resign",
-					user: player,
-				}),
-				headers: { "X-CSRFToken": csrftoken },
-			})
-				.then((response) => response.json())
-				.then((result) => {
-					delete global.move
-					hideLoader()
-					var nbNonPlayers = 0
-					_.each(model.players, function (p) {
-						if (p.autoplay == true || p.bankrupt == true) {
-							nbNonPlayers++
-						}
-					})
-
-					if (nbNonPlayers >= model.players.length - 1) {
-						model.endGame()
-						IO.saveGameData(model)
-						V.render()
-						return false
-					}
-					if (model.workflow.turn == 0) C.next()
-					else IO.saveGameData(model)
-					// Want to check return data, passing it into simul phase to carry on the game
-				})
-				.catch((error) => {
-					console.log("Error:", error)
-					alert("Something went wrong. Please reload the page. If the problem persists, please contact the webmaster")
-				})
-		}
-	},
-
 	loadRewind: function (controller) {
 		if (global.alreadyRewinding) return
 		if (replay.showingReplay) {
@@ -856,7 +935,7 @@ var IO = {
 				global.secondsToNextKickout = data.secondsToNextKickout
 				$("#actions").empty()
 				// Do this to update the top line info / green player highlights
-				C.reloadModel(loadDataString)
+				await C.reloadModel(loadDataString)
 			}
 		} catch (error) {
 			console.error("Error fetching data:", error)

@@ -412,8 +412,20 @@ class GamePresenter:
             gp.save(update_fields=["remainingTurnOrder"])
         username = gp.player.username if gp.player else ""
         current = self.gameObj.serverCurrentPlayerNamesInTurnOrder or []
+        changed = False
         if username and username in current:
             self.gameObj.serverCurrentPlayerNamesInTurnOrder = [name for name in current if name != username]
+            changed = True
+        if self.gameObj.gameCode == "HLC":
+            # Legacy queue copy, used when the GamePlayer rows have no positions.
+            try:
+                current = json.loads(self.gameObj.currentPlayersInTurnOrder or "[]")
+            except (TypeError, ValueError):
+                current = []
+            if username and isinstance(current, list) and username in current:
+                self.gameObj.currentPlayersInTurnOrder = json.dumps([name for name in current if name != username])
+                changed = True
+        if changed:
             self.gameObj.save()
 
     def handSeatToAi(self, user):
@@ -1605,6 +1617,21 @@ def rnbPhaseOrder(phase):
 
 
 class RNBpresenter(GamePresenter):
+    def setServerCurrentPlayerNamesInTurnOrder(self, playersInTurnOrderArray, seats=None):
+        super().setServerCurrentPlayerNamesInTurnOrder(playersInTurnOrderArray, seats)
+        # A conflict-end save can send a queue that starts with a real player but name
+        # the just-kicked bot as its single current player; the bot is filtered out and
+        # nobody is current, so the homepage goes blank and no turn notification fires.
+        # The queue itself is correct, so take its head.
+        if self.gameObj.gameStatus == "ACTIVE" and self.gameObj.phase in rfRNB.MAIN_PHASES:
+            queue = self.getRemainingTurnOrderNames()
+            if queue and not self.gameObj.players.filter(is_current=True).exists():
+                head = self.gameObj.players.filter(player__username=queue[0]).first()
+                if head:
+                    head.is_current = True
+                    head.availabilityAnchor = int(time.time() * 1000)
+                    head.save(update_fields=["is_current", "availabilityAnchor"])
+
     def quickIsMyMove(self, loggedInPlayerUsername=None):
         # Return False if no username is provided
         if loggedInPlayerUsername is None:

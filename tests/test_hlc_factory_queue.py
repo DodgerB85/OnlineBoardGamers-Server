@@ -1,6 +1,7 @@
 import json
 import time
 
+import lzstring
 from django.test import TestCase
 from django.urls import reverse
 
@@ -18,6 +19,7 @@ from Lobby.sharedFunctions.sharedFunctions import (
 class HLCFactoryQueueTests(TestCase):
     def setUp(self):
         self.users = [User.objects.create_user(username=name, password="testpass123") for name in ["alice", "bob", "carol", "dave"]]
+        self.bks = User.objects.create_user(username="BotKickStarter", password="testpass123")
         self.game = Game.objects.create(
             gameCode="HLC",
             gameStatus="ACTIVE",
@@ -106,6 +108,135 @@ class HLCFactoryQueueTests(TestCase):
 
         self.assertEqual(self.presenter.getCurrentPlayersInOrderArrHLC(), [])
         self.assertFalse(self.game.players.filter(is_current=True).exists())
+
+    def test_resigning_removes_the_seat_from_the_factory_queue(self):
+        # The client swaps the seat to a bot once the server confirms the
+        # resignation. If the server never records it, the bot seat keeps the
+        # turn and nobody can act.
+        for gp in self.game.players.all():
+            gp.remainingTurnOrder = gp.seat_order + 1
+            gp.save(update_fields=["remainingTurnOrder"])
+        self.client.force_login(self.users[0])
+        response = self.client.post(
+            reverse("HLC:processHLCturn"),
+            json.dumps({"action": "resign", "gameID": self.game.id}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        gp = self.game.players.get(player=self.users[0])
+        self.assertTrue(gp.is_missing)
+        self.assertFalse(gp.is_current)
+        self.assertIsNone(gp.remainingTurnOrder)
+        self.assertEqual(self.presenter.getCurrentPlayersInOrderArrHLC(), ["bob", "carol", "dave"])
+        self.assertEqual(self.presenter.getArrayOfIsCurrentPlayers(), ["bob"])
+
+    def test_last_resigning_player_can_still_submit_the_final_factory(self):
+        # A resignation removes the seat before its turn-ending factory save
+        # arrives, leaving the queue empty. That save must still be processed so
+        # the client can move the phase on.
+        alice_gp = self.game.players.get(player=self.users[0])
+        alice_gp.remainingTurnOrder = 1
+        alice_gp.save(update_fields=["remainingTurnOrder"])
+        self.game.currentPlayersInTurnOrder = json.dumps(["alice"])
+        self.game.save(update_fields=["currentPlayersInTurnOrder"])
+        self.client.force_login(self.users[0])
+        self.client.post(
+            reverse("HLC:processHLCturn"),
+            json.dumps({"action": "resign", "gameID": self.game.id}),
+            content_type="application/json",
+        )
+        self.game.refresh_from_db()
+        self.assertEqual(self.presenter.getCurrentPlayersInOrderArrHLC(), [])
+
+        components = [20] * 60
+        model = [components, [], [3, 5, 0, [0], [0], 0, []], [[[]], [[]], [[]], [[]]], 0, [], [], 0, [], 0, [], 0, [], 0, [], [], [0]]
+        lzs = lzstring.LZString()
+        self.game.gameData = lzs.compressToEncodedURIComponent(json.dumps(model))
+        self.game.save(update_fields=["gameData"])
+
+        response = self.client.post(
+            reverse("HLC:processHLCturn"),
+            json.dumps(
+                {
+                    "action": "saveFactoryMove",
+                    "gameID": self.game.id,
+                    "name": "alice",
+                    "idx": -1,
+                    "useTheFirst": False,
+                    "data": lzs.compressToEncodedURIComponent(json.dumps([1, 2, 3])),
+                    "other": lzs.compressToEncodedURIComponent(json.dumps([[], [], [], components, [[], []]])),
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        result = response.json()
+        self.assertTrue(result["VFFFP"])
+        self.assertEqual(result["currentPlayers"], [])
+
+    def test_bot_kick_starter_repair_drops_live_bot_seats_and_sets_the_queue(self):
+        for gp in self.game.players.all():
+            gp.remainingTurnOrder = gp.seat_order + 1
+            gp.save(update_fields=["remainingTurnOrder"])
+        self.game.turn = 5
+        self.game.gameData = "repaired-data"
+        self.game.save(update_fields=["turn", "gameData"])
+        self.client.force_login(self.bks)
+
+        response = self.client.post(
+            reverse("HLC:processHLCturn"),
+            json.dumps(
+                {
+                    "action": "adminRepair",
+                    "gameID": self.game.id,
+                    "latestUpdate": self.game.latestUpdate,
+                    "data": "repaired-data",
+                    "turn": 5,
+                    "phase": 3,
+                    "nextPlayer": ["bob", "carol", "dave"],
+                    "nextPlayerSeats": [1, 2, 3],
+                    "botSeats": [0],
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        alice_gp = self.game.players.get(player=self.users[0])
+        self.assertTrue(alice_gp.is_missing)
+        self.assertFalse(alice_gp.is_current)
+        self.assertIsNone(alice_gp.remainingTurnOrder)
+        self.assertEqual(self.presenter.getCurrentPlayersInOrderArrHLC(), ["bob", "carol", "dave"])
+        self.assertEqual(response.json()["currentPlayers"], ["bob", "carol", "dave"])
+        self.assertTrue(self.game.players.get(player=self.users[1]).is_current)
+        self.assertTrue(self.game.players.get(player=self.users[2]).is_current)
+        self.assertTrue(self.game.players.get(player=self.users[3]).is_current)
+
+    def test_admin_repair_is_bot_kick_starter_only(self):
+        self.client.force_login(self.users[0])
+
+        response = self.client.post(
+            reverse("HLC:processHLCturn"),
+            json.dumps(
+                {
+                    "action": "adminRepair",
+                    "gameID": self.game.id,
+                    "latestUpdate": self.game.latestUpdate,
+                    "data": self.game.gameData,
+                    "turn": self.game.turn,
+                    "phase": self.game.phase,
+                    "nextPlayer": [],
+                    "nextPlayerSeats": [],
+                    "botSeats": [1],
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(self.game.players.get(player=self.users[1]).is_missing)
 
     def test_show_page_reports_no_current_player_when_queue_is_stale(self):
         # The bad row left by a lost next-phase save: server queue empty,

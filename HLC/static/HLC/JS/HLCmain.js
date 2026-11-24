@@ -256,8 +256,13 @@ function init() {
 		})
 	}
 
-	// Check for no current player here
-	if (!global.openReplay && (global.currentPlayers === undefined || global.currentPlayers.length === 0)) {
+	// BotKickStarter repairs the queue itself; the generic no-current kickstart
+	// would discard a factory queue the client can still rebuild from its model.
+	if (global.name === "BotKickStarter" && !global.openReplay) {
+		IO.loadGame(C).then(function () {
+			IO.repairStuckGame()
+		})
+	} else if (!global.openReplay && (global.currentPlayers === undefined || global.currentPlayers.length === 0)) {
 		// If it is factory build phase, with no one to move, it means the last player disconnected
 		// So run the code in IO again here. This should save it and move the game on
 		if (M.gameFlow.phase === PHASE_BUILD_FACTORY) {
@@ -269,6 +274,27 @@ function init() {
 			IO.sendDiscordWebhook(`HLC GameID ${global.gameID} - No current player detected: ${global.currentPlayers}`)
 			alert("ERROR: No current player\nContact admin on Discord or Email")
 		}
+	}
+
+	// A resignation that never reached the server leaves this seat as a bot in
+	// the game data while the server still lists it as current. Send it again so
+	// the queue can move on.
+	if (
+		!global.openReplay &&
+		!M.trainingGame &&
+		M.gameEnded === 0 &&
+		M.gameFlow.phase !== PHASE_GAME_END_CHECK &&
+		global.pov != undefined &&
+		global.pov >= 0 &&
+		M.players[global.pov] &&
+		M.players[global.pov].autoplay === true &&
+		M.players[global.pov].originalName === global.name &&
+		global.currentPlayers &&
+		global.currentPlayers.indexOf(global.name) > -1
+	) {
+		IO.resign(M, global.name).then(function (ok) {
+			if (ok) window.location.reload()
+		})
 	}
 
 	if (M.gameFlow.turn === 0 && global.move != undefined && global.pov >= 0) {
@@ -424,8 +450,9 @@ function init() {
 	$("#loggedInDiv").click(function () {
 		if (global.name === "BotKickStarter") {
 			global.superuser = true
-			global.pov++
-			if (global.pov === M.players.length) global.pov = 0
+			var wasSpectator = global.pov == undefined || global.pov < 0
+			if (wasSpectator) global.pov = 0
+			else global.pov = (global.pov + 1) % M.players.length
 
 			//M.availableComponents[TIRE] = 0
 			//IO.saveGame(M, true)
@@ -433,6 +460,10 @@ function init() {
 			V.render()
 			C.startActions()
 			$("#actions").prepend("P: " + String(global.pov) + " N: " + M.players[global.pov].name)
+
+			// First move from spectator to a seat: refresh, then repair.
+			if (wasSpectator) IO.loadGame(C).then(function () { IO.repairStuckGame() })
+			else IO.repairStuckGame()
 
 			/*M.players[2].name = "tlance8";
             IO.saveGame(M, true);*/
