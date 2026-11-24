@@ -264,6 +264,34 @@ test("a stale auto-pass flag does not skip the current turn", () => {
 	assert.equal(store.history.length, 1)
 })
 
+test("a forced water handoff resolves before the save without waiting for its seat", () => {
+	const game = createGame(["A", "B", "C"])
+	for (const nation of game.nations) nation.isRemoved = true
+	Object.assign(game.gameflow, { phase: rf.PHASE_RAINY_SEASON, stateOrder: [0, 1], turnOrder: [1] })
+	Object.assign(game.states[0], { isActive: true, king: 1 })
+	Object.assign(game.states[1], { isActive: true, king: 2 })
+	const area = (id) => game.board.areas.find((entry) => entry.id === id)
+	const river = area("printed-3-6")
+	const pump = area("printed-3-5")
+	const first = area("printed-3-4")
+	const second = area("printed-4-5")
+	river.waterwork = { state: 0, kind: "reservoir", capacity: 2 }
+	pump.waterwork = { state: 1, kind: "pump", capacity: 1 }
+	first.owner = first.markerOwner = 1
+	second.owner = second.markerOwner = 2
+	game.board.canals.push([river.id, pump.id], [pump.id, first.id], [pump.id, second.id])
+	game.rain.step = "routing"
+	game.rain.routing = { sourceIndex: 2, river: null, arrivals: {}, outflow: 0, stack: [{ area: river.id, water: 1, downstreamWater: 11, visited: [river.id], originReservoir: river.id }] }
+	const opening = historyStorage.changesBetween(createGame(["A", "B", "C"]), game)
+	storeGame(game, [[rf.HIST_NEW_GAME, -1, null, opening]])
+
+	model.playInactiveSeats()
+
+	assert.equal(store.history.length, 2, "the one-destination handoff is resolved as a move")
+	assert.equal(store.board.areas.find((entry) => entry.id === pump.id).irrigatedBy, null)
+	assert.deepEqual(store.gameflow.turnOrder, [2], "a real choice still waits for its own seat")
+})
+
 test("a rewind entry survives the save and replays without changing the position", () => {
 	const game = createGame(["A", "B", "C"])
 	storeGame(game)

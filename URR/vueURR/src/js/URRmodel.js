@@ -108,8 +108,9 @@ export function performAction(playerIndex, action) {
 	addHistory(rf.HIST_ACTION, playerIndex, action)
 }
 
-// Missing seats and auto-passing seats never hold the turn: missing seats use
-// the bot policy, auto-passing seats pass until the phase or their turn changes.
+// Missing seats, auto-passing seats and forced steps never hold the turn:
+// missing seats use the bot policy, auto-passers pass, and every seat resolves
+// moves with no choice (such as one-option rainy-season irrigation) before the save.
 // shortcut: auto-pass only advances when a client saves, upgrade with server-side turn automation
 export function playInactiveSeats(autoPassData = {}) {
 	const store = useModelStore()
@@ -120,7 +121,7 @@ export function playInactiveSeats(autoPassData = {}) {
 		if (!playerObj) return
 		const action = playerObj.isMissing
 			? game.getBotAction(snapshotState())
-			: (rules.isAutoPassActive(store, autoPassData[playerObj.name]) ? { type: "pass" } : null)
+			: (rules.isAutoPassActive(store, autoPassData[playerObj.name]) ? { type: "pass" } : rules.getAutomaticAction(store))
 		if (!action) return
 		performAction(player, action)
 	}
