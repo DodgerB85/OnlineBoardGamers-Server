@@ -105,11 +105,12 @@ def SF_getExperiencedEligibleCodes(user):
     if not user or not user.is_authenticated:
         return set()
 
+    # One row per finished game (the join only matches this user's GamePlayer row);
+    # distinct() would collapse each game code to a single row and undercount.
     finished_codes = (
         Game.objects.filter(gameStatus="FINISHED", players__player=user)
         .exclude(players__player__username="SHADOW")
         .values_list("gameCode", flat=True)
-        .distinct()
     )
     counts = Counter(finished_codes)
     return {code for code, count in counts.items() if count >= SF_getRequiredExp(code)}

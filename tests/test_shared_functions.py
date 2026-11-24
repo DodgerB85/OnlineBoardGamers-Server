@@ -12,6 +12,7 @@ from Lobby.sharedFunctions.sharedFunctions import (
     SF_M_ProcessAnyTournamentEndGame,
     SF_createNextRoundGamesSetup,
     SF_formatSecondsHHMM,
+    SF_getExperiencedEligibleCodes,
     SF_getRemainingFlexiSeconds,
     SF_getRequiredExp,
     SF_getSecondsToNextKickout,
@@ -66,6 +67,18 @@ class TestSFgetRequiredExp(PrintSuccessTestCase):
 
     def test_unknown_defaults_to_2(self):
         self.assertEqual(SF_getRequiredExp("UNKNOWN"), 2)
+
+
+class TestSFgetExperiencedEligibleCodes(PrintSuccessTestCase):
+    def test_requires_configured_number_of_finished_games(self):
+        user = User.objects.create_user("experienced", "exp@example.com", "pw")
+        first_game = Game.objects.create(gameCode="FCM", creator=user, host=user, gameStatus="FINISHED")
+        GamePlayer.objects.create(game=first_game, player=user, seat_order=0)
+        self.assertNotIn("FCM", SF_getExperiencedEligibleCodes(user))
+
+        second_game = Game.objects.create(gameCode="FCM", creator=user, host=user, gameStatus="FINISHED")
+        GamePlayer.objects.create(game=second_game, player=user, seat_order=0)
+        self.assertIn("FCM", SF_getExperiencedEligibleCodes(user))
 
 
 class TestSFupdateFlexiTime(PrintSuccessTestCase):
