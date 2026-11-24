@@ -183,3 +183,171 @@ test("a server turn order that still names an acted player needs a kickstart", {
 	assert.equal(model.turnOrderNeedsKickstart(["gregged"], ["gregged", "BlackM"]), false, "a server-omitted player is not re-added")
 	assert.equal(model.turnOrderNeedsKickstart([], []), true)
 })
+
+function setupWonderPhaseWithLeadingBot() {
+	setActivePinia(createPinia())
+	const store = useModelStore()
+	const personal = usePersonalStore()
+
+	const names = ["Marcasia726", "gregged", "Amifux", "BlackM"]
+	store.players.splice(0)
+	for (const name of names) store.players.push({ name, displayName: name, colour: 0, RnD: [0, 0, 0, 0, 0, 0, 0, 0] })
+	store.players[0].displayName = rf.BOT_NAME
+
+	personal.pov = 2
+	personal.name = "Amifux"
+	personal.soloGame = false
+	personal.trainingGame = false
+
+	store.gameflow.phase = rf.PHASE_WONDER_TO
+	store.gameflow.turn = 33
+	store.gameflow.turnOrder = [0, 3, 2, 1]
+	return { store, personal }
+}
+
+test("a kicked bot at the head of a main phase is not the current player", { skip: skip }, () => {
+	// Game 37468: when the wonder conflict's last turn-order choice resolved, the
+	// new main order was [Marcasia726 (kicked bot), BlackM, Amifux, gregged]. The
+	// save named Marcasia726 as current; the server filtered the bot, leaving no
+	// current player, a blank homepage and a game nobody was notified to continue.
+	const { store } = setupWonderPhaseWithLeadingBot()
+
+	const next = IO.getNextCurrentPlayers()
+
+	assert.deepEqual(next.allIsCurrentPlayers, ["BlackM"], "the first real player is current")
+	assert.deepEqual(next.allIsCurrentPlayerSeats, [3])
+	assert.deepEqual(next.allRemainingPlayersInTurnOrder, ["BlackM", "Amifux", "gregged"])
+	assert.deepEqual(next.allRemainingPlayerSeats, [3, 2, 1])
+	assert.deepEqual(store.gameflow.turnOrder, [3, 2, 1], "the bot is removed from the local order")
+})
+
+test("a conflict-end save names the first real player as current, not the leading bot", { skip: skip }, async () => {
+	const { personal } = setupWonderPhaseWithLeadingBot()
+	personal.latestUpdate = 1
+
+	const requests = []
+	const originalFetch = globalThis.fetch
+	globalThis.fetch = async (url, options) => {
+		requests.push({ url, ...JSON.parse(options.body) })
+		// Stop after the first save; processStacks would need a full game model.
+		return { ok: true, json: async () => ({ syncError: true }) }
+	}
+	try {
+		await IO.saveConflictMove(false)
+	} finally {
+		globalThis.fetch = originalFetch
+	}
+
+	assert.equal(requests.length, 1)
+	assert.equal(requests[0].phase, rf.PHASE_WONDER_TO)
+	assert.deepEqual(requests[0].allRemainingPlayersInTurnOrder, ["BlackM", "Amifux", "gregged"])
+	assert.equal(requests[0].nextSinglePlayerUsername, "BlackM", "the server must be told the real current player")
+})
+
+test("the real current player behind a kicked bot saves as current", { skip: skip }, async () => {
+	const { store, personal } = setupWonderPhaseWithLeadingBot()
+	// BlackM is next behind the kicked seat 0.
+	personal.pov = 3
+	personal.name = "BlackM"
+	personal.latestUpdate = 1
+
+	const requests = []
+	const originalFetch = globalThis.fetch
+	globalThis.fetch = async (url, options) => {
+		requests.push({ url, ...JSON.parse(options.body) })
+		return { ok: true, json: async () => ({ syncError: true }) }
+	}
+	try {
+		await IO.saveStackMove(false)
+	} finally {
+		globalThis.fetch = originalFetch
+	}
+
+	assert.equal(requests.length, 1)
+	assert.equal(requests[0].action, "saveStackMove")
+	assert.equal(requests[0].isCurrent, true, "the bot must not hide the real current player")
+	assert.deepEqual(requests[0].allIsCurrentPlayers, ["Amifux"], "the turn passes to the next real player")
+	assert.deepEqual(requests[0].allRemainingPlayersInTurnOrder, ["Amifux", "gregged"])
+	assert.deepEqual(store.gameflow.turnOrder, [2, 1], "BlackM has finished, the bot is gone")
+})
+
+async function reloadAsBks(turnOrder, history) {
+	const { store, personal } = setupWonderPhaseWithLeadingBot()
+	const gameData = [
+		[
+			[["Marcasia726", rf.BOT_NAME], 5],
+			[["gregged"], 2],
+			[["Amifux"], 4],
+			[["BlackM"], 1],
+		],
+		[],
+		[],
+		[],
+		history,
+		[],
+		[rf.PHASE_WONDER_TO, turnOrder, turnOrder, turnOrder, turnOrder, [], [], {}],
+		[[]],
+	]
+	const gameDataB64 = btoa(String.fromCharCode(...pako.gzip(JSON.stringify(gameData))))
+
+	personal.name = "BotKickStarter"
+	personal.pov = 3 // the POV change has just moved BKS from -1 to BlackM's seat
+	personal.latestUpdate = 1
+	// No real map/home markers in this fixture; keep startPlayerTurn from drawing them.
+	store.viewSettings.showReplay = true
+
+	const requests = []
+	const originalFetch = globalThis.fetch
+	globalThis.fetch = async (url, options) => {
+		const body = JSON.parse(options.body)
+		requests.push({ url, ...body })
+		if (url === "/RNB/data/1/") {
+			return {
+				ok: true,
+				json: async () => ({
+					gameDataB64,
+					finishedGame: false,
+					latestUpdate: 1,
+					transactionID: "",
+					allStackData: [],
+					currentMoveData: {},
+					allMyMoveData: [],
+					secondsToNextKickout: 99999,
+				}),
+			}
+		}
+		return { ok: true, json: async () => ({ latestUpdate: 2, currentMoveData: {}, allMyMoveData: [] }) }
+	}
+	try {
+		await IO.reloadGameData(false, true)
+	} finally {
+		globalThis.fetch = originalFetch
+	}
+	return { store, requests }
+}
+
+test("a BotKickStarter POV reload repairs the stuck turn order", { skip: skip }, async () => {
+	// Server game data from game 37468: the bot heads the order and Amifux already
+	// acted, so BKS's reload must drop both and persist BlackM as the current player.
+	const { store, requests } = await reloadAsBks([0, 3, 2, 1], [
+		[rf.HIST_NEW_TURN, -1, 0, [33]],
+		[rf.HIST_STACK_ACTIONS, 2, 0, [rf.PHASE_WONDER_TO]],
+	])
+
+	const save = requests.find((request) => request.action === "saveAndUpdateNotifictionsAfterStack")
+	assert.ok(save, "the reload must persist the repaired state")
+	assert.deepEqual(save.allIsCurrentPlayers, ["BlackM"])
+	assert.deepEqual(save.allRemainingPlayersInTurnOrder, ["BlackM", "gregged"])
+	assert.deepEqual(store.gameflow.turnOrder, [3, 1])
+})
+
+test("a BotKickStarter POV reload force-saves a state the kickstart heuristics miss", { skip: skip }, async () => {
+	// The order already looks valid, so none of the normal recovery blocks fire.
+	// BKS still persists the derived current player/queue when it takes a seat.
+	const { requests } = await reloadAsBks([3, 1], [[rf.HIST_NEW_TURN, -1, 0, [33]]])
+
+	const save = requests.find((request) => request.action === "saveAndUpdateNotifictionsAfterStack")
+	assert.ok(save, "the forced repair must persist the server state")
+	assert.deepEqual(save.allIsCurrentPlayers, ["BlackM"])
+	assert.deepEqual(save.allRemainingPlayersInTurnOrder, ["BlackM", "gregged"])
+})

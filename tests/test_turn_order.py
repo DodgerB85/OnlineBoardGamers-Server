@@ -5,6 +5,7 @@ from django.test import TestCase
 
 from Lobby.migrationHelpers import backfill_remaining_turn_order
 from Lobby.models import Game, GamePlayer, User
+from RNB import RNBconstants as rfRNB
 
 
 class TurnOrderTests(TestCase):
@@ -160,3 +161,41 @@ class TurnOrderTests(TestCase):
         ai_gp.save(update_fields=["is_kicked", "is_ai", "remainingTurnOrder"])
 
         self.assertEqual(self.game.presenter().getRemainingTurnOrderNames(), [self.players[1].username])
+
+
+class RNBMainPhaseCurrentTests(TestCase):
+    def setUp(self):
+        self.players = [User.objects.create_user(username=f"rnb-turn-{index}", password="pw") for index in range(4)]
+        self.game = Game.objects.create(
+            gameCode="RNB",
+            creator=self.players[1],
+            host=self.players[1],
+            gameStatus="ACTIVE",
+            maxPlayers=4,
+            startingOptions="[]",
+            turn=33,
+            phase=rfRNB.PHASE_WONDER_TO,
+        )
+        self.game_players = [
+            GamePlayer.objects.create(game=self.game, player=player, seat_order=index)
+            for index, player in enumerate(self.players)
+        ]
+        self.game_players[0].is_kicked = True
+        self.game_players[0].is_missing = True
+        self.game_players[0].save(update_fields=["is_kicked", "is_missing"])
+
+    def test_main_phase_queue_without_a_current_player_takes_its_head(self):
+        # Game 37468: the conflict-end save named the just-kicked bot as current while
+        # sending the real queue, so no is_current row remained and the homepage blanked.
+        presenter = self.game.presenter()
+        queue = [self.players[3].username, self.players[2].username, self.players[1].username]
+
+        presenter.setServerCurrentPlayerNamesInTurnOrder(queue)
+
+        for gp in self.game_players:
+            gp.refresh_from_db()
+        self.assertTrue(self.game_players[3].is_current, "the head of a main-phase queue must be current")
+        self.assertFalse(self.game_players[0].is_current)
+        self.assertFalse(self.game_players[1].is_current)
+        self.assertFalse(self.game_players[2].is_current)
+        self.assertEqual(presenter.getRemainingTurnOrderNames(), queue)

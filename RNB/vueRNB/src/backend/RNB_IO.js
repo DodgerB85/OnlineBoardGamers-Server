@@ -238,10 +238,17 @@ export function getNextCurrentPlayers() {
 			}
 		}
 	} else if (controller.isMainPhaseAndPseudoSimul()) {
-		allIsCurrentPlayers.push(store.players[store.gameflow.turnOrder[0]].name)
-		allRemainingPlayersInTurnOrder.push(store.players[store.gameflow.turnOrder[0]].name)
-		allIsCurrentPlayerSeats.push(store.gameflow.turnOrder[0])
-		allRemainingPlayerSeats.push(store.gameflow.turnOrder[0])
+		// A kicked seat (RnbBot) can head the order straight after conflict resolution.
+		// It never takes a main-phase turn, so skip it before naming the current player.
+		while (store.gameflow.turnOrder.length > 0 && store.players[store.gameflow.turnOrder[0]].displayName === rf.BOT_NAME) {
+			store.gameflow.turnOrder.shift()
+		}
+		if (store.gameflow.turnOrder.length > 0) {
+			allIsCurrentPlayers.push(store.players[store.gameflow.turnOrder[0]].name)
+			allRemainingPlayersInTurnOrder.push(store.players[store.gameflow.turnOrder[0]].name)
+			allIsCurrentPlayerSeats.push(store.gameflow.turnOrder[0])
+			allRemainingPlayerSeats.push(store.gameflow.turnOrder[0])
+		}
 		// start at the SECOND player in turnOrder
 		let startingIndex = 1
 		for (let i = startingIndex; i < store.gameflow.turnOrder.length; i++) {
@@ -339,6 +346,13 @@ export async function saveStackMove(saveRewind = true, overrideBKSN = null, over
 	}
 	let csrftoken = funcs.getCookie("csrftoken")
 
+	// In multiplayer, auto-remove consecutive bots from the turn order. This must
+	// happen before the isCurrent check: a kicked seat can head the order after a
+	// conflict, and it would otherwise hide the real player behind it.
+	while (store.gameflow.turnOrder.length > 0 && store.players[store.gameflow.turnOrder[0]].displayName === rf.BOT_NAME) {
+		store.gameflow.turnOrder.shift()
+	}
+
 	// If we are first in TO, we SHOULD only be able to submit valid move data
 	let isCurrent = false
 	const effectivePov = overridePlayerIndex !== null ? overridePlayerIndex : personal.pov
@@ -347,10 +361,6 @@ export async function saveStackMove(saveRewind = true, overrideBKSN = null, over
 		store.gameflow.turnOrder.shift()
 	}
 
-	// In multiplayer, auto-remove consecutive bots from the turn order
-	while (store.gameflow.turnOrder.length > 0 && store.players[store.gameflow.turnOrder[0]].displayName === rf.BOT_NAME) {
-		store.gameflow.turnOrder.shift()
-	}
 	productionSetup.dropPlayersWithoutChoices()
 
 	const { allIsCurrentPlayers, allRemainingPlayersInTurnOrder, allIsCurrentPlayerSeats, allRemainingPlayerSeats, pendingPlayersArr } = getNextCurrentPlayers()
@@ -610,7 +620,7 @@ export async function saveConflictMove(saveRewind = true, overrideBKSN = null, o
 		}
 	}
 
-	const nextSinglePlayerUsername = store.gameflow.turnOrder.length > 0 ? store.players[store.gameflow.turnOrder[0]].name : ""
+	let nextSinglePlayerUsername = store.gameflow.turnOrder.length > 0 ? store.players[store.gameflow.turnOrder[0]].name : ""
 
 	// When the conflict ends and this save lands IN a main phase (eg movement after turn-order
 	// selection), send the FULL remaining turn order so the server's
@@ -623,6 +633,9 @@ export async function saveConflictMove(saveRewind = true, overrideBKSN = null, o
 		const next = getNextCurrentPlayers()
 		allRemainingPlayersInTurnOrder = next.allRemainingPlayersInTurnOrder
 		allRemainingPlayerSeats = next.allRemainingPlayerSeats
+		// getNextCurrentPlayers skips a leading kicked bot, so name that real player
+		// as current instead of the bot seat that just headed the conflict order.
+		nextSinglePlayerUsername = allRemainingPlayersInTurnOrder[0] || ""
 	}
 
 	let postData = {
@@ -1451,7 +1464,7 @@ export async function reloadChatData() {
 	}
 }
 
-export async function reloadGameData(updatingFromWSAndCanPlay = false) {
+export async function reloadGameData(updatingFromWSAndCanPlay = false, forceRepair = false) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	let csrftoken = funcs.getCookie("csrftoken")
@@ -1538,6 +1551,8 @@ export async function reloadGameData(updatingFromWSAndCanPlay = false) {
 		personal.currentMoveData = data.currentMoveData || {}
 		personal.allMyMoveData = data.allMyMoveData || []
 
+		let repaired = false
+
 		// Transaction recovery: if server has a stuck transaction lock, process stacks and clear it.
 		// saveAndUpdateNotifictionsAfterStack clears personal.transactionID itself on success; left as a
 		// sub-step (finalize = false) because reloadGameData finishes loading below.
@@ -1548,6 +1563,7 @@ export async function reloadGameData(updatingFromWSAndCanPlay = false) {
 			store.allStackData = allStackData
 			processStacks(allStackData)
 			await saveAndUpdateNotifictionsAfterStack(false)
+			repaired = true
 		}
 
 		// KICKSTART: a main/simul phase with no current players, or a queue that still names
@@ -1559,12 +1575,24 @@ export async function reloadGameData(updatingFromWSAndCanPlay = false) {
 			store.allStackData = allStackData
 			processStacks(allStackData)
 			await saveAndUpdateNotifictionsAfterStack(false)
+			repaired = true
 		}
 
 		// BOT RECOVERY: if the current player is a bot, auto-process to end its turn and advance the game.
 		// processStacks already strips/handles bots in all phases (main, conflict decision, praying, TO).
 		const firstPlayerIdx = store.gameflow.turnOrder[0]
 		if (!data.transactionID && personal.pov >= 0 && store.gameflow.phase !== rf.PHASE_GAME_OVER && Number.isInteger(firstPlayerIdx) && firstPlayerIdx >= 0 && firstPlayerIdx < store.players.length && store.players[firstPlayerIdx].displayName === rf.BOT_NAME) {
+			const allStackData = data.allStackData || []
+			store.allStackData = allStackData
+			processStacks(allStackData)
+			await saveAndUpdateNotifictionsAfterStack(false)
+			repaired = true
+		}
+
+		// BKS can force a repair when it takes a seat: none of the heuristics above
+		// fired, but the server's current seat/queue may still be stale. Process the
+		// stacks and persist the client's derived current player so it is authoritative.
+		if (forceRepair && !repaired && personal.pov >= 0 && (rf.MAIN_PHASES.includes(store.gameflow.phase) || rf.ALL_PHASE_CONFLICTS.includes(store.gameflow.phase))) {
 			const allStackData = data.allStackData || []
 			store.allStackData = allStackData
 			processStacks(allStackData)

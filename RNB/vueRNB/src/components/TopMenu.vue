@@ -106,9 +106,12 @@ function loadRewind() {
 	}
 }
 
-function clickedLoggedInDiv() {
+async function clickedLoggedInDiv() {
 	if (rf.SUPER_USERS.includes(personal.name)) {
-		personal.pov++
+		const wasObserver = personal.pov < 0
+		// A super-user can open as -1 or -9. Go straight to the first seat rather
+		// than clicking through negative values that are not playable POVs.
+		personal.pov = wasObserver ? 0 : personal.pov + 1
 		if (personal.pov === store.players.length) personal.pov = 0
 		store.gameName = String(personal.pov) + "  :  " + store.players[personal.pov].name
 		// Recompute highlights for the new POV. Do NOT call startPlayerTurn here -
@@ -116,6 +119,17 @@ function clickedLoggedInDiv() {
 		context.resetContextAndHighlights()
 		if (store.gameflow.phase === rf.PHASE_CHOOSE_HOME_TILE) highlight.higlightTilesForStartTile()
 		else highlight.updateAllHighlightsForTransporterMode()
+		// Taking a seat is the admin's chance to repair a stuck game: reloading now
+		// lets the recovery/kickstart blocks run with a non-negative POV, so a stale
+		// queue or a stuck bot turn is fixed and saved before the admin acts.
+		if (wasObserver && personal.pov >= 0) {
+			store.viewSettings.showLoader = true
+			try {
+				await IO.reloadGameData(false, true)
+			} finally {
+				store.viewSettings.showLoader = false
+			}
+		}
 	}
 }
 
