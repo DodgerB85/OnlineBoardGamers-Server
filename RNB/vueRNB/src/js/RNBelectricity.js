@@ -176,24 +176,39 @@ export function isHexPowered(hexID) {
 // ============================================================================
 
 // shortcut: pre-conflict tile fuel cannot be replaced by a transporter to
-// reorder a city good; the plant always leaves city trunks to the sawmill and
-// a transporter can still fuel the plant with its own wood.
-function citySawmillTakesTrunks(hexID) {
+// reorder a city good; the plant always leaves city trunks to the sawmill
+// unless the sawmill cannot use them all.
+function citySawmillTrunkCapacity(hexID) {
 	const hex = model.getHexByID(hexID)
-	return hex.hexTerrainID === rf.CITY && model.getAllInGameBuildings().some((b) => b.location[1] === hexID && b.type === rf.BLDG_SAWMILL)
+	if (hex.hexTerrainID !== rf.CITY) return 0
+	const managerMultiplier = model.getManagerProductionMultiplierForHex(hexID)
+	return model
+		.getAllInGameBuildings()
+		.filter((b) => b.location[1] === hexID && b.type === rf.BLDG_SAWMILL)
+		.reduce((capacity, bldg) => capacity + model.getBuildingStatsFromBuildingID(bldg.id).maxConversions * managerMultiplier, 0)
+}
+
+function findAccessibleFuels(hexID, bucketID, fuelType) {
+	const locations = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation([rf.LOCATION_BUCKET, hexID, bucketID], false, 9)
+	return model.getAllInGameResources().filter((r) => r.type === fuelType && util.includesArray(locations, r.location))
 }
 
 function findAccessibleFuel(hexID, bucketID, fuelType) {
-	const locations = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation([rf.LOCATION_BUCKET, hexID, bucketID], false, 9)
-	return model.getAllInGameResources().find((r) => r.type === fuelType && util.includesArray(locations, r.location)) ?? null
+	return findAccessibleFuels(hexID, bucketID, fuelType)[0] ?? null
+}
+
+function citySawmillCanUseAllTrunks(hexID, bucketID) {
+	const capacity = citySawmillTrunkCapacity(hexID)
+	if (capacity <= 0) return false
+	return findAccessibleFuels(hexID, bucketID, rf.RES_TRUNKS).length <= capacity
 }
 
 // Free fuel sitting on the plant's tile. Board is preferred over trunk, and
-// only the plant's own side of a river is accessible. A city sawmill has first
-// use of trunks (city production order: sawmill, power plant, paper mill, ...).
+// only the plant's own side of a river is accessible. A city sawmill gets first
+// use of the trunks, but a surplus trunk may fire the plant.
 export function findFreeFuelOnTile(hexID, bucketID) {
 	for (const fuelType of [rf.RES_BOARDS, rf.RES_TRUNKS]) {
-		if (fuelType === rf.RES_TRUNKS && citySawmillTakesTrunks(hexID)) continue
+		if (fuelType === rf.RES_TRUNKS && citySawmillCanUseAllTrunks(hexID, bucketID)) continue
 		const res = findAccessibleFuel(hexID, bucketID, fuelType)
 		if (res) return res
 	}

@@ -94,7 +94,7 @@ globalThis.msgpack = globalThis.msgpack || {
 	decode: (buffer) => JSON.parse(new TextDecoder().decode(buffer)),
 }
 
-let rf, hd, map, build, model, graph, stack, produce, useModelStore, usePersonalStore, createPinia, setActivePinia, setupError
+let rf, hd, map, build, model, graph, stack, produce, loc, electricity, useModelStore, usePersonalStore, createPinia, setActivePinia, setupError
 try {
 	await import("../src/pakoLib.js")
 	;({ createPinia, setActivePinia } = await import("pinia"))
@@ -106,6 +106,8 @@ try {
 	graph = await import("../src/js/RNBgraph.js")
 	stack = await import("../src/js/RNBstack.js")
 	produce = await import("../src/js/RNBproduce.js")
+	loc = await import("../src/js/RNBlocation.js")
+	electricity = await import("../src/js/RNBelectricity.js")
 	;({ useModelStore } = await import("../src/stores/RNBstore.js"))
 	;({ usePersonalStore } = await import("../src/stores/RNBpersonal.js"))
 } catch (error) {
@@ -212,6 +214,55 @@ test("a city uses shared unattended goods in the printed production order", { sk
 	assert.equal(store.ALL_RESOURCES.filter((r) => r.type === rf.RES_FUEL).length, 0, "the coal burner gets nothing after the paper mill")
 })
 
+test("a ship on the city moat can use the city but not an adjacent tile", { skip: skip }, () => {
+	const { store } = setupCityMap()
+	const city = store.mapData.hexData[0]
+	store.ALL_TRANSPORTERS.splice(0)
+	store.ALL_RESOURCES.splice(0)
+	const moatVertex = city.riverVertices.find((vertex) => vertex >= 0) ?? 0
+	store.ALL_TRANSPORTERS.push({ id: 0, type: rf.RAFT, uniqueID: "00033000000", location: [rf.LOCATION_RIVER_VERTEX, 0, moatVertex], remainingMoves: 3, ownerIndex: 0, movedThisTurn: false, justPickedUpFromLocation: [], rawTransporterXY: [0, 0] })
+	model.addResourceToGame_core(rf.RES_TRUNKS, [rf.LOCATION_BUCKET, 0, 0], 9)
+	model.addResourceToGame_core(rf.RES_TRUNKS, [rf.LOCATION_BUCKET, 1, 0], 9)
+	const accessible = loc.getAllResourcesAccessibleToTransporter(0, true)
+	assert.ok(accessible.some((r) => r.location[1] === 0), "the ship reaches goods on the city tile")
+	assert.ok(!accessible.some((r) => r.location[1] === 1), "it cannot reach the neighbouring tile")
+})
+
+test("a city only reproduces while it is completely empty", { skip: skip }, () => {
+	const { store } = setupCityMap()
+	store.ALL_BUILDINGS.splice(0)
+	store.ALL_RESOURCES.splice(0)
+	store.ALL_TRANSPORTERS.splice(0)
+	for (let i = 0; i < 2; i++) {
+		store.ALL_TRANSPORTERS.push({ id: i, type: rf.DONKEY, uniqueID: "00031" + i, location: [rf.LOCATION_BUCKET, 0, 0], remainingMoves: 2, ownerIndex: 0, movedThisTurn: false, justPickedUpFromLocation: [] })
+	}
+	assert.equal(produce.findAllDonkeyReproductionHexIDpossibilities(0).length, 1, "an empty city is pasture enough to reproduce")
+	store.ALL_BUILDINGS.push({ id: 0, type: rf.BLDG_SAWMILL, location: [rf.LOCATION_BUCKET, 0, 0] })
+	assert.equal(produce.findAllDonkeyReproductionHexIDpossibilities(0).length, 0, "one building uses the empty half, so no reproduction")
+})
+
+test("a city plant fires from a surplus trunk only after the sawmill's needs are met", { skip: skip }, () => {
+	const { store } = setupCityMap()
+	store.ALL_BUILDINGS.splice(0)
+	store.ALL_RESOURCES.splice(0)
+	store.gameOptions.useElectricity = true
+	store.ALL_BUILDINGS.push(
+		{ id: 0, type: rf.BLDG_SAWMILL, location: [rf.LOCATION_BUCKET, 0, 0], remainingConversions: 3 },
+		{ id: 1, type: rf.BLDG_POWER_PLANT, location: [rf.LOCATION_BUCKET, 0, 0], remainingConversions: 1 }
+	)
+	for (let i = 0; i < 3; i++) model.addResourceToGame_core(rf.RES_TRUNKS, [rf.LOCATION_BUCKET, 0, 0], 9)
+
+	store.context.powerPlantsFueledTurn = -1
+	assert.equal(electricity.fuelPowerPlants().length, 0, "the plant leaves all three trunks to the sawmill")
+	assert.equal(store.ALL_BUILDINGS[1].powerActive, false, "the plant is not fired")
+
+	model.addResourceToGame_core(rf.RES_TRUNKS, [rf.LOCATION_BUCKET, 0, 0], 9)
+	store.context.powerPlantsFueledTurn = -1
+	assert.equal(electricity.fuelPowerPlants().length, 1, "a fourth, surplus trunk fires the plant")
+	assert.equal(store.ALL_BUILDINGS[1].powerActive, true)
+	assert.equal(store.ALL_RESOURCES.filter((r) => r.type === rf.RES_TRUNKS && r.location[0] !== rf.LOCATION_OOB).length, 3, "three trunks remain for the sawmill")
+})
+
 test("a bomb on the tile can destroy a building without being carried", { skip: skip }, () => {
 	const { store } = setupCityMap()
 	store.ALL_BUILDINGS.push({ id: 0, type: rf.BLDG_SAWMILL, location: [rf.LOCATION_BUCKET, 0, 0], uniqueID: "saw" })
@@ -220,6 +271,18 @@ test("a bomb on the tile can destroy a building without being carried", { skip: 
 	map.clickedBombOption(0)
 	assert.equal(store.ALL_BUILDINGS[0].location[0], rf.LOCATION_OOB, "the building is destroyed")
 	assert.equal(store.ALL_RESOURCES.find((r) => r.type === rf.RES_BOMB).location[0], rf.LOCATION_OOB, "the bomb is spent")
+})
+
+test("a bomb carried by another own transporter can destroy a building", { skip: skip }, () => {
+	const { store } = setupCityMap()
+	store.ALL_BUILDINGS.push({ id: 0, type: rf.BLDG_SAWMILL, location: [rf.LOCATION_BUCKET, 0, 0], uniqueID: "saw" })
+	store.ALL_TRANSPORTERS.push({ id: 1, type: rf.WAGON, uniqueID: "00032000000", location: [rf.LOCATION_LAND_VERTEX, 0, 1], remainingMoves: 3, ownerIndex: 0, movedThisTurn: false, justPickedUpFromLocation: [] })
+	model.addResourceToGame_core(rf.RES_BOMB, [rf.LOCATION_BUCKET, 0, 0], 0)
+	store.ALL_RESOURCES.find((r) => r.type === rf.RES_BOMB).location = [rf.LOCATION_TRANSPORTER, 1]
+	store.context.selectedTransporterIDforTM = 0
+	map.clickedBombOption(0)
+	assert.equal(store.ALL_BUILDINGS[0].location[0], rf.LOCATION_OOB, "the building is destroyed")
+	assert.equal(store.ALL_RESOURCES.find((r) => r.type === rf.RES_BOMB).location[0], rf.LOCATION_OOB, "the bomb from the wagon is spent")
 })
 
 test("a city bomb destroys both unstrengthened buildings; a strengthened one survives", { skip: skip }, () => {

@@ -82,18 +82,20 @@ globalThis.document = globalThis.document || {
 globalThis.window.document = globalThis.window.document || globalThis.document
 globalThis.alert = globalThis.alert || (() => {})
 
-let rf, hd, model, produce, stack, atelier, funcs, view, useModelStore, usePersonalStore, createPinia, setActivePinia, setupError
+let rf, hd, map, model, produce, stack, atelier, funcs, view, highlight, useModelStore, usePersonalStore, createPinia, setActivePinia, setupError
 try {
 	await import("../src/pakoLib.js") // attaches the pako browser global used by RNBfuncs.js
 	;({ createPinia, setActivePinia } = await import("pinia"))
 	rf = await import("../src/js/RNBreference.js")
 	hd = await import("../src/js/RNBhex.js")
+	map = await import("../src/js/RNBmap.js")
 	model = await import("../src/js/RNBmodel.js")
 	produce = await import("../src/js/RNBproduce.js")
 	stack = await import("../src/js/RNBstack.js")
 	atelier = await import("../src/js/RNBatelier.js")
 	funcs = await import("../src/js/RNBfuncs.js")
 	view = await import("../src/js/RNBview.js")
+	highlight = await import("../src/js/RNBhighlight.js")
 	;({ useModelStore } = await import("../src/stores/RNBstore.js"))
 	;({ usePersonalStore } = await import("../src/stores/RNBpersonal.js"))
 } catch (error) {
@@ -196,6 +198,27 @@ test("a caravan cannot pick up another transporter", skip, () => {
 
 	const entry = [rf.STACK_PICKUP_TRANSPORTER, 0, 1, [0]]
 	assert.equal(stack.verifySingleStackAction({ action: rf.STACK_PICKUP_TRANSPORTER, historyEntry: entry, playerIndex: 0 }), 4)
+})
+
+test("an exhibition caravan moves through a wall that blocks a donkey", skip, () => {
+	const { store } = setupArtMap()
+	store.gameflow.phase = rf.PHASE_MOVEMENT_TO
+	const across = hd.createActualHex([0, 1, -1], 0, rf.PASTURE_1)
+	across.hexID = 1
+	store.mapData.hexData.push(across)
+	map.addNewEdge([0, 1])
+	store.mapData.edgeData[0].wall = [0, 1] // player 1's wall
+
+	const reachesAcross = () => store.context.hexPiecesToHighlightUnderTransporters.some(([hexID]) => hexID === 1)
+
+	addTransporter(store, 0, rf.EXHIBITION_TRANSPORTER, [rf.LOCATION_LAND_VERTEX, 0, 0])
+	highlight.highlightEligibleHexAreasForTransporterMove(0)
+	assert.ok(reachesAcross(), "the caravan crosses the wall")
+
+	store.ALL_TRANSPORTERS.splice(0)
+	addTransporter(store, 0, rf.DONKEY, [rf.LOCATION_LAND_VERTEX, 0, 0])
+	highlight.highlightEligibleHexAreasForTransporterMove(0)
+	assert.ok(!reachesAcross(), "the donkey is stopped by the wall")
 })
 
 test("every exhibition takes place, and non-shows carry the reason why", skip, () => {

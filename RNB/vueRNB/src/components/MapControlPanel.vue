@@ -67,58 +67,7 @@ function resetLimits() {
 	}
 }
 
-function fixDropFollowingToWaterMove() {
-	const store = useModelStore()
-	let targetAction = JSON.stringify([rf.STACK_DROP_RES_FOLLOWING, 0, [55], [16]])
-	let newAction = [rf.STACK_MOVE_WATER, 0, [13, 0], [16, 0, 0], [], [1, [rf.LOCATION_BUCKET, 16, 0]]]
-
-	for (let i = 0; i < store.history.length; i++) {
-		const entry = store.history[i]
-		if (entry[0] !== rf.HIST_STACK_ACTIONS) continue
-		const stackActions = entry[3]
-		for (let j = 1; j < stackActions.length; j++) {
-			if (JSON.stringify(stackActions[j]) === targetAction) {
-				const newStackActions = [...stackActions]
-				newStackActions[j] = newAction
-				const newEntry = [...entry]
-				newEntry[3] = newStackActions
-				store.history[i] = newEntry
-				console.log(`fixDropFollowingToWaterMove: replaced at history[${i}][3][${j}]`)
-				return true
-			}
-		}
-	}
-	console.log("fixDropFollowingToWaterMove: target action not found")
-
-	targetAction = JSON.stringify([rf.STACK_DROP_RES_FOLLOWING, 0, [ 77 ], [ 16 ] ])
-	newAction = [rf.STACK_MOVE_WATER, 0, [13, 0], [16, 0, 0], [], [1, [rf.LOCATION_BUCKET, 16, 0]]]
-
-	for (let i = 0; i < store.history.length; i++) {
-		const entry = store.history[i]
-		if (entry[0] !== rf.HIST_STACK_ACTIONS) continue
-		const stackActions = entry[3]
-		for (let j = 1; j < stackActions.length; j++) {
-			if (JSON.stringify(stackActions[j]) === targetAction) {
-				const newStackActions = [...stackActions]
-				newStackActions[j] = newAction
-				const newEntry = [...entry]
-				newEntry[3] = newStackActions
-				store.history[i] = newEntry
-				console.log(`fixDropFollowingToWaterMove: replaced at history[${i}][3][${j}]`)
-				return true
-			}
-		}
-	}
-	console.log("fixDropFollowingToWaterMove: target action not found")
-
-	return false
-}
-
 function debugButton() {
-	/*fixDropFollowingToWaterMove()
-	const res = loc.getEligibleLocationsForInteractionWithinHexFromSingleLocation([3, 16, 1, 1, 0], false)
-	alert(JSON.stringify(res))*/
-	
 	let resources = loc.getAllResourcesAccessibleToTransporter(4, true)
 
 	alert(JSON.stringify(resources.map(r => r.id)))

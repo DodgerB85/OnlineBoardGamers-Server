@@ -459,8 +459,8 @@ export function createCompleteGraph(hexData, edgeData, playerIndex, ignoreWalls,
 			const vertexCount = hexIds.map((i) => hexVertexOffset[i])
 			const hasRoad = edge.hasRoad
 
-			// Check if edge is blocked by a wall
-			const blockedByWall = ![playerIndex, -1].includes(edge.wall[1])
+			// Check if edge is blocked by a wall (exhibition caravans ignore walls)
+			const blockedByWall = !ignoreWalls && ![playerIndex, -1].includes(edge.wall[1])
 			// CITY: a city is ringed by a moat, so land movement across its edge needs a bridge+road
 			const involvesCity = hexes.some((h) => h.hexTerrainID === rf.CITY)
 

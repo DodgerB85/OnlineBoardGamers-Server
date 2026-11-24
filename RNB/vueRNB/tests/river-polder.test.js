@@ -93,7 +93,7 @@ globalThis.msgpack = globalThis.msgpack || {
 	decode: (buffer) => JSON.parse(new TextDecoder().decode(buffer)),
 }
 
-let rf, hd, map, graph, wonder, useModelStore, createPinia, setActivePinia, setupError
+let rf, hd, map, graph, wonder, model, useModelStore, createPinia, setActivePinia, setupError
 try {
 	await import("../src/pakoLib.js") // attaches the pako browser global used by RNB code
 	;({ createPinia, setActivePinia } = await import("pinia"))
@@ -101,6 +101,7 @@ try {
 	hd = await import("../src/js/RNBhex.js")
 	map = await import("../src/js/RNBmap.js")
 	graph = await import("../src/js/RNBgraph.js")
+	model = await import("../src/js/RNBmodel.js")
 	;({ useModelStore } = await import("../src/stores/RNBstore.js"))
 	wonder = await import("../src/js/RNBwonder.js")
 } catch (error) {
@@ -230,4 +231,30 @@ test("transporters marooned by a polder flip are excluded from the remaining-mov
 
 	// Not a polder: nothing to flip, so nothing is marooned
 	assert.equal(wonder.isTransporterMarooned({ type: rf.RAFT, location: [rf.LOCATION_LAND_VERTEX, 0, 3] }), false, "a boat on a plain land hex is never marooned here")
+})
+
+test("a stranded transporter can still use a building on its polder", { skip: skip }, () => {
+	const { store } = setupRiverPolderMap()
+	store.mapData.hexData[1].currentTerrain = rf.TERR_POLDER_DRY
+	store.players.splice(0)
+	store.players.push({ name: "A", displayName: "A", colour: 0, RnD: [0, 0, 0, 0, 0, 0, 0, 0] })
+	store.gameflow.turn = 1
+	store.gameflow.phase = rf.PHASE_PRODUCTION_TO
+	store.gameflow.turnOrder = [0]
+	store.gameflow.fullTurnOrder = [0]
+	store.ALL_BUILDINGS.splice(0)
+	store.ALL_RESOURCES.splice(0)
+	store.ALL_TRANSPORTERS.splice(0)
+
+	// A sawmill and one trunk on the polder, with a raft marooned beside them.
+	store.ALL_BUILDINGS.push({ id: 0, type: rf.BLDG_SAWMILL, location: [rf.LOCATION_BUCKET, 1, 0], remainingConversions: 3 })
+	model.addResourceToGame_core(rf.RES_TRUNKS, [rf.LOCATION_BUCKET, 1, 0], 9)
+	store.ALL_TRANSPORTERS.push({ id: 0, type: rf.RAFT, uniqueID: "00033000000", location: [rf.LOCATION_LAND_VERTEX, 1, 1], remainingMoves: 3, ownerIndex: 0, movedThisTurn: false, justPickedUpFromLocation: [], rawTransporterXY: [0, 0] })
+	store.context.selectedTransporterIDforTM = 0
+	store.context.buildingIDsToHighlight = [0]
+
+	assert.equal(wonder.isTransporterMarooned(store.ALL_TRANSPORTERS[0]), true, "the raft cannot move")
+	map.clickedBuilding(0)
+	assert.equal(store.ALL_RESOURCES.filter((r) => r.type === rf.RES_BOARDS).length, 2, "the sawmill produced boards")
+	assert.equal(store.ALL_RESOURCES.filter((r) => r.type === rf.RES_TRUNKS && r.location[0] !== rf.LOCATION_OOB).length, 0, "the trunk was used")
 })

@@ -93,9 +93,9 @@ test("power line buckets only cross a river through a bridge; a city is one node
 	assert.deepEqual([...network.computePoweredBucketKeys([[2, 0, 1]])], ["0:city"])
 })
 
-test("plant fuel uses the plant's bank and leaves city trunks to the sawmill", () => {
+test("plant fuel uses the plant's bank and leaves only usable city trunks to the sawmill", () => {
 	const source = readFileSync(join(import.meta.dirname, "RNBelectricity.js"), "utf8")
-	const first = source.indexOf("function citySawmillTakesTrunks")
+	const first = source.indexOf("function citySawmillTrunkCapacity")
 	const last = source.indexOf("export function getCarriedFuelOnTile", first)
 	const rf = { RES_TRUNKS: 0, RES_BOARDS: 1, CITY: 20, LOCATION_BUCKET: 2, BLDG_SAWMILL: 51 }
 	const hexes = {
@@ -111,6 +111,8 @@ test("plant fuel uses the plant's bank and leaves city trunks to the sawmill", (
 			getHexByID: (id) => hexes[id],
 			getAllInGameBuildings: () => buildings,
 			getAllInGameResources: () => resources,
+			getBuildingStatsFromBuildingID: () => ({ maxConversions: 3 }),
+			getManagerProductionMultiplierForHex: () => 1,
 		},
 		loc: { getEligibleLocationsForInteractionWithinHexFromSingleLocation: (location) => [location] },
 	})
@@ -123,8 +125,13 @@ test("plant fuel uses the plant's bank and leaves city trunks to the sawmill", (
 
 	resources.splice(0, 1)
 	resources.push({ type: rf.RES_TRUNKS, location: [rf.LOCATION_BUCKET, 5, 0] })
-	buildings.push({ type: rf.BLDG_SAWMILL, location: [rf.LOCATION_BUCKET, 5, 0] })
-	assert.equal(findFreeFuel(5, 0), null, "a city sawmill keeps its trunks")
+	buildings.push({ id: 0, type: rf.BLDG_SAWMILL, location: [rf.LOCATION_BUCKET, 5, 0] })
+	assert.equal(findFreeFuel(5, 0), null, "a city sawmill keeps a trunk it can use")
+	resources.push({ type: rf.RES_TRUNKS, location: [rf.LOCATION_BUCKET, 5, 0] })
+	resources.push({ type: rf.RES_TRUNKS, location: [rf.LOCATION_BUCKET, 5, 0] })
+	assert.equal(findFreeFuel(5, 0), null, "all three trunks fit the sawmill")
+	resources.push({ type: rf.RES_TRUNKS, location: [rf.LOCATION_BUCKET, 5, 0] })
+	assert.equal(findFreeFuel(5, 0).type, rf.RES_TRUNKS, "a fourth, surplus trunk can fire the plant")
 	resources.push({ type: rf.RES_BOARDS, location: [rf.LOCATION_BUCKET, 5, 0] })
-	assert.equal(findFreeFuel(5, 0).type, rf.RES_BOARDS, "the plant may still use a board")
+	assert.equal(findFreeFuel(5, 0).type, rf.RES_BOARDS, "the plant may still use a board first")
 })

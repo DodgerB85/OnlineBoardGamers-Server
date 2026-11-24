@@ -245,8 +245,7 @@ export function doPrimaryProduction(performingFromReplay, histEntry = []) {
 
 	// Now check for geese to reproduce - only on land, if on pasture
 	let geese = model.getAllInGameResources().filter((r) => r.type === rf.RES_GOOSE && loc.isBucketLocation(r.location))
-	console.log(JSON.stringify(geese))
-	
+
 	// Split the filter for debugging
 	geese = geese.filter((r) => model.getHexByID(r.location[1]).currentTerrain === rf.TERR_PASTURE)
 	let reproducingGeeseIDs = []

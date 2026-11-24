@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 import Lobby.sharedFunctions.constants as rf
-from Lobby.models import Game, User
+from Lobby.models import Game, Tournament, User
 
 import RNB.RNBconstants as rfRNB
 
@@ -222,3 +222,46 @@ class RNBGameCreationTests(TestCase):
         self.assertEqual(game.maxPlayers, 1)
         self.assertEqual(game.invitedPlayers.count(), 0)
         self.assertEqual(set(game.players.values_list("player__username", flat=True)), {"creator"})
+
+
+class RNBMiniTournamentCreationTests(TestCase):
+    def setUp(self):
+        self.creator = User.objects.create_user(username="creator", password="pw")
+        self.client.force_login(self.creator)
+
+    def test_mini_tournament_stores_etcetera_options_and_map(self):
+        response = self.client.post(
+            reverse("createRNBminiTournament"),
+            {
+                "tournamentName": "Test Cup",
+                "tournamentDescription": "",
+                "tournamentFormat": "RR",
+                "playersPerGameMT": "4",
+                "totalPlayersMT": "8",
+                "invtedPlayersListMT": "[]",
+                "mapData": "[]",
+                "useElectricity": "1",
+                "useManagement": "1",
+                "useArt": "1",
+                "useTrade": "1",
+                "useFundamentalResearch": "1",
+                "usePlanes": "1",
+                "useBombs": "1",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        tournament = Tournament.objects.get(gameCode="RNB")
+        self.assertEqual(
+            json.loads(tournament.startingOptions),
+            [
+                rfRNB.SO_ELECTRICITY,
+                rfRNB.SO_MANAGEMENT,
+                rfRNB.SO_ART,
+                rfRNB.SO_TRADE,
+                rfRNB.SO_FUNDAMENTAL_RESEARCH,
+                rfRNB.SO_PLANES,
+                rfRNB.SO_BOMBS,
+            ],
+        )
+        self.assertEqual(tournament.startingMap, "[]")

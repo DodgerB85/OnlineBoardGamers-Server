@@ -78,8 +78,12 @@ globalThis.document = globalThis.document || {
 }
 globalThis.window.document = globalThis.window.document || globalThis.document
 globalThis.alert = globalThis.alert || (() => {})
+globalThis.msgpack = globalThis.msgpack || {
+	encode: (value) => new TextEncoder().encode(JSON.stringify(value)),
+	decode: (buffer) => JSON.parse(new TextDecoder().decode(buffer)),
+}
 
-let rf, hd, map, model, loc, useModelStore, usePersonalStore, createPinia, setActivePinia, setupError
+let rf, hd, map, model, loc, produce, highlight, useModelStore, usePersonalStore, createPinia, setActivePinia, setupError
 try {
 	await import("../src/pakoLib.js")
 	;({ createPinia, setActivePinia } = await import("pinia"))
@@ -88,6 +92,8 @@ try {
 	map = await import("../src/js/RNBmap.js")
 	model = await import("../src/js/RNBmodel.js")
 	loc = await import("../src/js/RNBlocation.js")
+	produce = await import("../src/js/RNBproduce.js")
+	highlight = await import("../src/js/RNBhighlight.js")
 	;({ useModelStore } = await import("../src/stores/RNBstore.js"))
 	;({ usePersonalStore } = await import("../src/stores/RNBpersonal.js"))
 } catch (error) {
@@ -270,4 +276,70 @@ test("planes can land at sea but not in rivers", { skip }, () => {
 	const riverLandVertex = river.sideNodeIds.find((node) => node >= 0)
 	assert.equal(model.canPlaneLandOnTile(plane, [rf.LOCATION_LAND_VERTEX, 1, riverLandVertex]), true, "landing on a river shore")
 	assert.equal(model.canPlaneLandOnTile(plane, [rf.LOCATION_RIVER_VERTEX, 1, 0]), false, "never in the river itself")
+})
+
+test("a plane in flight may airdrop goods onto any land tile but never onto the sea", { skip }, () => {
+	const { store } = setupMap([
+		[0, [0, 0, 0], rf.PASTURE_1],
+		[1, [0, 1, -1], rf.SEA_1],
+		[2, [1, 0, -1], rf.PASTURE_1],
+	])
+	const plane = addPlane(0, 0)
+	plane.remainingMoves = 98 // already took off
+	store.context.planeInFlight = true
+	store.context.selectedTransporterIDforTM = 0
+	model.addResourceToGame_core(rf.RES_BOARDS, [rf.LOCATION_TRANSPORTER, 0], 9)
+	const board = store.ALL_RESOURCES.find((r) => r.type === rf.RES_BOARDS)
+
+	const buckets = map.getPossibleDropBucketsForResourceOnTransporter(board.id)
+	assert.ok(buckets.some(([hexID]) => hexID === 0), "the plane's own tile is offered")
+	assert.ok(buckets.some(([hexID]) => hexID === 2), "a far land tile is offered")
+	assert.ok(!buckets.some(([hexID]) => hexID === 1), "the sea is never offered")
+
+	const farBucket = buckets.find(([hexID]) => hexID === 2)
+	store.context.action = rf.ACT_TM_ANY_PHASE_STRICT_DROP_RES_OR_TRANSPORT
+	store.context.resIDbeingMoved = board.id
+	map.dropResOrTransporterOnLocation(farBucket[2], true)
+	assert.equal(board.location[1], 2, "the board landed on the far land tile")
+	assert.equal(store.context.planeInFlight, true, "the plane stays in flight for further drops")
+})
+
+test("a taxiing plane follows roads and cannot cross unpaved land", { skip }, () => {
+	const { store } = setupMap([
+		[0, [0, 0, 0], rf.PASTURE_1],
+		[1, [0, 1, -1], rf.PASTURE_1],
+	])
+	addPlane(0, 0)
+	store.context.selectedPlaneMode = rf.MOVE_TAXI
+	const reachesNextTile = () => store.context.hexPiecesToHighlightUnderTransporters.some(([hexID]) => hexID === 1)
+
+	map.addRoadToMap_core([0, 0], [1, 0], -1, false)
+	highlight.highlightEligibleHexAreasForTransporterMove(0)
+	assert.ok(reachesNextTile(), "one road step reaches the next tile")
+
+	store.mapData.edgeData[0].hasRoad = [false, false]
+	highlight.highlightEligibleHexAreasForTransporterMove(0)
+	assert.ok(!reachesNextTile(), "unpaved land is not a taxi move")
+})
+
+test("a plane claims a transporter and research produced on its tile", { skip }, () => {
+	const { store } = setupMap([[0, [0, 0, 0], rf.PASTURE_1]])
+	addPlane(0, 0)
+	store.context.selectedTransporterIDforTM = 0
+	store.context.buildingIDsToHighlight = [0]
+
+	store.ALL_BUILDINGS.push({ id: 0, type: rf.BLDG_TRUCK_FACTORY, location: [rf.LOCATION_BUCKET, 0, 0], remainingConversions: 1 })
+	model.addResourceToGame_core(rf.RES_IRON, [rf.LOCATION_BUCKET, 0, 0], 9)
+	model.addResourceToGame_core(rf.RES_FUEL, [rf.LOCATION_BUCKET, 0, 0], 9)
+	map.clickedBuilding(0)
+	const truck = store.ALL_TRANSPORTERS.find((t) => t.type === rf.TRUCK)
+	assert.ok(truck, "the truck factory produced a truck")
+	assert.equal(truck.ownerIndex, 0, "the plane's player claimed it")
+
+	model.addResourceToGame_core(rf.RES_PAPER, [rf.LOCATION_BUCKET, 0, 0], 9)
+	model.addResourceToGame_core(rf.RES_GOOSE, [rf.LOCATION_BUCKET, 0, 0], 9)
+	model.addResourceToGame_core(rf.RES_GOOSE, [rf.LOCATION_BUCKET, 0, 0], 9)
+	assert.ok(produce.findAllResearchHexIDpossibilities(0).includes(0), "the plane's tile offers research")
+	assert.equal(produce.doResearch_core(0, rf.RND_ROWBOAT_IDX), 2, "the plane spent paper and two geese")
+	assert.equal(store.players[0].RnD[rf.RND_ROWBOAT_IDX], 1, "the research is claimed")
 })
