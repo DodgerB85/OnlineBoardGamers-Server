@@ -3137,10 +3137,11 @@ class KFWpresenter(GamePresenter):
 
     # TODO can this be moved to gen P?
     def getCurrentPlayers(self):
-        # Practice games score the final seats one at a time, but only the seat
-        # whose turn it is gets is_current. Keep offering every unscored seat,
-        # or the seats after the first can never submit.
-        if self.isTrainingGame() and self.gameObj.phase == 4:
+        # Final scoring is seat by seat: every seat without a move still owes one,
+        # whatever is_current says. A practice game or a failed game-over save can
+        # leave the flag on one seat or none, and the client rebuilds its turn
+        # order from this list, so dropping an un-flagged seat strands it.
+        if self.gameObj.phase == 4:
             return [
                 gp.player.username
                 for gp in self.gameObj.players.filter(is_missing=False).exclude(is_kicked=True).select_related("player").order_by("seat_order")
@@ -3268,9 +3269,11 @@ class KFWpresenter(GamePresenter):
         for gp, row in zip(game_players, move_rows, strict=True):
             player_time = row[1]
             player_data = row[2]
-            # ALWAYS add the move data, even if blank, in case of bots
-            # If you don't have a move, AND you're current, then you need to move
-            if player_data == "" and gp.is_current:
+            # The move rows decide who still owes a score, not is_current: a
+            # practice game or a failed game-over save can leave the flag on one
+            # seat or none, and the client rebuilds its turn order from this array.
+            # Missing and kicked seats cannot score, so they must count as ready.
+            if player_data == "" and not gp.is_missing and not gp.is_kicked:
                 readyPlayers.append(False)
                 if player_time == "":
                     player_time = int(time.time() * 1000)
@@ -3282,10 +3285,8 @@ class KFWpresenter(GamePresenter):
                 allPlayerReturnData.append({"timestamp": int(player_time), "content": player_data})
 
         readyWithBots = False
-        # Never finish on an empty slot: a submit while nobody is current would otherwise end the game without that player's scoring data
-        allRequiredMovesIn = all(row[2] != "" for gp, row in zip(game_players, move_rows, strict=True) if not gp.is_missing and not gp.is_kicked)
 
-        if (all(readyPlayers) and allRequiredMovesIn) or readyWithBots:
+        if all(readyPlayers) or readyWithBots:
             jsonResponse.append({"allPlayerReturnData": allPlayerReturnData})
             # Not cleared here: if the client's saveEndGame never arrives, endGame() cannot recover the moves, so keep them for a retry
 

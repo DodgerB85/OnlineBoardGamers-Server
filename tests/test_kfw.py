@@ -180,6 +180,16 @@ class KFWFinalScoringTests(TestCase):
         self.gp_two.refresh_from_db()
         self.assertEqual([self.gp_one.currentMoveData, self.gp_two.currentMoveData], ["final-a", ""])
 
+    def test_unscored_seat_stays_offerable_when_current_flags_are_lost(self):
+        self.set_moves("final-a", "")
+        self.game.players.update(is_current=False)
+
+        presenter = self.game.presenter()
+        self.assertEqual(presenter.getCurrentPlayers(), [self.player_two.username])
+        response = presenter.getJsonMoveResponseFinalScoring()
+        self.assertEqual(next(item["ready"] for item in response if "ready" in item), [True, False])
+        self.assertFalse(response[-1]["allReady"])
+
 
 class KFWTrainingFinalScoringTests(TestCase):
     """Practice games score seat by seat, so the unscored seat must stay current."""
@@ -242,7 +252,13 @@ class KFWTrainingFinalScoringTests(TestCase):
         self.gp_one.currentMoveData = "score-one"
         self.gp_one.save(update_fields=["is_current", "currentMoveTime", "currentMoveData"])
 
-        self.assertEqual(self.game.presenter().getCurrentPlayers(), [self.player_two.username])
+        presenter = self.game.presenter()
+        self.assertEqual(presenter.getCurrentPlayers(), [self.player_two.username])
+        # The client rebuilds its turn order from this response, so the unscored
+        # seat must be offered even though no is_current flag names it.
+        data = presenter.getJsonMoveResponseFinalScoring()
+        self.assertEqual(next(item["ready"] for item in data if "ready" in item), [True, False])
+        self.assertFalse(data[-1]["allReady"])
 
     def test_both_seats_can_finish(self):
         self.submit(self.player_one.username, "score-one")
