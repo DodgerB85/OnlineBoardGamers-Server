@@ -307,15 +307,9 @@ var IO = {
 			}
 
 			var oldOrder = M.gameFlow.turnOrder.slice()
-			if (M.gameFlow.phase === PHASE_BUILD_FACTORY) {
-				M.gameFlow.turnOrder = M.gameFlow.turnOrder.filter(function (seat) {
-					return M.players[seat] && M.players[seat].autoplay !== true
-				})
-			} else {
-				while (M.gameFlow.turnOrder.length > 0 && M.players[M.gameFlow.turnOrder[0]].autoplay === true) {
-					M.gameFlow.turnOrder.shift()
-				}
-			}
+			M.gameFlow.turnOrder = M.gameFlow.turnOrder.filter(function (seat) {
+				return M.players[seat] && M.players[seat].autoplay !== true
+			})
 			if (M.gameFlow.turnOrder.join(",") !== oldOrder.join(",")) needsRepair = true
 			var realCurrentPlayers = (global.currentPlayers || []).filter(function (name) {
 				return name !== "HcBot" && name !== "HlcBot"
