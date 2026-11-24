@@ -539,10 +539,10 @@ function calculateDelivery(game, player) {
 	const highest = startCities[startCities.length - 1]
 	const rt = game.getRailroadTrack()
 	for (const city of startCities) {
-		if (!rt.hasMadeDelivery(player, city) && rt.isAccessibleCity(player, city)) return city
+		if (!rt.hasMadeDelivery(player, city) && rt.isAccessibleCity(player, city, true)) return city
 	}
 	const candidates = rt
-		.possibleDeliveries(player, Number.MAX_SAFE_INTEGER, 0)
+		.possibleDeliveries(player, Number.MAX_SAFE_INTEGER, 0, true)
 		.map((d) => d.city)
 		.filter((city) => CITY_INFO[city].value > CITY_INFO[highest].value)
 	if (candidates.length > 0) {

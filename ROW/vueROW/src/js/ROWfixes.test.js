@@ -24,6 +24,13 @@ function clearDiscChain(game, player) {
         game.perform(player, { type, unlock }, new JavaRandom(100 + i));
     }
 }
+describe("Kansas City delivery cities", () => {
+    it("lists deliverable cities in second edition, where San Francisco is off the strip", () => {
+        const game = Game.start(players(2), defaultOptions(Edition.SECOND), new JavaRandom(5));
+        game.getTrail().movePlayer(game.currentPlayer, "KANSAS_CITY");
+        expect(game.possibleDeliveries().map((d) => d.city)).toContain(City.KANSAS_CITY);
+    });
+});
 describe("UPGRADE_SIMMENTAL (second edition)", () => {
     it("upgrades a Simmental card in hand one step", () => {
         const game = Game.start(players(2), defaultOptions(Edition.SECOND, { simmental: true }), new JavaRandom(3));
