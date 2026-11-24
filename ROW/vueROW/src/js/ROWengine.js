@@ -1672,6 +1672,13 @@ export class Game {
         if (this.isEnded())
             return new Set();
         const set = new Set(this.state.actionStack.getPossibleActions());
+        // Buying cattle and drawing from the cattle deck each cost at least one
+        // cowboy, and an earlier buy or draw in the same activation can empty the
+        // shared pool while these repeats still list the action.
+        if (this.currentPlayerState().cowboysRemaining() === 0) {
+            set.delete(ActionType.BUY_CATTLE);
+            set.delete(ActionType.DRAW_2_CATTLE_CARDS);
+        }
         // Objective cards and exchange tokens are only available once the game has started.
         if (this.state.status === Status.STARTED) {
             if (this.canPlayObjectiveCard())

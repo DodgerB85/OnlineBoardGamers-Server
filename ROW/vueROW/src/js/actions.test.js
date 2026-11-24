@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ActionStack, ActionType, CattleType, Game, JavaRandom, PossibleAction, Unlockable, defaultOptions, neutralBuildingAction, serializeGame, deserializeGame } from "./ROWindex";
+import { ActionStack, ActionType, CattleType, Game, JavaRandom, PossibleAction, Unlockable, Worker, defaultOptions, neutralBuildingAction, serializeGame, deserializeGame } from "./ROWindex";
 import { NEEDS_PARAMS } from "./ROWmap";
 function players(n) {
     const colors = ["RED", "BLUE", "YELLOW", "GREEN"];
@@ -106,6 +106,28 @@ describe("Neutral building F", () => {
         expect(ps.discardPile.every((card) => card.type === CattleType.JERSEY)).toBe(true);
         expect(ps.balance).toBe(4);
         expect(game.possibleActions().has(ActionType.REMOVE_HAZARD)).toBe(true);
+    });
+});
+
+describe("Cattle actions and the shared cowboy pool", () => {
+    it("drops buy and draw once an earlier buy or draw spent every cowboy", () => {
+        const game = Game.start(players(2), defaultOptions(), new JavaRandom(19));
+        const player = game.currentPlayer;
+        const ps = game.currentPlayerState();
+        ps.workers[Worker.COWBOY] = 3;
+        ps.balance = 20;
+        game.state.actionStack = ActionStack.initial([neutralBuildingAction("E", ps.getNumberOfCowboys())]);
+
+        game.perform(player, { type: ActionType.DRAW_2_CATTLE_CARDS }, new JavaRandom(20));
+        expect(game.possibleActions().has(ActionType.DRAW_2_CATTLE_CARDS)).toBe(true);
+
+        const card = game.getCattleMarket().market.find((c) => c.value === 3);
+        game.perform(player, { type: ActionType.BUY_CATTLE, cattleCards: [card], cowboys: 2, dollars: 3 }, new JavaRandom(21));
+
+        expect(ps.cowboysRemaining()).toBe(0);
+        const actions = game.possibleActions();
+        expect(actions.has(ActionType.BUY_CATTLE)).toBe(false);
+        expect(actions.has(ActionType.DRAW_2_CATTLE_CARDS)).toBe(false);
     });
 });
 
