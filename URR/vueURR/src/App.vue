@@ -26,6 +26,7 @@ import TurnOrder from "./components/TurnOrder.vue"
 import TurnControls from "./components/TurnControls.vue"
 import AutoPassToggle from "./components/AutoPassToggle.vue"
 import GameActions from "./components/GameActions.vue"
+import KickoutDialog from "./components/KickoutDialog.vue"
 import WaterForecastPanel from "./components/WaterForecastPanel.vue"
 import StateStrip from "./components/StateStrip.vue"
 import PlayerHoldings from "./components/PlayerHoldings.vue"
@@ -269,6 +270,7 @@ function showDebug() {
 				</Teleport>
 			</div>
 			<aside v-if="!store.viewSettings.showReplay" class="actionSidebar">
+				<KickoutDialog />
 				<WaterForecastPanel v-if="forecast.state.visible" />
 				<div v-show="!forecast.state.visible" class="actionPanelContent">
 					<div v-if="!isNationDivision" class="actionPanelHeading"><small class="actingLabel"><template v-if="actingLabel">{{ actingLabel }}</template><PlayerMarker v-if="actingPlayer !== undefined" :index="actingPlayer" /><span v-if="actingPlayer !== undefined">{{ store.players[actingPlayer].displayName }}</span></small><small v-if="actingState !== null" class="actingLabel actingState"><img :src="assets.getStateOrderImage(actingState)" alt="" />{{ $t("common.state") }}: {{ rf.STATE_NAMES[actingState] }}</small>{{ actionPanelTitle }}</div>

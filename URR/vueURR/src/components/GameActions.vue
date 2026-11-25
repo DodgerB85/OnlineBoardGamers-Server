@@ -4,7 +4,6 @@ let equipmentSiteCache = { key: "", sites: [] }
 
 <script setup>
 import PlayerMarker from "./PlayerMarker.vue"
-import KickoutDialog from "./KickoutDialog.vue"
 import ArtworkCard from "./ArtworkCard.vue"
 import StateLeadership from "./StateLeadership.vue"
 import MarketForecast from "./MarketForecast.vue"
@@ -536,7 +535,6 @@ watch(removeWaterwork, (id) => emit("changeRemoval", id), { immediate: true })
 
 <template>
 	<section class="gameActions" :aria-label="$t('actions.aria')">
-		<KickoutDialog />
 		<div v-if="game.gameflow.endReason && game.gameflow.phase !== rf.PHASE_GAME_OVER" class="endNotice" role="status"><b>{{ $t("actions.finalRound") }}</b> {{ game.gameflow.endReason === 'invasion' ? $t("actions.invasionEnd") : $t("actions.revolutionEnd") }}</div>
 		<template v-if="game.gameflow.phase === rf.PHASE_GAME_OVER">
 			<p class="gameOverReason">{{ endReasonText }}</p>
