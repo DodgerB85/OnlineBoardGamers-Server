@@ -1,4 +1,6 @@
 // it messages. Missing keys fall back to en.
+// Italian strings confirmed by the project owner live in it.confirmed.js and win over this file.
+// Do not replace those with AI-generated translations.
 export default {
 	"actionArea": {
 		"placeInitialHousesGardens": "Posiziona le tue case e i tuoi giardini iniziali",

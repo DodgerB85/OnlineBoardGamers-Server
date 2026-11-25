@@ -9,6 +9,7 @@ import es from './es.js'
 import esExtra from './es.extra.js'
 import it from './it.js'
 import itExtra from './it.extra.js'
+import itConfirmed from './it.confirmed.js'
 
 // Later translation passes live in *.extra.js; keep the main files untouched.
 const withExtra = (messages, extra) => merge(merge({}, messages), extra)
@@ -19,7 +20,7 @@ export const messages = {
 	de: withExtra(de, deExtra),
 	fr: withExtra(fr, frExtra),
 	es: withExtra(es, esExtra),
-	it: withExtra(it, itExtra),
+	it: withExtra(withExtra(it, itExtra), itConfirmed),
 }
 
 export default messages
