@@ -49,9 +49,12 @@ if not DEBUG:
 
     CSRF_COOKIE_SECURE = True
     CSRF_TRUSTED_ORIGINS = [
-        "https://www.onlineboardgamers.com",
-        "https://onlineboardgamers.com",
-        "https://webapp-1380192.pythonanywhere.com",
+        origin.strip()
+        for origin in config(
+            "CSRF_TRUSTED_ORIGINS",
+            default="https://www.onlineboardgamers.com,https://onlineboardgamers.com,https://webapp-1380192.pythonanywhere.com",
+        ).split(",")
+        if origin.strip()
     ]
     USE_X_FORWARDED_HOST = False
 
@@ -69,11 +72,14 @@ LOGIN_URL = "myLogin"
 if LOCAL_USER and DEBUG:
     ALLOWED_HOSTS = ["localhost", "192.168.1.2", "127.0.0.1", "obs"]
 else:
-    # ALLOWED_HOSTS = ['pythonanywhere']
+    # PythonAnywhere values are the defaults; a VPS stack sets these in .env.
     ALLOWED_HOSTS = [
-        "www.onlineboardgamers.com",
-        "onlineboardgamers.com",
-        "webapp-1380192.pythonanywhere.com",
+        host.strip()
+        for host in config(
+            "ALLOWED_HOSTS",
+            default="www.onlineboardgamers.com,onlineboardgamers.com,webapp-1380192.pythonanywhere.com",
+        ).split(",")
+        if host.strip()
     ]
 
 if LOCAL_USER:
@@ -290,13 +296,17 @@ elif LOCAL_USER:
         }
     }
 else:
+    # PythonAnywhere values are the defaults; the Docker stack overrides them.
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",
-            "NAME": "OnlineGaming$default",
-            "USER": "OnlineGaming",
+            "NAME": config("PRODUCTION_DB_NAME", default="OnlineGaming$default"),
+            "USER": config("PRODUCTION_DB_USER", default="OnlineGaming"),
             "PASSWORD": config("PRODUCTION_DB_PWD"),
-            "HOST": "OnlineGaming.mysql.pythonanywhere-services.com",
+            "HOST": config(
+                "PRODUCTION_DB_HOST",
+                default="OnlineGaming.mysql.pythonanywhere-services.com",
+            ),
             "OPTIONS": {
                 "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
                 "charset": "utf8mb4",

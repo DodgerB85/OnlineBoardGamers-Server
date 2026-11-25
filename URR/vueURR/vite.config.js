@@ -36,7 +36,7 @@ export default defineConfig(({ command }) => ({
 	resolve: {
 		alias: command === "serve" ? [{ find: "@static", replacement: fileURLToPath(new URL("./src", import.meta.url)) }] : [{ find: "@static", replacement: fileURLToPath(new URL("../static", import.meta.url)) }],
 	},
-	base: command === "serve" ? "/static/" : "https://www.onlineboardgamers.com/static/URR",
+	base: command === "serve" ? "/static/" : "/static/URR/",
 	build: {
 		outDir: resolve("../static/URR/URRvuedist"),
 		assetsDir: "./assets",

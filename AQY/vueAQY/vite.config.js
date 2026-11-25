@@ -121,12 +121,12 @@ export default defineConfig(({ command }) => ({
 				: [
 						{
 							find: "@static",
-							replacement: "https://www.onlineboardgamers.com/static",
+							replacement: "/static",
 						},
 					],
 	},
 
-	base: command === "serve" ? "/static/" : "https://www.onlineboardgamers.com/static/AQY/",
+	base: command === "serve" ? "/static/" : "/static/AQY/",
 
 	build: {
 		outDir: resolve("../static/AQY/AQYvuedist"),

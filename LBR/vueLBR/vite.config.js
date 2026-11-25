@@ -28,7 +28,7 @@ export default defineConfig(({ command }) => ({
 			allow: ["..", "../..", "/static", resolve("../static"), resolve("../../static"), resolve("../../")],
 		},
 	},
-	base: command === "serve" ? "/static/" : "https://www.onlineboardgamers.com/static/LBR",
+	base: command === "serve" ? "/static/" : "/static/LBR/",
 	build: {
 		outDir: resolve("../static/LBR/LBRvuedist"),
 		assetsDir: "./assets",

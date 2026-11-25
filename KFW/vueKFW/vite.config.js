@@ -44,7 +44,7 @@ export default defineConfig(({ command }) => ({
         ? [{ find: "@static", replacement: fileURLToPath(new URL("./src", import.meta.url)) }]
         : [{ find: "@static", replacement: fileURLToPath(new URL("../static", import.meta.url)) }]
   },
-   base: command === "serve" ? "/static/" : "https://www.onlineboardgamers.com/static/KFW",
+   base: command === "serve" ? "/static/" : "/static/KFW/",
   build: {
     outDir: resolve("../static/KFW/KFWvuedist"),
     assetsDir: "./assets",

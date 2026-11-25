@@ -70,11 +70,16 @@ curl -IL https://www.onlineboardgamers.com/      # at most one redirect, then 20
 If a browser has cached an old redirect, test in a private window and clear
 site data. Purge the Cloudflare cache if a bad redirect was cached at the edge.
 
+The Docker production stack binds its bundled nginx to `127.0.0.1` only and
+forwards `X-Forwarded-Proto: https` to Django. The host reverse proxy must still
+terminate TLS and must not expose that loopback port.
+
 ## Health checks
 
-This repository has no production health check. `docker-compose.yml` is the
-development stack and has no `healthcheck:`; PythonAnywhere does not use Docker
-health checks.
+This repository has no HTTP health check. `docker-compose.yml` is the
+development stack and has no `healthcheck:`. `docker-compose.prod.yml`
+healthchecks MySQL and gates app startup on migrations and static collection;
+PythonAnywhere does not use Docker health checks.
 
 Check whatever runs outside the repo:
 

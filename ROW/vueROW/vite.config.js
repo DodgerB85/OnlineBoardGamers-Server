@@ -35,7 +35,7 @@ export default defineConfig(({ command }) => ({
 			{ find: "@static", replacement: command === "serve" ? fileURLToPath(new URL("./src", import.meta.url)) : fileURLToPath(new URL("../static", import.meta.url)) },
 		],
 	},
-	base: command === "serve" ? "/static/" : "https://www.onlineboardgamers.com/static/ROW",
+	base: command === "serve" ? "/static/" : "/static/ROW/",
 	build: {
 		outDir: resolve("../static/ROW/ROWvuedist"),
 		assetsDir: "./assets",

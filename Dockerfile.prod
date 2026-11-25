@@ -1,0 +1,23 @@
+FROM python:3.13-alpine
+
+# mysqlclient needs the connector and a compiler only while pip builds it.
+RUN apk add --no-cache mariadb-connector-c-dev nodejs mysql-client tzdata
+RUN apk add --no-cache --virtual build-deps gcc musl-dev pkgconf mariadb-dev
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt \
+    && apk del build-deps
+
+# Vue bundles are the committed *vuedist folders; init.sh collects them.
+COPY . /app/
+# Git on Windows does not preserve the executable bit for the vendored AI binary.
+RUN chmod +x /app/LBR/ai-service/bin/lbr-policy
+
+EXPOSE 8000
+
+CMD ["gunicorn", "OnlineBoardGamers.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "2", "--timeout", "120", "--graceful-timeout", "30", "--access-logfile", "-", "--error-logfile", "-"]

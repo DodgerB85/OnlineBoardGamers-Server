@@ -69,7 +69,9 @@ Useful commands (or use the TUI directly):
 - `process-compose process start web` — restart it
 - `process-compose down` — stop everything
 
-## Docker
+## Docker (development)
+
+This stack is for local development: it runs all 14 Vite servers with hot reload. For a server, use the [Docker production stack](#docker-production-stack).
 
 1. Install Docker Desktop (Windows/macOS) or Docker Engine + Compose (Linux).
 2. Clone the repo and open a terminal in its root.
@@ -103,7 +105,28 @@ MySQL is published on 3307 if you want to connect a client.
 Backend tests use Django's unittest runner: `python manage.py test tests.test_<name>`. The Vue clients for FCM, IND, ROW, KFW and RNB have frontend tests: run `npm test` in the game's `vue<GAME>` folder. See [docs/UNIT_TESTS.md](docs/UNIT_TESTS.md) for details.
 
 ## Deployment
-Deployments are done manually by running a batch script to do a git pull / collectstatic / etc.
+Production currently runs on PythonAnywhere; deployments there are done manually with a batch script (git pull / collectstatic / etc).
+
+### Docker production stack
+
+`docker-compose.prod.yml` runs the compiled site without any Vite servers on a single host. It needs Docker Engine + Compose and an HTTPS reverse proxy already running on the host; the stack publishes only `127.0.0.1:8001`.
+
+1. Copy `.env.prod.example` to `.env` on the server and fill in every secret. Keep `DEBUG=False` and every `*_USE_SOURCE_CODE=False`.
+2. Start it:
+
+   ```bash
+   docker compose -f docker-compose.prod.yml up -d --build
+   ```
+
+   The one-shot `init` service runs migrations, `collectstatic` and offline compression before `obs` and `worker` start.
+3. Point the host reverse proxy at `http://127.0.0.1:8001`, preserve the `Host` header and send `X-Forwarded-Proto: https`.
+4. On a fresh database, create an admin with `docker compose -f docker-compose.prod.yml exec obs python manage.py createsuperuser`.
+
+To move an existing database, start only the database (`docker compose -f docker-compose.prod.yml up -d db`), import the dump, then start the full stack. Never run `setup_db_script.sh` in production; it creates the development users.
+
+Updates are `git pull` followed by `docker compose -f docker-compose.prod.yml up -d --build`. Follow logs with `docker compose -f docker-compose.prod.yml logs -f obs worker web`.
+
+The deploy image uses the committed `*vuedist` bundles. After changing a game's Vue source, run `npm run build` in its `vue<GAME>` folder, delete the stray `images/` output (RNB also leaves `help/`), and commit the regenerated dist.
 
 ## Production
 PA runs the Django server; there's a qcluster for async tasks (not currently used due technical limitations on PA that I'm in the process of working around), and the scripts in ./siteUtils generally run once a day to perform upkeep / notification emails.

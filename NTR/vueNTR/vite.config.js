@@ -36,7 +36,7 @@ export default defineConfig(({ command }) => ({
   },
   // NTR serves its images straight from Django (/static/NTR/images/...), so it
   // needs no @static alias or /static proxy the other games use.
-  base: command === "serve" ? "/static/" : "https://www.onlineboardgamers.com/static/NTR",
+  base: command === "serve" ? "/static/" : "/static/NTR/",
   build: {
     outDir: resolve("../static/NTR/NTRvuedist"),
     assetsDir: "./assets",

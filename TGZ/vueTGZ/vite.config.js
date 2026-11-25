@@ -112,7 +112,7 @@ export default defineConfig(({ command }) => ({
  resolve: {
 		alias: command === "serve" ? [{ find: "@static", replacement: fileURLToPath(new URL("./src", import.meta.url)) }] : [{ find: "@static", replacement: fileURLToPath(new URL("../static", import.meta.url)) }],
 	},
-   base: command === "serve" ? "/static/" : "https://www.onlineboardgamers.com/static/TGZ",
+   base: command === "serve" ? "/static/" : "/static/TGZ/",
   build: {
     outDir: resolve("../static/TGZ/TGZvuedist"),
     assetsDir: "./assets",

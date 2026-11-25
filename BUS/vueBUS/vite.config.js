@@ -47,12 +47,12 @@ export default defineConfig(({ command }) => ({
 				: [
 						{
 							find: "@static",
-							replacement: "https://www.onlineboardgamers.com/static",
+							replacement: "/static",
 						},
 					],
 	},
 
-	base: command === "serve" ? "/static/" : "https://www.onlineboardgamers.com/static/BUS/",
+	base: command === "serve" ? "/static/" : "/static/BUS/",
 
 	build: {
 		outDir: resolve("../static/BUS/BUSvuedist"),

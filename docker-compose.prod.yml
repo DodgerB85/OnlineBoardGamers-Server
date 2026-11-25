@@ -1,0 +1,103 @@
+name: onlineboardgamers
+
+x-app-build: &app-build
+  context: .
+  dockerfile: Dockerfile.prod
+
+x-app-environment: &app-environment
+  DEBUG: "False"
+  LOCAL_USER: "False"
+  LOCAL_USER_SQLITE3: "False"
+  PRODUCTION_DB_HOST: db
+  PRODUCTION_DB_NAME: ${MYSQL_DATABASE}
+  PRODUCTION_DB_USER: ${MYSQL_USER}
+  PRODUCTION_DB_PWD: ${MYSQL_PASSWORD}
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  db:
+    image: mysql:9.5
+    env_file:
+      - .env
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    restart: unless-stopped
+    logging: *default-logging
+
+  # One-shot: migrations and static collection before the app starts.
+  init:
+    build: *app-build
+    command: ["sh", "docker/prod/init.sh"]
+    working_dir: /app
+    env_file:
+      - .env
+    environment: *app-environment
+    volumes:
+      - static:/app/staticfiles
+      - ./logs:/app/logs
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+    stop_grace_period: 60s
+    logging: *default-logging
+
+  obs:
+    build: *app-build
+    working_dir: /app
+    env_file:
+      - .env
+    environment: *app-environment
+    volumes:
+      - static:/app/staticfiles:ro
+      - ./logs:/app/logs
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    stop_grace_period: 60s
+    logging: *default-logging
+
+  worker:
+    build: *app-build
+    command: ["python", "manage.py", "qcluster"]
+    working_dir: /app
+    env_file:
+      - .env
+    environment: *app-environment
+    volumes:
+      - static:/app/staticfiles:ro
+      - ./logs:/app/logs
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    stop_grace_period: 60s
+    logging: *default-logging
+
+  web:
+    image: nginx:1.29-alpine
+    volumes:
+      - static:/staticfiles:ro
+      - ./docker/prod/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "127.0.0.1:${OBS_HTTP_PORT:-8001}:80"
+    depends_on:
+      - obs
+    restart: unless-stopped
+    logging: *default-logging
+
+volumes:
+  db_data:
+  static:

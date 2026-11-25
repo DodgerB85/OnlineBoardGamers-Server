@@ -56,9 +56,8 @@ export default defineConfig(({ command }) => ({
         ? [{ find: "@static", replacement: fileURLToPath(new URL("./src", import.meta.url)) }]
         : [{ find: "@static", replacement: fileURLToPath(new URL("../static", import.meta.url)) }]
   },
-   // Production serves assets from the absolute site URL; local test builds can
-   // point back at the local Django server by setting VITE_BASE_URL=/static/FCM
-   base: command === "serve" ? "/static/" : (process.env.VITE_BASE_URL || "https://www.onlineboardgamers.com/static/FCM"),
+   // Production assets stay on the current host; VITE_BASE_URL can override.
+   base: command === "serve" ? "/static/" : (process.env.VITE_BASE_URL || "/static/FCM/"),
   build: {
     outDir: resolve("../static/FCM/FCMvuedist"),
     assetsDir: "./assets",

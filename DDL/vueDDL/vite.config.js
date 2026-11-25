@@ -27,7 +27,7 @@ export default defineConfig(({ command }) => ({
 	resolve: {
 		alias: command === "serve" ? [{ find: "@static", replacement: fileURLToPath(new URL("./src", import.meta.url)) }] : [{ find: "@static", replacement: fileURLToPath(new URL("../static", import.meta.url)) }],
 	},
-	base: command === "serve" ? "/static/" : "https://www.onlineboardgamers.com/static/DDL",
+	base: command === "serve" ? "/static/" : "/static/DDL/",
 	build: {
 		outDir: resolve("../static/DDL/DDLvuedist"),
 		assetsDir: "./assets",
