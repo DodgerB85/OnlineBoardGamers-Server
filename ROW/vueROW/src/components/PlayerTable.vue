@@ -134,9 +134,7 @@ function auxOfferedActions() {
 }
 
 function auxRowAvailable(row) {
-	if (!actable.value) return false
-	if (store.actions.includes(row.double) || store.actions.includes(row.single)) return true
-	if (!auxWrapper.value) return false
+	if (!actable.value || !auxWrapper.value) return false
 	const offered = auxOfferedActions()
 	return offered.has(row.double) || offered.has(row.single)
 }
@@ -150,13 +148,7 @@ function runAuxiliaryAction(action) {
 }
 
 function activateAuxiliaryAction(row) {
-	if (!actable.value) return
-	const direct = store.actions.includes(row.double) ? row.double : store.actions.includes(row.single) ? row.single : null
-	if (direct) {
-		runAuxiliaryAction(direct)
-		return
-	}
-	if (!auxWrapper.value) return
+	if (!actable.value || !auxWrapper.value) return
 	// The wrapper only opens the choice; picking the row's best action is the player's click.
 	if (!controller.perform({ type: auxWrapper.value })) return
 	const after = store.actions.includes(row.double) ? row.double : store.actions.includes(row.single) ? row.single : null

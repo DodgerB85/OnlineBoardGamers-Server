@@ -961,9 +961,9 @@ function leaveTarget(t) {
 						v-if="hoveredBuilding"
 						:key="hoveredBuilding.name"
 						class="buildingOverlay"
-						@mouseenter="hoverLocation(hoveredBuilding.name)"
-						@mouseleave="unhoverLocation(hoveredBuilding.name)"
-						@click="clickLocation(hoveredBuilding.name)"
+						@mouseenter="hoverLocation(hoveredBuilding?.name)"
+						@mouseleave="unhoverLocation(hoveredBuilding?.name)"
+						@click="clickLocation(hoveredBuilding?.name)"
 					>
 						<g :transform="hoveredBuilding.transform">
 							<image :href="hoveredBuilding.img" :x="hoveredBuilding.rect.x" :y="hoveredBuilding.rect.y" :width="hoveredBuilding.rect.w" :height="hoveredBuilding.rect.h" />

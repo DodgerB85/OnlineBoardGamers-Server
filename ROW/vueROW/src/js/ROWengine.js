@@ -1102,12 +1102,12 @@ export class RailroadTrack {
     transportCosts(player, city) {
         return Math.max(0, numberOfSignals(CITY_INFO[city].value) - this.signalsPassed(player));
     }
-    possibleDeliveries(player, handValue, extraCertificates = 0) {
+    possibleDeliveries(player, handValue, extraCertificates = 0, isComputer = false) {
         const passed = this.signalsPassed(player);
         const out = [];
         for (const city of Object.keys(CITY_INFO)) {
             const value = CITY_INFO[city].value;
-            if (!this.canDeliver(player, city))
+            if (!this.canDeliver(player, city, isComputer))
                 continue;
             if (value > handValue + extraCertificates)
                 continue;
@@ -1124,8 +1124,8 @@ export class RailroadTrack {
         return (this.branchlets[townName] ?? []).includes(player);
     }
     /** Java's RailroadTrack.canDeliver. */
-    canDeliver(player, city) {
-        return this.isAccessibleCity(player, city) && (!this.hasMadeDelivery(player, city) || this.isMultipleDeliveries(city));
+    canDeliver(player, city, isComputer = false) {
+        return this.isAccessibleCity(player, city, isComputer) && (!this.hasMadeDelivery(player, city) || this.isMultipleDeliveries(city));
     }
     /** Cities that may be delivered to more than once (RailroadTrack.isMultipleDeliveries). */
     isMultipleDeliveries(city) {
@@ -1136,10 +1136,10 @@ export class RailroadTrack {
         return city === City.NEW_YORK_CITY;
     }
     /** On the active strip, or behind a branchlet the player placed on that city's big town. */
-    isAccessibleCity(player, city) {
+    isAccessibleCity(player, city, isComputer = false) {
         if (this.cityStrip.includes(city))
             return true;
-        if (city === City.SAN_FRANCISCO && this.isComputer(player))
+        if (city === City.SAN_FRANCISCO && isComputer)
             return true;
         const town = RTTN_BIG_TOWNS[city];
         return !!town && this.hasBranchlet(town, player);
@@ -1654,13 +1654,13 @@ export class Game {
         const p = player ?? this.currentPlayer;
         const ps = this.playerState(p);
         if (this.state.trail.atKansasCity(p)) {
-            return this.state.railroadTrack.possibleDeliveries(p, ps.handValue(), ps.tempCertificates + ps.permanentCertificates());
+            return this.state.railroadTrack.possibleDeliveries(p, ps.handValue(), ps.tempCertificates + ps.permanentCertificates(), this.isComputer(p));
         }
         // Extraordinary delivery (building 9A): only cities the player may deliver to, and only
         // those whose value fits the engine's last backward move.
         const out = [];
         for (const city of Object.keys(CITY_INFO)) {
-            if (!this.state.railroadTrack.canDeliver(p, city))
+            if (!this.state.railroadTrack.canDeliver(p, city, this.isComputer(p)))
                 continue;
             const value = CITY_INFO[city].value;
             if (value <= ps.lastEngineMove)
@@ -1672,6 +1672,13 @@ export class Game {
         if (this.isEnded())
             return new Set();
         const set = new Set(this.state.actionStack.getPossibleActions());
+        // Buying cattle and drawing from the cattle deck each cost at least one
+        // cowboy, and an earlier buy or draw in the same activation can empty the
+        // shared pool while these repeats still list the action.
+        if (this.currentPlayerState().cowboysRemaining() === 0) {
+            set.delete(ActionType.BUY_CATTLE);
+            set.delete(ActionType.DRAW_2_CATTLE_CARDS);
+        }
         // Objective cards and exchange tokens are only available once the game has started.
         if (this.state.status === Status.STARTED) {
             if (this.canPlayObjectiveCard())
@@ -2735,10 +2742,11 @@ export class Game {
         const track = this.state.railroadTrack;
         const ps = this.currentPlayerState();
         const atKc = this.atKansasCity();
+        const isComputer = this.isComputer(this.currentPlayer);
         // Java's RailroadTrack.deliverToCity: on the active strip (or behind a branchlet) and not
         // delivered to yet, unless the city allows repeat deliveries.
-        if (!track.canDeliver(this.currentPlayer, city)) {
-            if (!track.isAccessibleCity(this.currentPlayer, city))
+        if (!track.canDeliver(this.currentPlayer, city, isComputer)) {
+            if (!track.isAccessibleCity(this.currentPlayer, city, isComputer))
                 throw new ROWException(ROWError.CITY_NOT_ACCESSIBLE);
             throw new ROWException(ROWError.ALREADY_DELIVERED_TO_CITY);
         }
