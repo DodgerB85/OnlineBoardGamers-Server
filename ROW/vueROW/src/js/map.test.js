@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ActionType, CattleType, Game, JavaRandom, defaultOptions } from "./ROWindex";
 import { neutralBuildingAction, playerBuildingAction } from "./ROWdata";
-import { armedTrailMove, buildingActionRegions, canAffordAction, canPlaceBuilding, cardActionsFor, trailMoveTargets, trailRoute } from "./ROWmap";
+import { armedTrailMove, buildingActionRegions, canAffordAction, canPlaceBuilding, cardActionsFor, singleAuxiliaryOnly, trailMoveTargets, trailRoute } from "./ROWmap";
 
 function players(n) {
     const colors = ["RED", "BLUE", "YELLOW", "GREEN"];
@@ -98,6 +98,20 @@ describe("cardActionsFor (click a hand card for any live action)", () => {
     });
     it("returns nothing when the live action does not apply", () => {
         expect(cardActionsFor(jersey, [jersey], [ActionType.MOVE])).toEqual([]);
+    });
+});
+
+describe("singleAuxiliaryOnly (phase B stop restrictions)", () => {
+    it("marks hazards, teepees and another player's private building", () => {
+        expect(singleAuxiliaryOnly({ kind: "HAZARD", hazard: { type: "FLOOD" } }, "A")).toBe(true);
+        expect(singleAuxiliaryOnly({ kind: "TEEPEE", teepee: "GREEN" }, "A")).toBe(true);
+        expect(singleAuxiliaryOnly({ kind: "BUILDING", building: { name: "1a", player: "B" } }, "A")).toBe(true);
+    });
+    it("leaves neutral and own buildings alone", () => {
+        expect(singleAuxiliaryOnly({ kind: "BUILDING", building: { name: "A", player: null } }, "A")).toBe(false);
+        expect(singleAuxiliaryOnly({ kind: "BUILDING", building: { name: "1a", player: "A" } }, "A")).toBe(false);
+        expect(singleAuxiliaryOnly({ kind: "KANSAS_CITY" }, "A")).toBe(false);
+        expect(singleAuxiliaryOnly(null, "A")).toBe(false);
     });
 });
 

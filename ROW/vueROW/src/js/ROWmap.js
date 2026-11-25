@@ -322,6 +322,13 @@ export function moveDestination(m) {
 	return m.steps[m.steps.length - 1]
 }
 
+/** True when ending the move here leaves only one single auxiliary action in phase B. */
+export function singleAuxiliaryOnly(location, player) {
+	if (!location) return false
+	if (location.hazard || location.teepee) return true
+	return location.kind === "BUILDING" && !!location.building && location.building.player !== null && location.building.player !== player
+}
+
 /** The spots walked between two adjacent spots of a route, filled in with the empty ones. */
 function trailGap(trail, from, to) {
 	if (from === to) return [from]

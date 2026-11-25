@@ -27,6 +27,9 @@ export function getImage(image) {
 	if (image === "icon-notebook") return asset("images/icon-notebook.svg")
 	if (image === "icon-scroll") return asset("images/icon-scroll.svg")
 	if (image === "icon-replay") return asset("images/icon-replay.svg")
+	if (image === "icon-building") return asset("images/row/icons/building.jpg")
+	if (image === "icon-objectives") return asset("images/row/icons/objectives.jpg")
+	if (image === "icon-danger") return asset("images/row/icons/danger.jpg")
 	if (image === "resign") return asset("images/resign.jpg")
 	return ""
 }

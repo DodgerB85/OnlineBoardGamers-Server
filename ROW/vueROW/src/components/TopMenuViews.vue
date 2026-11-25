@@ -3,6 +3,9 @@ import { computed, nextTick, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import * as model from "../js/ROWmodel"
 import * as rf from "../js/ROWreference"
+import * as view from "../js/ROWview"
+import { OBJECTIVE_CARD_TYPES } from "../js/ROWdata"
+import CardView from "./CardView.vue"
 import { useModelStore } from "../stores/ROWstore.js"
 import { usePersonalStore } from "../stores/ROWpersonal.js"
 import { castVote, decompress, saveNotes, sendChatMessage, submitBug } from "../backend/ROW_IO.js"
@@ -51,6 +54,34 @@ function playerMarkerStyle(name) {
 	const player = playerByName(name)
 	return player ? { backgroundColor: player.color.toLowerCase() } : {}
 }
+
+const playerInfo = computed(() => {
+	store.version
+	const game = store.game
+	if (!game) return []
+	return (store.state?.players ?? []).map((player) => {
+		let ps = null
+		try {
+			ps = game.playerState(player.name)
+		} catch {
+			ps = null
+		}
+		const color = player.color?.toLowerCase() ?? "red"
+		return {
+			name: player.name,
+			buildings: (ps?.buildings ?? []).map((building) => ({
+				name: building,
+				img: view.buildingImage(game.edition, building, color),
+			})),
+			objectives: (ps?.objectives ?? [])
+				.map((entry) => {
+					const id = typeof entry === "string" ? entry : entry?.objectiveCard?.id ?? entry?.id
+					return id ? OBJECTIVE_CARD_TYPES[id] : null
+				})
+				.filter(Boolean),
+		}
+	})
+})
 
 async function sendChat() {
 	if (!chatMessage.value.trim() || sendingChat.value) return
@@ -180,9 +211,25 @@ async function castVoteFor(topic) {
 			</div>
 		</transition>
 		<transition name="slidePanel">
-			<div v-if="store.viewSettings.showInfo" class="panel" role="region" :aria-label="t('topMenu.info')" tabindex="-1" @keydown.esc.stop.prevent="closePanels">
+			<div v-if="store.viewSettings.showInfo" class="panel infoPanel" role="region" :aria-label="t('topMenu.info')" tabindex="-1" @keydown.esc.stop.prevent="closePanels">
 				<h3>{{ t('topMenu.info') }}</h3>
-				<div v-for="p in store.state?.players ?? []" :key="p.name">{{ p.name }}</div>
+				<div v-for="p in playerInfo" :key="p.name" class="playerInfo">
+					<h4 :style="playerStyle(p.name)">{{ p.name }}</h4>
+					<div class="infoSection">
+						<h5><img class="infoIcon" :src="view.getImage('icon-objectives')" alt="" />{{ t('row.score.OBJECTIVE_CARDS') }}</h5>
+						<div v-if="p.objectives.length" class="infoObjectives">
+							<CardView v-for="(card, i) in p.objectives" :key="i" :card="card" />
+						</div>
+						<div v-else class="infoEmpty">{{ t('app.empty') }}</div>
+					</div>
+					<div class="infoSection">
+						<h5><img class="infoIcon" :src="view.getImage('icon-building')" alt="" />{{ t('row.buildingsDialog') }}</h5>
+						<div v-if="p.buildings.length" class="infoSupply">
+							<img v-for="b in p.buildings" :key="b.name" class="infoBuilding" :src="b.img" :alt="b.name" :title="b.name" loading="lazy" />
+						</div>
+						<div v-else class="infoEmpty">{{ t('app.empty') }}</div>
+					</div>
+				</div>
 				<div v-if="store.missingPlayers.length" class="missing">{{ t('app.missing', { players: store.missingPlayers.join(", ") }) }}</div>
 			</div>
 		</transition>
@@ -227,6 +274,16 @@ async function castVoteFor(topic) {
 .chatentry .messageBody { overflow: auto; white-space: pre-wrap; }
 .chatMarker { display: inline-block; width: 10px; height: 10px; border: 1px solid #333; border-radius: 50%; vertical-align: middle; margin-left: 4px; }
 .missing { color: #b00000; font-weight: bold; }
+.infoPanel { text-align: left; max-width: 1100px; margin-left: auto; margin-right: auto; }
+.infoPanel > h3 { text-align: center; }
+.playerInfo { margin: 8px 0; padding: 8px; border: 1px solid #666; background: #f7fcff; }
+.playerInfo h4 { display: inline-block; margin: 0 0 6px; font-size: 15px; }
+.infoSection { margin-top: 6px; }
+.infoSection h5 { display: flex; align-items: center; gap: 6px; margin: 0 0 4px; font-size: 14px; }
+.infoIcon { width: 20px; height: 20px; border-radius: 3px; }
+.infoSupply, .infoObjectives { display: flex; flex-wrap: wrap; gap: 4px; align-items: flex-start; }
+.infoBuilding { width: 88px; height: 88px; border: 2px solid #ffffff; border-radius: 6px; box-shadow: 3px 3px 3px rgb(0, 0, 0, 0.45); background: #ffffff; object-fit: cover; }
+.infoEmpty { font-size: 13px; color: #555; }
 .voteBlock { margin: 6px 0; }
 .voteSummary { font-size: 13px; margin: 3px 0; }
 .feedback { margin: 4px; font-weight: bold; }

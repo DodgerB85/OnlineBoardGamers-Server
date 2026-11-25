@@ -191,11 +191,6 @@ function playerFeesLabel(m) {
 		.join(", ")
 }
 
-function moveLabel(m) {
-	const fee = playerFeesLabel(m)
-	return fee ? t("row.map.moveHereWithFees", { cost: m.cost, fees: fee }) : t("row.map.moveHere", { cost: m.cost })
-}
-
 // ---------- trail moves: cheapest/shortest path per destination ----------
 const moveTargets = computed(() => {
 	const out = new Map()
@@ -206,6 +201,35 @@ const moveTargets = computed(() => {
 	}
 	return out
 })
+
+/** Destinations that only allow one single auxiliary action in phase B. */
+const singleAuxDestinations = computed(() => {
+	const out = new Set()
+	if (!game.value || !actable.value) return out
+	const player = g().currentPlayer
+	for (const name of moveTargets.value.keys()) {
+		const loc = g().getTrail().getLocation(name)
+		if (!loc) continue
+		if (map.singleAuxiliaryOnly(loc, player)) out.add(name)
+	}
+	return out
+})
+
+/** Small warning badges in the corner of those destinations. */
+const singleAuxBadges = computed(() => {
+	const out = []
+	for (const name of singleAuxDestinations.value) {
+		const rect = spot(name)
+		if (rect) out.push({ key: name, name, x: rect.x + rect.w - 20, y: rect.y + 2 })
+	}
+	return out
+})
+
+function moveLabel(m) {
+	const fee = playerFeesLabel(m)
+	const label = fee ? t("row.map.moveHereWithFees", { cost: m.cost, fees: fee }) : t("row.map.moveHere", { cost: m.cost })
+	return singleAuxDestinations.value.has(map.moveDestination(m)) ? `${label} — ${t("row.actions.buttons.SINGLE_AUXILIARY_ACTION")}` : label
+}
 
 /** The spot under the cursor that is a move destination, if any. */
 const hoveredMove = ref(null)
@@ -735,7 +759,7 @@ const hitTargets = computed(() => {
 		const hasTargets = candidatesFor(l.name).length > 0
 		const building = map.buildingInteraction(l.name, g(), store.actions)
 		if (!hasTargets && !building) continue
-		out.push({ key: "loc:" + l.name, type: "location", name: l.name, tone: locationTone(l.name), x: l.rect.x, y: l.rect.y, w: l.rect.w, h: l.rect.h, rx: 2, transform: null })
+		out.push({ key: "loc:" + l.name, type: "location", name: l.name, singleAux: singleAuxDestinations.value.has(l.name), tone: locationTone(l.name), x: l.rect.x, y: l.rect.y, w: l.rect.w, h: l.rect.h, rx: 2, transform: null })
 	}
 	for (const c of cityGroups.value) {
 		if (!deliverableCities.value.has(c.city)) continue
@@ -764,14 +788,16 @@ const hitTargets = computed(() => {
 	return out
 })
 
-function targetLabel(t) {
-	if (t.type === "location") return t.name
-	if (t.type === "city") return t.city
-	if (t.type === "space") return t.space
-	if (t.type === "town") return t.name
-	if (t.type === "foresight") return `${t.col + 1}-${t.row + 1}`
-	if (t.type === "bonus") return "NEW_YORK_CITY"
-	return t.key
+function targetLabel(target) {
+	let label
+	if (target.type === "location") label = target.name
+	else if (target.type === "city") label = target.city
+	else if (target.type === "space") label = target.space
+	else if (target.type === "town") label = target.name
+	else if (target.type === "foresight") label = `${target.col + 1}-${target.row + 1}`
+	else if (target.type === "bonus") label = "NEW_YORK_CITY"
+	else label = target.key
+	return target.singleAux ? `${label} — ${t("row.actions.buttons.SINGLE_AUXILIARY_ACTION")}` : label
 }
 
 function clickTarget(t) {
@@ -813,6 +839,11 @@ function leaveTarget(t) {
 <template>
 	<div id="trailBoard" v-if="game">
 		<svg :viewBox="`0 -20 800 ${rttn ? 1015 : 820}`">
+			<defs>
+				<clipPath id="singleAuxWarningClip" clipPathUnits="objectBoundingBox">
+					<circle cx="0.5" cy="0.5" r="0.5" />
+				</clipPath>
+			</defs>
 			<image :href="board" x="0" :y="shift" width="800" height="800" />
 			<image v-if="rttn" :href="rttnStrip" x="0" y="0" width="800" height="250" />
 
@@ -939,6 +970,14 @@ function leaveTarget(t) {
 						@keydown.space.prevent="clickTarget(target)"
 					/>
 				</g>
+
+				<!-- phase B warning: stopping here only allows one single auxiliary action -->
+				<g v-if="singleAuxBadges.length" class="singleAuxBadges" aria-hidden="true">
+					<g v-for="b in singleAuxBadges" :key="'aux-' + b.name" :transform="`translate(${b.x},${b.y})`">
+						<image class="singleAuxBadge" :href="view.getImage('icon-danger')" width="16" height="16" clip-path="url(#singleAuxWarningClip)" />
+						<title>{{ b.name }} — {{ t('row.actions.buttons.SINGLE_AUXILIARY_ACTION') }}</title>
+					</g>
+				</g>
 				<polygon
 					v-for="(region, index) in activeBuildingRegions"
 					:key="'building-region-' + region.name + '-' + index"
@@ -1001,6 +1040,11 @@ function leaveTarget(t) {
 				</g>
 			</g>
 		</svg>
+
+		<div v-if="singleAuxDestinations.size" class="singleAuxLegend" role="note">
+			<img class="singleAuxLegendIcon" :src="view.getImage('icon-danger')" alt="" aria-hidden="true" />
+			<span>{{ t('row.actions.buttons.SINGLE_AUXILIARY_ACTION') }}</span>
+		</div>
 
 		<button v-if="store.selectedAction" type="button" class="actionsLineButton cancelMove" @click="store.clearAction()">{{ t('panels.cancel') }}</button>
 
@@ -1106,6 +1150,22 @@ svg { width: min(760px, 92vw); height: auto; display: block; }
 	text-shadow: -1px -1px 0 #000, 1px 1px 0 #000;
 	pointer-events: none;
 }
+
+/* Warning icon: landing here only allows one single auxiliary action. */
+.singleAuxBadges { pointer-events: none; }
+.singleAuxBadge { pointer-events: none; }
+.singleAuxLegend {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	margin: 2px 8px 6px;
+	font-size: 13px;
+	font-weight: bold;
+	color: #8b0000;
+}
+.singleAuxLegendIcon { width: 16px; height: 16px; display: block; border-radius: 50%; }
 
 .disc, .engine, .rancher { stroke: black; stroke-width: 0.5; }
 .disc.red, .engine.red, .rancher.red { fill: red; }
