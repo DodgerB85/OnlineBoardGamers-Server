@@ -1,3 +1,4 @@
+import { milestoneDescription, employeeDescription } from './milestoneNightBalanceDisplay.js'
 import i18n from '../i18n'
 const t = i18n.global.t; // Shortcut
 
@@ -73,6 +74,7 @@ export const SO_NEW_MAP = 51
 export const SO_NEW_MAP_ALL = 52
 // Senior Business Developer mod
 export const SO_SENIOR_BUSINESS_DEVELOPER = 53
+export const SO_MILESTONE_NIGHT_BALANCE = 54
 // Other options
 export const SO_STRICT_PAYDAY_FRIDGE = 101
 export const SO_TRAINING_GAME = 102
@@ -1008,8 +1010,9 @@ export function sortEmployees(employees) {
 	return employees
 }
 
-// ponytail: translated once at module load (initData.locale is set before this runs);
-// rebuild these as getters if in-app locale switching is ever added without a page reload
+// Most metadata is translated once at module load. Only balance-target display
+// entries (milestones 19/25 and employee 47) below use live locale/game getters.
+// Economic constants and rule-level employee definitions remain static.
 export const MILESTONES_STR = [
 	{ text: t('milestones.firstToHire3'), type: "waitress", title: t('milestones.firstToHire3Title'), description: t('milestones.firstToHire3Desc'), img: "m_icon29.png" },
 	{ text: t('milestones.firstToThrowAway'), type: "waitress", title: t('milestones.firstToThrowAwayTitle'), description: t('milestones.firstToThrowAwayDesc'), img: "m_icon27.png", additionalClass: "vertical" },
@@ -1030,13 +1033,13 @@ export const MILESTONES_STR = [
 	{ text: t('milestones.firstAirplane'), type: "marketer", title: t('milestones.firstAirplaneTitle'), description: t('milestones.firstAirplaneDesc'), img: "m_icon25.png", additionalClass: "plane" },
 	{ text: t('milestones.firstRadio'), type: "marketer", title: t('milestones.firstRadioTitle'), description: t('milestones.firstRadioDesc'), img: "m_icon22.png", additionalClass: "vertical" },
 	{ text: t('milestones.firstMarketeer'), type: "marketer", title: t('milestones.firstMarketeerTitle'), description: t('milestones.firstMarketeerDesc'), img: "m_icon05.png", additionalClass: "billboard" },
-	{ text: t('milestones.firstMarketingTrainee'), type: "marketer", title: t('milestones.firstMarketingTraineeTitle'), description: t('milestones.firstMarketingTraineeDesc'), img: "m_icon01.png" },
+	{ get text() { return t('milestones.firstMarketingTrainee') }, type: "marketer", get title() { return t('milestones.firstMarketingTraineeTitle') }, get description() { return milestoneDescription(19, t('milestones.firstMarketingTraineeDesc')) }, img: "m_icon01.png" },
 	{ text: t('milestones.firstCampaignManager'), type: "marketer", title: t('milestones.firstCampaignManagerTitle'), description: t('milestones.firstCampaignManagerDesc'), img: "m_icon02.png" },
 	{ text: t('milestones.firstBrandManager'), type: "marketer", title: t('milestones.firstBrandManagerTitle'), description: t('milestones.firstBrandManagerDesc'), img: "m_icon03.png", additionalClass: "higher" },
 	{ text: t('milestones.firstBrandDirector'), type: "marketer", title: t('milestones.firstBrandDirectorTitle'), description: t('milestones.firstBrandDirectorDesc'), img: "m_icon06.png", additionalClass: "smaller higher" },
 	{ text: t('milestones.firstBurgerSold'), type: "food", title: t('milestones.firstBurgerSoldTitle'), description: t('milestones.firstBurgerSoldDesc'), img: "m_icon04.png" },
 	{ text: t('milestones.firstPizzaSold'), type: "food", title: t('milestones.firstPizzaSoldTitle'), description: t('milestones.firstPizzaSoldDesc'), img: "m_icon07.png", additionalClass: "vertical" },
-	{ text: t('milestones.firstLemonadeSold'), type: "drink", title: t('milestones.firstLemonadeSoldTitle'), description: t('milestones.firstLemonadeSoldDesc'), img: "m_icon08.png" },
+	{ get text() { return t('milestones.firstLemonadeSold') }, type: "drink", get title() { return t('milestones.firstLemonadeSoldTitle') }, get description() { return milestoneDescription(25, t('milestones.firstLemonadeSoldDesc')) }, img: "m_icon08.png" },
 	{ text: t('milestones.firstBeerSold'), type: "drink", title: t('milestones.firstBeerSoldTitle'), description: t('milestones.firstBeerSoldDesc'), img: "m_icon09.png" },
 	{ text: t('milestones.firstCokeSold'), type: "drink", title: t('milestones.firstCokeSoldTitle'), description: t('milestones.firstCokeSoldDesc'), img: "m_icon10.png", additionalClass: "vertical" },
 	{ text: t('milestones.firstRecruitingGirl'), type: "hiring", title: t('milestones.firstRecruitingGirlTitle'), description: t('milestones.firstRecruitingGirlDesc'), img: "m_icon11.png", additionalClass: "vertical" },
@@ -1108,7 +1111,7 @@ export const EMPLOYEES_STR = [
 	{ title: t('employees.gourmetFoodCritic'), description: t('employees.gourmetFoodCriticDesc'), type: "marketer" },
 	{ title: t('employees.lobbyist'), description: t('employees.lobbyistDesc'), type: "waitress" },
 	{ title: t('employees.massMarketeer'), description: t('employees.massMarketeerDesc'), type: "marketer" },
-	{ title: t('employees.nightShiftManager'), description: t('employees.nightShiftManagerDesc'), type: "manager" },
+	{ get title() { return t('employees.nightShiftManager') }, get description() { return employeeDescription(47, t('employees.nightShiftManagerDesc')) }, type: "manager" },
 	{ title: t('employees.ruralMarketeer'), description: t('employees.ruralMarketeerDesc'), type: "marketer" },
 
 	// Chinese expansion

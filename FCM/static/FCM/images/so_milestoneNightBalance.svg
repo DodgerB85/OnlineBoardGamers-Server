@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="128" height="128" role="img" aria-label="Milestone and Night Shift Balance">
+  <rect width="512" height="512" rx="72" fill="#526579"/>
+  <path d="M423 39a61 61 0 1 0 47 103 58 58 0 0 1-47-103Z" fill="#fff"/>
+  <g fill="none" stroke="#fff" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M256 160v265M111 213h290M131 216l-54 115h108l-54-115Zm250 0-54 115h108l-54-115ZM186 438h140"/>
+  </g>
+  <g fill="#fff">
+    <circle cx="256" cy="170" r="24"/>
+    <path d="M72 331h118a59 59 0 0 1-118 0Zm250 0h118a59 59 0 0 1-118 0ZM238 403h36l32 35H206Z"/>
+  </g>
+</svg>

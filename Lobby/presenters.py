@@ -2110,10 +2110,9 @@ class FCMpresenter(GamePresenter):
         # 14-movieStars
         # 16-nightShift
 
-        # Check for new player order seed
-        self.gameObj.playerOrderSeed = random.randint(1000, 32767)
-        self.gameObj.save()
+        # Resolve and validate before changing persistent or player state.
         starting_options = json.loads(self.gameObj.startingOptions) if self.gameObj.startingOptions else []
+        statsExcludedGame = self.gameObj.statsExcludedGame
 
         # Setup-only include markers are never gameplay options, even in crafted saves.
         includedCodes = {
@@ -2122,10 +2121,11 @@ class FCMpresenter(GamePresenter):
         }
         if includedCodes:
             starting_options = [x for x in starting_options if x not in includedCodes]
-            self.gameObj.startingOptions = json.dumps(starting_options, separators=(",", ":"))
 
         # need to add in possible new dist options
         if rfFCM.SO_RANDOM_MODULES in starting_options:
+            # Manual leftovers cannot make Balance mandatory or enable its pool.
+            starting_options = [x for x in starting_options if x != rfFCM.SO_MILESTONE_NIGHT_BALANCE]
             # Per-module exclusions arrive as SO_EXCLUDED_MODULE_BASE + mod id
             # (mod ids are at most two digits). NB the range check matters: the
             # 5-digit min/max codes (210xx/211xx) are larger than the base and
@@ -2156,6 +2156,10 @@ class FCMpresenter(GamePresenter):
             # Expansion pools: create-time only writes the pool marker (203 Chinese, 204 fan).
             # Legacy games may already have the module flags pre-written —
             # strip those too and treat them as pool candidates either way.
+            balanceEligible = (rfFCM.SO_RANDOM_MODULES_FAN in starting_options
+                               and rfFCM.SO_NEW_MS in starting_options
+                               and rfFCM.SO_SHORT_GAME not in starting_options
+                               and rfFCM.SO_NO_MILESTONES not in starting_options)
             expansionPools = []
             for marker, flags in [
                 (
@@ -2173,14 +2177,17 @@ class FCMpresenter(GamePresenter):
                 if inPool:
                     availableModules.extend(flags)
                 expansionPools.append((inPool, flags))
+            if balanceEligible:
+                availableModules.append(rfFCM.SO_MILESTONE_NIGHT_BALANCE)
+                expansionPools[-1][1].append(rfFCM.SO_MILESTONE_NIGHT_BALANCE)
             # Add hard choices only with original MS
             if rfFCM.SO_NEW_MS not in starting_options:
                 availableModules.append(rfFCM.SO_HARD_CHOICES)
-            # With mandatory picks, direct module flags cannot bypass the total.
-            if includedCodes:
-                starting_options = [x for x in starting_options if x not in availableModules and x != rfFCM.SO_HARD_CHOICES]
+            # Direct leftovers are not mandatory picks and cannot bypass the total.
+            starting_options = [x for x in starting_options if x not in availableModules and x != rfFCM.SO_HARD_CHOICES]
             # Drop excluded modules from the pool (exclusions win conflicts).
             if excludedModules:
+                starting_options = [m for m in starting_options if m not in excludedModules]
                 availableModules = [m for m in availableModules if m not in excludedModules]
             selectedModules = [m for m in availableModules if m in includedModules]
             # Defaults matching the create-game form, used when the min/max options are missing
@@ -2225,10 +2232,18 @@ class FCMpresenter(GamePresenter):
             # Only exclude stats if an expansion module actually made the roll
             for inPool, flags in expansionPools:
                 if inPool and any(x in selectedModules for x in flags):
-                    self.gameObj.statsExcludedGame = True
+                    statsExcludedGame = True
             starting_options.extend(selectedModules)
-            self.gameObj.startingOptions = json.dumps(starting_options, separators=(",", ":"))
 
+        # Setup markers have no meaning after resolution, including non-random saves.
+        starting_options = [x for x in starting_options if not (
+            isinstance(x, int) and rfFCM.SO_EXCLUDED_MODULE_BASE <= x < rfFCM.SO_INCLUDED_MODULE_BASE + 100
+        )]
+        from FCM.common import validateFCMOptionDependencies
+        validateFCMOptionDependencies(starting_options)
+        self.gameObj.startingOptions = json.dumps(starting_options, separators=(",", ":"))
+        self.gameObj.statsExcludedGame = statsExcludedGame or rfFCM.SO_MILESTONE_NIGHT_BALANCE in starting_options
+        self.gameObj.playerOrderSeed = random.randint(1000, 32767)
         self.gameObj.gameStatus = "ACTIVE"
 
         # Shuffle GamePlayers to determine seat order

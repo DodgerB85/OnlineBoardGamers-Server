@@ -52,6 +52,7 @@ export const useModelStore = defineStore("store", () => {
 		coffee: false,
 		ketchupMilestone: false,
 		newMilestones: false,
+		milestoneNightBalance: false,
 		lobbyists: false,
 
 		strictPaydayFridge: false,

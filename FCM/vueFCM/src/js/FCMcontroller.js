@@ -10,6 +10,10 @@ import * as Bot from "./FCMbot"
 import * as model from "./FCMmodel"
 import * as plyr from "./FCMplayer"
 import * as view from "./FCMview"
+import { isMilestoneNightBalanceEnabled, isBalancedNightShiftEnabled } from "./milestoneNightBalance"
+import { marketingTraineeReward } from "./milestoneNightBalanceReward"
+import { validateBalancedTraining } from "./milestoneNightBalanceTraining.js"
+import { previewTrainingOrganization } from "./milestoneNightBalanceOrganization.js"
 
 import { useModelStore } from "../stores/FCMstore.js"
 import { usePersonalStore } from "../stores/FCMpersonal"
@@ -233,7 +237,7 @@ export function endWorkingDaySubphase() {
 
 	// --- PHASE: TRAINING ---
 	else if (subphase === rf.SUBPHASE_TRAINING) {
-		completeTraining()
+		if (completeTraining() === false) return false
 		const unusedPoints = rules.getTrainingPoints(playerIndex, store.context.justTrained).total
 		summary.train.unused = unusedPoints
 
@@ -267,6 +271,7 @@ export function endWorkingDaySubphase() {
 
 	// --- PHASE: MARKETING ---
 	else if (subphase === rf.SUBPHASE_MARKETING) {
+		context.clearMarketingTraineeChoices()
 		const currentMarketers = playerObj.employees.filter((e) => rf.MARKETERS.includes(e) && e !== rf.MASS_MARKETEER)
 		if (playerObj.employees.includes(rf.NIGHT_SHIFT_MANAGER)) {
 			playerObj.employees.forEach((e) => {
@@ -1326,6 +1331,7 @@ export function setCampaignPlacementHighlights() {
 export function resetMarketingSelection() {
 	if (phone.pending()) return
 	const store = useModelStore()
+	context.clearMarketingTraineeChoices()
 	context.clearAllHighlights()
 
 	store.context.action = rf.ACT_NONE
@@ -1356,6 +1362,7 @@ export function selectMarketer(marketer, nightShift, temporary = false) {
 	const store = useModelStore()
 	const playerIndex = currentPlayerIndex()
 	const playerObj = currentPlayerObj()
+	context.setMarketingTraineeChoice(playerObj)
 
 	context.clearAllHighlights()
 	store.context.nightShift = nightShift === true
@@ -1567,11 +1574,48 @@ function awardCampaignTypeAndGoodMilestones(playerIndex) {
 }
 
 // Place campaign in model - after you click on square / press Place button
-export function placeMarketingCampaign(index) {
-	if (phone.modern() && phone.isPhone(useModelStore().context.campaign)) return phone.place(index)
+export function marketingTraineeRewardPending() {
 	const store = useModelStore()
+	return isMilestoneNightBalanceEnabled(store.startingOptions) &&
+		store.gameflow.subphase === rf.SUBPHASE_MARKETING &&
+		store.context.marketer === rf.MARKETING_TRAINEE && !store.context.nightShift &&
+		store.availableMilestones.includes(rf.FIRST_MARKETING_TRAINEE_USED) &&
+		!currentPlayerObj().milestones.includes(rf.FIRST_MARKETING_TRAINEE_USED)
+}
+
+export function chooseMarketingTraineeReward(choice) {
+	const store = useModelStore()
+	if (!marketingTraineeRewardPending()) return false
+	// Clearing is UI-only, never an in-stock forfeiture at confirmation.
+	if (choice == null) {
+		context.setMarketingTraineeChoice(currentPlayerObj())
+		return true
+	}
+	const result = marketingTraineeReward(store, currentPlayerIndex(), choice)
+	if (!result.ok) return false
+	context.setMarketingTraineeChoice(currentPlayerObj(), choice)
+	return true
+}
+
+export function placeMarketingCampaign(index, traineeChoice = context.marketingTraineeChoice(currentPlayerObj())) {
+	const store = useModelStore()
+	if (phone.modern() && phone.isPhone(store.context.campaign)) return phone.place(index)
+	const balancedTrainee = isMilestoneNightBalanceEnabled(store.startingOptions) && store.context.marketer === rf.MARKETING_TRAINEE
+	if (!rf.MARKETING_CAMPAIGNS[store.context.campaign] || (balancedTrainee && !store.availableMarketingCampaigns.includes(store.context.campaign))) return {ok: false, reason: 'campaign-unavailable'}
 	const playerIndex = currentPlayerIndex()
 	const playerObj = currentPlayerObj()
+	// The second night-shift selection is live immediately. Reject a stale
+	// double-click on the first token instead of spending the second campaign.
+	if (balancedTrainee && store.context.campaign <= 16 && !rules.givePossiblePositionsForMarketingCampaign(store.context.marketer, store.context.campaign, store.context.rotated).includes(index)) return {ok: false, reason: 'invalid-placement'}
+	// No campaign, employee, history, counter, or highlight changes before BOTH
+	// the pure preflight and the real award's immediate inventory recheck pass.
+	const rewardPending = marketingTraineeRewardPending()
+	if (rewardPending) {
+		const preflight = marketingTraineeReward(store, playerIndex, traineeChoice)
+		if (!preflight.ok) return preflight
+		const awarded = rules.giveMarketingMilestones(playerIndex, store.context.marketer, traineeChoice)
+		if (awarded?.ok === false) return awarded
+	}
 	let scmChain = false
 	let mlChain = false
 	const isTV = rf.MARKETING_CAMPAIGNS[store.context.campaign].type === rf.TV_CHANNEL
@@ -1669,7 +1713,7 @@ export function placeMarketingCampaign(index) {
 		model.addHistory(rf.HIST_START_MARKETING_CAMPAIGN, [...histObj], playerIndex, 0)
 
 		model.addMarketingCampaign(store.context.campaign, index, store.context.rotated, store.context.good, store.context.duration, isTV ? [...store.context.tvHouses] : undefined)
-		rules.giveMarketingMilestones(playerIndex, store.context.marketer)
+		if (!rewardPending) rules.giveMarketingMilestones(playerIndex, store.context.marketer, traineeChoice)
 
 		// Media Line mod: milestone 2 (First TV Announcer Used) - latch each
 		// holder's FIRST TV campaign; it pushes double demand until it expires
@@ -3055,7 +3099,7 @@ export function hireEmployee(emp) {
 	if (store.gameflow.phase !== rf.PHASE_WORKING_DAY || store.gameflow.subphase !== rf.SUBPHASE_HIRING) return false
 	const playerIndex = currentPlayerIndex()
 	if (rules.getRemainingRecruitingPoints(playerIndex) <= 0) return false
-	if (!rf.HIREABLE_EMPLOYEES.includes(emp) || store.availableEmployees[emp] <= 0) return false
+	if (!rules.hireableEmployees().includes(emp) || store.availableEmployees[emp] <= 0) return false
 	if (rules.forbiddenEmployeesDuringHire(playerIndex, store.context.justHired).includes(emp)) return false
 
 	let playerObj = currentPlayerObj()
@@ -3096,8 +3140,18 @@ export function undoHireEmployee(emp) {
 }
 
 // TRAIN
-export function trainEmployee(toEmp, steps) {
+export function trainEmployee(toEmp, steps, selection) {
 	const store = useModelStore()
+	// A bound live event stays bound even after loading a legacy game.
+	if (arguments.length >= 3) {
+		if (!context.trainingSelectionIsCurrent(selection, true)) return false
+	} else if (!context.trainingSelectionIsCurrent(store.context.selectedEmployeeToTrainData)) return false
+	if (isMilestoneNightBalanceEnabled(store.startingOptions)) {
+		// Do not call currentPlayerIndex on an empty order: its legacy fallback
+		// mutates turnOrder. All new-rule rejection paths are read-only.
+		if (store.bailout.pending || store.gameflow.phase !== rf.PHASE_WORKING_DAY || store.gameflow.subphase !== rf.SUBPHASE_TRAINING || store.gameflow.turnOrder.length === 0 || !usePersonalStore().canPlay()) return false
+		if (!validateBalancedTraining(store.gameflow.turnOrder[0], store.context.selectedEmployeeToTrainData, toEmp, steps).legal) return false
+	}
 	const fromEmp = store.context.selectedEmployeeToTrainData.employee
 	const fromHire = store.context.selectedEmployeeToTrainData.origin === 1
 	const fromStructure = store.context.selectedEmployeeToTrainData.origin === 2
@@ -3108,6 +3162,8 @@ export function trainEmployee(toEmp, steps) {
 		to: toEmp,
 		spent: steps,
 		fromStructure: fromStructure,
+		...(fromStructure && toEmp === rf.NIGHT_SHIFT_MANAGER && isBalancedNightShiftEnabled(store.startingOptions)
+			? { structureIndex: store.context.selectedEmployeeToTrainData.sourceIndex ?? playerObj.employees.indexOf(fromEmp) } : {}),
 	})
 
 	if (fromHire) {
@@ -3124,7 +3180,9 @@ export function trainEmployee(toEmp, steps) {
 		}
 	} else {
 		if (fromStructure === true) {
-			playerObj.employees.splice(playerObj.employees.indexOf(fromEmp), 1)
+			const record = store.context.justTrained[store.context.justTrained.length - 1]
+			if (record.structureIndex !== undefined) playerObj.employees[record.structureIndex] = -1
+			else playerObj.employees.splice(playerObj.employees.indexOf(fromEmp), 1)
 		} else {
 			playerObj.beach.splice(playerObj.beach.indexOf(fromEmp), 1)
 		}
@@ -3137,22 +3195,29 @@ export function trainEmployee(toEmp, steps) {
 	store.context.endOfDaySummaryData.train.trained.push(toEmp)
 	if (fromHire) store.context.endOfDaySummaryData.hire.hired.push(-1)
 
-	store.context.selectedEmployeeToTrainData.employee = -1
-	store.context.selectedEmployeeToTrainData.origin = 0
+	context.clearTrainingSelection()
 }
 
 // Inverse of trainEmployee, for a training still in progress in the training subphase
 export function undoTrainEmployee(entry) {
 	const store = useModelStore()
+	if (isMilestoneNightBalanceEnabled(store.startingOptions) &&
+		(store.bailout.pending || store.gameflow.phase !== rf.PHASE_WORKING_DAY ||
+		store.gameflow.subphase !== rf.SUBPHASE_TRAINING || store.gameflow.turnOrder.length === 0 ||
+		!usePersonalStore().canPlay())) return false
+	const entryIndex = store.context.justTrained.indexOf(entry)
+	// A rendered ledger card can outlive its undo; never refund it twice.
+	if (entryIndex === -1) return false
 	const playerObj = currentPlayerObj()
 
-	store.context.justTrained.splice(store.context.justTrained.indexOf(entry), 1)
+	store.context.justTrained.splice(entryIndex, 1)
 	store.availableEmployees[entry.to]++
 	store.context.endOfDaySummaryData.train.trained.splice(store.context.endOfDaySummaryData.train.trained.lastIndexOf(entry.to), 1)
 
 	if (entry.from > -1) {
 		store.availableEmployees[entry.from]--
-		;(entry.fromStructure ? playerObj.employees : playerObj.beach).push(entry.from)
+		if (entry.fromStructure && entry.structureIndex !== undefined) playerObj.employees[entry.structureIndex] = entry.from
+		else (entry.fromStructure ? playerObj.employees : playerObj.beach).push(entry.from)
 	} else {
 		// Train-from-hire: the -1 markers in justHired / hire.hired are the recruiting point it spent
 		store.context.justHired.splice(store.context.justHired.lastIndexOf(-1), 1)
@@ -3205,6 +3270,10 @@ export function settleUnionOrganizer() {
 
 function completeTraining() {
 	const store = useModelStore()
+	const hasIndexedTraining = store.context.justTrained.some(entry => entry.fromStructure && entry.structureIndex !== undefined)
+	const organization = hasIndexedTraining ? previewTrainingOrganization(currentPlayerObj(), store.context.justTrained) : null
+	if (organization && !organization.legal) return false
+	context.clearTrainingSelection()
 	const trained = store.context.justTrained
 
 	if (trained.length > 0) {
@@ -3219,7 +3288,8 @@ function completeTraining() {
 		// 2. Update Employees: Filter for structure items, then map to 'to' IDs
 		const newEmployeeItems = trained.filter((jt) => jt.fromStructure === true).map((jt) => jt.to)
 
-		playerObj.employees.push(...newEmployeeItems)
+		if (organization) playerObj.employees.splice(0, playerObj.employees.length, ...organization.employees)
+		else playerObj.employees.push(...newEmployeeItems)
 
 		// 3. Milestones. First to hire 3 is awarded during the hiring subphase:
 		// only employees actually hired there count, not train-from-hire.

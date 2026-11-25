@@ -126,3 +126,14 @@ The Senior Business Developer adds apartments and OUT markers to the New Busines
 - Place an OUT marker only on a house or apartment with no active demand. The building stays in place and receives no new demand for the rest of the game. Already marked or pending buildings and the stadium cannot be marked.
 - All players share 8 OUT markers. Each placement permanently spends one; markers cannot be removed or recovered. When none remain, this action is unavailable.
 - The first player to use a Senior Business Developer gains its milestone and may add 1 map tile, as with the Lobbyist milestone. Other modules combine normally; house, garden and tile supplies follow the applicable base and module rules.
+
+
+## Player Balance Module
+
+[Player help](/FCM/fanExpansionsHelp/#milestone-night-balance)
+
+A player balance module, available only when using New Milestones.
+
+- First Marketing Trainee Used: choose either a Kitchen Trainee or an Errand Boy; receive only one, no longer both;
+- First Lemonade Sold: train at most one on-duty employee per round, keeping their career colour and spending the normal training points;
+- With Night Shift enabled, the Night Shift Manager cannot be hired directly; promote a Junior Vice President through training;

@@ -1,6 +1,62 @@
 import * as rf from "./FCMreference"
+import { reactive, toRaw } from "vue"
+
+// Unconfirmed UI choice, deliberately outside the serialized context/wire.
+// Replacing players on import/new game gives an explicit null default even
+// when an old context omits every new field. Weak keys do not retain old games.
+const marketingTraineeChoices = reactive(new WeakMap())
+export function marketingTraineeChoice(playerObj) {
+	return marketingTraineeChoices.get(playerObj) ?? null
+}
+export function setMarketingTraineeChoice(playerObj, choice = null) {
+	if (choice == null) marketingTraineeChoices.delete(playerObj)
+	else marketingTraineeChoices.set(playerObj, choice)
+}
 
 import { useModelStore } from "../stores/FCMstore.js"
+
+export function clearMarketingTraineeChoices() {
+	for (const playerObj of useModelStore().players) marketingTraineeChoices.delete(playerObj)
+}
+
+// Bound live selections are ephemeral capabilities, never wire/context fields.
+// Keep revoked entries while a stale event still holds the selection object.
+const trainingSelectionOwners = new WeakMap()
+// Remember UI provenance independently of the replaceable selection/context.
+// Once this store has bound a UI choice, replacing it cannot reopen raw mode.
+// Weak store keys isolate games/test stores without adding serialized fields.
+const trainingSelectionSessions = new WeakMap()
+export function bindTrainingSelection(selection) {
+	const store = useModelStore()
+	clearTrainingSelection()
+	const bound = { employee: selection.employee, origin: selection.origin }
+	if (selection.sourceIndex !== undefined) Object.defineProperty(bound, "sourceIndex", { value: selection.sourceIndex, enumerable: false })
+	trainingSelectionOwners.set(bound, {
+		context: store.context, player: store.players[store.gameflow.turnOrder[0]],
+		playerIndex: store.gameflow.turnOrder[0], turn: store.gameflow.turn,
+		phase: store.gameflow.phase, subphase: store.gameflow.subphase, valid: true,
+	})
+	trainingSelectionSessions.set(store, bound)
+	store.context.selectedEmployeeToTrainData = bound
+	return store.context.selectedEmployeeToTrainData
+}
+export function trainingSelectionIsCurrent(selection, requireBound = false) {
+	const store = useModelStore()
+	const owner = trainingSelectionOwners.get(toRaw(selection))
+	// Retain the pre-existing raw controller API used by non-UI callers; the
+	// live UI always binds and explicitly submits its render-time capability.
+	if (!owner) return !requireBound && !trainingSelectionSessions.has(store)
+	return owner.valid && selection === store.context.selectedEmployeeToTrainData &&
+		owner.context === store.context && owner.player === store.players[owner.playerIndex] &&
+		owner.playerIndex === store.gameflow.turnOrder[0] && owner.turn === store.gameflow.turn &&
+		owner.phase === store.gameflow.phase && owner.subphase === store.gameflow.subphase
+}
+export function clearTrainingSelection() {
+	const store = useModelStore()
+	const owner = trainingSelectionOwners.get(trainingSelectionSessions.get(store))
+	if (owner) owner.valid = false
+	store.context.selectedEmployeeToTrainData = { employee: -1, origin: 0 }
+}
 
 export function resetContextAndHighlights() {
 	resetContext()
@@ -20,6 +76,7 @@ export function clearAllHighlights() {
 
 export function resetContext() {
     const store = useModelStore()
+	clearMarketingTraineeChoices()
 	store.context.phoneGroupAction = null
 	store.context.mediaLineSecondCall = false
 	resetEndOfDaySummaryData()
@@ -27,8 +84,7 @@ export function resetContext() {
 	store.context.action = rf.ACT_NONE
 	store.context.selectedReserveCard = rf.RES_CARD_NOT_CHOSEN
 	store.context.selectedEmployeeIndexForRestructuring = -1
-	store.context.selectedEmployeeToTrainData.employee = -1
-	store.context.selectedEmployeeToTrainData.origin = 0
+	clearTrainingSelection()
 	store.context.justHired.splice(0)
 	store.context.justTrained.splice(0)
 	store.context.justMarketed.splice(0)

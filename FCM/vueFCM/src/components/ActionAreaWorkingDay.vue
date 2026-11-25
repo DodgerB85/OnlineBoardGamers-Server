@@ -7,10 +7,12 @@
  */
 import * as rf from "../js/FCMreference"
 import * as phone from "../js/FCMphone"
+import * as context from "../js/FCMcontext"
 import * as controller from "../js/FCMcontroller"
 import * as view from "../js/FCMview"
 import * as rules from "../js/FCMrules"
 import * as plyr from "../js/FCMplayer"
+import { trainingAllowance, balancedTrainingSources, balancedTrainingOptions } from "../js/milestoneNightBalanceTraining"
 import AddItemBox from "./utils/AddItemBox.vue"
 
 import { useModelStore } from "../stores/FCMstore.js"
@@ -42,9 +44,16 @@ function confirmTemporaryWorkerSelection() {
 	resetTemporaryWorkerSelection()
 }
 
-function selectEmployeeToTrain(employee, origin = 0) {
-	store.context.selectedEmployeeToTrainData.employee = employee
-	store.context.selectedEmployeeToTrainData.origin = origin
+const trainingSelectionOwner = ref(null)
+
+function selectEmployeeToTrain(source) {
+	trainingSelectionOwner.value = computedBalancedTraining.value ? { player: store.gameflow.turnOrder[0], turn: store.gameflow.turn } : null
+	context.bindTrainingSelection(source)
+}
+
+function cancelTrainingSelection() {
+	context.clearTrainingSelection()
+	trainingSelectionOwner.value = null
 }
 
 function lobbyItemHeight(item) {
@@ -55,6 +64,9 @@ function lobbyItemHeight(item) {
 }
 
 // MARKETING
+const computedTraineeRewardPending = computed(() => controller.marketingTraineeRewardPending())
+const computedTraineeRewardOptions = computed(() => [rf.KITCHEN_TRAINEE, rf.ERRAND_BOY].filter(employee => store.availableEmployees[employee] > 0))
+const computedTraineeRewardChoice = computed(() => context.marketingTraineeChoice(controller.currentPlayerObj()))
 
 const computedAvailableMarketers = computed(() => {
 	const marketers = controller.currentPlayerObj().employees.filter((employee) => rf.MARKETERS.includes(employee)).map((employee) => ({ employee, temporary: false }))
@@ -78,7 +90,14 @@ const computedTVSelectionDone = computed(() => controller.tvSelectionComplete())
 // Media Line mod: free headline publications left for the current player
 const computedHeadlinesLeft = computed(() => (store.startingOptions.mediaLine ? controller.mediaLineHeadlinesLeft(controller.currentPlayerIndex()) : 0))
 
+const computedBalancedTraining = computed(() => trainingAllowance(controller.currentPlayerIndex()).active)
+const computedBalancedSources = computed(() => balancedTrainingSources(controller.currentPlayerIndex()))
+
 const computedTrainableOptions = computed(() => {
+	if (computedBalancedTraining.value) return {
+		beachTrainable: computedBalancedSources.value.filter(source => source.origin === 0),
+		atWorkTrainable: computedBalancedSources.value.filter(source => source.origin === 2),
+	}
 	const ret = {
 		beachTrainable: [],
 		atWorkTrainable: [],
@@ -107,6 +126,8 @@ const computedTrainableOptions = computed(() => {
 			return upgrades.length > 0
 		})
 	}
+	ret.beachTrainable = ret.beachTrainable.map(employee => ({ employee, origin: 0 }))
+	ret.atWorkTrainable = ret.atWorkTrainable.map(employee => ({ employee, origin: 2 }))
 	return ret
 })
 
@@ -156,6 +177,7 @@ function endTurnAutoPay() {
 }
 
 const computedOptionsToTrainToByLevel = computed(() => {
+	if (computedBalancedTraining.value) return balancedTrainingOptions(controller.currentPlayerIndex(), store.context.selectedEmployeeToTrainData)
 	const fromEmployee = store.context.selectedEmployeeToTrainData.employee
 	const fromBeach = store.context.selectedEmployeeToTrainData.origin === 0
 	const fromHire = store.context.selectedEmployeeToTrainData.origin === 1
@@ -170,11 +192,35 @@ const computedOptionsToTrainToByLevel = computed(() => {
 	if (fromStructure || fromBeach) {
 		upgradeOptions = rules.possibleUpgrades(store.availableEmployees, playerIndex, [fromEmployee], computedTrainingData.value.total, computedTrainingData.value.level2, computedTrainingData.value.level3, computedTrainingData.value.unlimited, justTrainedTo, fromStructure)
 	} else if (fromHire) {
-		upgradeOptions = rules.possibleUpgrades(store.availableEmployees, playerIndex, rf.HIREABLE_EMPLOYEES, computedTrainingData.value.total, computedTrainingData.value.level2, computedTrainingData.value.level3, computedTrainingData.value.unlimited, justTrainedTo, false)
+		upgradeOptions = rules.possibleUpgrades(store.availableEmployees, playerIndex, rules.hireableEmployees(), computedTrainingData.value.total, computedTrainingData.value.level2, computedTrainingData.value.level3, computedTrainingData.value.unlimited, justTrainedTo, false)
 	}
 
 	return upgradeOptions
 })
+
+// Capture the selection at render time, not when an old event later fires.
+const computedTrainingTargets = computed(() => computedOptionsToTrainToByLevel.value.map(level =>
+	level.map(employee => ({ employee, selection: store.context.selectedEmployeeToTrainData }))))
+
+// Only invalidate this panel's transient training choice. Do not reset the
+// shared context (phone second calls and marketing choices belong elsewhere).
+watch(
+	() => [store.gameflow.phase, store.gameflow.subphase, store.gameflow.turn,
+		store.gameflow.turnOrder[0], personal.pov, personal.canPlay(),
+		computedBalancedTraining.value, computedOptionsToTrainToByLevel.value],
+	() => {
+		const owner = trainingSelectionOwner.value
+		if (!owner) return
+		if (!computedBalancedTraining.value || store.gameflow.phase !== rf.PHASE_WORKING_DAY ||
+			store.gameflow.subphase !== rf.SUBPHASE_TRAINING || owner.player !== store.gameflow.turnOrder[0] ||
+			owner.turn !== store.gameflow.turn || !personal.canPlay() ||
+			!computedOptionsToTrainToByLevel.value.some(level => level.length > 0)) {
+			context.clearTrainingSelection()
+			trainingSelectionOwner.value = null
+		}
+	},
+	{ deep: true }
+)
 
 // PRODUCERS
 const isCollectingDrinks = computed(() => [rf.CART_OPERATOR, rf.TRUCK_DRIVER, rf.ZEPPELIN_PILOT].includes(store.context.producer))
@@ -348,7 +394,7 @@ const computedProducers = computed(() => {
 
 				<!-- Employee cards -->
 				<div class="allHireableEmployeesDiv">
-					<div v-for="employee in rf.HIREABLE_EMPLOYEES.filter((e) => store.availableEmployees[e] > 0 && !rules.forbiddenEmployeesDuringHire(controller.currentPlayerIndex(), store.context.justHired).includes(e))" :key="employee" class="cardChoiceDiv selectable" @click="controller.hireEmployee(employee)">
+					<div v-for="employee in rules.hireableEmployees().filter((e) => store.availableEmployees[e] > 0 && !rules.forbiddenEmployeesDuringHire(controller.currentPlayerIndex(), store.context.justHired).includes(e))" :key="employee" class="cardChoiceDiv selectable" @click="controller.hireEmployee(employee)">
 						<img :src="view.getImage(`emp_${employee}`)" class="cardImg" :alt="rf.employeeName(employee)" />
 					</div>
 				</div>
@@ -409,8 +455,8 @@ const computedProducers = computed(() => {
 			<div class="trainingOptionsDiv">
 				<!-- Training Options -->
 				<div class="allHireableEmployeesDiv">
-					<div v-for="employee in computedTrainableOptions.beachTrainable" :key="employee" class="cardChoiceDiv selectable" @click="selectEmployeeToTrain(employee)">
-						<img :src="view.getImage(`emp_${employee}`)" class="cardImg" :alt="rf.employeeName(employee)" />
+					<div v-for="(source, index) in computedTrainableOptions.beachTrainable" :key="index" class="cardChoiceDiv selectable" @click="selectEmployeeToTrain(source)">
+						<img :src="view.getImage(`emp_${source.employee}`)" class="cardImg" :alt="rf.employeeName(source.employee)" />
 					</div>
 				</div>
 			</div>
@@ -423,8 +469,8 @@ const computedProducers = computed(() => {
 					<p>{{ $t("workingDay.trainFromWorkingEmployees") }}</p>
 					<div class="trainingOptionsDiv">
 						<div class="allHireableEmployeesDiv">
-							<div v-for="employee in computedTrainableOptions.atWorkTrainable" :key="employee" class="cardChoiceDiv selectable" @click="selectEmployeeToTrain(employee, 2)">
-								<img :src="view.getImage(`emp_${employee}`)" class="cardImg" :alt="rf.employeeName(employee)" />
+							<div v-for="(source, index) in computedTrainableOptions.atWorkTrainable" :key="index" class="cardChoiceDiv selectable" @click="selectEmployeeToTrain(source)">
+								<img :src="view.getImage(`emp_${source.employee}`)" class="cardImg" :alt="rf.employeeName(source.employee)" />
 							</div>
 						</div>
 					</div>
@@ -432,7 +478,7 @@ const computedProducers = computed(() => {
 				<p v-else>{{ $t("workingDay.cannotTrainWorkingEmployees") }}</p>
 			</template>
 
-			<button v-if="rules.getRemainingRecruitingPoints(controller.currentPlayerIndex()) > 0 && computedTrainingData.total > 0" class="actionsLineButton" @click="selectEmployeeToTrain(-1, 1)">{{ $t("workingDay.trainFromHiring") }}</button>
+			<button v-if="rules.getRemainingRecruitingPoints(controller.currentPlayerIndex()) > 0 && computedTrainingData.total > 0 && (!computedBalancedTraining || computedBalancedSources.some(source => source.origin === 1))" class="actionsLineButton" @click="selectEmployeeToTrain({ employee: -1, origin: 1 })">{{ $t("workingDay.trainFromHiring") }}</button>
 			<br />
 			<button class="actionsLineButton resetWorkingDayButton" @click="controller.resetWholeTurn()">{{ $t("workingDay.resetWholeWorkingDay") }}</button>
 			<button class="actionsLineButton" @click="controller.resetSubphase()">{{ $t("workingDay.resetTraining") }}</button>
@@ -446,11 +492,12 @@ const computedProducers = computed(() => {
 					<img :src="view.getImage(`emp_${store.context.selectedEmployeeToTrainData.employee}`)" class="cardImg" :alt="rf.employeeName(store.context.selectedEmployeeToTrainData.employee)" />
 				</div>
 			</template>
+			<button v-if="computedBalancedTraining" class="actionsLineButton" @click="cancelTrainingSelection">{{ $t("workingDay.neverMind") }}</button>
 			<p>{{ $t("workingDay.toLabel") }}</p>
-			<template v-for="(level, idx1) in computedOptionsToTrainToByLevel" :key="idx1">
+			<template v-for="(level, idx1) in computedTrainingTargets" :key="idx1">
 				<template v-if="level.length > 0">
-					<div v-for="(emp, idx2) in level" :key="idx2" class="cardChoiceDiv selectable" @click="controller.trainEmployee(emp, idx1 + 1)">
-						<img :src="view.getImage(`emp_${emp}`)" class="cardImg" :alt="rf.employeeName(emp)" />
+					<div v-for="(target, idx2) in level" :key="idx2" class="cardChoiceDiv selectable" @click="controller.trainEmployee(target.employee, idx1 + 1, target.selection)">
+						<img :src="view.getImage(`emp_${target.employee}`)" class="cardImg" :alt="rf.employeeName(target.employee)" />
 					</div>
 				</template>
 				<br />
@@ -559,6 +606,14 @@ const computedProducers = computed(() => {
 				<p v-else>{{ $t("workingDay.chooseMarketingCampaign") }}</p>
 				<p v-if="!store.context.nightShift && !store.context.secondCampaignManager && controller.currentPlayerObj().employees.includes(rf.NIGHT_SHIFT_MANAGER) && store.context.marketer === rf.MARKETING_TRAINEE">{{ $t("workingDay.nightShiftMarketingTrainee") }}</p>
 
+				<div v-if="computedTraineeRewardPending" class="traineeRewardChoice">
+					<p>{{ $t("workingDay.chooseTraineeReward") }}</p>
+					<p v-if="computedTraineeRewardOptions.length === 0">{{ $t("workingDay.noTraineeRewardStock") }}</p>
+					<button v-if="computedTraineeRewardChoice !== null" type="button" data-trainee-reward-clear @click="controller.chooseMarketingTraineeReward(null)">{{ $t("workingDay.clearTraineeRewardChoice") }}</button>
+					<button v-for="employee in computedTraineeRewardOptions" :key="employee" type="button" class="cardChoiceDiv selectable" :class="{ selected: computedTraineeRewardChoice === employee }" :data-trainee-reward="employee" :aria-pressed="computedTraineeRewardChoice === employee" @click="controller.chooseMarketingTraineeReward(employee)">
+						<img :src="view.getImage(`emp_${employee}`)" class="cardImg" :alt="rf.employeeName(employee)" />
+					</button>
+				</div>
 				<AddItemBox :itemBeingAdded="rf.ITEM_BOX_CAMPAIGN" />
 				<!-- Media Line: the second phone token keeps the first token's good and duration -->
 				<p v-if="phone.modern() && rf.PHONE_CAMPAIGNS.includes(store.context.campaign) && !computedPhoneGroupLock">{{ $t("workingDay.phoneGroupRules") }}</p>

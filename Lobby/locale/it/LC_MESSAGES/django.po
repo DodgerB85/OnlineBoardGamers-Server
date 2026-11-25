@@ -16968,3 +16968,28 @@ msgstr "Amministratore del sito Django"
 
 #~ msgid "Final Round"
 #~ msgstr "Turno finale"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Player Balance Module"
+msgstr "Modulo di bilanciamento per i giocatori"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Use Player Balance Module"
+msgstr "Usa il modulo di bilanciamento per i giocatori"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Requires New Milestones. Adjusts marketing rewards, on-duty training and Night Shift recruitment."
+msgstr "Richiede i nuovi traguardi. Modifica le ricompense di marketing, la formazione in servizio e le assunzioni del turno di notte."
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Player Balance Module (requires New Milestones)"
+msgstr "Modulo di bilanciamento per i giocatori (richiede i nuovi traguardi)"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Include 8 fan expansion options (Balance requires New Milestones)"
+msgstr "Includi 8 opzioni delle espansioni dei fan (il bilanciamento richiede i nuovi traguardi)"

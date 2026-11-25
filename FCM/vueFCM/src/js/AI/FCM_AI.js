@@ -618,7 +618,7 @@ export function actionHires(playerIndex) {
     }
 
     while (totalHires > 0) {
-        let possibleHires = rf.HIREABLE_EMPLOYEES.filter(emp => 
+        let possibleHires = rules.hireableEmployees().filter(emp => 
             store.availableEmployees[emp] > 0 && !disallowed.includes(emp)
         );
 
@@ -652,6 +652,7 @@ export function actionHires(playerIndex) {
 
 export function actionAIhire(playerIndex, employee) {
 	const store = useModelStore()
+	if (!rules.hireableEmployees().includes(employee)) return false
 	const playerObj = store.players[playerIndex]
 	playerObj.beach.push(employee)
 	store.availableEmployees[employee]--

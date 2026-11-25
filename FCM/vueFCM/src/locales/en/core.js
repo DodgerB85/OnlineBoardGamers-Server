@@ -1,4 +1,11 @@
 export default {
+ milestoneNightBalanceDisplay: {
+  lemonade: "Train 1 on-duty employee of the same colour per round",
+  nightShift: "No-salary staff work twice. Train from Junior VP; no direct hire.",
+  nightShiftDetails: "All employees who do not require a salary work twice. Junior Vice President → Night Shift Manager; cannot be hired directly. Same-colour working promotion is allowed, but the entire organisation must fit after training. Management Trainee → Junior Vice President → Night Shift Manager takes two training steps. Salary and headhunt costs are unchanged.",
+  lemonadeDetails: "Train at most one on-duty employee per round, keeping their career colour and spending the normal training points;",
+  marketingTrainee: "Choose one available Kitchen Trainee or Errand Boy from the supply for free.",
+ },
 
 /**** ACTION AREA */
 actionArea: {

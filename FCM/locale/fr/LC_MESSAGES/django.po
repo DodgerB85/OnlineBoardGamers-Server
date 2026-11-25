@@ -2078,3 +2078,43 @@ msgstr "Ouvrir le diagramme en taille réelle"
 #. Media Line help diagram accessibility.
 msgid "Phone and TV tile ranges: three phone placements and TV house selection"
 msgstr "Portées des tuiles téléphone et TV : trois placements de téléphone et sélection des maisons TV"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Player Balance Module"
+msgstr "Module d’équilibrage des joueurs"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Player Balance Module icon"
+msgstr "Icône du module d’équilibrage des joueurs"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "A player balance module, available only when using New Milestones."
+msgstr "Un module d’équilibrage pour les joueurs, disponible uniquement avec les nouvelles étapes."
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "First Marketing Trainee Used: choose either a Kitchen Trainee or an Errand Boy; receive only one, no longer both;"
+msgstr "Première utilisation du stagiaire en marketing : choisissez un apprenti cuisinier ou un coursier ; recevez-en un seul, et non plus les deux ;"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "First Lemonade Sold: train at most one on-duty employee per round, keeping their career colour and spending the normal training points;"
+msgstr "Première limonade vendue : formez au maximum un employé en service par manche, en conservant sa couleur professionnelle et en dépensant les points de formation habituels ;"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "With Night Shift enabled, the Night Shift Manager cannot be hired directly; promote a Junior Vice President through training;"
+msgstr "Si le service de nuit est activé, son responsable ne peut pas être recruté directement ; formez-le à partir d’un vice-président junior ;"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Include 8 fan expansion options (Balance requires New Milestones)"
+msgstr "Inclure 8 options d’extensions de fans (l’équilibrage nécessite les nouveaux objectifs)"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Player Balance Module (requires New Milestones)"
+msgstr "Module d’équilibrage des joueurs (nécessite les nouvelles étapes)"

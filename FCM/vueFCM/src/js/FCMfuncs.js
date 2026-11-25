@@ -1205,7 +1205,8 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 			store.availableEmployees[store.players[i].beach[j]]--
 		}
 		for (let j = 0; j < store.players[i].marketers.length; j++) {
-			store.availableEmployees[store.players[i].marketers[j].marketer]--
+			// Night-shift bindings share an employee; only the physical binding owns a card.
+			if (!store.players[i].marketers[j].nightShift) store.availableEmployees[store.players[i].marketers[j].marketer]--
 		}
 		// Remove MS from available
 		for (let j = 0; j < store.players[i].milestones.length; j++) {

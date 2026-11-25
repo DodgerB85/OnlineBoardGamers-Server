@@ -1,5 +1,13 @@
 // de messages added after the main translation pass. Merged over de.js in index.js.
 export default {
+ milestoneNightBalanceDisplay: {
+  "marketingTrainee": "Kostenlos 1 Küchenlehrling oder Laufburschen aus dem Vorrat wählen.",
+  "lemonade": "Pro Runde 1 Mitarbeiter im Dienst derselben Berufsfarbe ausbilden",
+  "lemonadeDetails": "Pro Runde höchstens einen Mitarbeiter im Dienst ausbilden, bei gleicher Berufsfarbe und mit den üblichen Ausbildungspunkten;",
+  "nightShift": "Personal ohne Gehalt arbeitet doppelt. Vom Junior-Vizepräsidenten schulen; nicht einstellen.",
+  "nightShiftDetails": "Alle Mitarbeiter ohne Gehalt arbeiten doppelt. Junior-Vizepräsident → Nachtschichtleiter; nicht direkt einstellbar. Farbgleiche Beförderung im Dienst ist erlaubt, aber danach müssen alle Mitarbeiter in die vollständige Organisation passen. Ohne genügend Plätze keine Beförderung auf Kredit. Management-Trainee → Junior-Vizepräsident → Nachtschichtleiter sind zwei Schulungsschritte. Gehälter und Abwerbekosten bleiben gleich."
+},
+
 	"actionArea": {
 		"turnNudge": {
 		"streak": "🔥 {days} Tage in Folge · Bestwert: {best}. {goal}",
@@ -58,6 +66,10 @@ export default {
 		"unionMustWork": "Du musst den Gewerkschaftsorganisator einsetzen"
 	},
 	"workingDay": {
+    "chooseTraineeReward": "Wähle vor dem Platzieren einen verfügbaren Mitarbeiter als Belohnung. Du erhältst ihn erst beim Platzieren.",
+    "noTraineeRewardStock": "Beide Mitarbeiter sind ausverkauft. Platziere die Kampagne ohne Mitarbeiterbelohnung.",
+    "clearTraineeRewardChoice": "Belohnungsauswahl löschen",
+
 		"chooseTemporaryWorker": "Wähle bis zu {count} Aktionen von Einstiegsmitarbeitern. Du kannst Fähigkeiten mischen oder dieselbe mehrfach wählen; ungenutzte Aktionen verfallen gegebenenfalls.",
 		"temporaryWorkerSelected": "Gewählte Aktionen ({selected}/{count}):",
 		"clickToRemoveTemporaryWorker": "Klicken, um diese Aktion zu entfernen",
@@ -92,6 +104,8 @@ export default {
 		"nonHireable": "Nicht einstellbar"
 	},
 	"history": {
+		"traineeRewardChosen": "Erhalte {employee}.",
+		"traineeRewardEmpty": "Beide Belohnungsangestellten sind vergriffen. Kein Angestellter erhalten.",
 		"modules": {
 			"laborMarket": "Arbeitsmarkt"
 		},

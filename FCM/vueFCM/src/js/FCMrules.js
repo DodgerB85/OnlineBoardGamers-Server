@@ -5,6 +5,8 @@ import * as map from "./FCMmap"
 import * as funcs from "./FCMfuncs"
 import * as plyr from "./FCMplayer"
 import * as model from "./FCMmodel"
+import { isMilestoneNightBalanceEnabled, isBalancedNightShiftEnabled } from "./milestoneNightBalance.js"
+import { marketingTraineeReward } from "./milestoneNightBalanceReward.js"
 
 import { toRaw } from "vue"
 import { useModelStore } from "../stores/FCMstore.js"
@@ -21,6 +23,11 @@ export function getOffsetForRotation(rotation) {
 	if (rotation === 1) return rf.ssW + 1
 	if (rotation === 2) return rf.ssW
 	return 0
+}
+
+// Recruitment is per game; the static roots still define economic levels.
+export function hireableEmployees(options = useModelStore().startingOptions) {
+	return rf.HIREABLE_EMPLOYEES.filter(employee => employee !== rf.NIGHT_SHIFT_MANAGER || !isBalancedNightShiftEnabled(options))
 }
 
 export function oneLevelAbove(employee, preservingColour) {
@@ -142,6 +149,7 @@ export function oneLevelAbove(employee, preservingColour) {
 		}
 	}
 
+	if (employee === rf.JUNIOR_VICE_PRESIDENT && isBalancedNightShiftEnabled(store.startingOptions)) level.push(rf.NIGHT_SHIFT_MANAGER)
 	return level
 }
 
@@ -3267,7 +3275,17 @@ export function kimchiFridgeCollision(playerIndex) {
 	return distinctSet.has(rf.KIMCHI) && distinctSet.size > 1
 }
 
-export function giveMarketingMilestones(playerIndex, marketer) {
+export function giveMarketingMilestones(playerIndex, marketer, choice) {
+	const store = useModelStore()
+	if (marketer === rf.MARKETING_TRAINEE && isMilestoneNightBalanceEnabled(store.startingOptions)
+		&& store.availableMilestones.includes(rf.FIRST_MARKETING_TRAINEE_USED)
+		&& !plyr.hasMilestone(playerIndex, rf.FIRST_MARKETING_TRAINEE_USED)) {
+		// Validate before even milestone 18 can change; awardMilestone rechecks live stock.
+		const reward = marketingTraineeReward(store, playerIndex, choice)
+		if (!reward.ok) return reward
+		plyr.awardMilestone(playerIndex, rf.FIRST_MARKETEER_USED)
+		return plyr.awardMilestone(playerIndex, rf.FIRST_MARKETING_TRAINEE_USED, false, choice)
+	}
 	switch (marketer) {
 		case rf.MARKETING_TRAINEE:
 			plyr.awardMilestone(playerIndex, rf.FIRST_MARKETEER_USED)

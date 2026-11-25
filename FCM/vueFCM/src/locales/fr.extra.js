@@ -1,5 +1,13 @@
 // fr messages added after the main translation pass. Merged over fr.js in index.js.
 export default {
+ milestoneNightBalanceDisplay: {
+  "marketingTrainee": "Choisir gratuitement 1 apprenti cuisinier ou coursier disponible.",
+  "lemonade": "Formez 1 employé en service de la même couleur par manche",
+  "lemonadeDetails": "Formez au maximum un employé en service par manche, en conservant sa couleur professionnelle et en dépensant les points de formation habituels ;",
+  "nightShift": "Personnel sans salaire : travail doublé. Former depuis le vice-président junior ; pas de recrutement direct.",
+  "nightShiftDetails": "Tous les employés sans salaire travaillent deux fois. Vice-président junior → Responsable de nuit ; recrutement direct interdit. La promotion au travail de même couleur est autorisée, mais toute l’organisation après formation doit pouvoir accueillir tous les employés. Pas de promotion sans les places nécessaires. Stagiaire en gestion → Vice-président junior → Responsable de nuit nécessite deux étapes. Salaires et frais de débauchage inchangés."
+},
+
 	"actionArea": {
 		"turnNudge": {
 		"streak": "🔥 {days} jours d'affilée · Meilleur : {best}. {goal}",
@@ -58,6 +66,10 @@ export default {
 		"unionMustWork": "Vous devez employer l'Organisateur syndical"
 	},
 	"workingDay": {
+    "chooseTraineeReward": "Choisissez un employé disponible avant de placer la campagne. La récompense est accordée au placement.",
+    "noTraineeRewardStock": "Aucun des deux employés n’est disponible. Placez la campagne sans récompense d’employé.",
+    "clearTraineeRewardChoice": "Effacer le choix de récompense",
+
 		"chooseTemporaryWorker": "Choisissez jusqu'à {count} actions d'employés débutants. Vous pouvez mélanger les capacités ou choisir plusieurs fois la même ; les actions inutilisées peuvent être perdues.",
 		"temporaryWorkerSelected": "Actions sélectionnées ({selected}/{count}) :",
 		"clickToRemoveTemporaryWorker": "Cliquez pour retirer cette action",
@@ -92,6 +104,8 @@ export default {
 		"nonHireable": "Non embauchable"
 	},
 	"history": {
+		"traineeRewardChosen": "Recevez {employee}.",
+		"traineeRewardEmpty": "Les deux employés offerts sont épuisés. Aucun employé reçu.",
 		"modules": {
 			"laborMarket": "Marché du travail"
 		},

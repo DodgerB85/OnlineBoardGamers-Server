@@ -1,6 +1,7 @@
 import i18n from "../i18n"
 const t = i18n.global.t // Shortcut
 
+import { cardImage } from "./milestoneNightBalanceDisplay.js"
 import * as rf from "./FCMreference"
 import * as phone from "./FCMphone"
 import * as map from "./FCMmap"
@@ -86,6 +87,11 @@ export function phaseStr(phase) {
 }
 
 export function getImage(image) {
+ // Audited original art; display text is derived separately for the current game.
+ if (image === 'emp_47') return cardImage('employee', 47)
+ if (image === 'm_icon01.png') return cardImage('milestone', 19)
+ if (image === 'm_icon08.png') return cardImage('milestone', 25)
+
 	if (image === `emp_${rf.TELEMARKETER}`) {
 		if (!phone.modern()) return new URL(`../../../static/FCM/images/e_telemarketer_legacy.jpg`, import.meta.url).href
 		if (String(i18n.global.locale.value).startsWith('zh')) return new URL(`../../../static/FCM/images/e_telemarketer.jpg`, import.meta.url).href
@@ -388,6 +394,7 @@ export function getImage(image) {
 	// Rural Marketing Area background
 	else if (image === "ruralArea") return new URL(`../../../static/FCM/images/ruralArea.jpg`, import.meta.url).href
 	// MODULES / STARTING OPTION ICONS
+	else if (image === "so_milestoneNightBalance") return new URL(`../../../static/FCM/images/so_milestoneNightBalance.svg`, import.meta.url).href
 	else if (image === "so_hardchoices2") return new URL(`../../../static/FCM/images/hardchoices2.jpg`, import.meta.url).href
 	else if (image === "hardChoice2_icon") return new URL(`../../../static/FCM/images/hardchoices2.jpg`, import.meta.url).href
 	else if (image === "hardChoice3_icon") return new URL(`../../../static/FCM/images/hardchoices3.jpg`, import.meta.url).href
