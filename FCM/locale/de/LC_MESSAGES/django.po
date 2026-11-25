@@ -2113,3 +2113,8 @@ msgstr "8 Fan-Erweiterungsoptionen einbeziehen (Balance benötigt neue Meilenste
 #. Milestone & Night Shift Balance player help.
 msgid "Player Balance Module (requires New Milestones)"
 msgstr "Spieler-Balance-Modul (benötigt neue Meilensteine)"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Requires New Milestones. Player Balance Module is unavailable in short games or without milestones."
+msgstr "Erfordert neue Meilensteine. Das Spieler-Balance-Modul ist in kurzen Spielen oder ohne Meilensteine nicht verfügbar."

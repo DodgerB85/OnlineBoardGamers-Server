@@ -2450,3 +2450,8 @@ msgstr "Incluir 8 opciones de expansiones de aficionados (Equilibrio requiere nu
 #. Milestone & Night Shift Balance player help.
 msgid "Player Balance Module (requires New Milestones)"
 msgstr "Módulo de equilibrio para jugadores (requiere nuevos hitos)"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Requires New Milestones. Player Balance Module is unavailable in short games or without milestones."
+msgstr "Requiere nuevos hitos. El módulo de equilibrio para jugadores no está disponible en partidas cortas ni sin hitos."

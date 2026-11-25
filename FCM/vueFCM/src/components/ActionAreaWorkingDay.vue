@@ -90,7 +90,7 @@ const computedTVSelectionDone = computed(() => controller.tvSelectionComplete())
 // Media Line mod: free headline publications left for the current player
 const computedHeadlinesLeft = computed(() => (store.startingOptions.mediaLine ? controller.mediaLineHeadlinesLeft(controller.currentPlayerIndex()) : 0))
 
-const computedBalancedTraining = computed(() => trainingAllowance(controller.currentPlayerIndex()).active)
+const computedBalancedTraining = computed(() => trainingAllowance().active)
 const computedBalancedSources = computed(() => balancedTrainingSources(controller.currentPlayerIndex()))
 
 const computedTrainableOptions = computed(() => {

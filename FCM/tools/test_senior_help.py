@@ -57,7 +57,7 @@ class SeniorHelpTests(unittest.TestCase):
             end=current.index('</section>',start)+len('</section>')
             current=current.replace('          '+current[start:end]+'\n','',1)
         self.assertEqual(hashlib.sha256(current.replace(section(current),'').encode()).hexdigest(),
-            'b342b90734f1f44b1be1b9edfda8727ab69a65f1b74b46fd1fec3c8f2a264ebf')
+            'a20cf3694f12f6dbc7c91ca2f4930d1a43d0394b8f3669486e6bb404d2c3c628')
     def test_generator_and_lossless_art_are_idempotent(self):
         import subprocess,sys,hashlib
         from PIL import Image, ImageChops

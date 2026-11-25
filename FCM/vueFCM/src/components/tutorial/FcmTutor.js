@@ -18,6 +18,7 @@ import * as rf from "../../js/FCMreference"
 import * as rules from "../../js/FCMrules"
 import * as map from "../../js/FCMmap"
 import * as controller from "../../js/FCMcontroller"
+import * as context from "../../js/FCMcontext"
 import * as model from "../../js/FCMmodel"
 import { useModelStore } from "../../stores/FCMstore.js"
 import { usePersonalStore } from "../../stores/FCMpersonal.js"
@@ -83,7 +84,7 @@ function tutorHire() {
 	return `Recruits ${hired.map(employeeName).join(", ")}. They all land on the beach and wait for the next restructuring phase.`
 }
 
-function tutorTrain() {
+export function tutorTrain() {
 	const store = useModelStore()
 	const notes = []
 	while (notes.length < 4) {
@@ -97,9 +98,10 @@ function tutorTrain() {
 			const levels = rules.possibleUpgrades(store.availableEmployees, TUTOR_INDEX, from, train.total, train.level2, train.level3, train.unlimited, trainedTo, false)
 			const to = levels[0] && levels[0][0]
 			if (to === undefined) continue
-			store.context.selectedEmployeeToTrainData.employee = from
-			store.context.selectedEmployeeToTrainData.origin = 0 // 0 = from the beach
-			controller.trainEmployee(to, 1)
+			// Bind the selection like the live training UI does; the raw two-argument
+			// controller call is deliberately closed once the UI has bound a selection.
+			const selection = context.bindTrainingSelection({ employee: from, origin: 0 })
+			if (controller.trainEmployee(to, 1, selection) === false) break
 			notes.push(`${employeeName(from)} into ${employeeName(to)}`)
 			moved = true
 			break

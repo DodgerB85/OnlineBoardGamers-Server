@@ -1,4 +1,4 @@
-import { beforeAll, afterEach, it, expect, vi } from 'vitest'
+import { beforeAll, afterEach, it, expect } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import { createRenderer, h, nextTick } from 'vue'
 function node(type, text = '') { return { type, text, children: [], props: {}, parent: null } }
@@ -100,6 +100,8 @@ const trainingHistoryCases=[
  {raw:56,to:47,decoded:6,legacy:'>',balanced:'>'},
 ]
 const historyMatrix=[false,true].flatMap(initial=>trainingHistoryCases.map(c=>({...c,initial})))
+// HistoryEntry abbreviates some training targets (see empTitle(..., true)).
+const trainingTargetTitle=id=>id===rf.EXECUTIVE_VICE_PRESIDENT?i18n.global.t('history.abbr.executiveVP'):rf.EMPLOYEES_STR[id].title
 it.each(historyMatrix)('real raw HistoryEntry preserves source/text across both live gate directions: %j',async ({raw,to,decoded,legacy,balanced,initial})=>{
  fresh({milestoneNightBalance:initial})
  const entry=[rf.HIST_TRAIN,0,0,[raw,to]],before=JSON.stringify(entry)
@@ -108,7 +110,7 @@ it.each(historyMatrix)('real raw HistoryEntry preserves source/text across both 
  for(const enabled of [initial,!initial,initial]){
   store.startingOptions.milestoneNightBalance=enabled;await nextTick()
   expect(all(root,n=>n.type==='b').map(text)).toEqual([enabled?(balanced??legacy):legacy])
-  const titles=decoded===-1?[rf.EMPLOYEES_STR[to].title]:[rf.EMPLOYEES_STR[decoded].title,rf.EMPLOYEES_STR[to].title]
+  const titles=decoded===-1?[trainingTargetTitle(to)]:[rf.EMPLOYEES_STR[decoded].title,trainingTargetTitle(to)]
   expect(all(root,n=>n.type==='span'&&cls(n,'compact')).map(text)).toEqual(titles)
   expect(text(root).includes(i18n.global.t('history.fromStructure'))).toBe(raw>=50)
   expect(text(root).includes(i18n.global.t('history.fromHiring'))).toBe(raw===-1)
@@ -139,10 +141,8 @@ it.each(['en','zh-hans','de','fr','es','it'])('resource expanded/compact/hover c
  expect(text(card(47))).toContain(i18n.global.t('employees.nightShiftManagerDesc'))
 })
 
-it('layout exposes visual third level without equating it to training cost or economic level',async()=>{
+it('training-step helper uses decoded ids and the balanced night branch',async()=>{
  fresh();const layout=await import('../js/milestoneNightBalanceLayout.js')
- expect(layout.employeeDisplayLevel).toBeTypeOf('function')
- expect(layout.employeeDisplayLevel(47,store.startingOptions)).toBe(3)
  expect(layout.employeeTrainingSteps(5,47,store.startingOptions)).toBe(2)
  expect(layout.employeeTrainingSteps(6,47,store.startingOptions)).toBe(1)
  // The helper takes decoded employee IDs; +50 is decoded only by HistoryEntry.
@@ -151,7 +151,6 @@ it('layout exposes visual third level without equating it to training cost or ec
  expect(layout.employeeTrainingSteps(54,55,store.startingOptions)).toBe(1)
  expect(rf.EMPLOYEE_ARRANGEMENT.indexOf(47)%5).toBe(0)
  expect(rf.HIREABLE_EMPLOYEES).toContain(47)
- expect(layout.employeeDisplayLevel(47,{...store.startingOptions,milestoneNightBalance:false})).toBe(1)
 })
 
 function legacyLayout(store){

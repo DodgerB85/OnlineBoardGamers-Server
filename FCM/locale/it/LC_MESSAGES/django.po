@@ -2271,3 +2271,8 @@ msgstr "Includi 8 opzioni delle espansioni dei fan (il bilanciamento richiede i 
 #. Milestone & Night Shift Balance player help.
 msgid "Player Balance Module (requires New Milestones)"
 msgstr "Modulo di bilanciamento per i giocatori (richiede i nuovi traguardi)"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Requires New Milestones. Player Balance Module is unavailable in short games or without milestones."
+msgstr "Richiede i nuovi traguardi. Il modulo di bilanciamento per i giocatori non è disponibile nelle partite brevi o senza traguardi."

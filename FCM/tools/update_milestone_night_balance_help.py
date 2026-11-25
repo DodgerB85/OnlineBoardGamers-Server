@@ -114,40 +114,45 @@ def main():
     assert len(set(ids)) == len(ids)
     def block(message):
         return '{% blocktranslate trimmed %}'+message+'{% endblocktranslate %}'
-    generated = ANCHOR+'\n'
-    generated += '            <h2 class="fcm-china-help-title">{% translate "'+ids[0]+'" %}</h2>\n'
-    generated += '            <img src="{% static \'FCM/images/so_milestoneNightBalance.svg\' %}" alt="{% translate "'+ids[1]+'" %}" width="42" height="42" style="display:block;margin:8px 0 12px" />\n'
-    generated += '            <p>'+block(ids[2])+'</p>\n            <ul>\n'
-    for message in ids[3:6]:
-        generated += '              <li>'+block(message)+'</li>\n'
-    generated += '            </ul>\n          </section>'
     template = ROOT/'FCM/templates/FCM/fanExpansionsHelp.html'
     original = template.read_bytes()
     text = original.decode('utf-8')
+    nl = '\r\n' if '\r\n' in text else '\n'
+    generated = ANCHOR+nl
+    generated += '            <h2 class="fcm-china-help-title">{% translate "'+ids[0]+'" %}</h2>'+nl
+    generated += '            <img src="{% static \'FCM/images/so_milestoneNightBalance.svg\' %}" alt="{% translate "'+ids[1]+'" %}" width="42" height="42" style="display:block;margin:8px 0 12px" />'+nl
+    generated += '            <p>'+block(ids[2])+'</p>'+nl+'            <ul>'+nl
+    for message in ids[3:6]:
+        generated += '              <li>'+block(message)+'</li>'+nl
+    generated += '            </ul>'+nl+'          </section>'
     if ANCHOR in text:
         start = text.index(ANCHOR)
         end = text.index('</section>', start)+len('</section>')
         updated = text[:start]+generated+text[end:]
     else:
-        boundary = '            <div class="card section">\n              <h2 class="fcm-china-help-title">{% translate "Further Help" %}</h2>'
+        boundary = ('            <div class="card section">'+nl
+                    +'              <h2 class="fcm-china-help-title">{% translate "Further Help" %}</h2>')
         assert text.count(boundary) == 1
-        updated = text.replace(boundary, '          '+generated+'\n'+boundary, 1)
+        updated = text.replace(boundary, '          '+generated+nl+boundary, 1)
     if updated.encode('utf-8') != original:
         template.write_bytes(updated.encode('utf-8'))
     rules = ROOT/'FCM/rules/Fan_Expansions_rules.md'
     original = rules.read_bytes()
-    heading = b'\n\n## Player Balance Module\n'
-    legacy_heading = b'\n\n## Milestone & Night Shift Balance\n'
+    nl_bytes = b'\r\n' if b'\r\n' in original else b'\n'
+    nl_text = nl_bytes.decode('ascii')
+    heading = nl_bytes*2 + b'## Player Balance Module' + nl_bytes
+    legacy_heading = nl_bytes*2 + b'## Milestone & Night Shift Balance' + nl_bytes
     if heading not in original and legacy_heading in original:
         original = original.replace(legacy_heading, heading, 1)
-    addition = ('\n\n## Player Balance Module\n\n'
-                '[Player help](/FCM/fanExpansionsHelp/#milestone-night-balance)\n\n'
-                +ids[2]+'\n\n'+'\n'.join('- '+s for s in ids[3:6])+'\n').encode('utf-8')
+    addition = (nl_bytes*2 + b'## Player Balance Module' + nl_bytes*2
+                + b'[Player help](/FCM/fanExpansionsHelp/#milestone-night-balance)' + nl_bytes*2
+                + ids[2].encode('utf-8') + nl_bytes*2
+                + nl_text.join('- '+s for s in ids[3:6]).encode('utf-8') + nl_bytes)
     if heading not in original:
         rules.write_bytes(original+addition)
     else:
         start = original.index(heading)
-        end = original.find(b'\n\n## ', start+len(heading))
+        end = original.find(nl_bytes*2 + b'## ', start+len(heading))
         if end < 0:
             end = len(original)
         updated = original[:start]+addition+original[end:]

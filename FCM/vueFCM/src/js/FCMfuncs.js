@@ -1196,17 +1196,20 @@ export function importFCMmodel(inputB64, forGameOver, includeContext) {
 	// 4 - availableMilestones
 	//m.availableMilestones = inputArr[4]
 	for (let i = 0; i < store.players.length; i++) {
-		// Remove employees from available
+		// Remove employees from available. Blank slots (-1) are not cards.
 		for (let j = 0; j < store.players[i].employees.length; j++) {
-			store.availableEmployees[store.players[i].employees[j]]--
+			const employee = store.players[i].employees[j]
+			if (employee >= 0) store.availableEmployees[employee]--
 		}
 		// Remove Beach from available
 		for (let j = 0; j < store.players[i].beach.length; j++) {
-			store.availableEmployees[store.players[i].beach[j]]--
+			const employee = store.players[i].beach[j]
+			if (employee >= 0) store.availableEmployees[employee]--
 		}
 		for (let j = 0; j < store.players[i].marketers.length; j++) {
+			const marketer = store.players[i].marketers[j]
 			// Night-shift bindings share an employee; only the physical binding owns a card.
-			if (!store.players[i].marketers[j].nightShift) store.availableEmployees[store.players[i].marketers[j].marketer]--
+			if (!marketer.nightShift && marketer.marketer >= 0) store.availableEmployees[marketer.marketer]--
 		}
 		// Remove MS from available
 		for (let j = 0; j < store.players[i].milestones.length; j++) {

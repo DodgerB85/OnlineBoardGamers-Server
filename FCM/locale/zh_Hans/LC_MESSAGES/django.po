@@ -2259,3 +2259,8 @@ msgstr "加入8个玩家扩展选项（平衡模组需要新里程碑）"
 #. Milestone & Night Shift Balance player help.
 msgid "Player Balance Module (requires New Milestones)"
 msgstr "玩家平衡模组 (需要新里程碑)"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Requires New Milestones. Player Balance Module is unavailable in short games or without milestones."
+msgstr "需要新里程碑。玩家平衡模组在短游戏或无里程碑模式下不可用。"

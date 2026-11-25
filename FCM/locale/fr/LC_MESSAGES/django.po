@@ -2118,3 +2118,8 @@ msgstr "Inclure 8 options d’extensions de fans (l’équilibrage nécessite le
 #. Milestone & Night Shift Balance player help.
 msgid "Player Balance Module (requires New Milestones)"
 msgstr "Module d’équilibrage des joueurs (nécessite les nouvelles étapes)"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Requires New Milestones. Player Balance Module is unavailable in short games or without milestones."
+msgstr "Nécessite les nouvelles étapes. Le module d’équilibrage des joueurs n’est pas disponible dans les parties courtes ou sans étapes."
