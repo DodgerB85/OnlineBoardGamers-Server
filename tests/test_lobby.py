@@ -34,6 +34,15 @@ class BGHAPIParsingTests(SimpleTestCase):
 
         self.assertJSONEqual(response.content, {"map_tiles": [{"tile_letter": "A"}]})
 
+    @patch("Lobby.views.requests.get", side_effect=requests.exceptions.Timeout)
+    def test_upstream_timeout_returns_502(self, mock_get):
+        request = RequestFactory().get("/BGH_API/test/")
+        request.user = type("User", (), {"username": "tester"})()
+
+        response = BGH_API.__wrapped__(request, "3,2,F,F,F,fcmmgapi4829")
+
+        self.assertEqual(response.status_code, 502)
+
 class ChangelogWebhookFailureTests(TestCase):
     def test_update_saved_when_discord_webhook_times_out(self):
         admin = User.objects.create_user("changelogadmin", "a@example.com", "pw")

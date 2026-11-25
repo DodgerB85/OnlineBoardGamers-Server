@@ -11,10 +11,16 @@ export function buildBgStatsUrl() {
 
 	// ranking() groups equal scores together.
 	const groups = []
+	const outPlayers = []
 	for (const name of game.ranking()) {
 		const player = game.state.players.find((p) => p.name === name)
-		// A computer opponent is not a person; a kicked seat has no result.
-		if (!player || game.isComputer(name) || store.missingPlayers.includes(name)) continue
+		// A computer opponent is not a person; a resigned or kicked seat keeps
+		// its own name but is listed after the players still in the game.
+		if (!player || game.isComputer(name)) continue
+		if (store.missingPlayers.includes(name)) {
+			outPlayers.push(name)
+			continue
+		}
 		const score = game.getScore(name)
 		const last = groups[groups.length - 1]
 		if (last && last[0].score === score) last.push({ name, score })
@@ -27,5 +33,6 @@ export function buildBgStatsUrl() {
 		sourcePlayId: personal.gameID,
 		playDate: store.history[0]?.time ?? Date.now(),
 		groups,
+		outPlayers,
 	})
 }

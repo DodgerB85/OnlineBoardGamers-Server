@@ -12,10 +12,12 @@ export function buildBgStatsUrl() {
 	const gameEnd = store.history[store.history.length - 1]
 	// endGame tie-breaks by seat, so the field is fully ordered: one group each.
 	const groups = []
+	const outPlayers = store.players.filter((player) => player.displayName === rf.BOT_NAME && player.name !== rf.BOT_NAME).map((player) => player.name)
 	for (const playerIndex of store.gameflow.fullTurnOrder) {
 		const player = store.players[playerIndex]
-		// A bot is not a player: solo games export as a one-player play.
-		if (player.displayName === rf.BOT_NAME) continue
+		// Only the FcmBot account is a bot seat: a seat renamed FcmBot is a human
+		// who resigned or was kicked. FcmAI is the in-game AI, never a person.
+		if (player.name === rf.BOT_NAME || player.name === rf.AI_NAME || player.displayName === rf.BOT_NAME) continue
 		groups.push([{ name: player.name, score: player.money }])
 	}
 
@@ -26,5 +28,6 @@ export function buildBgStatsUrl() {
 		sourcePlayId: personal.gameID,
 		playDate: gameEnd[2] * 1000,
 		groups,
+		outPlayers,
 	})
 }

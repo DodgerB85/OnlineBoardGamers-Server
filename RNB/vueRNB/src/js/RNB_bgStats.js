@@ -19,10 +19,12 @@ export function buildBgStatsUrl() {
 	// fullTurnOrder is sorted by score, but its tie-break still separates
 	// players who finished level, so group equal consecutive scores.
 	const groups = []
+	const outPlayers = store.players.filter((player) => player.displayName === rf.BOT_NAME && player.name !== rf.BOT_NAME).map((player) => player.name)
 	for (const playerIndex of store.gameflow.fullTurnOrder) {
 		const player = store.players[playerIndex]
-		// A bot is not a player: solo games export as a one-player play.
-		if (player.displayName === rf.BOT_NAME) continue
+		// Only the RnbBot account is a bot seat: a seat renamed RnbBot is a human
+		// who resigned or was kicked, and is exported under their own name.
+		if (player.name === rf.BOT_NAME || player.displayName === rf.BOT_NAME) continue
 		const entry = { name: player.name, score: wonder.getPlayerTotalScore(playerIndex) }
 		const group = groups[groups.length - 1]
 		if (group && group[0].score === entry.score) group.push(entry)
@@ -36,5 +38,6 @@ export function buildBgStatsUrl() {
 		sourcePlayId: personal.gameID,
 		playDate,
 		groups,
+		outPlayers,
 	})
 }

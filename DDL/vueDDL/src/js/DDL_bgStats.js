@@ -11,12 +11,14 @@ export function buildBgStatsUrl() {
 
 	// finalPositions already groups tied players, best group first.
 	const groups = []
+	const outPlayers = store.players.filter((player) => player.displayName === rf.BOT_NAME && player.name !== rf.BOT_NAME).map((player) => player.name)
 	for (const group of store.gameflow.finalPositions || []) {
 		const players = []
 		for (const index of group) {
 			const player = store.players[index]
-			// A bot is not a player: solo games export as a one-player play.
-			if (player.displayName === rf.BOT_NAME) continue
+			// Only the DdlBot account is a bot seat: a seat renamed DdlBot is a
+			// human who was kicked, and is exported under their own name.
+			if (player.name === rf.BOT_NAME || player.displayName === rf.BOT_NAME) continue
 			players.push({ name: player.name, score: rules.finalScore(player) })
 		}
 		if (players.length > 0) groups.push(players)
@@ -30,5 +32,6 @@ export function buildBgStatsUrl() {
 		// DDL history carries no timestamps.
 		playDate: Date.now(),
 		groups,
+		outPlayers,
 	})
 }

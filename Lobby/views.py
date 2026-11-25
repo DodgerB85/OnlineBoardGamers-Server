@@ -5184,8 +5184,13 @@ def BGH_API(request, options):
     if not re.fullmatch(r"[A-Za-z0-9_,.-]{1,100}", options):
         return JsonResponse({"error": "Invalid options"}, status=400)
     url = "https://api.boardgamehelpers.com/api/FoodChainMagnate/GenerateMap/" + options
-    response = requests.get(url, timeout=10)
-    data = response.json()
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+    except (requests.exceptions.RequestException, ValueError):
+        # The map generator is a third party and does time out; don't turn that into a 500.
+        return JsonResponse({"error": "Map service unavailable"}, status=502)
     final_dictionary = {}
     if isinstance(data, dict):
         final_dictionary = data

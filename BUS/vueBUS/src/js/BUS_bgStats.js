@@ -14,9 +14,11 @@ export function buildBgStatsUrl() {
 	// The ranking already settles time-stone and first-to-score ties, so every
 	// player keeps their own rank.
 	const groups = []
+	const outPlayers = store.players.filter((player) => player.displayName === rf.BOT_NAME && player.name !== rf.BOT_NAME).map((player) => player.name)
 	for (const player of model.getFinalRanking()) {
-		// A bot is not a player: solo games export as a one-player play.
-		if (player.displayName === rf.BOT_NAME) continue
+		// Only the BusBot account is a bot seat: a seat renamed BusBot is a human
+		// who resigned or was kicked, and is exported under their own name.
+		if (player.name === rf.BOT_NAME || player.displayName === rf.BOT_NAME) continue
 		groups.push([{ name: player.name, score: player.score }])
 	}
 
@@ -27,5 +29,6 @@ export function buildBgStatsUrl() {
 		sourcePlayId: personal.gameID,
 		playDate: (personal.gameCreationTimestamp + gameEnd[2]) * 1000,
 		groups,
+		outPlayers,
 	})
 }

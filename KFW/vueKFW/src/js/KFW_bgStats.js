@@ -17,12 +17,14 @@ export function buildBgStatsUrl() {
 
 	// finalPositions already groups players tied on the same score.
 	const groups = []
+	const outPlayers = store.players.filter((player) => player.displayName === rf.BOT_NAME && player.name !== rf.BOT_NAME).map((player) => player.name)
 	for (const group of store.context.finalPositions) {
 		const players = []
 		for (const playerIndex of group) {
 			const player = store.players[playerIndex]
-			// A bot is not a player: solo games export as a one-player play.
-			if (player.displayName === rf.BOT_NAME) continue
+			// Only the KfwBot account is a bot seat: a seat renamed KfwBot is a
+			// human who resigned or was kicked, and is exported under their own name.
+			if (player.name === rf.BOT_NAME || player.displayName === rf.BOT_NAME) continue
 			players.push({ name: player.name, score: player.finalScore })
 		}
 		// Drop groups left empty by bots so the ranks and winners stay right.
@@ -36,5 +38,6 @@ export function buildBgStatsUrl() {
 		sourcePlayId: personal.gameID,
 		playDate,
 		groups,
+		outPlayers,
 	})
 }

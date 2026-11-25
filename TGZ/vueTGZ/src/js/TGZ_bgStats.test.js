@@ -109,14 +109,14 @@ describe("buildBgStatsUrl", () => {
 		])
 	})
 
-	it("drops bots and re-ranks the humans left", () => {
+	it("drops bot accounts and re-ranks the humans left", () => {
 		finish(
 			[
 				[10, 2, 1],
 				[5, 0, 1],
 				[1, 1, 1],
 			],
-			[makePlayer(0), makePlayer(1), makePlayer(2, { displayName: rf.BOT_NAME })]
+			[makePlayer(0), makePlayer(1), makePlayer(2, { name: rf.BOT_NAME, displayName: rf.BOT_NAME })]
 		)
 
 		const play = decode(buildBgStatsUrl())
@@ -126,8 +126,25 @@ describe("buildBgStatsUrl", () => {
 		expect(play.players[0].winner).toBe(true)
 	})
 
+	it("keeps a resigned or kicked human last under their own name", () => {
+		finish(
+			[
+				[10, 0, 1],
+				[-41, 1, 1],
+			],
+			[makePlayer(0), makePlayer(1, { displayName: rf.BOT_NAME })]
+		)
+
+		const play = decode(buildBgStatsUrl())
+
+		expect(play.players.map((player) => [player.name, player.rank, player.score])).toEqual([
+			["user0", 1, 10],
+			["user1", 2, 0],
+		])
+	})
+
 	it("returns nothing when only bots sat at the table", () => {
-		finish([[10, 0, 1]], [makePlayer(0, { displayName: rf.BOT_NAME })])
+		finish([[10, 0, 1]], [makePlayer(0, { name: rf.BOT_NAME, displayName: rf.BOT_NAME })])
 
 		expect(buildBgStatsUrl()).toBeUndefined()
 	})

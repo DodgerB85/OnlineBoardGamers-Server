@@ -63,8 +63,8 @@ describe("buildBgStatsUrl", () => {
 		})
 	})
 
-	it("gives tied players one shared rank and drops bots before ranking", () => {
-		finish([[0, 1, 3], [2]], [makePlayer(0, { finalScore: 50 }), makePlayer(1, { finalScore: 50 }), makePlayer(2, { finalScore: 30 }), makePlayer(3, { finalScore: 50, displayName: rf.BOT_NAME })])
+	it("gives tied players one shared rank and drops bot accounts before ranking", () => {
+		finish([[0, 1, 3], [2]], [makePlayer(0, { finalScore: 50 }), makePlayer(1, { finalScore: 50 }), makePlayer(2, { finalScore: 30 }), makePlayer(3, { name: rf.BOT_NAME, displayName: rf.BOT_NAME, finalScore: 50 })])
 
 		const play = decode(buildBgStatsUrl())
 
@@ -76,7 +76,7 @@ describe("buildBgStatsUrl", () => {
 	})
 
 	it("promotes the best human when a bot won the game", () => {
-		finish([[2], [0], [1]], [makePlayer(0, { finalScore: 40 }), makePlayer(1, { finalScore: 20 }), makePlayer(2, { finalScore: 60, displayName: rf.BOT_NAME })])
+		finish([[2], [0], [1]], [makePlayer(0, { finalScore: 40 }), makePlayer(1, { finalScore: 20 }), makePlayer(2, { name: rf.BOT_NAME, displayName: rf.BOT_NAME, finalScore: 60 })])
 
 		const play = decode(buildBgStatsUrl())
 
@@ -86,8 +86,19 @@ describe("buildBgStatsUrl", () => {
 		])
 	})
 
+	it("keeps a resigned or kicked human last under their own name", () => {
+		finish([[0], [1]], [makePlayer(0, { finalScore: 40 }), makePlayer(1, { displayName: rf.BOT_NAME, finalScore: -1 })])
+
+		const play = decode(buildBgStatsUrl())
+
+		expect(play.players.map((player) => [player.name, player.rank, player.score])).toEqual([
+			["user0", 1, 40],
+			["user1", 2, 0],
+		])
+	})
+
 	it("returns nothing when only bots sat at the table", () => {
-		finish([[0]], [makePlayer(0, { displayName: rf.BOT_NAME })])
+		finish([[0]], [makePlayer(0, { name: rf.BOT_NAME, displayName: rf.BOT_NAME })])
 
 		expect(buildBgStatsUrl()).toBeUndefined()
 	})

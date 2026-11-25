@@ -84,8 +84,8 @@ describe("buildBgStatsUrl", () => {
 		])
 	})
 
-	it("drops bots and re-ranks the humans left", () => {
-		finish([2, 0, 1], [makePlayer(0, { money: 50 }), makePlayer(1, { money: 10 }), makePlayer(2, { money: 999, displayName: rf.BOT_NAME })])
+	it("drops bot accounts and re-ranks the humans left", () => {
+		finish([2, 0, 1], [makePlayer(0, { money: 50 }), makePlayer(1, { money: 10 }), makePlayer(2, { name: rf.BOT_NAME, displayName: rf.BOT_NAME, money: 999 })])
 
 		const play = decode(buildBgStatsUrl())
 
@@ -96,8 +96,19 @@ describe("buildBgStatsUrl", () => {
 	})
 
 	it("returns nothing when only bots sat at the table", () => {
-		finish([0], [makePlayer(0, { displayName: rf.BOT_NAME })])
+		finish([0], [makePlayer(0, { name: rf.BOT_NAME, displayName: rf.BOT_NAME })])
 
 		expect(buildBgStatsUrl()).toBeUndefined()
+	})
+
+	it("keeps a resigned or kicked human under their own name", () => {
+		finish([0, 1], [makePlayer(0, { money: 50 }), makePlayer(1, { displayName: rf.BOT_NAME, money: -120 })])
+
+		const play = decode(buildBgStatsUrl())
+
+		expect(play.players).toEqual([
+			{ name: "user0", sourcePlayerId: "user0", score: 50, rank: 1, winner: true, startPlayer: false },
+			{ name: "user1", sourcePlayerId: "user1", score: 0, rank: 2, winner: false, startPlayer: false },
+		])
 	})
 })

@@ -85,7 +85,7 @@ describe("buildBgStatsUrl", () => {
 		])
 	})
 
-	it("drops computer seats and kicked players, keeping the human ranking", () => {
+	it("drops computer seats and lists a kicked player last with no score", () => {
 		const store = setup(
 			makeGame(
 				[
@@ -100,7 +100,10 @@ describe("buildBgStatsUrl", () => {
 
 		const play = decode(buildBgStatsUrl())
 
-		expect(play.players.map((player) => [player.name, player.rank])).toEqual([["alice", 1]])
+		expect(play.players.map((player) => [player.name, player.rank, player.score, player.winner])).toEqual([
+			["alice", 1, 60, true],
+			["bob", 2, 0, false],
+		])
 	})
 
 	it("returns nothing when the game is not over", () => {

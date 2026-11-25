@@ -20,8 +20,9 @@ export function buildBgStatsUrl() {
 		const group = []
 		for (const playerIndex of indices) {
 			const player = store.players[playerIndex]
-			// A bot is not a player: solo games export as a one-player play.
-			if (player.displayName === rf.BOT_NAME) continue
+			// Only the AqyBot account is a bot seat: a seat renamed AqyBot is a
+			// human who resigned or was kicked, and keeps their own name.
+			if (player.name === rf.BOT_NAME) continue
 			// Antiquity has no score: only the finishing order is exported.
 			group.push({ name: player.name })
 		}

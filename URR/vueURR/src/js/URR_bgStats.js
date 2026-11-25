@@ -8,13 +8,17 @@ export function buildBgStatsUrl() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 
-	// finalPositions groups tied players, best group first.
+	// finalPositions groups tied players, best group first. It skips missing
+	// seats, so collect those from the player list instead.
 	const groups = []
+	const outPlayers = store.players.filter((player) => player.isMissing && player.name !== rf.BOT_NAME).map((player) => player.name)
 	for (const group of store.gameflow.finalPositions || []) {
 		const players = []
 		for (const index of group) {
 			const player = store.players[index]
-			// A bot is not a player: solo games export as a one-player play.
+			// Only the UrBot account is a bot seat: a seat renamed UrBot is a human
+			// who resigned or was kicked, and is exported under their own name.
+			if (player.name === rf.BOT_NAME) continue
 			if (player.isMissing || player.displayName === rf.BOT_NAME) continue
 			players.push({ name: player.name, score: player.score })
 		}
@@ -29,5 +33,6 @@ export function buildBgStatsUrl() {
 		sourcePlayId: personal.gameID,
 		playDate: (endTime ?? Math.floor(Date.now() / 1000)) * 1000,
 		groups,
+		outPlayers,
 	})
 }
