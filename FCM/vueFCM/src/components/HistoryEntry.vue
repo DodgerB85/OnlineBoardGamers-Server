@@ -3,6 +3,7 @@
  *  Displays player actions, game events, and turn information
  */
 
+import { employeeTrainingSteps } from "../js/milestoneNightBalanceLayout.js"
 import * as rf from "../js/FCMreference.js"
 import * as rules from "../js/FCMrules.js"
 import * as funcs from "../js/FCMfuncs.js"
@@ -183,20 +184,8 @@ function salaryPayText(salaryArr) {
 }
 
 function getNumOfTrainsStr(from, to) {
-	let res = ">"
-	// from hiring, just give level of employee
-	if (from === -1) {
-		let idx = rf.EMPLOYEE_ARRANGEMENT.indexOf(to)
-		idx = idx % 5
-		res = String(idx) + "x >"
-	} else {
-		let fromIdx = rf.EMPLOYEE_ARRANGEMENT.indexOf(from)
-		fromIdx = fromIdx % 5
-		let toIdx = rf.EMPLOYEE_ARRANGEMENT.indexOf(to)
-		toIdx = toIdx % 5
-		if (toIdx - fromIdx > 1) res = String(toIdx - fromIdx) + "x >"
-	}
-	return res
+ const steps = employeeTrainingSteps(from, to, store.startingOptions)
+ return from === -1 || steps > 1 ? String(steps) + "x >" : ">"
 }
 
 /////////////////////////
@@ -727,6 +716,11 @@ const computedEntry3 = computed(() => {
 		}
 	} else if (entry[0] === rf.HIST_NEW_MILESTONE) {
 		ret.ms = rf.MILESTONES_STR[param[0]]
+		if (param[0] === rf.FIRST_MARKETING_TRAINEE_USED && (param[1] === rf.KITCHEN_TRAINEE || param[1] === rf.ERRAND_BOY)) {
+			ret.ms = { ...ret.ms, description: i18n.global.t("history.traineeRewardChosen", { employee: rf.employeeName(param[1]) }) }
+		} else if (param[0] === rf.FIRST_MARKETING_TRAINEE_USED && param.length > 1 && param[1] === null) {
+			ret.ms = { ...ret.ms, description: i18n.global.t("history.traineeRewardEmpty") }
+		}
 	} else if (entry[0] === rf.HIST_CEO_BONUS_CHOSEN) {
 		if (param[0] === rf.CEO_ACTION_PRICE_MINUS_3) ret.ceoText = "playerDetails.priceMinus3"
 		else if (param[0] === rf.CEO_ACTION_RECRUITING_MANAGER) ret.ceoText = "employees.recruitingManagerDesc"

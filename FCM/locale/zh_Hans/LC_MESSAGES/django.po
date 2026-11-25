@@ -2219,3 +2219,43 @@ msgstr "点击查看原图"
 #. Media Line help diagram accessibility.
 msgid "Phone and TV tile ranges: three phone placements and TV house selection"
 msgstr "电话与电视的板块范围：三种电话放置与电视选房示例"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Player Balance Module"
+msgstr "玩家平衡模组"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Player Balance Module icon"
+msgstr "玩家平衡模组图标"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "A player balance module, available only when using New Milestones."
+msgstr "玩家平衡模组，仅在使用新里程碑时可启用。"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "First Marketing Trainee Used: choose either a Kitchen Trainee or an Errand Boy; receive only one, no longer both;"
+msgstr "首个使用营销实习生：从见习厨师和跑腿伙计中二选一，仅获得一名，不再同时获得两名;"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "First Lemonade Sold: train at most one on-duty employee per round, keeping their career colour and spending the normal training points;"
+msgstr "首个卖出柠檬水：每回合最多培训一名在岗员工，保持职业颜色并消耗原培训点；"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "With Night Shift enabled, the Night Shift Manager cannot be hired directly; promote a Junior Vice President through training;"
+msgstr "已启用夜班时，夜班经理不可直接招聘，须由总经理助理培训晋升；"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Include 8 fan expansion options (Balance requires New Milestones)"
+msgstr "加入8个玩家扩展选项（平衡模组需要新里程碑）"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Player Balance Module (requires New Milestones)"
+msgstr "玩家平衡模组 (需要新里程碑)"

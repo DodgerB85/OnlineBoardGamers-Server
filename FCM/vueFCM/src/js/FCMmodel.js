@@ -379,9 +379,14 @@ export async function initGame() {
 
 export function setInternalStartingOptions(startingOptionsArray) {
 	const store = useModelStore()
-	if (startingOptionsArray.length === 0) return
-
-	const opts = startingOptionsArray.map(Number)
+	const opts = (startingOptionsArray ?? []).map(Number)
+	// Refresh only this opt-in and its direct eligibility from the current setup.
+	// In particular, a previous short game must not disable this game's milestones.
+	store.startingOptions.shortGame = opts.includes(rf.SO_SHORT_GAME)
+	store.startingOptions.useMilestones = !opts.includes(rf.SO_NO_MILESTONES) && !store.startingOptions.shortGame
+	store.startingOptions.newMilestones = opts.includes(rf.SO_NEW_MS)
+	store.startingOptions.nightShift = opts.includes(rf.SO_NIGHT_SHIFT)
+	store.startingOptions.milestoneNightBalance = opts.includes(rf.SO_MILESTONE_NIGHT_BALANCE)
 
 	for (let i = 0; i < opts.length; i++) {
 		if (opts[i] === rf.SO_SHORT_GAME) store.startingOptions.shortGame = true

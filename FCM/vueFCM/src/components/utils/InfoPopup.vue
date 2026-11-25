@@ -1,7 +1,8 @@
 <script setup>
 import * as view from "../../js/FCMview"
 import * as rf from "../../js/FCMreference"
-import { ref } from "vue"
+import { ref, computed } from "vue"
+import { cardDetails } from "../../js/milestoneNightBalanceDisplay.js"
 
 const props = defineProps({
 	type: { type: String, required: true },
@@ -10,6 +11,7 @@ const props = defineProps({
 })
 
 const show = ref(false)
+const details = computed(() => cardDetails(props.type, props.type === 'employee' ? props.employeeId : props.milestoneId))
 </script>
 
 <template>
@@ -17,12 +19,12 @@ const show = ref(false)
 		<slot />
 		<div v-if="show" class="infoPopup">
 			<!-- Employee card -->
-			<div v-if="type === 'employee' && employeeId > -1" class="expandedEmployeeDiv" :class="{ nonHireableEmployeeCard: employeeId === rf.UNION_ORGANIZER || employeeId === rf.TEMPORARY_WORKER }">
+			<div v-if="type === 'employee' && employeeId > -1" class="expandedEmployeeDiv" :class="{ balancedDetails: !!details, nonHireableEmployeeCard: employeeId === rf.UNION_ORGANIZER || employeeId === rf.TEMPORARY_WORKER }">
 				<div v-if="employeeId === rf.UNION_ORGANIZER || employeeId === rf.TEMPORARY_WORKER" class="nonHireableEmployeeLabel">{{ $t('topMenuViews.nonHireable') }}</div>
 				<h3 class="expandedEmployeeTitle" :class="[rf.EMPLOYEES_STR[employeeId].type, { inverted: rf.EMPLOYEES_STR[employeeId].type === 'manager' || rf.EMPLOYEES_STR[employeeId].type === 'restaurant' }]">
 					{{ rf.EMPLOYEES_STR[employeeId].title }}
 				</h3>
-				<div class="employeeDescriptionDiv">{{ rf.EMPLOYEES_STR[employeeId].description }}</div>
+				<div class="employeeDescriptionDiv">{{ details || rf.EMPLOYEES_STR[employeeId].description }}</div>
 				<div class="employeeIconsDiv">
 					<img v-if="rf.UNIQUE_CARDS.indexOf(employeeId) > -1" :src="view.getImage('icon1x')" class="iconsImg" />
 					<img v-else-if="rf.HIREABLE_EMPLOYEES.indexOf(employeeId) > -1" :src="view.getImage('iconRecruit')" class="iconsImg" />
@@ -36,9 +38,9 @@ const show = ref(false)
 			</div>
 
 			<!-- Milestone card -->
-			<div v-else-if="type === 'milestone' && milestoneId > -1" class="fullMilestoneSpan" :class="rf.MILESTONES_STR[milestoneId].type">
+			<div v-else-if="type === 'milestone' && milestoneId > -1" class="fullMilestoneSpan" :class="[rf.MILESTONES_STR[milestoneId].type, { balancedDetails: !!details }]">
 				<div class="milestoneTitle">{{ rf.MILESTONES_STR[milestoneId].title.toUpperCase() }}</div>
-				<div class="milestoneText">{{ rf.MILESTONES_STR[milestoneId].description }}</div>
+				<div class="milestoneText">{{ details || rf.MILESTONES_STR[milestoneId].description }}</div>
 				<div class="milestoneSpacer">&nbsp;</div>
 				<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[milestoneId].img)" :class="rf.MILESTONES_STR[milestoneId].additionalClass" />
 			</div>
@@ -47,6 +49,25 @@ const show = ref(false)
 </template>
 
 <style scoped>
+/* Only expanded opt-in explanations grow; legacy card geometry stays intact. */
+.balancedDetails.expandedEmployeeDiv,
+.balancedDetails.fullMilestoneSpan {
+ width: 260px;
+ height: auto;
+ min-height: 130px;
+}
+.balancedDetails .employeeDescriptionDiv,
+.balancedDetails .milestoneText {
+ height: auto;
+ min-height: 70px;
+ white-space: normal;
+}
+.balancedDetails .employeeIconsDiv {
+ position: static;
+ margin-top: 8px;
+}
+.balancedDetails.fullMilestoneSpan { padding-bottom: 15px; }
+
 .infoPopupWrapper {
 	position: relative;
 	display: inline-block;

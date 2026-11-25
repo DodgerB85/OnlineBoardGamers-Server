@@ -1,0 +1,62 @@
+{
+  "en": [
+    "Player Balance Module",
+    "Player Balance Module icon",
+    "A player balance module, available only when using New Milestones.",
+    "First Marketing Trainee Used: choose either a Kitchen Trainee or an Errand Boy; receive only one, no longer both;",
+    "First Lemonade Sold: train at most one on-duty employee per round, keeping their career colour and spending the normal training points;",
+    "With Night Shift enabled, the Night Shift Manager cannot be hired directly; promote a Junior Vice President through training;",
+    "Use Player Balance Module",
+    "Requires New Milestones. Adjusts marketing rewards, on-duty training and Night Shift recruitment."
+  ],
+  "zh_Hans": [
+    "玩家平衡模组",
+    "玩家平衡模组图标",
+    "玩家平衡模组，仅在使用新里程碑时可启用。",
+    "首个使用营销实习生：从见习厨师和跑腿伙计中二选一，仅获得一名，不再同时获得两名;",
+    "首个卖出柠檬水：每回合最多培训一名在岗员工，保持职业颜色并消耗原培训点；",
+    "已启用夜班时，夜班经理不可直接招聘，须由总经理助理培训晋升；",
+    "启用玩家平衡模组",
+    "需要新里程碑。调整营销奖励、在岗培训和夜班招聘。"
+  ],
+  "de": [
+    "Spieler-Balance-Modul",
+    "Symbol des Spieler-Balance-Moduls",
+    "Ein Balance-Modul für Spieler, nur mit neuen Meilensteinen verfügbar.",
+    "Erster Einsatz eines Marketing-Trainees: Wähle einen Küchen-Trainee oder einen Laufburschen; du erhältst nur einen, nicht mehr beide;",
+    "Erste verkaufte Limonade: Pro Runde höchstens einen Mitarbeiter im Dienst ausbilden, bei gleicher Berufsfarbe und mit den üblichen Ausbildungspunkten;",
+    "Bei aktivierter Nachtschicht kann der Nachtschichtmanager nicht direkt eingestellt werden; bilde einen Junior-Vizepräsidenten dazu aus;",
+    "Spieler-Balance-Modul verwenden",
+    "Benötigt neue Meilensteine. Passt Marketingbelohnungen, Ausbildung im Dienst und Nachtschicht-Einstellungen an."
+  ],
+  "es": [
+    "Módulo de equilibrio para jugadores",
+    "Icono del módulo de equilibrio para jugadores",
+    "Un módulo de equilibrio para jugadores, disponible solo con los nuevos hitos.",
+    "Primer uso del aprendiz de marketing: elige un aprendiz de cocina o un recadero; recibe solo uno, ya no ambos;",
+    "Primera limonada vendida: forma como máximo a un empleado en servicio por ronda, manteniendo su color profesional y gastando los puntos de formación habituales;",
+    "Con el turno de noche activado, el gerente del turno de noche no puede contratarse directamente; debe ascender mediante formación de un vicepresidente júnior;",
+    "Usar el módulo de equilibrio para jugadores",
+    "Requiere nuevos hitos. Ajusta las recompensas de marketing, la formación en servicio y la contratación del turno de noche."
+  ],
+  "fr": [
+    "Module d’équilibrage des joueurs",
+    "Icône du module d’équilibrage des joueurs",
+    "Un module d’équilibrage pour les joueurs, disponible uniquement avec les nouvelles étapes.",
+    "Première utilisation du stagiaire en marketing : choisissez un apprenti cuisinier ou un coursier ; recevez-en un seul, et non plus les deux ;",
+    "Première limonade vendue : formez au maximum un employé en service par manche, en conservant sa couleur professionnelle et en dépensant les points de formation habituels ;",
+    "Si le service de nuit est activé, son responsable ne peut pas être recruté directement ; formez-le à partir d’un vice-président junior ;",
+    "Utiliser le module d’équilibrage des joueurs",
+    "Nécessite les nouvelles étapes. Ajuste les récompenses de marketing, la formation en service et le recrutement du service de nuit."
+  ],
+  "it": [
+    "Modulo di bilanciamento per i giocatori",
+    "Icona del modulo di bilanciamento per i giocatori",
+    "Un modulo di bilanciamento per i giocatori, disponibile solo con i nuovi traguardi.",
+    "Primo utilizzo dell’apprendista di marketing: scegli un apprendista cuoco o un fattorino; ricevine solo uno, non più entrambi;",
+    "Prima limonata venduta: forma al massimo un dipendente in servizio per turno, mantenendo il suo colore professionale e spendendo i normali punti formazione;",
+    "Con il turno di notte attivo, il suo responsabile non può essere assunto direttamente; deve essere promosso tramite formazione da vicepresidente junior;",
+    "Usa il modulo di bilanciamento per i giocatori",
+    "Richiede i nuovi traguardi. Modifica le ricompense di marketing, la formazione in servizio e le assunzioni del turno di notte."
+  ]
+}

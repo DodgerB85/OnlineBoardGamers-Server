@@ -15081,3 +15081,28 @@ msgstr "Pflichtmodule festlegen"
 #: templates/Lobby/createFCM.html
 msgid "Mandatory modules count toward Min/Max. Excluded modules take precedence."
 msgstr "Pflichtmodule zählen zur Min-/Max-Gesamtzahl. Ausgeschlossene Module haben Vorrang."
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Player Balance Module"
+msgstr "Spieler-Balance-Modul"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Use Player Balance Module"
+msgstr "Spieler-Balance-Modul verwenden"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Requires New Milestones. Adjusts marketing rewards, on-duty training and Night Shift recruitment."
+msgstr "Benötigt neue Meilensteine. Passt Marketingbelohnungen, Ausbildung im Dienst und Nachtschicht-Einstellungen an."
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Player Balance Module (requires New Milestones)"
+msgstr "Spieler-Balance-Modul (benötigt neue Meilensteine)"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Include 8 fan expansion options (Balance requires New Milestones)"
+msgstr "8 Fan-Erweiterungsoptionen einbeziehen (Balance benötigt neue Meilensteine)"

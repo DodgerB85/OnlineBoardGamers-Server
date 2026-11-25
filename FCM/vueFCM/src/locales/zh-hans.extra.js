@@ -1,5 +1,13 @@
 // zh-hans messages added after the main translation pass. Merged over zh-hans.js in index.js.
 export default {
+ milestoneNightBalanceDisplay: {
+  "marketingTrainee": "从库存免费选择1名见习厨师或跑腿伙计。",
+  "lemonade": "每回合能培训1名同色在岗员工",
+  "lemonadeDetails": "每回合最多培训一名在岗员工，保持职业颜色并消耗原培训点；",
+  "nightShift": "免薪员工工作两次。由总经理助理升级，不可直接招聘。",
+  "nightShiftDetails": "所有免薪员工工作两次。总经理助理→夜班经理，不可直接招聘。允许同色在岗晋升，但升级后完整组织架构必须放得下全员；工位不足不可先升后救。管理培训生→总经理助理→夜班经理为两步培训。工资及猎头挖人费用不变。"
+},
+
 	"actionArea": {
 		"turnNudge": {
 		"streak": "🔥 连续 {days} 天 · 最佳：{best}。{goal}",
@@ -72,9 +80,15 @@ export default {
 		"olderVersionDetected": "检测到旧版本。请刷新。"
 	},
 	"workingDay": {
+    "chooseTraineeReward": "放置营销前，请选择一名有货的奖励员工。确认放置时才领取。",
+    "noTraineeRewardStock": "两种员工均已缺货，可正常营销但不获赠员工。",
+    "clearTraineeRewardChoice": "清除奖励选择",
+
 		"clickToUndoTrain": "点击撤销此培训"
 	},
 	"history": {
+		"traineeRewardChosen": "获得{employee}。",
+		"traineeRewardEmpty": "两种奖励员工均已缺货，未获得员工。",
 		"animAnimate": "动画",
 		"animStepThrough": "逐步播放",
 		"animHouseLabel": "房屋 #{num}",

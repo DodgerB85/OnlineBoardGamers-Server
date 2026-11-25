@@ -1,5 +1,13 @@
 // es messages added after the main translation pass. Merged over es.js in index.js.
 export default {
+ milestoneNightBalanceDisplay: {
+  "marketingTrainee": "Elige gratis 1 aprendiz de cocina o recadero disponible de la reserva.",
+  "lemonade": "Forma a 1 empleado en servicio del mismo color por ronda",
+  "lemonadeDetails": "Forma como máximo a un empleado en servicio por ronda, manteniendo su color profesional y gastando los puntos de formación habituales;",
+  "nightShift": "Personal sin sueldo trabaja dos veces. Formar desde vicepresidente junior; no contratar directamente.",
+  "nightShiftDetails": "Todos los empleados sin sueldo trabajan dos veces. Vicepresidente junior → Encargado del turno de noche; no se puede contratar directamente. Se permite ascender en servicio manteniendo el color, pero toda la organización resultante debe tener sitio para todos los empleados. No se puede ascender antes de disponer de los puestos necesarios. Aprendiz de gestión → Vicepresidente junior → Encargado del turno de noche son dos pasos. Sueldos y costes de captación sin cambios."
+},
+
 	"actionArea": {
 		"turnNudge": {
 		"streak": "🔥 {days} días seguidos · Mejor: {best}. {goal}",
@@ -58,6 +66,10 @@ export default {
 		"unionMustWork": "Debes emplear al Organizador sindical"
 	},
 	"workingDay": {
+    "chooseTraineeReward": "Elige un empleado disponible antes de colocar la campaña. Recibirás la recompensa al colocarla.",
+    "noTraineeRewardStock": "No queda ninguno de los dos empleados. Coloca la campaña sin recompensa de empleado.",
+    "clearTraineeRewardChoice": "Borrar elección de recompensa",
+
 		"chooseTemporaryWorker": "Elige hasta {count} acciones de empleados iniciales. Puedes mezclar habilidades o elegir la misma varias veces; las acciones no usadas pueden perderse.",
 		"temporaryWorkerSelected": "Acciones seleccionadas ({selected}/{count}):",
 		"clickToRemoveTemporaryWorker": "Haz clic para quitar esta acción",
@@ -92,6 +104,8 @@ export default {
 		"nonHireable": "No se puede contratar"
 	},
 	"history": {
+		"traineeRewardChosen": "Recibe {employee}.",
+		"traineeRewardEmpty": "Ambos empleados de recompensa están agotados. No se recibe ningún empleado.",
 		"modules": {
 			"laborMarket": "Mercado laboral"
 		},

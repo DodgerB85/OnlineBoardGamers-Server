@@ -50,6 +50,12 @@ class SeniorHelpTests(unittest.TestCase):
     def test_media_line_unchanged(self):
         import hashlib
         current=(ROOT/'FCM/templates/FCM/fanExpansionsHelp.html').read_text(encoding='utf-8')
+        # Exclude only the independently added sibling section, not any old help.
+        marker='<section class="FCMhelpSection" id="milestone-night-balance">'
+        if marker in current:
+            start=current.index(marker)
+            end=current.index('</section>',start)+len('</section>')
+            current=current.replace('          '+current[start:end]+'\n','',1)
         self.assertEqual(hashlib.sha256(current.replace(section(current),'').encode()).hexdigest(),
             'b342b90734f1f44b1be1b9edfda8727ab69a65f1b74b46fd1fec3c8f2a264ebf')
     def test_generator_and_lossless_art_are_idempotent(self):

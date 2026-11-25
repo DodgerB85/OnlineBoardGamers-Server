@@ -1,5 +1,13 @@
 // it messages added after the main translation pass. Merged over it.js in index.js.
 export default {
+ milestoneNightBalanceDisplay: {
+  "marketingTrainee": "Scegli gratis 1 apprendista cuoco o fattorino disponibile nella riserva.",
+  "lemonade": "Forma 1 dipendente in servizio dello stesso colore per turno",
+  "lemonadeDetails": "Forma al massimo un dipendente in servizio per turno, mantenendo il suo colore professionale e spendendo i normali punti formazione;",
+  "nightShift": "Personale senza stipendio lavora due volte. Formare da vicepresidente junior; non assumere direttamente.",
+  "nightShiftDetails": "Tutti i dipendenti senza stipendio lavorano due volte. Vicepresidente junior → Responsabile del turno di notte; non assumibile direttamente. La promozione al lavoro dello stesso colore è consentita, ma l’intera organizzazione dopo la formazione deve poter ospitare tutti. Nessuna promozione prima di avere i posti necessari. Apprendista manager → Vicepresidente junior → Responsabile del turno di notte richiede due passaggi. Stipendi e costi di sottrazione del personale invariati."
+},
+
 	"actionArea": {
 		"turnNudge": {
 		"streak": "🔥 {days} giorni di fila · Migliore: {best}. {goal}",
@@ -58,6 +66,10 @@ export default {
 		"unionMustWork": "Devi impiegare l'Organizzatore sindacale"
 	},
 	"workingDay": {
+    "chooseTraineeReward": "Scegli un dipendente disponibile prima di piazzare la campagna. Riceverai la ricompensa al piazzamento.",
+    "noTraineeRewardStock": "Nessuno dei due dipendenti è disponibile. Piazza la campagna senza la ricompensa dipendente.",
+    "clearTraineeRewardChoice": "Cancella la scelta della ricompensa",
+
 		"chooseTemporaryWorker": "Scegli fino a {count} azioni di dipendenti di livello base. Puoi combinare abilità o scegliere più volte la stessa; le azioni non usate possono andare perse.",
 		"temporaryWorkerSelected": "Azioni selezionate ({selected}/{count}):",
 		"clickToRemoveTemporaryWorker": "Fai clic per rimuovere questa azione",
@@ -92,6 +104,8 @@ export default {
 		"nonHireable": "Non assumibile"
 	},
 	"history": {
+		"traineeRewardChosen": "Ricevi {employee}.",
+		"traineeRewardEmpty": "Entrambi i dipendenti premio sono esauriti. Nessun dipendente ricevuto.",
 		"modules": {
 			"laborMarket": "Mercato del lavoro"
 		},

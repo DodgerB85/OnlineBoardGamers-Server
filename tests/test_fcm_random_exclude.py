@@ -101,7 +101,8 @@ class RandomExcludePoolTests(TestCase):
         options = buildFCMstartingOptions(post_data)
         base = rfFCM.SO_EXCLUDED_MODULE_BASE
         self.assertNotIn(base + 200, options)
-        self.assertEqual(len([x for x in options if base <= x < base + 100]), 26)
+        self.assertEqual([x-base for x in options if base <= x < base + 100],
+                         [8,9,10,11,12,13,14,15,16,17,18,19,20,22,23])
 
     def test_many_exclusions_fit_starting_options(self):
         # Regression: 25 exclusion codes used to overflow Game.startingOptions

@@ -232,6 +232,13 @@
 <div class="opts-section opts-amber">
   <div class="section-title">{% trans "Unofficial Mods" %}</div>
   <label class="check-label">
+    <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt222" id="milestoneNightBalance" name="milestoneNightBalance" value="54" disabled />
+    <div>
+      <div style="color:#d97706">{% trans 'Use Player Balance Module' %} (MOD) &mdash; {% trans "See" %} <a href="{% url 'FCM:fanExpansionsHelp' %}#milestone-night-balance" target="_blank">{% trans "Help" %}</a></div>
+      <div class="opt-help">{% trans 'Requires New Milestones. Adjusts marketing rewards, on-duty training and Night Shift recruitment.' %}</div>
+    </div>
+  </label>
+  <label class="check-label">
     <input type="checkbox" onchange="validateOptions(this.id)" class="myCheckbox individualOpt222" id="friedChicken" name="friedChicken" value="46" />
     <div>
       <div style="color:#d97706">{% trans "Use Fried Chicken" %} (MOD) &mdash; {% trans "See" %} <a href="{% url 'FCM:fanExpansionsHelp' %}" target="_blank">{% trans "Help" %}</a></div>

@@ -10,6 +10,8 @@ import * as plyr from "./FCMplayer"
 import * as view from "./FCMview"
 import * as model from "./FCMmodel"
 import * as bot from "./FCMbot"
+import { isBalancedNightShiftEnabled } from "./milestoneNightBalance.js"
+import { previewTrainingOrganization } from "./milestoneNightBalanceOrganization.js"
 
 import { useModelStore } from "../stores/FCMstore.js"
 import { usePersonalStore } from "../stores/FCMpersonal.js"
@@ -588,10 +590,14 @@ export function replayTrain(historyIndex, playerObj, param) {
 		}
 		// else if it's from structure, remove from structure, and add to available
 		else if (fromStructure) {
-			playerObj.employees.splice(playerObj.employees.indexOf(fromNum), 1)
+			const balancedManager = isBalancedNightShiftEnabled(store.startingOptions) && toNum === rf.NIGHT_SHIFT_MANAGER && [rf.MANAGEMENT_TRAINEE, rf.JUNIOR_VICE_PRESIDENT].includes(fromNum)
+			const organization = balancedManager ? previewTrainingOrganization(playerObj, [], {employee:fromNum}, toNum) : null
+			if (organization && !organization.legal) throw new Error('Invalid night manager training history organization')
+			if (organization) playerObj.employees.splice(0, playerObj.employees.length, ...organization.employees)
+			else playerObj.employees.splice(playerObj.employees.indexOf(fromNum), 1)
 			store.availableEmployees[fromNum]++
 			store.availableEmployees[toNum]--
-			playerObj.employees.push(toNum)
+			if (!organization) playerObj.employees.push(toNum)
 		} else {
 			if (playerObj.beach.indexOf(fromNum) > -1) playerObj.beach.splice(playerObj.beach.indexOf(fromNum), 1)
 			store.availableEmployees[fromNum]++
@@ -972,7 +978,23 @@ export function replayStartNightShiftMarketingCampaign(historyIndex, playerIndex
 	let campaignRotated = 0
 	if (param.length >= 5) campaignRotated = param[4]
 
-	plyr.sendPlayerMarketerToMarket(playerIndex, campaignEmployee, campaignNumber, true, false)
+	// Live play can swap the attachment when the second campaign lasts longer.
+	// Only cross this confirmation's contiguous milestone records (legacy puts
+	// 18/19 after marketing; choice histories put them before it). Never borrow
+	// a campaign from another player or across an unrelated intervening action.
+	let previousIndex = historyIndex - 1
+	while (previousIndex >= 0) {
+		const entry = store.computedHistory[previousIndex]
+		if (entry[0] !== rf.HIST_NEW_MILESTONE || entry[1] !== playerIndex || ![rf.FIRST_MARKETEER_USED, rf.FIRST_MARKETING_TRAINEE_USED].includes(entry[3]?.[0])) break
+		previousIndex--
+	}
+	const previous = store.computedHistory[previousIndex]
+	const firstCampaign = previous?.[0] === rf.HIST_START_MARKETING_CAMPAIGN && previous[1] === playerIndex
+		? store.campaigns.find((campaign) => campaign.number === previous[3][0]) : undefined
+	const firstMarketer = firstCampaign && store.players[playerIndex].marketers.find((marketer) => marketer.campaign === firstCampaign.number && marketer.marketer === campaignEmployee)
+	const swappingNSmarketer = Boolean(firstMarketer && firstCampaign.duration === 1 && campaignDuration === 2)
+	if (swappingNSmarketer) firstMarketer.nightShift = true
+	plyr.sendPlayerMarketerToMarket(playerIndex, campaignEmployee, campaignNumber, !swappingNSmarketer, swappingNSmarketer)
 
 	let height = rf.MARKETING_CAMPAIGNS[campaignNumber].height
 	let width = rf.MARKETING_CAMPAIGNS[campaignNumber].width
@@ -998,7 +1020,16 @@ export function replayRestructure(historyIndex, playerIndex, param) {
 export function replayGetMS(historyIndex, playerIndex, param) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
-	plyr.awardMilestone(playerIndex, param[0], true)
+	if (param[0] === rf.FIRST_MARKETING_TRAINEE_USED) {
+		// The recorded payload, not today's room flags, defines the reward.
+		if (store.availableMilestones.includes(param[0]) && !plyr.hasMilestone(playerIndex, param[0])) {
+			plyr.addMilestone(playerIndex, param[0])
+			if (param.length === 1) {
+				model.giveEmployeeIfAvailable(playerIndex, rf.KITCHEN_TRAINEE)
+				model.giveEmployeeIfAvailable(playerIndex, rf.ERRAND_BOY)
+			} else if (param[1] === rf.KITCHEN_TRAINEE || param[1] === rf.ERRAND_BOY) model.giveEmployeeIfAvailable(playerIndex, param[1])
+		}
+	} else plyr.awardMilestone(playerIndex, param[0], true)
 	if (param[0] === rf.FIRST_THROW_AWAY) {
 		playerObj.resources.splice(0)
 	}

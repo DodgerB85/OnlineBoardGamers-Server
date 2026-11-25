@@ -37,7 +37,18 @@ STATS_EXCLUDED_OPTIONS = [
     rfFCM.SO_NEW_MAP,
     rfFCM.SO_NEW_MAP_ALL,
     rfFCM.SO_SENIOR_BUSINESS_DEVELOPER,
+    rfFCM.SO_MILESTONE_NIGHT_BALANCE,
 ]
+
+
+def validateFCMOptionDependencies(options):
+    """Validate the resolved flags, reusable after random/draft resolution."""
+    if rfFCM.SO_MILESTONE_NIGHT_BALANCE in options and (
+        rfFCM.SO_NEW_MS not in options
+        or rfFCM.SO_SHORT_GAME in options
+        or rfFCM.SO_NO_MILESTONES in options
+    ):
+        raise ValueError("Requires New Milestones. Player Balance Module is unavailable in short games or without milestones.")
 
 
 def buildFCMstartingOptions(post_data):
@@ -73,20 +84,14 @@ def buildFCMstartingOptions(post_data):
             if "includeFanExpansion" in post_data:
                 # Marker only — actual fan mods are rolled in startGame
                 optionsArr.append(rfFCM.SO_RANDOM_MODULES_FAN)
-            # Random-module exclusions: each ticked "exclude_<mod id>" checkbox is
-            # stored as SO_EXCLUDED_MODULE_BASE + mod id and consumed in startGame.
-            # Keep ids in the module range and cap at the 26-module pool so a
-            # crafted POST cannot bloat Game.startingOptions.
-            excluded_mods = [
-                int(key[len("exclude_"):])
-                for key in post_data
-                if key.startswith("exclude_") and key[len("exclude_"):].isdigit()
-            ]
-            excluded_mods = sorted(mod for mod in excluded_mods if mod < 100)[:26]
-            optionsArr.extend(rfFCM.SO_EXCLUDED_MODULE_BASE + mod for mod in excluded_mods)
-            # Whitelist exact field names: unknown ids and aliases are not options.
+            # The union has 27 IDs, but each eligible pool still has at most 26.
+            # Exact names bound setup payloads without truncating exclude_54.
             random_module_ids = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23,
-                                 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 53]
+                                 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 53, 54]
+            optionsArr.extend(
+                rfFCM.SO_EXCLUDED_MODULE_BASE + mod
+                for mod in random_module_ids if f"exclude_{mod}" in post_data
+            )
             optionsArr.extend(
                 rfFCM.SO_INCLUDED_MODULE_BASE + mod
                 for mod in random_module_ids if f"include_{mod}" in post_data
@@ -144,12 +149,36 @@ def buildFCMstartingOptions(post_data):
         "newMap",
         "newMapAll",
         "seniorBusinessDeveloper",
+        "milestoneNightBalance",
         "allowRewind",
     ]
-    optionsArr.extend(int(post_data[opt]) for opt in option_names if opt in post_data)
+    # In random games that can involve Balance, only random_MS may select
+    # New Milestones. Preserve unrelated legacy requests with no Balance pool.
+    balance_random = (rfFCM.SO_RANDOM_MODULES in optionsArr and (
+        rfFCM.SO_RANDOM_MODULES_FAN in optionsArr or "include_54" in post_data
+        or "milestoneNightBalance" in post_data))
+    optionsArr.extend(int(post_data[opt]) for opt in option_names if opt in post_data
+                      and not (balance_random and opt == "newMilestones"))
     # New Map priority mode is a sub-option: always store the base flag too.
     if rfFCM.SO_NEW_MAP_ALL in optionsArr and rfFCM.SO_NEW_MAP not in optionsArr:
         optionsArr.append(rfFCM.SO_NEW_MAP)
+    dependency_options = optionsArr
+    if ("enableAdvancedOptions" in post_data and "randomModules" in post_data
+            and "draftModules" in post_data
+            and ("include_54" in post_data or "includeFanExpansion" in post_data)
+            and (post_data.get("random_MS") != "202" or post_data.get("draft_MS") != "302")):
+        # Crafted simultaneous modes must satisfy every active selector.
+        validateFCMOptionDependencies([rfFCM.SO_MILESTONE_NIGHT_BALANCE])
+    if rfFCM.SO_MILESTONE_NIGHT_BALANCE in optionsArr and "enableAdvancedOptions" in post_data:
+        # Hidden manual controls are not the milestone source in expert modes.
+        selectors = [("randomModules", "random_MS", "202"), ("draftModules", "draft_MS", "302")]
+        active_selectors = [(field, new) for mode, field, new in selectors if mode in post_data]
+        if not active_selectors or any(post_data.get(field) != new for field, new in active_selectors):
+            dependency_options = [opt for opt in optionsArr if opt != rfFCM.SO_NEW_MS]
+    validateFCMOptionDependencies(dependency_options)
+    if rfFCM.SO_RANDOM_MODULES in optionsArr:
+        # Only pool selection / include_54 can select Balance in random mode.
+        optionsArr = [opt for opt in optionsArr if opt != rfFCM.SO_MILESTONE_NIGHT_BALANCE]
     return optionsArr
 
 
@@ -206,6 +235,9 @@ def create_fcm_game(
             raise ValueError(
                 "Tournament and round_number_string required for tournament games"
             )
+        validateFCMOptionDependencies(
+            json.loads(tournamentObj.startingOptions) if tournamentObj.startingOptions else []
+        )
         max_players = tournamentObj.maxGamePlayers
         game_name = f"[{tournamentObj.tournamentName}] {round_number_string}"
         game_description = ""
@@ -232,9 +264,12 @@ def create_fcm_game(
 
         game_status = "ACTIVE"
 
-        # Now exclude stats if any stats-excluding option is in the
-        # tournament's starting options
-        if any(x in starting_options for x in STATS_EXCLUDED_OPTIONS):
+        # Random setup may contain a stale direct Balance flag. Only its
+        # resolved selection excludes stats; preserve all other option reasons.
+        if any(x in starting_options and not (
+            x == rfFCM.SO_MILESTONE_NIGHT_BALANCE
+            and rfFCM.SO_RANDOM_MODULES in starting_options
+        ) for x in STATS_EXCLUDED_OPTIONS):
             stats_excluded_game = True
 
         all_players = [
@@ -247,6 +282,12 @@ def create_fcm_game(
         ]
     # Otherwise, create a normal game
     else:
+        if any(name in request.POST for name in ["milestoneNightBalance", "include_54", "includeFanExpansion"]):
+            try:
+                buildFCMstartingOptions(request.POST)
+            except ValueError as error:
+                messages.error(request, gettext(str(error)))
+                return HttpResponseRedirect(reverse("createFCMpage"))
         # Validate advanced options
         if (
             "enableAdvancedOptions" in request.POST

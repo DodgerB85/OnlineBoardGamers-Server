@@ -10,6 +10,8 @@ import * as funcs from "../js/FCMfuncs"
 import * as view from "../js/FCMview"
 import * as rf from "../js/FCMreference"
 import * as rules from "../js/FCMrules.js"
+import { employeeLayout, employeeConnections } from "../js/milestoneNightBalanceLayout.js"
+import { cardDetails } from "../js/milestoneNightBalanceDisplay.js"
 import i18n from "../i18n"
 
 import { ref, computed } from "vue"
@@ -269,205 +271,8 @@ function getRoadCounts() {
 	return getTypeCounts(rules.availableNewRoads(store))
 }
 
-const computedEmployeeArrangementForDisplay = computed(() => {
-	let employeeArrangement = structuredClone(rf.EMPLOYEE_ARRANGEMENT)
-
-	// Senior Business Developer mod off: restore the original board layout
-	// (drop the extra NBD/SBD top row, put NBD back next to the Night Shift
-	// Manager so every other card stays in its usual spot)
-	if (!store.startingOptions.seniorBusinessDeveloper) {
-		employeeArrangement.splice(0, 5)
-		employeeArrangement[1] = rf.NEW_BUSINESS_DEVELOPER
-	}
-
-	// If you have jazz musicians, but no movie star B, then combine them onto one line
-	// (indexes shifted +5 by the Media Line marketer row, +5 more by the SBD
-	// NBD/SBD top row when that mod is on)
-	const jazzSlot = store.startingOptions.seniorBusinessDeveloper ? 66 : 61
-	if (store.availableEmployees[rf.B_MOVIE_STAR] < 0 && store.availableEmployees[rf.JAZZ_MUSICIAN] >= 0) {
-		employeeArrangement[jazzSlot] = rf.JAZZ_MUSICIAN
-		employeeArrangement[jazzSlot + 15] = -1
-	}
-
-	// Remove from the general display any employee not in the game
-	for (let i = 0; i < employeeArrangement.length; i++) {
-		// Temporary Workers are player-owned cards, not part of the hireable supply.
-		if (employeeArrangement[i] === rf.TEMPORARY_WORKER) {
-			if (!store.startingOptions.laborMarket) employeeArrangement[i] = -1
-			continue
-		}
-		if (employeeArrangement[i] > -1 && store.availableEmployees[employeeArrangement[i]] === -1) {
-			employeeArrangement[i] = -1
-		}
-	}
-	// Now remove groups of 5x -1's in a row
-	for (let i = employeeArrangement.length - 5; i >= 0; i -= 5) {
-		// Check the slice of 5 elements starting at this index
-		const chunk = employeeArrangement.slice(i, i + 5)
-
-		// If every item in this specific chunk is -1
-		if (chunk.every((val) => val === -1)) {
-			employeeArrangement.splice(i, 5)
-		}
-	}
-
-	// Group into subArrs of length 5
-	const groupedArrangement = []
-	for (let i = 0; i < employeeArrangement.length; i += 5) {
-		groupedArrangement.push(employeeArrangement.slice(i, i + 5))
-	}
-
-	return groupedArrangement
-})
-
-/*** EMPLOYEE SVG  */
-const horizontalShift = 160
-const verticalShift = 190
-const initialLeft = 80
-const initialTop = 165
-
-const svgInstructions = computed(() => {
-	const lines = []
-	const actualArr = computedEmployeeArrangementForDisplay.value.flat().filter((id) => id > -1)
-
-	// The SBD mod puts the NBD/SBD pair on an extra top row, pushing every other
-	// row one slot down; the train paths below all use that offset
-	const sbdOn = store.startingOptions.seniorBusinessDeveloper
-	const rowShift = sbdOn ? 1 : 0
-
-	let currentTop = initialTop + verticalShift * (1 + rowShift)
-	let currentLeft = initialLeft
-
-	// Helper to push lines to the array
-	const addLine = (x1, y1, x2, y2) => lines.push({ type: "line", x1, y1, x2, y2 })
-
-	// --- ROW 1: NBD <-> SBD chain (SBD mod only) ---
-	if (sbdOn) {
-		addLine(initialLeft + horizontalShift, initialTop, initialLeft + horizontalShift * 2, initialTop)
-	}
-
-	// --- ROW 2: MANAGERS ---
-	addLine(initialLeft, currentTop, initialLeft + horizontalShift * 4, currentTop)
-
-	lines.push(generatePath(initialLeft, currentTop, 1, 1 + rowShift)) // NBD
-	if (actualArr.includes(rf.HEADHUNTER)) lines.push(generatePath(initialLeft, currentTop, -1, 1)) // Headhunter
-	lines.push(generatePath(initialLeft, currentTop, -1, 3)) // Lux Mgr
-
-	currentLeft += horizontalShift // VP
-	lines.push(generatePath(currentLeft, currentTop, 1, 1))
-	lines.push(generatePath(currentLeft, currentTop, -1, 1))
-	lines.push(generatePath(currentLeft, currentTop, -1, 2))
-	lines.push(generatePath(currentLeft, currentTop, -1, 3))
-
-	currentLeft += horizontalShift // SVP
-	lines.push(generatePath(currentLeft, currentTop, 1, 1))
-	lines.push(generatePath(currentLeft, currentTop, -1, 2))
-
-	currentLeft += horizontalShift // HR
-	lines.push(generatePath(currentLeft, currentTop, 1, 1))
-	lines.push(generatePath(currentLeft, currentTop, -1, 1))
-
-	// --- MARKETERS ---
-	currentTop += verticalShift * 4
-	currentLeft = initialLeft
-	addLine(currentLeft, currentTop, currentLeft + horizontalShift * 3, currentTop)
-
-	// Module marketers branch straight off the trainee; the Media Line pair
-	// chains trainee -> telemarketer -> TV announcer -> brand director (upgrade rules)
-	const moduleMarketers = actualArr.filter((id) => [rf.MASS_MARKETEER, rf.RURAL_MARKETEER, rf.GOURMET_FOOD_CRITIC, rf.HAWKER_MARKETEER].includes(id)).length
-	const hasTelemarketer = actualArr.includes(rf.TELEMARKETER)
-	const hasTvAnnouncer = actualArr.includes(rf.TV_ANNOUNCER)
-	const extraMarketers = moduleMarketers + (hasTelemarketer || hasTvAnnouncer ? 1 : 0)
-
-	for (let i = 0; i < moduleMarketers; i++) {
-		lines.push(generatePath(currentLeft, currentTop, -1, i + 1))
-	}
-	const tmRow = moduleMarketers + 1 // 1-based row below the marketing chain
-	const marketerColX = initialLeft + horizontalShift
-	if (hasTelemarketer || hasTvAnnouncer) {
-		lines.push(generatePath(currentLeft, currentTop, -1, tmRow)) // trainee down to the Media Line row
-	}
-	if (hasTelemarketer && hasTvAnnouncer) {
-		addLine(marketerColX, currentTop + verticalShift * tmRow, marketerColX + horizontalShift, currentTop + verticalShift * tmRow) // telemarketer -> TV announcer
-	}
-	if (hasTvAnnouncer) {
-		// Over to the brand director's column, then straight up into its card
-		lines.push({ type: "path", d: `M ${marketerColX + horizontalShift} ${currentTop + verticalShift * tmRow} h ${horizontalShift} v ${-verticalShift}` })
-	}
-
-	// --- ERRAND BOYS ---
-	currentTop += verticalShift * (extraMarketers + 1)
-	currentLeft = initialLeft
-	addLine(initialLeft, currentTop, initialLeft + horizontalShift * 3, currentTop)
-
-	// --- WAITRESS / MOVIE STARS ---
-	currentTop += verticalShift
-	currentLeft = initialLeft
-
-	if (actualArr.includes(rf.B_MOVIE_STAR) || actualArr.includes(rf.JAZZ_MUSICIAN)) {
-		addLine(currentLeft, currentTop, currentLeft + horizontalShift, currentTop)
-	}
-
-	if (actualArr.includes(rf.C_MOVIE_STAR)) lines.push(generatePath(currentLeft, currentTop, -1, 1))
-	if (actualArr.includes(rf.D_MOVIE_STAR)) lines.push(generatePath(currentLeft, currentTop, -1, 2))
-
-	if (actualArr.includes(rf.JAZZ_MUSICIAN) && actualArr.includes(rf.B_MOVIE_STAR)) {
-		let downShift = 1
-		if (actualArr.includes(rf.C_MOVIE_STAR)) downShift++
-		if (actualArr.includes(rf.D_MOVIE_STAR)) downShift++
-		lines.push(generatePath(currentLeft, currentTop, -1, downShift))
-	}
-
-	// --- DYNAMIC VERTICAL SHIFTS ---
-	currentTop += verticalShift
-	if (actualArr.includes(rf.C_MOVIE_STAR)) currentTop += verticalShift
-	if (actualArr.includes(rf.D_MOVIE_STAR)) currentTop += verticalShift
-	if (actualArr.includes(rf.DELIVERY_DRIVER)) currentTop += verticalShift
-	if (actualArr.includes(rf.LOBBYIST)) currentTop += verticalShift
-
-	// --- COOKS / CHEFS ---
-	addLine(currentLeft, currentTop, currentLeft + horizontalShift * 2, currentTop)
-	lines.push(generatePath(currentLeft, currentTop, -1, 1)) // P Cook
-
-	const extraCooks = actualArr.filter((id) => [rf.SUSHI_COOK, rf.NOODLE_COOK, rf.DUMPLING_COOK, rf.FRIED_CHICKEN_COOK].includes(id)).length
-
-	for (let i = 0; i < extraCooks; i++) {
-		lines.push(generatePath(currentLeft, currentTop, -1, i + 2))
-	}
-
-	if (actualArr.includes(rf.FRY_CHEF)) {
-		lines.push(generatePath(currentLeft + horizontalShift, currentTop, -1, 2 + extraCooks))
-	}
-
-	// --- PRODUCTION LINE ---
-	currentTop += verticalShift
-	currentLeft = initialLeft
-	addLine(currentLeft + horizontalShift, currentTop, currentLeft + horizontalShift * 2, currentTop)
-
-	for (let i = 0; i < extraCooks; i++) {
-		currentTop += verticalShift
-		addLine(currentLeft + horizontalShift, currentTop, currentLeft + horizontalShift * 2, currentTop)
-	}
-
-	// --- FINAL SHIFTS ---
-	if (actualArr.includes(rf.FRY_CHEF)) currentTop += verticalShift
-	if (actualArr.includes(rf.KIMCHI_MASTER)) currentTop += verticalShift
-	if (actualArr.includes(rf.BARISTA_TRAINEE)) {
-		currentTop += verticalShift
-		currentLeft = initialLeft
-		addLine(currentLeft, currentTop, currentLeft + horizontalShift * 2, currentTop)
-	}
-
-	return lines
-})
-
-function generatePath(x, y, dir, rows) {
-	const h = horizontalShift / 2
-	const v = -dir * (verticalShift * rows)
-	return { type: "path", d: `M ${x} ${y} h ${h} v ${v} h ${h}` }
-}
-
-/*** END SVG */
+const computedEmployeeArrangementForDisplay = computed(() => employeeLayout(store.startingOptions, store.availableEmployees))
+const svgInstructions = computed(() => employeeConnections(computedEmployeeArrangementForDisplay.value, store.startingOptions))
 
 const sortedCampaigns = computed(() => {
 	// We spread into a new array so we don't mutate the store directly.
@@ -684,7 +489,7 @@ const sortedCampaigns = computed(() => {
 				</p>
 				<template v-if="store.availableMilestones.length > 0">
 				<template v-if="showExpandedMS">
-					<span class="fullMilestoneSpan" :class="[rf.MILESTONES_STR[ms].type, milestoneHCclass(ms), { compactMilestoneLeavingSpan: aboutToLeave.includes(ms) }]" v-for="(ms, idx) in store.availableMilestones" :key="idx">
+					<span class="fullMilestoneSpan" :title="cardDetails('milestone', ms)" :class="[rf.MILESTONES_STR[ms].type, milestoneHCclass(ms), { compactMilestoneLeavingSpan: aboutToLeave.includes(ms) }]" v-for="(ms, idx) in store.availableMilestones" :key="idx">
 						<div class="milestoneTitle">{{ rf.MILESTONES_STR[ms].title.toUpperCase() }}</div>
 						<div class="milestoneText">{{ rf.MILESTONES_STR[ms].description }}</div>
 						<div class="milestoneSpacer">&nbsp;</div>
@@ -710,7 +515,7 @@ const sortedCampaigns = computed(() => {
 				<p v-else>{{ $t('topMenuViews.noneAvailable') }}</p>
 				<p>{{ $t('topMenuViews.takenMilestones') }}</p>
 				<template v-if="showExpandedMS">
-					<span class="fullMilestoneSpan" :class="[rf.MILESTONES_STR[ms[0]].type, milestoneHCclass(ms[0])]" v-for="(ms, idx) in takenMilestones" :key="idx">
+					<span class="fullMilestoneSpan" :title="cardDetails('milestone', ms[0])" :class="[rf.MILESTONES_STR[ms[0]].type, milestoneHCclass(ms[0])]" v-for="(ms, idx) in takenMilestones" :key="idx">
 						<div class="milestoneTitle">{{ rf.MILESTONES_STR[ms[0]].title.toUpperCase() }}</div>
 						<div class="milestoneText">{{ rf.MILESTONES_STR[ms[0]].description }}</div>
 						<div class="milestoneSpacer">&nbsp;</div>
@@ -761,7 +566,7 @@ const sortedCampaigns = computed(() => {
 					<template v-for="(line, idx1) in computedEmployeeArrangementForDisplay" :key="idx1">
 						<div class="employeeLine">
 							<template v-for="(emp, idx2) in line" :key="idx2">
-								<div v-if="emp > -1" class="expandedEmployeeAreaDiv" :class="{ nonHireableEmployeeArea: emp === rf.UNION_ORGANIZER || emp === rf.TEMPORARY_WORKER }">
+								<div v-if="emp > -1" class="expandedEmployeeAreaDiv" :title="cardDetails('employee', emp)" :class="{ nonHireableEmployeeArea: emp === rf.UNION_ORGANIZER || emp === rf.TEMPORARY_WORKER }">
 									<div class="expandedEmployeeAmountDiv">
 										<span>{{ reserveEmployeeCount(emp) }}</span>
 									</div>
@@ -796,7 +601,7 @@ const sortedCampaigns = computed(() => {
 				<template v-for="(line, idx1) in computedEmployeeArrangementForDisplay" :key="idx1">
 					<template v-for="(emp, idx2) in line" :key="idx2">
 						<InfoPopup v-if="emp > -1" type="employee" :employeeId="emp">
-							<span class="empSpan" :class="[rf.EMPLOYEES_STR[emp].type, { inverted: rf.EMPLOYEES_STR[emp].type === 'manager' || rf.EMPLOYEES_STR[emp].type === 'restaurant' }, { noMoreEmployees: reserveEmployeeCount(emp) === 0 }, { nonHireableEmployeeCompact: emp === rf.UNION_ORGANIZER || emp === rf.TEMPORARY_WORKER }]" :data-non-hireable="emp === rf.UNION_ORGANIZER || emp === rf.TEMPORARY_WORKER ? $t('topMenuViews.nonHireable') : undefined">{{ rf.EMPLOYEES_STR[emp].title }} ({{ reserveEmployeeCount(emp) }})</span>
+							<span class="empSpan" :title="cardDetails('employee', emp)" :class="[rf.EMPLOYEES_STR[emp].type, { inverted: rf.EMPLOYEES_STR[emp].type === 'manager' || rf.EMPLOYEES_STR[emp].type === 'restaurant' }, { noMoreEmployees: reserveEmployeeCount(emp) === 0 }, { nonHireableEmployeeCompact: emp === rf.UNION_ORGANIZER || emp === rf.TEMPORARY_WORKER }]" :data-non-hireable="emp === rf.UNION_ORGANIZER || emp === rf.TEMPORARY_WORKER ? $t('topMenuViews.nonHireable') : undefined">{{ rf.EMPLOYEES_STR[emp].title }} ({{ reserveEmployeeCount(emp) }})</span>
 						</InfoPopup>
 						<span v-else class="empSpan"></span>
 					</template>

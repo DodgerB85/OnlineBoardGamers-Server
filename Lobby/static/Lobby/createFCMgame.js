@@ -146,13 +146,29 @@ function initGameCreation(fillData, setupData = {}) {
 					document.getElementById(choice + "Modules").checked = hasChoices
 				})
 				syncRandomExcludeUI()
+			} else if (startingOptions.includes("300") || startingOptions.includes("205")) {
+				// Both the draft boundary and legacy draft flag identify expert setups.
+				// Clear hidden manual choices before restoring the actual draft controls.
+				document.getElementById("enableAdvancedOptions").checked = true
+				validateOptions("enableAdvancedOptions")
+				document.getElementById("draftModules").checked = true
+				validateOptions("draftModules")
+				document.getElementById("draft_originalMS").checked = !startingOptions.includes("21")
+				document.getElementById("draft_newMS").checked = startingOptions.includes("21")
 			}
 
 		}
 	}
+	if (fillData && !setupData.scenarioUsed) document.getElementById("milestoneNightBalance").checked = startingOptions.includes("54")
+	syncMilestoneNightBalanceUI()
 }
 
 function show_Options(listType) {
+	removeOption("milestoneNightBalance")
+	if (document.getElementById("enableAdvancedOptions").checked) {
+		document.getElementById("enableAdvancedOptions").checked = false
+		validateOptions("enableAdvancedOptions")
+	}
 	// Update Tab bar
 	var tablinks = document.getElementsByClassName("tablinks")
 	for (let i = 0; i < tablinks.length; i++) {
@@ -185,6 +201,11 @@ function show_Options(listType) {
 }
 
 function validateScenario(scenario) {
+	removeOption("milestoneNightBalance")
+	if (document.getElementById("enableAdvancedOptions").checked) {
+		document.getElementById("enableAdvancedOptions").checked = false
+		validateOptions("enableAdvancedOptions")
+	}
 	// clear all options
 	var ele = document.getElementsByClassName("individualOpt")
 	for (var i = 0; i < ele.length; i++) {
@@ -263,6 +284,18 @@ function validateScenario(scenario) {
 }
 
 // Kickout choices per pace come from Lobby/kickoutOptions.html so the labels stay translated.
+function syncMilestoneNightBalanceUI() {
+	var balance = document.getElementById("milestoneNightBalance")
+	if (!balance) return
+	var allowed = document.getElementById("newMilestones").checked
+		&& !document.getElementById("short").checked
+		&& !document.getElementById("noMilestones").checked
+		&& !document.getElementById("enableAdvancedOptions").checked
+		&& document.getElementById("scenarioOptionsView").style.display !== "inline-block"
+	balance.disabled = !allowed
+	if (!allowed) balance.checked = false
+}
+
 function validateOptions(change) {
 	// Mini Tournamnt
 	if (change === "playersPerGameMT") {
@@ -508,6 +541,7 @@ function validateOptions(change) {
 			addOption("allowRewind")
 		}
 	}
+	syncMilestoneNightBalanceUI()
 	syncRandomExcludeUI()
 }
 
@@ -519,13 +553,19 @@ var RANDOM_POOL = {
 	hardChoices: 8,
 	chinese: [42, 43, 44, 45],
 	fan: [46, 47, 48, 49, 50, 51, 53],
+	balance: 54,
 }
 
 function getExcludePool() {
 	var pool = RANDOM_POOL.core.slice()
 	if (document.getElementById("random_originalMS").checked) pool.push(RANDOM_POOL.hardChoices)
 	if (document.getElementById("includeChineseExpansion").checked) pool = pool.concat(RANDOM_POOL.chinese)
-	if (document.getElementById("includeFanExpansion").checked) pool = pool.concat(RANDOM_POOL.fan)
+	if (document.getElementById("includeFanExpansion").checked) {
+		pool = pool.concat(RANDOM_POOL.fan)
+		if (document.getElementById("random_newMS").checked
+			&& !document.getElementById("short").checked
+			&& !document.getElementById("noMilestones").checked) pool.push(RANDOM_POOL.balance)
+	}
 	return pool
 }
 
@@ -577,6 +617,12 @@ function syncRandomExcludeUI() {
 	}
 
 	var pool = getExcludePool()
+	// Balance alone depends on usable New Milestones as well as the fan pool.
+	var excludeBalance = document.getElementById("exclude_54")
+	if (excludeBalance) {
+		excludeBalance.disabled = !excludeOn || pool.indexOf(RANDOM_POOL.balance) === -1
+		if (excludeBalance.disabled) excludeBalance.checked = false
+	}
 	var excluded = getExcludedMods()
 	var includeBox = document.getElementById("includeModules")
 	if (includeBox) includeBox.disabled = !randomOn

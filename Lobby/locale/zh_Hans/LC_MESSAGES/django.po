@@ -14092,3 +14092,28 @@ msgstr "指定必选模块"
 #: templates/Lobby/createFCM.html
 msgid "Mandatory modules count toward Min/Max. Excluded modules take precedence."
 msgstr "必选模块计入最少/最多模块总数。排除模块优先。"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Player Balance Module"
+msgstr "玩家平衡模组"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Use Player Balance Module"
+msgstr "启用玩家平衡模组"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Requires New Milestones. Adjusts marketing rewards, on-duty training and Night Shift recruitment."
+msgstr "需要新里程碑。调整营销奖励、在岗培训和夜班招聘。"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Player Balance Module (requires New Milestones)"
+msgstr "玩家平衡模组 (需要新里程碑)"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Include 8 fan expansion options (Balance requires New Milestones)"
+msgstr "加入8个玩家扩展选项（平衡模组需要新里程碑）"

@@ -1,4 +1,5 @@
 <script setup>
+import { cardDetails } from "../js/milestoneNightBalanceDisplay.js"
 import * as view from "../js/FCMview"
 import * as rf from "../js/FCMreference"
 import * as plyr from "../js/FCMplayer"
@@ -53,7 +54,7 @@ const resourceCounts = computed(() => {
 			<template v-if="store.players[playerIndexProp].milestones.length > 0">
 				<span class="fullMilestoneSpan" :class="rf.MILESTONES_STR[ms].type" v-for="(ms, idx) in store.players[playerIndexProp].milestones" :key="idx">
 					<div class="milestoneTitle">{{ rf.MILESTONES_STR[ms].title.toUpperCase() }}</div>
-					<div class="milestoneText">{{ rf.MILESTONES_STR[ms].description }}</div>
+					<div class="milestoneText" :title="cardDetails('milestone', ms)">{{ rf.MILESTONES_STR[ms].description }}</div>
 					<div class="milestoneSpacer">&nbsp;</div>
 					<img class="milestoneIcon" :src="view.getImage(rf.MILESTONES_STR[ms].img)" :class="rf.MILESTONES_STR[ms].additionalClass" />
 				</span>
@@ -135,7 +136,7 @@ const resourceCounts = computed(() => {
 						{{ rf.EMPLOYEES_STR[emp].title }}
 					</h3>
 
-					<div class="employeeDescriptionDiv">{{ rf.EMPLOYEES_STR[emp].description }}</div>
+					<div class="employeeDescriptionDiv" :title="cardDetails('employee', emp)">{{ rf.EMPLOYEES_STR[emp].description }}</div>
 
 					<div class="employeeIconsDiv">
 						<img v-if="rf.UNIQUE_CARDS.indexOf(emp) > -1" :src="view.getImage('icon1x')" class="iconsImg" />
@@ -162,7 +163,7 @@ const resourceCounts = computed(() => {
 						{{ rf.EMPLOYEES_STR[emp].title }}
 					</h3>
 
-					<div class="employeeDescriptionDiv">{{ rf.EMPLOYEES_STR[emp].description }}</div>
+					<div class="employeeDescriptionDiv" :title="cardDetails('employee', emp)">{{ rf.EMPLOYEES_STR[emp].description }}</div>
 
 					<div class="employeeIconsDiv">
 						<img v-if="rf.UNIQUE_CARDS.indexOf(emp) > -1" :src="view.getImage('icon1x')" class="iconsImg" />

@@ -2073,3 +2073,43 @@ msgstr "Vollständiges Diagramm öffnen"
 #. Media Line help diagram accessibility.
 msgid "Phone and TV tile ranges: three phone placements and TV house selection"
 msgstr "Telefon- und TV-Plättchenbereiche: drei Telefonplatzierungen und TV-Hausauswahl"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Player Balance Module"
+msgstr "Spieler-Balance-Modul"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Player Balance Module icon"
+msgstr "Symbol des Spieler-Balance-Moduls"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "A player balance module, available only when using New Milestones."
+msgstr "Ein Balance-Modul für Spieler, nur mit neuen Meilensteinen verfügbar."
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "First Marketing Trainee Used: choose either a Kitchen Trainee or an Errand Boy; receive only one, no longer both;"
+msgstr "Erster Einsatz eines Marketing-Trainees: Wähle einen Küchen-Trainee oder einen Laufburschen; du erhältst nur einen, nicht mehr beide;"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "First Lemonade Sold: train at most one on-duty employee per round, keeping their career colour and spending the normal training points;"
+msgstr "Erste verkaufte Limonade: Pro Runde höchstens einen Mitarbeiter im Dienst ausbilden, bei gleicher Berufsfarbe und mit den üblichen Ausbildungspunkten;"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "With Night Shift enabled, the Night Shift Manager cannot be hired directly; promote a Junior Vice President through training;"
+msgstr "Bei aktivierter Nachtschicht kann der Nachtschichtmanager nicht direkt eingestellt werden; bilde einen Junior-Vizepräsidenten dazu aus;"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Include 8 fan expansion options (Balance requires New Milestones)"
+msgstr "8 Fan-Erweiterungsoptionen einbeziehen (Balance benötigt neue Meilensteine)"
+
+
+#. Milestone & Night Shift Balance player help.
+msgid "Player Balance Module (requires New Milestones)"
+msgstr "Spieler-Balance-Modul (benötigt neue Meilensteine)"

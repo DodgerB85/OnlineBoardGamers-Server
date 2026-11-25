@@ -5,6 +5,8 @@ import * as phone from "./FCMphone"
 import * as rules from "./FCMrules"
 import * as controller from "./FCMcontroller.js"
 import * as model from "./FCMmodel.js"
+import { isMilestoneNightBalanceEnabled } from "./milestoneNightBalance.js"
+import { marketingTraineeReward } from "./milestoneNightBalanceReward.js"
 
 export function addRestaurantToPlayer(playerIndex, index, rotation, open) {
 	const store = useModelStore()
@@ -461,9 +463,19 @@ export function doesPlayerHaveDriveIn(playerIndex) {
 	return playerObj.employees.indexOf(rf.LOCAL_MANAGER) > -1 || playerObj.employees.indexOf(rf.REGIONAL_MANAGER) > -1
 }
 
-export function awardMilestone(playerIndex, milestone, replayOnly) {
+// Legacy calls still return undefined. Only balanced milestone 19 returns
+// {ok:true, employee:27|23|null} or {ok:false, reason}; choice is the 4th arg.
+export function awardMilestone(playerIndex, milestone, replayOnly, choice) {
 	const store = useModelStore()
 	const playerObj = store.players[playerIndex]
+	if (milestone === rf.FIRST_MARKETING_TRAINEE_USED && isMilestoneNightBalanceEnabled(store.startingOptions)) {
+		const reward = marketingTraineeReward(store, playerIndex, choice)
+		if (!reward.ok) return reward
+		addMilestone(playerIndex, milestone)
+		if (reward.employee !== null) model.giveEmployeeIfAvailable(playerIndex, reward.employee)
+		if (!replayOnly) model.addHistory(rf.HIST_NEW_MILESTONE, [milestone, reward.employee], playerIndex, 0)
+		return reward
+	}
 	if (store.availableMilestones.indexOf(milestone) > -1 && !hasMilestone(playerIndex, milestone)) {
 		addMilestone(playerIndex, milestone)
 

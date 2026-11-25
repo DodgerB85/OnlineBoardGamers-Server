@@ -1,5 +1,9 @@
 ﻿export default {
   workingDay: {
+    "chooseTraineeReward": "Choose one available employee before placing the campaign. The reward is granted only when you place it.",
+    "noTraineeRewardStock": "Neither employee is available. Place the campaign without an employee reward.",
+    "clearTraineeRewardChoice": "Clear reward choice",
+
     chooseTemporaryWorker: "Choose up to {count} entry-employee actions. You may mix abilities or choose the same one repeatedly; unused actions may be forfeited.",
     temporaryWorkerSelected: "Selected actions ({selected}/{count}):",
     clickToRemoveTemporaryWorker: "Click to remove this action",

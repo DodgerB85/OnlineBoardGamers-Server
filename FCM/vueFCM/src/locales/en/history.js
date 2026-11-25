@@ -1,5 +1,7 @@
 ﻿export default {
   history: {
+    traineeRewardChosen: "Receive {employee}.",
+    traineeRewardEmpty: "Both reward employees are out of stock. No employee received.",
     // NOTE: a few messages intentionally include leading/trailing spaces to
     // match layout spacing that used to live in the template - keep them.
 
