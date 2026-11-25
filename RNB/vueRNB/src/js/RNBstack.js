@@ -919,8 +919,14 @@ export function addItemToStack(newItem) {
 	//console.log(`actionstack store: ${JSON.stringify(store.actionStack)} newitem: ${JSON.stringify(newItem)}`)
 	if (newItem == null || newItem.historyEntry.some((e) => e == null)) rf.doAdminAlrt("SEND TO ADMIN: ERROR CODE 9 - error adding to stack")
 	if (!reversedAction && !combinedAction) store.actionStack.push(newItem)
-	// Match the history with the stack
-	idx = Math.max(0, store.history.length - 1)
+	syncStackHistory()
+}
+
+// Match the history with the stack
+export function syncStackHistory() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	const idx = Math.max(0, store.history.length - 1)
 
 	// Map the stack to get an array of historyEntry values
 	const historyEntries = store.actionStack.map((subArr) => subArr.historyEntry)
