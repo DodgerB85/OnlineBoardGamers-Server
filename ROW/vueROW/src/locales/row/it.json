@@ -628,7 +628,15 @@
       "showGameData": "Mostra i dati della partita",
       "current": "attuale:",
       "status": "stato:",
-      "actions": "azioni:"
+      "actions": "azioni:",
+      "dollars": "Dollari",
+      "cowboys": "Cowboy",
+      "craftsmen": "Artigiani",
+      "engineers": "Ingegneri",
+      "exchangeTokens": "Gettoni di scambio",
+      "branchlets": "Succursali",
+      "apply": "Applica",
+      "reset": "Reimposta"
     },
     "ended": {
       "title": "Partita finita",
@@ -645,7 +653,8 @@
       "undo": "Annulla",
       "endTurn": "Termina turno",
       "skip": "Salta",
-      "resign": "Abbandonare"
+      "resign": "Abbandonare",
+      "adminEdit": "L'admin ha modificato lo stato della partita:"
     },
     "map": {
       "removeHazard": "Rimuovi pericolo",

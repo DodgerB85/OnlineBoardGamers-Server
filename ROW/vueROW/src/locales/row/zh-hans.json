@@ -626,7 +626,15 @@
       "showGameData": "显示游戏数据",
       "current": "当前：",
       "status": "状态：",
-      "actions": "行动："
+      "actions": "行动：",
+      "dollars": "美元",
+      "cowboys": "牛仔",
+      "craftsmen": "工匠",
+      "engineers": "工程师",
+      "exchangeTokens": "交换标记",
+      "branchlets": "分部",
+      "apply": "应用",
+      "reset": "重置"
     },
     "ended": {
       "title": "游戏结束",
@@ -643,7 +651,8 @@
       "undo": "撤销",
       "endTurn": "结束回合",
       "skip": "跳过",
-      "resign": "认输"
+      "resign": "认输",
+      "adminEdit": "管理员更改了游戏状态："
     },
     "map": {
       "removeHazard": "移除危险",

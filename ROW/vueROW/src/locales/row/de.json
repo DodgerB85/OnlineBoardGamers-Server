@@ -626,7 +626,15 @@
       "showGameData": "Spieldaten anzeigen",
       "current": "aktuell:",
       "status": "Status:",
-      "actions": "Aktionen:"
+      "actions": "Aktionen:",
+      "dollars": "Dollar",
+      "cowboys": "Cowboys",
+      "craftsmen": "Handwerker",
+      "engineers": "Ingenieure",
+      "exchangeTokens": "Tauschmarker",
+      "branchlets": "Zweigstellen",
+      "apply": "Anwenden",
+      "reset": "Zurücksetzen"
     },
     "ended": {
       "title": "Spiel vorbei",
@@ -643,7 +651,8 @@
       "undo": "Rückgängig",
       "endTurn": "Zug beenden",
       "skip": "Überspringen",
-      "resign": "Aufgeben"
+      "resign": "Aufgeben",
+      "adminEdit": "Admin hat den Spielstand geändert:"
     },
     "map": {
       "removeHazard": "Gefahr entfernen",

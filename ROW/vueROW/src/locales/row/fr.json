@@ -626,7 +626,15 @@
       "showGameData": "Afficher les données de la partie",
       "current": "actuel :",
       "status": "statut :",
-      "actions": "actions :"
+      "actions": "actions :",
+      "dollars": "Dollars",
+      "cowboys": "Cow-boys",
+      "craftsmen": "Artisans",
+      "engineers": "Ingénieurs",
+      "exchangeTokens": "Jetons d'échange",
+      "branchlets": "Branches",
+      "apply": "Appliquer",
+      "reset": "Réinitialiser"
     },
     "ended": {
       "title": "Fin de partie",
@@ -643,7 +651,8 @@
       "undo": "Annuler",
       "endTurn": "Terminer le tour",
       "skip": "Passer",
-      "resign": "Abandonner"
+      "resign": "Abandonner",
+      "adminEdit": "L'admin a modifié l'état de la partie :"
     },
     "map": {
       "removeHazard": "Retirer un danger",

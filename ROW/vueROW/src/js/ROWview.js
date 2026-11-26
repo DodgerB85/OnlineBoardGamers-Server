@@ -8,6 +8,7 @@
  */
 import i18n from "../i18n"
 import { ActionType, Status } from "./ROWcore"
+import { ADMIN_FIELDS } from "./ROWadmin"
 
 const STATIC_BASE = "/static/ROW/"
 
@@ -105,6 +106,7 @@ const HISTORY_LABELS = {
 	END_TURN: "row.history.endTurn",
 	SKIP: "row.history.skip",
 	RESIGN: "row.history.resign",
+	ADMIN_EDIT: "row.history.adminEdit",
 }
 
 // Label sets taken from the reference Angular `gwt`/`gwt2` locale. Object 2
@@ -122,6 +124,17 @@ export function humanizeAction(a) {
 		.replace(/_/g, " ")
 		.toLowerCase()
 		.replace(/^\w/, (c) => c.toUpperCase())
+}
+
+/** Describe one admin edit's field changes for the history panel. */
+export function describeAdminChanges(changes) {
+	return (changes ?? [])
+		.map((change) => {
+			const field = ADMIN_FIELDS.find((f) => f.key === change.field)
+			const label = field ? i18n.global.t(field.labelKey) : change.field
+			return `${label} ${change.from} → ${change.to}`
+		})
+		.join(", ")
 }
 
 /** One-line status shared by the turn bar and the action panel. */

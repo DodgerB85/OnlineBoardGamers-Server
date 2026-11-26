@@ -10,6 +10,7 @@ import { PHASE_GAME_OVER, PHASE_MAIN } from "./ROWreference"
 import i18n from "../i18n"
 import { useModelStore } from "../stores/ROWstore"
 import { usePersonalStore } from "../stores/ROWpersonal"
+import { applyAdminChanges } from "./ROWadmin"
 
 function clone(value) {
 	return JSON.parse(JSON.stringify(value))
@@ -186,7 +187,8 @@ export function buildReplayFrames(initial, history) {
 		if (current.rngState) rng.setState(current.rngState)
 		const game = deserializeGame(clone(current))
 		try {
-			if (entry.action) {
+			if (entry.adminChanges?.length) applyAdminChanges(game, entry.player, entry.adminChanges)
+			else if (entry.action) {
 				game.perform(entry.player, entry.action, rng)
 				// Automatic follow-ups (e.g. a delivery's exchange token) share their
 				// triggering action's frame, so one undo still removes the whole step.

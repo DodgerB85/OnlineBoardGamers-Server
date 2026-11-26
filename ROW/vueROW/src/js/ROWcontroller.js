@@ -11,6 +11,7 @@ import { decompress, loadChat, loadRewind, reloadGameData, resign, saveGame, sav
 import { broadcastGameUpdate } from "../backend/ROWwebsocket"
 import { ActionType, PHASE_MAIN, PHASE_GAME_OVER } from "./ROWreference"
 import { AI_NAME, playAutomaTurns } from "./automa/index"
+import { applyAdminChanges } from "./ROWadmin"
 
 /** Engine errors are ROWError codes; show the translated text when there is one. */
 function errorText(error) {
@@ -63,8 +64,29 @@ export function submit(action) {
 	store.clearAction()
 	store.clearMovePlan()
 	store.undoSnapshot = g.canUndo() ? before : null
-	model.recordHistory(action.type, g.currentPlayer, model.actionParams(action), action, null, followups)
+	model.recordHistory(action.type, g.currentPlayer, model.actionParams(action), action, null, { followups })
 	if (followups.length) store.gameMessages.successText = i18n.global.t("row.actions.descriptions.GAIN_EXCHANGE_TOKEN")
+	store.touch()
+	return true
+}
+
+/**
+ * Apply a batch of debug edits to the current player as one history entry.
+ * All fields share one entry and one undo step, and replay applies the same
+ * absolute values, so an admin edit cannot make the replay drift.
+ */
+export function adminEdit(changes) {
+	const store = useModelStore()
+	const g = store.game
+	if (!g || !changes?.length || store.saving || store.viewSettings.showReplay) return false
+	store.gameMessages.errorText = ""
+	const player = g.currentPlayer
+	const before = captureUndo()
+	applyAdminChanges(g, player, changes)
+	store.clearAction()
+	store.clearMovePlan()
+	store.undoSnapshot = g.canUndo() ? before : null
+	model.recordHistory("ADMIN_EDIT", player, [], null, null, { adminChanges: changes })
 	store.touch()
 	return true
 }

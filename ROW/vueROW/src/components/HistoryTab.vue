@@ -45,9 +45,10 @@ onBeforeUnmount(() => {
 		<h3>{{ t('topMenu.history') }} <button class="actionsLineButton" @click="close">{{ t('panels.close') }}</button></h3>
 		<div class="historyList">
 			<div v-for="(h, i) in store.history" :key="i" class="historyEntry">
-				<span class="hp">{{ h.player }}</span>
+				<span v-if="h.type !== 'ADMIN_EDIT'" class="hp">{{ h.player }}</span>
 				<span class="ht">{{ view.humanizeAction(h.type) }}</span>
-				<span v-if="h.params.length" class="hparams">{{ h.params.join(", ") }}</span>
+				<span v-if="h.adminChanges?.length" class="hparams">{{ view.describeAdminChanges(h.adminChanges) }}</span>
+				<span v-else-if="h.params.length" class="hparams">{{ h.params.join(", ") }}</span>
 			</div>
 			<div v-if="store.history.length === 0" class="empty">{{ t('row.history.empty') }}</div>
 		</div>

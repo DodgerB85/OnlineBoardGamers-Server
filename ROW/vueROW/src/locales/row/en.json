@@ -626,7 +626,15 @@
       "showGameData": "Show game data",
       "current": "current:",
       "status": "status:",
-      "actions": "actions:"
+      "actions": "actions:",
+      "dollars": "Dollars",
+      "cowboys": "Cowboys",
+      "craftsmen": "Craftsmen",
+      "engineers": "Engineers",
+      "exchangeTokens": "Exchange tokens",
+      "branchlets": "Branchlets",
+      "apply": "Apply",
+      "reset": "Reset"
     },
     "ended": {
       "title": "Game over",
@@ -643,7 +651,8 @@
       "undo": "Undo",
       "endTurn": "End turn",
       "skip": "Skip",
-      "resign": "Resign"
+      "resign": "Resign",
+      "adminEdit": "Admin altered the game state:"
     },
     "map": {
       "removeHazard": "Remove hazard",

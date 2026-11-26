@@ -60,13 +60,14 @@ export function actionParams(action) {
 		.map(([k, v]) => `${k}: ${typeof v === "object" ? JSON.stringify(v) : String(v)}`)
 }
 
-export function recordHistory(type, player, params = [], action = null, snapshot = null, followups = null) {
+export function recordHistory(type, player, params = [], action = null, snapshot = null, extra = null) {
 	const store = useModelStore()
 	const entry = { type, player, time: Date.now(), params }
 	// Structured action data lets the replay rebuild the game from the initial position.
 	// shortcut: history is capped at 1000 entries, upgrade to a replay base snapshot if games grow longer.
 	if (action) entry.action = JSON.parse(JSON.stringify(action))
-	if (followups?.length) entry.followups = JSON.parse(JSON.stringify(followups))
+	if (extra?.followups?.length) entry.followups = JSON.parse(JSON.stringify(extra.followups))
+	if (extra?.adminChanges?.length) entry.adminChanges = JSON.parse(JSON.stringify(extra.adminChanges))
 	if (snapshot) entry.snapshot = JSON.parse(JSON.stringify(snapshot))
 	store.history.unshift(entry)
 	if (store.history.length > 1000) store.history.length = 1000

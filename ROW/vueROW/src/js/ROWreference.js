@@ -34,7 +34,7 @@ export {
 // ---------------------------------------------------------------------------
 export const BOT_NAME = "RowBot"
 export const SUPER_USERS = ["BotKickStarter"]
-export const DEBUG_USERS = ["admin", "BotKickStarter"]
+export const DEBUG_USERS = ["admin", "ChubbChubb", "BotKickStarter", "Physic13"]
 
 export const DELETE_VOTE_TOPIC = "delete_game_votes"
 export const STATS_EXCLUDE_VOTE_TOPIC = "stats_exclude_votes"

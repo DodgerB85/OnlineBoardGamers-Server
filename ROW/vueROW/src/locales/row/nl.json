@@ -626,7 +626,15 @@
       "showGameData": "Spelgegevens tonen",
       "current": "huidige:",
       "status": "status:",
-      "actions": "acties:"
+      "actions": "acties:",
+      "dollars": "Dollar",
+      "cowboys": "Cowboys",
+      "craftsmen": "Ambachtsmannen",
+      "engineers": "Ingenieurs",
+      "exchangeTokens": "Wisselfiches",
+      "branchlets": "Filialen",
+      "apply": "Toepassen",
+      "reset": "Resetten"
     },
     "ended": {
       "title": "Spel voorbij",
@@ -643,7 +651,8 @@
       "undo": "Ongedaan maken",
       "endTurn": "Beurt beëindigen",
       "skip": "Overslaan",
-      "resign": "Opgeven"
+      "resign": "Opgeven",
+      "adminEdit": "Admin heeft de spelstatus gewijzigd:"
     },
     "map": {
       "removeHazard": "Gevaar verwijderen",

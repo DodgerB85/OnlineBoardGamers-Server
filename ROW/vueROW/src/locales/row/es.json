@@ -626,7 +626,15 @@
       "showGameData": "Mostrar datos de la partida",
       "current": "actual:",
       "status": "estado:",
-      "actions": "acciones:"
+      "actions": "acciones:",
+      "dollars": "Dólares",
+      "cowboys": "Vaqueros",
+      "craftsmen": "Artesanos",
+      "engineers": "Ingenieros",
+      "exchangeTokens": "Fichas de intercambio",
+      "branchlets": "Ramales",
+      "apply": "Aplicar",
+      "reset": "Restablecer"
     },
     "ended": {
       "title": "Fin de la partida",
@@ -643,7 +651,8 @@
       "undo": "Deshacer",
       "endTurn": "Terminar turno",
       "skip": "Saltar",
-      "resign": "Rendirse"
+      "resign": "Rendirse",
+      "adminEdit": "El admin modificó el estado de la partida:"
     },
     "map": {
       "removeHazard": "Retirar peligro",
