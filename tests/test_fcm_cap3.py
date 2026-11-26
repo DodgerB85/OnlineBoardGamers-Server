@@ -76,13 +76,14 @@ class FcmCap3Test(TestCase):
     def test_regular_game_pins_cap3_when_the_last_player_joins(self, _page_available, _available):
         self.client.post(reverse("FCM:createFCMgame"), {
             "gameName": "Cap3 test", "gameDescription": "", "pace": "1",
-            "mapData": "", "playerNumber": "4", "fcmCap3": ["2", "4"],
+            "mapData": "", "playerNumber": "4", "fcmCap3": ["2", "4"], "fcmCap3Policy": "full",
         })
         regular = Game.objects.get()
         self.assertEqual(regular.gameStatus, "AVAILABLE")
         self.assertEqual(regular.players.count(), 3)
         self.assertEqual(regular.players.get(player=self.ai).seat_order, 1)
         self.assertNotIn(102, json.loads(regular.startingOptions))
+        self.assertIn(rf.SO_CAP3_FULL_ROLLOUT, json.loads(regular.startingOptions))
 
         join_route = reverse("joinGame", args=["FCM"])
         self.client.force_login(User.objects.create_user("joiner"))
@@ -97,6 +98,7 @@ class FcmCap3Test(TestCase):
         response = self.client.get(reverse("createFCMpage", args=[regular.id]))
         self.assertContains(response, 'setupData.cap3Seats = [2, 4]')
         self.assertContains(response, 'name="fcmCap3"', count=4)
+        self.assertContains(response, 'name="fcmCap3Policy"')
         self.assertEqual(response.context["playerNames"], [
             player.player.username for player in regular.players.exclude(is_ai=True).exclude(player=self.human)
         ])
@@ -172,3 +174,12 @@ class FcmCap3Test(TestCase):
         self.assertEqual(request_data["metadata"]["turn"], 0)
         self.assertEqual(request_data["metadata"]["starting_options"], ["22", "21"])
         self.assertEqual(run.call_args.args[0][1:], ["--cap3"])
+
+        game.startingOptions = json.dumps([
+            rf.SO_CAP3_AI, rf.SO_CAP3_FULL_ROLLOUT, rf.SO_LOBBYISTS, rf.SO_NEW_MS,
+        ])
+        game.save(update_fields=["startingOptions"])
+        response = self.client.post(route, payload, content_type="application/json")
+        self.assertEqual(response.json(), expected)
+        self.assertEqual(run.call_args.args[0][1:], ["--full-rollout"])
+        self.assertEqual(json.loads(run.call_args.kwargs["input"])["metadata"]["starting_options"], ["22", "21"])

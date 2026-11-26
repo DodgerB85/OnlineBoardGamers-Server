@@ -35,9 +35,10 @@ function train(seat, from, to, origin) {
 	const p = store.players[seat]
 	const points = rules.getTrainingPoints(seat, store.context.justTrained)
 	requireMove(origin === 0 ? p.beach.includes(from) : origin === 1
-		? rules.getRemainingRecruitingPoints(seat) > 0 && rules.hireableEmployees().includes(from)
+		? from === -1 && rules.getRemainingRecruitingPoints(seat) > 0
 		: p.employees.includes(from) && p.milestones.includes(rf.FIRST_LEMONADE_SOLD))
-	const upgrades = rules.possibleUpgrades(store.availableEmployees, seat, from,
+	const upgrades = rules.possibleUpgrades(store.availableEmployees, seat,
+		origin === 1 ? rules.hireableEmployees() : from,
 		points.total, points.level2, points.level3, points.unlimited, store.context.justTrained.map(t => t.to), origin === 2)
 	const steps = upgrades.findIndex(level => level.includes(to)) + 1
 	requireMove(steps > 0)
@@ -65,13 +66,14 @@ function restructure(plan) {
 	}
 }
 
-function work(seat, action, secondGood) {
+function work(seat, action, secondGood, hasLaterLobbyistOrDone = false) {
 	const store = useModelStore()
 	const p = store.players[seat]
 	const ctx = store.context
 	const subphase = store.gameflow.subphase
 	if (finishSubphases.has(action)) {
 		// The client advances through some empty subphases in the same call.
+		if (action === 2400000 && subphase === rf.SUBPHASE_LOBBYISTS && hasLaterLobbyistOrDone) return
 		if (finishSubphases.get(action).includes(subphase)) controller.endWorkingDaySubphase()
 		return
 	}
@@ -255,9 +257,13 @@ export async function applyCap3Turn(plan) {
 		controller.chooseTurnOrderPosition(slot)
 	} else if (phase === rf.PHASE_WORKING_DAY) {
 		requireMove(inRange(actions.at(-1), 3000001, 3000006))
+		let actionIdx = 0
 		for (const step of plan.steps) {
 			for (const action of step.actions) {
-				if (!inRange(action, 3000001, 3000006)) work(plan.seat, action, step.second_good)
+				const hasLaterLobbyistOrDone = actions.slice(actionIdx + 1).some(a =>
+					a === 2400000 || inRange(a, 7200000, 8000000) || inRange(a, 19000000, 21720000))
+				if (!inRange(action, 3000001, 3000006)) work(plan.seat, action, step.second_good, hasLaterLobbyistOrDone)
+				actionIdx++
 			}
 		}
 		requireMove(store.gameflow.subphase === rf.SUBPHASE_CONFIRM_END_TURN)

@@ -101,7 +101,10 @@ def cap3_turn(request, game_id):
         # Vue exports the selected draft modules' fields even while the draft is in progress.
         engine_options = [
             option for option in options
-            if option not in {rf.SO_CAP3_AI, rf.SO_AUTO_ENABLE_REWINDS, rf.SO_DRAFT_MODULE_BREAKER}
+            if option not in {
+                rf.SO_CAP3_AI, rf.SO_CAP3_FULL_ROLLOUT,
+                rf.SO_AUTO_ENABLE_REWINDS, rf.SO_DRAFT_MODULE_BREAKER,
+            }
         ]
         if rf.SO_DRAFT_MODULE_BREAKER in options:
             engine_options.append(rf.SO_DRAFT_MODULE_BREAKER)
@@ -112,11 +115,12 @@ def cap3_turn(request, game_id):
     except (AttributeError, IndexError, KeyError, TypeError, ValueError):
         return JsonResponse({"error": gettext("Invalid Cap3 position.")}, status=400)
 
+    full_rollout = rf.SO_CAP3_FULL_ROLLOUT in options
     try:
         completed = subprocess.run(
-            [settings.FCM_CAP3_BIN, "--cap3"],
+            [settings.FCM_CAP3_BIN, "--full-rollout" if full_rollout else "--cap3"],
             input=json.dumps({"state": state, "metadata": metadata}), text=True, capture_output=True,
-            check=True, timeout=20,
+            check=True, timeout=120 if full_rollout else 20,
         )
         plan = json.loads(completed.stdout)
         if plan["seat"] != seat or plan["phase"] != game.phase or not plan["steps"]:

@@ -427,7 +427,10 @@ def createFCMspinoff(request):
 
     startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
     # A practice copy replaces the other seats with hotseat players.
-    startingOptions = [option for option in startingOptions if option != rfFCM.SO_CAP3_AI]
+    startingOptions = [
+        option for option in startingOptions
+        if option not in {rfFCM.SO_CAP3_AI, rfFCM.SO_CAP3_FULL_ROLLOUT}
+    ]
     if rf.SO_TRAINING_GAME not in startingOptions:
         startingOptions = [rf.SO_TRAINING_GAME, *startingOptions]
     maxPlayers = currentGame.maxPlayers

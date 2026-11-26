@@ -360,6 +360,12 @@ def create_fcm_game(
             if not cap3_options_supported(starting_options):
                 messages.error(request, gettext("Cap3 AI is unavailable with China Expansion modules."))
                 return HttpResponseRedirect(reverse("createFCMpage"))
+            policy = request.POST.get("fcmCap3Policy", "a2")
+            if policy not in {"a2", "full"}:
+                messages.error(request, gettext("Choose a valid FCM AI policy."))
+                return HttpResponseRedirect(reverse("createFCMpage"))
+            if policy == "full":
+                starting_options.append(rfFCM.SO_CAP3_FULL_ROLLOUT)
             stats_excluded_game = True
         # Exclude stats if Chinese expansion / custom modules are always
         # enabled (picked individually, not via the random pool). Random-pool

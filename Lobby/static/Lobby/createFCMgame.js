@@ -54,6 +54,8 @@ function initGameCreation(fillData, setupData = {}) {
 			const box = document.getElementById(`fcmCap3Seat${seat}`)
 			if (box) box.checked = true
 		}
+		const policy = document.getElementById("fcmCap3Policy")
+		if (policy && startingOptions.includes("502")) policy.value = "full"
 		selectPlayers(true)
 
 		// Check and enable map data if necessary
@@ -697,6 +699,8 @@ function selectPlayers(preservePracticeNames = false) {
 		cap3Seats.style.display = enabled ? "" : "none"
 		const boxes = [...cap3Seats.querySelectorAll("input")]
 		const count = enabled ? boxes.filter(box => box.checked).length : 0
+		document.getElementById("fcmCap3PolicyRow").hidden = count === 0
+		document.getElementById("fcmCap3Policy").disabled = count === 0
 		for (const box of boxes) {
 			if (!enabled) box.checked = false
 			box.disabled = !enabled || (count === 3 && !box.checked)

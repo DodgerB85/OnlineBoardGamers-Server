@@ -640,6 +640,13 @@
                       </label>
                     {% endfor %}
                   </div>
+                  <label id="fcmCap3PolicyRow" for="fcmCap3Policy" hidden>
+                    {% translate "AI policy" %}
+                    <select id="fcmCap3Policy" name="fcmCap3Policy" disabled>
+                      <option value="a2">{% translate "Cap3 (A2)" %}</option>
+                      <option value="full">{% translate "Full Rollout" %}</option>
+                    </select>
+                  </label>
                 </div>
               </div>
             {% endif %}
