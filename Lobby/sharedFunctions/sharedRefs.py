@@ -791,8 +791,7 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
 
     startingOptionsHTML = ""
     if rfFCM.SO_CAP3_AI in startingOptionsArr:
-        label = gettext("Full Rollout AI") if rfFCM.SO_CAP3_FULL_ROLLOUT in startingOptionsArr else gettext("Cap3 AI")
-        startingOptionsHTML = f"<span>{escape(label)}</span> "
+        startingOptionsHTML = f"<span>{escape(gettext('Deep-Fry Bot'))}</span> "
     sorted_options = [opt for opt in preferred_order if opt in startingOptionsArr]
 
     for opt in sorted_options:

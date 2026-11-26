@@ -629,24 +629,17 @@
             </div>
             {% if cap3_enabled %}
               <div class="form-row" id="cap3SeatsRow" style="display:none">
-                <span class="form-label">{% translate "Cap3 AI" %}</span>
+                <span class="form-label">{% translate "Deep-Fry Bot" %}</span>
                 <div class="field">
                   <div class="check-list">
                     {% for seat in "1234" %}
                       <label class="check-label">
                         <input type="checkbox" id="fcmCap3Seat{{ seat }}" name="fcmCap3" value="{{ seat }}"
                                class="myCheckbox" onchange="selectPlayers(true)" disabled />
-                        <div>{% blocktranslate with number=seat %}Cap3 AI plays seat {{ number }}{% endblocktranslate %}</div>
+                        <div>{% blocktranslate with number=seat %}Deep-Fry Bot plays seat {{ number }}{% endblocktranslate %}</div>
                       </label>
                     {% endfor %}
                   </div>
-                  <label id="fcmCap3PolicyRow" for="fcmCap3Policy" hidden>
-                    {% translate "AI policy" %}
-                    <select id="fcmCap3Policy" name="fcmCap3Policy" disabled>
-                      <option value="a2">{% translate "Cap3 (A2)" %}</option>
-                      <option value="full">{% translate "Full Rollout" %}</option>
-                    </select>
-                  </label>
                 </div>
               </div>
             {% endif %}

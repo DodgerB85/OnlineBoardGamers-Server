@@ -98,7 +98,6 @@ class FcmCap3Test(TestCase):
         response = self.client.get(reverse("createFCMpage", args=[regular.id]))
         self.assertContains(response, 'setupData.cap3Seats = [2, 4]')
         self.assertContains(response, 'name="fcmCap3"', count=4)
-        self.assertContains(response, 'name="fcmCap3Policy"')
         self.assertEqual(response.context["playerNames"], [
             player.player.username for player in regular.players.exclude(is_ai=True).exclude(player=self.human)
         ])

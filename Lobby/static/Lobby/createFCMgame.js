@@ -697,10 +697,8 @@ function selectPlayers(preservePracticeNames = false) {
 	if (cap3Seats) {
 		const enabled = document.getElementById("playerNumber").value === "4" && !document.getElementById("fcmAI").checked
 		cap3Seats.style.display = enabled ? "" : "none"
-		const boxes = [...cap3Seats.querySelectorAll("input")]
+		const boxes = [...cap3Seats.querySelectorAll('input[type="checkbox"]')]
 		const count = enabled ? boxes.filter(box => box.checked).length : 0
-		document.getElementById("fcmCap3PolicyRow").hidden = count === 0
-		document.getElementById("fcmCap3Policy").disabled = count === 0
 		for (const box of boxes) {
 			if (!enabled) box.checked = false
 			box.disabled = !enabled || (count === 3 && !box.checked)

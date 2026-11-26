@@ -25,11 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 def cap3_available():
-    return (
-        bool(settings.FCM_CAP3_BIN)
-        and Path(settings.FCM_CAP3_BIN).is_file()
-        and os.access(settings.FCM_CAP3_BIN, os.X_OK)
-    )
+    return Path(settings.BASE_DIR, "FCM/static/FCM/wasm/fcm_rollout.wasm").is_file()
 
 
 def cap3_options_supported(options):
@@ -64,7 +60,7 @@ def cap3_turn(request, game_id):
     if not game.players.filter(player=request.user, is_missing=False, is_kicked=False).exists():
         return JsonResponse({"error": gettext("You are not a player in this game.")}, status=403)
     if not cap3_available():
-        return JsonResponse({"error": gettext("Cap3 AI is currently unavailable.")}, status=503)
+        return JsonResponse({"error": gettext("Deep-Fry Bot is currently unavailable.")}, status=503)
     try:
         if len(request.body) > 262144:
             raise ValueError("position too large")
@@ -127,7 +123,7 @@ def cap3_turn(request, game_id):
             raise ValueError("policy returned a turn for the wrong position")
     except (OSError, subprocess.SubprocessError, ValueError, TypeError, KeyError) as error:
         logger.warning("Cap3 failed for FCM game %s: %s", game.id, error)
-        return JsonResponse({"error": gettext("Cap3 AI could not complete its move. Try again.")}, status=502)
+        return JsonResponse({"error": gettext("Deep-Fry Bot could not complete its move. Try again.")}, status=502)
 
     if not Game.objects.filter(pk=game.pk, latestUpdate=game.latestUpdate).exists():
         return JsonResponse({"stale": True}, status=409)

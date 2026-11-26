@@ -337,7 +337,7 @@ def create_fcm_game(
         cap3_choices = [choice for choice in request.POST.getlist("fcmCap3") if choice]
         if cap3_choices:
             if not cap3_available():
-                messages.error(request, gettext("Cap3 AI is currently unavailable."))
+                messages.error(request, gettext("Deep-Fry Bot is currently unavailable."))
                 return HttpResponseRedirect(reverse("createFCMpage"))
             if (
                 max_players != 4 or not 1 <= len(cap3_choices) <= 3
@@ -347,7 +347,7 @@ def create_fcm_game(
                 or not set(rf.FCM_CAP3_USERNAMES).isdisjoint(usernames)
                 or any(request.POST.get(f"player{i}") for i in range(5 - len(cap3_choices), 7))
             ):
-                messages.error(request, gettext("Choose up to three Cap3 AI seats in a four-player game, leaving room for the human players."))
+                messages.error(request, gettext("Choose up to three Deep-Fry Bot seats in a four-player game, leaving room for the human players."))
                 return HttpResponseRedirect(reverse("createFCMpage"))
             cap3_seats = {int(choice) - 1 for choice in cap3_choices}
 
@@ -358,14 +358,13 @@ def create_fcm_game(
         if cap3_seats:
             starting_options = list(dict.fromkeys([*starting_options, rfFCM.SO_STRICT_PAYDAY_FRIDGE, rfFCM.SO_CAP3_AI]))
             if not cap3_options_supported(starting_options):
-                messages.error(request, gettext("Cap3 AI is unavailable with China Expansion modules."))
+                messages.error(request, gettext("Deep-Fry Bot is unavailable with China Expansion modules."))
                 return HttpResponseRedirect(reverse("createFCMpage"))
-            policy = request.POST.get("fcmCap3Policy", "a2")
-            if policy not in {"a2", "full"}:
+            policy = request.POST.get("fcmCap3Policy", "full")
+            if policy != "full":
                 messages.error(request, gettext("Choose a valid FCM AI policy."))
                 return HttpResponseRedirect(reverse("createFCMpage"))
-            if policy == "full":
-                starting_options.append(rfFCM.SO_CAP3_FULL_ROLLOUT)
+            starting_options.append(rfFCM.SO_CAP3_FULL_ROLLOUT)
             stats_excluded_game = True
         # Exclude stats if Chinese expansion / custom modules are always
         # enabled (picked individually, not via the random pool). Random-pool

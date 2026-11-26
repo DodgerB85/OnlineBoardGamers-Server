@@ -119,8 +119,7 @@ export function setupNewGame(opts = {}) {
 		else if (store.players[i].name === "SHADOW_4" && displayNamesArr.length > 3) store.players[i].displayName = displayNamesArr[3]
 		else if (store.players[i].name === "SHADOW_5" && displayNamesArr.length > 4) store.players[i].displayName = displayNamesArr[4]
 		else if (init.startingOptions?.includes(rf.SO_CAP3_AI) && rf.CAP3_AI_NAMES.includes(store.players[i].name)) {
-			const policy = init.startingOptions.includes(rf.SO_CAP3_FULL_ROLLOUT) ? "Full Rollout AI" : "Cap3 AI"
-			store.players[i].displayName = `${policy} (Seat ${i + 1})`
+			store.players[i].displayName = `Deep-Fry Bot (Seat ${i + 1})`
 		} else store.players[i].displayName = store.players[i].name
 	}
 
