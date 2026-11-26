@@ -131,6 +131,52 @@ class HLCFactoryQueueTests(TestCase):
         self.assertEqual(self.presenter.getCurrentPlayersInOrderArrHLC(), ["bob", "carol", "dave"])
         self.assertEqual(self.presenter.getArrayOfIsCurrentPlayers(), ["bob"])
 
+    def test_missing_bot_left_in_factory_queue_is_skipped(self):
+        # A rewind or stale save can copy an already-resigned seat back into the
+        # queue. The bot never submits, so the queue must not wait for it.
+        alice_gp = self.game.players.get(player=self.users[0])
+        alice_gp.is_missing = True
+        alice_gp.is_current = True
+        alice_gp.remainingTurnOrder = 1
+        alice_gp.save(update_fields=["is_missing", "is_current", "remainingTurnOrder"])
+        for gp in self.game.players.order_by("seat_order")[1:]:
+            gp.remainingTurnOrder = gp.seat_order + 1
+            gp.save(update_fields=["remainingTurnOrder"])
+
+        self.assertEqual(self.presenter.getCurrentPlayersInOrderArrHLC(), ["bob", "carol", "dave"])
+        self.assertEqual(self.presenter.getArrayOfIsCurrentPlayers(), ["bob"])
+
+    def test_saving_a_queue_with_a_missing_bot_drops_the_seat(self):
+        alice_gp = self.game.players.get(player=self.users[0])
+        alice_gp.is_missing = True
+        alice_gp.save(update_fields=["is_missing"])
+
+        self.presenter.setCurrentPlayersFromArrInTurnOrder(["bob", "alice", "carol"], current_player_seats=[1, 0, 2])
+
+        alice_gp.refresh_from_db()
+        self.assertFalse(alice_gp.is_current)
+        self.assertIsNone(alice_gp.remainingTurnOrder)
+        self.assertEqual(self.presenter.getCurrentPlayersInOrderArrHLC(), ["bob", "carol"])
+
+    def test_show_page_skips_a_missing_bot_left_as_current(self):
+        # The production shape of this bug: the bot seat is is_current and in
+        # both server queues, so the show page must still report nobody current
+        # and let the factory-phase kickstart move the game on.
+        alice_gp = self.game.players.get(player=self.users[0])
+        alice_gp.is_missing = True
+        alice_gp.is_current = True
+        alice_gp.remainingTurnOrder = 1
+        alice_gp.save(update_fields=["is_missing", "is_current", "remainingTurnOrder"])
+        self.game.currentPlayersInTurnOrder = json.dumps(["alice"])
+        self.game.serverCurrentPlayerNamesInTurnOrder = ["alice"]
+        self.game.save(update_fields=["currentPlayersInTurnOrder", "serverCurrentPlayerNamesInTurnOrder"])
+        self.client.force_login(self.users[1])
+
+        response = self.client.get(reverse("HLC:showHLCgame", args=[self.game.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "global.currentPlayers = [];")
+
     def test_last_resigning_player_can_still_submit_the_final_factory(self):
         # A resignation removes the seat before its turn-ending factory save
         # arrives, leaving the queue empty. That save must still be processed so

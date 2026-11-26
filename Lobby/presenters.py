@@ -2708,9 +2708,16 @@ class HLCpresenter(GamePresenter):
         allPlayersString = " / ".join(gp.player.username for gp in all_players if gp.player)
         return f"{self.gameObj.id}: {self.getGameName()} : {allPlayersString} : {self.gameObj.gameStatus} : {self.currentTurnString()}"
 
+    def _resolveTurnOrderGamePlayers(self, names, seats=None):
+        # A missing player is a bot and never takes a turn. A stale save or
+        # rewind can name one; drop the seat instead of making everyone wait.
+        return [gp for gp in super()._resolveTurnOrderGamePlayers(names, seats) if not gp.is_missing]
+
     def getCurrentPlayersInOrderArrHLC(self):
         """Get current players as an array"""
-        return self.getRemainingTurnOrderNames()
+        bots = {"HcBot", "HlcBot"}
+        bots.update(self.gameObj.players.filter(is_missing=True, player__isnull=False).values_list("player__username", flat=True))
+        return [name for name in self.getRemainingTurnOrderNames() if name not in bots]
 
     def getArrayOfIsCurrentPlayers(self):
         if self.gameObj.phase == 3:

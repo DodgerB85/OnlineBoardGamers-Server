@@ -48,10 +48,12 @@ var Bot = (function () {
 				if (model.players[model.gameFlow.turnOrder[0]].autoplay === true) model.gameFlow.turnOrder.shift()
 			}
 		} else {
-			// Remove any bots at start of factory lists
-			while (model.players[model.gameFlow.turnOrder[0]].name === "HcBot") {
-				model.gameFlow.turnOrder.shift()
-			}
+			// Drop every bot from the factory queue, not only the ones at the
+			// front: a bot left at the end blocks the server once the last human
+			// has submitted.
+			model.gameFlow.turnOrder = model.gameFlow.turnOrder.filter(function (seat) {
+				return model.players[seat].autoplay !== true && model.players[seat].name !== "HcBot"
+			})
 		}
 	}
 
