@@ -17,7 +17,7 @@ export function buildBgStatsUrl() {
 		const player = store.players[playerIndex]
 		// Only the FcmBot account is a bot seat: a seat renamed FcmBot is a human
 		// who resigned or was kicked. FcmAI is the in-game AI, never a person.
-		if (player.name === rf.BOT_NAME || player.name === rf.AI_NAME || player.displayName === rf.BOT_NAME) continue
+		if (player.name === rf.BOT_NAME || rf.CAP3_AI_NAMES.includes(player.name) || player.displayName === rf.BOT_NAME) continue
 		groups.push([{ name: player.name, score: player.money }])
 	}
 

@@ -529,19 +529,7 @@
                 <option value="6">6</option>
               </select>
             </div>
-            {% if cap3_enabled %}
-              <div class="form-row">
-                <label class="form-label" for="fcmCap3">{% translate "Cap3 AI" %}</label>
-                <select id="fcmCap3" name="fcmCap3" onchange="selectPlayers();" disabled>
-                  <option value="">{% translate "Off" %}</option>
-                  {% for seat in "1234" %}
-                    <option value="{{ seat }}">{% blocktranslate with number=seat %}Opening seat {{ number }}{% endblocktranslate %}</option>
-                  {% endfor %}
-                </select>
-                <div class="form-help">{% translate "Four-player base games with original milestones. The other seats are shuffled." %}</div>
-              </div>
-            {% endif %}
-            <div class="form-row">
+            <div class="form-row" id="selPlayer2">
               <label class="form-label" for="player2"{% if cap3_enabled %} data-player-label="{% translate 'Player 2' %}" data-cap3-label="{% translate 'Opponent 1' %}"{% endif %}>{% trans "Player 2" %}</label>
               <div class="field">
                 <div class="autocomplete">
@@ -639,6 +627,22 @@
                 </div>
               </div>
             </div>
+            {% if cap3_enabled %}
+              <div class="form-row" id="cap3SeatsRow" style="display:none">
+                <span class="form-label">{% translate "Cap3 AI" %}</span>
+                <div class="field">
+                  <div class="check-list">
+                    {% for seat in "1234" %}
+                      <label class="check-label">
+                        <input type="checkbox" id="fcmCap3Seat{{ seat }}" name="fcmCap3" value="{{ seat }}"
+                               class="myCheckbox" onchange="selectPlayers(true)" disabled />
+                        <div>{% blocktranslate with number=seat %}Cap3 AI plays seat {{ number }}{% endblocktranslate %}</div>
+                      </label>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
           </div>
           <div class="card">
             <div class="card-header">
@@ -1306,7 +1310,7 @@
             setupData.kickoutDuration = "{{ kickoutDuration }}";
             setupData.playerNumber = {{ playerNumber }};
             setupData.playerNames = {{ playerNames |script_json }};
-            setupData.cap3Seat = "{{ cap3_seat|default_if_none:'' }}";
+            setupData.cap3Seats = {{ cap3_seats|default:"[]" }};
             {% if scenarioUsed %}
             setupData.scenarioUsed = true;
             setupData.scenarioName = "{{ scenarioName }}";

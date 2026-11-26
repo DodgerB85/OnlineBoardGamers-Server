@@ -16,7 +16,7 @@ from Lobby.sharedFunctions.sharedFunctions import SF_getGameCreationJsonReturn
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from . import FCMconstants as rfFCM
-from .cap3 import AI_USERNAME, cap3_available, cap3_options_supported
+from .cap3 import cap3_available, cap3_options_supported
 
 if TYPE_CHECKING:
     from Lobby.presenters import FCMpresenter
@@ -219,7 +219,7 @@ def create_fcm_game(
     game_pace = rf.PACE_STANDARD
     created = SR_getTimeNow()
     player_Order_Seed = 0
-    cap3_seat = None
+    cap3_seats = set()
     starting_options = []
     max_players = 2
     game_status = "AVAILABLE"
@@ -334,28 +334,31 @@ def create_fcm_game(
             tiles = request.POST["mapData"].split(",")
             max_players = {18: 2, 24: 3, 32: 4, 40: 5, 48: 6}.get(len(tiles), 2)
 
-        cap3_choice = request.POST.get("fcmCap3", "")
-        if cap3_choice:
+        cap3_choices = [choice for choice in request.POST.getlist("fcmCap3") if choice]
+        if cap3_choices:
             if not cap3_available():
                 messages.error(request, gettext("Cap3 AI is currently unavailable."))
                 return HttpResponseRedirect(reverse("createFCMpage"))
             if (
-                max_players != 4 or cap3_choice not in {"1", "2", "3", "4"}
-                or "fcmAI" in request.POST or AI_USERNAME in usernames
-                or any(request.POST.get(f"player{i}") for i in range(4, 7))
+                max_players != 4 or not 1 <= len(cap3_choices) <= 3
+                or len(set(cap3_choices)) != len(cap3_choices)
+                or set(cap3_choices) - {"1", "2", "3", "4"}
+                or "fcmAI" in request.POST
+                or not set(rf.FCM_CAP3_USERNAMES).isdisjoint(usernames)
+                or any(request.POST.get(f"player{i}") for i in range(5 - len(cap3_choices), 7))
             ):
-                messages.error(request, gettext("Choose a Cap3 seat in a four-player game with room for two other players."))
+                messages.error(request, gettext("Choose up to three Cap3 AI seats in a four-player game, leaving room for the human players."))
                 return HttpResponseRedirect(reverse("createFCMpage"))
-            cap3_seat = int(cap3_choice) - 1
+            cap3_seats = {int(choice) - 1 for choice in cap3_choices}
 
         player_Order_Seed = randint(0, max_players - 1)
         starting_options = buildFCMstartingOptions(
             request.POST
         )  # Use the extracted function
-        if cap3_seat is not None:
+        if cap3_seats:
             starting_options = list(dict.fromkeys([*starting_options, rfFCM.SO_STRICT_PAYDAY_FRIDGE, rfFCM.SO_CAP3_AI]))
             if not cap3_options_supported(starting_options):
-                messages.error(request, gettext("Cap3 AI supports the base game with original milestones."))
+                messages.error(request, gettext("Cap3 AI is unavailable with China Expansion modules."))
                 return HttpResponseRedirect(reverse("createFCMpage"))
             stats_excluded_game = True
         # Exclude stats if Chinese expansion / custom modules are always
@@ -389,7 +392,7 @@ def create_fcm_game(
             game_status = "ACTIVE"
             shadow_names = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
             shadow_display = []
-            for i in range(1, max_players - int(cap3_seat is not None)):
+            for i in range(1, max_players - len(cap3_seats)):
                 all_players.append(User.objects.get(username=shadow_names[i - 1]))
                 display_name = request.POST.get(f"player{i + 1}", shadow_names[i - 1])
                 shadow_display.append(display_name)
@@ -405,6 +408,8 @@ def create_fcm_game(
                 usernames_to_notify = usernames
                 if "privateGame" not in request.POST:
                     game_status = "WAITING"
+        if cap3_seats and len(cap3_seats) + len(all_players) == max_players:
+            game_status = "ACTIVE"
 
     # Database operations
     with transaction.atomic():
@@ -437,30 +442,22 @@ def create_fcm_game(
             new_game.relatedMiniTournament = tournamentObj
 
         # Add players as GamePlayer instances
+        open_seats = [seat for seat in range(max_players) if seat not in cap3_seats]
         for idx, player in enumerate(all_players):
             GamePlayer.objects.create(
                 game=new_game,
                 player=player,
-                seat_order=idx + int(cap3_seat is not None and idx >= cap3_seat),
+                seat_order=open_seats[idx] if cap3_seats else idx,
                 notes=shadowNameNotes if player == request.user else "",
             )
-        if cap3_seat is not None:
-            GamePlayer.objects.create(
-                game=new_game,
-                player=User.objects.get(username=AI_USERNAME),
-                seat_order=cap3_seat,
-            )
+        for seat, username in zip(sorted(cap3_seats), rf.FCM_CAP3_USERNAMES):
+            player, _ = User.objects.get_or_create(username=username, defaults={"is_active": False})
+            GamePlayer.objects.create(game=new_game, player=player, seat_order=seat, is_ai=True)
 
         for player in invited_players:
             new_game.invitedPlayers.add(player)
 
-        if (
-            "trainingGame" in request.POST
-            or "fcmAI" in request.POST
-            or is_main_tournament
-            or is_mini_tournament
-            or is_tournament
-        ):
+        if game_status == "ACTIVE":
             new_game.save()
             presenter = cast("FCMpresenter", new_game.presenter())
             presenter.startGame(request)
@@ -488,7 +485,7 @@ def create_fcm_game(
         return HttpResponseRedirect(
             reverse("indexListType", kwargs={"listType": "current"})
         )
-    elif "fcmAI" in request.POST:
+    elif "fcmAI" in request.POST or (cap3_seats and game_status == "ACTIVE"):
         messages.success(request, gettext("Your AI game has been started"))
         return HttpResponseRedirect(
             reverse("indexListType", kwargs={"listType": "current"})

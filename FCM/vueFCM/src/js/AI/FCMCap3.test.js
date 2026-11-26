@@ -46,22 +46,30 @@ it("recognizes Cap3 only for the opted-in four-seat game and applies a legal ope
 	expect(IO.saveGameNormal).toHaveBeenCalledWith(false, false, false, { cap3Seat: 0 })
 })
 
-it.runIf(process.env.FCM_CAP3_BIN)(
-	"plays a complete four-seat practice game through the native policy and Vue rules",
-	async () => {
+it.runIf(process.env.FCM_CAP3_BIN).each([
+	["base game to completion", startingOptions, Infinity],
+	["Ketchup, Coffee, Lobbyists and New Milestones through 15 rounds", [...startingOptions, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23], 16],
+])(
+	"plays a four-seat practice game (%s) through the native policy and Vue rules",
+	async (_name, options, stopRound) => {
+		window.initData.startingOptions = options
+		window.initData.playerNames = [...rf.CAP3_AI_NAMES, "D"]
+		model.setInternalStartingOptions(options)
+		useModelStore().externalStartingOptions = options.slice()
+		model.setupNewGame()
 		const store = useModelStore()
 		usePersonalStore().pov = -1
 		const phases = new Set()
 		let turns = 0
-		while (store.gameflow.phase !== rf.PHASE_GAME_OVER && turns++ < 400) {
+		while (store.gameflow.phase !== rf.PHASE_GAME_OVER && store.gameflow.turn < stopRound && turns++ < 600) {
 			const seat = store.gameflow.turnOrder[0]
 			const p = store.players[seat]
 			const originalName = p.name
-			p.name = rf.AI_NAME
+			p.name = rf.CAP3_AI_NAMES[seat % 3]
 			controller.startPlayerTurn(false, true)
 			const state = funcs.decompressData(funcs.exportFCMmodel(false, false))
 			const metadata = {
-				starting_map: map.getOriginalTiles(false), starting_options: startingOptions.map(String),
+				starting_map: map.getOriginalTiles(false), starting_options: options.map(String),
 				turn: store.gameflow.turn, subphase: store.gameflow.subphase,
 				availableEmployees: store.availableEmployees,
 				availableMarketingCampaigns: store.availableMarketingCampaigns,
@@ -74,11 +82,11 @@ it.runIf(process.env.FCM_CAP3_BIN)(
 			try {
 				await applyCap3Turn(plan)
 			} catch (error) {
-				throw new Error(`Round ${metadata.turn}, seat ${seat}, phase ${plan.phase}: ${result}`, { cause: error })
+				throw new Error(`Round ${metadata.turn}, seat ${seat}, phase ${plan.phase}, CEO slots ${p.ceoSlots}, milestones ${JSON.stringify(p.milestones)}: ${result}`, { cause: error })
 			}
 			p.name = originalName
 		}
-		expect(store.gameflow.phase).toBe(rf.PHASE_GAME_OVER)
+		expect(store.gameflow.phase === rf.PHASE_GAME_OVER || store.gameflow.turn >= stopRound).toBe(true)
 		expect(phases.has(rf.PHASE_PAYDAY)).toBe(true)
 		expect(phases.has(rf.PHASE_RESTRUCTURING)).toBe(true)
 	},

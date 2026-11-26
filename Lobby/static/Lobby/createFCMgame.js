@@ -50,11 +50,11 @@ function initGameCreation(fillData, setupData = {}) {
 			validateOptions("trainingGame")
 		}
 
-		const cap3 = document.getElementById("fcmCap3")
-		if (cap3 && setupData.cap3Seat) {
-			cap3.value = setupData.cap3Seat
-			selectPlayers()
+		for (const seat of setupData.cap3Seats) {
+			const box = document.getElementById(`fcmCap3Seat${seat}`)
+			if (box) box.checked = true
 		}
+		selectPlayers(true)
 
 		// Check and enable map data if necessary
 		if (setupData.startingMap != "") {
@@ -689,19 +689,24 @@ function setPlayersforMapData() {
 	}
 }
 
-function selectPlayers() {
-	showSeats()
-	const cap3 = document.getElementById("fcmCap3")
-	if (cap3) {
-		cap3.disabled = document.getElementById("playerNumber").value !== "4" || document.getElementById("fcmAI").checked
-		if (cap3.disabled) cap3.value = ""
-		const hasCap3 = cap3.value !== ""
-		const player4 = document.getElementById("player4")
-		player4.disabled = hasCap3
-		if (hasCap3) document.getElementById("selPlayer4").style.display = "none"
-		for (const seat of [2, 3]) {
+function selectPlayers(preservePracticeNames = false) {
+	showSeats(preservePracticeNames)
+	const cap3Seats = document.getElementById("cap3SeatsRow")
+	if (cap3Seats) {
+		const enabled = document.getElementById("playerNumber").value === "4" && !document.getElementById("fcmAI").checked
+		cap3Seats.style.display = enabled ? "" : "none"
+		const boxes = [...cap3Seats.querySelectorAll("input")]
+		const count = enabled ? boxes.filter(box => box.checked).length : 0
+		for (const box of boxes) {
+			if (!enabled) box.checked = false
+			box.disabled = !enabled || (count === 3 && !box.checked)
+		}
+		for (const seat of [2, 3, 4]) {
+			const filled = count > 0 && seat > 4 - count
+			document.getElementById(`player${seat}`).disabled = filled
+			if (filled) document.getElementById(`selPlayer${seat}`).style.display = "none"
 			const label = document.querySelector(`label[for="player${seat}"]`)
-			label.textContent = hasCap3 ? label.dataset.cap3Label : label.dataset.playerLabel
+			if (label.dataset.cap3Label) label.textContent = count > 0 ? label.dataset.cap3Label : label.dataset.playerLabel
 		}
 	}
 	// The AI takes the second seat and locks every seat box.

@@ -12,13 +12,15 @@ from django.utils.translation import gettext
 from django.views.decorators.http import require_POST
 
 from Lobby.models import Game
-from Lobby.sharedFunctions.constants import SO_TRAINING_GAME
+from Lobby.sharedFunctions.constants import FCM_CAP3_USERNAMES, SO_TRAINING_GAME
 
 from . import FCMconstants as rf
 
-AI_USERNAME = "FcmAI"
 SIMULTANEOUS_PHASES = {rf.PHASE_SETUP_RESERVE, rf.PHASE_RESTRUCTURING}
-CAP3_OPTIONS = {rf.SO_CAP3_AI, rf.SO_STRICT_PAYDAY_FRIDGE, SO_TRAINING_GAME, rf.SO_AUTO_ENABLE_REWINDS}
+CHINA_OPTIONS = {
+    rf.SO_URBAN_PLANNING, rf.SO_URBAN_PLANNING_PLUS, rf.SO_JAZZ_MUSICIANS,
+    rf.SO_DUMPLINGS, rf.SO_DELIVERY_DRIVERS, rf.SO_HAWKERS, rf.SO_RANDOM_MODULES_CHINESE,
+}
 logger = logging.getLogger(__name__)
 
 
@@ -31,27 +33,28 @@ def cap3_available():
 
 
 def cap3_options_supported(options):
-    return set(options) <= CAP3_OPTIONS
+    return CHINA_OPTIONS.isdisjoint(options)
 
 
 def is_cap3_simultaneous(game):
     return game.phase in SIMULTANEOUS_PHASES and SO_TRAINING_GAME not in json.loads(game.startingOptions)
 
 
-def pending_cap3_seat(game):
-    if game.gameStatus != "ACTIVE" or game.maxPlayers != 4:
+def pending_cap3_username(game, seat):
+    if type(seat) is not int or seat not in range(4) or game.gameStatus != "ACTIVE" or game.maxPlayers != 4:
         return None
     options = json.loads(game.startingOptions or "[]")
     if rf.SO_CAP3_AI not in options or not cap3_options_supported(options):
         return None
-    seat = game.players.filter(
-        player__username=AI_USERNAME, is_current=True, is_missing=False, is_kicked=False,
-    ).values_list("seat_order", flat=True).first()
-    if seat not in range(4) or game.players.count() != 4:
+    username = game.players.filter(
+        seat_order=seat, player__username__in=FCM_CAP3_USERNAMES,
+        is_current=True, is_missing=False, is_kicked=False,
+    ).values_list("player__username", flat=True).first()
+    if username is None or game.players.count() != 4:
         return None
-    if is_cap3_simultaneous(game) and game.presenter().hasValidActualMoveData(AI_USERNAME):
+    if is_cap3_simultaneous(game) and game.presenter().hasValidActualMoveData(username):
         return None
-    return seat
+    return username
 
 
 @login_required
@@ -60,9 +63,6 @@ def cap3_turn(request, game_id):
     game = get_object_or_404(Game, id=game_id, gameCode="FCM")
     if not game.players.filter(player=request.user, is_missing=False, is_kicked=False).exists():
         return JsonResponse({"error": gettext("You are not a player in this game.")}, status=403)
-    seat = pending_cap3_seat(game)
-    if seat is None:
-        return JsonResponse({"latestUpdate": game.latestUpdate}, status=409)
     if not cap3_available():
         return JsonResponse({"error": gettext("Cap3 AI is currently unavailable.")}, status=503)
     try:
@@ -71,15 +71,21 @@ def cap3_turn(request, game_id):
         payload = json.loads(request.body)
         if str(payload["latestUpdate"]) != str(game.latestUpdate):
             return JsonResponse({"stale": True}, status=409)
+        seat = payload.get("cap3Seat")
+        if pending_cap3_username(game, seat) is None:
+            return JsonResponse({"latestUpdate": game.latestUpdate}, status=409)
         state = payload["state"]
         metadata = {key: payload["metadata"][key] for key in (
             "starting_map", "subphase", "availableEmployees", "availableMarketingCampaigns",
             "availableMilestones", "bankruptPlayers",
         )}
-        flow = state[2]
+        options = json.loads(game.startingOptions)
+        player_slot = int(rf.SO_LOBBYISTS in options)
+        players = state[player_slot]
+        flow = state[player_slot + 2]
         order = flow[2]
         if (
-            len(state[0]) != 4 or flow[1] != game.phase or seat not in order
+            len(players) != 4 or flow[1] != game.phase or seat not in order
             or any(type(other) is not int or other not in range(4) for other in order)
             or len(set(order)) != len(order)
             or (not is_cap3_simultaneous(game) and order[0] != seat)
@@ -88,11 +94,18 @@ def cap3_turn(request, game_id):
         if len(flow[0]) != 4 or any(type(other) is not int for other in flow[0]) or set(flow[0]) != set(range(4)):
             raise ValueError("invalid full turn order")
         flow[2] = [seat, *(other for other in order if other != seat)]
-        for index, player in enumerate(state[0]):
+        for index, player in enumerate(players):
             names = player[0]
             player[0] = ["FcmBot" if "FcmBot" in names else f"P{index}"]
         metadata["starting_map"] = json.loads(game.startingMap) if game.startingMap else metadata["starting_map"]
-        metadata["starting_options"] = [str(option) for option in json.loads(game.startingOptions)]
+        # Vue exports the selected draft modules' fields even while the draft is in progress.
+        engine_options = [
+            option for option in options
+            if option not in {rf.SO_CAP3_AI, rf.SO_AUTO_ENABLE_REWINDS, rf.SO_DRAFT_MODULE_BREAKER}
+        ]
+        if rf.SO_DRAFT_MODULE_BREAKER in options:
+            engine_options.append(rf.SO_DRAFT_MODULE_BREAKER)
+        metadata["starting_options"] = list(map(str, engine_options))
         metadata["turn"] = game.turn
         if len(metadata["starting_map"]) != 32 or any(type(tile) is not int for tile in metadata["starting_map"]):
             raise ValueError("expected a four-player map")

@@ -8,6 +8,7 @@ from django.urls import reverse
 
 from FCM import FCMconstants as rf
 from Lobby.models import Game, GamePlayer, User
+from Lobby.sharedFunctions.sharedFunctions import SF_fastSerializeGame
 
 
 class FcmCap3Test(TestCase):
@@ -27,6 +28,10 @@ class FcmCap3Test(TestCase):
         }
         self.client.post(route, {**setup, "playerNumber": "3", "fcmCap3": "1"})
         self.client.post(route, {**setup, "fcmCap3": "5"})
+        self.client.post(route, {**setup, "fcmCap3": ["1", "1"]})
+        self.client.post(route, {**setup, "fcmCap3": ["1", "2", "3", "4"]})
+        self.client.post(route, {**setup, "fcmCap3": ["1", "2"], "player3": "No room"})
+        self.client.post(route, {**setup, "fcmCap3": "1", "urbanPlanning": "40"})
         self.assertFalse(Game.objects.exists())
 
         for seat in range(1, 5):
@@ -47,33 +52,53 @@ class FcmCap3Test(TestCase):
                 )
 
     @patch("FCM.common.cap3_available", return_value=True)
+    def test_three_cap3_opponents_start_with_expansions_in_regular_and_practice_games(self, _available):
+        setup = {
+            "gameName": "Cap3 test", "gameDescription": "", "pace": "1",
+            "mapData": "", "playerNumber": "4", "fcmCap3": ["1", "2", "4"],
+            "newMilestones": "21", "coffee": "19", "lobbyists": "22",
+        }
+        for practice in (False, True):
+            with self.subTest(practice=practice):
+                self.client.post(reverse("FCM:createFCMgame"), {
+                    **setup, **({"trainingGame": "102"} if practice else {}),
+                })
+                game = Game.objects.latest("id")
+                self.assertEqual(game.gameStatus, "ACTIVE")
+                self.assertTrue({19, 21, 22, rf.SO_CAP3_AI}.issubset(json.loads(game.startingOptions)))
+                self.assertEqual(list(game.players.filter(is_ai=True).values_list("seat_order", flat=True)), [0, 1, 3])
+                self.assertEqual(game.players.get(player=self.human).seat_order, 2)
+                self.assertEqual(game.presenter().isTrainingGame(), practice)
+                self.assertEqual(SF_fastSerializeGame(game, self.human)["deleteableGame"], practice)
+
+    @patch("FCM.common.cap3_available", return_value=True)
     @patch("Lobby.views.cap3_available", return_value=True)
     def test_regular_game_pins_cap3_when_the_last_player_joins(self, _page_available, _available):
         self.client.post(reverse("FCM:createFCMgame"), {
             "gameName": "Cap3 test", "gameDescription": "", "pace": "1",
-            "mapData": "", "playerNumber": "4", "fcmCap3": "4",
+            "mapData": "", "playerNumber": "4", "fcmCap3": ["2", "4"],
         })
         regular = Game.objects.get()
         self.assertEqual(regular.gameStatus, "AVAILABLE")
-        self.assertEqual(regular.players.count(), 2)
-        self.assertEqual(regular.players.get(player=self.ai).seat_order, 3)
+        self.assertEqual(regular.players.count(), 3)
+        self.assertEqual(regular.players.get(player=self.ai).seat_order, 1)
         self.assertNotIn(102, json.loads(regular.startingOptions))
 
         join_route = reverse("joinGame", args=["FCM"])
-        for name in ("joiner1", "joiner2"):
-            self.client.force_login(User.objects.create_user(name))
-            response = self.client.post(join_route, {"gameID": regular.id}, content_type="application/json")
-            self.assertEqual(response.status_code, 200)
+        self.client.force_login(User.objects.create_user("joiner"))
+        response = self.client.post(join_route, {"gameID": regular.id}, content_type="application/json")
+        self.assertEqual(response.status_code, 200)
         regular.refresh_from_db()
         self.assertEqual(regular.gameStatus, "ACTIVE")
         self.assertEqual(list(regular.players.values_list("seat_order", flat=True)), [0, 1, 2, 3])
-        self.assertEqual(regular.players.get(player=self.ai).seat_order, 3)
+        self.assertEqual(regular.players.get(player=self.ai).seat_order, 1)
 
         self.client.force_login(self.human)
         response = self.client.get(reverse("createFCMpage", args=[regular.id]))
-        self.assertContains(response, 'setupData.cap3Seat = "4"')
+        self.assertContains(response, 'setupData.cap3Seats = [2, 4]')
+        self.assertContains(response, 'name="fcmCap3"', count=4)
         self.assertEqual(response.context["playerNames"], [
-            player.player.username for player in regular.players.exclude(player__in=[self.ai, self.human])
+            player.player.username for player in regular.players.exclude(is_ai=True).exclude(player=self.human)
         ])
 
     def active_game(self, phase):
@@ -82,7 +107,8 @@ class FcmCap3Test(TestCase):
             gameStatus="ACTIVE", phase=phase, turn=0, latestUpdate="1000",
             startingOptions=json.dumps([rf.SO_CAP3_AI, rf.SO_STRICT_PAYDAY_FRIDGE]),
         )
-        for seat, user in enumerate([self.human, self.ai, User.objects.get(username="SHADOW"), User.objects.get(username="SHADOW_2")]):
+        second_ai = User.objects.create_user("FcmAI_2", is_active=False)
+        for seat, user in enumerate([self.human, self.ai, second_ai, User.objects.get(username="SHADOW_2")]):
             GamePlayer.objects.create(game=game, player=user, seat_order=seat, is_current=(phase == rf.PHASE_SETUP_RESERVE or seat == 1))
         return game
 
@@ -101,6 +127,14 @@ class FcmCap3Test(TestCase):
         self.assertTrue(game.presenter().hasValidActualMoveData(self.ai.username))
         self.assertFalse(game.presenter().hasValidActualMoveData(self.human.username))
         self.assertNotIn(self.ai.username, response.json()["playersToMove"])
+        second_move = {**move, "cap3Seat": 2}
+        response = self.client.post(route, second_move, content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json()["allPlayersMoved"])
+        self.assertNotIn("FcmAI_2", response.json()["playersToMove"])
+        game.refresh_from_db()
+        self.assertTrue(game.presenter().hasValidActualMoveData("FcmAI_2"))
+        self.assertFalse(game.presenter().hasValidActualMoveData(self.human.username))
         response = self.client.post(route, move, content_type="application/json")
         self.assertTrue(response.json()["syncError"])
 
@@ -111,6 +145,7 @@ class FcmCap3Test(TestCase):
         route = reverse("FCM:cap3_turn", args=[game.pk])
         payload = {
             "latestUpdate": "999",
+            "cap3Seat": 1,
             "state": [[[["player"]], [["FcmAI", "Cap3 AI"]], [["C"]], [["D"]]], 200, [[0, 1, 2, 3], 0, [1, 2, 3, 0]]],
             "metadata": {
                 "starting_map": [0] * 32, "subphase": 0, "availableEmployees": [],
@@ -121,12 +156,19 @@ class FcmCap3Test(TestCase):
         run.assert_not_called()
 
         payload["latestUpdate"] = "1000"
+        game.startingOptions = json.dumps([rf.SO_CAP3_AI, rf.SO_LOBBYISTS, rf.SO_NEW_MS])
+        game.save(update_fields=["startingOptions"])
+        payload["state"].insert(0, [])
+        self.assertEqual(self.client.post(route, {**payload, "cap3Seat": 2}, content_type="application/json").status_code, 409)
+        run.assert_not_called()
+
         expected = {"seat": 1, "phase": 0, "steps": [{"actions": [161000]}]}
         run.return_value.stdout = json.dumps(expected)
         response = self.client.post(route, payload, content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), expected)
         request_data = json.loads(run.call_args.kwargs["input"])
-        self.assertEqual(request_data["state"][2][2][0], 1)
+        self.assertEqual(request_data["state"][3][2][0], 1)
         self.assertEqual(request_data["metadata"]["turn"], 0)
+        self.assertEqual(request_data["metadata"]["starting_options"], ["22", "21"])
         self.assertEqual(run.call_args.args[0][1:], ["--cap3"])

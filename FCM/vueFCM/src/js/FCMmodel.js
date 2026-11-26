@@ -118,7 +118,7 @@ export function setupNewGame(opts = {}) {
 		else if (store.players[i].name === "SHADOW_3" && displayNamesArr.length > 2) store.players[i].displayName = displayNamesArr[2]
 		else if (store.players[i].name === "SHADOW_4" && displayNamesArr.length > 3) store.players[i].displayName = displayNamesArr[3]
 		else if (store.players[i].name === "SHADOW_5" && displayNamesArr.length > 4) store.players[i].displayName = displayNamesArr[4]
-		else if (store.players[i].name === rf.AI_NAME && init.startingOptions?.includes(rf.SO_CAP3_AI)) store.players[i].displayName = "Cap3 AI"
+		else if (init.startingOptions?.includes(rf.SO_CAP3_AI) && rf.CAP3_AI_NAMES.includes(store.players[i].name)) store.players[i].displayName = `Cap3 AI (Seat ${i + 1})`
 		else store.players[i].displayName = store.players[i].name
 	}
 

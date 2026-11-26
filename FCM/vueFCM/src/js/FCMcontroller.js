@@ -1217,7 +1217,7 @@ export function setupPizzaBombPhase() {
 }
 
 // Clicked a highlighted square to place the free radio campaign
-export function choosePizzaBombMarketer(index) {
+export function choosePizzaBombMarketer(index, extraPostData) {
 	const playerIndex = currentPlayerIndex()
 
 	const campaign = rules.firstRadioCampaign()
@@ -1227,20 +1227,20 @@ export function choosePizzaBombMarketer(index) {
 	if (campaign !== 1) histData.push(campaign)
 	model.addHistory(rf.HIST_PIZZA_BOMB, histData, playerIndex, 0)
 
-	advancePizzaBomb(false, false)
+	return advancePizzaBomb(false, false, extraPostData)
 }
 
 // No space left for the pizza radio - skip this bomb
-export function skipPizzaBombMarketer() {
-	advancePizzaBomb(true, true)
+export function skipPizzaBombMarketer(extraPostData) {
+	return advancePizzaBomb(true, true, extraPostData)
 }
 
-function advancePizzaBomb(forced, pointless) {
+function advancePizzaBomb(forced, pointless, extraPostData) {
 	const store = useModelStore()
 	store.firstPizzas.splice(0, 3)
 
 	if (store.firstPizzas.length < 3 || store.firstPizzas[2] !== currentPlayerIndex()) {
-		endPlayerTurn(forced, pointless)
+		return endPlayerTurn(forced, pointless, extraPostData)
 	} else {
 		setupPizzaBombPhase()
 	}
@@ -2189,7 +2189,7 @@ export async function endPlayerTurn(forced, isPointlessMove = false, extraPostDa
 		// of the mover's turn". For the AI that is a state a human cannot act on
 		// (the AI just plays it again) and it burns one of the 20 rewind slots, so
 		// skip it. Matches the FcmBot suppression in FCM_IO.saveGameNormal.
-		const moverIsAi = store.players[playerIndex]?.name === rf.AI_NAME
+		const moverIsAi = rf.CAP3_AI_NAMES.includes(store.players[playerIndex]?.name)
 		// Dinner may have just installed the gift queue. Persist it under the
 		// same freeze/retry contract as a claim, without running dinner again.
 		if (store.bailout.pending) return saveBailoutProgress(false, [!moverIsAi, false, isPointlessMove, extraPostData])

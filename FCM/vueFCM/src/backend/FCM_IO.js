@@ -227,6 +227,11 @@ export async function loadGame() {
 			// Keep the snapshot importFCMmodel rebuilds the grid from (FCMfuncs) up to
 			// date, or live updates resurrect the page-load map (stale UP tile slots)
 			window.initData.startingMap = Array.isArray(result.startingMap) ? result.startingMap : JSON.parse(result.startingMap)
+			if (window.initData.startingOptions?.includes(rf.SO_CAP3_AI) && result.startingOptions) {
+				window.initData.startingOptions = JSON.parse(result.startingOptions)
+				store.externalStartingOptions = [...window.initData.startingOptions]
+				personal.haltPlay = false
+			}
 			if (result.seatPlayerNames) window.initData.seatPlayerNames = result.seatPlayerNames
 			if (result.myName) window.initData.name = result.myName
 			//let suppressActions = false
@@ -351,7 +356,7 @@ export async function saveInProgressMap() {
 		})
 }
 
-export async function saveModuleSelection(moduleIndex) {
+export async function saveModuleSelection(moduleIndex, cap3Seat = null) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.clearMessages()
@@ -359,9 +364,6 @@ export async function saveModuleSelection(moduleIndex) {
 	personal.haltPlay = true
 
 	store.gameflow.turnOrder.push(store.gameflow.turnOrder.shift())
-
-	let nextPlayer = [controller.currentPlayerObj().name]
-	let nextPlayerSeats = [controller.currentPlayerIndex()]
 
 	let SM = 999
 	if (moduleIndex !== 999) SM = rules.getAvailableModules()[moduleIndex]
@@ -398,28 +400,29 @@ export async function saveModuleSelection(moduleIndex) {
 	let callData = {
 		latestUpdate: personal.latestUpdate,
 		action: "saveModuleSelection",
+		...(cap3Seat === null ? {} : { cap3Seat }),
 		data: funcs.exportFCMmodel(false, false),
-		nextPlayer: nextPlayer,
-		nextPlayerSeats: nextPlayerSeats,
+		nextPlayer: [controller.currentPlayerObj().name],
+		nextPlayerSeats: [controller.currentPlayerIndex()],
 		gameID: personal.gameID,
 		SM: SM,
 		phase: store.gameflow.phase,
 	}
 
 	let csrftoken = funcs.getCookie("csrftoken")
-	fetch("/FCM/processTurn/", {
+	return fetch("/FCM/processTurn/", {
 		method: "POST",
 		body: JSON.stringify(callData),
 		headers: { "X-CSRFToken": csrftoken },
 	})
 		.then((response) => response.json())
 		.then((result) => {
-			personal.latestUpdate = String(result.latestUpdate)
-
 			if (result.syncError) {
 				store.gameMessages.errorText = i18n.global.t("FCM_IO.olderVersionRefresh")
-				return
+				return false
 			}
+			personal.latestUpdate = String(result.latestUpdate)
+			if (cap3Seat !== null) window.initData.startingOptions = JSON.parse(result.SO)
 			store.viewSettings.showGameLoader = false
 
 			personal.secondsToNextKickout = result.secondsToNextKickout
@@ -430,10 +433,12 @@ export async function saveModuleSelection(moduleIndex) {
 			store.context.selectedModuleIndex = 0
 			personal.haltPlay = false
 			controller.startPlayerTurn(false)
+			return true
 		})
 		.catch((error) => {
 			console.log("Error:", error)
 			personal.haltPlay = false
+			return false
 		})
 }
 

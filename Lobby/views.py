@@ -69,7 +69,7 @@ from user_visit.models import UserVisit
 import Lobby.sharedFunctions.constants as rf
 import NTR.NTRconstants as rfNTR
 from FCM import FCMconstants as rfFCM
-from FCM.cap3 import AI_USERNAME, cap3_available
+from FCM.cap3 import cap3_available
 from FCM.common import buildFCMstartingOptions
 from Lobby.sharedFunctions.availability import availability_join_warning_hours
 from Lobby.sharedFunctions.db_mutex import db_mutex
@@ -2927,14 +2927,14 @@ def createFCMpage(request, gameID=None):
                 scenarioName = scen
 
         has_cap3 = rfFCM.SO_CAP3_AI in json.loads(currentGame.startingOptions or "[]")
-        cap3_seat = None
+        cap3_seats = []
         playerNames = []
         for gp in currentGame.players.select_related("player"):
             if not gp.player:
                 continue
-            if has_cap3 and gp.player.username == AI_USERNAME:
+            if has_cap3 and gp.player.username in rf.FCM_CAP3_USERNAMES:
                 if gp.seat_order in range(4):
-                    cap3_seat = gp.seat_order + 1
+                    cap3_seats.append(gp.seat_order + 1)
             elif request.user != gp.player:
                 playerNames.append(gp.player.username)
 
@@ -2956,7 +2956,7 @@ def createFCMpage(request, gameID=None):
                 "startingMap": currentGame.startingMap,
                 "experienced": experienced,
                 "cap3_enabled": cap3_enabled,
-                "cap3_seat": cap3_seat,
+                "cap3_seats": cap3_seats,
             },
         )
     else:

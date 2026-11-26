@@ -8,6 +8,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext  # , activate, get_language
 
 import Lobby.sharedFunctions.constants as rf
+from FCM.FCMconstants import SO_CAP3_AI
 
 # from django.urls import reverse
 # from django.http import HttpResponseRedirect
@@ -184,6 +185,20 @@ def SF_serializeGame(game, user, player_context):
     m, s = divmod(rem, 60)
     elapsed_str = f"{f'{d}d ' if d else ''}{f'{h}h ' if h else ''}{f'{m}min ' if m else ''}{s}s"
 
+    # Handle both JSON array format and legacy comma-separated string format
+    if game.startingOptions:
+        try:
+            startingOptionsArr = json.loads(game.startingOptions)
+        except (json.JSONDecodeError, ValueError):
+            # Legacy format: comma-separated string like "21,200,21001"
+            try:
+                startingOptionsArr = [int(x.strip()) for x in game.startingOptions.split(",") if x.strip()]
+            except (ValueError, AttributeError):
+                startingOptionsArr = []
+    else:
+        startingOptionsArr = []
+
+    cap3_game = game_code == "FCM" and SO_CAP3_AI in startingOptionsArr
     # 4. MyMove & Involved Logic
     is_my_move = False
     if user and game.gameStatus == "ACTIVE":
@@ -199,6 +214,11 @@ def SF_serializeGame(game, user, player_context):
             if user.username in current_player_usernames:
                 current_player_usernames = [u for u in current_player_usernames if u != user.username]
                 current_players_str = ", ".join(current_player_usernames)
+        if cap3_game:
+            is_my_move = user.username in current_usernames or (
+                user.id in all_ids and user.id not in missing_ids
+                and bool(current_usernames.intersection((*rf.FCM_CAP3_USERNAMES, *rf.SHADOW_PLAYER_NAMES)))
+            )
         if game_code == "RNB" and is_my_move and not game.presenter().quickIsMyMove(user.username):
             is_my_move = False
 
@@ -216,6 +236,8 @@ def SF_serializeGame(game, user, player_context):
 
     # 5. Shadow/Delete Logic
     is_training_game = any(name in all_usernames for name in rf.SHADOW_USERNAMES) or game.maxPlayers == 1
+    if cap3_game:
+        is_training_game = game.presenter().isTrainingGame()
     is_deleteable = is_training_game and (user == game.creator if user else False)
 
     creator = game.creator.username if game.creator else "Unknown Creator"
@@ -225,19 +247,6 @@ def SF_serializeGame(game, user, player_context):
     gameName = getattr(game, "gameName", "Unknown Game")
     if gameName == "":
         gameName = f"[{creator}'s Game]"
-
-    # Handle both JSON array format and legacy comma-separated string format
-    if game.startingOptions:
-        try:
-            startingOptionsArr = json.loads(game.startingOptions)
-        except (json.JSONDecodeError, ValueError):
-            # Legacy format: comma-separated string like "21,200,21001"
-            try:
-                startingOptionsArr = [int(x.strip()) for x in game.startingOptions.split(",") if x.strip()]
-            except (ValueError, AttributeError):
-                startingOptionsArr = []
-    else:
-        startingOptionsArr = []
 
     isLearningGame = False
     isExperiencedGame = False

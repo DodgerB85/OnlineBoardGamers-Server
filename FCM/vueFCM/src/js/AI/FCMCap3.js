@@ -15,7 +15,7 @@ let inFlight = false
 
 const finishSubphases = new Map([
 	[700000, [rf.SUBPHASE_HIRING]],
-	[900000, [rf.SUBPHASE_TRAINING]],
+	[900000, [rf.SUBPHASE_TRAINING, rf.SUBPHASE_COFFEE_SHOPS_FROM_TRAIN]],
 	[330000, [rf.SUBPHASE_MARKETING]],
 	[430000, [rf.SUBPHASE_PRODUCE]],
 	[2400000, [rf.SUBPHASE_HOUSES, rf.SUBPHASE_LOBBYISTS]],
@@ -49,14 +49,20 @@ function restructure(plan) {
 	const store = useModelStore()
 	const p = store.players[plan.seat]
 	const held = [...p.employees, ...p.beach].filter(emp => emp >= 0).sort()
-	const deployed = plan.employees.filter(emp => emp >= 0)
-	const assigned = [...deployed, ...plan.beach].sort()
-	const extraSlots = plan.employees.slice(0, p.ceoSlots).reduce((slots, emp) =>
-		slots + (emp >= 0 ? rules.getSubSlotsForEmployee(emp) : 0), 0)
+	const active = plan.employees.filter(emp => emp >= 0)
+	const assigned = [...active, ...plan.beach].sort()
 	requireMove(held.length === assigned.length && held.every((emp, i) => emp === assigned[i]))
-	requireMove(deployed.length <= p.ceoSlots + extraSlots &&
-		plan.employees.slice(p.ceoSlots).every(emp => !rf.MANAGERS.includes(emp)))
-	return deployed
+
+	// The plan's working roster can include managers outside Vue's CEO slots.
+	const managers = active.filter(emp => rf.MANAGERS.includes(emp))
+	const crew = active.filter(emp => !rf.MANAGERS.includes(emp))
+	const leaders = managers.slice(0, p.ceoSlots)
+	const slots = p.ceoSlots + leaders.reduce((total, emp) => total + rules.getSubSlotsForEmployee(emp), 0)
+	const workers = crew.slice(0, slots - leaders.length)
+	return {
+		employees: [...leaders, ...workers],
+		beach: [...plan.beach, ...managers.slice(p.ceoSlots), ...crew.slice(workers.length)],
+	}
 }
 
 function work(seat, action, secondGood) {
@@ -77,6 +83,14 @@ function work(seat, action, secondGood) {
 	} else if (subphase === rf.SUBPHASE_TRAINING && inRange(action, 5110000, 5130000)) {
 		const offset = action - 5100000
 		train(seat, Math.floor(offset % 10000 / 100) - 1, offset % 100, Math.floor(offset / 10000))
+	} else if (subphase === rf.SUBPHASE_COFFEE_SHOPS_FROM_TRAIN && inRange(action, 1000000, 1050000)) {
+		const square = funcs.importIndex(action - 1000000)
+		requireMove(ctx.coffeeShopAction === "place" && store.highlights.indexesToHighlightYellow.includes(square))
+		controller.placeCoffeeShop(square)
+	} else if (subphase === rf.SUBPHASE_COFFEE_SHOPS_FROM_TRAIN && inRange(action, 1050000, 1056800)) {
+		const square = action - 1050000
+		requireMove(ctx.coffeeShopAction === "remove" && p.coffeeShops.includes(square))
+		controller.removeCoffeeShop(square)
 	} else if (subphase === rf.SUBPHASE_MARKETING && inRange(action, 300000, 300100)) {
 		const marketer = action - 300000
 		requireMove(rf.MARKETERS.includes(marketer) && p.employees.includes(marketer))
@@ -98,6 +112,13 @@ function work(seat, action, secondGood) {
 		controller.chooseDuration(duration)
 		controller.chooseSecondGood(secondGood ?? -1)
 		controller.placeMarketingCampaign(square)
+	} else if (subphase === rf.SUBPHASE_MARKETING && inRange(action, 9000000, 9000100)) {
+		const offset = action - 9000000
+		controller.chooseGood(offset % 10)
+		controller.chooseDuration(Math.floor(offset / 10))
+		requireMove(inRange(ctx.campaign, 17, 25))
+		controller.chooseSecondGood(secondGood ?? -1)
+		requireMove(controller.placeMarketingCampaign(0)?.ok !== false)
 	} else if (subphase === rf.SUBPHASE_PRODUCE && inRange(action, 400000, 400100)) {
 		const producer = action - 400000
 		requireMove(rules.availableProducers(seat, ctx.justProduced.team).includes(producer))
@@ -143,6 +164,29 @@ function work(seat, action, secondGood) {
 			requireMove(store.highlights.indexesToHighlightYellow.includes(square))
 			controller.chooseHousePosition(square)
 		}
+	} else if (subphase === rf.SUBPHASE_LOBBYISTS && inRange(action, 7200000, 8000000)) {
+		const offset = action - 7200000
+		const objectClass = Math.floor(offset / 272000)
+		const variety = Math.floor(offset / 27200) % 10
+		const square = offset % 6800
+		const building = objectClass === 1 ? 0 : 1
+		requireMove((building === 0 ? rules.availableNewRoads() : rules.availableParks()).includes(variety))
+		ctx.buildingType = building
+		ctx.variety = variety
+		ctx.rotation = Math.floor(offset / 6800) % 4
+		ctx.flipped = objectClass === 2
+		controller.updateLobbyistHighlights()
+		requireMove(store.highlights.indexesToHighlightYellow.includes(square))
+		controller.clickedLobbyistSquare(square)
+	} else if (subphase === rf.SUBPHASE_LOBBYISTS && inRange(action, 19000000, 21720000)) {
+		const offset = action - 19000000
+		const square = offset % 6800
+		requireMove(ctx.lobbyistMilestoneActive)
+		ctx.newLobbyistTile = Math.floor(offset / 27200)
+		ctx.rotation = Math.floor(offset / 6800) % 4
+		controller.updateLobbyistMSHighlights()
+		requireMove(store.highlights.indexesToHighlightYellow.includes(square))
+		controller.clickedNewTileSquare(square)
 	} else if (subphase === rf.SUBPHASE_NEW_RESTAURANTS && inRange(action, 2600000, 2600100)) {
 		const manager = action - 2600000
 		requireMove(rf.CAN_BUILD_RESTAURANT.includes(manager) && p.employees.includes(manager))
@@ -171,9 +215,16 @@ export async function applyCap3Turn(plan) {
 	const actions = plan.steps.flatMap(step => step.actions)
 	const first = actions[0]
 	const phase = store.gameflow.phase
-	requireMove(plan.phase === phase && p?.name === rf.AI_NAME)
+	requireMove(plan.phase === phase && rf.CAP3_AI_NAMES.includes(p?.name))
 	const simultaneous = controller.isSimulPhase(phase)
-	if (phase === rf.PHASE_SETUP_RESTAURANT1 || phase === rf.PHASE_SETUP_RESTAURANT2) {
+	if (phase === rf.PHASE_SETUP_MODULES) {
+		const module = first - 2800000
+		const index = module === 999 ? 999 : rules.getAvailableModules().indexOf(module)
+		requireMove(actions.length === 1 && index >= 0)
+		model.addHistory(rf.HIST_CHOOSE_MODULE, [module], plan.seat, 0)
+		requireMove(await IO.saveModuleSelection(index, plan.seat))
+		return
+	} else if (phase === rf.PHASE_SETUP_RESTAURANT1 || phase === rf.PHASE_SETUP_RESTAURANT2) {
 		requireMove(actions.length === 1)
 		if (first === 200000) {
 			requireMove(phase === rf.PHASE_SETUP_RESTAURANT1 && store.gameflow.turnOrder.length > 1)
@@ -194,10 +245,10 @@ export async function applyCap3Turn(plan) {
 		store.reserveCards[plan.seat] = card
 		model.addHistory(rf.HIST_CHOOSE_RESERVE_CARD, [card], plan.seat, 0)
 	} else if (phase === rf.PHASE_RESTRUCTURING) {
-		const employees = restructure(plan)
-		if (simultaneous) return IO.saveSimulMove([plan.beach, employees, 0], false, "", null, plan.seat)
+		const { employees, beach } = restructure(plan)
+		if (simultaneous) return IO.saveSimulMove([beach, employees, 0], false, "", null, plan.seat)
 		p.employees = employees
-		p.beach = plan.beach
+		p.beach = beach
 	} else if (phase === rf.PHASE_TURN_ORDER) {
 		const slot = (first - 500000) / 1000
 		requireMove(actions.length === 1 && store.gameflow.newTurnOrder[slot] === -1)
@@ -210,6 +261,32 @@ export async function applyCap3Turn(plan) {
 			}
 		}
 		requireMove(store.gameflow.subphase === rf.SUBPHASE_CONFIRM_END_TURN)
+	} else if (phase === rf.PHASE_PIZZA_BOMB) {
+		for (const action of actions) {
+			if (action === 2150001) continue
+			if (action === 2100000) {
+				await controller.skipPizzaBombMarketer({ cap3Seat: plan.seat })
+			} else {
+				const square = action - 2000000
+				requireMove(store.highlights.indexesToHighlightYellow.includes(square))
+				await controller.choosePizzaBombMarketer(square, { cap3Seat: plan.seat })
+			}
+		}
+		return
+	} else if (phase === rf.PHASE_COFFE_SHOP_MS) {
+		for (const action of actions) {
+			if (action === 2400000) {
+				controller.skipCoffeeMS()
+			} else if (inRange(action, 2350000, 2356800)) {
+				const square = action - 2350000
+				requireMove(store.context.coffeeShopMSAction === "remove" && p.coffeeShops.includes(square))
+				controller.removeCoffeeShop(square)
+			} else {
+				const square = action - 2300000
+				requireMove(store.context.coffeeShopMSAction === "place" && store.highlights.indexesToHighlightYellow.includes(square))
+				controller.placeCoffeeShopMS(square)
+			}
+		}
 	} else if (phase === rf.PHASE_PAYDAY) {
 		for (const action of actions) {
 			if (action === 4000007) continue
@@ -247,7 +324,7 @@ export function cap3Seat() {
 		store.players.length !== 4 || store.gameflow.phase === rf.PHASE_GAME_OVER) return -1
 	const order = store.gameflow.turnOrder
 	const eligible = controller.isSimulPhase() ? order : order.slice(0, 1)
-	return eligible.find(seat => store.players[seat]?.name === rf.AI_NAME && store.players[seat].displayName !== rf.BOT_NAME) ?? -1
+	return eligible.find(seat => rf.CAP3_AI_NAMES.includes(store.players[seat]?.name) && store.players[seat].displayName !== rf.BOT_NAME) ?? -1
 }
 
 export async function runCap3Turn(seat) {
@@ -272,6 +349,7 @@ export async function runCap3Turn(seat) {
 			headers: { "Content-Type": "application/json", "X-CSRFToken": funcs.getCookie("csrftoken") },
 			body: JSON.stringify({
 				latestUpdate,
+				cap3Seat: seat,
 				state: funcs.decompressData(funcs.exportFCMmodel(false, false)),
 				metadata: {
 					starting_map: map.getOriginalTiles(false),
@@ -296,7 +374,7 @@ export async function runCap3Turn(seat) {
 			if (!response.ok) throw new Error(plan.error)
 			if (latestUpdate === personal.latestUpdate && seat === cap3Seat()) await applyCap3Turn(plan)
 			keepHalted = personal.haltPlay && Boolean(store.gameMessages.errorText)
-			refreshTurn = latestUpdate !== personal.latestUpdate || (simultaneous && cap3Seat() < 0)
+			refreshTurn = latestUpdate !== personal.latestUpdate || (simultaneous && cap3Seat() !== seat)
 		}
 	} catch (error) {
 		if (latestUpdate === personal.latestUpdate) {

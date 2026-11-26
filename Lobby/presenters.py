@@ -2239,7 +2239,6 @@ class FCMpresenter(GamePresenter):
         starting_options = [x for x in starting_options if not (
             isinstance(x, int) and rfFCM.SO_EXCLUDED_MODULE_BASE <= x < rfFCM.SO_INCLUDED_MODULE_BASE + 100
         )]
-        from FCM.cap3 import AI_USERNAME
         from FCM.common import validateFCMOptionDependencies
         validateFCMOptionDependencies(starting_options)
         self.gameObj.startingOptions = json.dumps(starting_options, separators=(",", ":"))
@@ -2253,14 +2252,13 @@ class FCMpresenter(GamePresenter):
         game_players = [gp for gp in all_gps if gp.player and gp.player.username != "FCMtourneyAdmin"]
         fcm_tourney_admin_gps = [gp for gp in all_gps if gp.player and gp.player.username == "FCMtourneyAdmin"]
 
-        cap3_player = None
+        cap3_players = []
         if rfFCM.SO_CAP3_AI in starting_options:
-            cap3_player = next((gp for gp in game_players if gp.player.username == AI_USERNAME), None)
-            if cap3_player:
-                game_players.remove(cap3_player)
+            cap3_players = [gp for gp in game_players if gp.player.username in rf.FCM_CAP3_USERNAMES]
+            game_players = [gp for gp in game_players if gp not in cap3_players]
         random.Random(self.gameObj.playerOrderSeed).shuffle(game_players)
-        if cap3_player:
-            game_players.insert(cap3_player.seat_order, cap3_player)
+        for gp in sorted(cap3_players, key=lambda gp: gp.seat_order):
+            game_players.insert(gp.seat_order, gp)
         game_players.extend(fcm_tourney_admin_gps)
 
         _currentPlayers = ""
@@ -2275,7 +2273,7 @@ class FCMpresenter(GamePresenter):
 
         GamePlayer.objects.bulk_update(game_players, ["seat_order", "is_current", "remainingTurnOrder"])
 
-        playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username]
+        playerListToNotify = [gp.player.username for gp in game_players if gp.player and gp.player.username != request.user.username and gp not in cap3_players]
 
         self._sendStartGameNotification(request, playerListToNotify)
 
