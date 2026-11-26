@@ -77,6 +77,18 @@ describe("Rails to the North: New York City bonus station master", () => {
         expect(game.getRailroadTrack().stationMasters).not.toContain(tile);
     });
 });
+describe("Rails to the North delivery exchange token", () => {
+    it("queues the paired-city bonus as a mandatory action", () => {
+        const game = Game.start(players(2), defaultOptions(Edition.SECOND, { railsToTheNorth: true }), new JavaRandom(22));
+        const player = game.currentPlayer;
+        game.getRailroadTrack().cities[City.ST_LOUIS] = [player];
+        game.state.actionStack = new ActionStack([], game.deliveryActions(City.COLUMBIA));
+        expect(game.pendingMandatoryAction()).toBe(ActionType.GAIN_EXCHANGE_TOKEN);
+        game.perform(player, { type: ActionType.GAIN_EXCHANGE_TOKEN }, new JavaRandom(23));
+        expect(game.currentPlayerState().exchangeTokens).toBe(2);
+        expect(game.pendingMandatoryAction()).toBe(null);
+    });
+});
 describe("Player order (OBG server is master)", () => {
     it("keeps the incoming seat order when playerOrder is not RANDOMIZED", () => {
         const roster = players(4);

@@ -854,6 +854,11 @@ export class ActionStack {
     hasImmediate() {
         return this.immediateActions.length > 0;
     }
+    /** The next pending action type when it is mandatory, otherwise null. */
+    pendingMandatoryAction() {
+        const next = this.immediateActions.length > 0 ? this.immediateActions[0] : this.actions[0];
+        return next instanceof Mandatory ? next.action : null;
+    }
     /** Pushes immediate actions on top, keeping relative order (Java addFirst loop). */
     addImmediateActions(immediate) {
         for (let i = immediate.length - 1; i >= 0; i--)

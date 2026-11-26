@@ -45,8 +45,17 @@ export function submit(action) {
 		return false
 	}
 	const before = captureUndo()
+	// The delivery exchange-token bonus is mandatory and has no downside, so collect
+	// it without making the player click the token counter. Keep it in the same
+	// history entry as the action that triggered it, so one undo undoes both.
+	const followups = []
 	try {
 		g.perform(g.currentPlayer, action, model.getRng())
+		while (g.pendingMandatoryAction() === ActionType.GAIN_EXCHANGE_TOKEN) {
+			const gain = { type: ActionType.GAIN_EXCHANGE_TOKEN }
+			g.perform(g.currentPlayer, gain, model.getRng())
+			followups.push(gain)
+		}
 	} catch (err) {
 		store.gameMessages.errorText = errorText(err)
 		return false
@@ -54,7 +63,8 @@ export function submit(action) {
 	store.clearAction()
 	store.clearMovePlan()
 	store.undoSnapshot = g.canUndo() ? before : null
-	model.recordHistory(action.type, g.currentPlayer, model.actionParams(action), action)
+	model.recordHistory(action.type, g.currentPlayer, model.actionParams(action), action, null, followups)
+	if (followups.length) store.gameMessages.successText = i18n.global.t("row.actions.descriptions.GAIN_EXCHANGE_TOKEN")
 	store.touch()
 	return true
 }

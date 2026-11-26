@@ -1688,6 +1688,10 @@ export class Game {
         }
         return set;
     }
+    /** The next pending action type when it is mandatory, otherwise null. */
+    pendingMandatoryAction() {
+        return this.state.actionStack.pendingMandatoryAction();
+    }
     /** Java's Action.UseExchangeToken.canPerform. */
     canUseExchangeToken() {
         if (!this.isRailsToTheNorth() && this.edition !== Edition.SECOND)

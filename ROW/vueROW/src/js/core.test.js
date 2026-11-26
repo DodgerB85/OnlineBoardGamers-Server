@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ActionType, ROWError, ROWException, Hand, JavaRandom, PossibleAction, RecordingRandom, handFee } from "./ROWcore";
+import { ActionStack, ActionType, ROWError, ROWException, Hand, JavaRandom, PossibleAction, RecordingRandom, handFee } from "./ROWcore";
 describe("Hand toll matrix (TrailTest / Hand.getFee)", () => {
     it("matches the authoritative fee matrix", () => {
         // NONE 0/0/0, GREEN 2/2/1, BLACK 2/1/2, BOTH 4/3/3 for 2/3/4 players
@@ -90,6 +90,12 @@ describe("PossibleAction state machine (PossibleActionTest)", () => {
         expect(wt.canPerform(ActionType.GAIN_2_DOLLARS)).toBe(true);
         wt.perform(ActionType.GAIN_2_DOLLARS);
         expect(wt.isFinal()).toBe(true);
+    });
+    it("pendingMandatoryAction sees a bare mandatory action but not an optional one", () => {
+        const mandatory = new ActionStack([], [PossibleAction.mandatory(ActionType.GAIN_EXCHANGE_TOKEN)]);
+        expect(mandatory.pendingMandatoryAction()).toBe(ActionType.GAIN_EXCHANGE_TOKEN);
+        const optional = new ActionStack([], [PossibleAction.optionalAction(ActionType.GAIN_EXCHANGE_TOKEN)]);
+        expect(optional.pendingMandatoryAction()).toBe(null);
     });
 });
 describe("ROWException carries the error code", () => {

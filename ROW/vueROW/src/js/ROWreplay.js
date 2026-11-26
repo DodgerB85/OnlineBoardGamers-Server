@@ -186,7 +186,12 @@ export function buildReplayFrames(initial, history) {
 		if (current.rngState) rng.setState(current.rngState)
 		const game = deserializeGame(clone(current))
 		try {
-			if (entry.action) game.perform(entry.player, entry.action, rng)
+			if (entry.action) {
+				game.perform(entry.player, entry.action, rng)
+				// Automatic follow-ups (e.g. a delivery's exchange token) share their
+				// triggering action's frame, so one undo still removes the whole step.
+				for (const followup of entry.followups ?? []) game.perform(entry.player, followup, rng)
+			}
 			else if (entry.type === "END_TURN") game.endTurn(entry.player, rng)
 			else if (entry.type === "SKIP") game.skip(entry.player)
 			else continue
