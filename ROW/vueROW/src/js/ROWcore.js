@@ -305,6 +305,7 @@ export var ActionType;
     ActionType["GAIN_1_CERTIFICATE_AND_1_DOLLAR_PER_BELL"] = "GAIN_1_CERTIFICATE_AND_1_DOLLAR_PER_BELL";
     ActionType["DISCARD_1_JERSEY_FOR_SINGLE_AUXILIARY_ACTION"] = "DISCARD_1_JERSEY_FOR_SINGLE_AUXILIARY_ACTION";
     // The following are second-edition / Rails to the North only (not exercised by first-edition scope):
+    ActionType["GAIN_1_CERTIFICATE_PER_BELL"] = "GAIN_1_CERTIFICATE_PER_BELL";
     ActionType["UPGRADE_SIMMENTAL"] = "UPGRADE_SIMMENTAL";
     ActionType["GAIN_EXCHANGE_TOKEN"] = "GAIN_EXCHANGE_TOKEN";
     ActionType["USE_EXCHANGE_TOKEN"] = "USE_EXCHANGE_TOKEN";

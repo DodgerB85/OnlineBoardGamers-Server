@@ -2442,6 +2442,10 @@ export class Game {
                 ps.gainDollars(bells);
                 return null;
             }
+            case ActionType.GAIN_1_CERTIFICATE_PER_BELL: {
+                ps.gainTempCertificates(ps.numberOfBells());
+                return null;
+            }
             case ActionType.TAKE_BREEDING_VALUE_3_CATTLE_CARD: {
                 const card = (action.card ?? action.cattleCard);
                 this.state.cattleMarket.take(card);

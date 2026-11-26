@@ -640,7 +640,7 @@ export function buildingActionRegions(name, rect, inter, game) {
 		"3a": 185, "3b": 182, "4a": 182, "4b": 182,
 		"5a": second ? 183 : 205, "5b": 185, "6a": second ? 183 : 185,
 		"8a": 192, "9a": 192, "10a": 192, "10b": 192,
-		"11a": 188, "12b": 189, "13a": second ? 190 : 189, "13b": second ? 190 : 189,
+		"11a": 188, "12a": second ? 190 : 185, "12b": 189, "13a": second ? 190 : 189, "13b": second ? 190 : 189,
 	}
 	const x = (value) => rect.x + rect.w * value / 376
 	const y = (value) => rect.y + rect.h * value / 376
@@ -651,7 +651,10 @@ export function buildingActionRegions(name, rect, inter, game) {
 	let groups
 	let shapes
 
-	if (inter.mode === "activate" && name === "11a" && second) {
+	if (inter.mode === "activate" && second && name === "13a") {
+		groups = [[0], [1], [2]]
+		shapes = [panel(left, 136), panel(136, 240), panel(240, right)]
+	} else if (inter.mode === "activate" && name === "11a" && second) {
 		groups = [[0], [0]]
 		shapes = [panel(left, middle), panel(middle, right)]
 	} else if (inter.mode === "adjacent" || allActions.length <= 1) {

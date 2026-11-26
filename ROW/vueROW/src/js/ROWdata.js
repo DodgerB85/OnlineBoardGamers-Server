@@ -442,13 +442,14 @@ export const PLAYER_BUILDINGS = {
     "13b": PB("13b", Hand.NONE, 2, 4),
 };
 /**
- * Second-edition stat overrides (PlayerBuilding 11A2ndEdition / 13A2ndEdition / 13B2ndEdition):
- * only the hand fee / craftsmen / points differ; the actions are handled in playerBuildingAction.
+ * Second-edition player-building stats: base buildings 11-12 and RTTN 13a/13b.
  */
 const PLAYER_BUILDINGS_SECOND_EDITION = {
     "11a": PB("11a", Hand.NONE, 12, 20),
-    "13a": PB("13a", Hand.NONE, 4, 5),
-    "13b": PB("13b", Hand.NONE, 3, 4),
+    "12a": PB("12a", Hand.NONE, 4, 5),
+    "12b": PB("12b", Hand.NONE, 3, 4),
+    "13a": PB("13a", Hand.NONE, 2, 3),
+    "13b": PB("13b", Hand.NONE, 2, 3),
 };
 /** Edition-aware player-building stats. */
 export function playerBuildingInfo(name, edition) {
@@ -459,13 +460,17 @@ export function playerBuildingInfo(name, edition) {
 /** Buildings available for the given edition + options (BuildingSet.buildingsForOptions). */
 export function buildingNumbersForOptions(edition, opts) {
     const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    if (opts.railsToTheNorth) {
+    if (edition === Edition.SECOND) {
         numbers.push(11, 12);
+        if (opts.railsToTheNorth)
+            numbers.push(13);
+        return numbers;
     }
-    else if (edition === Edition.SECOND || opts.building11) {
+    if (opts.railsToTheNorth)
+        numbers.push(11, 12);
+    else if (opts.building11)
         numbers.push(11);
-    }
-    if (edition === Edition.SECOND || opts.building13)
+    if (opts.building13)
         numbers.push(13);
     return numbers;
 }
@@ -507,6 +512,7 @@ export function neutralBuildingAction(name, cowboys) {
  */
 export function playerBuildingAction(name, edition, cowboys) {
     const A = ActionType;
+    const second = edition === Edition.SECOND;
     switch (name) {
         case "1a":
             return PossibleAction.optionalAction(A.GAIN_2_DOLLARS_PER_BUILDING_IN_WOODS);
@@ -567,13 +573,21 @@ export function playerBuildingAction(name, edition, cowboys) {
         case "11b":
             return PossibleAction.optionalAction(A.MOVE_ENGINE_FORWARD_UP_TO_NUMBER_OF_HAZARDS);
         case "12a":
-            return PossibleAction.optionalAction(A.GAIN_1_CERTIFICATE_AND_1_DOLLAR_PER_BELL);
+            return second
+                ? PossibleAction.anyActions([A.GAIN_1_DOLLAR_PER_CRAFTSMAN, A.MOVE_1_FORWARD])
+                : PossibleAction.optionalAction(A.GAIN_1_CERTIFICATE_AND_1_DOLLAR_PER_BELL);
         case "12b":
-            return PossibleAction.anyActions([A.GAIN_1_DOLLAR_PER_CRAFTSMAN, A.PLACE_BRANCHLET]);
+            return second
+                ? PossibleAction.anyActions([A.GAIN_2_DOLLARS_PER_STATION, A.GAIN_EXCHANGE_TOKEN])
+                : PossibleAction.anyActions([A.GAIN_1_DOLLAR_PER_CRAFTSMAN, A.PLACE_BRANCHLET]);
         case "13a":
-            return edition === Edition.SECOND ? PossibleAction.anyActions([A.GAIN_1_DOLLAR_PER_CRAFTSMAN, A.MOVE_1_FORWARD]) : PossibleAction.anyActions([A.DISCARD_1_JERSEY_FOR_SINGLE_AUXILIARY_ACTION, A.PLACE_CHEAP_BUILDING]);
+            if (!second)
+                return PossibleAction.anyActions([A.DISCARD_1_JERSEY_FOR_SINGLE_AUXILIARY_ACTION, A.PLACE_CHEAP_BUILDING]);
+            return PossibleAction.anyActions([A.SINGLE_AUXILIARY_ACTION, A.GAIN_1_CERTIFICATE, A.PLACE_BRANCHLET]);
         case "13b":
-            return edition === Edition.SECOND ? PossibleAction.anyActions([A.GAIN_2_DOLLARS_PER_STATION, A.GAIN_EXCHANGE_TOKEN]) : PossibleAction.anyActions([A.GAIN_2_DOLLARS_PER_STATION, A.SINGLE_OR_DOUBLE_AUXILIARY_ACTION]);
+            if (!second)
+                return PossibleAction.anyActions([A.GAIN_2_DOLLARS_PER_STATION, A.SINGLE_OR_DOUBLE_AUXILIARY_ACTION]);
+            return PossibleAction.anyActions([A.GAIN_1_CERTIFICATE_PER_BELL, A.PLACE_BRANCHLET]);
         default:
             return PossibleAction.anyActions([]);
     }

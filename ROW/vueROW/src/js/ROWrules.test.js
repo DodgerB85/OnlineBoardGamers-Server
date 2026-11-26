@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ActionStack, ActionType, CattleType, Edition, Game, Hand, JavaRandom, OBJECTIVE_CARD_TYPES, PossibleAction, Worker, defaultOptions } from "./ROWindex";
-import { playerBuildingInfo } from "./ROWdata";
+import { buildingNumbersForOptions, playerBuildingAction, playerBuildingInfo } from "./ROWdata";
 function players(n) {
     const colors = ["RED", "BLUE", "YELLOW", "GREEN"];
     return Array.from({ length: n }, (_, i) => ({ name: `Player ${i + 1}`, color: colors[i], type: "HUMAN" }));
@@ -52,7 +52,45 @@ describe("Second-edition building stats (PlayerBuilding 2e subclasses)", () => {
         expect(playerBuildingInfo("13a", Edition.FIRST).hand).toBe(Hand.GREEN);
         expect(playerBuildingInfo("13a", Edition.SECOND).hand).toBe(Hand.NONE);
         expect(playerBuildingInfo("13b", Edition.FIRST).craftsmen).toBe(2);
-        expect(playerBuildingInfo("13b", Edition.SECOND).craftsmen).toBe(3);
+        expect(playerBuildingInfo("13b", Edition.SECOND).craftsmen).toBe(2);
+    });
+    it("uses the 2e base 12 and RTTN 13 stats", () => {
+        expect(playerBuildingInfo("12a", Edition.SECOND)).toMatchObject({ craftsmen: 4, points: 5 });
+        expect(playerBuildingInfo("12b", Edition.SECOND)).toMatchObject({ craftsmen: 3, points: 4 });
+        expect(playerBuildingInfo("13a", Edition.SECOND)).toMatchObject({ craftsmen: 2, points: 3 });
+        expect(playerBuildingInfo("13b", Edition.SECOND)).toMatchObject({ craftsmen: 2, points: 3 });
+    });
+    it("maps second-edition building sets", () => {
+        expect(buildingNumbersForOptions(Edition.SECOND, {})).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+        expect(buildingNumbersForOptions(Edition.SECOND, { railsToTheNorth: true })).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
+    });
+    it("gives a new 2e game the 12a/12b set", () => {
+        const base = Game.start(players(2), defaultOptions(Edition.SECOND, { buildings: "BEGINNER" }), new JavaRandom(1));
+        const baseNumbers = new Set(base.currentPlayerState().buildings.map((b) => parseInt(b, 10)));
+        expect(baseNumbers.has(12)).toBe(true);
+        expect(baseNumbers.has(13)).toBe(false);
+        expect(base.currentPlayerState().buildings).toHaveLength(12);
+
+        const rttn = Game.start(players(2), defaultOptions(Edition.SECOND, { buildings: "BEGINNER", railsToTheNorth: true }), new JavaRandom(1));
+        const rttnNumbers = new Set(rttn.currentPlayerState().buildings.map((b) => parseInt(b, 10)));
+        expect(rttnNumbers.has(12)).toBe(true);
+        expect(rttnNumbers.has(13)).toBe(true);
+        expect(rttn.currentPlayerState().buildings).toHaveLength(13);
+    });
+    it("uses the 2e base and RTTN 13 actions", () => {
+        expect(playerBuildingAction("12a", Edition.SECOND, 3).canPerform(ActionType.GAIN_1_DOLLAR_PER_CRAFTSMAN)).toBe(true);
+        expect(playerBuildingAction("12a", Edition.SECOND, 3).canPerform(ActionType.MOVE_1_FORWARD)).toBe(true);
+        expect(playerBuildingAction("12b", Edition.SECOND, 3).canPerform(ActionType.GAIN_2_DOLLARS_PER_STATION)).toBe(true);
+        expect(playerBuildingAction("12b", Edition.SECOND, 3).canPerform(ActionType.GAIN_EXCHANGE_TOKEN)).toBe(true);
+        expect(playerBuildingAction("13a", Edition.SECOND, 3).canPerform(ActionType.SINGLE_AUXILIARY_ACTION)).toBe(true);
+        expect(playerBuildingAction("13a", Edition.SECOND, 3).canPerform(ActionType.GAIN_1_CERTIFICATE)).toBe(true);
+        expect(playerBuildingAction("13a", Edition.SECOND, 3).canPerform(ActionType.PLACE_BRANCHLET)).toBe(true);
+        expect(playerBuildingAction("13b", Edition.SECOND, 3).canPerform(ActionType.GAIN_1_CERTIFICATE_PER_BELL)).toBe(true);
+        expect(playerBuildingAction("13b", Edition.SECOND, 3).canPerform(ActionType.PLACE_BRANCHLET)).toBe(true);
+        // First edition still uses the original RTTN 12b and promo 13a/13b.
+        expect(playerBuildingAction("12b", Edition.FIRST, 3).canPerform(ActionType.PLACE_BRANCHLET)).toBe(true);
+        expect(playerBuildingAction("13a", Edition.FIRST, 3).canPerform(ActionType.PLACE_CHEAP_BUILDING)).toBe(true);
+        expect(playerBuildingAction("13b", Edition.FIRST, 3).canPerform(ActionType.SINGLE_OR_DOUBLE_AUXILIARY_ACTION)).toBe(true);
     });
 });
 describe("UPGRADE_ANY_STATION_BEHIND_ENGINE walks the graph (Space.isAfter)", () => {

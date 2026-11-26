@@ -64,6 +64,15 @@ describe("Coverage: money / certificate gains", () => {
 	G(ActionType.GAIN_2_CERTIFICATES_AND_2_DOLLARS_PER_TEEPEE_PAIR);
 	G(ActionType.MAX_CERTIFICATES);
 	G(ActionType.GAIN_1_CERTIFICATE_AND_1_DOLLAR_PER_BELL);
+	G(ActionType.GAIN_1_CERTIFICATE_PER_BELL);
+	it("gains one certificate per cleared bell", () => {
+		const game = freshGame(1);
+		const ps = game.currentPlayerState();
+		ps.branchlets = 6;
+		arm(game, ActionType.GAIN_1_CERTIFICATE_PER_BELL);
+		run(game, { type: ActionType.GAIN_1_CERTIFICATE_PER_BELL });
+		expect(ps.tempCertificates).toBe(3);
+	});
 });
 
 describe("Coverage: draw actions", () => {

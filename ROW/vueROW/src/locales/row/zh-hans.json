@@ -684,6 +684,7 @@
         "DISCARD_1_DUTCH_BELT_TO_MOVE_ENGINE_2_FORWARD": "弃置 1 张荷兰带牛以将火车头向前移动 2 格",
         "DISCARD_1_CATTLE_CARD_TO_GAIN_6_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND": "弃置 1 张牛只卡，获得 6 美元并将 1 张目标卡加入手牌",
         "DISCARD_CATTLE_CARD_TO_GAIN_7_DOLLARS": "弃置 1 张牛只卡以获得 7 美元",
+        "GAIN_1_CERTIFICATE_PER_BELL": "每个铃铛获得 1 个证书",
         "MOVE_ENGINE_2_FORWARD": "将火车头向前移动 2 格",
         "MOVE_ENGINE_1_BACKWARDS_TO_REMOVE_1_CARD_AND_GAIN_1_DOLLAR": "将火车头向后移动 1 格以移除 1 张卡并获得 1 美元",
         "MOVE_ENGINE_2_BACKWARDS_TO_REMOVE_2_CARDS_AND_GAIN_2_DOLLARS": "将火车头向后移动 2 格以移除 2 张卡并获得 2 美元",

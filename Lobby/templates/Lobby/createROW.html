@@ -125,7 +125,7 @@
                     <div class="check-list">
                         <div class="form-row">
                             <label class="form-label" for="edition">{% translate "Edition" %}</label>
-                            <select name="edition" id="edition" style="flex:0 0 auto;width:auto" onchange="toggleSimmental();">
+                            <select name="edition" id="edition" style="flex:0 0 auto;width:auto" onchange="toggleEditionOptions();">
                                 <option value="FIRST" selected="selected">{% translate "First edition" %}</option>
                                 <option value="SECOND">{% translate "Second edition" %}</option>
                             </select>
@@ -180,14 +180,14 @@
                                 <div class="opt-help">{% translate "Adds the promo station master tiles" %}</div>
                             </div>
                         </label>
-                        <label class="check-label">
+                        <label class="check-label" id="building11Row">
                             <input type="checkbox" class="myCheckbox" id="building11" name="building11" value="1">
                             <div>
                                 <div>{% translate "Building 11" %}</div>
                                 <div class="opt-help">{% translate "Adds the building 11 promo tiles" %}</div>
                             </div>
                         </label>
-                        <label class="check-label">
+                        <label class="check-label" id="building13Row">
                             <input type="checkbox" class="myCheckbox" id="building13" name="building13" value="1">
                             <div>
                                 <div>{% translate "Building 13" %}</div>
@@ -234,9 +234,19 @@
             else if (/^SHADOW(_\d+)?$/.test(input.value)) input.value = "";
         }
     }
-    function toggleSimmental() {
-        var row = document.getElementById("simmentalRow");
-        if (row) row.style.display = document.getElementById("edition").value === "SECOND" ? "block" : "none";
+    function toggleEditionOptions() {
+        var second = document.getElementById("edition").value === "SECOND";
+        var simmental = document.getElementById("simmentalRow");
+        if (simmental) simmental.style.display = second ? "block" : "none";
+        // Buildings 11/12 are base 2e and 13 is 2e RTTN; the 1e promos do not apply.
+        var building11Row = document.getElementById("building11Row");
+        var building13Row = document.getElementById("building13Row");
+        if (building11Row) building11Row.style.display = second ? "none" : "block";
+        if (building13Row) building13Row.style.display = second ? "none" : "block";
+        if (second) {
+            document.getElementById("building11").checked = false;
+            document.getElementById("building13").checked = false;
+        }
     }
     function toggleRowAI() {
         var checked = document.getElementById("rowAI").checked;
@@ -253,7 +263,7 @@
             var input = document.getElementById("player" + i);
             if (input) autocomplete(input);
         }
-        toggleSimmental();
+        toggleEditionOptions();
         toggleRowAI();
         var form = document.getElementById("gameCreationForm");
         if (form) {
@@ -298,7 +308,7 @@
             document.getElementById("difficulty").value = automaDifficulty;
         }
         selectPlayers();
-        toggleSimmental();
+        toggleEditionOptions();
         toggleRowAI();
         {% endif %}
     });

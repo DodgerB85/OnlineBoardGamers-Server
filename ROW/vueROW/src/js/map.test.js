@@ -209,6 +209,11 @@ describe("printed building action regions", () => {
         expect(regions("5a", "SECOND")[0].points).toContain("183,176");
         expect(regions("2b", "SECOND")[0].actions).toEqual([ActionType.DISCARD_1_DUTCH_BELT_TO_MOVE_ENGINE_2_FORWARD]);
     });
+    it("uses three printed panels for the 2e RTTN 13a", () => {
+        const r = regions("13a", "SECOND");
+        expect(r).toHaveLength(3);
+        expect(r.map((x) => x.actions[0])).toEqual([ActionType.SINGLE_AUXILIARY_ACTION, ActionType.GAIN_1_CERTIFICATE, ActionType.PLACE_BRANCHLET]);
+    });
     it("provides valid polygons for all private tiles in both editions", () => {
         for (const edition of ["FIRST", "SECOND"]) {
             for (let number = 1; number <= 13; number++) {
