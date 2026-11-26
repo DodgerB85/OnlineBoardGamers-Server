@@ -85,14 +85,14 @@ const moveOrigin = computed(() => {
 })
 
 /** A MOVE-family action picked off a building, armed until a spot is clicked or it is cancelled. */
-const armedMove = computed(() => (game.value ? map.armedTrailMove(g(), store.actions, store.selectedAction) : null))
+const armedMove = computed(() => (game.value ? map.armedTrailMove(g(), focusedLiveActions.value, store.selectedAction) : null))
 
 /** Live trail moves other than the turn's own MOVE; objective cards and medium towns grant these. */
 const liveTrailMoves = computed(() => {
 	if (!game.value) return []
 	if (armedMove.value) return [armedMove.value]
 	if (store.selectedAction) return []
-	return store.actions
+	return focusedLiveActions.value
 		.filter((a) => a !== ActionType.MOVE && map.MOVE_FAMILY.includes(a))
 		.map((a) => ({ type: a, limit: g().moveStepLimit(a) ?? g().getStepLimit() }))
 })
@@ -100,7 +100,7 @@ const liveTrailMoves = computed(() => {
 const moves = computed(() => {
 	if (!game.value || !store.currentPlayer) return []
 	// The turn's own move is planned step by step; every other trail move is a single commit.
-	if (!armedMove.value && store.actions.includes(ActionType.MOVE)) {
+	if (!armedMove.value && focusedLiveActions.value.includes(ActionType.MOVE)) {
 		try {
 			return model.possibleMovesFor(store.currentPlayer, store.moveStepsLeft, moveOrigin.value).map((m) => ({ ...m, type: ActionType.MOVE }))
 		} catch {
@@ -144,7 +144,7 @@ function takeMove(name) {
 
 function candidatesFor(name) {
 	if (!game.value || !actable.value) return []
-	const acts = store.actions
+	const acts = focusedLiveActions.value
 	const player = g().currentPlayer
 	const out = []
 
@@ -179,7 +179,7 @@ function candidatesFor(name) {
 				run: () => controller.perform({ type: buildAction, location: name, building: b }),
 			})
 		}
-	} else if (sel === ActionType.USE_ADJACENT_BUILDING && loc.building) {
+	} else if (sel === ActionType.USE_ADJACENT_BUILDING && loc.building && g().getTrail().getAdjacentLocations(g().getTrail().currentLocation(player)).includes(name)) {
 		out.push({ label: t("row.map.useBuilding", { building: loc.building.name }), run: () => controller.perform({ type: ActionType.USE_ADJACENT_BUILDING, location: name }) })
 	}
 	return out
@@ -320,7 +320,7 @@ function deliveryTransport(city) {
 }
 
 function clickCity(idx, city) {
-	if (!game.value || !actable.value || !store.actions.includes(ActionType.DELIVER_TO_CITY)) return
+	if (!game.value || !actable.value || !focusedLiveActions.value.includes(ActionType.DELIVER_TO_CITY)) return
 	const name = city ?? cityStrip(g().edition, g().isRailsToTheNorth())[idx]
 	const pd = g().possibleDeliveries().find((d) => d.city === name)
 	if (!pd) return
@@ -353,7 +353,7 @@ function clickCity(idx, city) {
 
 /** Bonus station masters are taken at New York City: click the city, then the tile. */
 function clickBonusStationMasters() {
-	if (!game.value || !actable.value || !store.actions.includes(ActionType.TAKE_BONUS_STATION_MASTER)) return
+	if (!game.value || !actable.value || !focusedLiveActions.value.includes(ActionType.TAKE_BONUS_STATION_MASTER)) return
 	const masters = g().getRailroadTrack().stationMasters
 	if (!masters.length) return
 	const grp = cityGroups.value.find((cg) => cg.city === "NEW_YORK_CITY")
@@ -378,7 +378,7 @@ function clickSpace(space) {
 	if (selected) {
 		if (map.engineMoveRange(selected, g()) && map.reachableSpacesFor(selected, g()).has(space)) live.push(selected)
 	} else {
-		for (const a of store.actions) {
+		for (const a of focusedLiveActions.value) {
 			if (map.reachableSpacesFor(a, g()).has(space) && !live.includes(a)) live.push(a)
 		}
 	}
@@ -395,7 +395,7 @@ function clickSpace(space) {
 
 function stationClickable(i) {
 	if (!game.value || !actable.value) return false
-	const acts = store.actions
+	const acts = focusedLiveActions.value
 	const player = g().currentPlayer
 	const rt = g().getRailroadTrack()
 	const station = rt.stations[i]
@@ -408,7 +408,7 @@ function stationClickable(i) {
 
 function clickStation(i) {
 	if (!game.value || !actable.value) return
-	const acts = store.actions
+	const acts = focusedLiveActions.value
 	const player = g().currentPlayer
 	const rt = g().getRailroadTrack()
 	const station = rt.stations[i]
@@ -428,7 +428,7 @@ function hireActionFor(row, worker) {
 	if (!game.value || !actable.value) return null
 	const jm = g().getJobMarket()
 	if (row >= jm.currentRowIndex) return null
-	const hire = WORKER_ACTIONS.find((a) => store.actions.includes(a))
+	const hire = WORKER_ACTIONS.find((a) => focusedLiveActions.value.includes(a))
 	if (!hire) return null
 	const mod = hire === ActionType.HIRE_WORKER_PLUS_2 ? 2 : hire === ActionType.HIRE_WORKER_MINUS_1 ? -1 : hire === ActionType.HIRE_WORKER_MINUS_2 ? -2 : 0
 	if (jm.cost(row, worker) + mod > g().playerState(g().currentPlayer).balance) return null
@@ -444,7 +444,7 @@ function clickWorker(row, worker) {
 function clickForesight(col, row) {
 	if (!game.value || !actable.value) return
 	const a = [ActionType.CHOOSE_FORESIGHT_1, ActionType.CHOOSE_FORESIGHT_2, ActionType.CHOOSE_FORESIGHT_3][col]
-	if (!store.actions.includes(a)) return
+	if (!focusedLiveActions.value.includes(a)) return
 	controller.perform({ type: a, choice: row })
 }
 
@@ -609,6 +609,17 @@ const jobToken = computed(() => {
 })
 
 // ---- clickable-target highlighting (yellow = available, green = hover) ----
+/** Live actions whose targets/choices may light up right now. */
+const focusedLiveActions = computed(() => {
+	if (!game.value) return []
+	return map.focusedActions(g(), store.actions, store.focusedBuildingAction)
+})
+const canCancelFocus = computed(() => !!store.selectedAction || (!!store.focusedBuildingAction && focusedLiveActions.value.includes(store.focusedBuildingAction.action)))
+function cancelFocus() {
+	store.clearAction()
+	store.focusedBuildingAction = null
+}
+
 const reachableSpaces = computed(() => {
 	const out = new Set()
 	if (!game.value) return out
@@ -619,12 +630,12 @@ const reachableSpaces = computed(() => {
 		for (const s of map.reachableSpacesFor(selected, g())) out.add(s)
 		return out
 	}
-	for (const a of store.actions) for (const s of map.reachableSpacesFor(a, g())) out.add(s)
+	for (const a of focusedLiveActions.value) for (const s of map.reachableSpacesFor(a, g())) out.add(s)
 	return out
 })
 
 const deliverableCities = computed(() => {
-	if (!game.value || !actable.value || !store.actions.includes(ActionType.DELIVER_TO_CITY)) return new Set()
+	if (!game.value || !actable.value || !focusedLiveActions.value.includes(ActionType.DELIVER_TO_CITY)) return new Set()
 	try {
 		return new Set(g().possibleDeliveries().map((d) => d.city))
 	} catch {
@@ -636,13 +647,16 @@ const activeBuildingRegions = computed(() => {
 	if (!game.value || !actable.value) return []
 	return buildingTiles.value.flatMap((tile) => {
 		const inter = map.buildingInteraction(tile.name, g(), store.actions)
+		if (!inter) return []
+		// Adjacent-building targets stay dark until the current building's region is picked.
+		if (inter.mode === "adjacent" && !focusedLiveActions.value.includes(ActionType.USE_ADJACENT_BUILDING)) return []
 		const building = g().getTrail().getLocation(tile.name).building.name
 		return map.buildingActionRegions(building, tile.rect, inter, g()).map((region) => ({ ...region, name: tile.name, mode: inter.mode }))
 	})
 })
 
 const foresightActive = computed(() => {
-	const acts = actable.value ? store.actions : []
+	const acts = actable.value ? focusedLiveActions.value : []
 	return {
 		0: acts.includes(ActionType.CHOOSE_FORESIGHT_1),
 		1: acts.includes(ActionType.CHOOSE_FORESIGHT_2),
@@ -687,9 +701,10 @@ const hoveredBuilding = computed(() => {
 	const tile = buildingTiles.value.find((t) => t.name === name)
 	if (!tile) return null
 	const inter = map.buildingInteraction(name, g(), store.actions)
+	const focusableInter = inter && (inter.mode !== "adjacent" || focusedLiveActions.value.includes(ActionType.USE_ADJACENT_BUILDING)) ? inter : null
 	const r = tile.rect
 	const building = tile.building
-	const regions = actable.value ? map.buildingActionRegions(building, r, inter, g()).map((region) => ({ ...region, name, mode: inter.mode })) : []
+	const regions = actable.value && focusableInter ? map.buildingActionRegions(building, r, focusableInter, g()).map((region) => ({ ...region, name, mode: focusableInter.mode })) : []
 	return {
 		name,
 		building,
@@ -701,8 +716,8 @@ const hoveredBuilding = computed(() => {
 		// The zoomed tile covers the board's own border, so it redraws it:
 		// light green while the spot would be lit under the mouse (a clickable
 		// target or part of the shown route), black otherwise.
-		active: moveRoute.value.has(name) || candidatesFor(name).length > 0 || !!inter,
-		mode: inter ? inter.mode : null,
+		active: moveRoute.value.has(name) || candidatesFor(name).length > 0 || !!focusableInter,
+		mode: focusableInter ? focusableInter.mode : null,
 		regions,
 		transform: `translate(${r.x + r.w / 2},${r.y + r.h / 2}) scale(2) translate(${-(r.x + r.w / 2)},${-(r.y + r.h / 2)})`,
 	}
@@ -710,6 +725,7 @@ const hoveredBuilding = computed(() => {
 
 function runHotspot(opt, name, mode) {
 	if (!actable.value) return
+	if (mode === "activate") store.focusedBuildingAction = { location: name, action: opt }
 	if (mode === "adjacent") {
 		controller.perform({ type: ActionType.USE_ADJACENT_BUILDING, location: name })
 		return
@@ -721,6 +737,17 @@ function runHotspot(opt, name, mode) {
 			if (options.length === 1) controller.perform({ type: opt, steps: options[0].steps })
 			return
 		}
+		store.selectAction(opt)
+		return
+	}
+	// The auxiliary wrapper opens a choice on the player board; focus it first so
+	// the auxiliary rows do not light up before the player picks that region.
+	if (opt === ActionType.SINGLE_AUXILIARY_ACTION || opt === ActionType.SINGLE_OR_DOUBLE_AUXILIARY_ACTION) {
+		store.selectAction(opt)
+		return
+	}
+	// Drawing from the cattle deck is done on the draw pile; focus it first.
+	if (opt === ActionType.DRAW_2_CATTLE_CARDS) {
 		store.selectAction(opt)
 		return
 	}
@@ -759,18 +786,21 @@ const hitTargets = computed(() => {
 		const hasTargets = candidatesFor(l.name).length > 0
 		const building = map.buildingInteraction(l.name, g(), store.actions)
 		if (!hasTargets && !building) continue
+		// The printed regions are the click surface; a bare building outline would
+		// add a non-action highlight and, when unfocused, a dead click target.
+		if (building && !hasTargets) continue
 		out.push({ key: "loc:" + l.name, type: "location", name: l.name, singleAux: singleAuxDestinations.value.has(l.name), tone: locationTone(l.name), x: l.rect.x, y: l.rect.y, w: l.rect.w, h: l.rect.h, rx: 2, transform: null })
 	}
 	for (const c of cityGroups.value) {
 		if (!deliverableCities.value.has(c.city)) continue
 		out.push({ key: "city:" + c.city, type: "city", idx: c.idx, city: c.city, x: c.pos.rect.x, y: c.pos.rect.y, w: 52, h: 50, rx: 2, transform: null })
 	}
-	if (store.actions.includes(ActionType.TAKE_BONUS_STATION_MASTER)) {
+	if (focusedLiveActions.value.includes(ActionType.TAKE_BONUS_STATION_MASTER)) {
 		const ny = cityGroups.value.find((c) => c.city === "NEW_YORK_CITY")
 		if (ny) out.push({ key: "city:bonus", type: "bonus", x: ny.pos.rect.x, y: ny.pos.rect.y, w: 52, h: 50, rx: 2, transform: null })
 	}
 	// Rails to the North: towns the player may put a branchlet on.
-	if (store.actions.includes(ActionType.PLACE_BRANCHLET)) {
+	if (focusedLiveActions.value.includes(ActionType.PLACE_BRANCHLET)) {
 		const allowed = new Set(g().possibleTowns(g().currentPlayer))
 		for (const [name, sp] of Object.entries(RTTN_TOWN_SPOTS)) {
 			if (!allowed.has(name)) continue
@@ -1046,7 +1076,7 @@ function leaveTarget(t) {
 			<span>{{ t('row.actions.buttons.SINGLE_AUXILIARY_ACTION') }}</span>
 		</div>
 
-		<button v-if="store.selectedAction" type="button" class="actionsLineButton cancelMove" @click="store.clearAction()">{{ t('panels.cancel') }}</button>
+		<button v-if="canCancelFocus" type="button" class="actionsLineButton cancelMove" @click="cancelFocus">{{ t('panels.cancel') }}</button>
 
 		<div
 			v-if="chooser"

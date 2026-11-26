@@ -36,6 +36,8 @@ export const useModelStore = defineStore("store", () => {
 	})
 
 	const selectedAction = ref(null)
+	/** Building action region the player clicked; kept while a repeatable action remains. */
+	const focusedBuildingAction = ref(null)
 	/**
 	 * Trail spots the player has clicked for the mandatory MOVE, so the move can
 	 * be walked one step at a time. Null until they click the first one.
@@ -126,6 +128,7 @@ export const useModelStore = defineStore("store", () => {
 
 	function setGame(g) {
 		game.value = g
+		focusedBuildingAction.value = null
 		clearMovePlan()
 		touch()
 	}
@@ -154,6 +157,7 @@ export const useModelStore = defineStore("store", () => {
 		game,
 		viewSettings,
 		selectedAction,
+		focusedBuildingAction,
 		plannedSteps,
 		moveStepsLeft,
 		gameMessages,

@@ -6,6 +6,7 @@
 import { computed } from "vue"
 import * as rf from "../js/ROWreference"
 import * as controller from "../js/ROWcontroller"
+import * as map from "../js/ROWmap"
 import * as view from "../js/ROWview"
 import { useModelStore } from "../stores/ROWstore.js"
 import CardView from "./CardView.vue"
@@ -26,10 +27,11 @@ function g() {
 const available = computed(() => (game.value ? g().getObjectiveCards().available : []))
 const drawStackSize = computed(() => (game.value ? g().getObjectiveCards().drawStack.length : 0))
 const actable = computed(() => controller.canAct())
+const focusedActions = computed(() => (game.value ? map.focusedActions(game.value, store.actions, store.focusedBuildingAction) : []))
 const takeAction = computed(() => {
 	if (!actable.value) return null
-	if (store.actions.includes(ActionType.TAKE_OBJECTIVE_CARD)) return ActionType.TAKE_OBJECTIVE_CARD
-	if (store.actions.includes(ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND)) return ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND
+	if (focusedActions.value.includes(ActionType.TAKE_OBJECTIVE_CARD)) return ActionType.TAKE_OBJECTIVE_CARD
+	if (focusedActions.value.includes(ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND)) return ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND
 	return null
 })
 const canTake = computed(() => !!takeAction.value)

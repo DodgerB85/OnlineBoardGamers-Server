@@ -8,6 +8,7 @@ import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import * as rf from "../js/ROWreference"
 import * as controller from "../js/ROWcontroller"
+import * as map from "../js/ROWmap"
 import * as view from "../js/ROWview"
 import { CattleType } from "../js/ROWcore"
 import { CATTLE_COSTS } from "../js/ROWdata"
@@ -54,8 +55,9 @@ function marketOrder(a, b) {
 const displayMarket = computed(() => [...market.value].sort(marketOrder))
 const drawStackSize = computed(() => (game.value ? g().getCattleMarket().drawStack.length : 0))
 const actable = computed(() => controller.canAct())
-const buying = computed(() => actable.value && store.actions.includes(ActionType.BUY_CATTLE))
-const takingThree = computed(() => actable.value && store.actions.includes(ActionType.TAKE_BREEDING_VALUE_3_CATTLE_CARD))
+const focusedActions = computed(() => (game.value ? map.focusedActions(game.value, store.actions, store.focusedBuildingAction) : []))
+const buying = computed(() => actable.value && focusedActions.value.includes(ActionType.BUY_CATTLE))
+const takingThree = computed(() => actable.value && focusedActions.value.includes(ActionType.TAKE_BREEDING_VALUE_3_CATTLE_CARD))
 
 const possibleBuys = computed(() => {
 	if (!game.value || !buying.value) return []
@@ -64,7 +66,7 @@ const possibleBuys = computed(() => {
 })
 
 /** DRAW_2_CATTLE_CARDS lives on the draw pile: 1 cowboy for 2 cards, repeatable. */
-const drawingTwo = computed(() => actable.value && store.actions.includes(ActionType.DRAW_2_CATTLE_CARDS))
+const drawingTwo = computed(() => actable.value && focusedActions.value.includes(ActionType.DRAW_2_CATTLE_CARDS))
 
 const selected = ref([])
 const selectedCostIndex = ref(0)

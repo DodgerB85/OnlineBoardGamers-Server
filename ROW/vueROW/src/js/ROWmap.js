@@ -557,6 +557,7 @@ export const NEEDS_PARAMS = new Set([
 	ActionType.PLACE_BUILDING,
 	ActionType.PLACE_CHEAP_BUILDING,
 	ActionType.PLACE_BUILDING_FOR_FREE,
+	ActionType.USE_ADJACENT_BUILDING,
 	ActionType.REMOVE_HAZARD,
 	ActionType.REMOVE_HAZARD_FOR_FREE,
 	ActionType.REMOVE_HAZARD_FOR_2_DOLLARS,
@@ -625,6 +626,30 @@ export function activeBuildingActions(game, liveActions) {
 		if (inter) for (const a of inter.options) if (!MARKET_DRAW_ACTIONS.has(a)) set.add(a)
 	}
 	return set
+}
+
+/**
+ * Building local actions whose targets stay dark until the player clicks their
+ * printed region. `focus` is { location, action } from the clicked region.
+ */
+export function unfocusedBuildingActions(game, liveActions, focus) {
+	const ps = game.currentPlayerState()
+	const current = game.getTrail().currentLocation(game.currentPlayer)
+	const last = ps.getLastActivatedLocation()
+	for (const locName of [current, last]) {
+		if (!locName) continue
+		const inter = buildingInteraction(locName, game, liveActions)
+		if (!inter || inter.mode !== "activate") continue
+		const focusedAction = focus && focus.location === inter.location ? focus.action : null
+		return inter.options.filter((a) => a !== focusedAction)
+	}
+	return []
+}
+
+/** Live actions whose targets/choices may light up right now. */
+export function focusedActions(game, liveActions, focus) {
+	const waiting = new Set(unfocusedBuildingActions(game, liveActions, focus))
+	return liveActions.filter((a) => !waiting.has(a))
 }
 
 /** Printed action regions used by both the trail and its enlarged building preview. */
@@ -702,7 +727,7 @@ export function buildingActionRegions(name, rect, inter, game) {
 	return groups
 		.map((slots, index) => ({
 			points: shapes[index],
-			actions: slots.map((slot) => allActions[slot]).filter((action) => actions.includes(action) && !MARKET_DRAW_ACTIONS.has(action)),
+			actions: slots.map((slot) => allActions[slot]).filter((action) => actions.includes(action)),
 		}))
 		.filter((region) => region.actions.length)
 		.map((region) => ({ ...region, affordable: region.actions.some((a) => canAffordAction(game, a)) }))

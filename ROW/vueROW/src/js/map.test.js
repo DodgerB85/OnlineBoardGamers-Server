@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ActionType, CattleType, Game, JavaRandom, defaultOptions } from "./ROWindex";
 import { neutralBuildingAction, playerBuildingAction } from "./ROWdata";
-import { armedTrailMove, buildingActionRegions, canAffordAction, canPlaceBuilding, cardActionsFor, singleAuxiliaryOnly, trailMoveTargets, trailRoute } from "./ROWmap";
+import { armedTrailMove, buildingActionRegions, canAffordAction, canPlaceBuilding, cardActionsFor, singleAuxiliaryOnly, trailMoveTargets, trailRoute, unfocusedBuildingActions } from "./ROWmap";
 
 function players(n) {
     const colors = ["RED", "BLUE", "YELLOW", "GREEN"];
@@ -213,6 +213,44 @@ describe("printed building action regions", () => {
         const r = regions("13a", "SECOND");
         expect(r).toHaveLength(3);
         expect(r.map((x) => x.actions[0])).toEqual([ActionType.SINGLE_AUXILIARY_ACTION, ActionType.GAIN_1_CERTIFICATE, ActionType.PLACE_BRANCHLET]);
+    });
+    it("keeps a multi-action building unfocused until a region is picked", () => {
+        const game = Game.start(players(2), defaultOptions(), new JavaRandom(0));
+        const trail = game.getTrail();
+        trail.getLocation("A").building = { name: "G", player: null };
+        trail.movePlayer(game.currentPlayer, "A");
+        const live = [...game.activateLocation(trail.getLocation("A")).getPossibleActions()];
+        expect(live).toEqual(expect.arrayContaining([ActionType.MOVE_ENGINE_FORWARD, ActionType.SINGLE_OR_DOUBLE_AUXILIARY_ACTION]));
+        expect(unfocusedBuildingActions(game, live, null).sort()).toEqual([...live].sort());
+        expect(unfocusedBuildingActions(game, live, { location: "A", action: ActionType.MOVE_ENGINE_FORWARD })).toEqual([ActionType.SINGLE_OR_DOUBLE_AUXILIARY_ACTION]);
+        expect(unfocusedBuildingActions(game, live, { location: "B", action: ActionType.MOVE_ENGINE_FORWARD })).toEqual(unfocusedBuildingActions(game, live, null));
+    });
+    it("gates a single-action building until its region is picked", () => {
+        const game = Game.start(players(2), defaultOptions(), new JavaRandom(0));
+        const trail = game.getTrail();
+        trail.getLocation("A").building = { name: "7b", player: game.currentPlayer };
+        trail.movePlayer(game.currentPlayer, "A");
+        const move = ActionType.MOVE_ENGINE_FORWARD_UP_TO_NUMBER_OF_BUILDINGS_IN_WOODS;
+        const live = [...game.activateLocation(trail.getLocation("A")).getPossibleActions()];
+        expect(live).toContain(move);
+        expect(unfocusedBuildingActions(game, live, null)).toContain(move);
+        expect(unfocusedBuildingActions(game, live, { location: "A", action: move })).not.toContain(move);
+    });
+    it("gives every printed action a clickable region in both editions", () => {
+        const privateNames = [];
+        for (let n = 1; n <= 13; n++) for (const side of ["a", "b"]) privateNames.push(`${n}${side}`);
+        const names = ["A", "B", "C", "D", "E", "F", "G", ...privateNames];
+        for (const edition of ["FIRST", "SECOND"]) {
+            const game = Game.start(players(2), defaultOptions(edition), new JavaRandom(0));
+            for (const name of names) {
+                const local = /^[A-G]$/.test(name) ? neutralBuildingAction(name, 3) : playerBuildingAction(name, edition, 3);
+                const actions = [...local.getPossibleActions()];
+                const inter = { mode: "activate", options: actions, layoutActions: actions };
+                const regions = buildingActionRegions(name, { x: 0, y: 0, w: 376, h: 376 }, inter, game);
+                const covered = new Set(regions.flatMap((r) => r.actions));
+                for (const action of actions) expect(covered.has(action), `${edition} ${name} missing ${action}`).toBe(true);
+            }
+        }
     });
     it("provides valid polygons for all private tiles in both editions", () => {
         for (const edition of ["FIRST", "SECOND"]) {

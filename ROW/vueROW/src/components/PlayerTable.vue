@@ -117,9 +117,21 @@ const auxRows = computed(() => [...AUX_ROW_DEFS, {
 	action: store.actions.includes(row.double) ? row.double : row.single,
 })))
 
+/** Aux wrapper from a multi-action building waits for its printed region click. */
+const waitingBuildingActions = computed(() => {
+	const g = game.value
+	if (!g) return []
+	return map.unfocusedBuildingActions(g, store.actions, store.focusedBuildingAction)
+})
+/** Live actions whose targets/choices may light up now. */
+const focusedActions = computed(() => store.actions.filter((a) => !waitingBuildingActions.value.includes(a)))
+
 const auxWrapper = computed(() => {
 	if (!actable.value) return null
-	return [ActionType.SINGLE_AUXILIARY_ACTION, ActionType.SINGLE_OR_DOUBLE_AUXILIARY_ACTION].find((a) => store.actions.includes(a)) ?? null
+	const wrapper = [ActionType.SINGLE_AUXILIARY_ACTION, ActionType.SINGLE_OR_DOUBLE_AUXILIARY_ACTION].find((a) => store.actions.includes(a)) ?? null
+	if (!wrapper) return null
+	if (waitingBuildingActions.value.includes(wrapper)) return null
+	return wrapper
 })
 
 /** Actions the live single/double auxiliary wrapper still offers. */
@@ -201,7 +213,7 @@ const PAIR_ACTIONS = new Set([ActionType.DISCARD_PAIR_TO_GAIN_3_DOLLARS, ActionT
 
 function applicableCardActions(card) {
 	if (!actable.value || !card) return []
-	const actions = map.cardActionsFor(card, hand.value, store.actions)
+	const actions = map.cardActionsFor(card, hand.value, focusedActions.value)
 	// A building hotspot may have armed one specific action: keep the table focused on it.
 	if (store.selectedAction) return actions.filter((a) => a === store.selectedAction)
 	if (actions.length || !auxWrapper.value) return actions
@@ -291,10 +303,10 @@ const DRAW_ACTIONS = new Set([
 ])
 const EXCHANGE_ACTIONS = new Set([ActionType.GAIN_EXCHANGE_TOKEN, ActionType.USE_EXCHANGE_TOKEN])
 
-const liveDollarGains = computed(() => store.actions.filter((a) => DOLLAR_GAINS.has(a)))
-const liveCertGains = computed(() => store.actions.filter((a) => CERT_GAINS.has(a)))
-const liveDraws = computed(() => store.actions.filter((a) => DRAW_ACTIONS.has(a)))
-const liveExchange = computed(() => store.actions.filter((a) => EXCHANGE_ACTIONS.has(a)))
+const liveDollarGains = computed(() => focusedActions.value.filter((a) => DOLLAR_GAINS.has(a)))
+const liveCertGains = computed(() => focusedActions.value.filter((a) => CERT_GAINS.has(a)))
+const liveDraws = computed(() => focusedActions.value.filter((a) => DRAW_ACTIONS.has(a)))
+const liveExchange = computed(() => focusedActions.value.filter((a) => EXCHANGE_ACTIONS.has(a)))
 const canCollectDollars = computed(() => actable.value && liveDollarGains.value.length > 0)
 const canCollectCerts = computed(() => actable.value && liveCertGains.value.length > 0)
 const canDraw = computed(() => actable.value && liveDraws.value.length > 0)
@@ -483,7 +495,7 @@ function selectCard(card) {
 			</circle>
 
 			<!-- cowboys remaining, when a cowboy-spending action is active -->
-			<g v-if="store.actions.includes(ActionType.DRAW_2_CATTLE_CARDS) || store.actions.includes(ActionType.BUY_CATTLE)">
+			<g v-if="focusedActions.includes(ActionType.DRAW_2_CATTLE_CARDS) || focusedActions.includes(ActionType.BUY_CATTLE)">
 				<text x="222" y="224" text-anchor="middle" class="cowboysRemaining">{{ ps.cowboysRemaining() }}/{{ ps.getNumberOfCowboys() }}</text>
 			</g>
 		</svg>

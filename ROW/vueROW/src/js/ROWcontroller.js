@@ -84,6 +84,7 @@ export function adminEdit(changes) {
 	const before = captureUndo()
 	applyAdminChanges(g, player, changes)
 	store.clearAction()
+	store.focusedBuildingAction = null
 	store.clearMovePlan()
 	store.undoSnapshot = g.canUndo() ? before : null
 	model.recordHistory("ADMIN_EDIT", player, [], null, null, { adminChanges: changes })
@@ -129,6 +130,7 @@ export async function endTurn() {
 		return
 	}
 	const endingPlayer = g.currentPlayer
+	store.focusedBuildingAction = null
 	const before = captureUndo()
 	const prevTurnSnapshot = store.wholeTurnResetData
 	const prevFrameCount = store.replayFrames.length
@@ -187,6 +189,7 @@ export function skip() {
 		return
 	}
 	g.skip(g.currentPlayer)
+	store.focusedBuildingAction = null
 	store.clearAction()
 	model.recordHistory("SKIP", g.currentPlayer)
 	store.touch()

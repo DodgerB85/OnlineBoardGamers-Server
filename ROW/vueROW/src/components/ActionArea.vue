@@ -18,19 +18,21 @@ const personal = usePersonalStore()
 
 const g = () => store.getGame()
 const actions = computed(() => store.actions)
+/** Actions whose targets/choices may light up now (building regions gate the rest). */
+const focusedActions = computed(() => (store.game ? map.focusedActions(store.game, actions.value, store.focusedBuildingAction) : []))
 const isBidding = computed(() => store.game?.state?.status === Status.BIDDING)
 const automaThinking = computed(() => store.game?.currentPlayer === AI_NAME)
 
 // --- Moves on the trail (done by clicking the map, not from here) ---
-const canMove = computed(() => store.actions.includes(ActionType.MOVE) && store.moveStepsLeft > 0)
+const canMove = computed(() => focusedActions.value.includes(ActionType.MOVE) && store.moveStepsLeft > 0)
 const stepsLeft = computed(() => store.moveStepsLeft)
-const armedMove = computed(() => (store.game ? map.armedTrailMove(store.game, store.actions, store.selectedAction) : null))
+const armedMove = computed(() => (store.game ? map.armedTrailMove(store.game, focusedActions.value, store.selectedAction) : null))
 
 // --- Hire worker ---
-const hiring = computed(() => map.WORKER_ACTIONS.some((a) => actions.value.includes(a)))
+const hiring = computed(() => map.WORKER_ACTIONS.some((a) => focusedActions.value.includes(a)))
 
 // --- Buildings ---
-const buildingActions = computed(() => actions.value.filter((a) => a === ActionType.PLACE_BUILDING || a === ActionType.PLACE_CHEAP_BUILDING || a === ActionType.PLACE_BUILDING_FOR_FREE))
+const buildingActions = computed(() => focusedActions.value.filter((a) => a === ActionType.PLACE_BUILDING || a === ActionType.PLACE_CHEAP_BUILDING || a === ActionType.PLACE_BUILDING_FOR_FREE))
 // Display only: a building is listed when it fits at least one spot the player may
 // build on. The choice itself is made in the chooser that opens on the map.
 const buildingOptions = computed(() => {
@@ -60,7 +62,7 @@ function buildingLabel(building) {
 }
 
 // --- Engine moves ---
-const engineActive = computed(() => actions.value.some((a) => map.engineMoveRange(a, g())))
+const engineActive = computed(() => focusedActions.value.some((a) => map.engineMoveRange(a, g())))
 
 // --- Actions with no extra target ---
 const TARGET_ACTIONS = new Set([
@@ -101,11 +103,11 @@ const CARD_TARGET_ACTIONS = new Set([
 ])
 
 // Market draw actions are done on the cattle-market draw pile, so they are explained here instead of shown as buttons.
-const drawingTwo = computed(() => actions.value.includes(ActionType.DRAW_2_CATTLE_CARDS))
+const drawingTwo = computed(() => focusedActions.value.includes(ActionType.DRAW_2_CATTLE_CARDS))
 
-const directActions = computed(() => actions.value.filter((a) => a !== ActionType.PLACE_BRANCHLET && a !== ActionType.PLACE_BID && !map.MARKET_DRAW_ACTIONS.has(a) && !TARGET_ACTIONS.has(a) && !CARD_TARGET_ACTIONS.has(a) && !map.engineMoveRange(a, g()) && !buildingActionSet.value.has(a)))
+const directActions = computed(() => focusedActions.value.filter((a) => a !== ActionType.PLACE_BRANCHLET && a !== ActionType.PLACE_BID && !map.MARKET_DRAW_ACTIONS.has(a) && !TARGET_ACTIONS.has(a) && !CARD_TARGET_ACTIONS.has(a) && !map.engineMoveRange(a, g()) && !buildingActionSet.value.has(a)))
 
-const cardActions = computed(() => actions.value.filter((a) => CARD_TARGET_ACTIONS.has(a)))
+const cardActions = computed(() => focusedActions.value.filter((a) => CARD_TARGET_ACTIONS.has(a)))
 /** A draw-then-discard leaves DISCARD_CARD as the only card action: clicking a card discards it. */
 const discardOnly = computed(() => cardActions.value.length === 1 && cardActions.value[0] === ActionType.DISCARD_CARD)
 
@@ -138,16 +140,16 @@ const discardOnly = computed(() => cardActions.value.length === 1 && cardActions
 			</div>
 		</div>
 
-		<div v-if="actions.includes(ActionType.PLACE_BRANCHLET)" class="group">
+		<div v-if="focusedActions.includes(ActionType.PLACE_BRANCHLET)" class="group">
 			<div class="label">{{ t('row.actionArea.placeBranchletHint') }}</div>
 		</div>
 
-		<div v-if="actions.includes(ActionType.APPOINT_STATION_MASTER)" class="group">
+		<div v-if="focusedActions.includes(ActionType.APPOINT_STATION_MASTER)" class="group">
 			<div class="label">{{ t('row.actions.buttons.APPOINT_STATION_MASTER') }}</div>
 			<div class="note">{{ t('row.actionArea.clickWorker') }}</div>
 		</div>
 
-		<div v-if="actions.includes(ActionType.TAKE_BONUS_STATION_MASTER)" class="group">
+		<div v-if="focusedActions.includes(ActionType.TAKE_BONUS_STATION_MASTER)" class="group">
 			<div class="label">{{ t('row.actions.buttons.TAKE_BONUS_STATION_MASTER') }}</div>
 			<div class="note">{{ t('row.actionArea.bonusStationMasterHint') }}</div>
 		</div>
