@@ -233,6 +233,9 @@ export async function loadGame() {
 			//if (result.specialData) suppressActions = true
 			// Do this to update the top line info / green player highlights
 			funcs.importFCMmodel(loadDataString, false, false)
+			if (window.initData.startingOptions?.includes(rf.SO_CAP3_AI) && controller.isSimulPhase()) {
+				store.gameflow.turnOrder = store.players.flatMap((p, seat) => result.currentPlayers.includes(p.name) ? [seat] : [])
+			}
 			personal.moveDataRaw = result.specialData
 			if (personal.pov >= 0) store.players[personal.pov].OOBpreference = result.OOBpreference
 			// Match fresh page load: wipe highlights / toasts / client-only fire state from the previous snapshot
@@ -736,7 +739,8 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 
 		if (personal.liveWS) WS.broadcastGameUpdate()
 
-		if (controller.currentPlayerObj().name === rf.AI_NAME && store.gameflow.phase != rf.PHASE_GAME_OVER) makeAImove()
+		if (window.initData.startingOptions?.includes(rf.SO_CAP3_AI)) controller.startPlayerTurn(false)
+		else if (controller.currentPlayerObj().name === rf.AI_NAME && store.gameflow.phase != rf.PHASE_GAME_OVER) makeAImove()
 		return true
 	} catch (error) {
 		console.error("Error fetching data:", error)
@@ -834,7 +838,7 @@ export async function saveOOBpreference() {
 	}
 }
 
-export async function saveSimulMove(moveData, continueFromStalledGame = false, passKickoutFor = "", passKickoutSeat = null) {
+export async function saveSimulMove(moveData, continueFromStalledGame = false, passKickoutFor = "", passKickoutSeat = null, cap3Seat = null) {
 	if (useModelStore().bailout.pending) return
 	if (usePersonalStore().tutorial) return // Tutorial game is never persisted
 	const store = useModelStore()
@@ -906,6 +910,7 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false, p
 		continueFromStalledGame: continueFromStalledGame,
 		passKickoutFor: passKickoutFor,
 		passKickoutSeat: passKickoutSeat,
+		...(cap3Seat === null ? {} : { cap3Seat }),
 	}
 
 	/* This is only used in PASS_KICKOUT function
@@ -975,11 +980,11 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false, p
 			await controller.endCurrentPhase()
 			// save the game
 			// NB could M have been changed in endCurrentPhase that isn't reflected in model??
-			await saveGameNormal(true, false, false)
+			const saved = await saveGameNormal(true, false, false)
 			// Keep haltPlay true through the saves above so Vue renders during the
 			// in-flight fetches (empty turn order) don't look like a live state;
 			// the turn order is rebuilt by now, so allow play again
-			personal.haltPlay = false
+			personal.haltPlay = cap3Seat !== null && !saved
 		}
 
 		store.viewSettings.showGameLoader = false
@@ -988,7 +993,7 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false, p
 		console.error("Error fetching data:", error)
 		personal.haltPlay = false
 		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingGame")
-		store.gameMessages.retrySave = () => saveSimulMove(retryMoveData, continueFromStalledGame, passKickoutFor, passKickoutSeat)
+		store.gameMessages.retrySave = () => saveSimulMove(retryMoveData, continueFromStalledGame, passKickoutFor, passKickoutSeat, cap3Seat)
 		reportSaveError("FCM simul move save error", `LU=${personal.latestUpdate}`, error)
 	}
 }

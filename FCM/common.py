@@ -16,6 +16,7 @@ from Lobby.sharedFunctions.sharedFunctions import SF_getGameCreationJsonReturn
 from Lobby.sharedFunctions.sharedRefs import SR_getTimeNow
 
 from . import FCMconstants as rfFCM
+from .cap3 import AI_USERNAME, cap3_available, cap3_options_supported
 
 if TYPE_CHECKING:
     from Lobby.presenters import FCMpresenter
@@ -218,6 +219,7 @@ def create_fcm_game(
     game_pace = rf.PACE_STANDARD
     created = SR_getTimeNow()
     player_Order_Seed = 0
+    cap3_seat = None
     starting_options = []
     max_players = 2
     game_status = "AVAILABLE"
@@ -294,6 +296,7 @@ def create_fcm_game(
             and "randomModules" not in request.POST
             and "draftModules" not in request.POST
             and "fcmAI" not in request.POST
+            and not request.POST.get("fcmCap3")
         ):
             messages.error(request, gettext("Please Select an Expert Option"))
             return HttpResponseRedirect(reverse("createFCMpage"))
@@ -331,10 +334,30 @@ def create_fcm_game(
             tiles = request.POST["mapData"].split(",")
             max_players = {18: 2, 24: 3, 32: 4, 40: 5, 48: 6}.get(len(tiles), 2)
 
+        cap3_choice = request.POST.get("fcmCap3", "")
+        if cap3_choice:
+            if not cap3_available():
+                messages.error(request, gettext("Cap3 AI is currently unavailable."))
+                return HttpResponseRedirect(reverse("createFCMpage"))
+            if (
+                max_players != 4 or cap3_choice not in {"1", "2", "3", "4"}
+                or "fcmAI" in request.POST or AI_USERNAME in usernames
+                or any(request.POST.get(f"player{i}") for i in range(4, 7))
+            ):
+                messages.error(request, gettext("Choose a Cap3 seat in a four-player game with room for two other players."))
+                return HttpResponseRedirect(reverse("createFCMpage"))
+            cap3_seat = int(cap3_choice) - 1
+
         player_Order_Seed = randint(0, max_players - 1)
         starting_options = buildFCMstartingOptions(
             request.POST
         )  # Use the extracted function
+        if cap3_seat is not None:
+            starting_options = list(dict.fromkeys([*starting_options, rfFCM.SO_STRICT_PAYDAY_FRIDGE, rfFCM.SO_CAP3_AI]))
+            if not cap3_options_supported(starting_options):
+                messages.error(request, gettext("Cap3 AI supports the base game with original milestones."))
+                return HttpResponseRedirect(reverse("createFCMpage"))
+            stats_excluded_game = True
         # Exclude stats if Chinese expansion / custom modules are always
         # enabled (picked individually, not via the random pool). Random-pool
         # Chinese modules are decided in FCMpresenter.startGame after the roll.
@@ -366,7 +389,7 @@ def create_fcm_game(
             game_status = "ACTIVE"
             shadow_names = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
             shadow_display = []
-            for i in range(1, max_players):
+            for i in range(1, max_players - int(cap3_seat is not None)):
                 all_players.append(User.objects.get(username=shadow_names[i - 1]))
                 display_name = request.POST.get(f"player{i + 1}", shadow_names[i - 1])
                 shadow_display.append(display_name)
@@ -418,8 +441,14 @@ def create_fcm_game(
             GamePlayer.objects.create(
                 game=new_game,
                 player=player,
-                seat_order=idx,
+                seat_order=idx + int(cap3_seat is not None and idx >= cap3_seat),
                 notes=shadowNameNotes if player == request.user else "",
+            )
+        if cap3_seat is not None:
+            GamePlayer.objects.create(
+                game=new_game,
+                player=User.objects.get(username=AI_USERNAME),
+                seat_order=cap3_seat,
             )
 
         for player in invited_players:

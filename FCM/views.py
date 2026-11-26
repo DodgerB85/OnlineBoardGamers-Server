@@ -40,6 +40,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 from Lobby.sharedFunctions.sharedRefs import SR_getFCMstartingOptionsHTML
 
 from . import FCMconstants as rfFCM
+from .cap3 import AI_USERNAME, is_cap3_simultaneous, pending_cap3_seat
 from .common import create_fcm_game
 
 if TYPE_CHECKING:
@@ -425,6 +426,8 @@ def createFCMspinoff(request):
         return JsonResponse({"error": "No game data."}, status=400)
 
     startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    # A practice copy replaces the other seats with hotseat players.
+    startingOptions = [option for option in startingOptions if option != rfFCM.SO_CAP3_AI]
     if rf.SO_TRAINING_GAME not in startingOptions:
         startingOptions = [rf.SO_TRAINING_GAME, *startingOptions]
     maxPlayers = currentGame.maxPlayers
@@ -723,6 +726,17 @@ def _processTurn(request):
     # Spectators may poll loadNew; every other action mutates the game
     if jsonData["action"] != "loadNew" and not _canActInGame(request, currentGame):
         return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
+
+    cap3_seat = jsonData.get("cap3Seat")
+    if cap3_seat is not None and (
+        jsonData["action"] not in ("saveNormal", "saveSimulMove")
+        or type(cap3_seat) is not int
+        or cap3_seat != pending_cap3_seat(currentGame)
+        or (jsonData["action"] == "saveSimulMove") != is_cap3_simultaneous(currentGame)
+        or jsonData.get("continueFromStalledGame")
+        or not currentGame.players.filter(player=request.user, is_missing=False, is_kicked=False).exists()
+    ):
+        return JsonResponse({"syncError": True}, safe=False)
 
     if jsonData["action"] in ("preTurn", "saveSimulMove"):
         starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
@@ -1042,7 +1056,9 @@ def _processTurn(request):
             return blocked
 
         nameToUse = request.user.username
-        if is_game_admin(request.user):
+        if cap3_seat is not None:
+            nameToUse = AI_USERNAME
+        elif is_game_admin(request.user):
             nameToUse = jsonData["BKSN"]
             if nameToUse.startswith("FCMtourneyAdmin/"):
                 name_parts = nameToUse.split("/", 1)
@@ -1328,7 +1344,9 @@ def _processTurn(request):
             currentGame.phase = jsonData["phase"]
 
             nameToUpdate = request.user.username
-            if is_game_admin(request.user):
+            if cap3_seat is not None:
+                nameToUpdate = AI_USERNAME
+            elif is_game_admin(request.user):
                 nameToUpdate = jsonData["BKSN"]
                 if nameToUpdate.startswith("FCMtourneyAdmin/"):
                     name_parts = nameToUpdate.split("/", 1)
@@ -1373,7 +1391,7 @@ def _processTurn(request):
             if currentGame.phase != rfFCM.PHASE_SETUP_RESTAURANT1 and currentGame.phase != rfFCM.PHASE_SETUP_RESTAURANT2:
                 presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayersFCM(), acting_username=nameToUpdate, old_latest_update=oldVer)
 
-            if is_game_admin(request.user):
+            if cap3_seat is None and is_game_admin(request.user):
                 flexName = jsonData["BKSN"]
                 if flexName.startswith("FCMtourneyAdmin/"):
                     name_parts = flexName.split("/", 1)
@@ -1390,7 +1408,7 @@ def _processTurn(request):
                     currentGame,
                     currentGame.latestUpdate,
                     int(time.time()) * 1000,
-                    passKickoutTarget if passKickoutTarget else request.user.username,
+                    nameToUpdate,
                     currentGame.kickoutDuration,
                 )
 

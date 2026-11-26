@@ -18,6 +18,7 @@ import { previewTrainingOrganization } from "./milestoneNightBalanceOrganization
 import { useModelStore } from "../stores/FCMstore.js"
 import { usePersonalStore } from "../stores/FCMpersonal"
 import i18n from "../i18n"
+import { cap3Seat, runCap3Turn } from "./AI/FCMCap3"
 
 // Only the front seat may be auto-declined; never pre-consume a later bot's choice.
 export function settleAutomaticBailoutClaims() {
@@ -2072,7 +2073,7 @@ export async function endPlayerTurn(forced, isPointlessMove = false, extraPostDa
 	}
 
 	// EXIT EARLY FOR CHOOSING RESERVE OUT OF PHASE (not used in training games)
-	if (!personal.trainingGame && (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 || store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT2) && model.alreadyChosenReserveCard() && store.players[personal.pov].restaurants.length > 0) {
+	if (extraPostData?.cap3Seat == null && !personal.trainingGame && (store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT1 || store.gameflow.phase === rf.PHASE_SETUP_RESTAURANT2) && model.alreadyChosenReserveCard() && store.players[personal.pov].restaurants.length > 0) {
 		let moveData = [store.reserveCards[personal.pov]]
 		personal.moveDataRaw = funcs.compressData([personal.name, [0, 1, 2], Math.round(new Date().getTime() / 1000), [...moveData]])
 		IO.saveSimulMove(moveData)
@@ -2192,7 +2193,11 @@ export async function endPlayerTurn(forced, isPointlessMove = false, extraPostDa
 		// Dinner may have just installed the gift queue. Persist it under the
 		// same freeze/retry contract as a claim, without running dinner again.
 		if (store.bailout.pending) return saveBailoutProgress(false, [!moverIsAi, false, isPointlessMove, extraPostData])
-		await IO.saveGameNormal(!moverIsAi, false, isPointlessMove, extraPostData)
+		const saved = await IO.saveGameNormal(!moverIsAi, false, isPointlessMove, extraPostData)
+		if (!saved && extraPostData?.cap3Seat != null) {
+			personal.haltPlay = true
+			return
+		}
 		// In case it is your turn again right away, run startPlayerTurn
 		// If it isn't then you get returned from that function anyway
 		if (rf.SUPER_USERS.includes(personal.name)) personal.pov = -1
@@ -2591,7 +2596,7 @@ export function autoProcessTurnOrder() {
 	}
 }
 
-export function startPlayerTurn(startingMidPhase) {
+export function startPlayerTurn(startingMidPhase, preparingCap3 = false) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	if (store.bailout.pending) {
@@ -2611,7 +2616,14 @@ export function startPlayerTurn(startingMidPhase) {
 	// false while it is FcmTutor's turn (so the player cannot act for them), which
 	// would otherwise skip this setup and leave a stale context.justHired behind.
 	const tutorialAlwaysPrepare = personal.tutorial && store.gameflow.turnOrder[0] !== 0
-	if (!personal.canPlay() && !tutorialAlwaysPrepare) {
+	if (!preparingCap3) {
+		const seat = cap3Seat()
+		if (seat >= 0) {
+			void runCap3Turn(seat)
+			return
+		}
+	}
+	if (!personal.canPlay() && !tutorialAlwaysPrepare && !preparingCap3) {
 		return
 	}
 	if (store.gameflow.phase === rf.PHASE_URBAN_PLANNING) {

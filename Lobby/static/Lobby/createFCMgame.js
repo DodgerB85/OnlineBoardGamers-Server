@@ -50,6 +50,12 @@ function initGameCreation(fillData, setupData = {}) {
 			validateOptions("trainingGame")
 		}
 
+		const cap3 = document.getElementById("fcmCap3")
+		if (cap3 && setupData.cap3Seat) {
+			cap3.value = setupData.cap3Seat
+			selectPlayers()
+		}
+
 		// Check and enable map data if necessary
 		if (setupData.startingMap != "") {
 			document.getElementById("keepMapDiv").style.display = "block"
@@ -685,6 +691,19 @@ function setPlayersforMapData() {
 
 function selectPlayers() {
 	showSeats()
+	const cap3 = document.getElementById("fcmCap3")
+	if (cap3) {
+		cap3.disabled = document.getElementById("playerNumber").value !== "4" || document.getElementById("fcmAI").checked
+		if (cap3.disabled) cap3.value = ""
+		const hasCap3 = cap3.value !== ""
+		const player4 = document.getElementById("player4")
+		player4.disabled = hasCap3
+		if (hasCap3) document.getElementById("selPlayer4").style.display = "none"
+		for (const seat of [2, 3]) {
+			const label = document.querySelector(`label[for="player${seat}"]`)
+			label.textContent = hasCap3 ? label.dataset.cap3Label : label.dataset.playerLabel
+		}
+	}
 	// The AI takes the second seat and locks every seat box.
 	if (document.getElementById("trainingGame").checked && document.getElementById("fcmAI").checked) {
 		document.getElementById("player2").value = "FcmAI"

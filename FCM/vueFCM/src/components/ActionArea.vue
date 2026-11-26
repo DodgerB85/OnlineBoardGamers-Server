@@ -771,7 +771,7 @@ function skipModuleAndEndTurn() {
 							</ul>
 						</div>
 
-						<h1 v-if="personal.trainingGame && (store.players[0].name === 'FcmAI' || store.players[1].name === 'FcmAI')" v-html="$t('welcome.aiWarning')"></h1>
+						<h1 v-if="personal.trainingGame && store.players.some(p => p.name === rf.AI_NAME && p.displayName === rf.AI_NAME)" v-html="$t('welcome.aiWarning')"></h1>
 
 						<p>{{ $t("welcome.chooseRestaurant") }}</p>
 						<p v-if="store.startingOptions.useMilestones && store.startingOptions.newMilestones">

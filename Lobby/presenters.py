@@ -2239,6 +2239,7 @@ class FCMpresenter(GamePresenter):
         starting_options = [x for x in starting_options if not (
             isinstance(x, int) and rfFCM.SO_EXCLUDED_MODULE_BASE <= x < rfFCM.SO_INCLUDED_MODULE_BASE + 100
         )]
+        from FCM.cap3 import AI_USERNAME
         from FCM.common import validateFCMOptionDependencies
         validateFCMOptionDependencies(starting_options)
         self.gameObj.startingOptions = json.dumps(starting_options, separators=(",", ":"))
@@ -2252,7 +2253,14 @@ class FCMpresenter(GamePresenter):
         game_players = [gp for gp in all_gps if gp.player and gp.player.username != "FCMtourneyAdmin"]
         fcm_tourney_admin_gps = [gp for gp in all_gps if gp.player and gp.player.username == "FCMtourneyAdmin"]
 
+        cap3_player = None
+        if rfFCM.SO_CAP3_AI in starting_options:
+            cap3_player = next((gp for gp in game_players if gp.player.username == AI_USERNAME), None)
+            if cap3_player:
+                game_players.remove(cap3_player)
         random.Random(self.gameObj.playerOrderSeed).shuffle(game_players)
+        if cap3_player:
+            game_players.insert(cap3_player.seat_order, cap3_player)
         game_players.extend(fcm_tourney_admin_gps)
 
         _currentPlayers = ""

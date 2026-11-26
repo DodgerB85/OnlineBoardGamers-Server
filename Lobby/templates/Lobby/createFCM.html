@@ -529,8 +529,20 @@
                 <option value="6">6</option>
               </select>
             </div>
+            {% if cap3_enabled %}
+              <div class="form-row">
+                <label class="form-label" for="fcmCap3">{% translate "Cap3 AI" %}</label>
+                <select id="fcmCap3" name="fcmCap3" onchange="selectPlayers();" disabled>
+                  <option value="">{% translate "Off" %}</option>
+                  {% for seat in "1234" %}
+                    <option value="{{ seat }}">{% blocktranslate with number=seat %}Opening seat {{ number }}{% endblocktranslate %}</option>
+                  {% endfor %}
+                </select>
+                <div class="form-help">{% translate "Four-player base games with original milestones. The other seats are shuffled." %}</div>
+              </div>
+            {% endif %}
             <div class="form-row">
-              <label class="form-label" for="player2">{% trans "Player 2" %}</label>
+              <label class="form-label" for="player2"{% if cap3_enabled %} data-player-label="{% translate 'Player 2' %}" data-cap3-label="{% translate 'Opponent 1' %}"{% endif %}>{% trans "Player 2" %}</label>
               <div class="field">
                 <div class="autocomplete">
                   <input type="text"
@@ -553,7 +565,7 @@
               </div>
             </div>
             <div class="form-row" id="selPlayer3" style="display:none">
-              <label class="form-label" for="player3">{% trans "Player 3" %}</label>
+              <label class="form-label" for="player3"{% if cap3_enabled %} data-player-label="{% translate 'Player 3' %}" data-cap3-label="{% translate 'Opponent 2' %}"{% endif %}>{% trans "Player 3" %}</label>
               <div class="field">
                 <div class="autocomplete">
                   <input type="text"
@@ -1294,6 +1306,7 @@
             setupData.kickoutDuration = "{{ kickoutDuration }}";
             setupData.playerNumber = {{ playerNumber }};
             setupData.playerNames = {{ playerNames |script_json }};
+            setupData.cap3Seat = "{{ cap3_seat|default_if_none:'' }}";
             {% if scenarioUsed %}
             setupData.scenarioUsed = true;
             setupData.scenarioName = "{{ scenarioName }}";

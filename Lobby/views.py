@@ -68,6 +68,8 @@ from user_visit.models import UserVisit
 
 import Lobby.sharedFunctions.constants as rf
 import NTR.NTRconstants as rfNTR
+from FCM import FCMconstants as rfFCM
+from FCM.cap3 import AI_USERNAME, cap3_available
 from FCM.common import buildFCMstartingOptions
 from Lobby.sharedFunctions.availability import availability_join_warning_hours
 from Lobby.sharedFunctions.db_mutex import db_mutex
@@ -2890,9 +2892,10 @@ def createHLCpage(request, gameID=0):
 @login_required
 def createFCMpage(request, gameID=None):
     experienced = SF_hasRequiredExperience(request, "FCM", Game)
+    cap3_enabled = cap3_available()
 
     if request.method != "POST" and gameID is None:
-        return render(request, "Lobby/createFCM.html", {"experienced": experienced})
+        return render(request, "Lobby/createFCM.html", {"experienced": experienced, "cap3_enabled": cap3_enabled})
     elif request.method != "POST" and gameID is not None:
         # Extract the data from gameID and return template with all data
         try:
@@ -2923,9 +2926,16 @@ def createFCMpage(request, gameID=None):
                 gameName = gameName.replace(scen, "")
                 scenarioName = scen
 
+        has_cap3 = rfFCM.SO_CAP3_AI in json.loads(currentGame.startingOptions or "[]")
+        cap3_seat = None
         playerNames = []
-        for gp in currentGame.players.all().select_related("player"):
-            if gp.player and request.user != gp.player:
+        for gp in currentGame.players.select_related("player"):
+            if not gp.player:
+                continue
+            if has_cap3 and gp.player.username == AI_USERNAME:
+                if gp.seat_order in range(4):
+                    cap3_seat = gp.seat_order + 1
+            elif request.user != gp.player:
                 playerNames.append(gp.player.username)
 
         messages.success(request, (gettext("Game creation for rematch")))
@@ -2945,6 +2955,8 @@ def createFCMpage(request, gameID=None):
                 "startingOptions": currentGame.startingOptions,
                 "startingMap": currentGame.startingMap,
                 "experienced": experienced,
+                "cap3_enabled": cap3_enabled,
+                "cap3_seat": cap3_seat,
             },
         )
     else:
@@ -2952,7 +2964,7 @@ def createFCMpage(request, gameID=None):
         return render(
             request,
             "Lobby/createFCM.html",
-            {"experienced": experienced, "mapData": request.POST["mapData"]},
+            {"experienced": experienced, "cap3_enabled": cap3_enabled, "mapData": request.POST["mapData"]},
         )
 
 

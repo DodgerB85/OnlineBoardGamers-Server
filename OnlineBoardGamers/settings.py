@@ -241,6 +241,8 @@ LBR_AI_MAX_ATTEMPTS = config("LBR_AI_MAX_ATTEMPTS", default=2, cast=int)
 # It must outlast a pending retry, or a poll starts a second retry chain.
 LBR_AI_CLAIM_SECONDS = config("LBR_AI_CLAIM_SECONDS", default=LBR_AI_RETRY_SECONDS + 30, cast=int)
 
+FCM_CAP3_BIN = config("FCM_CAP3_BIN", default=str(BASE_DIR / "FCM" / "ai-service" / "bin" / "fcm_ai_runner"))
+
 # ASYNC SETTINGS
 Q_CLUSTER = {
     "name": "obg_cluster",

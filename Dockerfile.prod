@@ -15,8 +15,8 @@ RUN pip install --no-cache-dir -r requirements.txt \
 
 # Vue bundles are the committed *vuedist folders; init.sh collects them.
 COPY . /app/
-# Git on Windows does not preserve the executable bit for the vendored AI binary.
-RUN chmod +x /app/LBR/ai-service/bin/lbr-policy
+# Git on Windows does not preserve the executable bit for the vendored AI binaries.
+RUN chmod +x /app/LBR/ai-service/bin/lbr-policy /app/FCM/ai-service/bin/fcm_ai_runner
 
 EXPOSE 8000
 
