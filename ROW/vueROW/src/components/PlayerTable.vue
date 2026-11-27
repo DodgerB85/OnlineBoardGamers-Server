@@ -2,7 +2,7 @@
 /**
  * Player table, ported from the boardgamefiesta GWT player-board.component
  * (GPL-3.0, Tom Wetjens): player_board_{color}.jpg backdrop, positioned worker
- * tiles, temporary-certificate markers, auxiliary-action squares and unlock
+ * tiles, temporary-certificate markers, auxiliary-action circles and unlock
  * discs with the same coordinates as the original SVG.
  */
 import { computed, ref } from "vue"
@@ -107,15 +107,16 @@ const AUX_ROW_DEFS = [
 	{ id: "aux-move-engine-forward", y: 288, single: ActionType.PAY_1_DOLLAR_TO_MOVE_ENGINE_1_FORWARD, double: ActionType.PAY_2_DOLLARS_TO_MOVE_ENGINE_2_FORWARD },
 ]
 
+// The two printed helper circles: left = single action, right = double action.
+const AUX_CIRCLE_X = { single: 38, double: 138 }
+const AUX_CIRCLE_R = 27
+
 const auxRows = computed(() => [...AUX_ROW_DEFS, {
 	id: "aux-remove-card",
 	y: 368,
 	single: auxRemoveCardAction.value,
 	double: auxRemoveCard2Action.value,
-}].map((row) => ({
-	...row,
-	action: store.actions.includes(row.double) ? row.double : row.single,
-})))
+}].map((row) => ({ ...row, cy: row.y + 27 })))
 
 /** Aux wrapper from a multi-action building waits for its printed region click. */
 const waitingBuildingActions = computed(() => {
@@ -145,10 +146,9 @@ function auxOfferedActions() {
 	return out
 }
 
-function auxRowAvailable(row) {
+function auxActionAvailable(action) {
 	if (!actable.value || !auxWrapper.value) return false
-	const offered = auxOfferedActions()
-	return offered.has(row.double) || offered.has(row.single)
+	return auxOfferedActions().has(action)
 }
 
 function runAuxiliaryAction(action) {
@@ -159,12 +159,14 @@ function runAuxiliaryAction(action) {
 	controller.perform({ type: action })
 }
 
-function activateAuxiliaryAction(row) {
-	if (!actable.value || !auxWrapper.value) return
-	// The wrapper only opens the choice; picking the row's best action is the player's click.
+const hoveredAuxRow = ref(null)
+
+function activateAuxiliaryAction(action) {
+	if (!actable.value || !auxWrapper.value || !auxActionAvailable(action)) return
+	hoveredAuxRow.value = null
+	// The wrapper only opens the choice; the clicked circle is the player's pick.
 	if (!controller.perform({ type: auxWrapper.value })) return
-	const after = store.actions.includes(row.double) ? row.double : store.actions.includes(row.single) ? row.single : null
-	if (after) runAuxiliaryAction(after)
+	runAuxiliaryAction(action)
 }
 
 // Unlock discs: [unlockable, cx, cy, color] (white = first disc of a pair).
@@ -453,27 +455,41 @@ function selectCard(card) {
 			<!-- temporary certificates -->
 			<rect v-for="m in certMarkers" v-show="tempCertificates === m.n" :key="'cert' + m.n" class="marker" x="744" :y="m.y" width="30" height="30" />
 
-			<!-- Choose one auxiliary row. If its double action is available, select that by default. -->
-			<rect
-				v-for="row in auxRows"
-				:key="row.id"
-				class="action"
-				x="13"
-				:y="row.y"
-				rx="4"
-				ry="4"
-				width="155"
-				height="54"
-				:class="{ selectable: auxRowAvailable(row), disabled: !auxRowAvailable(row) }"
-				:tabindex="auxRowAvailable(row) ? 0 : undefined"
-				role="button"
-				:aria-label="view.humanizeAction(row.action)"
-				@click="activateAuxiliaryAction(row)"
-				@keydown.enter.prevent="activateAuxiliaryAction(row)"
-				@keydown.space.prevent="activateAuxiliaryAction(row)"
-			>
-				<title>{{ view.humanizeAction(row.action) }}</title>
-			</rect>
+			<!-- Auxiliary rows: left circle = single action, right circle = double. -->
+			<g v-for="row in auxRows" :key="row.id">
+				<circle
+					class="action"
+					:class="{ selectable: auxActionAvailable(row.single), disabled: !auxActionAvailable(row.single), linked: hoveredAuxRow === row.id }"
+					:cx="AUX_CIRCLE_X.single"
+					:cy="row.cy"
+					:r="AUX_CIRCLE_R"
+					:tabindex="auxActionAvailable(row.single) ? 0 : undefined"
+					role="button"
+					:aria-label="view.humanizeAction(row.single)"
+					@click="activateAuxiliaryAction(row.single)"
+					@keydown.enter.prevent="activateAuxiliaryAction(row.single)"
+					@keydown.space.prevent="activateAuxiliaryAction(row.single)"
+				>
+					<title>{{ view.humanizeAction(row.single) }}</title>
+				</circle>
+				<circle
+					class="action"
+					:class="{ selectable: auxActionAvailable(row.double), disabled: !auxActionAvailable(row.double) }"
+					:cx="AUX_CIRCLE_X.double"
+					:cy="row.cy"
+					:r="AUX_CIRCLE_R"
+					:tabindex="auxActionAvailable(row.double) ? 0 : undefined"
+					role="button"
+					:aria-label="view.humanizeAction(row.double)"
+					@mouseenter="hoveredAuxRow = auxActionAvailable(row.double) ? row.id : null"
+					@mouseleave="hoveredAuxRow = null"
+					@click="activateAuxiliaryAction(row.double)"
+					@keydown.enter.prevent="activateAuxiliaryAction(row.double)"
+					@keydown.space.prevent="activateAuxiliaryAction(row.double)"
+				>
+					<title>{{ view.humanizeAction(row.double) }}</title>
+				</circle>
+			</g>
 
 			<!-- unlock discs -->
 			<circle
@@ -595,8 +611,16 @@ function selectCard(card) {
 	stroke-width: 2;
 	fill: rgb(0, 0, 0, 0.01);
 }
-.action.selectable { cursor: pointer; stroke: #ffd400; stroke-width: 4; }
-.action.selectable:hover { stroke: #90ee90; stroke-width: 6; }
+.action.selectable {
+	cursor: pointer;
+	stroke: #ffd400;
+	stroke-width: 4;
+	/* The auxiliary circles are printed yellow; the dark halo keeps the yellow
+	   highlight visible on the yellow player board. */
+	filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 1px #000);
+}
+.action.selectable:hover,
+.action.selectable.linked { stroke: #90ee90; stroke-width: 6; }
 .action.selectable:focus-visible { stroke: #177daf; stroke-width: 6; }
 .action.disabled { stroke: none; }
 
