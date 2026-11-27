@@ -339,15 +339,17 @@ def create_fcm_game(
             if not cap3_available():
                 messages.error(request, gettext("Deep-Fry Bot is currently unavailable."))
                 return HttpResponseRedirect(reverse("createFCMpage"))
+            max_bots = min(len(rf.FCM_CAP3_USERNAMES), max_players - 1)
+            valid_seats = {str(s) for s in range(1, max_players + 1)}
             if (
-                max_players != 4 or not 1 <= len(cap3_choices) <= 3
+                max_players not in range(2, 7) or not 1 <= len(cap3_choices) <= max_bots
                 or len(set(cap3_choices)) != len(cap3_choices)
-                or set(cap3_choices) - {"1", "2", "3", "4"}
+                or set(cap3_choices) - valid_seats
                 or "fcmAI" in request.POST
                 or not set(rf.FCM_CAP3_USERNAMES).isdisjoint(usernames)
-                or any(request.POST.get(f"player{i}") for i in range(5 - len(cap3_choices), 7))
+                or any(request.POST.get(f"player{i}") for i in range(max_players + 1 - len(cap3_choices), 7))
             ):
-                messages.error(request, gettext("Choose up to three Deep-Fry Bot seats in a four-player game, leaving room for the human players."))
+                messages.error(request, gettext("Choose Deep-Fry Bot seats leaving room for at least one human player."))
                 return HttpResponseRedirect(reverse("createFCMpage"))
             cap3_seats = {int(choice) - 1 for choice in cap3_choices}
 
@@ -358,7 +360,7 @@ def create_fcm_game(
         if cap3_seats:
             starting_options = list(dict.fromkeys([*starting_options, rfFCM.SO_STRICT_PAYDAY_FRIDGE, rfFCM.SO_CAP3_AI]))
             if not cap3_options_supported(starting_options):
-                messages.error(request, gettext("Deep-Fry Bot is unavailable with China Expansion modules."))
+                messages.error(request, gettext("Deep-Fry Bot is unavailable with China Expansion or fan-made modules."))
                 return HttpResponseRedirect(reverse("createFCMpage"))
             policy = request.POST.get("fcmCap3Policy", "full")
             if policy != "full":

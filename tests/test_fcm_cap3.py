@@ -26,13 +26,28 @@ class FcmCap3Test(TestCase):
             "gameName": "Cap3 test", "gameDescription": "", "pace": "1",
             "mapData": "", "playerNumber": "4", "trainingGame": "102",
         }
-        self.client.post(route, {**setup, "playerNumber": "3", "fcmCap3": "1"})
+        self.client.post(route, {**setup, "playerNumber": "2", "fcmCap3": ["1", "2"]})
         self.client.post(route, {**setup, "fcmCap3": "5"})
         self.client.post(route, {**setup, "fcmCap3": ["1", "1"]})
         self.client.post(route, {**setup, "fcmCap3": ["1", "2", "3", "4"]})
         self.client.post(route, {**setup, "fcmCap3": ["1", "2"], "player3": "No room"})
         self.client.post(route, {**setup, "fcmCap3": "1", "urbanPlanning": "40"})
+        self.client.post(route, {**setup, "fcmCap3": "1", "friedChicken": "46"})
+        self.client.post(route, {**setup, "fcmCap3": "1", "enableAdvancedOptions": "1", "randomModules": "200", "includeFanExpansion": "204"})
         self.assertFalse(Game.objects.exists())
+
+        self.client.post(route, {**setup, "playerNumber": "2", "fcmCap3": "2"})
+        two_player = Game.objects.latest("id")
+        self.assertEqual(two_player.maxPlayers, 2)
+        self.assertEqual(two_player.players.get(player=self.ai).seat_order, 1)
+        two_player.delete()
+
+        self.client.post(route, {**setup, "playerNumber": "6", "fcmCap3": ["1", "2", "4", "5", "6"]})
+        six_player = Game.objects.latest("id")
+        self.assertEqual(six_player.maxPlayers, 6)
+        self.assertEqual(six_player.players.filter(is_ai=True).count(), 5)
+        self.assertEqual(six_player.players.get(player=self.human).seat_order, 2)
+        six_player.delete()
 
         for seat in range(1, 5):
             with self.subTest(seat=seat):
@@ -97,7 +112,7 @@ class FcmCap3Test(TestCase):
         self.client.force_login(self.human)
         response = self.client.get(reverse("createFCMpage", args=[regular.id]))
         self.assertContains(response, 'setupData.cap3Seats = [2, 4]')
-        self.assertContains(response, 'name="fcmCap3"', count=4)
+        self.assertContains(response, 'name="fcmCap3"', count=6)
         self.assertEqual(response.context["playerNames"], [
             player.player.username for player in regular.players.exclude(is_ai=True).exclude(player=self.human)
         ])

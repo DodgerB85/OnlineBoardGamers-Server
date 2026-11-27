@@ -3,7 +3,7 @@ from typing import Final
 # Ordered list of shadow player usernames (used when creating training games)
 SHADOW_PLAYER_NAMES = ["SHADOW", "SHADOW_2", "SHADOW_3", "SHADOW_4", "SHADOW_5"]
 # Full set of bot/shadow usernames for membership checks (is-my-move, kickout, etc.)
-FCM_CAP3_USERNAMES = ("FcmAI", "FcmAI_2", "FcmAI_3")
+FCM_CAP3_USERNAMES = ("FcmAI", "FcmAI_2", "FcmAI_3", "FcmAI_4", "FcmAI_5")
 SHADOW_USERNAMES = {*SHADOW_PLAYER_NAMES, FCM_CAP3_USERNAMES[0]}
 # Accounts that must never be taken through registration or a username change.
 RESERVED_USERNAMES = {

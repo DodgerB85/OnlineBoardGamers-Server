@@ -632,8 +632,8 @@
                 <span class="form-label">{% translate "Deep-Fry Bot" %}</span>
                 <div class="field">
                   <div class="check-list">
-                    {% for seat in "1234" %}
-                      <label class="check-label">
+                    {% for seat in "123456" %}
+                      <label class="check-label" data-cap3-seat="{{ seat }}">
                         <input type="checkbox" id="fcmCap3Seat{{ seat }}" name="fcmCap3" value="{{ seat }}"
                                class="myCheckbox" onchange="selectPlayers(true)" disabled />
                         <div>{% blocktranslate with number=seat %}Deep-Fry Bot plays seat {{ number }}{% endblocktranslate %}</div>

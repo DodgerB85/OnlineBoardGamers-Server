@@ -12,68 +12,6 @@ import * as rf from "../FCMreference"
 import * as rules from "../FCMrules"
 
 let inFlight = false
-let worker = null
-let nextRequestId = 1
-const pendingRequests = new Map()
-
-function getRolloutWorker() {
-	if (!worker) {
-		worker = new Worker(new URL("./fcmRolloutWorker.js", import.meta.url), { type: "module" })
-		worker.onmessage = event => {
-			const { id, plan, error } = event.data
-			const pending = pendingRequests.get(id)
-			if (!pending) return
-			pendingRequests.delete(id)
-			if (error) pending.reject(new Error(error))
-			else pending.resolve(plan)
-		}
-		worker.onerror = event => {
-			const error = new Error(event?.message || "Deep-Fry Bot worker failed")
-			for (const pending of pendingRequests.values()) pending.reject(error)
-			pendingRequests.clear()
-			worker = null
-		}
-	}
-	return worker
-}
-
-function runRolloutInWorker(input) {
-	return new Promise((resolve, reject) => {
-		const id = nextRequestId++
-		pendingRequests.set(id, { resolve, reject })
-		getRolloutWorker().postMessage({ id, input })
-	})
-}
-
-function buildRolloutInput(seat) {
-	const store = useModelStore()
-	const options = window.initData.startingOptions ?? []
-	const state = funcs.decompressData(funcs.exportFCMmodel(false, false))
-	const playerSlot = options.includes(rf.SO_LOBBYISTS) ? 1 : 0
-	const players = state[playerSlot]
-	const flow = state[playerSlot + 2]
-	const order = flow[2]
-	flow[2] = [seat, ...order.filter(other => other !== seat)]
-	for (let i = 0; i < players.length; i++) {
-		const names = players[i][0]
-		players[i][0] = [names.includes(rf.BOT_NAME) ? rf.BOT_NAME : `P${i}`]
-	}
-	const excludedOptions = new Set([rf.SO_CAP3_AI, rf.SO_CAP3_FULL_ROLLOUT])
-	const engineOptions = options.filter(opt => !excludedOptions.has(opt))
-	return {
-		state,
-		metadata: {
-			starting_map: map.getOriginalTiles(false),
-			starting_options: engineOptions.map(String),
-			turn: store.gameflow.turn,
-			subphase: store.gameflow.subphase,
-			availableEmployees: store.availableEmployees,
-			availableMarketingCampaigns: store.availableMarketingCampaigns,
-			availableMilestones: store.availableMilestones,
-			bankruptPlayers: store.players.flatMap((p, index) => (p.bankrupt ? [index] : [])),
-		},
-	}
-}
 
 const finishSubphases = new Map([
 	[700000, [rf.SUBPHASE_HIRING]],
@@ -389,7 +327,7 @@ export function cap3Seat() {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	if (!window.initData.startingOptions?.includes(rf.SO_CAP3_AI) || personal.pov < 0 || store.viewSettings.showReplay ||
-		store.players.length !== 4 || store.gameflow.phase === rf.PHASE_GAME_OVER) return -1
+		store.players.length < 2 || store.players.length > 6 || store.gameflow.phase === rf.PHASE_GAME_OVER) return -1
 	const order = store.gameflow.turnOrder
 	const eligible = controller.isSimulPhase() ? order : order.slice(0, 1)
 	return eligible.find(seat => rf.CAP3_AI_NAMES.includes(store.players[seat]?.name) && store.players[seat].displayName !== rf.BOT_NAME) ?? -1
@@ -404,6 +342,7 @@ export async function runCap3Turn(seat) {
 	const latestUpdate = personal.latestUpdate
 	const simultaneous = controller.isSimulPhase(phase)
 	let snapshot
+	let reload = false
 	let refreshTurn = false
 	let keepHalted = false
 	try {
@@ -411,14 +350,38 @@ export async function runCap3Turn(seat) {
 		snapshot = funcs.simpleExportWholeFCMmodel()
 		personal.haltPlay = true
 		store.viewSettings.showGameLoader = true
-		const input = buildRolloutInput(seat)
-		const plan = await runRolloutInWorker(input)
-		if (!plan || plan.seat !== seat || plan.phase !== phase || !plan.steps?.length) {
-			throw new Error("Deep-Fry Bot returned a turn for the wrong position")
+		const response = await fetch(`/FCM/${personal.gameID}/cap3/`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json", "X-CSRFToken": funcs.getCookie("csrftoken") },
+			body: JSON.stringify({
+				latestUpdate,
+				cap3Seat: seat,
+				state: funcs.decompressData(funcs.exportFCMmodel(false, false)),
+				metadata: {
+					starting_map: map.getOriginalTiles(false),
+					subphase: store.gameflow.subphase,
+					availableEmployees: store.availableEmployees,
+					availableMarketingCampaigns: store.availableMarketingCampaigns,
+					availableMilestones: store.availableMilestones,
+					bankruptPlayers: store.players.flatMap((p, index) => p.bankrupt ? [index] : []),
+				},
+			}),
+		})
+		const plan = await response.json()
+		if (response.status === 409) {
+			if (latestUpdate === personal.latestUpdate && simultaneous && String(plan.latestUpdate) === latestUpdate) {
+				store.gameflow.turnOrder = store.gameflow.turnOrder.filter(other => other !== seat)
+				refreshTurn = true
+			} else {
+				reload = latestUpdate === personal.latestUpdate && (plan.stale === true || String(plan.latestUpdate) !== latestUpdate)
+				refreshTurn = latestUpdate !== personal.latestUpdate
+			}
+		} else {
+			if (!response.ok) throw new Error(plan.error)
+			if (latestUpdate === personal.latestUpdate && seat === cap3Seat()) await applyCap3Turn(plan)
+			keepHalted = personal.haltPlay && Boolean(store.gameMessages.errorText)
+			refreshTurn = latestUpdate !== personal.latestUpdate || (simultaneous && cap3Seat() !== seat)
 		}
-		if (latestUpdate === personal.latestUpdate && seat === cap3Seat()) await applyCap3Turn(plan)
-		keepHalted = personal.haltPlay && Boolean(store.gameMessages.errorText)
-		refreshTurn = latestUpdate !== personal.latestUpdate || (simultaneous && cap3Seat() !== seat)
 	} catch (error) {
 		if (latestUpdate === personal.latestUpdate) {
 			if (snapshot) funcs.simpleImportWholeFCMmodel(snapshot)
@@ -431,5 +394,6 @@ export async function runCap3Turn(seat) {
 		store.viewSettings.showGameLoader = false
 		personal.haltPlay = keepHalted
 	}
-	if (refreshTurn) controller.startPlayerTurn(false)
+	if (reload) await IO.loadGame()
+	else if (refreshTurn) controller.startPlayerTurn(false)
 }

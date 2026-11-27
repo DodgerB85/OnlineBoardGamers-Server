@@ -16,7 +16,7 @@ export const BOT_NAME = "FcmBot"
 // Seat name of the in-game AI. Distinct from BOT_NAME: a BOT_NAME seat is a
 // human who was kicked out or resigned, an AI_NAME seat plays itself.
 export const AI_NAME = "FcmAI"
-export const CAP3_AI_NAMES = [AI_NAME, "FcmAI_2", "FcmAI_3"]
+export const CAP3_AI_NAMES = [AI_NAME, "FcmAI_2", "FcmAI_3", "FcmAI_4", "FcmAI_5"]
 export const SO_CAP3_AI = 501
 export const SO_CAP3_FULL_ROLLOUT = 502
 export const TOURNAMENT_ADMIN_NAME = "FCMtourneyAdmin"

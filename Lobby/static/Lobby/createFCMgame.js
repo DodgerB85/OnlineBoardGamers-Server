@@ -551,6 +551,7 @@ function validateOptions(change) {
 	}
 	syncMilestoneNightBalanceUI()
 	syncRandomExcludeUI()
+	selectPlayers(true)
 }
 
 // === Random module exclusion panel ===
@@ -691,24 +692,42 @@ function setPlayersforMapData() {
 	}
 }
 
+function hasUnsupportedBotModules() {
+	const ids = [
+		"urbanPlanning", "urbanPlanningPlus", "jazzMusicians", "dumplings", "deliveryDrivers", "hawkers",
+		"friedChicken", "stadium", "laborMarket", "secondBailout", "mediaLine", "newMap", "newMapAll",
+		"seniorBusinessDeveloper", "milestoneNightBalance",
+		"includeChineseExpansion", "includeFanExpansion",
+		"include_42", "include_43", "include_44", "include_45",
+		"include_46", "include_47", "include_48", "include_49", "include_50", "include_51", "include_53", "include_54",
+	]
+	return ids.some(id => document.getElementById(id)?.checked)
+}
+
 function selectPlayers(preservePracticeNames = false) {
 	showSeats(preservePracticeNames)
 	const cap3Seats = document.getElementById("cap3SeatsRow")
 	if (cap3Seats) {
-		const enabled = document.getElementById("playerNumber").value === "4" && !document.getElementById("fcmAI").checked
+		const maxPlayers = parseInt(document.getElementById("playerNumber").value, 10) || 4
+		const maxBots = maxPlayers - 1
+		const enabled = maxPlayers >= 2 && maxPlayers <= 6 && !document.getElementById("fcmAI").checked && !hasUnsupportedBotModules()
 		cap3Seats.style.display = enabled ? "" : "none"
 		const boxes = [...cap3Seats.querySelectorAll('input[type="checkbox"]')]
-		const count = enabled ? boxes.filter(box => box.checked).length : 0
+		const count = enabled ? boxes.filter(box => parseInt(box.value, 10) <= maxPlayers && box.checked).length : 0
 		for (const box of boxes) {
-			if (!enabled) box.checked = false
-			box.disabled = !enabled || (count === 3 && !box.checked)
+			const seat = parseInt(box.value, 10)
+			const inGame = seat <= maxPlayers
+			const label = box.closest("[data-cap3-seat]")
+			if (label) label.style.display = inGame ? "" : "none"
+			if (!enabled || !inGame) box.checked = false
+			box.disabled = !enabled || !inGame || (count >= maxBots && !box.checked)
 		}
-		for (const seat of [2, 3, 4]) {
-			const filled = count > 0 && seat > 4 - count
+		for (let seat = 2; seat <= maxPlayers; seat++) {
+			const filled = count > 0 && seat > maxPlayers - count
 			document.getElementById(`player${seat}`).disabled = filled
 			if (filled) document.getElementById(`selPlayer${seat}`).style.display = "none"
 			const label = document.querySelector(`label[for="player${seat}"]`)
-			if (label.dataset.cap3Label) label.textContent = count > 0 ? label.dataset.cap3Label : label.dataset.playerLabel
+			if (label?.dataset.cap3Label) label.textContent = count > 0 ? label.dataset.cap3Label : label.dataset.playerLabel
 		}
 	}
 	// The AI takes the second seat and locks every seat box.

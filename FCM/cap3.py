@@ -21,15 +21,27 @@ CHINA_OPTIONS = {
     rf.SO_URBAN_PLANNING, rf.SO_URBAN_PLANNING_PLUS, rf.SO_JAZZ_MUSICIANS,
     rf.SO_DUMPLINGS, rf.SO_DELIVERY_DRIVERS, rf.SO_HAWKERS, rf.SO_RANDOM_MODULES_CHINESE,
 }
+FAN_OPTIONS = {
+    rf.SO_FRIED_CHICKEN, rf.SO_STADIUM, rf.SO_LABOR_MARKET, rf.SO_SECOND_BAILOUT,
+    rf.SO_MEDIA_LINE, rf.SO_NEW_MAP, rf.SO_NEW_MAP_ALL,
+    rf.SO_SENIOR_BUSINESS_DEVELOPER, rf.SO_MILESTONE_NIGHT_BALANCE, rf.SO_RANDOM_MODULES_FAN,
+}
+UNSUPPORTED_BOT_OPTIONS = CHINA_OPTIONS | FAN_OPTIONS | {
+    rf.SO_INCLUDED_MODULE_BASE + mod for mod in range(40, 55)
+}
 logger = logging.getLogger(__name__)
 
 
 def cap3_available():
-    return Path(settings.BASE_DIR, "FCM/static/FCM/wasm/fcm_rollout.wasm").is_file()
+    return (
+        bool(settings.FCM_CAP3_BIN)
+        and Path(settings.FCM_CAP3_BIN).is_file()
+        and os.access(settings.FCM_CAP3_BIN, os.X_OK)
+    )
 
 
 def cap3_options_supported(options):
-    return CHINA_OPTIONS.isdisjoint(options)
+    return UNSUPPORTED_BOT_OPTIONS.isdisjoint(options)
 
 
 def is_cap3_simultaneous(game):
@@ -37,7 +49,7 @@ def is_cap3_simultaneous(game):
 
 
 def pending_cap3_username(game, seat):
-    if type(seat) is not int or seat not in range(4) or game.gameStatus != "ACTIVE" or game.maxPlayers != 4:
+    if game.maxPlayers not in range(2, 7) or type(seat) is not int or seat not in range(game.maxPlayers) or game.gameStatus != "ACTIVE":
         return None
     options = json.loads(game.startingOptions or "[]")
     if rf.SO_CAP3_AI not in options or not cap3_options_supported(options):
@@ -46,7 +58,7 @@ def pending_cap3_username(game, seat):
         seat_order=seat, player__username__in=FCM_CAP3_USERNAMES,
         is_current=True, is_missing=False, is_kicked=False,
     ).values_list("player__username", flat=True).first()
-    if username is None or game.players.count() != 4:
+    if username is None or game.players.count() != game.maxPlayers:
         return None
     if is_cap3_simultaneous(game) and game.presenter().hasValidActualMoveData(username):
         return None
@@ -80,14 +92,15 @@ def cap3_turn(request, game_id):
         players = state[player_slot]
         flow = state[player_slot + 2]
         order = flow[2]
+        n = game.maxPlayers
         if (
-            len(players) != 4 or flow[1] != game.phase or seat not in order
-            or any(type(other) is not int or other not in range(4) for other in order)
+            len(players) != n or flow[1] != game.phase or seat not in order
+            or any(type(other) is not int or other not in range(n) for other in order)
             or len(set(order)) != len(order)
             or (not is_cap3_simultaneous(game) and order[0] != seat)
         ):
             raise ValueError("position does not match the game")
-        if len(flow[0]) != 4 or any(type(other) is not int for other in flow[0]) or set(flow[0]) != set(range(4)):
+        if len(flow[0]) != n or any(type(other) is not int for other in flow[0]) or set(flow[0]) != set(range(n)):
             raise ValueError("invalid full turn order")
         flow[2] = [seat, *(other for other in order if other != seat)]
         for index, player in enumerate(players):
@@ -106,8 +119,9 @@ def cap3_turn(request, game_id):
             engine_options.append(rf.SO_DRAFT_MODULE_BREAKER)
         metadata["starting_options"] = list(map(str, engine_options))
         metadata["turn"] = game.turn
-        if len(metadata["starting_map"]) != 32 or any(type(tile) is not int for tile in metadata["starting_map"]):
-            raise ValueError("expected a four-player map")
+        expected_tiles = {2: 18, 3: 24, 4: 32, 5: 40, 6: 48}.get(n)
+        if expected_tiles is None or len(metadata["starting_map"]) != expected_tiles or any(type(tile) is not int for tile in metadata["starting_map"]):
+            raise ValueError("unexpected map size for player count")
     except (AttributeError, IndexError, KeyError, TypeError, ValueError):
         return JsonResponse({"error": gettext("Invalid Cap3 position.")}, status=400)
 
