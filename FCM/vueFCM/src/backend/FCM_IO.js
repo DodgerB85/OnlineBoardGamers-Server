@@ -17,6 +17,24 @@ import { usePersonalStore } from "../stores/FCMpersonal.js"
 
 //import { usePersonalStore } from "../stores/FCMpersonal.js"
 
+function isDeepFryVsAI() {
+	return window.initData.startingOptions?.includes(rf.SO_DEEPFRY_VS_AI) === true
+}
+
+// The DeepFry VS AI preset puts the old in-browser FcmAI in the creator's seat
+// and the server-side Deep-Fry Bot in the other; the creator's tab drives both.
+export function runDeepFryVsAITurn() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return
+	const current = controller.currentPlayerObj()
+	if (current && current.name === personal.name) {
+		void makeAImove()
+		return
+	}
+	controller.startPlayerTurn(false)
+}
+
 function restartKickoutTimers() {
 	const personal = usePersonalStore()
 	clearInterval(personal.kickoutCountdownIntervalTimer)
@@ -227,12 +245,20 @@ export async function loadGame() {
 			// Keep the snapshot importFCMmodel rebuilds the grid from (FCMfuncs) up to
 			// date, or live updates resurrect the page-load map (stale UP tile slots)
 			window.initData.startingMap = Array.isArray(result.startingMap) ? result.startingMap : JSON.parse(result.startingMap)
+			if (window.initData.startingOptions?.includes(rf.SO_CAP3_AI) && result.startingOptions) {
+				window.initData.startingOptions = JSON.parse(result.startingOptions)
+				store.externalStartingOptions = [...window.initData.startingOptions]
+				personal.haltPlay = false
+			}
 			if (result.seatPlayerNames) window.initData.seatPlayerNames = result.seatPlayerNames
 			if (result.myName) window.initData.name = result.myName
 			//let suppressActions = false
 			//if (result.specialData) suppressActions = true
 			// Do this to update the top line info / green player highlights
 			funcs.importFCMmodel(loadDataString, false, false)
+			if (window.initData.startingOptions?.includes(rf.SO_CAP3_AI) && controller.isSimulPhase()) {
+				store.gameflow.turnOrder = store.players.flatMap((p, seat) => result.currentPlayers.includes(p.name) ? [seat] : [])
+			}
 			personal.moveDataRaw = result.specialData
 			if (personal.pov >= 0) store.players[personal.pov].OOBpreference = result.OOBpreference
 			// Match fresh page load: wipe highlights / toasts / client-only fire state from the previous snapshot
@@ -258,7 +284,8 @@ export async function loadGame() {
 			}
 
 			if (store.gameflow.phase !== rf.PHASE_SETUP_MODULES) personal.haltPlay = false
-			controller.startPlayerTurn(false)
+			if (isDeepFryVsAI()) runDeepFryVsAITurn()
+			else controller.startPlayerTurn(false)
 			restartKickoutTimers()
 		})
 		.catch((error) => {
@@ -348,7 +375,7 @@ export async function saveInProgressMap() {
 		})
 }
 
-export async function saveModuleSelection(moduleIndex) {
+export async function saveModuleSelection(moduleIndex, cap3Seat = null) {
 	const store = useModelStore()
 	const personal = usePersonalStore()
 	store.clearMessages()
@@ -356,9 +383,6 @@ export async function saveModuleSelection(moduleIndex) {
 	personal.haltPlay = true
 
 	store.gameflow.turnOrder.push(store.gameflow.turnOrder.shift())
-
-	let nextPlayer = [controller.currentPlayerObj().name]
-	let nextPlayerSeats = [controller.currentPlayerIndex()]
 
 	let SM = 999
 	if (moduleIndex !== 999) SM = rules.getAvailableModules()[moduleIndex]
@@ -395,28 +419,29 @@ export async function saveModuleSelection(moduleIndex) {
 	let callData = {
 		latestUpdate: personal.latestUpdate,
 		action: "saveModuleSelection",
+		...(cap3Seat === null ? {} : { cap3Seat }),
 		data: funcs.exportFCMmodel(false, false),
-		nextPlayer: nextPlayer,
-		nextPlayerSeats: nextPlayerSeats,
+		nextPlayer: [controller.currentPlayerObj().name],
+		nextPlayerSeats: [controller.currentPlayerIndex()],
 		gameID: personal.gameID,
 		SM: SM,
 		phase: store.gameflow.phase,
 	}
 
 	let csrftoken = funcs.getCookie("csrftoken")
-	fetch("/FCM/processTurn/", {
+	return fetch("/FCM/processTurn/", {
 		method: "POST",
 		body: JSON.stringify(callData),
 		headers: { "X-CSRFToken": csrftoken },
 	})
 		.then((response) => response.json())
 		.then((result) => {
-			personal.latestUpdate = String(result.latestUpdate)
-
 			if (result.syncError) {
 				store.gameMessages.errorText = i18n.global.t("FCM_IO.olderVersionRefresh")
-				return
+				return false
 			}
+			personal.latestUpdate = String(result.latestUpdate)
+			if (cap3Seat !== null) window.initData.startingOptions = JSON.parse(result.SO)
 			store.viewSettings.showGameLoader = false
 
 			personal.secondsToNextKickout = result.secondsToNextKickout
@@ -427,10 +452,12 @@ export async function saveModuleSelection(moduleIndex) {
 			store.context.selectedModuleIndex = 0
 			personal.haltPlay = false
 			controller.startPlayerTurn(false)
+			return true
 		})
 		.catch((error) => {
 			console.log("Error:", error)
 			personal.haltPlay = false
+			return false
 		})
 }
 
@@ -736,7 +763,9 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 
 		if (personal.liveWS) WS.broadcastGameUpdate()
 
-		if (controller.currentPlayerObj().name === rf.AI_NAME && store.gameflow.phase != rf.PHASE_GAME_OVER) makeAImove()
+		if (isDeepFryVsAI()) runDeepFryVsAITurn()
+		else if (window.initData.startingOptions?.includes(rf.SO_CAP3_AI)) controller.startPlayerTurn(false)
+		else if (controller.currentPlayerObj().name === rf.AI_NAME && store.gameflow.phase != rf.PHASE_GAME_OVER) makeAImove()
 		return true
 	} catch (error) {
 		console.error("Error fetching data:", error)
@@ -834,7 +863,7 @@ export async function saveOOBpreference() {
 	}
 }
 
-export async function saveSimulMove(moveData, continueFromStalledGame = false, passKickoutFor = "", passKickoutSeat = null) {
+export async function saveSimulMove(moveData, continueFromStalledGame = false, passKickoutFor = "", passKickoutSeat = null, cap3Seat = null) {
 	if (useModelStore().bailout.pending) return
 	if (usePersonalStore().tutorial) return // Tutorial game is never persisted
 	const store = useModelStore()
@@ -906,6 +935,7 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false, p
 		continueFromStalledGame: continueFromStalledGame,
 		passKickoutFor: passKickoutFor,
 		passKickoutSeat: passKickoutSeat,
+		...(cap3Seat === null ? {} : { cap3Seat }),
 	}
 
 	/* This is only used in PASS_KICKOUT function
@@ -975,11 +1005,11 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false, p
 			await controller.endCurrentPhase()
 			// save the game
 			// NB could M have been changed in endCurrentPhase that isn't reflected in model??
-			await saveGameNormal(true, false, false)
+			const saved = await saveGameNormal(true, false, false)
 			// Keep haltPlay true through the saves above so Vue renders during the
 			// in-flight fetches (empty turn order) don't look like a live state;
 			// the turn order is rebuilt by now, so allow play again
-			personal.haltPlay = false
+			personal.haltPlay = cap3Seat !== null && !saved
 		}
 
 		store.viewSettings.showGameLoader = false
@@ -988,7 +1018,7 @@ export async function saveSimulMove(moveData, continueFromStalledGame = false, p
 		console.error("Error fetching data:", error)
 		personal.haltPlay = false
 		store.gameMessages.errorText = i18n.global.t("FCM_IO.errorSavingGame")
-		store.gameMessages.retrySave = () => saveSimulMove(retryMoveData, continueFromStalledGame, passKickoutFor, passKickoutSeat)
+		store.gameMessages.retrySave = () => saveSimulMove(retryMoveData, continueFromStalledGame, passKickoutFor, passKickoutSeat, cap3Seat)
 		reportSaveError("FCM simul move save error", `LU=${personal.latestUpdate}`, error)
 	}
 }

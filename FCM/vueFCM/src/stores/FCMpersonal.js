@@ -61,7 +61,7 @@ export const usePersonalStore = defineStore("personal", () => {
 		}
 		if (store.gameflow.turnOrder.length > 0) {
 			let obj = controller.currentPlayerObj()
-			if (obj && obj.displayName === "FcmAI") return false
+			if (obj && (obj.displayName === rf.AI_NAME || rf.CAP3_AI_NAMES.includes(obj.name))) return false
 		}
 		if (store.gameflow.phase === rf.PHASE_GAME_OVER) return false
 		if (store.viewSettings.showReplay) return false

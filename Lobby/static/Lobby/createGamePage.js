@@ -49,7 +49,7 @@ function clearSeatNames() {
 
 // Shows the seat rows for the chosen player count, empties the unused ones and
 // fills in the practice-game shadow names.
-function showSeats() {
+function showSeats(preservePracticeNames = false) {
 	var maxPlayers = parseInt(document.getElementById("playerNumber").value)
 	var practice = document.getElementById("trainingGame").checked
 	document.getElementById("player2help").innerHTML = practice ? '<span style="background-color: yellow; color: darkred;">' + global.player2practiceText + "</span>" : global.player2normText
@@ -60,7 +60,7 @@ function showSeats() {
 		var inUse = i <= maxPlayers
 		if (row) row.style.display = inUse ? "flex" : "none"
 		if (!inUse) input.value = ""
-		else if (practice) input.value = SHADOW_NAMES[i - 2]
+		else if (practice && !preservePracticeNames) input.value = SHADOW_NAMES[i - 2]
 	}
 }
 

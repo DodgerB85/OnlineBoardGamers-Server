@@ -4,7 +4,7 @@ from django.views.generic import RedirectView
 
 from Lobby.models import Game
 
-from . import views
+from . import cap3, views
 
 app_name = "FCM"
 
@@ -62,6 +62,7 @@ urlpatterns = [
     # API Routes
     path("createFCMgame/", views.createFCMgame, name="createFCMgame"),
     path("createFCMspinoff/", views.createFCMspinoff, name="createFCMspinoff"),
+    path("<int:game_id>/cap3/", cap3.cap3_turn, name="cap3_turn"),
     path("processTurn/", views.processTurn, name="processTurn"),
     path("bugEntry/", views.bugEntry, name="bugEntry"),
     path("notes/", views.notes, name="notes"),

@@ -529,8 +529,8 @@
                 <option value="6">6</option>
               </select>
             </div>
-            <div class="form-row">
-              <label class="form-label" for="player2">{% trans "Player 2" %}</label>
+            <div class="form-row" id="selPlayer2">
+              <label class="form-label" for="player2"{% if cap3_enabled %} data-player-label="{% translate 'Player 2' %}" data-cap3-label="{% translate 'Opponent 1' %}"{% endif %}>{% trans "Player 2" %}</label>
               <div class="field">
                 <div class="autocomplete">
                   <input type="text"
@@ -553,7 +553,7 @@
               </div>
             </div>
             <div class="form-row" id="selPlayer3" style="display:none">
-              <label class="form-label" for="player3">{% trans "Player 3" %}</label>
+              <label class="form-label" for="player3"{% if cap3_enabled %} data-player-label="{% translate 'Player 3' %}" data-cap3-label="{% translate 'Opponent 2' %}"{% endif %}>{% trans "Player 3" %}</label>
               <div class="field">
                 <div class="autocomplete">
                   <input type="text"
@@ -627,6 +627,22 @@
                 </div>
               </div>
             </div>
+            {% if cap3_enabled %}
+              <div class="form-row" id="cap3SeatsRow" style="display:none">
+                <span class="form-label">{% translate "Deep-Fry Bot" %}</span>
+                <div class="field">
+                  <div class="check-list">
+                    {% for seat in "123456" %}
+                      <label class="check-label" data-cap3-seat="{{ seat }}">
+                        <input type="checkbox" id="fcmCap3Seat{{ seat }}" name="fcmCap3" value="{{ seat }}"
+                               class="myCheckbox" onchange="selectPlayers(true)" disabled />
+                        <div>{% blocktranslate with number=seat %}Deep-Fry Bot plays seat {{ number }}{% endblocktranslate %}</div>
+                      </label>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
           </div>
           <div class="card">
             <div class="card-header">
@@ -777,6 +793,21 @@
                        disabled />
                 <div>{% trans "AI v0.1. Vague intelligence. Very bad!" %}</div>
               </label>
+              {% if cap3_enabled %}
+                <label class="check-label">
+                  <input type="checkbox"
+                         onchange="validateOptions(this.id)"
+                         class="myCheckbox"
+                         id="deepFryVsAI"
+                         name="deepFryVsAI"
+                         value="1"
+                         disabled />
+                  <div>
+                    <div>{% trans "DeepFry VS AI" %}</div>
+                    <div class="opt-help">{% trans "Watch the Deep-Fry Bot play the old FcmAI. No human seats." %}</div>
+                  </div>
+                </label>
+              {% endif %}
               <label class="check-label">
                 <input type="checkbox"
                        onchange="validateOptions(this.id)"
@@ -1294,6 +1325,7 @@
             setupData.kickoutDuration = "{{ kickoutDuration }}";
             setupData.playerNumber = {{ playerNumber }};
             setupData.playerNames = {{ playerNames |script_json }};
+            setupData.cap3Seats = {{ cap3_seats|default:"[]" }};
             {% if scenarioUsed %}
             setupData.scenarioUsed = true;
             setupData.scenarioName = "{{ scenarioName }}";

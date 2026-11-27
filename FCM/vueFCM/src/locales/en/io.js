@@ -1,5 +1,6 @@
 ﻿export default {
   FCM_IO: {
+    cap3Error: "Deep-Fry Bot could not complete its move. Try again.",
     saveErrorSST: "An Error Occured During Save (SST-DMD)",
     errorOccurred: "ERROR OCCURRED: {error}",
     errorSavingGame: "Error saving the game - Send all this to admin (eg on discord/email)",

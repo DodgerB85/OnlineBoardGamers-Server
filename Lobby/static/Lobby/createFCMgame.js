@@ -50,6 +50,14 @@ function initGameCreation(fillData, setupData = {}) {
 			validateOptions("trainingGame")
 		}
 
+		for (const seat of setupData.cap3Seats) {
+			const box = document.getElementById(`fcmCap3Seat${seat}`)
+			if (box) box.checked = true
+		}
+		const policy = document.getElementById("fcmCap3Policy")
+		if (policy && startingOptions.includes("502")) policy.value = "full"
+		selectPlayers(true)
+
 		// Check and enable map data if necessary
 		if (setupData.startingMap != "") {
 			document.getElementById("keepMapDiv").style.display = "block"
@@ -296,7 +304,7 @@ function syncMilestoneNightBalanceUI() {
 	if (!allowed) balance.checked = false
 }
 
-function validateOptions(change) {
+function validateOptions(change, internal = false) {
 	// Mini Tournamnt
 	if (change === "playersPerGameMT") {
 		let totalPlayersMT_el = document.getElementById("totalPlayersMT")
@@ -409,6 +417,7 @@ function validateOptions(change) {
 			addOption("randomModules")
 			addOption("draftModules")
 			addOption("fcmAI")
+			if (document.getElementById("deepFryVsAI")) addOption("deepFryVsAI")
 			document.getElementById("nonExpertOptions").style.display = "none"
 		} else {
 			removeOption("randomModules")
@@ -425,6 +434,7 @@ function validateOptions(change) {
 			removeOption("includeChineseExpansion")
 			removeOption("includeFanExpansion")
 			removeOption("fcmAI")
+			if (document.getElementById("deepFryVsAI")) removeOption("deepFryVsAI")
 			document.getElementById("nonExpertOptions").style.display = "inline-block"
 		}
 	} else if (change === "randomModules") {
@@ -493,6 +503,8 @@ function validateOptions(change) {
 		}
 	} else if (change === "fcmAI") {
 		if (document.getElementById(change).checked == true) {
+			const deepFry = document.getElementById("deepFryVsAI")
+			if (deepFry && !internal) deepFry.checked = false
 			// Expert Options
 			removeOption("randomModules")
 			removeOption("random_originalMS")
@@ -540,9 +552,23 @@ function validateOptions(change) {
 			if (global.experienced) addOption("experiencedGame")
 			addOption("allowRewind")
 		}
+	} else if (change === "deepFryVsAI") {
+		const oldAI = document.getElementById("fcmAI")
+		if (document.getElementById("deepFryVsAI").checked) {
+			// Reuse the old-AI preset to force a 2-seat practice game, then drop
+			// that checkbox so the server sees only the Deep-Fry mode.
+			oldAI.checked = true
+			validateOptions("fcmAI", true)
+			oldAI.checked = false
+			if (!document.getElementById("name").value) document.getElementById("name").value = "DeepFry vs AI"
+		} else {
+			oldAI.checked = false
+			validateOptions("fcmAI", true)
+		}
 	}
 	syncMilestoneNightBalanceUI()
 	syncRandomExcludeUI()
+	selectPlayers(true)
 }
 
 // === Random module exclusion panel ===
@@ -683,12 +709,60 @@ function setPlayersforMapData() {
 	}
 }
 
-function selectPlayers() {
-	showSeats()
+function hasUnsupportedBotModules() {
+	const ids = [
+		"urbanPlanning", "urbanPlanningPlus", "jazzMusicians", "dumplings", "deliveryDrivers", "hawkers",
+		"friedChicken", "stadium", "laborMarket", "secondBailout", "mediaLine", "newMap", "newMapAll",
+		"seniorBusinessDeveloper", "milestoneNightBalance",
+		"includeChineseExpansion", "includeFanExpansion",
+		"include_42", "include_43", "include_44", "include_45",
+		"include_46", "include_47", "include_48", "include_49", "include_50", "include_51", "include_53", "include_54",
+	]
+	return ids.some(id => document.getElementById(id)?.checked)
+}
+
+function selectPlayers(preservePracticeNames = false) {
+	showSeats(preservePracticeNames)
+	const cap3Seats = document.getElementById("cap3SeatsRow")
+	if (cap3Seats) {
+		const maxPlayers = parseInt(document.getElementById("playerNumber").value, 10) || 4
+		const maxBots = maxPlayers - 1
+		const enabled = maxPlayers >= 2 && maxPlayers <= 6 && !document.getElementById("fcmAI").checked && !hasUnsupportedBotModules()
+		cap3Seats.style.display = enabled ? "" : "none"
+		const boxes = [...cap3Seats.querySelectorAll('input[type="checkbox"]')]
+		const count = enabled ? boxes.filter(box => parseInt(box.value, 10) <= maxPlayers && box.checked).length : 0
+		for (const box of boxes) {
+			const seat = parseInt(box.value, 10)
+			const inGame = seat <= maxPlayers
+			const label = box.closest("[data-cap3-seat]")
+			if (label) label.style.display = inGame ? "" : "none"
+			if (!enabled || !inGame) box.checked = false
+			box.disabled = !enabled || !inGame || (count >= maxBots && !box.checked)
+		}
+		for (let seat = 2; seat <= maxPlayers; seat++) {
+			const filled = count > 0 && seat > maxPlayers - count
+			document.getElementById(`player${seat}`).disabled = filled
+			if (filled) document.getElementById(`selPlayer${seat}`).style.display = "none"
+			const label = document.querySelector(`label[for="player${seat}"]`)
+			if (label?.dataset.cap3Label) label.textContent = count > 0 ? label.dataset.cap3Label : label.dataset.playerLabel
+		}
+	}
 	// The AI takes the second seat and locks every seat box.
 	if (document.getElementById("trainingGame").checked && document.getElementById("fcmAI").checked) {
 		document.getElementById("player2").value = "FcmAI"
 		for (var i = 2; i <= 6; i++) document.getElementById("player" + i).disabled = true
+	}
+	// DeepFry VS AI: a 2-seat practice game with the old FcmAI and the Deep-Fry
+	// Bot; the server forces the bot into seat 2.
+	const deepFry = document.getElementById("deepFryVsAI")
+	if (deepFry && deepFry.checked) {
+		document.getElementById("playerNumber").value = 2
+		document.getElementById("playerNumber").disabled = true
+		const cap3Row = document.getElementById("cap3SeatsRow")
+		if (cap3Row) cap3Row.style.display = "none"
+		const player2Row = document.getElementById("selPlayer2")
+		if (player2Row) player2Row.style.display = "none"
+		document.getElementById("player2").disabled = true
 	}
 }
 

@@ -34,7 +34,7 @@ from Lobby.sharedFunctions.sharedRefs import DISCORD, SLACK, SR_valid_webhook_ur
 USERNAMES_NOT_TO_NOTIFY = [
     # Bots / AI
     "FcmBot",
-    "FcmAI",
+    *rf.FCM_CAP3_USERNAMES,
     "HcBot",
     "HlcBot",
     "BusBot",
@@ -505,7 +505,7 @@ def SN_sendNextTurnNotificationWithValidation(gameCode, playerList, gameID, game
 
         # 3. Efficient Player Fetch:
         # Use values_list to get usernames in a SINGLE query without hitting the User model separately
-        current_game_usernames = set(current_game.players.filter(is_current=True).exclude(player__username__in=rf.SHADOW_USERNAMES).values_list("player__username", flat=True))
+        current_game_usernames = set(current_game.players.filter(is_current=True, is_ai=False).exclude(player__username__in=rf.SHADOW_USERNAMES).values_list("player__username", flat=True))
 
         # 4. Use Set Intersection for speed
         # This replaces the 'for username in current_game_usernames' loop

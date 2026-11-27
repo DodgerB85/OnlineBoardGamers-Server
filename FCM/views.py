@@ -40,6 +40,7 @@ from Lobby.sharedFunctions.sharedNotifications import (
 from Lobby.sharedFunctions.sharedRefs import SR_getFCMstartingOptionsHTML
 
 from . import FCMconstants as rfFCM
+from .cap3 import cap3_options_supported, is_cap3_simultaneous, pending_cap3_username
 from .common import create_fcm_game
 
 if TYPE_CHECKING:
@@ -425,6 +426,11 @@ def createFCMspinoff(request):
         return JsonResponse({"error": "No game data."}, status=400)
 
     startingOptions = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
+    # A practice copy replaces the other seats with hotseat players.
+    startingOptions = [
+        option for option in startingOptions
+        if option not in {rfFCM.SO_CAP3_AI, rfFCM.SO_CAP3_FULL_ROLLOUT}
+    ]
     if rf.SO_TRAINING_GAME not in startingOptions:
         startingOptions = [rf.SO_TRAINING_GAME, *startingOptions]
     maxPlayers = currentGame.maxPlayers
@@ -724,6 +730,17 @@ def _processTurn(request):
     if jsonData["action"] != "loadNew" and not _canActInGame(request, currentGame):
         return JsonResponse({"error": gettext("You are not a player in this game")}, status=403)
 
+    cap3_seat = jsonData.get("cap3Seat")
+    cap3_username = pending_cap3_username(currentGame, cap3_seat) if cap3_seat is not None else None
+    if cap3_seat is not None and (
+        jsonData["action"] not in ("saveNormal", "saveSimulMove", "saveModuleSelection")
+        or cap3_username is None
+        or (jsonData["action"] == "saveSimulMove") != is_cap3_simultaneous(currentGame)
+        or jsonData.get("continueFromStalledGame")
+        or not currentGame.players.filter(player=request.user, is_missing=False, is_kicked=False).exists()
+    ):
+        return JsonResponse({"syncError": True}, safe=False)
+
     if jsonData["action"] in ("preTurn", "saveSimulMove"):
         starting_options = json.loads(currentGame.startingOptions) if currentGame.startingOptions else []
         if _fcm_bailout_next_player(currentGame.gameData, starting_options):
@@ -755,6 +772,7 @@ def _processTurn(request):
                 "specialData": currentMove,
                 "latestUpdate": currentGame.latestUpdate,
                 "startingMap": currentGame.startingMap if currentGame.startingMap else [],
+                "startingOptions": currentGame.startingOptions or "[]",
                 "OOBpreference": OOBpreference,
                 "seatPlayerNames": presenter.getSeatPlayerNames(),
                 "myName": request.user.username,
@@ -864,8 +882,7 @@ def _processTurn(request):
                 playerListToNotify.remove(request.user.username)
             if "FcmBot" in playerListToNotify:
                 playerListToNotify.remove("FcmBot")
-            if "FcmAI" in playerListToNotify:
-                playerListToNotify.remove("FcmAI")
+            playerListToNotify = [name for name in playerListToNotify if name not in rf.FCM_CAP3_USERNAMES]
             for player in list(playerListToNotify):
                 ppov = presenter.seatPosition(player)
                 playerNotificationSuppression = currentGame.FCMnotificationSuppression[ppov : ppov + 1]
@@ -902,6 +919,8 @@ def _processTurn(request):
             return _syncErrorResponse("FCM saveModuleSelection - gameID:", request, currentGame, presenter, jsonData)
         if currentGame.phase != rfFCM.PHASE_SETUP_MODULES:
             return _syncErrorResponse("FCM saveModuleSelection - gameID:", request, currentGame, presenter, jsonData)
+        if cap3_username is not None and not cap3_options_supported([int(jsonData["SM"])]):
+            return JsonResponse({"syncError": True}, safe=False)
 
         currentGame.gameData = jsonData["data"]
         currentGame.phase = jsonData["phase"]
@@ -910,7 +929,7 @@ def _processTurn(request):
             currentGame,
             currentGame.latestUpdate,
             int(time.time()) * 1000,
-            request.user.username,
+            cap3_username or request.user.username,
             currentGame.kickoutDuration,
         )
 
@@ -946,8 +965,7 @@ def _processTurn(request):
                 playerListToNotify.remove(request.user.username)
             if "FcmBot" in playerListToNotify:
                 playerListToNotify.remove("FcmBot")
-            if "FcmAI" in playerListToNotify:
-                playerListToNotify.remove("FcmAI")
+            playerListToNotify = [name for name in playerListToNotify if name not in rf.FCM_CAP3_USERNAMES]
             for player in list(playerListToNotify):
                 ppov = presenter.seatPosition(player)
                 playerNotificationSuppression = currentGame.FCMnotificationSuppression[ppov : ppov + 1]
@@ -1042,7 +1060,9 @@ def _processTurn(request):
             return blocked
 
         nameToUse = request.user.username
-        if is_game_admin(request.user):
+        if cap3_username is not None:
+            nameToUse = cap3_username
+        elif is_game_admin(request.user):
             nameToUse = jsonData["BKSN"]
             if nameToUse.startswith("FCMtourneyAdmin/"):
                 name_parts = nameToUse.split("/", 1)
@@ -1214,8 +1234,7 @@ def _processTurn(request):
                 playerListToNotify.remove(request.user.username)
             if "FcmBot" in playerListToNotify:
                 playerListToNotify.remove("FcmBot")
-            if "FcmAI" in playerListToNotify:
-                playerListToNotify.remove("FcmAI")
+            playerListToNotify = [name for name in playerListToNotify if name not in rf.FCM_CAP3_USERNAMES]
 
             # If you are saving into phase 4, and the next player has OOB, remove them from notifications
             if jsonData["phase"] == rfFCM.PHASE_TURN_ORDER and jsonData["nextPlayer"][0] in playerListToNotify and presenter.hasValidActualMoveData(jsonData["nextPlayer"][0]):
@@ -1328,7 +1347,9 @@ def _processTurn(request):
             currentGame.phase = jsonData["phase"]
 
             nameToUpdate = request.user.username
-            if is_game_admin(request.user):
+            if cap3_username is not None:
+                nameToUpdate = cap3_username
+            elif is_game_admin(request.user):
                 nameToUpdate = jsonData["BKSN"]
                 if nameToUpdate.startswith("FCMtourneyAdmin/"):
                     name_parts = nameToUpdate.split("/", 1)
@@ -1373,7 +1394,7 @@ def _processTurn(request):
             if currentGame.phase != rfFCM.PHASE_SETUP_RESTAURANT1 and currentGame.phase != rfFCM.PHASE_SETUP_RESTAURANT2:
                 presenter.setCurrentPlayersFromArrInTurnOrder(presenter.getCurrentSimulPlayersFCM(), acting_username=nameToUpdate, old_latest_update=oldVer)
 
-            if is_game_admin(request.user):
+            if cap3_seat is None and is_game_admin(request.user):
                 flexName = jsonData["BKSN"]
                 if flexName.startswith("FCMtourneyAdmin/"):
                     name_parts = flexName.split("/", 1)
@@ -1390,7 +1411,7 @@ def _processTurn(request):
                     currentGame,
                     currentGame.latestUpdate,
                     int(time.time()) * 1000,
-                    passKickoutTarget if passKickoutTarget else request.user.username,
+                    nameToUpdate,
                     currentGame.kickoutDuration,
                 )
 
@@ -1419,7 +1440,7 @@ def _processTurn(request):
 
         currentGame.save()
 
-        playerListToNotify = [name for name in playersToMove if name not in (request.user.username, "FcmBot", "FcmAI")]
+        playerListToNotify = [name for name in playersToMove if name not in (request.user.username, "FcmBot", *rf.FCM_CAP3_USERNAMES)]
         if playerListToNotify:
             presenter.sendYourTurnNotification(
                 "FCM",
@@ -1527,8 +1548,7 @@ def _processTurn(request):
                 playerListToNotify.remove(request.user.username)
             if "FcmBot" in playerListToNotify:
                 playerListToNotify.remove("FcmBot")
-            if "FcmAI" in playerListToNotify:
-                playerListToNotify.remove("FcmAI")
+            playerListToNotify = [name for name in playerListToNotify if name not in rf.FCM_CAP3_USERNAMES]
             if len(playerListToNotify) > 0:
                 presenter.sendYourTurnNotification(
                     "FCM",
@@ -1733,8 +1753,7 @@ def _processTurn(request):
                 playerListToNotify.remove(request.user.username)
             if "FcmBot" in playerListToNotify:
                 playerListToNotify.remove("FcmBot")
-            if "FcmAI" in playerListToNotify:
-                playerListToNotify.remove("FcmAI")
+            playerListToNotify = [name for name in playerListToNotify if name not in rf.FCM_CAP3_USERNAMES]
             if len(playerListToNotify) > 0:
                 presenter.sendYourTurnNotification(
                     "FCM",

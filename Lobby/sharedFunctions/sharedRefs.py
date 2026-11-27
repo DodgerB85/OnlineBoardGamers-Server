@@ -789,8 +789,9 @@ def SR_getFCMstartingOptionsHTML(startingOptionsArr):
         ),
     }
 
-    # startingOptionsHTML = "<div>"
     startingOptionsHTML = ""
+    if rfFCM.SO_CAP3_AI in startingOptionsArr:
+        startingOptionsHTML = f"<span>{escape(gettext('Deep-Fry Bot'))}</span> "
     sorted_options = [opt for opt in preferred_order if opt in startingOptionsArr]
 
     for opt in sorted_options:
