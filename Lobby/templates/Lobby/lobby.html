@@ -2,36 +2,6 @@
 {% load static i18n compress %}
 {% block head %}
     <link href="{% static 'Lobby/CSS/lobby_new.css' %}?v=20" rel="stylesheet" />
-    <style>
-        /* RNB &Cetera release banner */
-        .new-game-teaser { text-align: center; margin-bottom: 14px; }
-        .new-game-teaser-box { position: relative; display: inline-block; line-height: 0; }
-        .new-game-teaser-box img {
-            height: 300px;
-            max-width: 90vw;
-            display: block;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-        .new-game-teaser-link {
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-sizing: border-box;
-            padding: 0 10px;
-            color: #fff;
-            font-size: 24px;
-            font-weight: 700;
-            line-height: 1.2;
-            text-align: center;
-            text-decoration: none;
-            overflow-wrap: anywhere;
-            text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000;
-        }
-    </style>
 {% endblock head %}
 {% block body %}
     {% compress js %}
@@ -123,14 +93,6 @@
         </div>
         <!-- hidden map editor forms (required by Lobby.js) -->
         {% include 'Lobby/map_editor_forms.html' %}
-        <!-- RNB &Cetera release banner -->
-        <div class="new-game-teaser">
-            <div class="new-game-teaser-box">
-                <img src="{% static 'RNB/images/cetera-box.jpg' %}"
-                     alt="Roads &amp; Boats: &amp;Cetera" />
-                <a class="new-game-teaser-link" href="{% url 'createRNBpage' %}">{% translate "Click here to play" %}</a>
-            </div>
-        </div>
         <div class="tabs">
             <button class="tab tablinks" id="available" data-tab="available">
                 <span class="tab-label">{% translate "Available" %}</span>
