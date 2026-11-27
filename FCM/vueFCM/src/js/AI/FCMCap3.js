@@ -161,8 +161,9 @@ function work(seat, action, secondGood, hasLaterLobbyistOrDone = false) {
 			controller.chooseHouseEdge(edge, square)
 		} else {
 			requireMove(rules.availableHouses().includes(house))
-			ctx.rotation = rotation
 			controller.selectHouseToBuild(house)
+			ctx.rotation = rotation
+			controller.updateHousesHighlights()
 			requireMove(store.highlights.indexesToHighlightYellow.includes(square))
 			controller.chooseHousePosition(square)
 		}
