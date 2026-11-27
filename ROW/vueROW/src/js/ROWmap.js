@@ -315,11 +315,31 @@ export function armedTrailMove(game, liveActions, selected) {
 
 /** Spots a building move can reach, used to tell a forced move from a real choice. */
 export function trailMoveTargets(game, type) {
-	return game.getTrail().possibleMovesFrom(game.currentPlayer, game.playerState(game.currentPlayer).balance, game.moveStepLimit(type) ?? game.getStepLimit(), game.state.players.length)
+	const moves = game.getTrail().possibleMovesFrom(game.currentPlayer, game.playerState(game.currentPlayer).balance, game.moveStepLimit(type) ?? game.getStepLimit(), game.state.players.length)
+	// The objective-card move explicitly may not reach Kansas City (RULES 12.3).
+	return type === ActionType.MOVE_3_FORWARD_WITHOUT_FEES ? moves.filter((m) => trailMoveAllowed(type, moveDestination(m))) : moves
 }
 
 export function moveDestination(m) {
 	return m.steps[m.steps.length - 1]
+}
+
+/** The objective-card move explicitly may not reach Kansas City (RULES 12.3). */
+export function trailMoveAllowed(type, destination) {
+	return !(type === ActionType.MOVE_3_FORWARD_WITHOUT_FEES && destination === "KANSAS_CITY")
+}
+
+/** Trade with the Indians must pay a negative teepee value in full. */
+export function canAffordTrade(location, balance) {
+	const reward = location?.def?.reward ?? 0
+	return reward >= 0 || balance >= -reward
+}
+
+/** The 1st-edition remove-card auxiliaries need a real hand card to remove. */
+export function auxiliaryCardsToRemove(action) {
+	if (action === ActionType.MOVE_ENGINE_1_BACKWARDS_TO_REMOVE_1_CARD) return 1
+	if (action === ActionType.MOVE_ENGINE_2_BACKWARDS_TO_REMOVE_2_CARDS) return 2
+	return 0
 }
 
 /** True when ending the move here leaves only one single auxiliary action in phase B. */
@@ -384,6 +404,7 @@ const ACTION_DOLLARS = {
 	PAY_2_DOLLARS_TO_MOVE_ENGINE_2_FORWARD: 2,
 	PAY_1_DOLLAR_AND_MOVE_ENGINE_1_BACKWARDS_TO_GAIN_1_CERTIFICATE: 1,
 	PAY_2_DOLLARS_AND_MOVE_ENGINE_2_BACKWARDS_TO_GAIN_2_CERTIFICATES: 2,
+	REMOVE_HAZARD: 7,
 	REMOVE_HAZARD_FOR_2_DOLLARS: 2,
 	REMOVE_HAZARD_FOR_5_DOLLARS: 5,
 }
@@ -611,7 +632,11 @@ export function buildingInteraction(locName, game, liveActions) {
 		const options = [...offered].filter((a) => liveActions.includes(a))
 		if (options.length) return { mode: "activate", location: locName, options, layoutActions }
 	}
-	if (liveActions.includes(ActionType.USE_ADJACENT_BUILDING) && game.getTrail().getAdjacentLocations(current).includes(locName)) {
+	// 8b/6b copy from the building that was actually activated last, not the cattleman's spot.
+	const adjacentFrom = last ?? current
+	if (liveActions.includes(ActionType.USE_ADJACENT_BUILDING) && game.getTrail().getAdjacentLocations(adjacentFrom).includes(locName)) {
+		const local = buildingLocalAction(loc, game)
+		if (local?.canPerform(ActionType.USE_ADJACENT_BUILDING) && ps.locationsActivatedInTurn.includes(locName)) return null
 		return { mode: "adjacent", location: locName, options: [ActionType.USE_ADJACENT_BUILDING], layoutActions: [ActionType.USE_ADJACENT_BUILDING] }
 	}
 	return null

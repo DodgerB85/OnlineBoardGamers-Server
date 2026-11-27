@@ -46,6 +46,8 @@ describe("canAffordAction (view preview of Game.execute's dollars and cards)", (
         ps.balance = 1;
         expect(canAffordAction(game, ActionType.REMOVE_HAZARD_FOR_2_DOLLARS)).toBe(false);
         expect(canAffordAction(game, ActionType.REMOVE_HAZARD_FOR_5_DOLLARS)).toBe(false);
+        expect(canAffordAction(game, ActionType.REMOVE_HAZARD)).toBe(false);
+        ps.balance = 7;
         expect(canAffordAction(game, ActionType.REMOVE_HAZARD)).toBe(true);
     });
     it("rejects a discard the hand cannot satisfy", () => {

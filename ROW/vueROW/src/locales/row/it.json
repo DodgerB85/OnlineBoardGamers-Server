@@ -513,6 +513,8 @@
       "CANNOT_REPLACE_NEUTRAL_BUILDING": "Non puoi coprire un edificio neutrale.",
       "CANNOT_STEP_DIRECTLY_FROM_TO": "Non hai abbastanza passi per arrivare in questo posto.",
       "CARD_NOT_IN_HAND": "Non hai questa carta in mano.",
+      "NO_CARDS_TO_REMOVE": "Non hai abbastanza carte in mano da rimuovere.",
+      "NO_DISC_AVAILABLE": "Non hai un disco disponibile da piazzare.",
       "CATTLE_CARDS_NOT_IN_HAND": "Non hai queste mucche in mano.",
       "CATTLE_CARD_NOT_AVAILABLE": "Questa mucca non è disponibile.",
       "CITY_VALUE_MUST_BE_LESS_THEN_OR_EQUAL_TO_SPACES_THAT_ENGINE_MOVED_BACKWARDS": "Devi scegliere una città il cui valore sia inferiore o uguale al numero di passi con cui hai spostato indietro il tuo treno.",
@@ -635,6 +637,8 @@
       "engineers": "Ingegneri",
       "exchangeTokens": "Gettoni di scambio",
       "branchlets": "Succursali",
+      "disc": "Disco",
+      "removeDisc": "Rimuovi disco",
       "apply": "Applica",
       "reset": "Reimposta"
     },

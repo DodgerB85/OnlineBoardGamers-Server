@@ -532,6 +532,8 @@
       "CANNOT_REPLACE_NEUTRAL_BUILDING": "No puedes sustituir un edificio neutral.",
       "CANNOT_STEP_DIRECTLY_FROM_TO": "No puedes moverte directamente de tu ubicación actual a esta ubicación.",
       "CARD_NOT_IN_HAND": "No tienes esta carta en la mano.",
+      "NO_CARDS_TO_REMOVE": "No tienes suficientes cartas en la mano para eliminar.",
+      "NO_DISC_AVAILABLE": "No tienes ningún disco disponible para colocar.",
       "CATTLE_CARDS_NOT_IN_HAND": "No tienes estas cartas de ganado en la mano.",
       "CATTLE_CARD_NOT_AVAILABLE": "Esta carta de ganado no está disponible.",
       "CITY_VALUE_MUST_BE_LESS_THEN_OR_EQUAL_TO_SPACES_THAT_ENGINE_MOVED_BACKWARDS": "Debes elegir una ciudad cuyo valor sea menor o igual al número de casillas que hayas retrocedido tu locomotora.",
@@ -633,6 +635,8 @@
       "engineers": "Ingenieros",
       "exchangeTokens": "Fichas de intercambio",
       "branchlets": "Ramales",
+      "disc": "Disco",
+      "removeDisc": "Quitar disco",
       "apply": "Aplicar",
       "reset": "Restablecer"
     },

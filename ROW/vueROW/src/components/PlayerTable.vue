@@ -163,6 +163,11 @@ const hoveredAuxRow = ref(null)
 
 function activateAuxiliaryAction(action) {
 	if (!actable.value || !auxWrapper.value || !auxActionAvailable(action)) return
+	const needed = map.auxiliaryCardsToRemove(action)
+	if (needed > hand.value.length) {
+		store.gameMessages.errorText = t("row.errors.NO_CARDS_TO_REMOVE")
+		return
+	}
 	hoveredAuxRow.value = null
 	// The wrapper only opens the choice; the clicked circle is the player's pick.
 	if (!controller.perform({ type: auxWrapper.value })) return

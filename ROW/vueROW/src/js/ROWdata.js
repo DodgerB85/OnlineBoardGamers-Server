@@ -330,9 +330,10 @@ export function createKcSet3() {
     return tiles;
 }
 /**
- * FIRST edition trail graph. Built exactly as Trail.java wires it, except the
- * negative teepee locations, which the Java source creates as graph orphans
- * (kept here for completeness / trade reference).
+ * FIRST edition trail graph. Built exactly as Trail.java wires it. The negative teepee
+ * spaces (TEEPEE--3/-2/-1) are Indian-trade display slots, not trail steps: they are
+ * intentionally off the dashed trail, but Trade with the Indians can take a tile from
+ * any of them. This is not a missing trail fork.
  */
 export function buildTrailNodes(edition) {
     const nodes = [];

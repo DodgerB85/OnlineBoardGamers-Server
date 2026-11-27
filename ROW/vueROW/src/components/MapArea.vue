@@ -110,7 +110,11 @@ const moves = computed(() => {
 	const out = []
 	for (const tm of liveTrailMoves.value) {
 		try {
-			for (const m of model.possibleMovesFor(store.currentPlayer, tm.limit)) out.push({ ...m, type: tm.type })
+			for (const m of model.possibleMovesFor(store.currentPlayer, tm.limit)) {
+				// Objective-card moves may not reach Kansas City (RULES 12.3).
+				if (!map.trailMoveAllowed(tm.type, map.moveDestination(m))) continue
+				out.push({ ...m, type: tm.type })
+			}
 		} catch {
 			// A building move can be illegal from the current spot; leave the board unlit.
 		}
@@ -164,7 +168,7 @@ function candidatesFor(name) {
 		const hz = HAZARD_ACTIONS.find((a) => acts.includes(a))
 		if (hz) out.push({ label: t("row.map.removeHazard"), run: () => controller.perform({ type: hz, location: name }) })
 	}
-	if (loc.teepee && acts.includes(ActionType.TRADE_WITH_TRIBES)) {
+	if (loc.teepee && acts.includes(ActionType.TRADE_WITH_TRIBES) && map.canAffordTrade(loc, g().currentPlayerState().balance)) {
 		out.push({ label: t("row.map.tradeWithTribe"), run: () => controller.perform({ type: ActionType.TRADE_WITH_TRIBES, location: name }) })
 	}
 	if (buildAction && loc.kind === "BUILDING" && (!loc.building || loc.building.player === player)) {
@@ -179,7 +183,7 @@ function candidatesFor(name) {
 				run: () => controller.perform({ type: buildAction, location: name, building: b }),
 			})
 		}
-	} else if (sel === ActionType.USE_ADJACENT_BUILDING && loc.building && g().getTrail().getAdjacentLocations(g().getTrail().currentLocation(player)).includes(name)) {
+	} else if (sel === ActionType.USE_ADJACENT_BUILDING && loc.building && map.buildingInteraction(name, g(), store.actions)?.mode === "adjacent") {
 		out.push({ label: t("row.map.useBuilding", { building: loc.building.name }), run: () => controller.perform({ type: ActionType.USE_ADJACENT_BUILDING, location: name }) })
 	}
 	return out
@@ -311,11 +315,14 @@ function choose(c) {
 /** Breeding-value income the bank pays before the delivery's separate transport cost. */
 function deliveryIncome(city, total) {
 	const ps = g().currentPlayerState()
-	let income = ps.handValue() + total
+	// Income is a Kansas City subphase, not part of an extraordinary 9a delivery.
+	let income = g().atKansasCity() ? ps.handValue() + total : 0
 	if (city === "KANSAS_CITY") income += g().edition === "FIRST" ? 6 : 4
 	return income
 }
 function deliveryTransport(city) {
+	// Extraordinary deliveries pay no transport costs (RULES 10.12).
+	if (!g().atKansasCity()) return 0
 	return g().getRailroadTrack().transportCosts(g().currentPlayer, city)
 }
 
@@ -325,13 +332,15 @@ function clickCity(idx, city) {
 	const pd = g().possibleDeliveries().find((d) => d.city === name)
 	if (!pd) return
 	const ps = g().currentPlayerState()
+	const atKc = g().atKansasCity()
 	const perm = ps.permanentCertificates()
 	const minTotal = Math.max(pd.certificates, perm)
 	// Permanent certificates are always free value; the only real choice is how many
 	// temporary certificates to spend (which moves the temp track down to a valid step).
-	const totals = [...new Set(CERTIFICATE_STEPS.filter((s) => s <= ps.tempCertificates).map((s) => perm + (ps.tempCertificates - s)))]
-		.filter((cert) => cert >= minTotal)
-		.sort((a, b) => a - b)
+	// An extraordinary delivery has no income subphase, so no certificate choice applies.
+	const totals = atKc
+		? [...new Set(CERTIFICATE_STEPS.filter((s) => s <= ps.tempCertificates).map((s) => perm + (ps.tempCertificates - s)))].filter((cert) => cert >= minTotal).sort((a, b) => a - b)
+		: [0]
 	const cands = totals.map((total) => ({
 		label: t("row.map.deliveryOption", { certificates: total, income: deliveryIncome(name, total), transport: deliveryTransport(name) }),
 		run: () => controller.perform({ type: ActionType.DELIVER_TO_CITY, city: pd.city, certificates: total }),
@@ -397,17 +406,20 @@ function stationClickable(i) {
 	if (!game.value || !actable.value) return false
 	const acts = focusedLiveActions.value
 	const player = g().currentPlayer
+	const ps = g().currentPlayerState()
 	const rt = g().getRailroadTrack()
 	const station = rt.stations[i]
 	if (!station) return false
-	if (acts.includes(ActionType.UPGRADE_STATION) && station.space === rt.currentSpace(player)) return true
-	if (acts.includes(ActionType.UPGRADE_STATION_TOWN) && (i === 10 || i === 11)) return true
-	if (acts.includes(ActionType.DOWNGRADE_STATION) && station.upgradedBy.includes(player)) return true
-	return acts.includes(ActionType.UPGRADE_ANY_STATION_BEHIND_ENGINE) && parseFloat(rt.currentSpace(player)) > parseFloat(station.space)
+	const canPay = ps.balance >= station.cost
+	if (acts.includes(ActionType.UPGRADE_STATION) && station.space === rt.currentSpace(player)) return canPay
+	if (acts.includes(ActionType.UPGRADE_STATION_TOWN) && (i === 10 || i === 11)) return canPay
+	if (acts.includes(ActionType.DOWNGRADE_STATION) && station.upgradedBy.includes(player))
+		return ps.pendingStationUpgrade !== i
+	return acts.includes(ActionType.UPGRADE_ANY_STATION_BEHIND_ENGINE) && parseFloat(rt.currentSpace(player)) > parseFloat(station.space) && canPay
 }
 
 function clickStation(i) {
-	if (!game.value || !actable.value) return
+	if (!game.value || !actable.value || !stationClickable(i)) return
 	const acts = focusedLiveActions.value
 	const player = g().currentPlayer
 	const rt = g().getRailroadTrack()
@@ -418,7 +430,8 @@ function clickStation(i) {
 	// Rails to the North: the station town you just branched onto offers its own upgrade.
 	if (acts.includes(ActionType.UPGRADE_STATION_TOWN) && (i === 10 || i === 11))
 		return controller.perform({ type: ActionType.UPGRADE_STATION_TOWN })
-	if (acts.includes(ActionType.DOWNGRADE_STATION) && station.upgradedBy.includes(player)) return controller.perform({ type: ActionType.DOWNGRADE_STATION, station: i })
+	if (acts.includes(ActionType.DOWNGRADE_STATION) && station.upgradedBy.includes(player))
+		return controller.perform({ type: ActionType.DOWNGRADE_STATION, station: i })
 	if (acts.includes(ActionType.UPGRADE_ANY_STATION_BEHIND_ENGINE) && parseFloat(rt.currentSpace(player)) > parseFloat(station.space)) {
 		return controller.perform({ type: ActionType.UPGRADE_ANY_STATION_BEHIND_ENGINE, station: i })
 	}
@@ -667,12 +680,14 @@ const foresightActive = computed(() => {
 const foresightTiles = computed(() => {
 	if (!game.value) return []
 	const fs = g().getForesights()
+	const finalTurns = g().getJobMarket().isClosed()
 	const out = []
 	for (const slot of FORESIGHT_SLOTS) {
 		const t = fs.spaces[slot.col][slot.row]
 		if (!t) continue
 		const img = "worker" in t ? view.workerImage(t.worker) : "teepee" in t ? view.teepeeImage(t.teepee) : view.hazardImage(t.hazard.type, t.hazard.hand)
-		out.push({ slot, img, points: "hazard" in t ? t.hazard.points : 0 })
+		// Workers stay face up in the final turns but may not be taken (RULES 14.1/14.2).
+		out.push({ slot, img, points: "hazard" in t ? t.hazard.points : 0, selectable: !finalTurns || !("worker" in t) })
 	}
 	return out
 })
@@ -812,7 +827,7 @@ const hitTargets = computed(() => {
 		out.push({ key: "space:" + sr.space, type: "space", space: sr.space, x: 0, y: 0, w: sr.w, h: sr.h, rx: 3, transform: `translate(${sr.x},${sr.y}) ${sr.transform ?? ""}` })
 	}
 	for (const f of foresightTiles.value) {
-		if (!foresightActive.value[f.slot.col]) continue
+		if (!foresightActive.value[f.slot.col] || f.selectable === false) continue
 		out.push({ key: "fs:" + f.slot.col + "-" + f.slot.row, type: "foresight", col: f.slot.col, row: f.slot.row, x: f.slot.x, y: f.slot.y, w: 33, h: 39, rx: 3, transform: null })
 	}
 	return out

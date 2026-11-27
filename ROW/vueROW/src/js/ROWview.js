@@ -131,7 +131,7 @@ export function describeAdminChanges(changes) {
 	return (changes ?? [])
 		.map((change) => {
 			const field = ADMIN_FIELDS.find((f) => f.key === change.field)
-			const label = field ? i18n.global.t(field.labelKey) : change.field
+			const label = field ? (field.label ?? i18n.global.t(field.labelKey)) : change.field
 			return `${label} ${change.from} → ${change.to}`
 		})
 		.join(", ")

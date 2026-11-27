@@ -4,11 +4,11 @@
  * Apply batches every changed field into one history entry, so replay rebuilds
  * the same state in one step.
  */
-import { computed, reactive, watch } from "vue"
+import { computed, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import * as model from "../js/ROWmodel"
 import * as controller from "../js/ROWcontroller"
-import { ADMIN_FIELDS, adminChangesFor } from "../js/ROWadmin"
+import { ADMIN_FIELDS, DISC_FIELDS, adminChangesFor } from "../js/ROWadmin"
 import { useModelStore } from "../stores/ROWstore.js"
 
 const { t } = useI18n()
@@ -16,9 +16,23 @@ const store = useModelStore()
 
 const values = reactive(Object.fromEntries(ADMIN_FIELDS.map((field) => [field.key, 0])))
 const fields = computed(() =>
-	ADMIN_FIELDS.filter((field) => !field.available || (store.game && field.available(store.game))),
+	ADMIN_FIELDS.filter((field) => !field.hidden && (!field.available || (store.game && field.available(store.game)))),
 )
-const playerState = computed(() => (store.game && store.currentPlayer ? store.game.playerState(store.currentPlayer) : null))
+const playerState = computed(() => {
+	store.version
+	return store.game && store.currentPlayer ? store.game.playerState(store.currentPlayer) : null
+})
+
+/** Disc spaces still on this player's board, so they can be admin-cleared. */
+const discOptions = computed(() => {
+	if (!playerState.value || !store.game) return []
+	return DISC_FIELDS.filter((field) => (!field.available || field.available(store.game)) && field.get(playerState.value) < field.count).map((field) => ({
+		key: field.key,
+		label: field.label,
+		remaining: field.count - field.get(playerState.value),
+	}))
+})
+const selectedDisc = ref("")
 
 function resetValues() {
 	if (!playerState.value) return
@@ -26,6 +40,13 @@ function resetValues() {
 }
 
 watch([() => store.currentPlayer, () => store.version], resetValues, { immediate: true })
+watch(
+	discOptions,
+	(options) => {
+		if (!options.some((option) => option.key === selectedDisc.value)) selectedDisc.value = options[0]?.key ?? ""
+	},
+	{ immediate: true },
+)
 
 function applyChanges() {
 	if (!playerState.value) return
@@ -35,6 +56,17 @@ function applyChanges() {
 		return
 	}
 	if (controller.adminEdit(changes)) resetValues()
+}
+
+function removeDisc() {
+	if (!playerState.value) return
+	const field = DISC_FIELDS.find((f) => f.key === selectedDisc.value)
+	if (!field) return
+	const from = field.get(playerState.value)
+	if (from >= field.count) return
+	// Admin removal is direct: it does not pay the normal hand-limit cost or grant the
+	// printed step-space reward. Use the dollars field to correct those separately.
+	if (controller.adminEdit([{ field: field.key, from, to: from + 1 }])) resetValues()
 }
 
 function showState() {
@@ -57,6 +89,15 @@ function showState() {
 				<button class="actionsLineButton" @click="resetValues">{{ t('row.debug.reset') }}</button>
 			</div>
 		</div>
+		<div v-if="playerState && discOptions.length" class="discRow">
+			<label>
+				<span>{{ t('row.debug.disc') }}</span>
+				<select v-model="selectedDisc">
+					<option v-for="option in discOptions" :key="option.key" :value="option.key">{{ option.label }} ({{ option.remaining }})</option>
+				</select>
+			</label>
+			<button class="actionsLineButton" @click="removeDisc">{{ t('row.debug.removeDisc') }}</button>
+		</div>
 		<button class="actionsLineButton" @click="showState">{{ t('row.debug.showGameData') }}</button>
 	</div>
 </template>
@@ -69,4 +110,7 @@ function showState() {
 #debugArea .adminRow span { flex: 1; }
 #debugArea .adminRow input { width: 58px; text-align: right; }
 #debugArea .adminButtons { grid-column: 1 / -1; }
+#debugArea .discRow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+#debugArea .discRow label { display: flex; align-items: center; gap: 4px; }
+#debugArea .discRow select { max-width: 320px; }
 </style>

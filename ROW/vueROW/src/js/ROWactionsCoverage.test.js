@@ -114,7 +114,8 @@ describe("Coverage: objective actions", () => {
 	it(`performs ${ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND}`, () => {
 		const game = freshGame(2);
 		arm(game, ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND);
-		expect(() => run(game, { type: ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND })).not.toThrow();
+		const card = game.getObjectiveCards().available[0];
+		expect(() => run(game, { type: ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND, objectiveCard: card })).not.toThrow();
 	});
 	it(`performs ${ActionType.DISCARD_1_OBJECTIVE_CARD_TO_GAIN_2_CERTIFICATES}`, () => {
 		const game = freshGame(2);

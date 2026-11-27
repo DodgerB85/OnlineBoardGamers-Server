@@ -29,6 +29,7 @@ function serializePlayerState(ps) {
         stops: ps.stops,
         lastEngineMove: ps.lastEngineMove,
         lastUpgradedStation: ps.lastUpgradedStation,
+        pendingStationUpgrade: ps.pendingStationUpgrade,
         exchangeTokens: ps.exchangeTokens,
         branchlets: ps.branchlets,
         lastPlacedBranchlet: ps.lastPlacedBranchlet,
@@ -61,6 +62,7 @@ function deserializePlayerState(obj) {
     ps.stops = obj.stops ?? {};
     ps.lastEngineMove = obj.lastEngineMove ?? 0;
     ps.lastUpgradedStation = obj.lastUpgradedStation ?? -1;
+    ps.pendingStationUpgrade = obj.pendingStationUpgrade ?? null;
     // Payloads saved before exchange tokens existed still start with the one every player gets.
     ps.exchangeTokens = obj.exchangeTokens ?? 1;
     ps.branchlets = obj.branchlets ?? 15;
@@ -123,6 +125,7 @@ export function serializeGame(game, rng) {
         objectiveCards: { drawStack: s.objectiveCards.drawStack.map((c) => c.id), available: s.objectiveCards.available.map((c) => c.id) },
         startingObjectiveCards: s.startingObjectiveCards.map((c) => c.id),
         canUndo: s.canUndo,
+        deliveryDisplayOnly: !!s.deliveryDisplayOnly,
         actionStack: s.actionStack.serialize(),
         rngState: rng instanceof JavaRandom ? rng.getState() : undefined,
     };
@@ -179,6 +182,7 @@ export function deserializeGame(obj) {
         startingObjectiveCards: (obj.startingObjectiveCards ?? []).map((id) => OBJECTIVE_CARD_TYPES[id]),
         actionStack: obj.actionStack ? ActionStack.deserialize(obj.actionStack) : new ActionStack([], []),
         canUndo: obj.canUndo ?? false,
+        deliveryDisplayOnly: !!obj.deliveryDisplayOnly,
     };
     const game = new Game(state);
     // Older payloads (and fresh games) have no action stack: rebuild begin-turn

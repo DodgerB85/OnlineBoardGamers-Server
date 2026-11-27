@@ -3,11 +3,25 @@
  * replayed from history, so an edit survives a rebuild from the opening position.
  * Every field stores an absolute target value: replay never recomputes a delta.
  */
-import { Worker } from "./ROWcore"
+import { UNLOCKABLE_INFO, Unlockable, Worker } from "./ROWcore"
 import { CERTIFICATE_STEPS } from "./ROWengine"
 
 const MAX_WORKERS = 6
 const MAX_BRANCHLETS = 15
+
+const DISC_LABELS = {
+	[Unlockable.CERT_LIMIT_4]: "Certificate limit 4",
+	[Unlockable.CERT_LIMIT_6]: "Certificate limit 6",
+	[Unlockable.EXTRA_STEP_DOLLARS]: "Step limit +1 ($3 space)",
+	[Unlockable.EXTRA_STEP_POINTS]: "Step limit +1 (3 VP space)",
+	[Unlockable.EXTRA_CARD]: "Hand limit +1 ($5 space)",
+	[Unlockable.AUX_GAIN_DOLLAR]: "Auxiliary: gain $1",
+	[Unlockable.AUX_DRAW_CARD_TO_DISCARD_CARD]: "Auxiliary: draw/discard",
+	[Unlockable.AUX_MOVE_ENGINE_BACKWARDS_TO_GAIN_CERT]: "Auxiliary: engine back + certificate",
+	[Unlockable.AUX_PAY_TO_MOVE_ENGINE_FORWARD]: "Auxiliary: pay + engine forward",
+	[Unlockable.AUX_MOVE_ENGINE_BACKWARDS_TO_REMOVE_CARD]: "Auxiliary: engine back + remove card",
+	[Unlockable.AUX_DISCARD_CATTLE_CARD_TO_PLACE_BRANCHLET]: "Auxiliary: discard cattle + branchlet",
+}
 
 function clamp(value, min, max) {
 	return Math.min(max, Math.max(min, Math.trunc(value)))
@@ -32,6 +46,29 @@ function workerField(key, worker, labelKey) {
 		},
 	}
 }
+
+/**
+ * Player-board disc spaces. A space is cleared by increasing `unlocked` for its
+ * Unlockable, so admin edits store the absolute cleared count. These fields are
+ * hidden from the generic number grid and driven by the disc control in DebugArea.
+ */
+export const DISC_FIELDS = Object.values(Unlockable).map((u) => {
+	const count = UNLOCKABLE_INFO[u].count
+	return {
+		key: `disc_${u}`,
+		u,
+		count,
+		hidden: true,
+		labelKey: "row.debug.disc",
+		label: DISC_LABELS[u] ?? u,
+		get: (ps) => ps.unlocked[u] ?? 0,
+		normalize: (ps, value) => clamp(value, 0, count),
+		set: (ps, value) => {
+			ps.unlocked[u] = clamp(value, 0, count)
+		},
+		available: (game) => u !== Unlockable.AUX_DISCARD_CATTLE_CARD_TO_PLACE_BRANCHLET || game.isRailsToTheNorth(),
+	}
+})
 
 export const ADMIN_FIELDS = [
 	{
@@ -83,6 +120,7 @@ export const ADMIN_FIELDS = [
 		},
 		available: (game) => game.isRailsToTheNorth(),
 	},
+	...DISC_FIELDS,
 ]
 
 /** Build absolute from/to edits for every changed input, skipping no-ops. */

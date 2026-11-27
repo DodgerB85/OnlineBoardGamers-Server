@@ -532,6 +532,8 @@
       "CANNOT_REPLACE_NEUTRAL_BUILDING": "你不能替换中立建筑。",
       "CANNOT_STEP_DIRECTLY_FROM_TO": "你不能从当前位置直接移动到该位置。",
       "CARD_NOT_IN_HAND": "你手上没有这张卡。",
+      "NO_CARDS_TO_REMOVE": "你手牌中没有足够的牌可移除。",
+      "NO_DISC_AVAILABLE": "你没有可放置的圆片。",
       "CATTLE_CARDS_NOT_IN_HAND": "你手上没有这些牛只卡。",
       "CATTLE_CARD_NOT_AVAILABLE": "这张牛只卡不可用。",
       "CITY_VALUE_MUST_BE_LESS_THEN_OR_EQUAL_TO_SPACES_THAT_ENGINE_MOVED_BACKWARDS": "你必须选择一座价值小于或等于你火车头向后移动格数的城市。",
@@ -633,6 +635,8 @@
       "engineers": "工程师",
       "exchangeTokens": "交换标记",
       "branchlets": "分部",
+      "disc": "圆片",
+      "removeDisc": "移除圆片",
       "apply": "应用",
       "reset": "重置"
     },

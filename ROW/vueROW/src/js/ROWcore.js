@@ -383,6 +383,7 @@ export var ROWError;
     ROWError["ALREADY_PLACED_BRANCHLET"] = "ALREADY_PLACED_BRANCHLET";
     ROWError["NOT_ENOUGH_EXCHANGE_TOKENS"] = "NOT_ENOUGH_EXCHANGE_TOKENS";
     ROWError["NO_BRANCHLETS"] = "NO_BRANCHLETS";
+    ROWError["NO_DISC_AVAILABLE"] = "NO_DISC_AVAILABLE";
     ROWError["NO_SUCH_TOWN"] = "NO_SUCH_TOWN";
     ROWError["STATION_MASTER_NOT_AVAILABLE"] = "STATION_MASTER_NOT_AVAILABLE";
     ROWError["TOWN_NOT_ACCESSIBLE"] = "TOWN_NOT_ACCESSIBLE";
@@ -521,9 +522,9 @@ export class PossibleAction {
             case "choice":
                 return new ChoiceAction((obj.actions ?? []).map(PossibleAction.deserialize));
             case "repeat":
-                return new Repeat(obj.atLeast ?? 0, obj.atMost ?? 0, PossibleAction.deserialize(obj.repeatingAction), obj.current ? PossibleAction.deserialize(obj.current) : null);
+                return new Repeat(obj.atLeast ?? 0, obj.atMost ?? 0, PossibleAction.deserialize(obj.repeatingAction), obj.current ? PossibleAction.deserialize(obj.current) : null, !!obj.started);
             case "whenThen":
-                return new WhenThen(obj.atLeast ?? 0, obj.atMost ?? 0, obj.when, obj.then, obj.thens ?? 0, obj.current ? PossibleAction.deserialize(obj.current) : null);
+                return new WhenThen(obj.atLeast ?? 0, obj.atMost ?? 0, obj.when, obj.then, obj.thens ?? 0, obj.current ? PossibleAction.deserialize(obj.current) : null, !!obj.started);
         }
     }
     static mandatory(action) {
@@ -661,14 +662,16 @@ class ChoiceAction extends AnyAction {
     }
 }
 class Repeat extends PossibleAction {
-    constructor(atLeast, atMost, action, current = null) {
+    constructor(atLeast, atMost, action, current = null, started = false) {
         super();
         this.atLeast = atLeast;
         this.atMost = atMost;
         this.repeatingAction = action;
         this.current = current;
+        this.started = started;
     }
     perform(action) {
+        this.started = true;
         if (this.current === null) {
             if (this.atMost === 0)
                 throw new ROWException(ROWError.CANNOT_PERFORM_ACTION);
@@ -704,7 +707,7 @@ class Repeat extends PossibleAction {
         return this.atMost > 0 ? this.repeatingAction.getPossibleActions() : new Set();
     }
     clone() {
-        return new Repeat(this.atLeast, this.atMost, this.repeatingAction, this.current);
+        return new Repeat(this.atLeast, this.atMost, this.repeatingAction, this.current, this.started);
     }
     serialize() {
         return {
@@ -713,12 +716,13 @@ class Repeat extends PossibleAction {
             atMost: this.atMost,
             repeatingAction: this.repeatingAction.serialize(),
             current: this.current ? this.current.serialize() : null,
+            started: this.started,
         };
     }
 }
 class WhenThen extends Repeat {
-    constructor(atLeast, atMost, when, then, thens, current = null) {
-        super(atLeast, atMost, PossibleAction.optionalAction(when), current);
+    constructor(atLeast, atMost, when, then, thens, current = null, started = false) {
+        super(atLeast, atMost, PossibleAction.optionalAction(when), current, started);
         this.when = when;
         this.then = then;
         this.thens = thens;
@@ -756,7 +760,7 @@ class WhenThen extends Repeat {
         return super.getPossibleActions();
     }
     clone() {
-        return new WhenThen(this.atLeast, this.atMost, this.when, this.then, this.thens, this.current);
+        return new WhenThen(this.atLeast, this.atMost, this.when, this.then, this.thens, this.current, this.started);
     }
     serialize() {
         return {
@@ -768,12 +772,21 @@ class WhenThen extends Repeat {
             when: this.when,
             then: this.then,
             thens: this.thens,
+            started: this.started,
         };
     }
 }
 // ---------------------------------------------------------------------------
 // ActionStack (port of ActionStack.java)
 // ---------------------------------------------------------------------------
+/** True when a repeatable local action has already started and is not finished. */
+function hasStartedRepeat(possible) {
+    if (possible instanceof Repeat)
+        return possible.started || possible.current !== null || hasStartedRepeat(possible.current);
+    if (possible instanceof AnyAction)
+        return possible.actions.some(hasStartedRepeat);
+    return false;
+}
 export class ActionStack {
     constructor(actions = [], immediateActions = []) {
         // Java uses a Deque with peek() at the head; we treat index 0 as the head.
@@ -854,6 +867,10 @@ export class ActionStack {
     }
     hasImmediate() {
         return this.immediateActions.length > 0;
+    }
+    /** True while a repeatable action (e.g. Buy Cattle) is between repetitions. */
+    hasStartedRepeat() {
+        return [...this.immediateActions, ...this.actions].some(hasStartedRepeat);
     }
     /** The next pending action type when it is mandatory, otherwise null. */
     pendingMandatoryAction() {

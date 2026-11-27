@@ -532,6 +532,8 @@
       "CANNOT_REPLACE_NEUTRAL_BUILDING": "Du kannst ein neutrales Gebäude nicht ersetzen.",
       "CANNOT_STEP_DIRECTLY_FROM_TO": "Du kannst nicht direkt von deinem aktuellen Ort zu diesem Ort ziehen.",
       "CARD_NOT_IN_HAND": "Diese Karte hast du nicht auf der Hand.",
+      "NO_CARDS_TO_REMOVE": "Du hast nicht genügend Karten auf der Hand, um sie zu entfernen.",
+      "NO_DISC_AVAILABLE": "Du hast keine Scheibe zum Einsetzen.",
       "CATTLE_CARDS_NOT_IN_HAND": "Diese Rinderkarten hast du nicht auf der Hand.",
       "CATTLE_CARD_NOT_AVAILABLE": "Diese Rinderkarte ist nicht verfügbar.",
       "CITY_VALUE_MUST_BE_LESS_THEN_OR_EQUAL_TO_SPACES_THAT_ENGINE_MOVED_BACKWARDS": "Du musst eine Stadt wählen, deren Wert kleiner oder gleich der Anzahl der Felder ist, um die du deine Lokomotive rückwärts bewegt hast.",
@@ -633,6 +635,8 @@
       "engineers": "Ingenieure",
       "exchangeTokens": "Tauschmarker",
       "branchlets": "Zweigstellen",
+      "disc": "Scheibe",
+      "removeDisc": "Scheibe entfernen",
       "apply": "Anwenden",
       "reset": "Zurücksetzen"
     },

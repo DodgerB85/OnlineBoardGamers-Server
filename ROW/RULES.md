@@ -69,7 +69,7 @@ The backs of all worker, teepee and hazard tiles are marked 1, 2 or 3. They are 
 ### 2.3 Board tiles, job market and foresight
 
 6. Reveal tiles from the back-1 pile and place them on the board according to type:
-   - **Teepee tile (green or blue):** place it in the Indian trade section on the empty space with the lowest printed money value (the track starts at −3).
+   - **Teepee tile (green or blue):** place it in the Indian trade section on the empty space with the lowest printed money value (the track starts at −3). The negative spaces are display slots, not trail steps; a Trade with the Indians action may take a tile from any space in the section.
    - **Hazard tile:** place it in its matching hazard section (flood, drought or rockfall) on the empty space with the lowest number (1–4).
    - If there is no empty space for a tile, flip it face down and return it to the Kansas City supply.
    - Keep revealing back-1 tiles until 7 tiles have been placed on the board.
@@ -151,7 +151,7 @@ Each player has:
   - `hand`: cards in hand, capped by the hand limit.
   - `discardPile`: face-up personal discard pile.
 - **Hand limit:** starts at 4, maximum 6.
-- **Step limit:** starts at 3 or 4 depending on player count, maximum 6.
+- **Step limit:** starts at 3 or 4 depending on player count; maximum 5 for 2 players, 6 for 3 players, 7 for 4 players.
 - **Certificate track:**
   - Temporary certificate limit: starts at 3, maximum 6.
   - Certificate marker position: starts at 0.
@@ -667,8 +667,8 @@ The possible tasks are:
 - Have 1 hazard tile in front of you (of any kind).
 - Have 1 of your discs on a train station.
 - Have 1 cattle card with a breeding value of 3 in your deck.
-- Have 1 West Highland cattle card in your deck.
-- Have 1 Texas Longhorn cattle card in your deck.
+- Have 1 cattle card with a breeding value of 4 in your deck.
+- Have 1 cattle card with a breeding value of 5 in your deck.
 - Have 1 of your discs on the city space of San Francisco.
 
 Each single fulfilled task can count towards only one objective card. If several objective cards show the same task, that task must be fulfilled separately for each card.

@@ -35,12 +35,17 @@ const takeAction = computed(() => {
 	return null
 })
 const canTake = computed(() => !!takeAction.value)
-const canTakeFromDraw = computed(() => canTake.value && (takeAction.value === ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND || !(g().edition === "FIRST" && !g().isRailsToTheNorth() && g().atKansasCity())))
+/** First-edition 6b and delivery green arrows must take from the display, not the stack. */
+const displayOnlyObjective = computed(() => {
+	if (!takeAction.value || g().edition !== "FIRST" || g().isRailsToTheNorth()) return false
+	if (takeAction.value === ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND) return true
+	return takeAction.value === ActionType.TAKE_OBJECTIVE_CARD && g().objectiveFromDisplayOnly()
+})
+const canTakeFromDraw = computed(() => canTake.value && !displayOnlyObjective.value)
 
-function take(id) {
+function take(card) {
 	if (!canTake.value || !actable.value) return
-	const card = g().getObjectiveCards().available.find((c) => c.id === id)
-	if (card) controller.perform({ type: takeAction.value, objectiveCard: card })
+	controller.perform({ type: takeAction.value, objectiveCard: card })
 }
 
 function takeFromDrawStack() {
@@ -53,12 +58,12 @@ function takeFromDrawStack() {
 	<div id="objectivesMarket" v-if="game">
 		<div v-if="canTake" class="hint">{{ view.humanizeAction(takeAction) }}</div>
 		<CardView
-			v-for="card in available"
-			:key="card.id"
+			v-for="(card, index) in available"
+			:key="`${card.id}-${index}`"
 			class="objCard"
 			:class="{ selectable: canTake }"
 			:card="card"
-			@click="take(card.id)"
+			@click="take(card)"
 		/>
 		<div class="drawStack" :class="{ selectable: canTakeFromDraw }" @click="takeFromDrawStack">
 			<img :src="view.cardBackGreyImage()" alt="" draggable="false" />

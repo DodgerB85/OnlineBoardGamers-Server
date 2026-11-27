@@ -532,6 +532,8 @@
       "CANNOT_REPLACE_NEUTRAL_BUILDING": "Tu ne peux pas remplacer un bâtiment neutre.",
       "CANNOT_STEP_DIRECTLY_FROM_TO": "Tu ne peux pas te déplacer directement de ta position actuelle à cet emplacement.",
       "CARD_NOT_IN_HAND": "Tu n'as pas cette carte en main.",
+      "NO_CARDS_TO_REMOVE": "Vous n'avez pas assez de cartes en main à retirer.",
+      "NO_DISC_AVAILABLE": "Vous n'avez aucun disque à placer.",
       "CATTLE_CARDS_NOT_IN_HAND": "Tu n'as pas ces cartes de bétail en main.",
       "CATTLE_CARD_NOT_AVAILABLE": "Cette carte de bétail n'est pas disponible.",
       "CITY_VALUE_MUST_BE_LESS_THEN_OR_EQUAL_TO_SPACES_THAT_ENGINE_MOVED_BACKWARDS": "Tu dois choisir une ville dont la valeur est inférieure ou égale au nombre de cases dont tu as reculé ta locomotive.",
@@ -633,6 +635,8 @@
       "engineers": "Ingénieurs",
       "exchangeTokens": "Jetons d'échange",
       "branchlets": "Branches",
+      "disc": "Disque",
+      "removeDisc": "Retirer le disque",
       "apply": "Appliquer",
       "reset": "Réinitialiser"
     },

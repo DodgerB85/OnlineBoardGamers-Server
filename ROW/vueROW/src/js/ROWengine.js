@@ -154,6 +154,7 @@ export class PlayerState {
         this.automaState = null;
         this.lastEngineMove = 0;
         this.lastUpgradedStation = -1; // Java's "no station yet" representation
+        this.pendingStationUpgrade = null;
         this.player = player;
         for (const u of Object.values(Unlockable))
             this.unlocked[u] = 0;
@@ -329,6 +330,8 @@ export class PlayerState {
         return this.numberOfCowboysUsedInTurn;
     }
     gainTempCertificates(steps) {
+        // "Up to N" is taken at the maximum: moving the marker forward is always beneficial
+        // and is clamped to the temporary certificate limit.
         const idx = CERTIFICATE_STEPS.indexOf(this.tempCertificates);
         const newIdx = Math.min(CERTIFICATE_STEPS.length - 1, idx + steps);
         this.tempCertificates = Math.min(this.getTempCertificateLimit(), CERTIFICATE_STEPS[newIdx]);
@@ -721,6 +724,7 @@ export class CattleMarket {
         this.fillUp(playerCount);
     }
     fillUp(playerCount) {
+        // The internal array keeps draw order; the UI sorts the market display by colour/value.
         const limit = cattleMarketLimit(playerCount, this.simmental);
         while (this.market.length < limit && this.drawStack.length > 0) {
             this.market.push(this.drawStack.shift());
@@ -885,17 +889,16 @@ export class Foresights {
             [null, null],
         ];
     }
-    init(supply, rng) {
-        this.fillUp(supply, true);
+    init(supply) {
+        this.fillUp(supply);
     }
-    fillUp(supply, workers) {
+    fillUp(supply) {
         for (let col = 0; col < 3; col++) {
             for (let row = 0; row < 2; row++) {
                 if (this.spaces[col][row] === null) {
-                    let tile = supply.draw(col);
-                    if (tile && "worker" in tile && !workers)
-                        tile = null;
-                    this.spaces[col][row] = tile;
+                    const tile = supply.draw(col);
+                    if (tile)
+                        this.spaces[col][row] = tile;
                 }
             }
         }
@@ -913,17 +916,6 @@ export class Foresights {
         const tile = this.spaces[col][row];
         this.spaces[col][row] = null;
         return tile;
-    }
-    removeWorkers() {
-        // Reference-engine behaviour: worker tiles are cleared from foresight when the job
-        // market closes so final turns cannot take them. The rulebook keeps them face up but
-        // unselectable; changing that would break the replay fixtures.
-        for (let col = 0; col < 3; col++)
-            for (let row = 0; row < 2; row++) {
-                const t = this.spaces[col][row];
-                if (t && "worker" in t)
-                    this.spaces[col][row] = null;
-            }
     }
 }
 // ---------------------------------------------------------------------------
@@ -1491,7 +1483,7 @@ export class Game {
         const kcSupply = new KansasCitySupply();
         kcSupply.init(players.length, rng, balanced);
         const foresights = new Foresights();
-        foresights.init(kcSupply, rng);
+        foresights.init(kcSupply);
         const objectiveCards = new ObjectiveCards(rng);
         const startingDeck = [...STARTING_OBJECTIVE_IDS];
         shuffle(startingDeck, rng);
@@ -1570,8 +1562,10 @@ export class Game {
     // ---- turn flow (ROW.determineBeginTurnActions) ----
     beginTurn(countTurn = true) {
         this.state.actionStack = ActionStack.initial(this.determineBeginTurnActions());
+        this.state.deliveryDisplayOnly = false;
         if (this.state.status !== Status.BIDDING) {
             const ps = this.currentPlayerState();
+            ps.pendingStationUpgrade = null;
             ps.numberOfCowboysUsedInTurn = 0;
             ps.locationsActivatedInTurn = [];
             if (countTurn)
@@ -1647,7 +1641,7 @@ export class Game {
     }
     possibleMoves(player) {
         const p = player ?? this.currentPlayer;
-        return this.state.trail.possibleMovesFrom(p, this.playerState(p).balance, this.getStepLimit(), this.state.players.length);
+        return this.state.trail.possibleMovesFrom(p, this.playerState(p).balance, this.playerState(p).getStepLimit(this.state.players.length), this.state.players.length);
     }
     /** Deliveries for the current viewer: normal at Kansas City, otherwise extraordinary (building 9A). */
     possibleDeliveries(player) {
@@ -1708,10 +1702,15 @@ export class Game {
         if (this.atKansasCity())
             return false;
         const stack = this.state.actionStack;
+        if (stack.hasStartedRepeat()) return false;
         return (stack.size() === 1 && stack.canPerform(ActionType.MOVE)) || !stack.hasImmediate() || stack.isEmpty();
     }
     atKansasCity() {
         return this.state.trail.atKansasCity(this.currentPlayer);
+    }
+    /** A green-arrow delivery action is display-only in the first edition. */
+    objectiveFromDisplayOnly() {
+        return !!this.state.deliveryDisplayOnly || this.atKansasCity() || this.currentPlayerState().lastEngineMove > 0;
     }
     canSkip() {
         return !this.isEnded() && this.state.actionStack.canSkip();
@@ -1754,8 +1753,10 @@ export class Game {
             ps.lastEngineMove = 0;
             ps.lastUpgradedStation = -1;
             ps.lastPlacedBranchlet = null;
+            ps.pendingStationUpgrade = null;
             if (this.state.trail.atKansasCity(this.currentPlayer))
                 this.state.trail.moveToStart(this.currentPlayer);
+            this.state.deliveryDisplayOnly = false;
             this.state.canUndo = false;
             this.afterEndTurn(rng);
         }
@@ -1899,7 +1900,7 @@ export class Game {
             if (this.state.status === Status.STARTED)
                 return;
         }
-        this.state.foresights.fillUp(this.state.kcSupply, !this.state.jobMarket.isClosed());
+        this.state.foresights.fillUp(this.state.kcSupply);
         const playerThatEndedTurn = this.currentPlayer;
         this.state.currentPlayer = this.getNextPlayer();
         if (this.state.jobMarket.isClosed()) {
@@ -2059,9 +2060,10 @@ export class Game {
             case ActionType.HIRE_WORKER_MINUS_2:
                 return { immediate: this.hireWorker(action.row, action.worker, -2), actions: [], canUndo: true };
             case ActionType.TAKE_OBJECTIVE_CARD: {
-                // A green-arrow delivery action runs at Kansas City and may only take from the
-                // display. The generic building action still allows the top of the stack.
-                if (!action.objectiveCard && this.atKansasCity() && this.edition === Edition.FIRST && !this.isRailsToTheNorth())
+                // Green-arrow delivery actions (normal KC or an extraordinary delivery) may only
+                // take from the display in the first edition. A generic building action still
+                // allows the top of the stack.
+                if (!action.objectiveCard && this.edition === Edition.FIRST && !this.isRailsToTheNorth() && this.objectiveFromDisplayOnly())
                     throw new ROWException(ROWError.OBJECTIVE_CARD_NOT_AVAILABLE);
                 const chosen = action.objectiveCard ? this.state.objectiveCards.remove(action.objectiveCard) : this.state.objectiveCards.draw();
                 // Rules: a taken objective card goes face up onto the personal discard pile.
@@ -2070,6 +2072,9 @@ export class Game {
                 return { immediate: [], actions: [], canUndo: false };
             }
             case ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND: {
+                // Building 6b takes from the general objective display in the first edition.
+                if (!action.objectiveCard && this.edition === Edition.FIRST && !this.isRailsToTheNorth())
+                    throw new ROWException(ROWError.OBJECTIVE_CARD_NOT_AVAILABLE);
                 const chosen = action.objectiveCard ? this.state.objectiveCards.remove(action.objectiveCard) : this.state.objectiveCards.draw();
                 ps.addCardToHand(chosen);
                 // Java: ActionResult.undoNotAllowed(ImmediateActions.none())
@@ -2077,6 +2082,8 @@ export class Game {
             }
             case ActionType.PLAY_OBJECTIVE_CARD: {
                 const requested = action.objectiveCard;
+                if (!requested || !isObjectiveCard(requested))
+                    throw new ROWException(ROWError.CARD_NOT_IN_HAND);
                 let idx = ps.hand.indexOf(requested);
                 if (idx < 0 && requested && typeof requested === "object")
                     idx = ps.hand.findIndex((c) => cardKey(c) === cardKey(requested));
@@ -2143,6 +2150,7 @@ export class Game {
                 return { immediate, actions: [], canUndo: true };
             }
             case ActionType.MOVE_ENGINE_2_FORWARD: {
+                // Rule 9.4: a forward move may stop early, so "2 forward" is 1..2.
                 const immediate = this.state.railroadTrack.moveEngineForward(this.currentPlayer, action.to, 1, 2);
                 return { immediate, actions: [], canUndo: true };
             }
@@ -2203,6 +2211,8 @@ export class Game {
                 return { immediate, actions: [], canUndo: true };
             }
             case ActionType.MOVE_ENGINE_1_BACKWARDS_TO_REMOVE_1_CARD: {
+                if (ps.hand.length < 1)
+                    throw new ROWException(ROWError.CARD_NOT_IN_HAND);
                 const immediate = this.state.railroadTrack.moveEngineBackwards(this.currentPlayer, action.to, 1, 1);
                 return { immediate: [...immediate, PossibleAction.mandatory(ActionType.REMOVE_CARD)], actions: [], canUndo: true };
             }
@@ -2212,6 +2222,8 @@ export class Game {
                 return { immediate: [...immediate, PossibleAction.optionalAction(ActionType.REMOVE_CARD)], actions: [], canUndo: true };
             }
             case ActionType.MOVE_ENGINE_2_BACKWARDS_TO_REMOVE_2_CARDS: {
+                if (ps.hand.length < 2)
+                    throw new ROWException(ROWError.CARD_NOT_IN_HAND);
                 const immediate = this.state.railroadTrack.moveEngineBackwards(this.currentPlayer, action.to, 2, 2);
                 return { immediate: [...immediate, PossibleAction.repeat(2, 2, ActionType.REMOVE_CARD)], actions: [], canUndo: true };
             }
@@ -2244,9 +2256,12 @@ export class Game {
             }
             case ActionType.DOWNGRADE_STATION: {
                 const stationIndex = action.station;
-                if (stationIndex === ps.lastUpgradedStation)
+                if (!this.state.railroadTrack.stations[stationIndex])
+                    throw new ROWException(ROWError.STATION_NOT_ON_TRACK);
+                if (ps.pendingStationUpgrade !== null && stationIndex === ps.pendingStationUpgrade)
                     throw new ROWException(ROWError.STATION_MUST_BE_DIFFERENT);
                 this.downgradeStation(stationIndex);
+                ps.pendingStationUpgrade = null;
                 return { immediate: [], actions: [], canUndo: true };
             }
             case ActionType.APPOINT_STATION_MASTER:
@@ -2311,11 +2326,13 @@ export class Game {
             case ActionType.UNLOCK_WHITE:
                 // Java rejects a black disc here; without this the player could unlock e.g.
                 // CERT_LIMIT_6 with UNLOCK_WHITE.
-                if (UNLOCKABLE_INFO[action.unlock].discColor !== DiscColor.WHITE)
+                if (!UNLOCKABLE_INFO[action.unlock] || UNLOCKABLE_INFO[action.unlock].discColor !== DiscColor.WHITE)
                     throw new ROWException(ROWError.MUST_PICK_WHITE_DISC);
                 ps.unlock(action.unlock);
                 return null;
             case ActionType.UNLOCK_BLACK_OR_WHITE:
+                if (!UNLOCKABLE_INFO[action.unlock])
+                    throw new ROWException(ROWError.CANNOT_PERFORM_ACTION);
                 ps.unlock(action.unlock);
                 return null;
             case ActionType.PLACE_BUILDING:
@@ -2363,7 +2380,9 @@ export class Game {
                     ps.gainTempCertificates(1);
                 else {
                     ps.gainDollars(action.type === ActionType.DISCARD_1_CATTLE_CARD_TO_GAIN_6_DOLLARS_AND_ADD_1_OBJECTIVE_CARD_TO_HAND ? 6 : 3);
-                    const hasObjectives = this.state.objectiveCards.available.length + this.state.objectiveCards.drawStack.length > 0;
+                    const hasObjectives = this.edition === Edition.FIRST && !this.isRailsToTheNorth()
+                        ? this.state.objectiveCards.available.length > 0
+                        : this.state.objectiveCards.available.length + this.state.objectiveCards.drawStack.length > 0;
                     return { immediate: hasObjectives ? [PossibleAction.optionalAction(ActionType.ADD_1_OBJECTIVE_CARD_TO_HAND)] : [], actions: [], canUndo: true };
                 }
                 return null;
@@ -2550,19 +2569,28 @@ export class Game {
     upgradeStation(stationIndex) {
         const ps = this.currentPlayerState();
         const station = this.state.railroadTrack.stations[stationIndex];
+        if (!station)
+            throw new ROWException(ROWError.STATION_NOT_ON_TRACK);
         if (station.upgradedBy.includes(this.currentPlayer))
             throw new ROWException(ROWError.ALREADY_UPGRADED_STATION);
         ps.payDollars(station.cost);
+        // Pick the disc before the new station counts as upgraded, so the fallback can never
+        // choose the station whose disc is being placed and leave the upgrade half-done.
+        const immediate = this.removeDisc(station.discColors);
+        if (immediate.length === 0)
+            throw new ROWException(ROWError.NO_DISC_AVAILABLE);
         ps.lastUpgradedStation = stationIndex;
         station.upgradedBy.push(this.currentPlayer);
-        // Java's RailroadTrack.upgradeStation: placing the station disc costs a player-board disc
-        // (or a station downgrade when none are left), then offers the station master.
-        const immediate = this.removeDisc(station.discColors);
+        // If the disc comes from an existing station, remember that the new station itself
+        // is not a legal source for this downgrade (it only became a station just now).
+        ps.pendingStationUpgrade = immediate.some((a) => a.getPossibleActions().has(ActionType.DOWNGRADE_STATION)) ? stationIndex : null;
         if (station.stationMaster)
             immediate.push(PossibleAction.optionalAction(ActionType.APPOINT_STATION_MASTER));
         return immediate;
     }
     appointStationMaster(worker) {
+        if (!Object.values(Worker).includes(worker))
+            throw new ROWException(ROWError.WORKER_NOT_AVAILABLE);
         const ps = this.currentPlayerState();
         // Java serialises "none" as -1; only a real station index counts as remembered.
         const remembered = typeof ps.lastUpgradedStation === "number" && ps.lastUpgradedStation >= 0;
@@ -2570,6 +2598,8 @@ export class Game {
         if (stationIndex === null)
             throw new ROWException(ROWError.NOT_AT_STATION);
         const station = this.state.railroadTrack.stations[stationIndex];
+        if (!station)
+            throw new ROWException(ROWError.STATION_NOT_ON_TRACK);
         if (!station.stationMaster)
             throw new ROWException(ROWError.CANNOT_PERFORM_ACTION);
         if (ps.stationMasters.includes(station.stationMaster))
@@ -2590,6 +2620,8 @@ export class Game {
     downgradeStation(stationIndex) {
         const ps = this.currentPlayerState();
         const station = this.state.railroadTrack.stations[stationIndex];
+        if (!station)
+            throw new ROWException(ROWError.STATION_NOT_ON_TRACK);
         const idx = station.upgradedBy.indexOf(this.currentPlayer);
         if (idx < 0)
             throw new ROWException(ROWError.STATION_NOT_UPGRADED_BY_PLAYER);
@@ -2613,6 +2645,8 @@ export class Game {
     placeBuilding(locationName, buildingName, costPerCraftsman) {
         const ps = this.currentPlayerState();
         const loc = this.state.trail.getLocation(locationName);
+        if (!loc)
+            throw new ROWException(ROWError.NO_SUCH_LOCATION);
         if (loc.kind !== "BUILDING")
             throw new ROWException(ROWError.MUST_START_ON_NEUTRAL_BUILDING);
         const info = playerBuildingInfo(buildingName, this.edition);
@@ -2640,6 +2674,8 @@ export class Game {
     removeHazard(type, locationName) {
         const ps = this.currentPlayerState();
         const loc = this.state.trail.getLocation(locationName);
+        if (!loc)
+            throw new ROWException(ROWError.NO_SUCH_LOCATION);
         if (loc.hazard === null)
             throw new ROWException(ROWError.LOCATION_EMPTY);
         const cost = type === ActionType.REMOVE_HAZARD_FOR_FREE ? 0 : type === ActionType.REMOVE_HAZARD_FOR_2_DOLLARS ? 2 : type === ActionType.REMOVE_HAZARD_FOR_5_DOLLARS ? 5 : 7;
@@ -2651,6 +2687,8 @@ export class Game {
     tradeWithTribes(locationName) {
         const ps = this.currentPlayerState();
         const loc = this.state.trail.getLocation(locationName);
+        if (!loc)
+            throw new ROWException(ROWError.NO_SUCH_LOCATION);
         if (loc.kind !== "TEEPEE" || loc.teepee === null)
             throw new ROWException(ROWError.NO_TEEPEE_AT_LOCATION);
         const reward = loc.def.reward ?? 0;
@@ -2703,17 +2741,30 @@ export class Game {
         }
         return [];
     }
+    foresightTileSelectable(tile) {
+        // Final turns may not take worker tiles from foresight; workers stay face up but
+        // unselectable (RULES 14.1/14.2).
+        return !!tile && (!this.state.jobMarket.isClosed() || !("worker" in tile));
+    }
+    foresightColumnHasChoice(column) {
+        return this.state.foresights.choices(column).some((tile) => this.foresightTileSelectable(tile));
+    }
     chooseForesight(column, choice, rng) {
         void rng;
-        const tile = this.state.foresights.take(column, choice);
-        const canUndo = tile ? this.deployKcTile(tile) : true;
+        if (![0, 1, 2].includes(column) || !Number.isInteger(choice) || choice < 0 || choice > 1)
+            throw new ROWException(ROWError.CANNOT_PERFORM_ACTION);
+        const tile = this.state.foresights.choices(column)[choice];
+        if (!this.foresightTileSelectable(tile))
+            throw new ROWException(ROWError.CANNOT_PERFORM_ACTION);
+        const taken = this.state.foresights.take(column, choice);
+        const canUndo = this.deployKcTile(taken);
         return { next: PossibleAction.mandatory(this.nextForesightAction(column)), canUndo };
     }
     nextForesightAction(column) {
         if (column === 0)
-            return this.state.foresights.isEmpty(1) ? this.nextForesightAction(1) : ActionType.CHOOSE_FORESIGHT_2;
+            return this.foresightColumnHasChoice(1) ? ActionType.CHOOSE_FORESIGHT_2 : this.nextForesightAction(1);
         if (column === 1)
-            return this.state.foresights.isEmpty(2) ? this.nextForesightAction(2) : ActionType.CHOOSE_FORESIGHT_3;
+            return this.foresightColumnHasChoice(2) ? ActionType.CHOOSE_FORESIGHT_3 : ActionType.DELIVER_TO_CITY;
         return ActionType.DELIVER_TO_CITY;
     }
     /** Places a chosen KC tile; returns Java's `undoAllowed` (false when it refills the cattle market). */
@@ -2721,12 +2772,11 @@ export class Game {
         if ("worker" in tile) {
             const jm = this.state.jobMarket;
             if (!jm.isClosed()) {
-                const fillCattle = jm.addWorker(tile.worker, this.state.playerOrder.length);
+                const fillCattle = jm.addWorker(tile.worker, this.state.players.length);
                 if (fillCattle)
                     this.state.cattleMarket.fillUp(this.state.players.length);
                 if (jm.isClosed()) {
                     this.currentPlayerState().jobMarketToken = true;
-                    this.state.foresights.removeWorkers();
                 }
                 if (fillCattle)
                     return false;
@@ -2747,6 +2797,8 @@ export class Game {
         this.state.trail.placeTeepee(teepee);
     }
     deliverToCity(city, certificates) {
+        if (!CITY_INFO[city])
+            throw new ROWException(ROWError.CITY_NOT_ACCESSIBLE);
         const track = this.state.railroadTrack;
         const ps = this.currentPlayerState();
         const atKc = this.atKansasCity();
@@ -2763,11 +2815,16 @@ export class Game {
             // Income subphase first: permanent certificates always count, and temporary
             // certificates are the part of the displayed total above them.
             const permanent = ps.permanentCertificates();
-            const totalCertificates = Math.max(certificates, permanent);
+            const requested = certificates ?? 0;
+            if (!Number.isInteger(requested) || requested < 0)
+                throw new ROWException(ROWError.NOT_ENOUGH_CERTIFICATES);
+            const totalCertificates = Math.max(requested, permanent);
+            const tempCerts = totalCertificates - permanent;
+            if (tempCerts > ps.tempCertificates || !CERTIFICATE_STEPS.includes(ps.tempCertificates - tempCerts))
+                throw new ROWException(ROWError.NOT_ENOUGH_CERTIFICATES);
             const breedingValue = ps.handValue() + totalCertificates;
             if (breedingValue < CITY_INFO[city].value && !this.isComputer(this.currentPlayer))
                 throw new ROWException(ROWError.NOT_ENOUGH_BREEDING_VALUE);
-            const tempCerts = totalCertificates - permanent;
             if (tempCerts > 0)
                 ps.spendTempCertificates(tempCerts);
             ps.gainDollars(breedingValue);
@@ -2776,16 +2833,28 @@ export class Game {
                 ps.discardHand();
             // Delivery subphase: transport costs are paid separately from the income.
             ps.payDollars(track.transportCosts(this.currentPlayer, city));
-            if (city === City.KANSAS_CITY)
-                ps.gainDollars(this.edition === Edition.FIRST ? 6 : 4);
         }
         else {
             // Extraordinary delivery (building 9A): the city value must fit the engine's backward move.
             if (CITY_INFO[city].value > ps.lastEngineMove)
                 throw new ROWException(ROWError.CITY_VALUE_MUST_BE_LESS_THEN_OR_EQUAL_TO_SPACES_THAT_ENGINE_MOVED_BACKWARDS);
         }
+        const discActions = this.removeDisc(CITY_INFO[city].discColors);
+        if (discActions.length === 0)
+            throw new ROWException(ROWError.NO_DISC_AVAILABLE);
         (track.cities[city] ?? (track.cities[city] = [])).push(this.currentPlayer);
-        const immediate = this.removeDisc(CITY_INFO[city].discColors).concat(this.deliveryActions(city));
+        // Delivery green arrows take from the display, even after the cattleman moves to START.
+        this.state.deliveryDisplayOnly = true;
+        // Placing a disc on the Kansas City crest is worth $6 in the first edition ($4 in the
+        // second edition), whether the delivery is a normal KC delivery or an extraordinary one.
+        if (city === City.KANSAS_CITY)
+            ps.gainDollars(this.edition === Edition.FIRST ? 6 : 4);
+        const immediate = discActions.concat(this.deliveryActions(city));
+        // RULES 7.3.7: return the cattleman immediately. Do not refill the foresight here:
+        // drawing the random replacement tiles now would reveal them before the turn ends.
+        // afterEndTurn performs the refill.
+        if (atKc)
+            this.state.trail.moveToStart(this.currentPlayer);
         if (atKc && upgradeSimmentals) {
             // Java: upgrade the simmentals in hand instead of discarding it, while any are left.
             return immediate.concat([PossibleAction.repeat(0, ps.simmentalsToUpgrade(), ActionType.UPGRADE_SIMMENTAL)]);
@@ -2969,7 +3038,7 @@ export class Game {
             return l && l.building && l.building.name === buildingName;
         });
     }
-    activateLocation(loc, adjacent = false) {
+    activateLocation(loc, adjacent = false, copied = false) {
         const ps = this.currentPlayerState();
         if (loc.kind === "KANSAS_CITY")
             return this.kansasCityAction();
@@ -2981,6 +3050,13 @@ export class Game {
             if (canUse && building) {
                 ps.activate(loc.name);
                 const localAction = building.player === null ? neutralBuildingAction(building.name, ps.getNumberOfCowboys()) : playerBuildingAction(building.name, this.edition, ps.getNumberOfCowboys());
+                // A copied tile contributes its local actions only; the single-auxiliary
+                // alternative belongs to stopping at a building, not to the copy (RULES 10.13).
+                if (copied) {
+                    if (loc.riskAction)
+                        return PossibleAction.any([localAction, PossibleAction.mandatory(loc.riskAction)]);
+                    return localAction;
+                }
                 const hasSODA = localAction.canPerform(ActionType.SINGLE_OR_DOUBLE_AUXILIARY_ACTION);
                 if (loc.riskAction) {
                     const withRisk = PossibleAction.any([localAction, PossibleAction.mandatory(loc.riskAction)]);
@@ -3007,15 +3083,24 @@ export class Game {
         if (!this.state.trail.getAdjacentLocations(current).includes(locationName))
             throw new ROWException(ROWError.LOCATION_NOT_ADJACENT);
         const loc = this.state.trail.getLocation(locationName);
+        if (!loc)
+            throw new ROWException(ROWError.NO_SUCH_LOCATION);
+        // 8b/6b copy local actions of a building tile only, never Kansas City or a hazard/teepee.
+        if (loc.kind !== "BUILDING")
+            throw new ROWException(ROWError.CANNOT_PERFORM_ACTION);
         if (loc.isEmpty())
             throw new ROWException(ROWError.LOCATION_EMPTY);
-        return { immediate: [], actions: [this.activateLocation(loc, true)], canUndo: true };
+        // Copying a copy-cat tile that was already activated this turn would repeat its local
+        // action and can bounce 8b -> 8b -> 8b (RULES 9.6). The reference engine has this guard.
+        const local = loc.building.player === null ? neutralBuildingAction(loc.building.name, ps.getNumberOfCowboys()) : playerBuildingAction(loc.building.name, this.edition, ps.getNumberOfCowboys());
+        if (local.canPerform(ActionType.USE_ADJACENT_BUILDING) && ps.locationsActivatedInTurn.includes(locationName))
+            throw new ROWException(ROWError.CANNOT_PERFORM_ACTION);
+        return { immediate: [], actions: [this.activateLocation(loc, true, true)], canUndo: true };
     }
     kansasCityAction() {
-        const f = this.state.foresights;
-        if (f.isEmpty(0)) {
-            if (f.isEmpty(1)) {
-                if (f.isEmpty(2))
+        if (!this.foresightColumnHasChoice(0)) {
+            if (!this.foresightColumnHasChoice(1)) {
+                if (!this.foresightColumnHasChoice(2))
                     return PossibleAction.mandatory(ActionType.DELIVER_TO_CITY);
                 return PossibleAction.mandatory(ActionType.CHOOSE_FORESIGHT_3);
             }
@@ -3067,22 +3152,18 @@ export class Game {
      */
     scoreObjectives(ps) {
         const counts = this.objectiveCounts(ps);
-        const committedIds = new Set(ps.objectives);
         const cards = [];
         for (const id of ps.objectives) {
             const def = OBJECTIVE_CARD_TYPES[id];
             if (def)
                 cards.push({ def, committed: true });
         }
-        // Java's getOptionalObjectives collects objective cards from hand, discard pile
-        // and draw stack into a Set (PlayerState.java:844-848), so dedupe by card id.
-        const seenOptional = new Set();
+        // Every physical objective card counts, including duplicate copies of the same type
+        // (the deck contains four AUX_SF cards). Do not de-duplicate by id.
         for (const pile of [ps.hand, ps.discardPile, ps.drawStack]) {
             for (const c of pile) {
-                if (isObjectiveCard(c) && c.id && !committedIds.has(c.id) && !seenOptional.has(c.id)) {
-                    seenOptional.add(c.id);
+                if (isObjectiveCard(c))
                     cards.push({ def: c, committed: false });
-                }
             }
         }
         cards.sort((a, b) => b.def.points - a.def.points);

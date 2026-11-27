@@ -19,6 +19,8 @@
       "CANNOT_REPLACE_NEUTRAL_BUILDING": "Você não pode substituir uma construção neutra.",
       "CANNOT_STEP_DIRECTLY_FROM_TO": "Você não pode mover-se diretamente de sua localização atual para esta localização.",
       "CARD_NOT_IN_HAND": "Você não tem esta carta em suas mãos.",
+      "NO_CARDS_TO_REMOVE": "Você não tem cartas suficientes na mão para remover.",
+      "NO_DISC_AVAILABLE": "Você não tem nenhum disco disponível para colocar.",
       "CATTLE_CARDS_NOT_IN_HAND": "Você não tem essas cartas de gado em sua mão.",
       "CATTLE_CARD_NOT_AVAILABLE": "Esta carta de gado não está disponível.",
       "CITY_VALUE_MUST_BE_LESS_THEN_OR_EQUAL_TO_SPACES_THAT_ENGINE_MOVED_BACKWARDS": "Você deve escolher uma cidade cujo valor seja menor ou igual ao número de espaços que moveu sua locomotiva para trás.",
@@ -633,6 +635,8 @@
       "engineers": "Engenheiros",
       "exchangeTokens": "Fichas de troca",
       "branchlets": "Ramais",
+      "disc": "Disco",
+      "removeDisc": "Remover disco",
       "apply": "Aplicar",
       "reset": "Redefinir"
     },

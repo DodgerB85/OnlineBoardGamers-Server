@@ -515,6 +515,8 @@
       "CANNOT_REPLACE_NEUTRAL_BUILDING": "Je kunt niet een neutraal gebouw opwaarderen.",
       "CANNOT_STEP_DIRECTLY_FROM_TO": "Je kunt niet direct naar het aangegeven locatie verplaatsen.",
       "CARD_NOT_IN_HAND": "Je hebt deze kaart niet in je hand.",
+      "NO_CARDS_TO_REMOVE": "Je hebt niet genoeg kaarten in je hand om te verwijderen.",
+      "NO_DISC_AVAILABLE": "Je hebt geen schijf beschikbaar om te plaatsen.",
       "CATTLE_CARDS_NOT_IN_HAND": "Je hebt deze runderkaart(en) niet in je hand.",
       "CATTLE_CARD_NOT_AVAILABLE": "Deze runderkaart is niet beschikbaar.",
       "CITY_VALUE_MUST_BE_LESS_THEN_OR_EQUAL_TO_SPACES_THAT_ENGINE_MOVED_BACKWARDS": "Je moet een stad kiezen die een waarde heeft van ten hoogste het aantal vakjes dat je je locomotief achteruit hebt gezet.",
@@ -633,6 +635,8 @@
       "engineers": "Ingenieurs",
       "exchangeTokens": "Wisselfiches",
       "branchlets": "Filialen",
+      "disc": "Schijf",
+      "removeDisc": "Schijf verwijderen",
       "apply": "Toepassen",
       "reset": "Resetten"
     },

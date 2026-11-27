@@ -532,6 +532,8 @@
       "CANNOT_REPLACE_NEUTRAL_BUILDING": "You cannot replace a neutral building.",
       "CANNOT_STEP_DIRECTLY_FROM_TO": "You cannot move directly from your current location to this location.",
       "CARD_NOT_IN_HAND": "You don't have this card in your hand.",
+      "NO_CARDS_TO_REMOVE": "You don't have enough cards in hand to remove.",
+      "NO_DISC_AVAILABLE": "You have no disc available to place.",
       "CATTLE_CARDS_NOT_IN_HAND": "You don't have these cattle cards in your hand.",
       "CATTLE_CARD_NOT_AVAILABLE": "This cattle card is not available.",
       "CITY_VALUE_MUST_BE_LESS_THEN_OR_EQUAL_TO_SPACES_THAT_ENGINE_MOVED_BACKWARDS": "You must pick a city whose value is less than or equal to the number of spaces you moved your engine backwards.",
@@ -633,6 +635,8 @@
       "engineers": "Engineers",
       "exchangeTokens": "Exchange tokens",
       "branchlets": "Branchlets",
+      "disc": "Disc",
+      "removeDisc": "Remove disc",
       "apply": "Apply",
       "reset": "Reset"
     },
