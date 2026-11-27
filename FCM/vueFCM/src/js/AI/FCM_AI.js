@@ -92,11 +92,11 @@ export async function makeAImove() {
 				if (emp === rf.REGIONAL_MANAGER && needMarketing) score += 50
 				if (emp === rf.LOCAL_MANAGER && needProduction) score += 40
 				if (emp === rf.MARKETING_TRAINEE && needMarketing) score += 30
-				if (emp === rf.MARKETING_DIRECTOR) score += 25
+				if (emp === rf.BRAND_DIRECTOR) score += 25
 				if (emp === rf.CAMPAIGN_MANAGER) score += 20
 				if (emp === rf.RECRUITING_GIRL && needHiring) score += 35
 				if (emp === rf.HR_DIRECTOR) score += 20
-				if (emp === rf.TRAINING_COORDINATOR) score += 15
+				if (emp === rf.TRAINER) score += 15
 				score += 10 // base manager bonus
 			} else if (rf.PRODUCERS.includes(emp) && needProduction) {
 				// Prefer higher-tier producers
@@ -208,11 +208,11 @@ export async function makeAImove() {
 				// Prefer training towards managers we need
 				if (to === rf.REGIONAL_MANAGER) score += needMarketing ? 50 : 20
 				if (to === rf.LOCAL_MANAGER) score += needProduction ? 40 : 15
-				if (to === rf.MARKETING_DIRECTOR) score += needMarketing ? 35 : 15
+				if (to === rf.BRAND_DIRECTOR) score += needMarketing ? 35 : 15
 				if (to === rf.CAMPAIGN_MANAGER) score += needMarketing ? 30 : 15
 				if (to === rf.RECRUITING_GIRL) score += needHiring ? 40 : 15
 				if (to === rf.HR_DIRECTOR) score += needHiring ? 30 : 15
-				if (to === rf.TRAINING_COORDINATOR) score += 20
+				if (to === rf.TRAINER) score += 20
 				// Prefer higher-tier producers
 				if (to.endsWith("_CHEF") && needProduction) score += 30
 				if (to.endsWith("_COOK") && needProduction) score += 20
@@ -706,11 +706,11 @@ export function actionHires(playerIndex) {
         // Managers
         if (emp === rf.REGIONAL_MANAGER) return needMarketing ? 50 : 20
         if (emp === rf.LOCAL_MANAGER) return needProduction ? 40 : 15
-        if (emp === rf.MARKETING_DIRECTOR) return needMarketing ? 35 : 15
+        if (emp === rf.BRAND_DIRECTOR) return needMarketing ? 35 : 15
         if (emp === rf.CAMPAIGN_MANAGER) return needMarketing ? 30 : 15
         if (emp === rf.RECRUITING_GIRL) return needHiring ? 40 : 10
         if (emp === rf.HR_DIRECTOR) return needHiring ? 30 : 15
-        if (emp === rf.TRAINING_COORDINATOR) return 20
+        if (emp === rf.TRAINER) return 20
         // Producers
         if (emp.endsWith("_CHEF") && needProduction) return 30
         if (emp.endsWith("_COOK") && needProduction) return 20
