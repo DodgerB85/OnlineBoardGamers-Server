@@ -614,7 +614,8 @@
       "engineHint": "移动你的火车头——点击高亮的轨道格。",
       "bonusStationMasterHint": "点击纽约市，然后选择一枚奖励站长板块。",
       "clickHighlighted": "点击棋盘或玩家板上高亮的项目。",
-      "otherActions": "其他行动"
+      "otherActions": "其他行动",
+      "auxiliaryWrapperHint": "在您的玩家板上选择一个辅助动作"
     },
     "buildingInfo": {
       "label": "{building} — 工匠：{craftsmen}；{hand}；分数：{points}",

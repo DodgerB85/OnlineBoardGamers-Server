@@ -614,7 +614,8 @@
       "engineHint": "Verplaats je locomotief — klik op een gemarkeerd spoortvak.",
       "bonusStationMasterHint": "Klik op New York City en kies een bonusstationsmeester-tegel.",
       "clickHighlighted": "Klik op het gemarkeerde item op het bord of je spelersbord.",
-      "otherActions": "Andere acties"
+      "otherActions": "Andere acties",
+      "auxiliaryWrapperHint": "Kies een hulpaactie op je spelerbord"
     },
     "buildingInfo": {
       "label": "{building} — ambachtslieden: {craftsmen}; {hand}; punten: {points}",

@@ -614,7 +614,8 @@
       "engineHint": "Move your engine — click a highlighted track space.",
       "bonusStationMasterHint": "Click New York City, then pick a bonus station master tile.",
       "clickHighlighted": "Click the highlighted item on the board or your player board.",
-      "otherActions": "Other actions"
+      "otherActions": "Other actions",
+      "auxiliaryWrapperHint": "Choose an auxiliary action on your player board"
     },
     "buildingInfo": {
       "label": "{building} — craftsmen: {craftsmen}; {hand}; points: {points}",

@@ -614,7 +614,8 @@
       "engineHint": "Mueve tu locomotora — haz clic en una casilla de vía resaltada.",
       "bonusStationMasterHint": "Haz clic en Nueva York y elige una loseta de jefe de estación de bonificación.",
       "clickHighlighted": "Haz clic en el elemento resaltado del tablero o de tu tablero de jugador.",
-      "otherActions": "Otras acciones"
+      "otherActions": "Otras acciones",
+      "auxiliaryWrapperHint": "Elige una acción auxiliar en tu tablero de jugador"
     },
     "buildingInfo": {
       "label": "{building} — artesanos: {craftsmen}; {hand}; puntos: {points}",

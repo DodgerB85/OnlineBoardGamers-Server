@@ -89,6 +89,72 @@ describe("Audit fixes: remove-card auxiliary", () => {
 	});
 });
 
+describe("Audit fixes: auxiliary action unlocking", () => {
+	it("offers PAY_1_DOLLAR_TO_MOVE_ENGINE_1_FORWARD only when the forward disc is unlocked", () => {
+		const game = freshGame();
+		const ps = game.currentPlayerState();
+		// At game start: AUX_GAIN_DOLLAR=1, AUX_DRAW_CARD_TO_DISCARD_CARD=1, others=0
+		const singleOrDouble = game.unlockedSingleOrDoubleAuxiliaryActions(ps);
+		const offered = new Set();
+		for (const a of singleOrDouble) for (const act of a.getPossibleActions()) offered.add(act);
+		
+		// Base actions always available (pre-unlocked)
+		expect(offered.has(ActionType.GAIN_1_DOLLAR)).toBe(true);
+		expect(offered.has(ActionType.DRAW_CARD)).toBe(true);
+		
+		// Forward move requires disc unlock
+		expect(offered.has(ActionType.PAY_1_DOLLAR_TO_MOVE_ENGINE_1_FORWARD)).toBe(false);
+		expect(offered.has(ActionType.PAY_2_DOLLARS_TO_MOVE_ENGINE_2_FORWARD)).toBe(false);
+		
+		// Unlock first disc on forward row
+		ps.unlocked[Unlockable.AUX_PAY_TO_MOVE_ENGINE_FORWARD] = 1;
+		const afterUnlock = game.unlockedSingleOrDoubleAuxiliaryActions(ps);
+		const offered2 = new Set();
+		for (const a of afterUnlock) for (const act of a.getPossibleActions()) offered2.add(act);
+		expect(offered2.has(ActionType.PAY_1_DOLLAR_TO_MOVE_ENGINE_1_FORWARD)).toBe(true);
+		expect(offered2.has(ActionType.PAY_2_DOLLARS_TO_MOVE_ENGINE_2_FORWARD)).toBe(false);
+		
+		// Unlock second disc
+		ps.unlocked[Unlockable.AUX_PAY_TO_MOVE_ENGINE_FORWARD] = 2;
+		const afterUnlock2 = game.unlockedSingleOrDoubleAuxiliaryActions(ps);
+		const offered3 = new Set();
+		for (const a of afterUnlock2) for (const act of a.getPossibleActions()) offered3.add(act);
+		expect(offered3.has(ActionType.PAY_2_DOLLARS_TO_MOVE_ENGINE_2_FORWARD)).toBe(true);
+	});
+
+	it("offers backwards move when that disc is unlocked, not forwards", () => {
+		const game = freshGame();
+		const ps = game.currentPlayerState();
+		// Unlock backwards row only
+		ps.unlocked[Unlockable.AUX_MOVE_ENGINE_BACKWARDS_TO_GAIN_CERT] = 1;
+		
+		const actions = game.unlockedSingleOrDoubleAuxiliaryActions(ps);
+		const offered = new Set();
+		for (const a of actions) for (const act of a.getPossibleActions()) offered.add(act);
+		
+		expect(offered.has(ActionType.PAY_1_DOLLAR_AND_MOVE_ENGINE_1_BACKWARDS_TO_GAIN_1_CERTIFICATE)).toBe(true);
+		expect(offered.has(ActionType.PAY_1_DOLLAR_TO_MOVE_ENGINE_1_FORWARD)).toBe(false);
+	});
+
+	it("does not offer DRAW_2_CARDS unless both draw discs are unlocked", () => {
+		const game = freshGame();
+		const ps = game.currentPlayerState();
+		// At start: AUX_DRAW_CARD_TO_DISCARD_CARD = 1 (one disc pre-cleared)
+		const actions = game.unlockedSingleOrDoubleAuxiliaryActions(ps);
+		const offered = new Set();
+		for (const a of actions) for (const act of a.getPossibleActions()) offered.add(act);
+		expect(offered.has(ActionType.DRAW_CARD)).toBe(true);
+		expect(offered.has(ActionType.DRAW_2_CARDS)).toBe(false);
+		
+		// Unlock second draw disc
+		ps.unlocked[Unlockable.AUX_DRAW_CARD_TO_DISCARD_CARD] = 2;
+		const actions2 = game.unlockedSingleOrDoubleAuxiliaryActions(ps);
+		const offered2 = new Set();
+		for (const a of actions2) for (const act of a.getPossibleActions()) offered2.add(act);
+		expect(offered2.has(ActionType.DRAW_2_CARDS)).toBe(true);
+	});
+});
+
 describe("Audit fixes: 8a", () => {
 	it("offers trade/aux plus the up-to-2 engine move", () => {
 		const offered = playerBuildingAction("8a", Edition.FIRST, 3).getPossibleActions();

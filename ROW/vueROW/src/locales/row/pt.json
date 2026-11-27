@@ -614,7 +614,8 @@
       "engineHint": "Mova a sua locomotiva — clique numa casa de via destacada.",
       "bonusStationMasterHint": "Clique em Nova Iorque e escolha uma peça de chefe de estação bónus.",
       "clickHighlighted": "Clique no elemento destacado no tabuleiro ou no seu tabuleiro de jogador.",
-      "otherActions": "Outras ações"
+      "otherActions": "Outras ações",
+      "auxiliaryWrapperHint": "Escolha uma ação auxiliar no seu tabuleiro de jogador"
     },
     "buildingInfo": {
       "label": "{building} — artesãos: {craftsmen}; {hand}; pontos: {points}",

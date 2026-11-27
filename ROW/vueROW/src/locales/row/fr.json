@@ -614,7 +614,8 @@
       "engineHint": "Déplace ta locomotive — clique sur une case de voie surlignée.",
       "bonusStationMasterHint": "Clique sur New York, puis choisis une tuile de chef de gare bonus.",
       "clickHighlighted": "Clique sur l'élément surligné du plateau ou de ton plateau de joueur.",
-      "otherActions": "Autres actions"
+      "otherActions": "Autres actions",
+      "auxiliaryWrapperHint": "Choisissez une action auxiliaire sur votre plateau de joueur"
     },
     "buildingInfo": {
       "label": "{building} — artisans : {craftsmen} ; {hand} ; points : {points}",

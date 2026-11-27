@@ -102,10 +102,17 @@ const CARD_TARGET_ACTIONS = new Set([
 	ActionType.UPGRADE_SIMMENTAL,
 ])
 
-// Market draw actions are done on the cattle-market draw pile, so they are explained here instead of shown as buttons.
-const drawingTwo = computed(() => focusedActions.value.includes(ActionType.DRAW_2_CATTLE_CARDS))
+// When the auxiliary wrapper is active, the player must choose on the player board,
+// not via action area buttons.
+const auxiliaryWrapperActive = computed(() => 
+	focusedActions.value.includes(ActionType.SINGLE_AUXILIARY_ACTION) || 
+	focusedActions.value.includes(ActionType.SINGLE_OR_DOUBLE_AUXILIARY_ACTION)
+)
 
-const directActions = computed(() => focusedActions.value.filter((a) => a !== ActionType.PLACE_BRANCHLET && a !== ActionType.PLACE_BID && !map.MARKET_DRAW_ACTIONS.has(a) && !TARGET_ACTIONS.has(a) && !CARD_TARGET_ACTIONS.has(a) && !map.engineMoveRange(a, g()) && !buildingActionSet.value.has(a)))
+const directActions = computed(() => {
+	if (auxiliaryWrapperActive.value) return []
+	return focusedActions.value.filter((a) => a !== ActionType.PLACE_BRANCHLET && a !== ActionType.PLACE_BID && !map.MARKET_DRAW_ACTIONS.has(a) && !TARGET_ACTIONS.has(a) && !CARD_TARGET_ACTIONS.has(a) && !map.engineMoveRange(a, g()) && !buildingActionSet.value.has(a))
+})
 
 const cardActions = computed(() => focusedActions.value.filter((a) => CARD_TARGET_ACTIONS.has(a)))
 /** A draw-then-discard leaves DISCARD_CARD as the only card action: clicking a card discards it. */
@@ -156,6 +163,11 @@ const discardOnly = computed(() => cardActions.value.length === 1 && cardActions
 
 		<div v-if="engineActive" class="group">
 			<div class="label">{{ t('row.actionArea.engineHint') }}</div>
+		</div>
+
+		<div v-if="auxiliaryWrapperActive" class="group">
+			<div class="label">{{ t('row.actionArea.auxiliaryWrapperHint') }}</div>
+			<div class="note">{{ t('row.actionArea.clickHighlighted') }}</div>
 		</div>
 
 		<div v-if="cardActions.length" class="group">

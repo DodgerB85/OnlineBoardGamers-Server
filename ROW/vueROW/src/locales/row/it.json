@@ -616,7 +616,8 @@
       "engineHint": "Muovi la tua locomotiva — fai clic su una casella del binario evidenziata.",
       "bonusStationMasterHint": "Fai clic su New York, poi scegli una tessera capostazione bonus.",
       "clickHighlighted": "Fai clic sull'elemento evidenziato sul tabellone o sulla tua plancia giocatore.",
-      "otherActions": "Altre azioni"
+      "otherActions": "Altre azioni",
+      "auxiliaryWrapperHint": "Scegli un'azione ausiliaria sulla tua plancia giocatore"
     },
     "buildingInfo": {
       "label": "{building} — artigiani: {craftsmen}; {hand}; punti: {points}",

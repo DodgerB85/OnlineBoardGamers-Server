@@ -614,7 +614,8 @@
       "engineHint": "Bewege deine Lok — klicke auf ein hervorgehobenes Gleisfeld.",
       "bonusStationMasterHint": "Klicke auf New York City und wähle dann ein Bonus-Bahnhofsvorsteher-Plättchen.",
       "clickHighlighted": "Klicke auf das hervorgehobene Element auf dem Spielbrett oder deinem Spielertableau.",
-      "otherActions": "Andere Aktionen"
+      "otherActions": "Andere Aktionen",
+      "auxiliaryWrapperHint": "Wähle eine Hilfsaktion auf deinem Spielertableau"
     },
     "buildingInfo": {
       "label": "{building} — Handwerker: {craftsmen}; {hand}; Punkte: {points}",
