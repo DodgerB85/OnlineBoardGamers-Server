@@ -221,6 +221,7 @@ def create_fcm_game(
     player_Order_Seed = 0
     cap3_seats = set()
     starting_options = []
+    deep_fry_vs_ai = False
     max_players = 2
     game_status = "AVAILABLE"
     kickout_duration = rf.KICKOUT_1_DAY
@@ -284,6 +285,22 @@ def create_fcm_game(
         ]
     # Otherwise, create a normal game
     else:
+        deep_fry_vs_ai = "deepFryVsAI" in request.POST
+        if deep_fry_vs_ai:
+            # Fixed 2-seat practice preset: the creator's browser runs the old
+            # FcmAI seat and the server runs the Deep-Fry Bot in seat 2.
+            post = request.POST.copy()
+            post["trainingGame"] = "102"
+            post["playerNumber"] = "2"
+            post["fcmCap3"] = "2"
+            post["mapData"] = ""
+            for field in ("fcmAI", "privateGame", "learningGame", "experiencedGame",
+                          "allowRewind", "enableAdvancedOptions", "scenario"):
+                post.pop(field, None)
+            for i in range(2, 7):
+                post.pop(f"player{i}", None)
+            request.POST = post
+
         if any(name in request.POST for name in ["milestoneNightBalance", "include_54", "includeFanExpansion"]):
             try:
                 buildFCMstartingOptions(request.POST)
@@ -354,9 +371,11 @@ def create_fcm_game(
             cap3_seats = {int(choice) - 1 for choice in cap3_choices}
 
         player_Order_Seed = randint(0, max_players - 1)
-        starting_options = buildFCMstartingOptions(
-            request.POST
-        )  # Use the extracted function
+        starting_options = (
+            [rfFCM.SO_STRICT_PAYDAY_FRIDGE, rf.SO_TRAINING_GAME]
+            if deep_fry_vs_ai
+            else buildFCMstartingOptions(request.POST)
+        )
         if cap3_seats:
             starting_options = list(dict.fromkeys([*starting_options, rfFCM.SO_STRICT_PAYDAY_FRIDGE, rfFCM.SO_CAP3_AI]))
             if not cap3_options_supported(starting_options):
@@ -367,6 +386,8 @@ def create_fcm_game(
                 messages.error(request, gettext("Choose a valid FCM AI policy."))
                 return HttpResponseRedirect(reverse("createFCMpage"))
             starting_options.append(rfFCM.SO_CAP3_FULL_ROLLOUT)
+            if deep_fry_vs_ai:
+                starting_options.append(rfFCM.SO_DEEPFRY_VS_AI)
             stats_excluded_game = True
         # Exclude stats if Chinese expansion / custom modules are always
         # enabled (picked individually, not via the random pool). Random-pool
@@ -404,6 +425,8 @@ def create_fcm_game(
                 display_name = request.POST.get(f"player{i + 1}", shadow_names[i - 1])
                 shadow_display.append(display_name)
             shadowNameNotes = json.dumps(shadow_display, separators=(",", ":"))
+            if deep_fry_vs_ai:
+                shadowNameNotes = ""
             stats_excluded_game = True
         elif "learningGame" in request.POST:
             stats_excluded_game = True
@@ -487,6 +510,11 @@ def create_fcm_game(
 
 
 
+    if deep_fry_vs_ai:
+        messages.success(request, gettext("Your Deep-Fry vs AI game has been started"))
+        return HttpResponseRedirect(
+            reverse("indexListType", kwargs={"listType": "current"})
+        )
     if "trainingGame" in request.POST:
         messages.success(request, gettext("Your Practice game has been started"))
         return HttpResponseRedirect(

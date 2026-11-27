@@ -92,3 +92,17 @@ it.runIf(process.env.FCM_CAP3_BIN).each([
 	},
 	120000,
 )
+
+it("labels the creator's seat FcmAI in a DeepFry VS AI game", () => {
+	const store = useModelStore()
+	const options = [rf.SO_STRICT_PAYDAY_FRIDGE, rf.SO_TRAINING_GAME, rf.SO_CAP3_AI, rf.SO_DEEPFRY_VS_AI]
+	window.initData.startingMap = map.generateRandomMap(2)
+	window.initData.startingOptions = options
+	window.initData.playerNames = ["player", rf.AI_NAME]
+	window.initData.name = "player"
+	store.externalStartingOptions = options.slice()
+	model.setInternalStartingOptions(options)
+	model.setupNewGame()
+	expect(store.players[0].displayName).toBe(rf.AI_NAME)
+	expect(store.players[1].displayName).toBe("Deep-Fry Bot (Seat 2)")
+})

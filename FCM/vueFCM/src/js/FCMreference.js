@@ -19,6 +19,7 @@ export const AI_NAME = "FcmAI"
 export const CAP3_AI_NAMES = [AI_NAME, "FcmAI_2", "FcmAI_3", "FcmAI_4", "FcmAI_5"]
 export const SO_CAP3_AI = 501
 export const SO_CAP3_FULL_ROLLOUT = 502
+export const SO_DEEPFRY_VS_AI = 503
 export const TOURNAMENT_ADMIN_NAME = "FCMtourneyAdmin"
 // Feature flag: set to true when a tournament moderator is available to handle alerts
 export const IS_ANY_CURRENT_TOURNAMENT_MODERATOR = false

@@ -17,6 +17,24 @@ import { usePersonalStore } from "../stores/FCMpersonal.js"
 
 //import { usePersonalStore } from "../stores/FCMpersonal.js"
 
+function isDeepFryVsAI() {
+	return window.initData.startingOptions?.includes(rf.SO_DEEPFRY_VS_AI) === true
+}
+
+// The DeepFry VS AI preset puts the old in-browser FcmAI in the creator's seat
+// and the server-side Deep-Fry Bot in the other; the creator's tab drives both.
+export function runDeepFryVsAITurn() {
+	const store = useModelStore()
+	const personal = usePersonalStore()
+	if (store.gameflow.phase === rf.PHASE_GAME_OVER) return
+	const current = controller.currentPlayerObj()
+	if (current && current.name === personal.name) {
+		void makeAImove()
+		return
+	}
+	controller.startPlayerTurn(false)
+}
+
 function restartKickoutTimers() {
 	const personal = usePersonalStore()
 	clearInterval(personal.kickoutCountdownIntervalTimer)
@@ -266,7 +284,8 @@ export async function loadGame() {
 			}
 
 			if (store.gameflow.phase !== rf.PHASE_SETUP_MODULES) personal.haltPlay = false
-			controller.startPlayerTurn(false)
+			if (isDeepFryVsAI()) runDeepFryVsAITurn()
+			else controller.startPlayerTurn(false)
 			restartKickoutTimers()
 		})
 		.catch((error) => {
@@ -744,7 +763,8 @@ export async function saveGameNormal(saveRewind, restartAnySimulPhase, isPointle
 
 		if (personal.liveWS) WS.broadcastGameUpdate()
 
-		if (window.initData.startingOptions?.includes(rf.SO_CAP3_AI)) controller.startPlayerTurn(false)
+		if (isDeepFryVsAI()) runDeepFryVsAITurn()
+		else if (window.initData.startingOptions?.includes(rf.SO_CAP3_AI)) controller.startPlayerTurn(false)
 		else if (controller.currentPlayerObj().name === rf.AI_NAME && store.gameflow.phase != rf.PHASE_GAME_OVER) makeAImove()
 		return true
 	} catch (error) {

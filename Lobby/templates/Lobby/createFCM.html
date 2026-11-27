@@ -793,6 +793,21 @@
                        disabled />
                 <div>{% trans "AI v0.1. Vague intelligence. Very bad!" %}</div>
               </label>
+              {% if cap3_enabled %}
+                <label class="check-label">
+                  <input type="checkbox"
+                         onchange="validateOptions(this.id)"
+                         class="myCheckbox"
+                         id="deepFryVsAI"
+                         name="deepFryVsAI"
+                         value="1"
+                         disabled />
+                  <div>
+                    <div>{% trans "DeepFry VS AI" %}</div>
+                    <div class="opt-help">{% trans "Watch the Deep-Fry Bot play the old FcmAI. No human seats." %}</div>
+                  </div>
+                </label>
+              {% endif %}
               <label class="check-label">
                 <input type="checkbox"
                        onchange="validateOptions(this.id)"

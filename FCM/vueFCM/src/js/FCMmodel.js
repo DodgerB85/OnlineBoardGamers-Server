@@ -118,7 +118,9 @@ export function setupNewGame(opts = {}) {
 		else if (store.players[i].name === "SHADOW_3" && displayNamesArr.length > 2) store.players[i].displayName = displayNamesArr[2]
 		else if (store.players[i].name === "SHADOW_4" && displayNamesArr.length > 3) store.players[i].displayName = displayNamesArr[3]
 		else if (store.players[i].name === "SHADOW_5" && displayNamesArr.length > 4) store.players[i].displayName = displayNamesArr[4]
-		else if (init.startingOptions?.includes(rf.SO_CAP3_AI) && rf.CAP3_AI_NAMES.includes(store.players[i].name)) {
+		else if (init.startingOptions?.includes(rf.SO_DEEPFRY_VS_AI) && store.players[i].name === init.name) {
+			store.players[i].displayName = rf.AI_NAME
+		} else if (init.startingOptions?.includes(rf.SO_CAP3_AI) && rf.CAP3_AI_NAMES.includes(store.players[i].name)) {
 			store.players[i].displayName = `Deep-Fry Bot (Seat ${i + 1})`
 		} else store.players[i].displayName = store.players[i].name
 	}
@@ -376,7 +378,13 @@ export async function initGame() {
 	// Allow play
 	personal.haltPlay = false
 	// This must be the last item
-	if (personal.canPlay() || window.initData.startingOptions?.includes(rf.SO_CAP3_AI)) controller.startPlayerTurn()
+	if (personal.canPlay() || window.initData.startingOptions?.includes(rf.SO_CAP3_AI)) {
+		// A brand-new game's first save already triggers the automation; only
+		// resume from here when loading existing game data.
+		if (window.initData.startingOptions?.includes(rf.SO_DEEPFRY_VS_AI)) {
+			if (gameData !== "") IO.runDeepFryVsAITurn()
+		} else controller.startPlayerTurn()
+	}
 } // end initGame
 
 export function setInternalStartingOptions(startingOptionsArray) {

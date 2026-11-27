@@ -67,22 +67,26 @@ export async function makeAImove() {
 		await controller.endPlayerTurn(true, false)
 	} else if (phase === rf.PHASE_RESTRUCTURING) {
 		rf.sortEmployees(playerObj.beach)
-		if (playerObj.AIlevel === 0) {
-			for (let i = 0; i < playerObj.ceoSlots; i++) {
-				if (playerObj.employees[i] === rf.BLANK_EMPLOYEE_SPACE && playerObj.beach.length > 0) plyr.setEmployeeInIndex(playerIndex, playerObj.beach[0], i)
-			}
-		} else if (playerObj.AIlevel === 1) {
+		// CEO slots: level 2 prefers non-JVP, then level 1, then level 0 (first available)
+		let fillCeo = (preferNonJVP = false) => {
 			for (let i = 0; i < playerObj.ceoSlots; i++) {
 				if (playerObj.employees[i] === rf.BLANK_EMPLOYEE_SPACE && playerObj.beach.length > 0) {
-					for (let j = 0; j < playerObj.beach.length; j++) {
-						if (playerObj.beach[j] !== rf.JUNIOR_VICE_PRESIDENT) {
-							plyr.setEmployeeInIndex(playerIndex, playerObj.beach[j], i)
-							break
+					if (preferNonJVP) {
+						for (let j = 0; j < playerObj.beach.length; j++) {
+							if (playerObj.beach[j] !== rf.JUNIOR_VICE_PRESIDENT) {
+								plyr.setEmployeeInIndex(playerIndex, playerObj.beach[j], i)
+								break
+							}
 						}
+					} else {
+						plyr.setEmployeeInIndex(playerIndex, playerObj.beach[0], i)
 					}
 				}
 			}
 		}
+		if (playerObj.AIlevel >= 2) fillCeo(true)
+		else if (playerObj.AIlevel === 1) fillCeo(true)
+		else fillCeo(false)
 		let slots1 = playerObj.ceoSlots
 		let slots2 = 0
 		for (let i = 0; i < slots1; i++) if (playerObj.employees[i] !== rf.BLANK_EMPLOYEE_SPACE) slots2 += rules.getSubSlotsForEmployee(playerObj.employees[i])
@@ -96,7 +100,8 @@ export async function makeAImove() {
 		let offset = playerObj.ceoSlots
 		for (let i = 0 + offset; i < slots2 + offset; i++) {
 			playerObj.beach = funcs.shuffle(playerObj.beach)
-			if (playerObj.AIlevel === 1) {
+			// Sub-slots: level 2 and 1 prefer pizza chef / coach, level 0 takes first
+			if (playerObj.AIlevel >= 1) {
 				if (playerObj.beach.includes(rf.PIZZA_CHEF)) {
 					let index = playerObj.beach.indexOf(rf.PIZZA_CHEF)
 					playerObj.beach.splice(index, 1)
@@ -117,7 +122,7 @@ export async function makeAImove() {
 
 		await think({
 			summary: "Restructuring: filling " + playerObj.ceoSlots + " CEO slots and " + slots2 + " sub-slots from the beach",
-			reasons: ["Managers fill CEO slots first, skipping " + rf.JUNIOR_VICE_PRESIDENT, "Beach shuffled each sub-slot" + (playerObj.AIlevel === 1 ? ", pizza chef preferred" : "")],
+			reasons: ["Managers fill CEO slots first, skipping " + rf.JUNIOR_VICE_PRESIDENT, "Beach shuffled each sub-slot" + (playerObj.AIlevel >= 1 ? ", pizza chef / coach preferred" : "")],
 		})
 
 		await controller.endPlayerTurn(true, false)

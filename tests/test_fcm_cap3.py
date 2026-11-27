@@ -8,6 +8,7 @@ from django.urls import reverse
 
 from FCM import FCMconstants as rf
 from Lobby.models import Game, GamePlayer, User
+from Lobby.sharedFunctions.constants import SO_TRAINING_GAME
 from Lobby.sharedFunctions.sharedFunctions import SF_fastSerializeGame
 
 
@@ -65,6 +66,25 @@ class FcmCap3Test(TestCase):
                     json.loads(practice.players.get(player=self.human).notes),
                     ["First shadow", "Second shadow"],
                 )
+
+    @patch("FCM.common.cap3_available", return_value=True)
+    def test_deep_fry_vs_ai_starts_the_two_seat_preset(self, _available):
+        self.client.post(reverse("FCM:createFCMgame"), {
+            "gameName": "DeepFry vs AI", "gameDescription": "", "pace": "40",
+            "mapData": "", "deepFryVsAI": "1", "player2": "SHADOW",
+        })
+        game = Game.objects.latest("id")
+        self.assertEqual(game.maxPlayers, 2)
+        self.assertEqual(game.gameStatus, "ACTIVE")
+        self.assertEqual(game.players.get(player=self.human).seat_order, 0)
+        bot = game.players.get(player=self.ai)
+        self.assertEqual(bot.seat_order, 1)
+        self.assertTrue(bot.is_ai)
+        options = json.loads(game.startingOptions)
+        self.assertIn(SO_TRAINING_GAME, options)
+        self.assertIn(rf.SO_CAP3_AI, options)
+        self.assertIn(rf.SO_DEEPFRY_VS_AI, options)
+        self.assertTrue(game.statsExcludedGame)
 
     @patch("FCM.common.cap3_available", return_value=True)
     def test_three_cap3_opponents_start_with_expansions_in_regular_and_practice_games(self, _available):

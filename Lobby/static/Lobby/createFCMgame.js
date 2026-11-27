@@ -304,7 +304,7 @@ function syncMilestoneNightBalanceUI() {
 	if (!allowed) balance.checked = false
 }
 
-function validateOptions(change) {
+function validateOptions(change, internal = false) {
 	// Mini Tournamnt
 	if (change === "playersPerGameMT") {
 		let totalPlayersMT_el = document.getElementById("totalPlayersMT")
@@ -417,6 +417,7 @@ function validateOptions(change) {
 			addOption("randomModules")
 			addOption("draftModules")
 			addOption("fcmAI")
+			if (document.getElementById("deepFryVsAI")) addOption("deepFryVsAI")
 			document.getElementById("nonExpertOptions").style.display = "none"
 		} else {
 			removeOption("randomModules")
@@ -433,6 +434,7 @@ function validateOptions(change) {
 			removeOption("includeChineseExpansion")
 			removeOption("includeFanExpansion")
 			removeOption("fcmAI")
+			if (document.getElementById("deepFryVsAI")) removeOption("deepFryVsAI")
 			document.getElementById("nonExpertOptions").style.display = "inline-block"
 		}
 	} else if (change === "randomModules") {
@@ -501,6 +503,8 @@ function validateOptions(change) {
 		}
 	} else if (change === "fcmAI") {
 		if (document.getElementById(change).checked == true) {
+			const deepFry = document.getElementById("deepFryVsAI")
+			if (deepFry && !internal) deepFry.checked = false
 			// Expert Options
 			removeOption("randomModules")
 			removeOption("random_originalMS")
@@ -547,6 +551,19 @@ function validateOptions(change) {
 			addOption("learningGame")
 			if (global.experienced) addOption("experiencedGame")
 			addOption("allowRewind")
+		}
+	} else if (change === "deepFryVsAI") {
+		const oldAI = document.getElementById("fcmAI")
+		if (document.getElementById("deepFryVsAI").checked) {
+			// Reuse the old-AI preset to force a 2-seat practice game, then drop
+			// that checkbox so the server sees only the Deep-Fry mode.
+			oldAI.checked = true
+			validateOptions("fcmAI", true)
+			oldAI.checked = false
+			if (!document.getElementById("name").value) document.getElementById("name").value = "DeepFry vs AI"
+		} else {
+			oldAI.checked = false
+			validateOptions("fcmAI", true)
 		}
 	}
 	syncMilestoneNightBalanceUI()
@@ -734,6 +751,18 @@ function selectPlayers(preservePracticeNames = false) {
 	if (document.getElementById("trainingGame").checked && document.getElementById("fcmAI").checked) {
 		document.getElementById("player2").value = "FcmAI"
 		for (var i = 2; i <= 6; i++) document.getElementById("player" + i).disabled = true
+	}
+	// DeepFry VS AI: a 2-seat practice game with the old FcmAI and the Deep-Fry
+	// Bot; the server forces the bot into seat 2.
+	const deepFry = document.getElementById("deepFryVsAI")
+	if (deepFry && deepFry.checked) {
+		document.getElementById("playerNumber").value = 2
+		document.getElementById("playerNumber").disabled = true
+		const cap3Row = document.getElementById("cap3SeatsRow")
+		if (cap3Row) cap3Row.style.display = "none"
+		const player2Row = document.getElementById("selPlayer2")
+		if (player2Row) player2Row.style.display = "none"
+		document.getElementById("player2").disabled = true
 	}
 }
 
