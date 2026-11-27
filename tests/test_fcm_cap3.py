@@ -187,7 +187,7 @@ class FcmCap3Test(TestCase):
         self.assertEqual(request_data["state"][3][2][0], 1)
         self.assertEqual(request_data["metadata"]["turn"], 0)
         self.assertEqual(request_data["metadata"]["starting_options"], ["22", "21"])
-        self.assertEqual(run.call_args.args[0][1:], ["--cap3"])
+        self.assertEqual(run.call_args.args[0][1:], ["--full-rollout"])
 
         game.startingOptions = json.dumps([
             rf.SO_CAP3_AI, rf.SO_CAP3_FULL_ROLLOUT, rf.SO_LOBBYISTS, rf.SO_NEW_MS,
