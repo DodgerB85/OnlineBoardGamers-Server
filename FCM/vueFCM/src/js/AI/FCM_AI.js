@@ -1,4 +1,4 @@
-import * as rf from "../FCMreference"
+﻿import * as rf from "../FCMreference"
 import * as phone from "../FCMphone"
 import * as model from "../FCMmodel"
 import * as map from "../FCMmap"
@@ -22,6 +22,7 @@ export async function makeAImove() {
 	let subphase = store.gameflow.subphase
 	let playerIndex = store.gameflow.turnOrder[0]
 	let playerObj = store.players[playerIndex]
+	// Level 2 = new smart AI, Level 3 = even smarter (uses same logic for now)
 	playerObj.AIlevel = 2
 
 
@@ -62,27 +63,67 @@ export async function makeAImove() {
 
 		await controller.endPlayerTurn(true, false)
 	} else if (phase === rf.PHASE_SETUP_RESERVE) {
-		await think({ summary: "Taking reserve card 3" })
-		store.reserveCards[playerIndex] = 3
+		let card = 3
+		if (playerObj.AIlevel >= 2) {
+			// Reserve card 1: extra drink, 2: extra food, 3: extra money, 4: extra hire
+			// Pick based on what the board/modules need
+			const mods = store.startingOptions
+			if (mods.coffee || mods.sushi || mods.kimchi || mods.noodles || mods.fryChefs) card = 2
+			else if (mods.gourmet || mods.massMarketers || mods.ruralMarketers) card = 4
+			else if (store.bank < 50) card = 3
+			else card = 1
+		}
+		await think({ summary: "Taking reserve card " + card, reasons: ["Level " + playerObj.AIlevel + " heuristic pick"] })
+		store.reserveCards[playerIndex] = card
 		await controller.endPlayerTurn(true, false)
 	} else if (phase === rf.PHASE_RESTRUCTURING) {
 		rf.sortEmployees(playerObj.beach)
-		if (playerObj.AIlevel === 0) {
-			for (let i = 0; i < playerObj.ceoSlots; i++) {
-				if (playerObj.employees[i] === rf.BLANK_EMPLOYEE_SPACE && playerObj.beach.length > 0) plyr.setEmployeeInIndex(playerIndex, playerObj.beach[0], i)
+
+		// --- Level 2+: score beach employees by what we need ---
+		const needMarketing = store.availableMarketingCampaigns.some(c => c > 0)
+		const needProduction = playerObj.restaurants.length > 0
+		const needHiring = playerObj.employees.filter(e => e !== rf.BLANK_EMPLOYEE_SPACE).length < playerObj.ceoSlots * 2
+
+		const scoreEmployee = (emp) => {
+			if (!emp || typeof emp !== "string") return 0
+			if (emp === rf.JUNIOR_VICE_PRESIDENT) return -10
+			let score = 0
+			if (rf.MANAGERS.includes(emp)) {
+				if (emp === rf.REGIONAL_MANAGER && needMarketing) score += 50
+				if (emp === rf.LOCAL_MANAGER && needProduction) score += 40
+				if (emp === rf.MARKETING_TRAINEE && needMarketing) score += 30
+				if (emp === rf.MARKETING_DIRECTOR) score += 25
+				if (emp === rf.CAMPAIGN_MANAGER) score += 20
+				if (emp === rf.RECRUITING_GIRL && needHiring) score += 35
+				if (emp === rf.HR_DIRECTOR) score += 20
+				if (emp === rf.TRAINING_COORDINATOR) score += 15
+				score += 10 // base manager bonus
+			} else if (rf.PRODUCERS.includes(emp) && needProduction) {
+				// Prefer higher-tier producers
+				if (emp.endsWith("_CHEF")) score += 20
+				else if (emp.endsWith("_COOK")) score += 10
+			} else if (emp === rf.KITCHEN_TRAINEE) {
+				score += 5 // flexible
 			}
-		} else if (playerObj.AIlevel === 1) {
+			return score
+		}
+
+		// CEO slots
+		let fillCeo = (preferScored = false) => {
 			for (let i = 0; i < playerObj.ceoSlots; i++) {
 				if (playerObj.employees[i] === rf.BLANK_EMPLOYEE_SPACE && playerObj.beach.length > 0) {
-					for (let j = 0; j < playerObj.beach.length; j++) {
-						if (playerObj.beach[j] !== rf.JUNIOR_VICE_PRESIDENT) {
-							plyr.setEmployeeInIndex(playerIndex, playerObj.beach[j], i)
-							break
-						}
+					if (preferScored && playerObj.AIlevel >= 2) {
+						// Sort beach by score descending
+						playerObj.beach.sort((a, b) => scoreEmployee(b) - scoreEmployee(a))
 					}
+					plyr.setEmployeeInIndex(playerIndex, playerObj.beach[0], i)
 				}
 			}
 		}
+		if (playerObj.AIlevel >= 2) fillCeo(true)
+		else if (playerObj.AIlevel === 1) fillCeo(true)
+		else fillCeo(false)
+
 		let slots1 = playerObj.ceoSlots
 		let slots2 = 0
 		for (let i = 0; i < slots1; i++) if (playerObj.employees[i] !== rf.BLANK_EMPLOYEE_SPACE) slots2 += rules.getSubSlotsForEmployee(playerObj.employees[i])
@@ -95,8 +136,11 @@ export async function makeAImove() {
 
 		let offset = playerObj.ceoSlots
 		for (let i = 0 + offset; i < slots2 + offset; i++) {
-			playerObj.beach = funcs.shuffle(playerObj.beach)
-			if (playerObj.AIlevel === 1) {
+			if (playerObj.AIlevel >= 2) {
+				// Sort by score for sub-slots too
+				playerObj.beach.sort((a, b) => scoreEmployee(b) - scoreEmployee(a))
+			} else if (playerObj.AIlevel >= 1) {
+				// Sub-slots: level 2 and 1 prefer pizza chef / coach, level 0 takes first
 				if (playerObj.beach.includes(rf.PIZZA_CHEF)) {
 					let index = playerObj.beach.indexOf(rf.PIZZA_CHEF)
 					playerObj.beach.splice(index, 1)
@@ -106,6 +150,8 @@ export async function makeAImove() {
 					playerObj.beach.splice(index, 1)
 					playerObj.beach.unshift(rf.COACH)
 				}
+			} else {
+				playerObj.beach = funcs.shuffle(playerObj.beach)
 			}
 			for (let j = 0; j < playerObj.beach.length; j++) {
 				if (!rf.MANAGERS.includes(playerObj.beach[j])) {
@@ -117,7 +163,7 @@ export async function makeAImove() {
 
 		await think({
 			summary: "Restructuring: filling " + playerObj.ceoSlots + " CEO slots and " + slots2 + " sub-slots from the beach",
-			reasons: ["Managers fill CEO slots first, skipping " + rf.JUNIOR_VICE_PRESIDENT, "Beach shuffled each sub-slot" + (playerObj.AIlevel === 1 ? ", pizza chef preferred" : "")],
+			reasons: ["Scored beach employees by need (marketing/production/hiring)", "CEO slots filled first, then sub-slots"],
 		})
 
 		await controller.endPlayerTurn(true, false)
@@ -151,6 +197,30 @@ export async function makeAImove() {
 
 			const hasUpgrades = playerObj.beach.some((emp) => rules.possibleUpgrades(store.availableEmployees, playerIndex, emp, train.total, train.level2, train.level3, train.unlimited, trainedTo).flat().length > 0)
 
+			// Level 2+: score training targets by need
+			const needMarketing = store.availableMarketingCampaigns.some(c => c > 0)
+			const needProduction = playerObj.restaurants.length > 0
+			const needHiring = playerObj.employees.filter(e => e !== rf.BLANK_EMPLOYEE_SPACE).length < playerObj.ceoSlots * 2
+
+			const scoreTrainTarget = (from, to) => {
+				let score = 0
+				if (!to || typeof to !== "string") return score
+				// Prefer training towards managers we need
+				if (to === rf.REGIONAL_MANAGER) score += needMarketing ? 50 : 20
+				if (to === rf.LOCAL_MANAGER) score += needProduction ? 40 : 15
+				if (to === rf.MARKETING_DIRECTOR) score += needMarketing ? 35 : 15
+				if (to === rf.CAMPAIGN_MANAGER) score += needMarketing ? 30 : 15
+				if (to === rf.RECRUITING_GIRL) score += needHiring ? 40 : 15
+				if (to === rf.HR_DIRECTOR) score += needHiring ? 30 : 15
+				if (to === rf.TRAINING_COORDINATOR) score += 20
+				// Prefer higher-tier producers
+				if (to.endsWith("_CHEF") && needProduction) score += 30
+				if (to.endsWith("_COOK") && needProduction) score += 20
+				// Avoid training ERRAND_BOY unless desperate
+				if (from === rf.ERRAND_BOY) score -= 10
+				return score
+			}
+
 			if (hasUpgrades || recruitPoints > 0) {
 				while (train.total > 0) {
 					trainedTo = store.context.justTrained.map((t) => t.to)
@@ -159,14 +229,32 @@ export async function makeAImove() {
 						return upgrades.length > 0
 					})
 
-					if (playerObj.AIlevel === 1) {
+					if (playerObj.AIlevel >= 1) {
 						possibleBeach = possibleBeach.filter((emp) => emp !== rf.ERRAND_BOY)
 					}
 
 					if (possibleBeach.length === 0) break
 
 					let chosenBeach
-					if (playerObj.AIlevel === 1) {
+					let chosenTo
+
+					if (playerObj.AIlevel >= 2) {
+						// Score all possible (from, to) pairs
+						let bestScore = -999
+						for (const from of possibleBeach) {
+							const possibleTo = rules.possibleUpgrades(store.availableEmployees, playerIndex, from, train.total, train.level2, train.level3, train.unlimited, trainedTo, false)
+							const possibleToFlat = possibleTo.flat()
+							for (const to of possibleToFlat) {
+								const s = scoreTrainTarget(from, to)
+								if (s > bestScore) {
+									bestScore = s
+									chosenBeach = from
+									chosenTo = to
+								}
+							}
+						}
+						if (!chosenBeach) chosenBeach = pick(possibleBeach)
+					} else if (playerObj.AIlevel === 1) {
 						possibleBeach.sort(() => Math.random() - 0.5)
 
 						chosenBeach = possibleBeach.find((emp) => !rf.HIREABLE_EMPLOYEES.includes(emp)) || possibleBeach[0]
@@ -189,9 +277,9 @@ export async function makeAImove() {
 							continue
 						}
 
-						let chosenTo = pick(possibleToFlat)
-
-						if (playerObj.AIlevel === 1) {
+						if (playerObj.AIlevel >= 2 && chosenTo) {
+							// already chosen above
+						} else if (playerObj.AIlevel === 1) {
 							if (store.gameflow.turn === 3) chosenTo = rf.JUNIOR_VICE_PRESIDENT
 							else if (store.gameflow.turn === 4) chosenTo = rf.COACH
 							else if (possibleToFlat.includes(rf.PIZZA_CHEF)) {
@@ -204,6 +292,8 @@ export async function makeAImove() {
 								const highestTier = possibleTo.filter((tier) => tier.length > 0).pop()
 								if (highestTier) chosenTo = pick(highestTier)
 							}
+						} else {
+							chosenTo = pick(possibleToFlat)
 						}
 
 						steps = possibleTo.findIndex((tier) => tier.includes(chosenTo)) + 1
@@ -599,6 +689,34 @@ export function actionHires(playerIndex) {
     let totalHires = rules.getRemainingRecruitingPoints(playerIndex);
     const disallowed = rules.forbiddenEmployeesDuringHire(playerIndex, store.context.justHired);
 
+    // Level 2+: score hires by need
+    const needMarketing = store.availableMarketingCampaigns.some(c => c > 0)
+    const needProduction = playerObj.restaurants.length > 0
+    const needHiring = playerObj.employees.filter(e => e !== rf.BLANK_EMPLOYEE_SPACE).length < playerObj.ceoSlots * 2
+
+    const scoreHire = (emp) => {
+        if (!emp || typeof emp !== "string") return 5
+        let score = 0
+        if (emp === rf.RECRUITING_GIRL) return needHiring ? 40 : 10
+        if (emp === rf.TRAINER) return 20
+        if (emp === rf.MANAGEMENT_TRAINEE) return needHiring ? 30 : 10
+        if (emp === rf.MARKETING_TRAINEE) return needMarketing ? 35 : 10
+        if (emp === rf.ERRAND_BOY) return 15
+        if (emp === rf.KITCHEN_TRAINEE) return needProduction ? 25 : 10
+        // Managers
+        if (emp === rf.REGIONAL_MANAGER) return needMarketing ? 50 : 20
+        if (emp === rf.LOCAL_MANAGER) return needProduction ? 40 : 15
+        if (emp === rf.MARKETING_DIRECTOR) return needMarketing ? 35 : 15
+        if (emp === rf.CAMPAIGN_MANAGER) return needMarketing ? 30 : 15
+        if (emp === rf.RECRUITING_GIRL) return needHiring ? 40 : 10
+        if (emp === rf.HR_DIRECTOR) return needHiring ? 30 : 15
+        if (emp === rf.TRAINING_COORDINATOR) return 20
+        // Producers
+        if (emp.endsWith("_CHEF") && needProduction) return 30
+        if (emp.endsWith("_COOK") && needProduction) return 20
+        return 5
+    }
+
     if (playerObj.AIlevel >= 1) {
         const turn = store.gameflow.turn;
         const script = {
@@ -624,7 +742,12 @@ export function actionHires(playerIndex) {
 
         if (possibleHires.length === 0) break;
 
-        if (playerObj.AIlevel >= 1) {
+        if (playerObj.AIlevel >= 2) {
+            // Sort by score descending
+            possibleHires.sort((a, b) => scoreHire(b) - scoreHire(a))
+            const chosen = possibleHires[0]
+            actionAIhire(playerIndex, chosen)
+        } else if (playerObj.AIlevel >= 1) {
             possibleHires = possibleHires.filter(emp => emp !== rf.RECRUITING_GIRL);
             
             if (possibleHires.length === 0) break;
